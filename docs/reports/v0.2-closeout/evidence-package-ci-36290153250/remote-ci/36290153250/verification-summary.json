@@ -1,0 +1,163 @@
+{
+  "retrieved_at": "2026-09-27T03:15:00+00:00",
+  "run_id": 36290153250,
+  "run_url": "https://github.com/akifsen/ai-game-factory/actions/runs/36290153250",
+  "attempt": 1,
+  "event": "push",
+  "conclusion": "success",
+  "source_sha": "fef168cdd19af5251548eae0e3dd922497be71e1",
+  "local_head_sha": "fef168cdd19af5251548eae0e3dd922497be71e1",
+  "remote_main_sha": "fef168cdd19af5251548eae0e3dd922497be71e1",
+  "initial_dirty_state": "clean",
+  "ci_commit_txt": "fef168cdd19af5251548eae0e3dd922497be71e1",
+  "ci_source_status": "clean",
+  "prior_failed_run_not_used_as_proof": {
+    "run_id": 36289019065,
+    "source_sha": "93ded412242b2bebf0d90ab90225b5826b852489",
+    "recovery": "FAILED",
+    "live_child": "NOT RUN"
+  },
+  "github_blob_sha_matches_head": [
+    {
+      "path": "scripts/verify_godot_recovery.py",
+      "git_blob_sha": "f23c9810aa797d6602a77eca0b73998dffa345ae"
+    },
+    {
+      "path": "scripts/verify_godot_live_crash.py",
+      "git_blob_sha": "69b584019e4ab920bbaf44d998ec36dcdedf2f16"
+    },
+    {
+      "path": "tests/integration/test_verify_godot_python_resolution.py",
+      "git_blob_sha": "261787776b933d96547e0b3eab4ebb80ac9fb7bb"
+    }
+  ],
+  "content_sha256_matches_ci_source_manifest": [
+    {
+      "path": "scripts/verify_godot_recovery.py",
+      "sha256": "9efb7b7268f9c1f2a95f2670107c315ff172c367cdb1d299156a8da982e18841"
+    },
+    {
+      "path": "scripts/verify_godot_live_crash.py",
+      "sha256": "ed4320c3cb9ccfc0e568d84632a96f4b8b785d2ecb1b381b19338cc4da04f096"
+    },
+    {
+      "path": "tests/integration/test_verify_godot_python_resolution.py",
+      "sha256": "9cfc74956f7eea9777da7de5f37dc9411045882ae80f02645086bd9e67bf24d0"
+    },
+    {
+      "path": ".github/workflows/ci.yml",
+      "sha256": "40ba2394cb0ab123110bdd5424518ca3b5438ddb034586bd6a7051c47eb376ab"
+    }
+  ],
+  "artifact_digest_matches": [
+    {
+      "id": 10922240624,
+      "name": "godot-real-evidence",
+      "sha256": "1c3109590d30854e79cc75ca30ffa39275c8a73d2b5ec16d321458f206a86fa1",
+      "size": 181354
+    },
+    {
+      "id": 10922013045,
+      "name": "linux-filesystem-python-3.11",
+      "sha256": "671f891384b9713694f65422b1f24a5a43357f32d7e8695580c7ed14dad9d678",
+      "size": 502
+    },
+    {
+      "id": 10921318339,
+      "name": "linux-filesystem-python-3.12",
+      "sha256": "1b036a4664539cbe53c3826b4f173ce3bc6a4d9348060b31450870d13a4bc4cc",
+      "size": 502
+    }
+  ],
+  "interpreter_regression": {
+    "test": "tests/integration/test_verify_godot_python_resolution.py::test_real_venv_regression_without_downloads",
+    "linux_real_symlink_required": true,
+    "ubuntu_3_11_job": 108538554884,
+    "ubuntu_3_12_job": 108538555025,
+    "result": "PASSED for recovery and live_crash resolvers on both Ubuntu jobs; not skipped",
+    "assertions_beyond_path_string": [
+      "POSIX venv interpreter is a symlink",
+      "returned path is not the dereferenced base interpreter",
+      "subprocess sys.prefix equals the venv directory",
+      "dereferenced interpreter sys.prefix does not equal the venv directory"
+    ],
+    "installed_package_proof": "godot-real fault helper, not the matrix unit test"
+  },
+  "godot_real": {
+    "job_id": 108538554797,
+    "python": "3.12.14",
+    "godot_version": "4.7.2.stable.official.ed1daf0bf",
+    "godot_executable_sha256": "8d106cbe6144c2dc7e881d61d2429c1a8a76e6b22ef48bd5e48dcf934953f71e",
+    "wheel_sha256": "b83989ea5e6be1bfc209fe8df222a8d256eef6e8fbb94e8e91ab5fcf4dda2947",
+    "module_path": "/home/runner/work/_temp/gamefactory-venv/lib/python3.12/site-packages/gamefactory/__init__.py",
+    "acceptance": "PASSED",
+    "acceptance_commands": 43,
+    "cli": "/home/runner/work/_temp/gamefactory-venv/bin/gamefactory",
+    "recovery": "PASSED",
+    "recovery_python": "/home/runner/work/_temp/gamefactory-venv/bin/python",
+    "recovery_fault_helper_exit": 91,
+    "recovery_package_path": "/home/runner/work/_temp/gamefactory-venv/lib/python3.12/site-packages/gamefactory/__init__.py",
+    "hostedtoolcache_interpreter_count": 0,
+    "live_child": "PASSED",
+    "live_child_started_at": "2026-09-27T03:02:18.444586+00:00",
+    "live_child_completed_at": "2026-09-27T03:02:26.549803+00:00",
+    "live_child_duration_seconds": 8.105,
+    "live_child_godot_pid": 2811,
+    "live_child_fate_post_kill": "alive",
+    "live_child_fate_final": "terminated",
+    "filesystem": "/dev/sda1 ext4"
+  },
+  "jobs": [
+    {
+      "job_id": 108538554884,
+      "name": "test (ubuntu-latest, 3.11)",
+      "conclusion": "success",
+      "os": "Ubuntu 24.04.5",
+      "python": "3.11.16",
+      "tests": "277 passed, 6 skipped",
+      "lint": "ruff check passed; 78 files already formatted; mypy 49 files",
+      "log": "job-108538554884.txt"
+    },
+    {
+      "job_id": 108538555025,
+      "name": "test (ubuntu-latest, 3.12)",
+      "conclusion": "success",
+      "os": "Ubuntu 24.04.5",
+      "python": "3.12.14",
+      "tests": "277 passed, 6 skipped",
+      "lint": "ruff check passed; 78 files already formatted; mypy 49 files",
+      "log": "job-108538555025.txt"
+    },
+    {
+      "job_id": 108538555027,
+      "name": "test (windows-latest, 3.11)",
+      "conclusion": "success",
+      "os": "Windows Server 2025",
+      "python": "3.11.9",
+      "tests": "280 passed, 3 skipped",
+      "lint": "ruff check passed; 78 files already formatted; mypy 49 files",
+      "log": "job-108538555027.txt"
+    },
+    {
+      "job_id": 108538554959,
+      "name": "test (windows-latest, 3.12)",
+      "conclusion": "success",
+      "os": "Windows Server 2025",
+      "python": "3.12.10",
+      "tests": "280 passed, 3 skipped",
+      "lint": "ruff check passed; 78 files already formatted; mypy 49 files",
+      "log": "job-108538554959.txt"
+    },
+    {
+      "job_id": 108538554797,
+      "name": "godot-real",
+      "conclusion": "success",
+      "os": "Ubuntu 24.04.5",
+      "python": "3.12.14",
+      "acceptance": "PASSED",
+      "recovery": "PASSED",
+      "live_child": "PASSED",
+      "log": "job-108538554797.txt"
+    }
+  ]
+}

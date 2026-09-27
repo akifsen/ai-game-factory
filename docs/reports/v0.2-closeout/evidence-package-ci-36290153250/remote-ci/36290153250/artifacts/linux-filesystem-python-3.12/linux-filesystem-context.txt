@@ -1,0 +1,14 @@
+platform=Linux runnervmtr4k5 6.17.0-1022-azure #22-Ubuntu SMP Mon Jul 27 17:24:03 UTC 2026 x86_64 x86_64 x86_64 GNU/Linux
+
+checkout_mount:
+TARGET SOURCE    FSTYPE OPTIONS
+/      /dev/sda1 ext4   rw,relatime,discard,journal_async_commit,nobarrier,errors=remount-ro,commit=30,data=writeback
+
+temp_mount:
+TARGET SOURCE    FSTYPE OPTIONS
+/      /dev/sda1 ext4   rw,relatime,discard,journal_async_commit,nobarrier,errors=remount-ro,commit=30,data=writeback
+
+filesystem_capacity:
+Filesystem     Type 1K-blocks     Used Available Use% Mounted on
+/dev/root      ext4  75085112 61101200  13967528  82% /
+/dev/root      ext4  75085112 61101200  13967528  82% /

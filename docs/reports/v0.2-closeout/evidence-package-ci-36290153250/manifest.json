@@ -1,0 +1,237 @@
+{
+  "acceptance": "records/acceptance.json",
+  "files": [
+    {
+      "path": "metadata/source-identity.json",
+      "role": "source_identity",
+      "sha256": "b690009639d8152f9f6a765ba997cdedcee84e7b59f49469cb624a623684a3fa",
+      "size": 14741
+    },
+    {
+      "path": "records/acceptance.json",
+      "role": "acceptance",
+      "sha256": "31b66e60f11ac7dd766aee4a160dbb710a0e2226520c0490bc7b552e235f5b45",
+      "size": 1145501
+    },
+    {
+      "path": "records/recovery.json",
+      "role": "recovery",
+      "sha256": "b48fdcd70bb33f186694d5b11adfff1de162809397099ad008a5570f7540c483",
+      "size": 504590
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-0f9e853f/ART-0494f04c/runtime-observation.json",
+      "role": "observation",
+      "sha256": "52d6465046e0d5cd13e2785703d6c6f41dd1cb0e3ccc4f88347401bb10554608",
+      "size": 524
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-0f9e853f/ART-6c9c04a9/validation-report.json",
+      "role": "validation",
+      "sha256": "def28ed09b272e1ef1b3faf9040231cb27b27082dbf171eb9930436c57a4e3fe",
+      "size": 1550
+    },
+    {
+      "path": "records/selected-inspect.json",
+      "role": "inspect",
+      "sha256": "66e2ae25018a8fbaf7873b22b744ed34831a159f4afb814ae05da3534c79df62",
+      "size": 38829
+    },
+    {
+      "path": "remote-ci/36290153250/.gitignore",
+      "role": "other",
+      "sha256": "e027cf8ebf80d6dcdacced8a4dbd1c440e2436fb1868ec851db4061cb67bb787",
+      "size": 7
+    },
+    {
+      "path": "remote-ci/36290153250/artifact-10921318339.zip",
+      "role": "other",
+      "sha256": "1b036a4664539cbe53c3826b4f173ce3bc6a4d9348060b31450870d13a4bc4cc",
+      "size": 502
+    },
+    {
+      "path": "remote-ci/36290153250/artifact-10922013045.zip",
+      "role": "other",
+      "sha256": "671f891384b9713694f65422b1f24a5a43357f32d7e8695580c7ed14dad9d678",
+      "size": 502
+    },
+    {
+      "path": "remote-ci/36290153250/artifact-10922240624.zip",
+      "role": "other",
+      "sha256": "1c3109590d30854e79cc75ca30ffa39275c8a73d2b5ec16d321458f206a86fa1",
+      "size": 181354
+    },
+    {
+      "path": "remote-ci/36290153250/artifacts/godot-real-evidence/commit.txt",
+      "role": "other",
+      "sha256": "86f2fb2cc4027aa732f2827d8b83adbabd116f3c7e109c9aa26e6d49d7602df9",
+      "size": 41
+    },
+    {
+      "path": "remote-ci/36290153250/artifacts/godot-real-evidence/environment.txt",
+      "role": "other",
+      "sha256": "8fd6cd0e196d4d36db165b9dcefb30a1a9fae2482ea264bcf97131b2bbb342ac",
+      "size": 1295
+    },
+    {
+      "path": "remote-ci/36290153250/artifacts/godot-real-evidence/logs/acceptance.log",
+      "role": "other",
+      "sha256": "7ff8f841ab844b10cdadd02271b049d2d3598d8d587393f6663c4a5165d4b599",
+      "size": 264
+    },
+    {
+      "path": "remote-ci/36290153250/artifacts/godot-real-evidence/logs/live-crash.log",
+      "role": "other",
+      "sha256": "3ae2edbee0a5dfeb87ce0996088bee7f80bbf4102b1ee81af201947db4a6cf35",
+      "size": 407
+    },
+    {
+      "path": "remote-ci/36290153250/artifacts/godot-real-evidence/logs/recovery.log",
+      "role": "other",
+      "sha256": "9121ea4956b814f1d5d8930b184472e136905c356097690f68a4e0a06a5a395a",
+      "size": 257
+    },
+    {
+      "path": "remote-ci/36290153250/artifacts/godot-real-evidence/reports/acceptance.json",
+      "role": "other",
+      "sha256": "0ec3a09fcffb30da6b98fbd4f90b8f12dfc83977c43822eb7d083b8193f1a1cd",
+      "size": 1110641
+    },
+    {
+      "path": "remote-ci/36290153250/artifacts/godot-real-evidence/reports/live-crash.json",
+      "role": "other",
+      "sha256": "1621987bc585d4e1326e3d0758590723b1a7895fa7468c603c5da06dae066402",
+      "size": 179785
+    },
+    {
+      "path": "remote-ci/36290153250/artifacts/godot-real-evidence/reports/recovery.json",
+      "role": "other",
+      "sha256": "d78bcf760938ed5dafceacb1ebd6e0b93664d8ec3c6ac44a0d6974cd09d7de37",
+      "size": 497449
+    },
+    {
+      "path": "remote-ci/36290153250/artifacts/godot-real-evidence/source-manifest-digest.txt",
+      "role": "other",
+      "sha256": "a55d924cc6ec7f0fb6939d48dccb99d54f7f4368c3f55c76941b3366f8063c9d",
+      "size": 162
+    },
+    {
+      "path": "remote-ci/36290153250/artifacts/godot-real-evidence/source-manifest.sha256",
+      "role": "other",
+      "sha256": "917588f3a320da1a98b52223422f8dc7b2a87c4d070d196d1933e1c42ec120e2",
+      "size": 107140
+    },
+    {
+      "path": "remote-ci/36290153250/artifacts/godot-real-evidence/source-status.txt",
+      "role": "other",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    {
+      "path": "remote-ci/36290153250/artifacts/godot-real-evidence/wheel.sha256",
+      "role": "other",
+      "sha256": "a597d08ae0faf1e0523579035512bc00a49ee6553ebeebbe7f012c342a9d8171",
+      "size": 136
+    },
+    {
+      "path": "remote-ci/36290153250/artifacts/linux-filesystem-python-3.11/linux-filesystem-context.txt",
+      "role": "other",
+      "sha256": "6f706ab00f6aff189ae050b9a911f0a4533011a70d0a43fde63e188e928e7d10",
+      "size": 651
+    },
+    {
+      "path": "remote-ci/36290153250/artifacts/linux-filesystem-python-3.12/linux-filesystem-context.txt",
+      "role": "other",
+      "sha256": "9a4cbcf5d15755328249aee5ec76d16a4a33fa22a601b273f05b87f8916fa9a3",
+      "size": 651
+    },
+    {
+      "path": "remote-ci/36290153250/artifacts.json",
+      "role": "other",
+      "sha256": "28c850815922708213bb15a6c1404c4b3b89c794196e5b8679b74b89cc7ce1e6",
+      "size": 2125
+    },
+    {
+      "path": "remote-ci/36290153250/job-108538554797.txt",
+      "role": "other",
+      "sha256": "a98d1e2bc60c6f39503b62b5c4d48482c0a985350f747a835d752bd63fbec33e",
+      "size": 67409
+    },
+    {
+      "path": "remote-ci/36290153250/job-108538554884.txt",
+      "role": "other",
+      "sha256": "d0f3138723481025583d19fc205f4519515d57564c918a1acc8d2fad20f9e277",
+      "size": 72679
+    },
+    {
+      "path": "remote-ci/36290153250/job-108538554959.txt",
+      "role": "other",
+      "sha256": "1de1d06f9847e3bbdf0d7ac93d44f24f46c543e745a0233e46170064f2ddc67a",
+      "size": 66211
+    },
+    {
+      "path": "remote-ci/36290153250/job-108538555025.txt",
+      "role": "other",
+      "sha256": "6a6ab60dcc7020d7b0508fd8335ca57a50f7e349717fda5a47004710d973d6b3",
+      "size": 72876
+    },
+    {
+      "path": "remote-ci/36290153250/job-108538555027.txt",
+      "role": "other",
+      "sha256": "fbbd1086ca08a5d03c42b5343e63c0445eb0cd78008ec27bd5a1cd4b9b9a584a",
+      "size": 66405
+    },
+    {
+      "path": "remote-ci/36290153250/jobs.json",
+      "role": "other",
+      "sha256": "e43b2cccc6c226ca6000ddef08bb8c2ecea41bf1f1c13ce6a3ca58bfe87262d7",
+      "size": 16177
+    },
+    {
+      "path": "remote-ci/36290153250/remote-ref.json",
+      "role": "other",
+      "sha256": "715bf3fa4ded43a205d0573ea374842501758aec86d127c8887beb0eae60c492",
+      "size": 344
+    },
+    {
+      "path": "remote-ci/36290153250/retrieval.json",
+      "role": "other",
+      "sha256": "078c3fe4c2e1985c02410a45917569f8d174dfbb66c6061e03ccdec277385356",
+      "size": 4205
+    },
+    {
+      "path": "remote-ci/36290153250/run.json",
+      "role": "other",
+      "sha256": "e953228c07007df4c5aa3bb0a81ace0e3b6a7b05248d9ce611dbb7e304bd0af8",
+      "size": 12584
+    },
+    {
+      "path": "remote-ci/36290153250/verification-summary.json",
+      "role": "other",
+      "sha256": "cc30d886d273cb6d75d056a91439e6fd063d249ff5bd32b7c8abaf95355f8305",
+      "size": 6014
+    },
+    {
+      "path": "final-ci-report.md",
+      "role": "other",
+      "sha256": "495c6c7c09881db48e32104646555ed02875abfd7386c970b7cb8cdbff0f7107",
+      "size": 12435
+    },
+    {
+      "path": "verify_closeout_evidence.py",
+      "role": "verifier",
+      "sha256": "f9a72907495c65981fcf1689c26787d45e4eb33b582a4ec89fe4e4d70b40212d",
+      "size": 16068
+    }
+  ],
+  "recovery": "records/recovery.json",
+  "relationships": {
+    "execution_id": "EXEC-93637804",
+    "execution_task_id": "WF-GODOT-0f9e853f-EXECUTE",
+    "scenario_id": "fixture-smoke",
+    "validation_task_id": "WF-GODOT-0f9e853f-VALIDATE",
+    "workflow_id": "WF-GODOT-0f9e853f"
+  },
+  "schema_version": 1,
+  "source_identity": "metadata/source-identity.json"
+}

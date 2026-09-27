@@ -1,6 +1,26 @@
 # V0.2 closeout kanıt indeksi
 
-## Güncel final CI incelemesi — 2026-09-27
+## Helper düzeltmesi CI kapanışı — 2026-09-27
+
+**Verification Closure: CLOSED.** Test edilen revizyon
+`fef168cdd19af5251548eae0e3dd922497be71e1`, run `36290153250`.
+Ubuntu 3.11/3.12 **277 passed, 6 skipped**; Windows 3.11/3.12 **280 passed, 3 skipped**.
+Linux Godot kabulü 43 komut, temiz wheel/CLI ve ext4 mount geçti. Recovery **PASSED**
+(venv `bin/python`, fault helper exit 91, paket site-packages). Linux canlı-child
+**PASSED** ve tamamlandı (8.105 s, Godot pid 2811). Linux symlink venv regresyonu
+iki Ubuntu işinde de geçti, skip edilmedi. Rapor ekleri bu SHA'dan sonra yazıldı.
+
+| Yeni kalıcı kanıt | Kapsam |
+|---|---|
+| [remote-ci/36290153250/verification-summary.json](remote-ci/36290153250/verification-summary.json) | SHA/ref/CI kaynak eşleşmesi, job kimlikleri, regresyon ve recovery/canlı-child sonucu, artifact digest |
+| [remote-ci/36290153250/](remote-ci/36290153250/) | Beş job logu, run/jobs/ref metadata, üç ZIP ve çıkarılmış kabul/recovery/canlı-child dosyaları |
+| [ci-catalog-36290153250.json](ci-catalog-36290153250.json) | Mevcut verifier için açık dosya listesi; yeni kanıt sistemi değildir |
+| [evidence-package-ci-36290153250/](evidence-package-ci-36290153250/) | Taşınabilir paket; yeni CI dosyaları hash kontrolü ve eski seçili Windows graph semantik kontrolü |
+| [ci-cold-verification-36290153250.json](ci-cold-verification-36290153250.json) | Checkout dışı `python -I` soğuk kontrol kaydı |
+
+Önceki başarısız koşu silinmedi ve bu kapanışın kanıtı sayılmadı.
+
+## Güncel final CI incelemesi — 2026-09-27 (tarihsel PARTIAL)
 
 **Verification Closure: PARTIAL.** SHA `93ded412242b2bebf0d90ab90225b5826b852489`,
 run `36289019065`: Ubuntu 3.11/3.12 **260 passed, 6 skipped**; Windows 3.11/3.12
@@ -85,5 +105,6 @@ hazırlar; bu tanımın varlığı başarılı remote koşu sayılmaz.
 [final-ci-local-validation.json](final-ci-local-validation.json) ve
 `final-ci-local-*.txt`: bağımsız lider testi **56 passed, 6 skipped, 1 deselected**;
 lint/format/diff kontrolü geçti. Üç helper/test dosyasının hashleri kayıtlıdır.
-Bu düzeltmeler yalnız yereldir, run 36289019065 bunları içermez. POSIX symlink venv
-regresyonu yeni Linux CI'da zorunludur; yalnız Windows WinError 1314 gerekçeli skip.
+Bu yerel kayıt run 36289019065'i kapsamaz. Aynı üç dosya daha sonra
+`fef168cdd19af5251548eae0e3dd922497be71e1` ile remote'a geçti ve run
+`36290153250` içinde test edildi; güncel sonuç yukarıdaki CLOSED kaydıdır.

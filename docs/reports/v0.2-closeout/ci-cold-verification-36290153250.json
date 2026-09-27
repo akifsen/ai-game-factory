@@ -1,0 +1,65 @@
+{
+  "source_sha": "fef168cdd19af5251548eae0e3dd922497be71e1",
+  "run_id": 36290153250,
+  "manifest_sha256": "231706eef4816190434555c283f038e5774ea54a87dddc4650da69dd3c1c0304",
+  "recorded_at": "2026-09-27T03:17:52+00:00",
+  "scope": "New CI files byte integrity plus existing selected Windows graph semantics. Copied stdlib verifier runs outside checkout under -I; no original Temp, Godot, package, or network reads.",
+  "commands": [
+    {
+      "label": "cold-positive",
+      "argv": [
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.venv\\Scripts\\python.exe",
+        "-I",
+        "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gf-helper-ci-cold\\bundle\\verify_closeout_evidence.py",
+        "verify",
+        "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gf-helper-ci-cold\\bundle"
+      ],
+      "cwd": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gf-helper-ci-cold",
+      "exit_code": 0,
+      "stdout": "PASS: evidence bundle is complete, hash-valid, and internally consistent\n",
+      "stderr": ""
+    },
+    {
+      "label": "missing-new-ci-acceptance-rejected",
+      "argv": [
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.venv\\Scripts\\python.exe",
+        "-I",
+        "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gf-helper-ci-cold\\bundle\\verify_closeout_evidence.py",
+        "verify",
+        "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gf-helper-ci-cold\\bundle"
+      ],
+      "cwd": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gf-helper-ci-cold",
+      "exit_code": 1,
+      "stdout": "",
+      "stderr": "FAIL: missing or linked required file: remote-ci/36290153250/artifacts/godot-real-evidence/reports/acceptance.json\n"
+    },
+    {
+      "label": "new-ci-log-tamper-rejected",
+      "argv": [
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.venv\\Scripts\\python.exe",
+        "-I",
+        "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gf-helper-ci-cold\\bundle\\verify_closeout_evidence.py",
+        "verify",
+        "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gf-helper-ci-cold\\bundle"
+      ],
+      "cwd": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gf-helper-ci-cold",
+      "exit_code": 1,
+      "stdout": "",
+      "stderr": "FAIL: size/hash mismatch: remote-ci/36290153250/job-108538554797.txt\n"
+    },
+    {
+      "label": "restored-positive",
+      "argv": [
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.venv\\Scripts\\python.exe",
+        "-I",
+        "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gf-helper-ci-cold\\bundle\\verify_closeout_evidence.py",
+        "verify",
+        "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gf-helper-ci-cold\\bundle"
+      ],
+      "cwd": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gf-helper-ci-cold",
+      "exit_code": 0,
+      "stdout": "PASS: evidence bundle is complete, hash-valid, and internally consistent\n",
+      "stderr": ""
+    }
+  ]
+}

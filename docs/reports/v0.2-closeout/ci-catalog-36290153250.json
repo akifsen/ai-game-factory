@@ -1,0 +1,179 @@
+{
+  "source_identity": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\final-source.json",
+  "acceptance": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\windows-acceptance.json",
+  "recovery": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\windows-recovery.json",
+  "relationships": {
+    "workflow_id": "WF-GODOT-0f9e853f",
+    "execution_id": "EXEC-93637804",
+    "scenario_id": "fixture-smoke",
+    "execution_task_id": "WF-GODOT-0f9e853f-EXECUTE",
+    "validation_task_id": "WF-GODOT-0f9e853f-VALIDATE"
+  },
+  "files": [
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-0f9e853f\\ART-0494f04c\\runtime-observation.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-0f9e853f/ART-0494f04c/runtime-observation.json",
+      "role": "observation"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-0f9e853f\\ART-6c9c04a9\\validation-report.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-0f9e853f/ART-6c9c04a9/validation-report.json",
+      "role": "validation"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\selected-inspect.json",
+      "path": "records/selected-inspect.json",
+      "role": "inspect"
+    },
+    {
+      "source": "c:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\remote-ci\\36290153250\\.gitignore",
+      "path": "remote-ci/36290153250/.gitignore",
+      "role": "other"
+    },
+    {
+      "source": "c:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\remote-ci\\36290153250\\artifact-10921318339.zip",
+      "path": "remote-ci/36290153250/artifact-10921318339.zip",
+      "role": "other"
+    },
+    {
+      "source": "c:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\remote-ci\\36290153250\\artifact-10922013045.zip",
+      "path": "remote-ci/36290153250/artifact-10922013045.zip",
+      "role": "other"
+    },
+    {
+      "source": "c:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\remote-ci\\36290153250\\artifact-10922240624.zip",
+      "path": "remote-ci/36290153250/artifact-10922240624.zip",
+      "role": "other"
+    },
+    {
+      "source": "c:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\remote-ci\\36290153250\\artifacts\\godot-real-evidence\\commit.txt",
+      "path": "remote-ci/36290153250/artifacts/godot-real-evidence/commit.txt",
+      "role": "other"
+    },
+    {
+      "source": "c:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\remote-ci\\36290153250\\artifacts\\godot-real-evidence\\environment.txt",
+      "path": "remote-ci/36290153250/artifacts/godot-real-evidence/environment.txt",
+      "role": "other"
+    },
+    {
+      "source": "c:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\remote-ci\\36290153250\\artifacts\\godot-real-evidence\\logs\\acceptance.log",
+      "path": "remote-ci/36290153250/artifacts/godot-real-evidence/logs/acceptance.log",
+      "role": "other"
+    },
+    {
+      "source": "c:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\remote-ci\\36290153250\\artifacts\\godot-real-evidence\\logs\\live-crash.log",
+      "path": "remote-ci/36290153250/artifacts/godot-real-evidence/logs/live-crash.log",
+      "role": "other"
+    },
+    {
+      "source": "c:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\remote-ci\\36290153250\\artifacts\\godot-real-evidence\\logs\\recovery.log",
+      "path": "remote-ci/36290153250/artifacts/godot-real-evidence/logs/recovery.log",
+      "role": "other"
+    },
+    {
+      "source": "c:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\remote-ci\\36290153250\\artifacts\\godot-real-evidence\\reports\\acceptance.json",
+      "path": "remote-ci/36290153250/artifacts/godot-real-evidence/reports/acceptance.json",
+      "role": "other"
+    },
+    {
+      "source": "c:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\remote-ci\\36290153250\\artifacts\\godot-real-evidence\\reports\\live-crash.json",
+      "path": "remote-ci/36290153250/artifacts/godot-real-evidence/reports/live-crash.json",
+      "role": "other"
+    },
+    {
+      "source": "c:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\remote-ci\\36290153250\\artifacts\\godot-real-evidence\\reports\\recovery.json",
+      "path": "remote-ci/36290153250/artifacts/godot-real-evidence/reports/recovery.json",
+      "role": "other"
+    },
+    {
+      "source": "c:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\remote-ci\\36290153250\\artifacts\\godot-real-evidence\\source-manifest-digest.txt",
+      "path": "remote-ci/36290153250/artifacts/godot-real-evidence/source-manifest-digest.txt",
+      "role": "other"
+    },
+    {
+      "source": "c:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\remote-ci\\36290153250\\artifacts\\godot-real-evidence\\source-manifest.sha256",
+      "path": "remote-ci/36290153250/artifacts/godot-real-evidence/source-manifest.sha256",
+      "role": "other"
+    },
+    {
+      "source": "c:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\remote-ci\\36290153250\\artifacts\\godot-real-evidence\\source-status.txt",
+      "path": "remote-ci/36290153250/artifacts/godot-real-evidence/source-status.txt",
+      "role": "other"
+    },
+    {
+      "source": "c:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\remote-ci\\36290153250\\artifacts\\godot-real-evidence\\wheel.sha256",
+      "path": "remote-ci/36290153250/artifacts/godot-real-evidence/wheel.sha256",
+      "role": "other"
+    },
+    {
+      "source": "c:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\remote-ci\\36290153250\\artifacts\\linux-filesystem-python-3.11\\linux-filesystem-context.txt",
+      "path": "remote-ci/36290153250/artifacts/linux-filesystem-python-3.11/linux-filesystem-context.txt",
+      "role": "other"
+    },
+    {
+      "source": "c:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\remote-ci\\36290153250\\artifacts\\linux-filesystem-python-3.12\\linux-filesystem-context.txt",
+      "path": "remote-ci/36290153250/artifacts/linux-filesystem-python-3.12/linux-filesystem-context.txt",
+      "role": "other"
+    },
+    {
+      "source": "c:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\remote-ci\\36290153250\\artifacts.json",
+      "path": "remote-ci/36290153250/artifacts.json",
+      "role": "other"
+    },
+    {
+      "source": "c:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\remote-ci\\36290153250\\job-108538554797.txt",
+      "path": "remote-ci/36290153250/job-108538554797.txt",
+      "role": "other"
+    },
+    {
+      "source": "c:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\remote-ci\\36290153250\\job-108538554884.txt",
+      "path": "remote-ci/36290153250/job-108538554884.txt",
+      "role": "other"
+    },
+    {
+      "source": "c:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\remote-ci\\36290153250\\job-108538554959.txt",
+      "path": "remote-ci/36290153250/job-108538554959.txt",
+      "role": "other"
+    },
+    {
+      "source": "c:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\remote-ci\\36290153250\\job-108538555025.txt",
+      "path": "remote-ci/36290153250/job-108538555025.txt",
+      "role": "other"
+    },
+    {
+      "source": "c:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\remote-ci\\36290153250\\job-108538555027.txt",
+      "path": "remote-ci/36290153250/job-108538555027.txt",
+      "role": "other"
+    },
+    {
+      "source": "c:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\remote-ci\\36290153250\\jobs.json",
+      "path": "remote-ci/36290153250/jobs.json",
+      "role": "other"
+    },
+    {
+      "source": "c:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\remote-ci\\36290153250\\remote-ref.json",
+      "path": "remote-ci/36290153250/remote-ref.json",
+      "role": "other"
+    },
+    {
+      "source": "c:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\remote-ci\\36290153250\\retrieval.json",
+      "path": "remote-ci/36290153250/retrieval.json",
+      "role": "other"
+    },
+    {
+      "source": "c:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\remote-ci\\36290153250\\run.json",
+      "path": "remote-ci/36290153250/run.json",
+      "role": "other"
+    },
+    {
+      "source": "c:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\remote-ci\\36290153250\\verification-summary.json",
+      "path": "remote-ci/36290153250/verification-summary.json",
+      "role": "other"
+    },
+    {
+      "source": "c:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout-report.md",
+      "path": "final-ci-report.md",
+      "role": "other"
+    }
+  ]
+}

@@ -1,0 +1,154 @@
+[
+  {
+    "argv": [
+      "gh",
+      "api",
+      "repos/akifsen/ai-game-factory/git/ref/heads/main"
+    ],
+    "started_at": "2026-09-27T03:06:53.5926907+00:00",
+    "finished_at": "2026-09-27T03:06:54.3616451+00:00",
+    "exit_code": 0,
+    "stdout_file": "remote-ref.json",
+    "stderr": null
+  },
+  {
+    "argv": [
+      "gh",
+      "api",
+      "repos/akifsen/ai-game-factory/actions/runs/36290153250"
+    ],
+    "started_at": "2026-09-27T03:06:54.3764314+00:00",
+    "finished_at": "2026-09-27T03:06:55.0201087+00:00",
+    "exit_code": 0,
+    "stdout_file": "run.json",
+    "stderr": null
+  },
+  {
+    "argv": [
+      "gh",
+      "api",
+      "repos/akifsen/ai-game-factory/actions/runs/36290153250/jobs"
+    ],
+    "started_at": "2026-09-27T03:06:55.0250535+00:00",
+    "finished_at": "2026-09-27T03:06:55.7650965+00:00",
+    "exit_code": 0,
+    "stdout_file": "jobs.json",
+    "stderr": null
+  },
+  {
+    "argv": [
+      "gh",
+      "api",
+      "repos/akifsen/ai-game-factory/actions/runs/36290153250/artifacts"
+    ],
+    "started_at": "2026-09-27T03:06:55.7679100+00:00",
+    "finished_at": "2026-09-27T03:06:56.3681240+00:00",
+    "exit_code": 0,
+    "stdout_file": "artifacts.json",
+    "stderr": null
+  },
+  {
+    "argv": [
+      "gh",
+      "api",
+      "repos/akifsen/ai-game-factory/actions/jobs/108538554797/logs",
+      "--allow-escape-sequences"
+    ],
+    "started_at": "2026-09-27T03:06:56.3724779+00:00",
+    "finished_at": "2026-09-27T03:06:58.0196072+00:00",
+    "exit_code": 0,
+    "stdout_file": "job-108538554797.txt",
+    "stderr": null
+  },
+  {
+    "argv": [
+      "gh",
+      "api",
+      "repos/akifsen/ai-game-factory/actions/jobs/108538554884/logs",
+      "--allow-escape-sequences"
+    ],
+    "started_at": "2026-09-27T03:06:58.0226318+00:00",
+    "finished_at": "2026-09-27T03:06:59.5869497+00:00",
+    "exit_code": 0,
+    "stdout_file": "job-108538554884.txt",
+    "stderr": null
+  },
+  {
+    "argv": [
+      "gh",
+      "api",
+      "repos/akifsen/ai-game-factory/actions/jobs/108538554959/logs",
+      "--allow-escape-sequences"
+    ],
+    "started_at": "2026-09-27T03:06:59.5905905+00:00",
+    "finished_at": "2026-09-27T03:07:01.1290523+00:00",
+    "exit_code": 0,
+    "stdout_file": "job-108538554959.txt",
+    "stderr": null
+  },
+  {
+    "argv": [
+      "gh",
+      "api",
+      "repos/akifsen/ai-game-factory/actions/jobs/108538555025/logs",
+      "--allow-escape-sequences"
+    ],
+    "started_at": "2026-09-27T03:07:01.1329808+00:00",
+    "finished_at": "2026-09-27T03:07:02.7458651+00:00",
+    "exit_code": 0,
+    "stdout_file": "job-108538555025.txt",
+    "stderr": null
+  },
+  {
+    "argv": [
+      "gh",
+      "api",
+      "repos/akifsen/ai-game-factory/actions/jobs/108538555027/logs",
+      "--allow-escape-sequences"
+    ],
+    "started_at": "2026-09-27T03:07:02.7499206+00:00",
+    "finished_at": "2026-09-27T03:07:04.4702862+00:00",
+    "exit_code": 0,
+    "stdout_file": "job-108538555027.txt",
+    "stderr": null
+  },
+  {
+    "argv": [
+      "gh",
+      "api",
+      "repos/akifsen/ai-game-factory/actions/artifacts/10922240624/zip",
+      "--allow-escape-sequences"
+    ],
+    "started_at": "2026-09-27T03:07:04.4816434+00:00",
+    "finished_at": "2026-09-27T03:07:06.2019224+00:00",
+    "exit_code": 0,
+    "stdout_file": "artifact-10922240624.zip",
+    "stderr": null
+  },
+  {
+    "argv": [
+      "gh",
+      "api",
+      "repos/akifsen/ai-game-factory/actions/artifacts/10922013045/zip",
+      "--allow-escape-sequences"
+    ],
+    "started_at": "2026-09-27T03:07:06.2047424+00:00",
+    "finished_at": "2026-09-27T03:07:07.4160822+00:00",
+    "exit_code": 0,
+    "stdout_file": "artifact-10922013045.zip",
+    "stderr": null
+  },
+  {
+    "argv": [
+      "gh",
+      "api",
+      "repos/akifsen/ai-game-factory/actions/artifacts/10921318339/zip",
+      "--allow-escape-sequences"
+    ],
+    "started_at": "2026-09-27T03:07:07.4186300+00:00",
+    "finished_at": "2026-09-27T03:07:08.6683357+00:00",
+    "exit_code": 0,
+    "stdout_file": "artifact-10921318339.zip",
+    "stderr": null
+  }
+]

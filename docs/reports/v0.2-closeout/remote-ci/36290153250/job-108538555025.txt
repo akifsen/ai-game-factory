@@ -1,0 +1,649 @@
+﻿2026-09-27T03:00:34.5213407Z Current runner version: '2.337.0'
+2026-09-27T03:00:34.5272401Z ##[group]Runner Image Provisioner
+2026-09-27T03:00:34.5273721Z Hosted Compute Agent
+2026-09-27T03:00:34.5274686Z Version: 20260828.587
+2026-09-27T03:00:34.5275875Z Commit: abac92662cab4cc7352de4f9f9d2e2419aad9c29
+2026-09-27T03:00:34.5277286Z Build Date: 2026-08-28T16:44:25Z
+2026-09-27T03:00:34.5278471Z Worker ID: {56fcedae-ef1c-4c98-b7fd-41007dd9145f}
+2026-09-27T03:00:34.5279692Z Azure Region: northcentralus
+2026-09-27T03:00:34.5280649Z ##[endgroup]
+2026-09-27T03:00:34.5282885Z ##[group]Operating System
+2026-09-27T03:00:34.5283847Z Ubuntu
+2026-09-27T03:00:34.5284615Z 24.04.5
+2026-09-27T03:00:34.5285533Z LTS
+2026-09-27T03:00:34.5286375Z ##[endgroup]
+2026-09-27T03:00:34.5307820Z ##[group]Runner Image
+2026-09-27T03:00:34.5308895Z Image: ubuntu-24.04
+2026-09-27T03:00:34.5309780Z Version: 20260920.314.1
+2026-09-27T03:00:34.5312022Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260920.314/images/ubuntu/Ubuntu2404-Readme.md
+2026-09-27T03:00:34.5315377Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260920.314
+2026-09-27T03:00:34.5317228Z ##[endgroup]
+2026-09-27T03:00:34.5319243Z ##[group]GITHUB_TOKEN Permissions
+2026-09-27T03:00:34.5322537Z Contents: read
+2026-09-27T03:00:34.5323455Z Metadata: read
+2026-09-27T03:00:34.5324459Z Packages: read
+2026-09-27T03:00:34.5325318Z ##[endgroup]
+2026-09-27T03:00:34.5349044Z Secret source: Actions
+2026-09-27T03:00:34.5350518Z Cache mode: write
+2026-09-27T03:00:34.5352154Z Prepare workflow directory
+2026-09-27T03:00:34.6198959Z Prepare all required actions
+2026-09-27T03:00:34.6269106Z Getting action download info
+2026-09-27T03:00:34.9484688Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+2026-09-27T03:00:35.0378418Z Download action repository 'actions/setup-python@v5' (SHA:a26af69be951a213d495a4c3e4e4022e16d87065)
+2026-09-27T03:00:35.1264606Z Download action repository 'actions/upload-artifact@v4' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+2026-09-27T03:00:35.3559574Z Complete job name: test (ubuntu-latest, 3.12)
+2026-09-27T03:00:35.4326352Z ##[group]Run actions/checkout@v4
+2026-09-27T03:00:35.4327393Z with:
+2026-09-27T03:00:35.4327865Z   repository: akifsen/ai-game-factory
+2026-09-27T03:00:35.4331719Z   token: ***
+2026-09-27T03:00:35.4332175Z   ssh-strict: true
+2026-09-27T03:00:35.4332628Z   ssh-user: git
+2026-09-27T03:00:35.4333092Z   persist-credentials: true
+2026-09-27T03:00:35.4333590Z   clean: true
+2026-09-27T03:00:35.4334041Z   sparse-checkout-cone-mode: true
+2026-09-27T03:00:35.4334569Z   fetch-depth: 1
+2026-09-27T03:00:35.4335002Z   fetch-tags: false
+2026-09-27T03:00:35.4335465Z   show-progress: true
+2026-09-27T03:00:35.4335923Z   lfs: false
+2026-09-27T03:00:35.4336346Z   submodules: false
+2026-09-27T03:00:35.4336939Z   set-safe-directory: true
+2026-09-27T03:00:35.4337469Z   allow-unsafe-pr-checkout: false
+2026-09-27T03:00:35.4338283Z ##[endgroup]
+2026-09-27T03:00:35.5638188Z Syncing repository: akifsen/ai-game-factory
+2026-09-27T03:00:35.5641734Z ##[group]Getting Git version info
+2026-09-27T03:00:35.5644063Z Working directory is '/home/runner/work/ai-game-factory/ai-game-factory'
+2026-09-27T03:00:35.5647532Z [command]/usr/bin/git version
+2026-09-27T03:00:35.5756066Z git version 2.55.0
+2026-09-27T03:00:35.6657639Z ##[endgroup]
+2026-09-27T03:00:35.6667313Z Temporarily overriding HOME='/home/runner/work/_temp/699b4ece-73b7-476d-b510-df819a4c4bbd' before making global git config changes
+2026-09-27T03:00:35.6670091Z Adding repository directory to the temporary git global config as a safe directory
+2026-09-27T03:00:35.6672243Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/ai-game-factory/ai-game-factory
+2026-09-27T03:00:35.6675912Z Deleting the contents of '/home/runner/work/ai-game-factory/ai-game-factory'
+2026-09-27T03:00:35.6678314Z ##[group]Initializing the repository
+2026-09-27T03:00:35.6679763Z [command]/usr/bin/git init /home/runner/work/ai-game-factory/ai-game-factory
+2026-09-27T03:00:35.6681872Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-09-27T03:00:35.6683656Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-09-27T03:00:35.6685222Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-09-27T03:00:35.6686617Z hint: call:
+2026-09-27T03:00:35.6687405Z hint:
+2026-09-27T03:00:35.6688214Z hint: 	git config --global init.defaultBranch <name>
+2026-09-27T03:00:35.6689215Z hint:
+2026-09-27T03:00:35.6690197Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-09-27T03:00:35.6691730Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-09-27T03:00:35.6692955Z hint:
+2026-09-27T03:00:35.6693812Z hint: 	git branch -m <name>
+2026-09-27T03:00:35.6694586Z hint:
+2026-09-27T03:00:35.6695612Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-09-27T03:00:35.6697573Z Initialized empty Git repository in /home/runner/work/ai-game-factory/ai-game-factory/.git/
+2026-09-27T03:00:35.6701631Z [command]/usr/bin/git remote add origin https://github.com/akifsen/ai-game-factory
+2026-09-27T03:00:35.6705906Z ##[endgroup]
+2026-09-27T03:00:35.6707428Z ##[group]Disabling automatic garbage collection
+2026-09-27T03:00:35.6708470Z [command]/usr/bin/git config --local gc.auto 0
+2026-09-27T03:00:35.6710615Z ##[endgroup]
+2026-09-27T03:00:35.6711669Z ##[group]Setting up auth
+2026-09-27T03:00:35.6712755Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-09-27T03:00:35.6716067Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-09-27T03:00:35.7143432Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-09-27T03:00:35.7202025Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-09-27T03:00:35.7594039Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-09-27T03:00:35.7675556Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-09-27T03:00:35.8115299Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-09-27T03:00:35.8117848Z ##[endgroup]
+2026-09-27T03:00:35.8118608Z ##[group]Fetching the repository
+2026-09-27T03:00:35.8120314Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +fef168cdd19af5251548eae0e3dd922497be71e1:refs/remotes/origin/main
+2026-09-27T03:00:36.4431753Z From https://github.com/akifsen/ai-game-factory
+2026-09-27T03:00:36.4433512Z  * [new ref]         fef168cdd19af5251548eae0e3dd922497be71e1 -> origin/main
+2026-09-27T03:00:36.4439215Z ##[endgroup]
+2026-09-27T03:00:36.4441320Z ##[group]Determining the checkout info
+2026-09-27T03:00:36.4443979Z ##[endgroup]
+2026-09-27T03:00:36.4445346Z [command]/usr/bin/git sparse-checkout disable
+2026-09-27T03:00:36.4461837Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-09-27T03:00:36.4517399Z ##[group]Checking out the ref
+2026-09-27T03:00:36.4518764Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main
+2026-09-27T03:00:36.5289478Z Switched to a new branch 'main'
+2026-09-27T03:00:36.5291609Z branch 'main' set up to track 'origin/main'.
+2026-09-27T03:00:36.5296555Z ##[endgroup]
+2026-09-27T03:00:36.5344950Z [command]/usr/bin/git log -1 --format=%H
+2026-09-27T03:00:36.5376299Z fef168cdd19af5251548eae0e3dd922497be71e1
+2026-09-27T03:00:36.5695625Z ##[group]Run actions/setup-python@v5
+2026-09-27T03:00:36.5696250Z with:
+2026-09-27T03:00:36.5768558Z   python-version: 3.12
+2026-09-27T03:00:36.5769428Z   check-latest: false
+2026-09-27T03:00:36.5776246Z   token: ***
+2026-09-27T03:00:36.5777241Z   update-environment: true
+2026-09-27T03:00:36.5778067Z   allow-prereleases: false
+2026-09-27T03:00:36.5778829Z   freethreaded: false
+2026-09-27T03:00:36.5779557Z ##[endgroup]
+2026-09-27T03:00:36.7195332Z ##[group]Installed versions
+2026-09-27T03:00:36.7273058Z (node:2012) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-09-27T03:00:36.7275245Z Successfully set up CPython (3.12.14)
+2026-09-27T03:00:36.7276643Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-09-27T03:00:36.7281403Z ##[endgroup]
+2026-09-27T03:00:36.7539874Z ##[group]Run set -euo pipefail
+2026-09-27T03:00:36.7540879Z [36;1mset -euo pipefail[0m
+2026-09-27T03:00:36.7541681Z [36;1m{[0m
+2026-09-27T03:00:36.7542368Z [36;1m  printf 'platform='; uname -a[0m
+2026-09-27T03:00:36.7543836Z [36;1m  printf '\ncheckout_mount:\n'; findmnt -T "$GITHUB_WORKSPACE" -o TARGET,SOURCE,FSTYPE,OPTIONS[0m
+2026-09-27T03:00:36.7545752Z [36;1m  printf '\ntemp_mount:\n'; findmnt -T "${TMPDIR:-/tmp}" -o TARGET,SOURCE,FSTYPE,OPTIONS[0m
+2026-09-27T03:00:36.7547687Z [36;1m  printf '\nfilesystem_capacity:\n'; df -T "$GITHUB_WORKSPACE" "${TMPDIR:-/tmp}"[0m
+2026-09-27T03:00:36.7549120Z [36;1m} | tee "$RUNNER_TEMP/linux-filesystem-context.txt"[0m
+2026-09-27T03:00:36.7945817Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-09-27T03:00:36.7946561Z env:
+2026-09-27T03:00:36.7947307Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-09-27T03:00:36.7948182Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib/pkgconfig
+2026-09-27T03:00:36.7949091Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-09-27T03:00:36.7949828Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-09-27T03:00:36.7950565Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-09-27T03:00:36.7951306Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib
+2026-09-27T03:00:36.7951979Z ##[endgroup]
+2026-09-27T03:00:36.8102257Z platform=Linux runnervmtr4k5 6.17.0-1022-azure #22-Ubuntu SMP Mon Jul 27 17:24:03 UTC 2026 x86_64 x86_64 x86_64 GNU/Linux
+2026-09-27T03:00:36.8105754Z 
+2026-09-27T03:00:36.8106501Z checkout_mount:
+2026-09-27T03:00:36.8125171Z TARGET SOURCE    FSTYPE OPTIONS
+2026-09-27T03:00:36.8127463Z /      /dev/sda1 ext4   rw,relatime,discard,journal_async_commit,nobarrier,errors=remount-ro,commit=30,data=writeback
+2026-09-27T03:00:36.8129712Z 
+2026-09-27T03:00:36.8130358Z temp_mount:
+2026-09-27T03:00:36.8147516Z TARGET SOURCE    FSTYPE OPTIONS
+2026-09-27T03:00:36.8148605Z /      /dev/sda1 ext4   rw,relatime,discard,journal_async_commit,nobarrier,errors=remount-ro,commit=30,data=writeback
+2026-09-27T03:00:36.8151972Z 
+2026-09-27T03:00:36.8152514Z filesystem_capacity:
+2026-09-27T03:00:36.8171616Z Filesystem     Type 1K-blocks     Used Available Use% Mounted on
+2026-09-27T03:00:36.8173610Z /dev/root      ext4  75085112 61101200  13967528  82% /
+2026-09-27T03:00:36.8176542Z /dev/root      ext4  75085112 61101200  13967528  82% /
+2026-09-27T03:00:36.8285668Z ##[group]Run actions/upload-artifact@v4
+2026-09-27T03:00:36.8286253Z with:
+2026-09-27T03:00:36.8286697Z   name: linux-filesystem-python-3.12
+2026-09-27T03:00:36.8287790Z   path: /home/runner/work/_temp/linux-filesystem-context.txt
+2026-09-27T03:00:36.8288462Z   if-no-files-found: warn
+2026-09-27T03:00:36.8288948Z   compression-level: 6
+2026-09-27T03:00:36.8289411Z   overwrite: false
+2026-09-27T03:00:36.8289874Z   include-hidden-files: false
+2026-09-27T03:00:36.8290374Z env:
+2026-09-27T03:00:36.8290890Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-09-27T03:00:36.8291695Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib/pkgconfig
+2026-09-27T03:00:36.8292506Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-09-27T03:00:36.8293258Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-09-27T03:00:36.8294007Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-09-27T03:00:36.8295022Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib
+2026-09-27T03:00:36.8295681Z ##[endgroup]
+2026-09-27T03:00:37.0147200Z (node:2029) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-09-27T03:00:37.0150207Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-09-27T03:00:37.0217916Z With the provided path, there will be 1 file uploaded
+2026-09-27T03:00:37.0278362Z Artifact name is valid!
+2026-09-27T03:00:37.0284705Z Root directory input is valid!
+2026-09-27T03:00:37.2659754Z Beginning upload of artifact content to blob storage
+2026-09-27T03:00:37.2848218Z (node:2029) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-09-27T03:00:37.3892821Z Uploaded bytes 502
+2026-09-27T03:00:37.4251873Z Finished uploading artifact content to blob storage!
+2026-09-27T03:00:37.4254792Z SHA256 digest of uploaded artifact zip is 1b036a4664539cbe53c3826b4f173ce3bc6a4d9348060b31450870d13a4bc4cc
+2026-09-27T03:00:37.4257689Z Finalizing artifact upload
+2026-09-27T03:00:37.6595084Z Artifact linux-filesystem-python-3.12.zip successfully finalized. Artifact ID 10921318339
+2026-09-27T03:00:37.6620142Z Artifact linux-filesystem-python-3.12 has been successfully uploaded! Final size is 502 bytes. Artifact ID is 10921318339
+2026-09-27T03:00:37.6627670Z Artifact download URL: https://github.com/akifsen/ai-game-factory/actions/runs/36290153250/artifacts/10921318339
+2026-09-27T03:00:37.6787562Z ##[group]Run python -m pip install --upgrade pip
+2026-09-27T03:00:37.6789148Z [36;1mpython -m pip install --upgrade pip[0m
+2026-09-27T03:00:37.6863057Z shell: /usr/bin/bash -e {0}
+2026-09-27T03:00:37.6864209Z env:
+2026-09-27T03:00:37.6865383Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-09-27T03:00:37.6867528Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib/pkgconfig
+2026-09-27T03:00:37.6869482Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-09-27T03:00:37.6871216Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-09-27T03:00:37.6872976Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-09-27T03:00:37.6874792Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib
+2026-09-27T03:00:37.6876363Z ##[endgroup]
+2026-09-27T03:00:40.7371497Z Requirement already satisfied: pip in /opt/hostedtoolcache/Python/3.12.14/x64/lib/python3.12/site-packages (26.2.1)
+2026-09-27T03:00:41.0247393Z ##[group]Run python -m pip install -e ".[dev]"
+2026-09-27T03:00:41.0247837Z [36;1mpython -m pip install -e ".[dev]"[0m
+2026-09-27T03:00:41.0333833Z shell: /usr/bin/bash -e {0}
+2026-09-27T03:00:41.0334120Z env:
+2026-09-27T03:00:41.0334412Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-09-27T03:00:41.0334884Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib/pkgconfig
+2026-09-27T03:00:41.0335344Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-09-27T03:00:41.0335742Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-09-27T03:00:41.0336148Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-09-27T03:00:41.0336535Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib
+2026-09-27T03:00:41.0337165Z ##[endgroup]
+2026-09-27T03:00:41.9398190Z Obtaining file:///home/runner/work/ai-game-factory/ai-game-factory
+2026-09-27T03:00:41.9422735Z   Installing build dependencies: started
+2026-09-27T03:00:42.8082252Z   Installing build dependencies: finished with status 'done'
+2026-09-27T03:00:42.8084505Z   Checking if build backend supports build_editable: started
+2026-09-27T03:00:43.1930810Z   Checking if build backend supports build_editable: finished with status 'done'
+2026-09-27T03:00:43.1939348Z   Getting requirements to build editable: started
+2026-09-27T03:00:43.5678590Z   Getting requirements to build editable: finished with status 'done'
+2026-09-27T03:00:43.5688173Z   Preparing editable metadata (pyproject.toml): started
+2026-09-27T03:00:43.7728593Z   Preparing editable metadata (pyproject.toml): finished with status 'done'
+2026-09-27T03:00:43.9418016Z Collecting pydantic>=2.0.0 (from gamefactory==0.2.0)
+2026-09-27T03:00:43.9891158Z   Downloading pydantic-2.13.5-py3-none-any.whl.metadata (110 kB)
+2026-09-27T03:00:44.0558373Z Collecting pyyaml>=6.0 (from gamefactory==0.2.0)
+2026-09-27T03:00:44.0595536Z   Downloading pyyaml-6.0.3-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (2.4 kB)
+2026-09-27T03:00:44.0835269Z Collecting pytest>=8.0.0 (from gamefactory==0.2.0)
+2026-09-27T03:00:44.0875689Z   Downloading pytest-9.1.1-py3-none-any.whl.metadata (7.6 kB)
+2026-09-27T03:00:44.3853863Z Collecting ruff>=0.4.0 (from gamefactory==0.2.0)
+2026-09-27T03:00:44.3895100Z   Downloading ruff-0.16.9-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (20 kB)
+2026-09-27T03:00:44.4856020Z Collecting mypy>=1.9.0 (from gamefactory==0.2.0)
+2026-09-27T03:00:44.4905751Z   Downloading mypy-2.3.1-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (2.4 kB)
+2026-09-27T03:00:44.5083681Z Collecting types-PyYAML>=6.0.0 (from gamefactory==0.2.0)
+2026-09-27T03:00:44.5121297Z   Downloading types_pyyaml-6.0.12.20260906-py3-none-any.whl.metadata (1.8 kB)
+2026-09-27T03:00:44.5273430Z Collecting typing_extensions>=4.6.0 (from mypy>=1.9.0->gamefactory==0.2.0)
+2026-09-27T03:00:44.5309979Z   Downloading typing_extensions-4.16.0-py3-none-any.whl.metadata (3.3 kB)
+2026-09-27T03:00:44.5426179Z Collecting mypy_extensions>=1.0.0 (from mypy>=1.9.0->gamefactory==0.2.0)
+2026-09-27T03:00:44.5463235Z   Downloading mypy_extensions-1.1.0-py3-none-any.whl.metadata (1.1 kB)
+2026-09-27T03:00:44.5578314Z Collecting pathspec>=1.0.0 (from mypy>=1.9.0->gamefactory==0.2.0)
+2026-09-27T03:00:44.5631237Z   Downloading pathspec-1.1.1-py3-none-any.whl.metadata (14 kB)
+2026-09-27T03:00:44.6784205Z Collecting librt>=0.13.0 (from mypy>=1.9.0->gamefactory==0.2.0)
+2026-09-27T03:00:44.6833899Z   Downloading librt-0.15.0-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (1.3 kB)
+2026-09-27T03:00:44.7301333Z Collecting ast-serialize<1.0.0,>=0.6.0 (from mypy>=1.9.0->gamefactory==0.2.0)
+2026-09-27T03:00:44.7343795Z   Downloading ast_serialize-0.11.2-cp39-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (1.4 kB)
+2026-09-27T03:00:44.7457393Z Collecting annotated-types>=0.6.0 (from pydantic>=2.0.0->gamefactory==0.2.0)
+2026-09-27T03:00:44.7494164Z   Downloading annotated_types-0.8.0-py3-none-any.whl.metadata (15 kB)
+2026-09-27T03:00:45.3456785Z Collecting pydantic-core==2.46.5 (from pydantic>=2.0.0->gamefactory==0.2.0)
+2026-09-27T03:00:45.3495484Z   Downloading pydantic_core-2.46.5-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (6.6 kB)
+2026-09-27T03:00:45.3604248Z Collecting typing-inspection>=0.4.2 (from pydantic>=2.0.0->gamefactory==0.2.0)
+2026-09-27T03:00:45.3665949Z   Downloading typing_inspection-0.4.4-py3-none-any.whl.metadata (2.6 kB)
+2026-09-27T03:00:45.3777997Z Collecting iniconfig>=1.0.1 (from pytest>=8.0.0->gamefactory==0.2.0)
+2026-09-27T03:00:45.3817117Z   Downloading iniconfig-2.3.0-py3-none-any.whl.metadata (2.5 kB)
+2026-09-27T03:00:45.3952313Z Collecting packaging>=22 (from pytest>=8.0.0->gamefactory==0.2.0)
+2026-09-27T03:00:45.3988793Z   Downloading packaging-26.3-py3-none-any.whl.metadata (3.5 kB)
+2026-09-27T03:00:45.4102262Z Collecting pluggy<2,>=1.5 (from pytest>=8.0.0->gamefactory==0.2.0)
+2026-09-27T03:00:45.4137477Z   Downloading pluggy-1.6.0-py3-none-any.whl.metadata (4.8 kB)
+2026-09-27T03:00:45.4305598Z Collecting pygments>=2.7.2 (from pytest>=8.0.0->gamefactory==0.2.0)
+2026-09-27T03:00:45.4341845Z   Downloading pygments-2.21.0-py3-none-any.whl.metadata (2.5 kB)
+2026-09-27T03:00:45.4451186Z Downloading mypy-2.3.1-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (15.3 MB)
+2026-09-27T03:00:45.5107033Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 15.3/15.3 MB 256.1 MB/s  0:00:00
+2026-09-27T03:00:45.5148023Z Downloading ast_serialize-0.11.2-cp39-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (1.3 MB)
+2026-09-27T03:00:45.5232071Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.3/1.3 MB 188.7 MB/s  0:00:00
+2026-09-27T03:00:45.5272435Z Downloading librt-0.15.0-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (531 kB)
+2026-09-27T03:00:45.5320641Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 531.9/531.9 kB 103.4 MB/s  0:00:00
+2026-09-27T03:00:45.5360542Z Downloading mypy_extensions-1.1.0-py3-none-any.whl (5.0 kB)
+2026-09-27T03:00:45.5415760Z Downloading pathspec-1.1.1-py3-none-any.whl (57 kB)
+2026-09-27T03:00:45.5473071Z Downloading pydantic-2.13.5-py3-none-any.whl (472 kB)
+2026-09-27T03:00:45.5542236Z Downloading pydantic_core-2.46.5-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (2.1 MB)
+2026-09-27T03:00:45.5642834Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 2.1/2.1 MB 256.3 MB/s  0:00:00
+2026-09-27T03:00:45.5680096Z Downloading annotated_types-0.8.0-py3-none-any.whl (13 kB)
+2026-09-27T03:00:45.5739695Z Downloading pytest-9.1.1-py3-none-any.whl (386 kB)
+2026-09-27T03:00:45.5806267Z Downloading pluggy-1.6.0-py3-none-any.whl (20 kB)
+2026-09-27T03:00:45.5877737Z Downloading iniconfig-2.3.0-py3-none-any.whl (7.5 kB)
+2026-09-27T03:00:45.5923888Z Downloading packaging-26.3-py3-none-any.whl (129 kB)
+2026-09-27T03:00:45.5982145Z Downloading pygments-2.21.0-py3-none-any.whl (1.3 MB)
+2026-09-27T03:00:45.6048973Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.3/1.3 MB 239.7 MB/s  0:00:00
+2026-09-27T03:00:45.6089602Z Downloading pyyaml-6.0.3-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (807 kB)
+2026-09-27T03:00:45.6143116Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 807.9/807.9 kB 175.4 MB/s  0:00:00
+2026-09-27T03:00:45.6183940Z Downloading ruff-0.16.9-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (10.4 MB)
+2026-09-27T03:00:45.6541907Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 10.4/10.4 MB 305.3 MB/s  0:00:00
+2026-09-27T03:00:45.6579008Z Downloading types_pyyaml-6.0.12.20260906-py3-none-any.whl (21 kB)
+2026-09-27T03:00:45.6632883Z Downloading typing_extensions-4.16.0-py3-none-any.whl (45 kB)
+2026-09-27T03:00:45.6686611Z Downloading typing_inspection-0.4.4-py3-none-any.whl (14 kB)
+2026-09-27T03:00:45.7681900Z Building wheels for collected packages: gamefactory
+2026-09-27T03:00:45.7690657Z   Building editable for gamefactory (pyproject.toml): started
+2026-09-27T03:00:46.0068753Z   Building editable for gamefactory (pyproject.toml): finished with status 'done'
+2026-09-27T03:00:46.0070778Z   Created wheel for gamefactory: filename=gamefactory-0.2.0-0.editable-py3-none-any.whl size=4268 sha256=f94513a9b7b53123a1b751f3ad1afe2e7d5ea39a4924be84d5a313586e06f714
+2026-09-27T03:00:46.0072388Z   Stored in directory: /tmp/pip-ephem-wheel-cache-1mzbxnf6/wheels/7e/96/43/d774ef37188b4221ea2aad77158a65676801fb55832ddad809
+2026-09-27T03:00:46.0087217Z Successfully built gamefactory
+2026-09-27T03:00:46.0535507Z Installing collected packages: typing_extensions, types-PyYAML, ruff, pyyaml, pygments, pluggy, pathspec, packaging, mypy_extensions, librt, iniconfig, ast-serialize, annotated-types, typing-inspection, pytest, pydantic-core, mypy, pydantic, gamefactory
+2026-09-27T03:00:49.5679125Z 
+2026-09-27T03:00:49.5701968Z Successfully installed annotated-types-0.8.0 ast-serialize-0.11.2 gamefactory-0.2.0 iniconfig-2.3.0 librt-0.15.0 mypy-2.3.1 mypy_extensions-1.1.0 packaging-26.3 pathspec-1.1.1 pluggy-1.6.0 pydantic-2.13.5 pydantic-core-2.46.5 pygments-2.21.0 pytest-9.1.1 pyyaml-6.0.3 ruff-0.16.9 types-PyYAML-6.0.12.20260906 typing-inspection-0.4.4 typing_extensions-4.16.0
+2026-09-27T03:00:49.7030530Z ##[group]Run python -m pytest -ra -p no:cacheprovider
+2026-09-27T03:00:49.7051767Z [36;1mpython -m pytest -ra -p no:cacheprovider[0m
+2026-09-27T03:00:49.7121865Z shell: /usr/bin/bash -e {0}
+2026-09-27T03:00:49.7122147Z env:
+2026-09-27T03:00:49.7122444Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-09-27T03:00:49.7123129Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib/pkgconfig
+2026-09-27T03:00:49.7123562Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-09-27T03:00:49.7123954Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-09-27T03:00:49.7124333Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-09-27T03:00:49.7124710Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib
+2026-09-27T03:00:49.7125041Z ##[endgroup]
+2026-09-27T03:00:50.2248088Z ============================= test session starts ==============================
+2026-09-27T03:00:50.2249226Z platform linux -- Python 3.12.14, pytest-9.1.1, pluggy-1.6.0 -- /opt/hostedtoolcache/Python/3.12.14/x64/bin/python
+2026-09-27T03:00:50.2250141Z rootdir: /home/runner/work/ai-game-factory/ai-game-factory
+2026-09-27T03:00:50.2250679Z configfile: pyproject.toml
+2026-09-27T03:00:50.2251037Z testpaths: tests
+2026-09-27T03:00:51.7712770Z collecting ... collected 283 items
+2026-09-27T03:00:51.7713453Z 
+2026-09-27T03:00:51.7734086Z tests/integration/test_capabilities.py::TestCapabilityRegistry::test_discovery_contains_core_capabilities PASSED [  0%]
+2026-09-27T03:00:51.7751099Z tests/integration/test_capabilities.py::TestCapabilityRegistry::test_meshy_capability_classified_with_approval_or_unavailable PASSED [  0%]
+2026-09-27T03:00:52.5068499Z tests/integration/test_cli.py::test_help_version_and_json_usage_error PASSED [  1%]
+2026-09-27T03:00:54.5648553Z tests/integration/test_cli.py::test_cli_paid_workflow_requires_approval_and_resumes_across_processes PASSED [  1%]
+2026-09-27T03:00:54.8158496Z tests/integration/test_cli.py::test_doctor_keeps_invalid_explicit_paths_misconfigured PASSED [  1%]
+2026-09-27T03:00:54.8860986Z tests/integration/test_cli.py::test_database_lock_and_readonly_errors_are_actionable_json PASSED [  2%]
+2026-09-27T03:00:54.8990133Z tests/integration/test_cli.py::test_cli_engine_uses_project_policy_values PASSED [  2%]
+2026-09-27T03:00:54.9951255Z tests/integration/test_crash_recovery.py::TestCrashRecoveryAndFailures::test_deterministic_failure_and_retry_history PASSED [  2%]
+2026-09-27T03:00:55.0159586Z tests/integration/test_crash_recovery.py::TestCrashRecoveryAndFailures::test_crash_during_paid_operation_blocks_for_reconciliation PASSED [  3%]
+2026-09-27T03:00:55.0171120Z tests/integration/test_godot_blender_detection.py::TestGodotAndBlenderDetection::test_real_blender_detection_or_graceful_degradation PASSED [  3%]
+2026-09-27T03:00:55.0180594Z tests/integration/test_godot_blender_detection.py::TestGodotAndBlenderDetection::test_missing_blender_path_degrades_gracefully PASSED [  3%]
+2026-09-27T03:00:55.0194096Z tests/integration/test_godot_blender_detection.py::TestGodotAndBlenderDetection::test_real_godot_detection_or_graceful_degradation PASSED [  4%]
+2026-09-27T03:00:55.0202596Z tests/integration/test_godot_blender_detection.py::TestGodotAndBlenderDetection::test_missing_godot_path_degrades_gracefully PASSED [  4%]
+2026-09-27T03:00:55.0220595Z tests/integration/test_godot_blender_detection.py::TestGodotAndBlenderDetection::test_inspect_godot_project_file PASSED [  4%]
+2026-09-27T03:00:55.0237513Z tests/integration/test_godot_blender_detection.py::TestGodotAndBlenderDetection::test_inspect_empty_directory_not_godot_project PASSED [  5%]
+2026-09-27T03:00:55.2678703Z tests/integration/test_godot_pipeline.py::test_fake_godot_pipeline_passes_independent_assertions_and_no_duplicate_resume PASSED [  5%]
+2026-09-27T03:00:55.2871592Z tests/integration/test_godot_pipeline.py::test_staging_excludes_plural_secret_files_and_generic_cache_directories PASSED [  6%]
+2026-09-27T03:00:55.3879313Z tests/integration/test_godot_pipeline.py::test_process_and_stale_report_failures_keep_attempt_artifacts[import-failure-0] PASSED [  6%]
+2026-09-27T03:00:55.4996235Z tests/integration/test_godot_pipeline.py::test_process_and_stale_report_failures_keep_attempt_artifacts[runtime-failure-1] PASSED [  6%]
+2026-09-27T03:00:55.6149088Z tests/integration/test_godot_pipeline.py::test_process_and_stale_report_failures_keep_attempt_artifacts[missing-report-1] PASSED [  7%]
+2026-09-27T03:00:55.7908027Z tests/integration/test_godot_pipeline.py::test_process_and_stale_report_failures_keep_attempt_artifacts[stale-execution-1] PASSED [  7%]
+2026-09-27T03:00:56.0074739Z tests/integration/test_godot_pipeline.py::test_malformed_or_self_asserted_runtime_evidence_never_completes_workflow[completed-missing-snapshot] PASSED [  7%]
+2026-09-27T03:00:56.1828777Z tests/integration/test_godot_pipeline.py::test_malformed_or_self_asserted_runtime_evidence_never_completes_workflow[self-declared-pass] PASSED [  8%]
+2026-09-27T03:00:56.3041348Z tests/integration/test_godot_pipeline.py::test_malformed_or_self_asserted_runtime_evidence_never_completes_workflow[pass-stdout-nonzero] PASSED [  8%]
+2026-09-27T03:00:56.4269077Z tests/integration/test_godot_pipeline.py::test_malformed_or_self_asserted_runtime_evidence_never_completes_workflow[malformed-report] PASSED [  8%]
+2026-09-27T03:00:56.5504455Z tests/integration/test_godot_pipeline.py::test_malformed_or_self_asserted_runtime_evidence_never_completes_workflow[truncated-output] PASSED [  9%]
+2026-09-27T03:00:56.8704287Z tests/integration/test_godot_pipeline.py::test_prior_attempt_report_is_preserved_and_rejected_when_reused_by_retry PASSED [  9%]
+2026-09-27T03:00:57.0312843Z tests/integration/test_godot_pipeline.py::test_observation_integrity_or_managed_path_escape_blocks_validation[observation-bytes] PASSED [  9%]
+2026-09-27T03:00:57.1952047Z tests/integration/test_godot_pipeline.py::test_observation_integrity_or_managed_path_escape_blocks_validation[report-path-escape] PASSED [ 10%]
+2026-09-27T03:00:57.2729014Z tests/integration/test_godot_pipeline.py::test_approval_precedes_all_godot_processes_and_changed_inputs_request_new_approval PASSED [ 10%]
+2026-09-27T03:00:58.0603480Z tests/integration/test_godot_pipeline.py::test_recovery_with_unknown_child_intent_blocks_in_fresh_cli_processes PASSED [ 10%]
+2026-09-27T03:00:58.3108998Z tests/integration/test_godot_pipeline.py::test_known_terminal_or_no_intent_recovery_allows_only_explicit_new_attempt[False] PASSED [ 11%]
+2026-09-27T03:00:58.5692097Z tests/integration/test_godot_pipeline.py::test_known_terminal_or_no_intent_recovery_allows_only_explicit_new_attempt[True] PASSED [ 11%]
+2026-09-27T03:00:58.6108606Z tests/integration/test_godot_pipeline.py::test_metered_conservative_handler_never_uses_safe_terminal_retry_path PASSED [ 12%]
+2026-09-27T03:00:58.6877898Z tests/integration/test_godot_pipeline.py::test_terminal_journal_persistence_failure_preserves_unknown_child_state PASSED [ 12%]
+2026-09-27T03:00:58.6889536Z tests/integration/test_godot_real.py::test_real_godot_acceptance SKIPPED [ 12%]
+2026-09-27T03:00:58.6917945Z tests/integration/test_locks.py::TestExecutionLock::test_acquire_and_release PASSED [ 13%]
+2026-09-27T03:00:58.6932576Z tests/integration/test_locks.py::TestExecutionLock::test_hold_context_manager PASSED [ 13%]
+2026-09-27T03:00:58.6967553Z tests/integration/test_locks.py::TestExecutionLock::test_competing_runner_blocked_when_active PASSED [ 13%]
+2026-09-27T03:00:58.6982888Z tests/integration/test_locks.py::TestExecutionLock::test_stale_lock_reclaimed_when_process_is_dead PASSED [ 14%]
+2026-09-27T03:00:58.6996556Z tests/integration/test_locks.py::TestExecutionLock::test_workflow_id_never_becomes_a_path PASSED [ 14%]
+2026-09-27T03:00:58.7015796Z tests/integration/test_locks.py::TestExecutionLock::test_symlink_lock_leaf_cannot_write_outside_lock_directory PASSED [ 14%]
+2026-09-27T03:00:58.7032264Z tests/integration/test_locks.py::TestExecutionLock::test_hardlink_lock_leaf_is_rejected PASSED [ 15%]
+2026-09-27T03:00:59.4663924Z tests/integration/test_locks.py::test_two_processes_cannot_acquire_same_workflow PASSED [ 15%]
+2026-09-27T03:00:59.5503647Z tests/integration/test_paid_safety.py::TestPaidOperationSafety::test_paid_operation_safety_invariants PASSED [ 15%]
+2026-09-27T03:00:59.5569716Z tests/integration/test_persistence.py::TestPersistence::test_migrations_and_version_tracking PASSED [ 16%]
+2026-09-27T03:00:59.5637746Z tests/integration/test_persistence.py::TestPersistence::test_future_schema_version_rejected PASSED [ 16%]
+2026-09-27T03:00:59.5715418Z tests/integration/test_persistence.py::TestPersistence::test_gapped_migration_history_is_rejected PASSED [ 16%]
+2026-09-27T03:00:59.5754324Z tests/integration/test_persistence.py::TestPersistence::test_migration_failure_rolls_back_ddl_and_version_records PASSED [ 17%]
+2026-09-27T03:00:59.8666736Z tests/integration/test_persistence.py::TestPersistence::test_concurrent_fresh_migrations_apply_once PASSED [ 17%]
+2026-09-27T03:00:59.8747815Z tests/integration/test_persistence.py::TestPersistence::test_foreign_key_enforcement PASSED [ 18%]
+2026-09-27T03:00:59.8867735Z tests/integration/test_persistence.py::TestPersistence::test_cascade_delete PASSED [ 18%]
+2026-09-27T03:00:59.9010381Z tests/integration/test_persistence.py::TestPersistence::test_attempt_history_preservation PASSED [ 18%]
+2026-09-27T03:00:59.9088897Z tests/integration/test_persistence.py::TestPersistence::test_reopen_database_preserves_records PASSED [ 19%]
+2026-09-27T03:00:59.9318069Z tests/integration/test_persistence.py::TestPersistence::test_full_entity_persistence_roundtrip PASSED [ 19%]
+2026-09-27T03:00:59.9610526Z tests/integration/test_persistence_redaction.py::test_engine_provider_error_is_redacted_from_db_and_wal PASSED [ 19%]
+2026-09-27T03:00:59.9694485Z tests/integration/test_persistence_redaction.py::test_task_parameters_with_sensitive_inputs_are_rejected[prompt-task] PASSED [ 20%]
+2026-09-27T03:00:59.9787973Z tests/integration/test_persistence_redaction.py::test_task_parameters_with_sensitive_inputs_are_rejected[prompt-workflow] PASSED [ 20%]
+2026-09-27T03:00:59.9869457Z tests/integration/test_persistence_redaction.py::test_task_parameters_with_sensitive_inputs_are_rejected[output_path-task] PASSED [ 20%]
+2026-09-27T03:00:59.9948201Z tests/integration/test_persistence_redaction.py::test_task_parameters_with_sensitive_inputs_are_rejected[output_path-workflow] PASSED [ 21%]
+2026-09-27T03:01:00.0023569Z tests/integration/test_persistence_redaction.py::test_sensitive_task_parameter_keys_are_rejected_without_modifying_metadata PASSED [ 21%]
+2026-09-27T03:01:00.0243982Z tests/integration/test_persistence_redaction.py::test_evidence_approval_and_audit_payloads_are_sanitized PASSED [ 21%]
+2026-09-27T03:01:00.0362154Z tests/integration/test_persistence_redaction.py::test_finalize_task_rejects_invalid_state_transition PASSED [ 22%]
+2026-09-27T03:01:00.0372186Z tests/integration/test_process_metadata.py::TestProcessMetadata::test_command_result_defaults_and_properties PASSED [ 22%]
+2026-09-27T03:01:00.0381159Z tests/integration/test_process_metadata.py::TestProcessMetadata::test_command_result_canonical_construction PASSED [ 22%]
+2026-09-27T03:01:00.0390572Z tests/integration/test_process_metadata.py::TestProcessMetadata::test_multibyte_trim_incomplete_helper PASSED [ 23%]
+2026-09-27T03:01:00.0399573Z tests/integration/test_process_metadata.py::TestProcessMetadata::test_read_bounded_with_multibyte_stream PASSED [ 23%]
+2026-09-27T03:01:00.0408678Z tests/integration/test_process_metadata.py::TestProcessMetadata::test_read_error_does_not_silently_return_untruncated_success PASSED [ 24%]
+2026-09-27T03:01:00.0607591Z tests/integration/test_process_metadata.py::TestProcessMetadata::test_successful_execution_metadata_contract PASSED [ 24%]
+2026-09-27T03:01:00.0798472Z tests/integration/test_process_metadata.py::TestProcessMetadata::test_nonzero_execution_metadata_contract PASSED [ 24%]
+2026-09-27T03:01:00.5845905Z tests/integration/test_process_metadata.py::TestProcessMetadata::test_timeout_metadata_contract_and_serializability PASSED [ 25%]
+2026-09-27T03:01:01.0894788Z tests/integration/test_process_metadata.py::TestProcessMetadata::test_timeout_redaction_metadata_safety PASSED [ 25%]
+2026-09-27T03:01:01.3475836Z tests/integration/test_process_metadata.py::TestProcessMetadata::test_truncation_stdout_and_stderr PASSED [ 25%]
+2026-09-27T03:01:01.3512861Z tests/integration/test_process_metadata.py::TestProcessMetadata::test_tool_execution_error_redaction PASSED [ 26%]
+2026-09-27T03:01:01.3713911Z tests/integration/test_process_runner.py::TestProcessRunner::test_run_simple_command_stdout PASSED [ 26%]
+2026-09-27T03:01:01.3905377Z tests/integration/test_process_runner.py::TestProcessRunner::test_run_command_stderr PASSED [ 26%]
+2026-09-27T03:01:01.4098275Z tests/integration/test_process_runner.py::TestProcessRunner::test_minimal_env_filters_secrets PASSED [ 27%]
+2026-09-27T03:01:01.9148530Z tests/integration/test_process_runner.py::TestProcessRunner::test_timeout_enforcement PASSED [ 27%]
+2026-09-27T03:01:01.9337797Z tests/integration/test_process_runner.py::TestProcessRunner::test_secret_redaction_in_output PASSED [ 27%]
+2026-09-27T03:01:01.9370670Z tests/integration/test_process_runner.py::TestProcessRunner::test_nonexistent_executable_raises_error PASSED [ 28%]
+2026-09-27T03:01:01.9580351Z tests/integration/test_process_runner.py::TestProcessRunner::test_request_override_secret_is_redacted_from_output_and_errors PASSED [ 28%]
+2026-09-27T03:01:01.9774973Z tests/integration/test_process_runner.py::TestProcessRunner::test_sensitive_argument_flag_secret_is_redacted PASSED [ 28%]
+2026-09-27T03:01:01.9966777Z tests/integration/test_process_runner.py::TestProcessRunner::test_short_override_secret_and_malformed_unicode_are_safe PASSED [ 29%]
+2026-09-27T03:01:02.3127244Z tests/integration/test_process_runner.py::TestProcessRunner::test_output_is_bounded PASSED [ 29%]
+2026-09-27T03:01:04.3178592Z tests/integration/test_process_runner.py::TestProcessRunner::test_timeout_kills_descendant_process PASSED [ 30%]
+2026-09-27T03:01:04.3373223Z tests/integration/test_process_runner.py::TestProcessRunner::test_run_success_with_metadata PASSED [ 30%]
+2026-09-27T03:01:04.3566385Z tests/integration/test_process_runner.py::TestProcessRunner::test_run_nonzero_exit_code PASSED [ 30%]
+2026-09-27T03:01:06.3618635Z tests/integration/test_process_runner.py::TestProcessRunner::test_timeout_attaches_serializable_metadata PASSED [ 31%]
+2026-09-27T03:01:06.5811705Z tests/integration/test_process_runner.py::TestProcessRunner::test_redaction_expansion_stays_within_output_limit PASSED [ 31%]
+2026-09-27T03:01:08.3528685Z tests/integration/test_process_runner.py::TestProcessRunner::test_posix_parent_exit_kills_descendant_ignoring_sigterm PASSED [ 31%]
+2026-09-27T03:01:08.3728963Z tests/integration/test_process_runner.py::TestProcessRunner::test_incomplete_pipe_read_fails_with_evidence PASSED [ 32%]
+2026-09-27T03:01:08.3915862Z tests/integration/test_process_runner.py::TestProcessRunner::test_cleanup_error_message_redacts_request_secret PASSED [ 32%]
+2026-09-27T03:01:08.3927285Z tests/integration/test_process_runner.py::TestProcessRunner::test_windows_job_close_failure_is_reported SKIPPED [ 32%]
+2026-09-27T03:01:08.8975380Z tests/integration/test_process_runner.py::TestProcessRunner::test_timeout_redacts_secrets_in_details PASSED [ 33%]
+2026-09-27T03:01:09.0123154Z tests/integration/test_process_runner.py::TestProcessRunner::test_stdout_truncation_flag_and_multibyte_safety PASSED [ 33%]
+2026-09-27T03:01:09.1541322Z tests/integration/test_process_runner.py::TestProcessRunner::test_stderr_truncation_flag PASSED [ 33%]
+2026-09-27T03:01:09.1576168Z tests/integration/test_process_runner.py::TestProcessRunner::test_error_redacts_credentials_in_details PASSED [ 34%]
+2026-09-27T03:01:09.1585739Z tests/integration/test_process_runner.py::TestProcessRunner::test_command_result_backward_compatibility PASSED [ 34%]
+2026-09-27T03:01:09.1593607Z tests/integration/test_process_runner.py::TestProcessRunner::test_job_attach_failure_fails_closed SKIPPED [ 34%]
+2026-09-27T03:01:10.1962187Z tests/integration/test_process_runner.py::TestProcessRunner::test_parent_exit_descendant_bounded_and_cleaned PASSED [ 35%]
+2026-09-27T03:01:10.4011082Z tests/integration/test_process_runner.py::TestProcessRunner::test_cleanup_failure_retains_metadata PASSED [ 35%]
+2026-09-27T03:01:10.5868470Z tests/integration/test_v02_compatibility.py::test_v01_approved_workflow_resumes_with_original_input_hash PASSED [ 36%]
+2026-09-27T03:01:10.6044485Z tests/integration/test_v02_compatibility.py::test_update_parameters_rejects_secrets_without_overwriting_previous_snapshot PASSED [ 36%]
+2026-09-27T03:01:10.6057193Z tests/integration/test_verify_godot_live_crash.py::test_process_identity_query_current PASSED [ 36%]
+2026-09-27T03:01:10.6069055Z tests/integration/test_verify_godot_live_crash.py::test_process_identity_rejection_wrong_executable PASSED [ 37%]
+2026-09-27T03:01:10.6105190Z tests/integration/test_verify_godot_live_crash.py::test_sentinel_lifecycle PASSED [ 37%]
+2026-09-27T03:01:10.6137534Z tests/integration/test_verify_godot_live_crash.py::test_controlled_fixture_preparation PASSED [ 37%]
+2026-09-27T03:01:10.7022872Z tests/integration/test_verify_godot_live_crash.py::test_wrapper_intercepts_subprocess_launch PASSED [ 38%]
+2026-09-27T03:01:10.7038948Z tests/integration/test_verify_godot_live_crash.py::test_real_godot_live_crash SKIPPED [ 38%]
+2026-09-27T03:01:10.7049120Z tests/integration/test_verify_godot_live_crash.py::test_unknown_child_state_is_not_successful_cleanup[os_error: denied] PASSED [ 38%]
+2026-09-27T03:01:10.7058007Z tests/integration/test_verify_godot_live_crash.py::test_unknown_child_state_is_not_successful_cleanup[malformed_stat] PASSED [ 39%]
+2026-09-27T03:01:10.7066598Z tests/integration/test_verify_godot_live_crash.py::test_unknown_child_state_is_not_successful_cleanup[starttime_mismatch: reused] PASSED [ 39%]
+2026-09-27T03:01:10.7076323Z tests/integration/test_verify_godot_live_crash.py::test_unknown_child_state_is_not_successful_cleanup[exe_mismatch: other] PASSED [ 39%]
+2026-09-27T03:01:10.7086200Z tests/integration/test_verify_godot_python_resolution.py::test_valid_interpreter_path_resolved_to_absolute[recovery] PASSED [ 40%]
+2026-09-27T03:01:10.7095668Z tests/integration/test_verify_godot_python_resolution.py::test_valid_interpreter_path_resolved_to_absolute[live_crash] PASSED [ 40%]
+2026-09-27T03:01:10.7106125Z tests/integration/test_verify_godot_python_resolution.py::test_relative_interpreter_path_resolved_to_absolute[recovery] PASSED [ 40%]
+2026-09-27T03:01:10.7116565Z tests/integration/test_verify_godot_python_resolution.py::test_relative_interpreter_path_resolved_to_absolute[live_crash] PASSED [ 41%]
+2026-09-27T03:01:10.7132101Z tests/integration/test_verify_godot_python_resolution.py::test_nonexistent_python_path_rejected[recovery] PASSED [ 41%]
+2026-09-27T03:01:10.7147356Z tests/integration/test_verify_godot_python_resolution.py::test_nonexistent_python_path_rejected[live_crash] PASSED [ 42%]
+2026-09-27T03:01:10.7162573Z tests/integration/test_verify_godot_python_resolution.py::test_directory_python_path_rejected[recovery] PASSED [ 42%]
+2026-09-27T03:01:10.7177573Z tests/integration/test_verify_godot_python_resolution.py::test_directory_python_path_rejected[live_crash] PASSED [ 42%]
+2026-09-27T03:01:10.7196229Z tests/integration/test_verify_godot_python_resolution.py::test_symlink_interpreter_path_preserved_filesystem[recovery] PASSED [ 43%]
+2026-09-27T03:01:10.7214706Z tests/integration/test_verify_godot_python_resolution.py::test_symlink_interpreter_path_preserved_filesystem[live_crash] PASSED [ 43%]
+2026-09-27T03:01:10.7230185Z tests/integration/test_verify_godot_python_resolution.py::test_broken_symlink_rejected[recovery] PASSED [ 43%]
+2026-09-27T03:01:10.7246147Z tests/integration/test_verify_godot_python_resolution.py::test_broken_symlink_rejected[live_crash] PASSED [ 44%]
+2026-09-27T03:01:10.7267932Z tests/integration/test_verify_godot_python_resolution.py::test_symlink_preservation_synthetic_mock[recovery] PASSED [ 44%]
+2026-09-27T03:01:10.7287497Z tests/integration/test_verify_godot_python_resolution.py::test_symlink_preservation_synthetic_mock[live_crash] PASSED [ 44%]
+2026-09-27T03:01:10.7653682Z tests/integration/test_verify_godot_python_resolution.py::test_real_venv_regression_without_downloads[recovery] PASSED [ 45%]
+2026-09-27T03:01:10.7957791Z tests/integration/test_verify_godot_python_resolution.py::test_real_venv_regression_without_downloads[live_crash] PASSED [ 45%]
+2026-09-27T03:01:10.9398570Z tests/integration/test_verify_godot_python_resolution.py::test_cli_rejects_missing_python_executable PASSED [ 45%]
+2026-09-27T03:01:11.1289745Z tests/integration/test_workflow_engine.py::TestWorkflowEngine::test_demo_workflow_lifecycle_with_approval_gate PASSED [ 46%]
+2026-09-27T03:01:11.1536170Z tests/integration/test_workflow_regressions.py::test_budget_lost_between_evaluation_and_claim_persists_blocked_state PASSED [ 46%]
+2026-09-27T03:01:11.2301661Z tests/integration/test_workflow_regressions.py::test_paid_unknown_outcome_is_never_retried_and_invocation_is_durable PASSED [ 46%]
+2026-09-27T03:01:11.2418303Z tests/integration/test_workflow_regressions.py::test_claim_rolls_back_task_state_if_attempt_insert_fails PASSED [ 47%]
+2026-09-27T03:01:11.3083204Z tests/integration/test_workflow_regressions.py::test_approved_input_mutation_requires_new_approval_and_never_calls_provider PASSED [ 47%]
+2026-09-27T03:01:11.3678644Z tests/integration/test_workflow_regressions.py::test_tampering_while_approval_is_blocked_prevents_completion PASSED [ 48%]
+2026-09-27T03:01:11.4028594Z tests/integration/test_workflow_regressions.py::test_retries_cannot_mutate_another_workflows_task PASSED [ 48%]
+2026-09-27T03:01:11.4539108Z tests/integration/test_workflow_regressions.py::test_approval_compare_and_set_records_one_decision_and_audit PASSED [ 48%]
+2026-09-27T03:01:11.5188654Z tests/integration/test_workflow_regressions.py::test_rejected_approval_is_terminal_until_operator_changes_plan PASSED [ 49%]
+2026-09-27T03:01:11.6008724Z tests/integration/test_workflow_regressions.py::test_provider_cost_class_cannot_be_downgraded_and_ledger_is_generic PASSED [ 49%]
+2026-09-27T03:01:11.6775711Z tests/integration/test_workflow_regressions.py::test_metered_accepted_call_with_unknown_result_is_not_replayed PASSED [ 49%]
+2026-09-27T03:01:11.7447850Z tests/integration/test_workflow_regressions.py::test_missing_or_failed_provider_result_never_creates_artifact[None] PASSED [ 50%]
+2026-09-27T03:01:11.8102344Z tests/integration/test_workflow_regressions.py::test_missing_or_failed_provider_result_never_creates_artifact[provider1] PASSED [ 50%]
+2026-09-27T03:01:11.9308658Z tests/integration/test_workflow_regressions.py::test_project_budget_is_reserved_across_workflows PASSED [ 50%]
+2026-09-27T03:01:11.9474265Z tests/integration/test_workflow_regressions.py::test_concurrent_workflow_claims_cannot_overreserve_project_budget PASSED [ 51%]
+2026-09-27T03:01:11.9943073Z tests/integration/test_workflow_regressions.py::test_repository_write_policy_pauses_before_concept_artifact_creation PASSED [ 51%]
+2026-09-27T03:01:12.0597586Z tests/integration/test_workflow_regressions.py::test_artifacts_from_two_workflows_do_not_overwrite_each_other PASSED [ 51%]
+2026-09-27T03:01:12.0950985Z tests/integration/test_workflow_regressions.py::test_registered_handler_result_is_versioned_and_engine_verified PASSED [ 52%]
+2026-09-27T03:01:12.1228946Z tests/integration/test_workflow_regressions.py::test_malformed_handler_results_fail_closed[handler_result0] PASSED [ 52%]
+2026-09-27T03:01:12.1498737Z tests/integration/test_workflow_regressions.py::test_malformed_handler_results_fail_closed[handler_result1] PASSED [ 53%]
+2026-09-27T03:01:12.1768749Z tests/integration/test_workflow_regressions.py::test_malformed_handler_results_fail_closed[handler_result2] PASSED [ 53%]
+2026-09-27T03:01:12.1777149Z tests/unit/test_approvals.py::TestApprovalService::test_create_and_approve_with_matching_inputs PASSED [ 53%]
+2026-09-27T03:01:12.1787577Z tests/unit/test_approvals.py::TestApprovalService::test_approve_with_tampered_inputs_fails PASSED [ 54%]
+2026-09-27T03:01:12.1797898Z tests/unit/test_approvals.py::TestApprovalService::test_reject_and_request_changes PASSED [ 54%]
+2026-09-27T03:01:12.1823583Z tests/unit/test_artifacts.py::TestArtifactManager::test_create_and_verify_artifact PASSED [ 54%]
+2026-09-27T03:01:12.1849437Z tests/unit/test_artifacts.py::TestArtifactManager::test_missing_artifact_fails_verification PASSED [ 55%]
+2026-09-27T03:01:12.1878864Z tests/unit/test_artifacts.py::TestArtifactManager::test_tampered_artifact_fails_verification PASSED [ 55%]
+2026-09-27T03:01:12.2367664Z tests/unit/test_closeout_evidence.py::test_valid_bundle_verifies_cold PASSED [ 55%]
+2026-09-27T03:01:12.2478956Z tests/unit/test_closeout_evidence.py::test_builder_copies_only_catalogued_files_and_rejects_nonempty_output PASSED [ 56%]
+2026-09-27T03:01:12.2525515Z tests/unit/test_closeout_evidence.py::test_missing_mandatory_observation_is_rejected PASSED [ 56%]
+2026-09-27T03:01:12.2570491Z tests/unit/test_closeout_evidence.py::test_modified_log_is_rejected_by_hash PASSED [ 56%]
+2026-09-27T03:01:12.2621772Z tests/unit/test_closeout_evidence.py::test_mixed_execution_fails_relationship_even_with_updated_hash PASSED [ 57%]
+2026-09-27T03:01:12.2630603Z tests/unit/test_closeout_evidence.py::test_unsafe_bundle_paths_rejected[../outside] PASSED [ 57%]
+2026-09-27T03:01:12.2639431Z tests/unit/test_closeout_evidence.py::test_unsafe_bundle_paths_rejected[C:/outside] PASSED [ 57%]
+2026-09-27T03:01:12.2648256Z tests/unit/test_closeout_evidence.py::test_unsafe_bundle_paths_rejected[a//b] PASSED [ 58%]
+2026-09-27T03:01:12.2656742Z tests/unit/test_closeout_evidence.py::test_unsafe_bundle_paths_rejected[a/./b] PASSED [ 58%]
+2026-09-27T03:01:12.2664983Z tests/unit/test_closeout_evidence.py::test_unsafe_bundle_paths_rejected[a/../b] PASSED [ 59%]
+2026-09-27T03:01:12.2673286Z tests/unit/test_closeout_evidence.py::test_unsafe_bundle_paths_rejected[a/file:stream] PASSED [ 59%]
+2026-09-27T03:01:12.2682953Z tests/unit/test_closeout_evidence.py::test_unsafe_bundle_paths_rejected[a\\b] PASSED [ 59%]
+2026-09-27T03:01:12.3308771Z tests/unit/test_config.py::TestConfigLoader::test_init_project_idempotent_and_non_destructive PASSED [ 60%]
+2026-09-27T03:01:12.3327791Z tests/unit/test_config.py::TestConfigLoader::test_unknown_field_rejected PASSED [ 60%]
+2026-09-27T03:01:12.3351100Z tests/unit/test_config.py::TestConfigLoader::test_unsupported_schema_version_rejected PASSED [ 60%]
+2026-09-27T03:01:12.3376535Z tests/unit/test_config.py::TestConfigLoader::test_non_finite_or_negative_budgets_rejected[-1] PASSED [ 61%]
+2026-09-27T03:01:12.3402156Z tests/unit/test_config.py::TestConfigLoader::test_non_finite_or_negative_budgets_rejected[.nan] PASSED [ 61%]
+2026-09-27T03:01:12.3427938Z tests/unit/test_config.py::TestConfigLoader::test_non_finite_or_negative_budgets_rejected[.inf] PASSED [ 61%]
+2026-09-27T03:01:12.3459847Z tests/unit/test_config.py::TestConfigLoader::test_secret_field_and_missing_schema_version_rejected PASSED [ 62%]
+2026-09-27T03:01:12.3490748Z tests/unit/test_config.py::TestConfigLoader::test_user_defaults_are_overridden_by_project_values PASSED [ 62%]
+2026-09-27T03:01:12.3653542Z tests/unit/test_config.py::TestConfigLoader::test_unicode_project_name_generates_valid_ascii_id PASSED [ 62%]
+2026-09-27T03:01:12.3675129Z tests/unit/test_config.py::TestConfigLoader::test_malformed_yaml_rejected PASSED [ 63%]
+2026-09-27T03:01:12.3683595Z tests/unit/test_config.py::TestConfigLoader::test_init_rejects_factory_junction_escape_without_touching_target SKIPPED [ 63%]
+2026-09-27T03:01:12.3692292Z tests/unit/test_config.py::TestConfigLoader::test_init_rejects_state_junction_escape_without_touching_target SKIPPED [ 63%]
+2026-09-27T03:01:12.3701023Z tests/unit/test_dag.py::TestWorkflowDAG::test_linear_dependencies PASSED [ 64%]
+2026-09-27T03:01:12.3709646Z tests/unit/test_dag.py::TestWorkflowDAG::test_fan_out_and_fan_in PASSED  [ 64%]
+2026-09-27T03:01:12.3717466Z tests/unit/test_dag.py::TestWorkflowDAG::test_independent_tasks PASSED   [ 65%]
+2026-09-27T03:01:12.3726559Z tests/unit/test_dag.py::TestWorkflowDAG::test_direct_cycle_detected PASSED [ 65%]
+2026-09-27T03:01:12.3734905Z tests/unit/test_dag.py::TestWorkflowDAG::test_indirect_cycle_detected PASSED [ 65%]
+2026-09-27T03:01:12.3743102Z tests/unit/test_dag.py::TestWorkflowDAG::test_self_dependency_detected PASSED [ 66%]
+2026-09-27T03:01:12.3751569Z tests/unit/test_dag.py::TestWorkflowDAG::test_missing_dependency_detected PASSED [ 66%]
+2026-09-27T03:01:12.3760133Z tests/unit/test_dag.py::TestWorkflowDAG::test_duplicate_task_id_detected PASSED [ 66%]
+2026-09-27T03:01:12.3769846Z tests/unit/test_dag.py::TestWorkflowDAG::test_downstream_query_and_failure_propagation PASSED [ 67%]
+2026-09-27T03:01:12.3784221Z tests/unit/test_godot_contracts.py::test_load_fixture_scenario_and_build_oracle_free_request PASSED [ 67%]
+2026-09-27T03:01:12.3795674Z tests/unit/test_godot_contracts.py::test_scenario_rejects_invalid_fields_and_values[change0-schema_version] PASSED [ 67%]
+2026-09-27T03:01:12.3806771Z tests/unit/test_godot_contracts.py::test_scenario_rejects_invalid_fields_and_values[change1-unknown] PASSED [ 68%]
+2026-09-27T03:01:12.3817818Z tests/unit/test_godot_contracts.py::test_scenario_rejects_invalid_fields_and_values[change2-scene] PASSED [ 68%]
+2026-09-27T03:01:12.3828106Z tests/unit/test_godot_contracts.py::test_scenario_rejects_invalid_fields_and_values[change3-scene] PASSED [ 68%]
+2026-09-27T03:01:12.3838067Z tests/unit/test_godot_contracts.py::test_scenario_rejects_invalid_fields_and_values[change4-scene] PASSED [ 69%]
+2026-09-27T03:01:12.3848346Z tests/unit/test_godot_contracts.py::test_scenario_rejects_invalid_fields_and_values[change5-scene] PASSED [ 69%]
+2026-09-27T03:01:12.3858640Z tests/unit/test_godot_contracts.py::test_scenario_rejects_invalid_fields_and_values[change6-scene] PASSED [ 69%]
+2026-09-27T03:01:12.3869089Z tests/unit/test_godot_contracts.py::test_scenario_rejects_invalid_fields_and_values[change7-scene] PASSED [ 70%]
+2026-09-27T03:01:12.3879242Z tests/unit/test_godot_contracts.py::test_scenario_rejects_invalid_fields_and_values[change8-scene] PASSED [ 70%]
+2026-09-27T03:01:12.3889377Z tests/unit/test_godot_contracts.py::test_scenario_rejects_invalid_fields_and_values[change9-scene] PASSED [ 71%]
+2026-09-27T03:01:12.3899870Z tests/unit/test_godot_contracts.py::test_scenario_rejects_invalid_fields_and_values[change10-max_tick] PASSED [ 71%]
+2026-09-27T03:01:12.3910782Z tests/unit/test_godot_contracts.py::test_scenario_rejects_invalid_fields_and_values[change11-finite] PASSED [ 71%]
+2026-09-27T03:01:12.3921322Z tests/unit/test_godot_contracts.py::test_scenario_rejects_invalid_fields_and_values[change12-action] PASSED [ 72%]
+2026-09-27T03:01:12.3932279Z tests/unit/test_godot_contracts.py::test_scenario_rejects_invalid_fields_and_values[change13-amount] PASSED [ 72%]
+2026-09-27T03:01:12.3943247Z tests/unit/test_godot_contracts.py::test_scenario_rejects_invalid_fields_and_values[change14-does not accept amount] PASSED [ 72%]
+2026-09-27T03:01:12.3955763Z tests/unit/test_godot_contracts.py::test_scenario_rejects_invalid_fields_and_values[change15-tick 0] PASSED [ 73%]
+2026-09-27T03:01:12.3966599Z tests/unit/test_godot_contracts.py::test_scenario_rejects_invalid_fields_and_values[change16-expected] PASSED [ 73%]
+2026-09-27T03:01:12.3977365Z tests/unit/test_godot_contracts.py::test_scenario_rejects_invalid_fields_and_values[change17-at least 1 item] PASSED [ 73%]
+2026-09-27T03:01:12.3994713Z tests/unit/test_godot_contracts.py::test_scenario_rejects_duplicate_json_keys PASSED [ 74%]
+2026-09-27T03:01:12.4011652Z tests/unit/test_godot_contracts.py::test_scenario_size_limit_is_enforced PASSED [ 74%]
+2026-09-27T03:01:12.4026482Z tests/unit/test_godot_contracts.py::test_scenario_path_must_be_a_regular_file PASSED [ 74%]
+2026-09-27T03:01:12.4037945Z tests/unit/test_godot_contracts.py::test_schema_scene_pattern_rejects_non_normalized_paths PASSED [ 75%]
+2026-09-27T03:01:12.4052385Z tests/unit/test_godot_contracts.py::test_observation_is_bound_to_execution_scenario_and_requested_ticks PASSED [ 75%]
+2026-09-27T03:01:12.4064452Z tests/unit/test_godot_contracts.py::test_observation_rejects_report_supplied_oracle_or_spoofed_state PASSED [ 75%]
+2026-09-27T03:01:12.4077773Z tests/unit/test_godot_contracts.py::test_python_assertions_compare_expected_values_to_observed_state PASSED [ 76%]
+2026-09-27T03:01:12.4090105Z tests/unit/test_godot_contracts.py::test_assertion_operators_are_inclusive[equals-5-5-True] PASSED [ 76%]
+2026-09-27T03:01:12.4102324Z tests/unit/test_godot_contracts.py::test_assertion_operators_are_inclusive[minimum-5-5-True] PASSED [ 77%]
+2026-09-27T03:01:12.4114473Z tests/unit/test_godot_contracts.py::test_assertion_operators_are_inclusive[minimum-6-5-False] PASSED [ 77%]
+2026-09-27T03:01:12.4126620Z tests/unit/test_godot_contracts.py::test_assertion_operators_are_inclusive[maximum-5-5-True] PASSED [ 77%]
+2026-09-27T03:01:12.4140166Z tests/unit/test_godot_contracts.py::test_assertion_operators_are_inclusive[maximum-4-5-False] PASSED [ 78%]
+2026-09-27T03:01:12.4179137Z tests/unit/test_godot_staging.py::test_manifest_excludes_scenario_state_caches_and_secrets PASSED [ 78%]
+2026-09-27T03:01:12.4205567Z tests/unit/test_godot_staging.py::test_manifest_enforces_file_and_total_byte_bounds PASSED [ 78%]
+2026-09-27T03:01:12.4298376Z tests/unit/test_godot_staging.py::test_create_stage_is_attempt_scoped_and_preserves_original_project PASSED [ 79%]
+2026-09-27T03:01:12.4343822Z tests/unit/test_godot_staging.py::test_source_change_after_preflight_fingerprint_is_rejected PASSED [ 79%]
+2026-09-27T03:01:12.4393923Z tests/unit/test_godot_staging.py::test_source_change_between_manifest_and_copy_is_rejected PASSED [ 79%]
+2026-09-27T03:01:12.4415012Z tests/unit/test_godot_staging.py::test_manifest_rejects_symlinked_file_when_supported PASSED [ 80%]
+2026-09-27T03:01:12.4435641Z tests/unit/test_godot_staging.py::test_manifest_rejects_linked_source_directory PASSED [ 80%]
+2026-09-27T03:01:12.4455418Z tests/unit/test_godot_staging.py::test_stager_rejects_root_directory_link PASSED [ 80%]
+2026-09-27T03:01:12.4488982Z tests/unit/test_godot_staging.py::test_attempt_parent_link_is_rejected_before_writing_outside_scratch PASSED [ 81%]
+2026-09-27T03:01:12.4506550Z tests/unit/test_path_guard.py::TestPathGuard::test_safe_relative_path PASSED [ 81%]
+2026-09-27T03:01:12.4524023Z tests/unit/test_path_guard.py::TestPathGuard::test_traversal_attack_rejected PASSED [ 81%]
+2026-09-27T03:01:12.4541437Z tests/unit/test_path_guard.py::TestPathGuard::test_traversal_with_nested_dots PASSED [ 82%]
+2026-09-27T03:01:12.4557601Z tests/unit/test_path_guard.py::TestPathGuard::test_unc_path_rejected PASSED [ 82%]
+2026-09-27T03:01:12.4573433Z tests/unit/test_path_guard.py::TestPathGuard::test_empty_path_rejected PASSED [ 83%]
+2026-09-27T03:01:12.4593318Z tests/unit/test_path_guard.py::TestPathGuard::test_ensure_safe_parent_creates_directories PASSED [ 83%]
+2026-09-27T03:01:12.4613946Z tests/unit/test_path_guard.py::TestPathGuard::test_symlink_escape_rejected_if_pointing_outside PASSED [ 83%]
+2026-09-27T03:01:12.4643141Z tests/unit/test_path_guard.py::TestPathGuard::test_windows_special_paths_rejected_on_all_platforms[safe.txt:secret] PASSED [ 84%]
+2026-09-27T03:01:12.4659901Z tests/unit/test_path_guard.py::TestPathGuard::test_windows_special_paths_rejected_on_all_platforms[CON] PASSED [ 84%]
+2026-09-27T03:01:12.4676078Z tests/unit/test_path_guard.py::TestPathGuard::test_windows_special_paths_rejected_on_all_platforms[NUL.txt] PASSED [ 84%]
+2026-09-27T03:01:12.4692614Z tests/unit/test_path_guard.py::TestPathGuard::test_windows_special_paths_rejected_on_all_platforms[folder/name. ] PASSED [ 85%]
+2026-09-27T03:01:12.4712720Z tests/unit/test_path_guard.py::TestPathGuard::test_symlink_parent_escape_rejected_for_missing_leaf PASSED [ 85%]
+2026-09-27T03:01:12.4721879Z tests/unit/test_policy.py::TestPolicyEngine::test_local_read_allowed_without_approval PASSED [ 85%]
+2026-09-27T03:01:12.4730795Z tests/unit/test_policy.py::TestPolicyEngine::test_process_execution_allowed_without_approval PASSED [ 86%]
+2026-09-27T03:01:12.4740690Z tests/unit/test_policy.py::TestPolicyEngine::test_managed_process_write_obeys_existing_repository_write_policy PASSED [ 86%]
+2026-09-27T03:01:12.4750674Z tests/unit/test_policy.py::TestPolicyEngine::test_process_approval_policy_applies_without_managed_write PASSED [ 86%]
+2026-09-27T03:01:12.4759146Z tests/unit/test_policy.py::TestPolicyEngine::test_free_external_allowed_without_approval PASSED [ 87%]
+2026-09-27T03:01:12.4767834Z tests/unit/test_policy.py::TestPolicyEngine::test_repo_write_without_approval_when_rule_disabled PASSED [ 87%]
+2026-09-27T03:01:12.4776500Z tests/unit/test_policy.py::TestPolicyEngine::test_repo_write_requires_approval_when_configured PASSED [ 87%]
+2026-09-27T03:01:12.4784931Z tests/unit/test_policy.py::TestPolicyEngine::test_paid_operation_blocked_without_approval PASSED [ 88%]
+2026-09-27T03:01:12.4793780Z tests/unit/test_policy.py::TestPolicyEngine::test_paid_operation_allowed_with_approval PASSED [ 88%]
+2026-09-27T03:01:12.4802411Z tests/unit/test_policy.py::TestPolicyEngine::test_destructive_operation_blocked_without_approval PASSED [ 89%]
+2026-09-27T03:01:12.4810929Z tests/unit/test_policy.py::TestPolicyEngine::test_destructive_operation_allowed_with_approval PASSED [ 89%]
+2026-09-27T03:01:12.4820867Z tests/unit/test_policy.py::TestPolicyEngine::test_budget_exceeded_per_operation PASSED [ 89%]
+2026-09-27T03:01:12.4830394Z tests/unit/test_policy.py::TestPolicyEngine::test_budget_exceeded_total_project PASSED [ 90%]
+2026-09-27T03:01:12.4839640Z tests/unit/test_policy.py::TestPolicyEngine::test_external_cost_classes_require_approval_even_for_free_operation[METERED] PASSED [ 90%]
+2026-09-27T03:01:12.4848681Z tests/unit/test_policy.py::TestPolicyEngine::test_external_cost_classes_require_approval_even_for_free_operation[PAID] PASSED [ 90%]
+2026-09-27T03:01:12.4857718Z tests/unit/test_policy.py::TestPolicyEngine::test_external_cost_classes_require_approval_even_for_free_operation[EXPENSIVE] PASSED [ 91%]
+2026-09-27T03:01:12.4866595Z tests/unit/test_policy.py::TestPolicyEngine::test_invalid_estimated_cost_is_rejected[-1.0] PASSED [ 91%]
+2026-09-27T03:01:12.4875588Z tests/unit/test_policy.py::TestPolicyEngine::test_invalid_estimated_cost_is_rejected[nan] PASSED [ 91%]
+2026-09-27T03:01:12.4884940Z tests/unit/test_policy.py::TestPolicyEngine::test_invalid_estimated_cost_is_rejected[inf] PASSED [ 92%]
+2026-09-27T03:01:12.4894147Z tests/unit/test_policy.py::TestPolicyEngine::test_invalid_estimated_cost_is_rejected[-inf] PASSED [ 92%]
+2026-09-27T03:01:12.4904442Z tests/unit/test_policy.py::TestPolicyEngine::test_invalid_budget_configuration_is_rejected[-1.0-max_operation_cost] PASSED [ 92%]
+2026-09-27T03:01:12.4914394Z tests/unit/test_policy.py::TestPolicyEngine::test_invalid_budget_configuration_is_rejected[-1.0-project_budget] PASSED [ 93%]
+2026-09-27T03:01:12.4924134Z tests/unit/test_policy.py::TestPolicyEngine::test_invalid_budget_configuration_is_rejected[nan-max_operation_cost] PASSED [ 93%]
+2026-09-27T03:01:12.4934090Z tests/unit/test_policy.py::TestPolicyEngine::test_invalid_budget_configuration_is_rejected[nan-project_budget] PASSED [ 93%]
+2026-09-27T03:01:12.4943875Z tests/unit/test_policy.py::TestPolicyEngine::test_invalid_budget_configuration_is_rejected[inf-max_operation_cost] PASSED [ 94%]
+2026-09-27T03:01:12.4953671Z tests/unit/test_policy.py::TestPolicyEngine::test_invalid_budget_configuration_is_rejected[inf-project_budget] PASSED [ 94%]
+2026-09-27T03:01:12.4962432Z tests/unit/test_policy.py::TestPolicyEngine::test_invalid_current_spend_is_rejected[-1.0] PASSED [ 95%]
+2026-09-27T03:01:12.4971714Z tests/unit/test_policy.py::TestPolicyEngine::test_invalid_current_spend_is_rejected[nan] PASSED [ 95%]
+2026-09-27T03:01:12.4981984Z tests/unit/test_policy.py::TestPolicyEngine::test_invalid_current_spend_is_rejected[inf] PASSED [ 95%]
+2026-09-27T03:01:12.4992899Z tests/unit/test_redaction.py::TestSecretRedactor::test_redact_bearer_token PASSED [ 96%]
+2026-09-27T03:01:12.5002993Z tests/unit/test_redaction.py::TestSecretRedactor::test_redact_api_key_syntax PASSED [ 96%]
+2026-09-27T03:01:12.5013324Z tests/unit/test_redaction.py::TestSecretRedactor::test_redact_sk_prefixed_keys PASSED [ 96%]
+2026-09-27T03:01:12.5023415Z tests/unit/test_redaction.py::TestSecretRedactor::test_redact_custom_exact_secrets PASSED [ 97%]
+2026-09-27T03:01:12.5041403Z tests/unit/test_redaction.py::TestSecretRedactor::test_redact_nested_dictionary PASSED [ 97%]
+2026-09-27T03:01:12.5051369Z tests/unit/test_redaction.py::TestSecretRedactor::test_normal_text_untouched PASSED [ 97%]
+2026-09-27T03:01:12.5062024Z tests/unit/test_redaction.py::TestSecretRedactor::test_redact_short_punctuated_password_and_auth_headers PASSED [ 98%]
+2026-09-27T03:01:12.5075689Z tests/unit/test_redaction.py::TestSecretRedactor::test_redact_data_recurses_through_tuples PASSED [ 98%]
+2026-09-27T03:01:12.5083535Z tests/unit/test_state_machine.py::TestTaskStateMachine::test_valid_transitions PASSED [ 98%]
+2026-09-27T03:01:12.5092216Z tests/unit/test_state_machine.py::TestTaskStateMachine::test_invalid_transitions PASSED [ 99%]
+2026-09-27T03:01:12.5099711Z tests/unit/test_state_machine.py::TestWorkflowStateMachine::test_valid_transitions PASSED [ 99%]
+2026-09-27T03:01:12.5488088Z tests/unit/test_state_machine.py::TestWorkflowStateMachine::test_invalid_transitions PASSED [100%]
+2026-09-27T03:01:12.5489079Z 
+2026-09-27T03:01:12.5489801Z =========================== short test summary info ============================
+2026-09-27T03:01:12.5490925Z SKIPPED [1] tests/integration/test_godot_real.py:18: Set GAMEFACTORY_TEST_GODOT to run real-engine acceptance
+2026-09-27T03:01:12.5492235Z SKIPPED [1] tests/integration/test_process_runner.py:368: Windows Job Objects are only available on Windows
+2026-09-27T03:01:12.5493377Z SKIPPED [1] tests/integration/test_process_runner.py:494: Windows Job Objects only
+2026-09-27T03:01:12.5494757Z SKIPPED [1] tests/integration/test_verify_godot_live_crash.py:158: Opt-in real Godot test requires GAMEFACTORY_TEST_REAL_GODOT or GAMEFACTORY_TEST_GODOT env var
+2026-09-27T03:01:12.5496087Z SKIPPED [1] tests/unit/test_config.py:126: Windows junction validation
+2026-09-27T03:01:12.5497133Z SKIPPED [1] tests/unit/test_config.py:146: Windows junction validation
+2026-09-27T03:01:12.5497966Z ======================= 277 passed, 6 skipped in 22.30s ========================
+2026-09-27T03:01:12.6216252Z ##[group]Run ruff check src tests
+2026-09-27T03:01:12.6216575Z [36;1mruff check src tests[0m
+2026-09-27T03:01:12.6284447Z shell: /usr/bin/bash -e {0}
+2026-09-27T03:01:12.6284718Z env:
+2026-09-27T03:01:12.6285012Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-09-27T03:01:12.6285480Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib/pkgconfig
+2026-09-27T03:01:12.6285905Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-09-27T03:01:12.6286288Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-09-27T03:01:12.6286672Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-09-27T03:01:12.6287324Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib
+2026-09-27T03:01:12.6287653Z ##[endgroup]
+2026-09-27T03:01:12.6636396Z All checks passed!
+2026-09-27T03:01:12.6671264Z ##[group]Run ruff format --check src tests
+2026-09-27T03:01:12.6671627Z [36;1mruff format --check src tests[0m
+2026-09-27T03:01:12.6738721Z shell: /usr/bin/bash -e {0}
+2026-09-27T03:01:12.6738991Z env:
+2026-09-27T03:01:12.6739268Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-09-27T03:01:12.6739728Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib/pkgconfig
+2026-09-27T03:01:12.6740159Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-09-27T03:01:12.6740590Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-09-27T03:01:12.6740964Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-09-27T03:01:12.6741341Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib
+2026-09-27T03:01:12.6741671Z ##[endgroup]
+2026-09-27T03:01:12.7094644Z 78 files already formatted
+2026-09-27T03:01:12.7134076Z ##[group]Run mypy src/gamefactory
+2026-09-27T03:01:12.7134396Z [36;1mmypy src/gamefactory[0m
+2026-09-27T03:01:12.7202609Z shell: /usr/bin/bash -e {0}
+2026-09-27T03:01:12.7202916Z env:
+2026-09-27T03:01:12.7203204Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-09-27T03:01:12.7203652Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib/pkgconfig
+2026-09-27T03:01:12.7204077Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-09-27T03:01:12.7204474Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-09-27T03:01:12.7204904Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-09-27T03:01:12.7205614Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib
+2026-09-27T03:01:12.7206048Z ##[endgroup]
+2026-09-27T03:01:15.9266293Z Success: no issues found in 49 source files
+2026-09-27T03:01:15.9464425Z Post job cleanup.
+2026-09-27T03:01:16.0735159Z (node:2270) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-09-27T03:01:16.0736591Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-09-27T03:01:16.1019744Z Post job cleanup.
+2026-09-27T03:01:16.2377340Z [command]/usr/bin/git version
+2026-09-27T03:01:16.2507637Z git version 2.55.0
+2026-09-27T03:01:16.2649782Z Temporarily overriding HOME='/home/runner/work/_temp/de4711b6-88de-42ab-bf56-da7208d8f6b5' before making global git config changes
+2026-09-27T03:01:16.2688912Z Adding repository directory to the temporary git global config as a safe directory
+2026-09-27T03:01:16.2701084Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/ai-game-factory/ai-game-factory
+2026-09-27T03:01:16.2796009Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-09-27T03:01:16.2878093Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-09-27T03:01:16.3418375Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-09-27T03:01:16.3516580Z http.https://github.com/.extraheader
+2026-09-27T03:01:16.3547734Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-09-27T03:01:16.3640392Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-09-27T03:01:16.4237673Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-09-27T03:01:16.4368054Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-09-27T03:01:16.5016514Z Cleaning up orphan processes
+2026-09-27T03:01:16.5297899Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-python@v5, actions/upload-artifact@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
