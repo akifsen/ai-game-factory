@@ -19,7 +19,8 @@ def test_real_godot_acceptance() -> None:
 
     repo = Path(__file__).resolve().parents[2]
     godot = Path(godot_value).expanduser().resolve()
-    scripts_dir = Path(sys.executable).resolve().parent
+    # Preserve the venv entrypoint: resolving a POSIX symlink finds the base Python.
+    scripts_dir = Path(sys.executable).absolute().parent
     cli_candidates = [scripts_dir / "gamefactory.exe", scripts_dir / "gamefactory"]
     cli = next((path for path in cli_candidates if path.is_file()), None)
     if cli is None:

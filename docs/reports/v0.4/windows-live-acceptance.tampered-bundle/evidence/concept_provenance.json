@@ -1,0 +1,18 @@
+{
+  "artifact_hash": "30329b6163561da25974b95a03e98de51232d4e62364e6883dd0b6cca10cd3ca",
+  "asset_spec_hash": "0c39f9c806456d06a67cbb196dd790923cf340172d6fd0772e39c1224bf1f012",
+  "cost_classification": "LOCAL",
+  "dimensions": {
+    "height": 256,
+    "width": 256
+  },
+  "generation_timestamp": "2026-09-27T11:39:09.707961+00:00",
+  "imported_at": "2026-09-27T11:39:10.975728+00:00",
+  "model": "gamefactory-acceptance-fixture-v1",
+  "prompt": "Scripted synthetic icon for offline acceptance; not an AI-generated concept.",
+  "prompt_version": "1.0",
+  "provider": "UNKNOWN",
+  "sidecar_hash": "3d2bd2103591be6d90af2b3d71b39eb03936b737e8e4b4c78cdb4a7f4574ea5e",
+  "sidecar_path": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\gamefactory-asset-acceptance-7x073c9g\\project\\.acceptance-inputs\\concept-provenance.json",
+  "source_type": "imported"
+}

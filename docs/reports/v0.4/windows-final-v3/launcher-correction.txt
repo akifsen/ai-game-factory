@@ -1,0 +1,19 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.14, pytest-9.1.1, pluggy-1.6.0
+rootdir: C:\Users\lenovo\devel\ai-game-factory
+configfile: pyproject.toml
+collected 50 items
+
+tests\integration\test_verify_godot_live_crash.py .....s................ [ 44%]
+.ss                                                                      [ 50%]
+tests\integration\test_verify_godot_python_resolution.py ............sss [ 80%]
+sss.......                                                               [100%]
+
+============================== warnings summary ===============================
+.venv\Lib\site-packages\_pytest\cacheprovider.py:469
+  C:\Users\lenovo\devel\ai-game-factory\.venv\Lib\site-packages\_pytest\cacheprovider.py:469: PytestCacheWarning: could not create cache path C:\Users\lenovo\devel\ai-game-factory\.pytest_cache\v\cache\nodeids: [WinError 5] Eri�im engellendi: 'C:\\Users\\lenovo\\devel\\ai-game-factory\\.pytest_cache\\v\\cache'
+    config.cache.set("cache/nodeids", sorted(self.cached_nodeids))
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+- generated xml file: C:\Users\lenovo\devel\ai-game-factory\docs\reports\v0.4\windows-final-v3\pytest-launcher-correction.xml -
+================== 41 passed, 9 skipped, 1 warning in 2.57s ===================

@@ -1,0 +1,13 @@
+Usage: meshy-cli image-to-3d get [options] <task-id>
+
+Retrieve a single task by id (any status is a successful query)
+
+Options:
+  --save-json <file>  save the full task JSON as received (never overwrites)
+  --include-raw       v1: include the untouched task response under
+                      result.task.raw
+  --project <dir>     initialised meshy_output project: save task_<id>.json
+                      there and record the task in metadata.json
+  --stage <name>      stage label for the project record (default: derived from
+                      the task type, e.g. preview | refine | build)
+  -h, --help          display help for command

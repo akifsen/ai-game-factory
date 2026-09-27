@@ -1,0 +1,16 @@
+src\gamefactory\resources\blender\process_asset.py:68: error: Cannot find implementation or library stub for module named "bpy"  [import-not-found]
+src\gamefactory\resources\blender\process_asset.py:68: note: See https://mypy.readthedocs.io/en/stable/running_mypy.html#missing-imports
+src\gamefactory\resources\blender\process_asset.py:69: error: Cannot find implementation or library stub for module named "mathutils"  [import-not-found]
+src\gamefactory\adapters\fakes\fake_provider.py:122: error: Item "None" of "ProviderOperationIntentRepository | None" has no attribute "save"  [union-attr]
+src\gamefactory\resources\scripts\verify_asset_bundle.py:165: error: Argument 1 to "get" of "dict" has incompatible type "Any | None"; expected "int"  [arg-type]
+src\gamefactory\resources\scripts\verify_asset_bundle.py:183: error: Argument 1 to "range" has incompatible type "Any | None"; expected "SupportsIndex"  [arg-type]
+src\gamefactory\resources\scripts\verify_asset_bundle.py:185: error: Incompatible return value type (got "tuple[Any, Any | None]", expected "tuple[int, int]")  [return-value]
+src\gamefactory\resources\scripts\verify_asset_bundle.py:328: error: Argument 1 to "isfinite" has incompatible type "Any | None"; expected "SupportsFloat | SupportsIndex"  [arg-type]
+src\gamefactory\resources\scripts\verify_asset_bundle.py:328: error: Unsupported operand types for > ("int" and "None")  [operator]
+src\gamefactory\resources\scripts\verify_asset_bundle.py:328: note: Left operand is of type "Any | None"
+src\gamefactory\resources\scripts\verify_asset_bundle.py:369: error: Argument 1 to "isfinite" has incompatible type "Any | None"; expected "SupportsFloat | SupportsIndex"  [arg-type]
+src\gamefactory\resources\scripts\verify_asset_bundle.py:369: error: Unsupported operand types for >= ("int" and "None")  [operator]
+src\gamefactory\resources\scripts\verify_asset_bundle.py:369: note: Left operand is of type "Any | None"
+src\gamefactory\resources\scripts\verify_asset_bundle.py:370: error: Unsupported operand types for * ("None" and "float")  [operator]
+src\gamefactory\resources\scripts\verify_asset_bundle.py:370: note: Left operand is of type "Any | None"
+Found 11 errors in 3 files (checked 67 source files)

@@ -52,6 +52,8 @@ class TaskHandlerMetadata:
     operation: HandlerOperation = HandlerOperation.LOCAL_READ
     managed_write: bool = False
     recovery: HandlerRecovery = HandlerRecovery.SAFE_TO_RETRY
+    mandatory_approval_type: str | None = None
+    safe_paid_recovery: bool = False
     approval_context: Callable[[Workflow, Task], dict[str, Any]] | None = None
     refresh_parameters: Callable[[Workflow, Task], dict[str, Any]] | None = None
     recovery_check: Callable[[Workflow, Task, Execution], bool] | None = None

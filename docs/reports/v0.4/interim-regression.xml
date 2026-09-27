@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="32" failures="0" skipped="0" tests="32" time="0.516" timestamp="2026-09-27T14:02:20.146907+03:00" hostname="DESKTOP-LMPJ3VK"><testcase classname="" name="tests.integration.test_blender_processing" time="0.000"><error message="collection failure">ImportError while importing test module 'C:\Users\lenovo\devel\ai-game-factory\tests\integration\test_blender_processing.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+..\..\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\integration\test_blender_processing.py:9: in &lt;module&gt;
+    from gamefactory.adapters.assets.glb_validator import validate_glb
+E   ModuleNotFoundError: No module named 'gamefactory'</error></testcase><testcase classname="" name="tests.integration.test_capabilities" time="0.000"><error message="collection failure">ImportError while importing test module 'C:\Users\lenovo\devel\ai-game-factory\tests\integration\test_capabilities.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+..\..\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\integration\test_capabilities.py:3: in &lt;module&gt;
+    from gamefactory.capabilities.registry import (
+E   ModuleNotFoundError: No module named 'gamefactory'</error></testcase><testcase classname="" name="tests.integration.test_crash_recovery" time="0.000"><error message="collection failure">ImportError while importing test module 'C:\Users\lenovo\devel\ai-game-factory\tests\integration\test_crash_recovery.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+..\..\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\integration\test_crash_recovery.py:7: in &lt;module&gt;
+    from gamefactory.adapters.fakes.fake_provider import (
+E   ModuleNotFoundError: No module named 'gamefactory'</error></testcase><testcase classname="" name="tests.integration.test_godot_blender_detection" time="0.000"><error message="collection failure">ImportError while importing test module 'C:\Users\lenovo\devel\ai-game-factory\tests\integration\test_godot_blender_detection.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+..\..\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\integration\test_godot_blender_detection.py:5: in &lt;module&gt;
+    from gamefactory.adapters.dcc.blender import BlenderAdapter
+E   ModuleNotFoundError: No module named 'gamefactory'</error></testcase><testcase classname="" name="tests.integration.test_godot_capture_pipeline" time="0.000"><error message="collection failure">ImportError while importing test module 'C:\Users\lenovo\devel\ai-game-factory\tests\integration\test_godot_capture_pipeline.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+..\..\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\integration\test_godot_capture_pipeline.py:17: in &lt;module&gt;
+    from gamefactory.adapters.persistence.database import Database
+E   ModuleNotFoundError: No module named 'gamefactory'</error></testcase><testcase classname="" name="tests.integration.test_godot_pipeline" time="0.000"><error message="collection failure">ImportError while importing test module 'C:\Users\lenovo\devel\ai-game-factory\tests\integration\test_godot_pipeline.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+..\..\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\integration\test_godot_pipeline.py:18: in &lt;module&gt;
+    from gamefactory.adapters.engines.godot_contracts import SCHEMA_VERSION
+E   ModuleNotFoundError: No module named 'gamefactory'</error></testcase><testcase classname="" name="tests.integration.test_locks" time="0.000"><error message="collection failure">ImportError while importing test module 'C:\Users\lenovo\devel\ai-game-factory\tests\integration\test_locks.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+..\..\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\integration\test_locks.py:12: in &lt;module&gt;
+    from gamefactory.core.domain.errors import LockError
+E   ModuleNotFoundError: No module named 'gamefactory'</error></testcase><testcase classname="" name="tests.integration.test_paid_safety" time="0.000"><error message="collection failure">ImportError while importing test module 'C:\Users\lenovo\devel\ai-game-factory\tests\integration\test_paid_safety.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+..\..\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\integration\test_paid_safety.py:11: in &lt;module&gt;
+    from gamefactory.adapters.fakes.fake_provider import (
+E   ModuleNotFoundError: No module named 'gamefactory'</error></testcase><testcase classname="" name="tests.integration.test_persistence" time="0.000"><error message="collection failure">ImportError while importing test module 'C:\Users\lenovo\devel\ai-game-factory\tests\integration\test_persistence.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+..\..\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\integration\test_persistence.py:10: in &lt;module&gt;
+    import gamefactory.adapters.persistence.migrations as migrations_module
+E   ModuleNotFoundError: No module named 'gamefactory'</error></testcase><testcase classname="" name="tests.integration.test_persistence_redaction" time="0.000"><error message="collection failure">ImportError while importing test module 'C:\Users\lenovo\devel\ai-game-factory\tests\integration\test_persistence_redaction.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+..\..\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\integration\test_persistence_redaction.py:8: in &lt;module&gt;
+    from gamefactory.adapters.fakes.fake_provider import FakeAssetGenerationProvider
+E   ModuleNotFoundError: No module named 'gamefactory'</error></testcase><testcase classname="" name="tests.integration.test_process_metadata" time="0.000"><error message="collection failure">ImportError while importing test module 'C:\Users\lenovo\devel\ai-game-factory\tests\integration\test_process_metadata.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+..\..\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\integration\test_process_metadata.py:12: in &lt;module&gt;
+    from gamefactory.core.domain.errors import TimeoutError, ToolExecutionError
+E   ModuleNotFoundError: No module named 'gamefactory'</error></testcase><testcase classname="" name="tests.integration.test_process_runner" time="0.000"><error message="collection failure">ImportError while importing test module 'C:\Users\lenovo\devel\ai-game-factory\tests\integration\test_process_runner.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+..\..\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\integration\test_process_runner.py:15: in &lt;module&gt;
+    from gamefactory.core.domain.errors import TimeoutError, ToolExecutionError
+E   ModuleNotFoundError: No module named 'gamefactory'</error></testcase><testcase classname="" name="tests.integration.test_v02_compatibility" time="0.000"><error message="collection failure">ImportError while importing test module 'C:\Users\lenovo\devel\ai-game-factory\tests\integration\test_v02_compatibility.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+..\..\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\integration\test_v02_compatibility.py:7: in &lt;module&gt;
+    from gamefactory.adapters.fakes.fake_provider import FakeAssetGenerationProvider
+E   ModuleNotFoundError: No module named 'gamefactory'</error></testcase><testcase classname="" name="tests.integration.test_workflow_engine" time="0.000"><error message="collection failure">ImportError while importing test module 'C:\Users\lenovo\devel\ai-game-factory\tests\integration\test_workflow_engine.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+..\..\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\integration\test_workflow_engine.py:5: in &lt;module&gt;
+    from gamefactory.adapters.fakes.fake_provider import (
+E   ModuleNotFoundError: No module named 'gamefactory'</error></testcase><testcase classname="" name="tests.integration.test_workflow_regressions" time="0.000"><error message="collection failure">ImportError while importing test module 'C:\Users\lenovo\devel\ai-game-factory\tests\integration\test_workflow_regressions.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+..\..\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\integration\test_workflow_regressions.py:10: in &lt;module&gt;
+    from gamefactory.adapters.fakes.fake_provider import FakeAssetGenerationProvider
+E   ModuleNotFoundError: No module named 'gamefactory'</error></testcase><testcase classname="" name="tests.unit.test_approvals" time="0.000"><error message="collection failure">ImportError while importing test module 'C:\Users\lenovo\devel\ai-game-factory\tests\unit\test_approvals.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+..\..\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\unit\test_approvals.py:5: in &lt;module&gt;
+    from gamefactory.core.approvals.approval_service import ApprovalService
+E   ModuleNotFoundError: No module named 'gamefactory'</error></testcase><testcase classname="" name="tests.unit.test_artifacts" time="0.000"><error message="collection failure">ImportError while importing test module 'C:\Users\lenovo\devel\ai-game-factory\tests\unit\test_artifacts.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+..\..\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\unit\test_artifacts.py:7: in &lt;module&gt;
+    from gamefactory.core.artifacts.artifact_manager import ArtifactManager
+E   ModuleNotFoundError: No module named 'gamefactory'</error></testcase><testcase classname="" name="tests.unit.test_asset_contracts" time="0.000"><error message="collection failure">ImportError while importing test module 'C:\Users\lenovo\devel\ai-game-factory\tests\unit\test_asset_contracts.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+..\..\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\unit\test_asset_contracts.py:9: in &lt;module&gt;
+    from gamefactory.core.domain.asset_contracts import (
+E   ModuleNotFoundError: No module named 'gamefactory'</error></testcase><testcase classname="" name="tests.unit.test_asset_persistence" time="0.000"><error message="collection failure">ImportError while importing test module 'C:\Users\lenovo\devel\ai-game-factory\tests\unit\test_asset_persistence.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+..\..\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\unit\test_asset_persistence.py:8: in &lt;module&gt;
+    from gamefactory.adapters.persistence.database import Database
+E   ModuleNotFoundError: No module named 'gamefactory'</error></testcase><testcase classname="" name="tests.unit.test_blender_processor_paths" time="0.000"><error message="collection failure">ImportError while importing test module 'C:\Users\lenovo\devel\ai-game-factory\tests\unit\test_blender_processor_paths.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+..\..\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\unit\test_blender_processor_paths.py:7: in &lt;module&gt;
+    from gamefactory.adapters.dcc.blender_processor import BlenderAssetProcessor
+E   ModuleNotFoundError: No module named 'gamefactory'</error></testcase><testcase classname="" name="tests.unit.test_concept_ingest" time="0.000"><error message="collection failure">ImportError while importing test module 'C:\Users\lenovo\devel\ai-game-factory\tests\unit\test_concept_ingest.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+..\..\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\unit\test_concept_ingest.py:10: in &lt;module&gt;
+    from gamefactory.adapters.images.base import ConceptGenerationRequest
+E   ModuleNotFoundError: No module named 'gamefactory'</error></testcase><testcase classname="" name="tests.unit.test_config" time="0.000"><error message="collection failure">ImportError while importing test module 'C:\Users\lenovo\devel\ai-game-factory\tests\unit\test_config.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+..\..\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\unit\test_config.py:9: in &lt;module&gt;
+    from gamefactory.config.loader import ConfigLoader
+E   ModuleNotFoundError: No module named 'gamefactory'</error></testcase><testcase classname="" name="tests.unit.test_dag" time="0.000"><error message="collection failure">ImportError while importing test module 'C:\Users\lenovo\devel\ai-game-factory\tests\unit\test_dag.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+..\..\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\unit\test_dag.py:5: in &lt;module&gt;
+    from gamefactory.core.domain.dag import WorkflowDAG
+E   ModuleNotFoundError: No module named 'gamefactory'</error></testcase><testcase classname="" name="tests.unit.test_glb_validator" time="0.000"><error message="collection failure">ImportError while importing test module 'C:\Users\lenovo\devel\ai-game-factory\tests\unit\test_glb_validator.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+..\..\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\unit\test_glb_validator.py:8: in &lt;module&gt;
+    from gamefactory.adapters.assets.glb_validator import validate_glb
+E   ModuleNotFoundError: No module named 'gamefactory'</error></testcase><testcase classname="" name="tests.unit.test_godot_capture" time="0.000"><error message="collection failure">ImportError while importing test module 'C:\Users\lenovo\devel\ai-game-factory\tests\unit\test_godot_capture.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+..\..\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\unit\test_godot_capture.py:11: in &lt;module&gt;
+    from gamefactory.adapters.engines.godot_capture_contracts import load_capture_scenario
+E   ModuleNotFoundError: No module named 'gamefactory'</error></testcase><testcase classname="" name="tests.unit.test_godot_contracts" time="0.000"><error message="collection failure">ImportError while importing test module 'C:\Users\lenovo\devel\ai-game-factory\tests\unit\test_godot_contracts.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+..\..\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\unit\test_godot_contracts.py:9: in &lt;module&gt;
+    from gamefactory.adapters.engines.godot_contracts import (
+E   ModuleNotFoundError: No module named 'gamefactory'</error></testcase><testcase classname="" name="tests.unit.test_godot_staging" time="0.000"><error message="collection failure">ImportError while importing test module 'C:\Users\lenovo\devel\ai-game-factory\tests\unit\test_godot_staging.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+..\..\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\unit\test_godot_staging.py:10: in &lt;module&gt;
+    from gamefactory.adapters.engines import godot_staging
+E   ModuleNotFoundError: No module named 'gamefactory'</error></testcase><testcase classname="" name="tests.unit.test_meshy_adapter" time="0.000"><error message="collection failure">ImportError while importing test module 'C:\Users\lenovo\devel\ai-game-factory\tests\unit\test_meshy_adapter.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+..\..\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\unit\test_meshy_adapter.py:16: in &lt;module&gt;
+    from gamefactory.adapters.external.meshy_cli import (
+E   ModuleNotFoundError: No module named 'gamefactory'</error></testcase><testcase classname="" name="tests.unit.test_path_guard" time="0.000"><error message="collection failure">ImportError while importing test module 'C:\Users\lenovo\devel\ai-game-factory\tests\unit\test_path_guard.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+..\..\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\unit\test_path_guard.py:7: in &lt;module&gt;
+    from gamefactory.core.domain.errors import ValidationError
+E   ModuleNotFoundError: No module named 'gamefactory'</error></testcase><testcase classname="" name="tests.unit.test_policy" time="0.000"><error message="collection failure">ImportError while importing test module 'C:\Users\lenovo\devel\ai-game-factory\tests\unit\test_policy.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+..\..\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\unit\test_policy.py:5: in &lt;module&gt;
+    from gamefactory.core.domain.errors import BudgetExceeded, PolicyViolation
+E   ModuleNotFoundError: No module named 'gamefactory'</error></testcase><testcase classname="" name="tests.unit.test_redaction" time="0.000"><error message="collection failure">ImportError while importing test module 'C:\Users\lenovo\devel\ai-game-factory\tests\unit\test_redaction.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+..\..\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\unit\test_redaction.py:3: in &lt;module&gt;
+    from gamefactory.core.execution.redaction import SecretRedactor
+E   ModuleNotFoundError: No module named 'gamefactory'</error></testcase><testcase classname="" name="tests.unit.test_state_machine" time="0.000"><error message="collection failure">ImportError while importing test module 'C:\Users\lenovo\devel\ai-game-factory\tests\unit\test_state_machine.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+..\..\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\unit\test_state_machine.py:5: in &lt;module&gt;
+    from gamefactory.core.domain.errors import WorkflowError
+E   ModuleNotFoundError: No module named 'gamefactory'</error></testcase></testsuite></testsuites>

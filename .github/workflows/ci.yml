@@ -182,7 +182,7 @@ jobs:
         run: |
           set -euo pipefail
           sudo apt-get update
-          sudo apt-get install -y xvfb libgl1-mesa-dri mesa-utils
+          sudo apt-get install -y xvfb libgl1-mesa-dri mesa-utils blender python3-numpy
       - name: Build wheel and install it into a clean virtual environment
         shell: bash
         run: |
@@ -248,6 +248,28 @@ jobs:
             --output "$evidence/rendered-interrupt.json" \
             --workspace "$RUNNER_TEMP/rendered-interrupt-workspaces" \
             --timeout 180
+      - name: Verify offline asset production with real Blender and Godot
+        shell: bash
+        run: |
+          set -euo pipefail
+          evidence="$GITHUB_WORKSPACE/.verification/ci-asset-production"
+          mkdir -p "$evidence"
+          xvfb-run -a --server-args="-screen 0 1600x1200x24" \
+            "$RUNNER_TEMP/gamefactory-venv/bin/python" \
+            "$GITHUB_WORKSPACE/scripts/verify_asset_acceptance.py" \
+            --cli "$RUNNER_TEMP/gamefactory-venv/bin/gamefactory" \
+            --python "$RUNNER_TEMP/gamefactory-venv/bin/python" \
+            --blender "$(command -v blender)" \
+            --godot "$GAMEFACTORY_TEST_GODOT" \
+            --workspace "$RUNNER_TEMP/asset-production-workspace" \
+            --output "$evidence/acceptance.json"
+      - name: Archive offline asset evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: asset-production-offline-evidence
+          path: .verification/ci-asset-production/**/*
+          if-no-files-found: warn
       - name: Archive selected rendered evidence
         if: always()
         uses: actions/upload-artifact@v4

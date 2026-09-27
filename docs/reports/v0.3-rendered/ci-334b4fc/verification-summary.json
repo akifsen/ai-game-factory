@@ -1,0 +1,135 @@
+{
+  "verified_at": "2026-09-27T10:00:23.214753+00:00",
+  "tested_source_sha": "334b4fc368ab880d0352728c04548562fe5c6ffe",
+  "run_id": 36310782274,
+  "run_url": "https://github.com/akifsen/ai-game-factory/actions/runs/36310782274",
+  "platform_closure": "CLOSED",
+  "source_manifest_files": 109,
+  "source_manifest_match": true,
+  "jobs": [
+    {
+      "job_id": 108596147399,
+      "name": "godot-real",
+      "conclusion": "success",
+      "url": "https://github.com/akifsen/ai-game-factory/actions/runs/36310782274/job/108596147399"
+    },
+    {
+      "job_id": 108596147502,
+      "name": "test (windows-latest, 3.11)",
+      "conclusion": "success",
+      "url": "https://github.com/akifsen/ai-game-factory/actions/runs/36310782274/job/108596147502",
+      "descendant": "PASSED (not skipped)",
+      "descendant_log_line": 1067,
+      "suite_summary": "2026-09-27T09:55:43.9616835Z ================= 310 passed, 5 skipped in 114.45s (0:01:54) ==================",
+      "static_checks": "ruff lint, ruff format, mypy: success"
+    },
+    {
+      "job_id": 108596147519,
+      "name": "test (ubuntu-latest, 3.11)",
+      "conclusion": "success",
+      "url": "https://github.com/akifsen/ai-game-factory/actions/runs/36310782274/job/108596147519",
+      "descendant": "PASSED (not skipped)",
+      "descendant_log_line": 1747,
+      "suite_summary": "2026-09-27T09:53:53.1363813Z ======================= 309 passed, 6 skipped in 28.95s ========================",
+      "static_checks": "ruff lint, ruff format, mypy: success"
+    },
+    {
+      "job_id": 108596147521,
+      "name": "test (windows-latest, 3.12)",
+      "conclusion": "success",
+      "url": "https://github.com/akifsen/ai-game-factory/actions/runs/36310782274/job/108596147521",
+      "descendant": "PASSED (not skipped)",
+      "descendant_log_line": 2352,
+      "suite_summary": "2026-09-27T09:55:43.4191998Z ================= 310 passed, 5 skipped in 109.74s (0:01:49) ==================",
+      "static_checks": "ruff lint, ruff format, mypy: success"
+    },
+    {
+      "job_id": 108596147589,
+      "name": "test (ubuntu-latest, 3.12)",
+      "conclusion": "success",
+      "url": "https://github.com/akifsen/ai-game-factory/actions/runs/36310782274/job/108596147589",
+      "descendant": "PASSED (not skipped)",
+      "descendant_log_line": 3033,
+      "suite_summary": "2026-09-27T09:53:54.4950125Z ======================= 309 passed, 6 skipped in 28.25s ========================",
+      "static_checks": "ruff lint, ruff format, mypy: success"
+    },
+    {
+      "job_id": 108596147603,
+      "name": "godot-rendered",
+      "conclusion": "success",
+      "url": "https://github.com/akifsen/ai-game-factory/actions/runs/36310782274/job/108596147603"
+    }
+  ],
+  "engine_evidence": {
+    "godot-real/reports/acceptance.json": {
+      "status": "PASSED",
+      "evidence": "docs/reports/v0.3-rendered/ci-334b4fc/artifacts/godot-real-evidence/reports/acceptance.json"
+    },
+    "godot-real/reports/recovery.json": {
+      "status": "PASSED",
+      "evidence": "docs/reports/v0.3-rendered/ci-334b4fc/artifacts/godot-real-evidence/reports/recovery.json"
+    },
+    "godot-real/reports/live-crash.json": {
+      "status": "PASSED",
+      "evidence": "docs/reports/v0.3-rendered/ci-334b4fc/artifacts/godot-real-evidence/reports/live-crash.json",
+      "child_fate_final": {
+        "status": "terminated",
+        "method": "pidfd",
+        "reason": "pidfd_readable_proc_gone",
+        "leader_state": null,
+        "task_ids": null,
+        "exe_result": "error: [Errno 2] No such file or directory: '/proc/2855/exe'",
+        "elapsed_seconds": 0.7234296909999784,
+        "pidfd_readable": true,
+        "platform": "linux",
+        "initial_pid": 2855,
+        "initial_starttime": "14416",
+        "post_interrupt_status": "alive",
+        "wait_result": "terminal",
+        "wait_reason": "pidfd_readable_proc_gone",
+        "runtime_launches_count": 1,
+        "sentinel_survived_full_recovery": true,
+        "cleaned_up": true
+      }
+    },
+    "godot-rendered/acceptance.json": {
+      "status": "PASS",
+      "evidence": "docs/reports/v0.3-rendered/ci-334b4fc/artifacts/godot-rendered-evidence/acceptance.json",
+      "hud_mutation": {
+        "workflow_id": "WF-CAPTURE-c66aef69",
+        "status": "FAILED",
+        "state": "PASS",
+        "visual": "FAIL",
+        "isolated_copy": true
+      }
+    },
+    "godot-rendered/rendered-interrupt.json": {
+      "status": "PASSED",
+      "evidence": "docs/reports/v0.3-rendered/ci-334b4fc/artifacts/godot-rendered-evidence/rendered-interrupt.json",
+      "child_fate_final": {
+        "status": "terminated",
+        "method": "pidfd",
+        "reason": "pidfd_readable_proc_gone",
+        "leader_state": null,
+        "task_ids": null,
+        "exe_result": "error: [Errno 2] No such file or directory: '/proc/3201/exe'",
+        "elapsed_seconds": 1.8053105519999946,
+        "pidfd_readable": true,
+        "platform": "linux",
+        "initial_pid": 3201,
+        "initial_starttime": "11320",
+        "post_interrupt_status": "alive",
+        "wait_result": "terminal",
+        "wait_reason": "pidfd_readable_proc_gone",
+        "runtime_launches_count": 1,
+        "sentinel_survived_full_recovery": true,
+        "cleaned_up": true
+      }
+    }
+  },
+  "human_review": "PENDING",
+  "historical_0_5_second_timeout": "UNRESOLVED, not FIXED; trigger unknown",
+  "browser_loaded_this_session": false,
+  "commit_push_release_performed": false,
+  "revision_boundary": "This closure record and downloaded evidence are later report-only additions, not a new tested source revision. No rerun or commit-test loop is required for these records."
+}

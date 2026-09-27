@@ -1,0 +1,48 @@
+{
+  "asset_id": "prop_acceptance_crate_01",
+  "blender_version": "5.2.1 LTS",
+  "duration_seconds": 0.9282744999509305,
+  "exit_code": 0,
+  "input_raw_glb_sha256": "5d61f9a3594ff3881d63f52f9bf6f7d108c1f5ed6de6fad684dfd80d0638445a",
+  "output_sha256": "d49128457bf72eb11602673d0f6a90bd7e50a29314b4ae2fb792d60bf4b4498f",
+  "processed_metrics": {
+    "bounds_max": [
+      0.6000000238418579,
+      0.5,
+      1.0
+    ],
+    "bounds_min": [
+      -0.6000000238418579,
+      -0.5,
+      0.0
+    ],
+    "collider_triangles": 12,
+    "coordinate_space": "Blender internal Z-up (X width, Y depth, Z height)",
+    "dimensions": {
+      "depth_m": 1.0,
+      "height_m": 1.0,
+      "width_m": 1.2000000476837158
+    },
+    "exported_gltf_coordinate_space": "Godot/glTF Y-up (X width, Y height, Z depth)",
+    "lod0_triangles": 12,
+    "lod1_ratio": 0.5,
+    "lod1_triangles": 6,
+    "nodes": [
+      "SM_prop_acceptance_crate_01_LOD0",
+      "SM_prop_acceptance_crate_01_LOD1",
+      "COL_prop_acceptance_crate_01"
+    ]
+  },
+  "processing_script_sha256": "17eaacf51ee980b1238d53c5ef03e230baccc476ce304a41e6929bb9a1b15fa0",
+  "raw_metrics": {
+    "coordinate_space": "Blender internal Z-up (X width, Y depth, Z height)",
+    "dimensions": {
+      "depth_m": 1.0,
+      "height_m": 1.0,
+      "width_m": 1.2000000476837158
+    },
+    "materials": 1,
+    "triangles": 12
+  },
+  "status": "SUCCESS"
+}

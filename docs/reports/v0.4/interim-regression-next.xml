@@ -1,0 +1,750 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="4" skipped="14" tests="464" time="287.100" timestamp="2026-09-27T14:39:59.257219+03:00" hostname="DESKTOP-LMPJ3VK"><testcase classname="tests.integration.test_asset_workflow" name="test_mandatory_concept_and_paid_gates_when_generic_policy_disabled" time="0.758" /><testcase classname="tests.integration.test_asset_workflow" name="test_rejected_concept_never_invokes_provider_or_regenerates" time="0.613" /><testcase classname="tests.integration.test_asset_workflow" name="test_project_budget_blocks_before_provider_call" time="0.734" /><testcase classname="tests.integration.test_asset_workflow" name="test_unknown_cost_without_reservation_blocks_before_provider_call" time="0.877" /><testcase classname="tests.integration.test_asset_workflow" name="test_fake_generation_once_and_completed_resume_once" time="6.008" /><testcase classname="tests.integration.test_asset_workflow" name="test_final_review_is_mandatory_and_repeated_resume_does_not_regenerate" time="2.253" /><testcase classname="tests.integration.test_asset_workflow" name="test_paid_rejection_never_invokes_provider" time="0.947" /><testcase classname="tests.integration.test_asset_workflow" name="test_raw_tamper_stops_process_retry_without_second_generation" time="1.492" /><testcase classname="tests.integration.test_asset_workflow" name="test_processed_tamper_stops_final_review_without_second_generation" time="2.029" /><testcase classname="tests.integration.test_asset_workflow" name="test_malformed_fake_glb_fails_real_validator_before_final_gate" time="1.371" /><testcase classname="tests.integration.test_asset_workflow" name="test_blender_failure_retry_never_submits_second_provider_task" time="2.395" /><testcase classname="tests.integration.test_asset_workflow" name="test_known_id_crash_recovery_queries_once_without_second_budget_liability" time="0.960"><failure message="assert (None is not None)">tmp_path = WindowsPath('C:/Users/lenovo/devel/ai-game-factory/.verification/v04-regression-next/test_known_id_crash_recovery_q0')
+
+    def test_known_id_crash_recovery_queries_once_without_second_budget_liability(
+        tmp_path: Path,
+    ) -&gt; None:
+        fake = FakeAssetGenerationProvider(simulate_crash=True)
+        engine, db, workflow_id, fake, _ = _setup(
+            tmp_path,
+            provider=fake,
+            estimate=10.0,
+            budget=10.0,
+            stub_downstream=True,
+        )
+        paid_id = _at_paid_gate(engine, db, workflow_id)
+        _decision(engine, db, paid_id, approve=True)
+        crashed = engine.run_workflow(workflow_id)
+        assert crashed.status == WorkflowStatus.BLOCKED
+        assert fake.invocation_count == 1
+        intent = ProviderOperationIntentRepository(db).get_by_task(f"{workflow_id}-PAID-GENERATION")
+&gt;       assert intent is not None and intent.external_task_id
+E       assert (None is not None)
+
+tests\integration\test_asset_workflow.py:451: AssertionError</failure></testcase><testcase classname="tests.integration.test_blender_processing" name="test_blender_process_asset_end_to_end" time="4.309" /><testcase classname="tests.integration.test_blender_processing" name="test_blender_process_nonexistent_raw_raises" time="0.342" /><testcase classname="tests.integration.test_blender_processing" name="test_real_blender_glb_axis_mapping_with_unequal_height_and_depth" time="4.278" /><testcase classname="tests.integration.test_capabilities.TestCapabilityRegistry" name="test_discovery_contains_core_capabilities" time="2.564" /><testcase classname="tests.integration.test_capabilities.TestCapabilityRegistry" name="test_meshy_capability_classified_with_approval_or_unavailable" time="1.766" /><testcase classname="tests.integration.test_capabilities" name="test_meshy_local_readiness_never_implies_paid_authorization[AVAILABLE-True-APPROVAL_REQUIRED]" time="0.381" /><testcase classname="tests.integration.test_capabilities" name="test_meshy_local_readiness_never_implies_paid_authorization[CREDENTIAL_MISSING-False-MISCONFIGURED]" time="0.445" /><testcase classname="tests.integration.test_capabilities" name="test_meshy_local_readiness_never_implies_paid_authorization[MISCONFIGURED-True-MISCONFIGURED]" time="0.414" /><testcase classname="tests.integration.test_capabilities" name="test_meshy_local_readiness_never_implies_paid_authorization[UNAVAILABLE-False-UNAVAILABLE]" time="0.509" /><testcase classname="tests.integration.test_cli" name="test_help_version_and_json_usage_error" time="1.791" /><testcase classname="tests.integration.test_cli" name="test_cli_paid_workflow_requires_approval_and_resumes_across_processes" time="7.870" /><testcase classname="tests.integration.test_cli" name="test_doctor_keeps_invalid_explicit_paths_misconfigured" time="2.958" /><testcase classname="tests.integration.test_cli" name="test_database_lock_and_readonly_errors_are_actionable_json" time="0.192" /><testcase classname="tests.integration.test_cli" name="test_cli_engine_uses_project_policy_values" time="0.060" /><testcase classname="tests.integration.test_crash_recovery.TestCrashRecoveryAndFailures" name="test_deterministic_failure_and_retry_history" time="0.592" /><testcase classname="tests.integration.test_crash_recovery.TestCrashRecoveryAndFailures" name="test_crash_during_paid_operation_blocks_for_reconciliation" time="0.128" /><testcase classname="tests.integration.test_godot_blender_detection.TestGodotAndBlenderDetection" name="test_real_blender_detection_or_graceful_degradation" time="0.211" /><testcase classname="tests.integration.test_godot_blender_detection.TestGodotAndBlenderDetection" name="test_missing_blender_path_degrades_gracefully" time="0.001" /><testcase classname="tests.integration.test_godot_blender_detection.TestGodotAndBlenderDetection" name="test_real_godot_detection_or_graceful_degradation" time="0.300" /><testcase classname="tests.integration.test_godot_blender_detection.TestGodotAndBlenderDetection" name="test_missing_godot_path_degrades_gracefully" time="0.001" /><testcase classname="tests.integration.test_godot_blender_detection.TestGodotAndBlenderDetection" name="test_inspect_godot_project_file" time="0.007" /><testcase classname="tests.integration.test_godot_blender_detection.TestGodotAndBlenderDetection" name="test_inspect_empty_directory_not_godot_project" time="0.004" /><testcase classname="tests.integration.test_godot_capture_pipeline" name="test_fake_capture_blocks_for_visual_review_and_resume_does_not_rerun" time="2.417" /><testcase classname="tests.integration.test_godot_capture_pipeline" name="test_hud_mutation_keeps_state_pass_and_fails_visual_gate" time="1.577" /><testcase classname="tests.integration.test_godot_capture_pipeline" name="test_missing_png_and_dummy_renderer_are_not_passes" time="8.743" /><testcase classname="tests.integration.test_godot_capture_pipeline" name="test_reject_does_not_start_another_capture" time="2.144" /><testcase classname="tests.integration.test_godot_capture_pipeline" name="test_tampered_png_cannot_be_approved_or_completed" time="2.001" /><testcase classname="tests.integration.test_godot_capture_pipeline" name="test_approved_capture_rejects_changed_png_on_a_new_cli_resume" time="4.587" /><testcase classname="tests.integration.test_godot_capture_pipeline" name="test_linux_capture_allowlists_display_and_refuses_headless_fallback" time="0.239" /><testcase classname="tests.integration.test_godot_capture_pipeline" name="test_portrait_profile_is_a_separate_size" time="1.956" /><testcase classname="tests.integration.test_godot_pipeline" name="test_fake_godot_pipeline_passes_independent_assertions_and_no_duplicate_resume" time="2.671" /><testcase classname="tests.integration.test_godot_pipeline" name="test_staging_excludes_plural_secret_files_and_generic_cache_directories" time="0.451" /><testcase classname="tests.integration.test_godot_pipeline" name="test_process_and_stale_report_failures_keep_attempt_artifacts[import-failure-0]" time="1.312" /><testcase classname="tests.integration.test_godot_pipeline" name="test_process_and_stale_report_failures_keep_attempt_artifacts[runtime-failure-1]" time="1.531" /><testcase classname="tests.integration.test_godot_pipeline" name="test_process_and_stale_report_failures_keep_attempt_artifacts[missing-report-1]" time="1.502" /><testcase classname="tests.integration.test_godot_pipeline" name="test_process_and_stale_report_failures_keep_attempt_artifacts[stale-execution-1]" time="1.686" /><testcase classname="tests.integration.test_godot_pipeline" name="test_malformed_or_self_asserted_runtime_evidence_never_completes_workflow[completed-missing-snapshot]" time="1.709" /><testcase classname="tests.integration.test_godot_pipeline" name="test_malformed_or_self_asserted_runtime_evidence_never_completes_workflow[self-declared-pass]" time="1.744" /><testcase classname="tests.integration.test_godot_pipeline" name="test_malformed_or_self_asserted_runtime_evidence_never_completes_workflow[pass-stdout-nonzero]" time="1.469" /><testcase classname="tests.integration.test_godot_pipeline" name="test_malformed_or_self_asserted_runtime_evidence_never_completes_workflow[malformed-report]" time="1.163" /><testcase classname="tests.integration.test_godot_pipeline" name="test_malformed_or_self_asserted_runtime_evidence_never_completes_workflow[truncated-output]" time="1.297" /><testcase classname="tests.integration.test_godot_pipeline" name="test_prior_attempt_report_is_preserved_and_rejected_when_reused_by_retry" time="3.076" /><testcase classname="tests.integration.test_godot_pipeline" name="test_observation_integrity_or_managed_path_escape_blocks_validation[observation-bytes]" time="1.231" /><testcase classname="tests.integration.test_godot_pipeline" name="test_observation_integrity_or_managed_path_escape_blocks_validation[report-path-escape]" time="1.681" /><testcase classname="tests.integration.test_godot_pipeline" name="test_approval_precedes_all_godot_processes_and_changed_inputs_request_new_approval" time="0.584" /><testcase classname="tests.integration.test_godot_pipeline" name="test_recovery_with_unknown_child_intent_blocks_in_fresh_cli_processes" time="2.845" /><testcase classname="tests.integration.test_godot_pipeline" name="test_known_terminal_or_no_intent_recovery_allows_only_explicit_new_attempt[False]" time="2.046" /><testcase classname="tests.integration.test_godot_pipeline" name="test_known_terminal_or_no_intent_recovery_allows_only_explicit_new_attempt[True]" time="2.585" /><testcase classname="tests.integration.test_godot_pipeline" name="test_metered_conservative_handler_never_uses_safe_terminal_retry_path" time="0.232" /><testcase classname="tests.integration.test_godot_pipeline" name="test_terminal_journal_persistence_failure_preserves_unknown_child_state" time="0.876" /><testcase classname="tests.integration.test_godot_real" name="test_real_godot_acceptance" time="0.001"><skipped type="pytest.skip" message="Set GAMEFACTORY_TEST_GODOT to run real-engine acceptance">C:\Users\lenovo\devel\ai-game-factory\tests\integration\test_godot_real.py:18: Set GAMEFACTORY_TEST_GODOT to run real-engine acceptance</skipped></testcase><testcase classname="tests.integration.test_locks.TestExecutionLock" name="test_acquire_and_release" time="0.012" /><testcase classname="tests.integration.test_locks.TestExecutionLock" name="test_hold_context_manager" time="0.008" /><testcase classname="tests.integration.test_locks.TestExecutionLock" name="test_competing_runner_blocked_when_active" time="0.023" /><testcase classname="tests.integration.test_locks.TestExecutionLock" name="test_stale_lock_reclaimed_when_process_is_dead" time="0.022" /><testcase classname="tests.integration.test_locks.TestExecutionLock" name="test_workflow_id_never_becomes_a_path" time="0.006" /><testcase classname="tests.integration.test_locks.TestExecutionLock" name="test_symlink_lock_leaf_cannot_write_outside_lock_directory" time="0.009"><skipped type="pytest.skip" message="Symlink creation is unavailable on this host">C:\Users\lenovo\devel\ai-game-factory\tests\integration\test_locks.py:74: Symlink creation is unavailable on this host</skipped></testcase><testcase classname="tests.integration.test_locks.TestExecutionLock" name="test_hardlink_lock_leaf_is_rejected" time="0.016" /><testcase classname="tests.integration.test_locks" name="test_two_processes_cannot_acquire_same_workflow" time="4.017" /><testcase classname="tests.integration.test_paid_safety.TestPaidOperationSafety" name="test_paid_operation_safety_invariants" time="1.553" /><testcase classname="tests.integration.test_persistence.TestPersistence" name="test_migrations_and_version_tracking" time="0.108" /><testcase classname="tests.integration.test_persistence.TestPersistence" name="test_future_schema_version_rejected" time="0.253" /><testcase classname="tests.integration.test_persistence.TestPersistence" name="test_gapped_migration_history_is_rejected" time="0.111" /><testcase classname="tests.integration.test_persistence.TestPersistence" name="test_migration_failure_rolls_back_ddl_and_version_records" time="0.118" /><testcase classname="tests.integration.test_persistence.TestPersistence" name="test_concurrent_fresh_migrations_apply_once" time="2.658" /><testcase classname="tests.integration.test_persistence.TestPersistence" name="test_foreign_key_enforcement" time="0.042" /><testcase classname="tests.integration.test_persistence.TestPersistence" name="test_cascade_delete" time="0.108" /><testcase classname="tests.integration.test_persistence.TestPersistence" name="test_attempt_history_preservation" time="0.121" /><testcase classname="tests.integration.test_persistence.TestPersistence" name="test_reopen_database_preserves_records" time="0.040" /><testcase classname="tests.integration.test_persistence.TestPersistence" name="test_full_entity_persistence_roundtrip" time="0.142" /><testcase classname="tests.integration.test_persistence_redaction" name="test_engine_provider_error_is_redacted_from_db_and_wal" time="0.164" /><testcase classname="tests.integration.test_persistence_redaction" name="test_task_parameters_with_sensitive_inputs_are_rejected[prompt-task]" time="0.042" /><testcase classname="tests.integration.test_persistence_redaction" name="test_task_parameters_with_sensitive_inputs_are_rejected[prompt-workflow]" time="0.041" /><testcase classname="tests.integration.test_persistence_redaction" name="test_task_parameters_with_sensitive_inputs_are_rejected[output_path-task]" time="0.051" /><testcase classname="tests.integration.test_persistence_redaction" name="test_task_parameters_with_sensitive_inputs_are_rejected[output_path-workflow]" time="0.043" /><testcase classname="tests.integration.test_persistence_redaction" name="test_sensitive_task_parameter_keys_are_rejected_without_modifying_metadata" time="0.040" /><testcase classname="tests.integration.test_persistence_redaction" name="test_evidence_approval_and_audit_payloads_are_sanitized" time="0.137" /><testcase classname="tests.integration.test_persistence_redaction" name="test_finalize_task_rejects_invalid_state_transition" time="0.064" /><testcase classname="tests.integration.test_process_json_redaction" name="test_json_redaction_preserves_transport_and_hides_nested_secrets" time="0.374" /><testcase classname="tests.integration.test_process_json_redaction" name="test_invalid_json_falls_back_to_redacted_text" time="0.281" /><testcase classname="tests.integration.test_process_metadata.TestProcessMetadata" name="test_command_result_defaults_and_properties" time="0.002" /><testcase classname="tests.integration.test_process_metadata.TestProcessMetadata" name="test_command_result_canonical_construction" time="0.014" /><testcase classname="tests.integration.test_process_metadata.TestProcessMetadata" name="test_multibyte_trim_incomplete_helper" time="0.026" /><testcase classname="tests.integration.test_process_metadata.TestProcessMetadata" name="test_read_bounded_with_multibyte_stream" time="0.006" /><testcase classname="tests.integration.test_process_metadata.TestProcessMetadata" name="test_read_error_does_not_silently_return_untruncated_success" time="0.005" /><testcase classname="tests.integration.test_process_metadata.TestProcessMetadata" name="test_successful_execution_metadata_contract" time="0.173" /><testcase classname="tests.integration.test_process_metadata.TestProcessMetadata" name="test_nonzero_execution_metadata_contract" time="0.146" /><testcase classname="tests.integration.test_process_metadata.TestProcessMetadata" name="test_timeout_metadata_contract_and_serializability" time="2.113" /><testcase classname="tests.integration.test_process_metadata.TestProcessMetadata" name="test_timeout_redaction_metadata_safety" time="2.122" /><testcase classname="tests.integration.test_process_metadata.TestProcessMetadata" name="test_truncation_stdout_and_stderr" time="1.911" /><testcase classname="tests.integration.test_process_metadata.TestProcessMetadata" name="test_tool_execution_error_redaction" time="0.108" /><testcase classname="tests.integration.test_process_runner.TestProcessRunner" name="test_run_simple_command_stdout" time="0.195" /><testcase classname="tests.integration.test_process_runner.TestProcessRunner" name="test_run_command_stderr" time="0.745" /><testcase classname="tests.integration.test_process_runner.TestProcessRunner" name="test_minimal_env_filters_secrets" time="0.474" /><testcase classname="tests.integration.test_process_runner.TestProcessRunner" name="test_timeout_enforcement" time="3.158" /><testcase classname="tests.integration.test_process_runner.TestProcessRunner" name="test_secret_redaction_in_output" time="0.403" /><testcase classname="tests.integration.test_process_runner.TestProcessRunner" name="test_nonexistent_executable_raises_error" time="0.071" /><testcase classname="tests.integration.test_process_runner.TestProcessRunner" name="test_request_override_secret_is_redacted_from_output_and_errors" time="0.820" /><testcase classname="tests.integration.test_process_runner.TestProcessRunner" name="test_sensitive_argument_flag_secret_is_redacted" time="1.099" /><testcase classname="tests.integration.test_process_runner.TestProcessRunner" name="test_short_override_secret_and_malformed_unicode_are_safe" time="0.462" /><testcase classname="tests.integration.test_process_runner.TestProcessRunner" name="test_output_is_bounded" time="1.369" /><testcase classname="tests.integration.test_process_runner.TestProcessRunner" name="test_timeout_kills_descendant_process" time="4.394" /><testcase classname="tests.integration.test_process_runner.TestProcessRunner" name="test_run_success_with_metadata" time="0.158" /><testcase classname="tests.integration.test_process_runner.TestProcessRunner" name="test_run_nonzero_exit_code" time="0.180" /><testcase classname="tests.integration.test_process_runner.TestProcessRunner" name="test_timeout_attaches_serializable_metadata" time="4.824" /><testcase classname="tests.integration.test_process_runner.TestProcessRunner" name="test_redaction_expansion_stays_within_output_limit" time="2.126" /><testcase classname="tests.integration.test_process_runner.TestProcessRunner" name="test_posix_parent_exit_kills_descendant_ignoring_sigterm" time="0.001"><skipped type="pytest.skip" message="POSIX process-group cleanup">C:\Users\lenovo\devel\ai-game-factory\tests\integration\test_process_runner.py:426: POSIX process-group cleanup</skipped></testcase><testcase classname="tests.integration.test_process_runner.TestProcessRunner" name="test_incomplete_pipe_read_fails_with_evidence" time="0.385" /><testcase classname="tests.integration.test_process_runner.TestProcessRunner" name="test_cleanup_error_message_redacts_request_secret" time="0.385" /><testcase classname="tests.integration.test_process_runner.TestProcessRunner" name="test_windows_job_close_failure_is_reported" time="0.005" /><testcase classname="tests.integration.test_process_runner.TestProcessRunner" name="test_timeout_redacts_secrets_in_details" time="2.168" /><testcase classname="tests.integration.test_process_runner.TestProcessRunner" name="test_stdout_truncation_flag_and_multibyte_safety" time="0.570" /><testcase classname="tests.integration.test_process_runner.TestProcessRunner" name="test_stderr_truncation_flag" time="1.008" /><testcase classname="tests.integration.test_process_runner.TestProcessRunner" name="test_error_redacts_credentials_in_details" time="0.036" /><testcase classname="tests.integration.test_process_runner.TestProcessRunner" name="test_command_result_backward_compatibility" time="0.001" /><testcase classname="tests.integration.test_process_runner.TestProcessRunner" name="test_job_attach_failure_fails_closed" time="2.940" /><testcase classname="tests.integration.test_process_runner.TestProcessRunner" name="test_parent_exit_descendant_bounded_and_cleaned" time="2.330"><failure message="gamefactory.core.domain.errors.TimeoutError: Command timed out after 0.5 seconds: C:\Users\lenovo\devel\ai-game-factory\.venv\Scripts\python.exe -c import subprocess, sys, time&#10;from pathlib import Path&#10;ready_path = Path('C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\v04-regression-next\\test_parent_exit_descendant_bo0\\descendant-ready.txt')&#10;release_path = Path('C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\v04-regression-next\\test_parent_exit_descendant_bo0\\parent-release.txt')&#10;subprocess.Popen([sys.executable, 'C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\v04-regression-next\\test_parent_exit_descendant_bo0\\grandchild.py'])&#10;end = time.monotonic() + 0.35&#10;while not ready_path.exists() and time.monotonic() &lt; end:&#10;    time.sleep(0.002)&#10;while not release_path.exists() and time.monotonic() &lt; end:&#10;    time.sleep(0.002)&#10;if ready_path.exists() and release_path.exists():&#10;    sys.exit(0)&#10;sys.exit(1)">self = &lt;gamefactory.core.execution.process_runner.ProcessRunner object at 0x00000260A949A420&gt;
+request = CommandRequest(args=['C:\\Users\\lenovo\\devel\\ai-game-factory\\.venv\\Scripts\\python.exe', '-c', "import subprocess...st_parent_exit_descendant_bo0'), env_overrides={}, timeout_seconds=0.5, minimal_env=True, structured_json_output=False)
+
+    def run(self, request: CommandRequest) -&gt; CommandResult:
+        """Run the requested command synchronously with shell=False."""
+        if not request.args:
+            raise ToolExecutionError("Cannot execute empty argument list")
+        if (
+            isinstance(request.timeout_seconds, bool)
+            or not isinstance(request.timeout_seconds, (int, float))
+            or not math.isfinite(request.timeout_seconds)
+            or request.timeout_seconds &lt;= 0
+        ):
+            raise ToolExecutionError("Command timeout must be a finite positive number")
+        if sys.platform == "win32" and Path(str(request.args[0])).suffix.lower() in {
+            ".bat",
+            ".cmd",
+        }:
+            raise ToolExecutionError("Batch script executables are not allowed")
+        cwd_path = Path(request.cwd).resolve()
+        secrets = [
+            v
+            for k, v in request.env_overrides.items()
+            if v and any(part in k.upper() for part in _SENSITIVE_ENV_SUBSTRINGS)
+        ]
+        secrets.extend(self._sensitive_argument_values(request.args))
+    
+        def redact(value: str) -&gt; str:
+            return redactor.redact_text(value, secrets)
+    
+        command_display = redact(" ".join(str(a) for a in request.args))
+        redacted_args = [redact(str(a)) for a in request.args]
+        redacted_cwd = redact(str(cwd_path))
+    
+        if not cwd_path.is_dir():
+            raise ToolExecutionError(
+                f"Working directory does not exist: {redacted_cwd}",
+                details={
+                    "cwd": redacted_cwd,
+                    "command": command_display,
+                    "args": redacted_args,
+                },
+            )
+    
+        start_wall_time = utc_now_iso()
+        start_time = time.perf_counter()
+        deadline = start_time + request.timeout_seconds
+    
+        try:
+            if sys.platform == "win32":
+                proc = subprocess.Popen(  # noqa: S603
+                    request.args,
+                    cwd=str(cwd_path),
+                    env=self.build_env(request),
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    shell=False,
+                    creationflags=subprocess.CREATE_NEW_PROCESS_GROUP,
+                )
+            else:
+                proc = subprocess.Popen(  # noqa: S603
+                    request.args,
+                    cwd=str(cwd_path),
+                    env=self.build_env(request),
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    shell=False,
+                    start_new_session=True,
+                )
+        except FileNotFoundError as exc:
+            safe_exe = redact(str(request.args[0]))
+            raise ToolExecutionError(
+                f"Executable not found: '{safe_exe}'",
+                details={
+                    "executable": safe_exe,
+                    "command": command_display,
+                    "args": redacted_args,
+                    "cwd": redacted_cwd,
+                },
+            ) from exc
+        except OSError as exc:
+            safe_error = redact(str(exc))
+            raise ToolExecutionError(
+                f"Failed to execute command '{command_display}': {safe_error}",
+                details={
+                    "command": command_display,
+                    "error": safe_error,
+                    "args": redacted_args,
+                    "cwd": redacted_cwd,
+                },
+            ) from exc
+    
+        windows_job: int | None = None
+        if sys.platform == "win32":
+            try:
+                windows_job = self._attach_windows_job(proc)
+            except Exception:
+                windows_job = None
+    
+            if windows_job is None:
+                # Fail closed: Tree containment cannot be guaranteed without job object
+                try:
+                    self._kill_tree(proc)
+                except Exception:
+                    pass
+                completed_wall_time = utc_now_iso()
+                duration = round(time.perf_counter() - start_time, 3)
+                raise ToolExecutionError(
+                    f"Failed to attach process {proc.pid} to Windows Job Object: {command_display}",
+                    details={
+                        "command": command_display,
+                        "args": redacted_args,
+                        "cwd": redacted_cwd,
+                        "pid": proc.pid,
+                        "started_at": start_wall_time,
+                        "completed_at": completed_wall_time,
+                        "duration": duration,
+                        "duration_seconds": duration,
+                        "cleanup_completed": False,
+                        "cleanup_status": "uncertain",
+                        "stdout": "",
+                        "stderr": "",
+                        "stdout_truncated": False,
+                        "stderr_truncated": False,
+                        "timed_out": False,
+                        "exit_code": proc.returncode,
+                        "termination_status": "failed",
+                    },
+                )
+    
+        assert proc.stdout is not None and proc.stderr is not None
+        stdout_pipe = proc.stdout
+        stderr_pipe = proc.stderr
+        captured: dict[str, BoundedReadResult] = {}
+        readers = [
+            threading.Thread(
+                target=lambda: captured.setdefault("stdout", self._read_bounded(stdout_pipe)),
+                daemon=True,
+            ),
+            threading.Thread(
+                target=lambda: captured.setdefault("stderr", self._read_bounded(stderr_pipe)),
+                daemon=True,
+            ),
+        ]
+        for reader in readers:
+            reader.start()
+    
+        cleanup_completed = True
+        cleanup_status = "completed"
+        cleanup_error: Exception | None = None
+        timed_out = False
+        timeout_exc: Exception | None = None
+    
+        try:
+            # 1. Bounded wait for process exit up to deadline
+            remaining_proc_wait = max(0.0, deadline - time.perf_counter())
+            try:
+&gt;               proc.wait(timeout=remaining_proc_wait)
+
+src\gamefactory\core\execution\process_runner.py:492: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+..\..\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\Lib\subprocess.py:1264: in wait
+    return self._wait(timeout=timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = &lt;Popen: returncode: 0 args: ['C:\\Users\\lenovo\\devel\\ai-game-factory\\.ve...&gt;
+timeout = 0.3365474999882281
+
+    def _wait(self, timeout):
+        """Internal implementation of wait() on Windows."""
+        if timeout is None:
+            timeout_millis = _winapi.INFINITE
+        elif timeout &lt;= 0:
+            timeout_millis = 0
+        else:
+            timeout_millis = int(timeout * 1000)
+        if self.returncode is None:
+            # API note: Returns immediately if timeout_millis == 0.
+            result = _winapi.WaitForSingleObject(self._handle,
+                                                 timeout_millis)
+            if result == _winapi.WAIT_TIMEOUT:
+&gt;               raise TimeoutExpired(self.args, timeout)
+E               subprocess.TimeoutExpired: Command '['C:\\Users\\lenovo\\devel\\ai-game-factory\\.venv\\Scripts\\python.exe', '-c', "import subprocess, sys, time\nfrom pathlib import Path\nready_path = Path('C:\\\\Users\\\\lenovo\\\\devel\\\\ai-game-factory\\\\.verification\\\\v04-regression-next\\\\test_parent_exit_descendant_bo0\\\\descendant-ready.txt')\nrelease_path = Path('C:\\\\Users\\\\lenovo\\\\devel\\\\ai-game-factory\\\\.verification\\\\v04-regression-next\\\\test_parent_exit_descendant_bo0\\\\parent-release.txt')\nsubprocess.Popen([sys.executable, 'C:\\\\Users\\\\lenovo\\\\devel\\\\ai-game-factory\\\\.verification\\\\v04-regression-next\\\\test_parent_exit_descendant_bo0\\\\grandchild.py'])\nend = time.monotonic() + 0.35\nwhile not ready_path.exists() and time.monotonic() &lt; end:\n    time.sleep(0.002)\nwhile not release_path.exists() and time.monotonic() &lt; end:\n    time.sleep(0.002)\nif ready_path.exists() and release_path.exists():\n    sys.exit(0)\nsys.exit(1)\n"]' timed out after 0.3365474999882281 seconds
+
+..\..\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\Lib\subprocess.py:1593: TimeoutExpired
+
+The above exception was the direct cause of the following exception:
+
+self = &lt;test_process_runner.TestProcessRunner object at 0x00000260A905E390&gt;
+tmp_path = WindowsPath('C:/Users/lenovo/devel/ai-game-factory/.verification/v04-regression-next/test_parent_exit_descendant_bo0')
+
+    def test_parent_exit_descendant_bounded_and_cleaned(self, tmp_path: Path) -&gt; None:
+        """When parent spawns descendant inheriting pipes and exits, runner bounds wait and cleans descendant."""
+        marker = tmp_path / "descendant-marker.txt"
+        ready_file = tmp_path / "descendant-ready.txt"
+        release_file = tmp_path / "parent-release.txt"
+        grandchild = tmp_path / "grandchild.py"
+    
+        # Descendant writes its PID to signal READY, writes to stdout to verify pipe inheritance,
+        # then sleeps long enough to exceed runner deadline unless terminated by cleanup.
+        grandchild_code = (
+            "import os, sys, time\n"
+            "from pathlib import Path\n"
+            f"ready_path = Path({str(ready_file)!r})\n"
+            "tmp_ready = ready_path.with_suffix('.tmp')\n"
+            "tmp_ready.write_text(str(os.getpid()), encoding='utf-8')\n"
+            "sys.stdout.write('descendant pipe active\\n')\n"
+            "sys.stdout.flush()\n"
+            "tmp_ready.replace(ready_path)\n"
+            "time.sleep(3.0)\n"
+            f"Path({str(marker)!r}).write_text('survived', encoding='utf-8')\n"
+        )
+        grandchild.write_text(grandchild_code, encoding="utf-8")
+    
+        # Parent spawns grandchild (inheriting stdout/stderr pipes), waits for bounded READY handshake
+        # and release signal, then exits 0 ONLY if both ready and release were observed.
+        parent_code = (
+            "import subprocess, sys, time\n"
+            "from pathlib import Path\n"
+            f"ready_path = Path({str(ready_file)!r})\n"
+            f"release_path = Path({str(release_file)!r})\n"
+            f"subprocess.Popen([sys.executable, {str(grandchild)!r}])\n"
+            "end = time.monotonic() + 0.35\n"
+            "while not ready_path.exists() and time.monotonic() &lt; end:\n"
+            "    time.sleep(0.002)\n"
+            "while not release_path.exists() and time.monotonic() &lt; end:\n"
+            "    time.sleep(0.002)\n"
+            "if ready_path.exists() and release_path.exists():\n"
+            "    sys.exit(0)\n"
+            "sys.exit(1)\n"
+        )
+    
+        handle_holder: list[_ProcessIdentityHandle] = []
+        coord_error: list[Exception] = []
+        stop_coord = threading.Event()
+    
+        def coordinator() -&gt; None:
+            try:
+                ready_deadline = time.monotonic() + 1.0
+                pid_text = ""
+                while not stop_coord.is_set() and time.monotonic() &lt; ready_deadline:
+                    if ready_file.exists():
+                        try:
+                            pid_text = ready_file.read_text(encoding="utf-8").strip()
+                            if pid_text:
+                                break
+                        except OSError:
+                            pass
+                    time.sleep(0.002)
+    
+                if stop_coord.is_set():
+                    return
+    
+                if not pid_text:
+                    raise RuntimeError("Descendant failed to signal READY within bounded timeout")
+    
+                descendant_pid = int(pid_text)
+                handle = _ProcessIdentityHandle(descendant_pid)
+                handle_holder.append(handle)
+    
+                if not handle.is_alive():
+                    raise RuntimeError(
+                        f"Descendant PID {descendant_pid} was not alive before release"
+                    )
+    
+                release_file.write_text("release", encoding="utf-8")
+            except Exception as exc:
+                coord_error.append(exc)
+                try:
+                    release_file.write_text("release", encoding="utf-8")
+                except OSError:
+                    pass
+    
+        coord_thread = threading.Thread(target=coordinator, daemon=True)
+        coord_thread.start()
+    
+        try:
+            t_start = time.perf_counter()
+            req = CommandRequest(
+                args=[sys.executable, "-c", parent_code],
+                cwd=tmp_path,
+                timeout_seconds=0.5,
+            )
+&gt;           res = self.runner.run(req)
+                  ^^^^^^^^^^^^^^^^^^^^
+
+tests\integration\test_process_runner.py:772: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = &lt;gamefactory.core.execution.process_runner.ProcessRunner object at 0x00000260A949A420&gt;
+request = CommandRequest(args=['C:\\Users\\lenovo\\devel\\ai-game-factory\\.venv\\Scripts\\python.exe', '-c', "import subprocess...st_parent_exit_descendant_bo0'), env_overrides={}, timeout_seconds=0.5, minimal_env=True, structured_json_output=False)
+
+    def run(self, request: CommandRequest) -&gt; CommandResult:
+        """Run the requested command synchronously with shell=False."""
+        if not request.args:
+            raise ToolExecutionError("Cannot execute empty argument list")
+        if (
+            isinstance(request.timeout_seconds, bool)
+            or not isinstance(request.timeout_seconds, (int, float))
+            or not math.isfinite(request.timeout_seconds)
+            or request.timeout_seconds &lt;= 0
+        ):
+            raise ToolExecutionError("Command timeout must be a finite positive number")
+        if sys.platform == "win32" and Path(str(request.args[0])).suffix.lower() in {
+            ".bat",
+            ".cmd",
+        }:
+            raise ToolExecutionError("Batch script executables are not allowed")
+        cwd_path = Path(request.cwd).resolve()
+        secrets = [
+            v
+            for k, v in request.env_overrides.items()
+            if v and any(part in k.upper() for part in _SENSITIVE_ENV_SUBSTRINGS)
+        ]
+        secrets.extend(self._sensitive_argument_values(request.args))
+    
+        def redact(value: str) -&gt; str:
+            return redactor.redact_text(value, secrets)
+    
+        command_display = redact(" ".join(str(a) for a in request.args))
+        redacted_args = [redact(str(a)) for a in request.args]
+        redacted_cwd = redact(str(cwd_path))
+    
+        if not cwd_path.is_dir():
+            raise ToolExecutionError(
+                f"Working directory does not exist: {redacted_cwd}",
+                details={
+                    "cwd": redacted_cwd,
+                    "command": command_display,
+                    "args": redacted_args,
+                },
+            )
+    
+        start_wall_time = utc_now_iso()
+        start_time = time.perf_counter()
+        deadline = start_time + request.timeout_seconds
+    
+        try:
+            if sys.platform == "win32":
+                proc = subprocess.Popen(  # noqa: S603
+                    request.args,
+                    cwd=str(cwd_path),
+                    env=self.build_env(request),
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    shell=False,
+                    creationflags=subprocess.CREATE_NEW_PROCESS_GROUP,
+                )
+            else:
+                proc = subprocess.Popen(  # noqa: S603
+                    request.args,
+                    cwd=str(cwd_path),
+                    env=self.build_env(request),
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    shell=False,
+                    start_new_session=True,
+                )
+        except FileNotFoundError as exc:
+            safe_exe = redact(str(request.args[0]))
+            raise ToolExecutionError(
+                f"Executable not found: '{safe_exe}'",
+                details={
+                    "executable": safe_exe,
+                    "command": command_display,
+                    "args": redacted_args,
+                    "cwd": redacted_cwd,
+                },
+            ) from exc
+        except OSError as exc:
+            safe_error = redact(str(exc))
+            raise ToolExecutionError(
+                f"Failed to execute command '{command_display}': {safe_error}",
+                details={
+                    "command": command_display,
+                    "error": safe_error,
+                    "args": redacted_args,
+                    "cwd": redacted_cwd,
+                },
+            ) from exc
+    
+        windows_job: int | None = None
+        if sys.platform == "win32":
+            try:
+                windows_job = self._attach_windows_job(proc)
+            except Exception:
+                windows_job = None
+    
+            if windows_job is None:
+                # Fail closed: Tree containment cannot be guaranteed without job object
+                try:
+                    self._kill_tree(proc)
+                except Exception:
+                    pass
+                completed_wall_time = utc_now_iso()
+                duration = round(time.perf_counter() - start_time, 3)
+                raise ToolExecutionError(
+                    f"Failed to attach process {proc.pid} to Windows Job Object: {command_display}",
+                    details={
+                        "command": command_display,
+                        "args": redacted_args,
+                        "cwd": redacted_cwd,
+                        "pid": proc.pid,
+                        "started_at": start_wall_time,
+                        "completed_at": completed_wall_time,
+                        "duration": duration,
+                        "duration_seconds": duration,
+                        "cleanup_completed": False,
+                        "cleanup_status": "uncertain",
+                        "stdout": "",
+                        "stderr": "",
+                        "stdout_truncated": False,
+                        "stderr_truncated": False,
+                        "timed_out": False,
+                        "exit_code": proc.returncode,
+                        "termination_status": "failed",
+                    },
+                )
+    
+        assert proc.stdout is not None and proc.stderr is not None
+        stdout_pipe = proc.stdout
+        stderr_pipe = proc.stderr
+        captured: dict[str, BoundedReadResult] = {}
+        readers = [
+            threading.Thread(
+                target=lambda: captured.setdefault("stdout", self._read_bounded(stdout_pipe)),
+                daemon=True,
+            ),
+            threading.Thread(
+                target=lambda: captured.setdefault("stderr", self._read_bounded(stderr_pipe)),
+                daemon=True,
+            ),
+        ]
+        for reader in readers:
+            reader.start()
+    
+        cleanup_completed = True
+        cleanup_status = "completed"
+        cleanup_error: Exception | None = None
+        timed_out = False
+        timeout_exc: Exception | None = None
+    
+        try:
+            # 1. Bounded wait for process exit up to deadline
+            remaining_proc_wait = max(0.0, deadline - time.perf_counter())
+            try:
+                proc.wait(timeout=remaining_proc_wait)
+            except subprocess.TimeoutExpired as exc:
+                timed_out = True
+                timeout_exc = exc
+    
+            # 2. Cleanup process tree / descendants
+            if timed_out:
+                try:
+                    if windows_job is not None:
+                        self._close_windows_job(windows_job)
+                        windows_job = None
+                except Exception as exc:
+                    cleanup_completed = False
+                    cleanup_status = "failed"
+                    cleanup_error = exc
+    
+                try:
+                    self._kill_tree(proc)
+                except Exception as exc:
+                    cleanup_completed = False
+                    cleanup_status = "failed"
+                    if cleanup_error is None:
+                        cleanup_error = exc
+            else:
+                # Parent exited before deadline!
+                # Terminate any surviving pipe-inheriting descendants.
+                if windows_job is not None:
+                    try:
+                        self._close_windows_job(windows_job)
+                        windows_job = None
+                    except Exception as exc:
+                        cleanup_completed = False
+                        cleanup_status = "failed"
+                        cleanup_error = exc
+    
+                if sys.platform != "win32":
+                    try:
+                        # Reap the owned group even when descendants close inherited pipes
+                        # or ignore SIGTERM. A child that starts its own session is outside
+                        # this group's ownership and cannot be claimed as cleaned up here.
+                        self._kill_tree(proc)
+                    except Exception as exc:
+                        cleanup_completed = False
+                        cleanup_status = "failed"
+                        if cleanup_error is None:
+                            cleanup_error = exc
+    
+            # 3. Drain readers boundedly, honoring overall deadline.
+            # Never block close concurrently with reader!
+            for reader in readers:
+                remaining_time = max(0.0, deadline - time.perf_counter())
+                if timed_out:
+                    join_timeout = min(0.5, remaining_time) if remaining_time &gt; 0 else 0.2
+                else:
+                    join_timeout = min(2.0, remaining_time)
+                reader.join(timeout=join_timeout)
+    
+            # Check if any reader is still active or overall deadline expired
+            now = time.perf_counter()
+            readers_alive = any(reader.is_alive() for reader in readers)
+            if readers_alive or now &gt;= deadline:
+                if not timed_out and now &gt;= deadline:
+                    timed_out = True
+                if readers_alive:
+                    cleanup_completed = False
+                    if cleanup_status == "completed":
+                        cleanup_status = "uncertain"
+    
+            if sys.platform != "win32" and (timed_out or readers_alive):
+                try:
+                    os.killpg(proc.pid, signal.SIGKILL)
+                except ProcessLookupError:
+                    pass
+                except Exception as exc:
+                    cleanup_completed = False
+                    cleanup_status = "failed"
+                    if cleanup_error is None:
+                        cleanup_error = exc
+    
+        finally:
+            if windows_job is not None:
+                try:
+                    self._close_windows_job(windows_job)
+                except Exception as exc:
+                    cleanup_completed = False
+                    cleanup_status = "failed"
+                    if cleanup_error is None:
+                        cleanup_error = exc
+                windows_job = None
+    
+            # NEVER call close() concurrently with reader! Only close pipe if reader has stopped!
+            if not readers[0].is_alive():
+                try:
+                    stdout_pipe.close()
+                except OSError:
+                    pass
+            if not readers[1].is_alive():
+                try:
+                    stderr_pipe.close()
+                except OSError:
+                    pass
+    
+        stdout_res = captured.get("stdout", BoundedReadResult(b"", False))
+        stderr_res = captured.get("stderr", BoundedReadResult(b"", False))
+        stdout_str = stdout_res.data.decode("utf-8", errors="replace")
+        stderr_str = stderr_res.data.decode("utf-8", errors="replace")
+        safe_stdout = redact(stdout_str)
+        if request.structured_json_output:
+            # Redact decoded strings before serializing: text regexes can otherwise
+            # consume a JSON closing quote (for example CLI help containing "auth login").
+            # This option never exposes an unredacted fallback on malformed output.
+            def redact_json(value: Any, sensitive: bool = False) -&gt; Any:
+                if isinstance(value, str):
+                    return "[REDACTED]" if sensitive else redact(value)
+                if sensitive and isinstance(value, (int, float)) and not isinstance(value, bool):
+                    return "[REDACTED]"
+                # Booleans/null describe presence, not credential values (doctor
+                # reports credential_sources.env and stored_profile.exists).
+                if isinstance(value, list):
+                    return [redact_json(item, sensitive) for item in value]
+                if isinstance(value, dict):
+                    return {
+                        redact(key): redact_json(
+                            item,
+                            sensitive
+                            or any(part in key.upper() for part in _SENSITIVE_ENV_SUBSTRINGS),
+                        )
+                        for key, item in value.items()
+                    }
+                return value
+    
+            try:
+                safe_stdout = json.dumps(redact_json(json.loads(stdout_str)), allow_nan=False)
+            except (ValueError, TypeError, RecursionError):
+                pass
+        stdout_redacted, stdout_redaction_truncated = self._cap_redacted_text(safe_stdout)
+        stderr_redacted, stderr_redaction_truncated = self._cap_redacted_text(redact(stderr_str))
+        stdout_truncated = stdout_res.truncated or stdout_redaction_truncated
+        stderr_truncated = stderr_res.truncated or stderr_redaction_truncated
+        completed_wall_time = utc_now_iso()
+        duration = round(time.perf_counter() - start_time, 3)
+    
+        if cleanup_error is not None:
+            if timed_out:
+                raise TimeoutError(
+                    f"Command timed out after {request.timeout_seconds} seconds: {command_display}",
+                    timeout_seconds=request.timeout_seconds,
+                    details={
+                        "command": command_display,
+                        "args": redacted_args,
+                        "cwd": redacted_cwd,
+                        "duration": duration,
+                        "duration_seconds": duration,
+                        "pid": proc.pid,
+                        "exit_code": proc.returncode,
+                        "timed_out": True,
+                        "termination_status": "timed_out",
+                        "cleanup_completed": False,
+                        "cleanup_status": "failed",
+                        "stdout": stdout_redacted,
+                        "stderr": stderr_redacted,
+                        "stdout_truncated": stdout_truncated,
+                        "stderr_truncated": stderr_truncated,
+                        "started_at": start_wall_time,
+                        "completed_at": completed_wall_time,
+                    },
+                ) from cleanup_error
+            raise ToolExecutionError(
+                f"Command cleanup failed for '{command_display}': {redact(str(cleanup_error))}",
+                details={
+                    "command": command_display,
+                    "args": redacted_args,
+                    "cwd": redacted_cwd,
+                    "duration": duration,
+                    "duration_seconds": duration,
+                    "pid": proc.pid,
+                    "exit_code": proc.returncode,
+                    "timed_out": False,
+                    "termination_status": "failed",
+                    "cleanup_completed": False,
+                    "cleanup_status": "failed",
+                    "stdout": stdout_redacted,
+                    "stderr": stderr_redacted,
+                    "stdout_truncated": stdout_truncated,
+                    "stderr_truncated": stderr_truncated,
+                    "started_at": start_wall_time,
+                    "completed_at": completed_wall_time,
+                },
+            ) from cleanup_error
+    
+        if timed_out:
+&gt;           raise TimeoutError(
+                f"Command timed out after {request.timeout_seconds} seconds: {command_display}",
+                timeout_seconds=request.timeout_seconds,
+                details={
+                    "command": command_display,
+                    "args": redacted_args,
+                    "cwd": redacted_cwd,
+                    "duration": duration,
+                    "duration_seconds": duration,
+                    "pid": proc.pid,
+                    "exit_code": proc.returncode,
+                    "timed_out": True,
+                    "termination_status": "timed_out",
+                    "cleanup_completed": cleanup_completed,
+                    "cleanup_status": cleanup_status,
+                    "stdout": stdout_redacted,
+                    "stderr": stderr_redacted,
+                    "stdout_truncated": stdout_truncated,
+                    "stderr_truncated": stderr_truncated,
+                    "started_at": start_wall_time,
+                    "completed_at": completed_wall_time,
+                },
+            ) from timeout_exc
+E           gamefactory.core.domain.errors.TimeoutError: Command timed out after 0.5 seconds: C:\Users\lenovo\devel\ai-game-factory\.venv\Scripts\python.exe -c import subprocess, sys, time
+E           from pathlib import Path
+E           ready_path = Path('C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\v04-regression-next\\test_parent_exit_descendant_bo0\\descendant-ready.txt')
+E           release_path = Path('C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\v04-regression-next\\test_parent_exit_descendant_bo0\\parent-release.txt')
+E           subprocess.Popen([sys.executable, 'C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\v04-regression-next\\test_parent_exit_descendant_bo0\\grandchild.py'])
+E           end = time.monotonic() + 0.35
+E           while not ready_path.exists() and time.monotonic() &lt; end:
+E               time.sleep(0.002)
+E           while not release_path.exists() and time.monotonic() &lt; end:
+E               time.sleep(0.002)
+E           if ready_path.exists() and release_path.exists():
+E               sys.exit(0)
+E           sys.exit(1)
+
+src\gamefactory\core\execution\process_runner.py:683: TimeoutError</failure></testcase><testcase classname="tests.integration.test_process_runner.TestProcessRunner" name="test_cleanup_failure_retains_metadata" time="1.923"><failure message="AssertionError: assert 'partial output data' in ''">self = &lt;test_process_runner.TestProcessRunner object at 0x00000260A905DE50&gt;
+tmp_path = WindowsPath('C:/Users/lenovo/devel/ai-game-factory/.verification/v04-regression-next/test_cleanup_failure_retains_m0')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x00000260A918E810&gt;
+
+    def test_cleanup_failure_retains_metadata(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -&gt; None:
+        """When cleanup encounters an error, metadata must be retained and fail closed."""
+        original_kill = self.runner._kill_tree
+    
+        def failing_kill(proc: Any) -&gt; None:
+            original_kill(proc)
+            raise OSError("Simulated cleanup error")
+    
+        monkeypatch.setattr(self.runner, "_kill_tree", failing_kill)
+    
+        req = CommandRequest(
+            args=[
+                sys.executable,
+                "-c",
+                "import time, sys; sys.stdout.write('partial output data'); sys.stdout.flush(); time.sleep(5)",
+            ],
+            cwd=tmp_path,
+            timeout_seconds=0.2,
+        )
+        with pytest.raises(TimeoutError) as exc_info:
+            self.runner.run(req)
+    
+        details = exc_info.value.details
+        assert details["cleanup_completed"] is False
+        assert details["cleanup_status"] == "failed"
+        assert details["timed_out"] is True
+&gt;       assert "partial output data" in details["stdout"]
+E       AssertionError: assert 'partial output data' in ''
+
+tests\integration\test_process_runner.py:832: AssertionError</failure></testcase><testcase classname="tests.integration.test_v02_compatibility" name="test_v01_approved_workflow_resumes_with_original_input_hash" time="6.109" /><testcase classname="tests.integration.test_v02_compatibility" name="test_update_parameters_rejects_secrets_without_overwriting_previous_snapshot" time="0.124" /><testcase classname="tests.integration.test_verify_godot_live_crash" name="test_process_identity_query_current" time="0.002" /><testcase classname="tests.integration.test_verify_godot_live_crash" name="test_process_identity_rejection_wrong_executable" time="0.002" /><testcase classname="tests.integration.test_verify_godot_live_crash" name="test_sentinel_lifecycle" time="0.033" /><testcase classname="tests.integration.test_verify_godot_live_crash" name="test_controlled_fixture_preparation" time="0.063" /><testcase classname="tests.integration.test_verify_godot_live_crash" name="test_wrapper_intercepts_subprocess_launch" time="0.610" /><testcase classname="tests.integration.test_verify_godot_live_crash" name="test_real_godot_live_crash" time="0.005"><skipped type="pytest.skip" message="Opt-in real Godot test requires GAMEFACTORY_TEST_REAL_GODOT or GAMEFACTORY_TEST_GODOT env var">C:\Users\lenovo\devel\ai-game-factory\tests\integration\test_verify_godot_live_crash.py:168: Opt-in real Godot test requires GAMEFACTORY_TEST_REAL_GODOT or GAMEFACTORY_TEST_GODOT env var</skipped></testcase><testcase classname="tests.integration.test_verify_godot_live_crash" name="test_unknown_child_state_is_not_successful_cleanup[os_error: denied]" time="0.001" /><testcase classname="tests.integration.test_verify_godot_live_crash" name="test_unknown_child_state_is_not_successful_cleanup[os_error: [Errno 2] No such file or directory: '/proc/3117/exe']" time="0.001" /><testcase classname="tests.integration.test_verify_godot_live_crash" name="test_unknown_child_state_is_not_successful_cleanup[malformed_stat]" time="0.001" /><testcase classname="tests.integration.test_verify_godot_live_crash" name="test_unknown_child_state_is_not_successful_cleanup[starttime_mismatch: reused]" time="0.001" /><testcase classname="tests.integration.test_verify_godot_live_crash" name="test_unknown_child_state_is_not_successful_cleanup[exe_mismatch: other]" time="0.001" /><testcase classname="tests.integration.test_verify_godot_live_crash" name="test_live_thread_group_is_not_terminal" time="0.001" /><testcase classname="tests.integration.test_verify_godot_live_crash" name="test_unreaped_zombie_is_terminal_only_with_pidfd" time="0.001" /><testcase classname="tests.integration.test_verify_godot_live_crash" name="test_leader_zombie_with_live_worker_is_not_terminal" time="0.001" /><testcase classname="tests.integration.test_verify_godot_live_crash" name="test_exe_enoent_between_reads_is_not_success_or_uncaught" time="0.055" /><testcase classname="tests.integration.test_verify_godot_live_crash" name="test_permission_error_stays_unknown" time="0.001" /><testcase classname="tests.integration.test_verify_godot_live_crash" name="test_starttime_mismatch_does_not_signal" time="0.001" /><testcase classname="tests.integration.test_verify_godot_live_crash" name="test_matching_identity_signals_the_retained_fd_not_a_pid" time="0.001" /><testcase classname="tests.integration.test_verify_godot_live_crash" name="test_live_process_at_deadline_fails_with_evidence" time="0.001" /><testcase classname="tests.integration.test_verify_godot_live_crash" name="test_wait_for_owned_thread_group_early_poll_and_decreasing_remaining" time="0.001" /><testcase classname="tests.integration.test_verify_godot_live_crash" name="test_wait_for_owned_thread_group_terminal_before_deadline" time="0.001" /><testcase classname="tests.integration.test_verify_godot_live_crash" name="test_process_ref_closes_descriptor_when_observation_fails" time="0.001" /><testcase classname="tests.integration.test_verify_godot_live_crash" name="test_pidfd_reference_is_not_offered_outside_linux" time="0.001" /><testcase classname="tests.integration.test_verify_godot_live_crash" name="test_linux_unreaped_exit_is_observed_without_waitpid" time="0.001"><skipped type="pytest.skip" message="Linux pidfd thread group">C:\Users\lenovo\devel\ai-game-factory\tests\integration\test_verify_godot_live_crash.py:552: Linux pidfd thread group</skipped></testcase><testcase classname="tests.integration.test_verify_godot_live_crash" name="test_linux_leader_exit_leaves_worker_alive_until_worker_exits" time="0.001"><skipped type="pytest.skip" message="Linux pidfd thread group">C:\Users\lenovo\devel\ai-game-factory\tests\integration\test_verify_godot_live_crash.py:580: Linux pidfd thread group</skipped></testcase><testcase classname="tests.integration.test_verify_godot_python_resolution" name="test_valid_interpreter_path_resolved_to_absolute[recovery]" time="0.003" /><testcase classname="tests.integration.test_verify_godot_python_resolution" name="test_valid_interpreter_path_resolved_to_absolute[live_crash]" time="0.002" /><testcase classname="tests.integration.test_verify_godot_python_resolution" name="test_relative_interpreter_path_resolved_to_absolute[recovery]" time="0.006" /><testcase classname="tests.integration.test_verify_godot_python_resolution" name="test_relative_interpreter_path_resolved_to_absolute[live_crash]" time="0.002" /><testcase classname="tests.integration.test_verify_godot_python_resolution" name="test_nonexistent_python_path_rejected[recovery]" time="0.006" /><testcase classname="tests.integration.test_verify_godot_python_resolution" name="test_nonexistent_python_path_rejected[live_crash]" time="0.006" /><testcase classname="tests.integration.test_verify_godot_python_resolution" name="test_directory_python_path_rejected[recovery]" time="0.007" /><testcase classname="tests.integration.test_verify_godot_python_resolution" name="test_directory_python_path_rejected[live_crash]" time="0.007" /><testcase classname="tests.integration.test_verify_godot_python_resolution" name="test_symlink_interpreter_path_preserved_filesystem[recovery]" time="0.007"><skipped type="pytest.skip" message="Windows symlink privilege unavailable: [WinError 1314] Gereken ayrıcalık istemci tarafından sağlanmıyor: 'C:\\Users\\lenovo\\devel\\ai-game-factory\\.venv\\Scripts\\python.exe' -&gt; 'C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\v04-regression-next\\test_symlink_interpreter_path_0\\python_symlink.exe'">C:\Users\lenovo\devel\ai-game-factory\tests\integration\test_verify_godot_python_resolution.py:93: Windows symlink privilege unavailable: [WinError 1314] Gereken ayrıcalık istemci tarafından sağlanmıyor: 'C:\\Users\\lenovo\\devel\\ai-game-factory\\.venv\\Scripts\\python.exe' -&gt; 'C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\v04-regression-next\\test_symlink_interpreter_path_0\\python_symlink.exe'</skipped></testcase><testcase classname="tests.integration.test_verify_godot_python_resolution" name="test_symlink_interpreter_path_preserved_filesystem[live_crash]" time="0.006"><skipped type="pytest.skip" message="Windows symlink privilege unavailable: [WinError 1314] Gereken ayrıcalık istemci tarafından sağlanmıyor: 'C:\\Users\\lenovo\\devel\\ai-game-factory\\.venv\\Scripts\\python.exe' -&gt; 'C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\v04-regression-next\\test_symlink_interpreter_path_1\\python_symlink.exe'">C:\Users\lenovo\devel\ai-game-factory\tests\integration\test_verify_godot_python_resolution.py:93: Windows symlink privilege unavailable: [WinError 1314] Gereken ayrıcalık istemci tarafından sağlanmıyor: 'C:\\Users\\lenovo\\devel\\ai-game-factory\\.venv\\Scripts\\python.exe' -&gt; 'C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\v04-regression-next\\test_symlink_interpreter_path_1\\python_symlink.exe'</skipped></testcase><testcase classname="tests.integration.test_verify_godot_python_resolution" name="test_broken_symlink_rejected[recovery]" time="0.006"><skipped type="pytest.skip" message="Windows symlink privilege unavailable: [WinError 1314] Gereken ayrıcalık istemci tarafından sağlanmıyor: 'C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\v04-regression-next\\test_broken_symlink_rejected_r0\\does_not_exist_target' -&gt; 'C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\v04-regression-next\\test_broken_symlink_rejected_r0\\broken_symlink'">C:\Users\lenovo\devel\ai-game-factory\tests\integration\test_verify_godot_python_resolution.py:113: Windows symlink privilege unavailable: [WinError 1314] Gereken ayrıcalık istemci tarafından sağlanmıyor: 'C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\v04-regression-next\\test_broken_symlink_rejected_r0\\does_not_exist_target' -&gt; 'C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\v04-regression-next\\test_broken_symlink_rejected_r0\\broken_symlink'</skipped></testcase><testcase classname="tests.integration.test_verify_godot_python_resolution" name="test_broken_symlink_rejected[live_crash]" time="0.006"><skipped type="pytest.skip" message="Windows symlink privilege unavailable: [WinError 1314] Gereken ayrıcalık istemci tarafından sağlanmıyor: 'C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\v04-regression-next\\test_broken_symlink_rejected_l0\\does_not_exist_target' -&gt; 'C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\v04-regression-next\\test_broken_symlink_rejected_l0\\broken_symlink'">C:\Users\lenovo\devel\ai-game-factory\tests\integration\test_verify_godot_python_resolution.py:113: Windows symlink privilege unavailable: [WinError 1314] Gereken ayrıcalık istemci tarafından sağlanmıyor: 'C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\v04-regression-next\\test_broken_symlink_rejected_l0\\does_not_exist_target' -&gt; 'C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\v04-regression-next\\test_broken_symlink_rejected_l0\\broken_symlink'</skipped></testcase><testcase classname="tests.integration.test_verify_godot_python_resolution" name="test_symlink_preservation_synthetic_mock[recovery]" time="0.010" /><testcase classname="tests.integration.test_verify_godot_python_resolution" name="test_symlink_preservation_synthetic_mock[live_crash]" time="0.012" /><testcase classname="tests.integration.test_verify_godot_python_resolution" name="test_real_venv_regression_without_downloads[recovery]" time="0.300" /><testcase classname="tests.integration.test_verify_godot_python_resolution" name="test_real_venv_regression_without_downloads[live_crash]" time="0.214" /><testcase classname="tests.integration.test_verify_godot_python_resolution" name="test_cli_rejects_missing_python_executable" time="0.629" /><testcase classname="tests.integration.test_workflow_engine.TestWorkflowEngine" name="test_demo_workflow_lifecycle_with_approval_gate" time="1.338" /><testcase classname="tests.integration.test_workflow_regressions" name="test_budget_lost_between_evaluation_and_claim_persists_blocked_state" time="0.163" /><testcase classname="tests.integration.test_workflow_regressions" name="test_paid_unknown_outcome_is_never_retried_and_invocation_is_durable" time="0.519" /><testcase classname="tests.integration.test_workflow_regressions" name="test_claim_rolls_back_task_state_if_attempt_insert_fails" time="0.076" /><testcase classname="tests.integration.test_workflow_regressions" name="test_approved_input_mutation_requires_new_approval_and_never_calls_provider" time="0.504" /><testcase classname="tests.integration.test_workflow_regressions" name="test_tampering_while_approval_is_blocked_prevents_completion" time="0.432" /><testcase classname="tests.integration.test_workflow_regressions" name="test_retries_cannot_mutate_another_workflows_task" time="0.269" /><testcase classname="tests.integration.test_workflow_regressions" name="test_approval_compare_and_set_records_one_decision_and_audit" time="0.410" /><testcase classname="tests.integration.test_workflow_regressions" name="test_rejected_approval_is_terminal_until_operator_changes_plan" time="0.443" /><testcase classname="tests.integration.test_workflow_regressions" name="test_provider_cost_class_cannot_be_downgraded_and_ledger_is_generic" time="0.641" /><testcase classname="tests.integration.test_workflow_regressions" name="test_metered_accepted_call_with_unknown_result_is_not_replayed" time="1.100" /><testcase classname="tests.integration.test_workflow_regressions" name="test_missing_or_failed_provider_result_never_creates_artifact[None]" time="1.448" /><testcase classname="tests.integration.test_workflow_regressions" name="test_missing_or_failed_provider_result_never_creates_artifact[provider1]" time="0.936" /><testcase classname="tests.integration.test_workflow_regressions" name="test_project_budget_is_reserved_across_workflows" time="2.018" /><testcase classname="tests.integration.test_workflow_regressions" name="test_concurrent_workflow_claims_cannot_overreserve_project_budget" time="0.706" /><testcase classname="tests.integration.test_workflow_regressions" name="test_repository_write_policy_pauses_before_concept_artifact_creation" time="0.574" /><testcase classname="tests.integration.test_workflow_regressions" name="test_artifacts_from_two_workflows_do_not_overwrite_each_other" time="0.986" /><testcase classname="tests.integration.test_workflow_regressions" name="test_registered_handler_result_is_versioned_and_engine_verified" time="0.480" /><testcase classname="tests.integration.test_workflow_regressions" name="test_malformed_handler_results_fail_closed[handler_result0]" time="0.549" /><testcase classname="tests.integration.test_workflow_regressions" name="test_malformed_handler_results_fail_closed[handler_result1]" time="0.759" /><testcase classname="tests.integration.test_workflow_regressions" name="test_malformed_handler_results_fail_closed[handler_result2]" time="0.421" /><testcase classname="tests.unit.test_approvals.TestApprovalService" name="test_create_and_approve_with_matching_inputs" time="0.001" /><testcase classname="tests.unit.test_approvals.TestApprovalService" name="test_approve_with_tampered_inputs_fails" time="0.003" /><testcase classname="tests.unit.test_approvals.TestApprovalService" name="test_reject_and_request_changes" time="0.002" /><testcase classname="tests.unit.test_artifacts.TestArtifactManager" name="test_create_and_verify_artifact" time="0.060" /><testcase classname="tests.unit.test_artifacts.TestArtifactManager" name="test_missing_artifact_fails_verification" time="0.049" /><testcase classname="tests.unit.test_artifacts.TestArtifactManager" name="test_tampered_artifact_fails_verification" time="0.092" /><testcase classname="tests.unit.test_asset_bundle_verifier" name="test_cold_bundle_passes_in_isolated_python" time="0.870" /><testcase classname="tests.unit.test_asset_bundle_verifier" name="test_approved_bundle_reports_decision_separately" time="1.105" /><testcase classname="tests.unit.test_asset_bundle_verifier" name="test_missing_receipt_fails[concept_approval]" time="0.636" /><testcase classname="tests.unit.test_asset_bundle_verifier" name="test_missing_receipt_fails[paid_approval]" time="0.535" /><testcase classname="tests.unit.test_asset_bundle_verifier" name="test_missing_receipt_fails[final_approval]" time="1.552" /><testcase classname="tests.unit.test_asset_bundle_verifier" name="test_approval_fingerprint_tamper_fails_even_with_updated_file_hash" time="4.684" /><testcase classname="tests.unit.test_asset_bundle_verifier" name="test_unlisted_file_and_remote_html_fail" time="5.260" /><testcase classname="tests.unit.test_asset_bundle_verifier" name="test_unrecognized_remote_html_attributes_fail[&lt;body background=&quot;https://example.test/pixel.png&quot;&gt;]" time="1.759" /><testcase classname="tests.unit.test_asset_bundle_verifier" name="test_unrecognized_remote_html_attributes_fail[&lt;a href=&quot;concept.png&quot; ping=&quot;https://example.test/track&quot;&gt;track&lt;/a&gt;]" time="2.259" /><testcase classname="tests.unit.test_asset_bundle_verifier" name="test_runtime_observation_tamper_fails[revision-2]" time="2.951" /><testcase classname="tests.unit.test_asset_bundle_verifier" name="test_runtime_observation_tamper_fails[processed_glb_sha256-0000000000000000000000000000000000000000000000000000000000000000]" time="4.655" /><testcase classname="tests.unit.test_asset_bundle_verifier" name="test_runtime_observation_tamper_fails[collision_shape_present-False]" time="4.283" /><testcase classname="tests.unit.test_asset_bundle_verifier" name="test_capture_wrong_attempt_fails" time="3.912" /><testcase classname="tests.unit.test_asset_bundle_verifier" name="test_failed_validation_report_cannot_be_rehashed_into_pass" time="6.767" /><testcase classname="tests.unit.test_asset_bundle_verifier" name="test_processing_report_cannot_claim_different_raw_asset" time="4.503" /><testcase classname="tests.unit.test_asset_bundle_verifier" name="test_duplicate_manifest_key_fails" time="0.975" /><testcase classname="tests.unit.test_asset_bundle_verifier" name="test_rehashed_non_png_concept_fails" time="5.500" /><testcase classname="tests.unit.test_asset_bundle_verifier" name="test_png_decoder_rejects_large_inflate_after_small_ihdr" time="0.191" /><testcase classname="tests.unit.test_asset_contracts" name="test_valid_spec_parsing" time="0.007" /><testcase classname="tests.unit.test_asset_contracts" name="test_canonical_spec_file_exists_and_valid" time="0.046" /><testcase classname="tests.unit.test_asset_contracts" name="test_reject_bool_coercion" time="0.046" /><testcase classname="tests.unit.test_asset_contracts" name="test_reject_numeric_string_coercion" time="0.037" /><testcase classname="tests.unit.test_asset_contracts" name="test_reject_too_small_dimension" time="0.011" /><testcase classname="tests.unit.test_asset_contracts" name="test_dimensions_preserve_user_precision_and_boundaries" time="0.009" /><testcase classname="tests.unit.test_asset_contracts" name="test_reject_duplicate_yaml_keys" time="0.004" /><testcase classname="tests.unit.test_asset_contracts" name="test_reject_windows_ads_in_import_path" time="0.012" /><testcase classname="tests.unit.test_asset_contracts" name="test_reject_windows_device_in_import_path" time="0.044" /><testcase classname="tests.unit.test_asset_contracts" name="test_reject_unsupported_orientation" time="0.033" /><testcase classname="tests.unit.test_asset_contracts" name="test_lod_ratio_editable_not_rigid" time="0.017" /><testcase classname="tests.unit.test_asset_contracts" name="test_reject_unsupported_lod_ratio[0.049]" time="0.023" /><testcase classname="tests.unit.test_asset_contracts" name="test_reject_unsupported_lod_ratio[0.951]" time="0.003" /><testcase classname="tests.unit.test_asset_contracts" name="test_reject_unknown_field" time="0.003" /><testcase classname="tests.unit.test_asset_contracts" name="test_reject_unsupported_v04_profile_policies[collider_policy-convex]" time="0.011" /><testcase classname="tests.unit.test_asset_contracts" name="test_reject_unsupported_v04_profile_policies[collider_policy-primitive]" time="0.003" /><testcase classname="tests.unit.test_asset_contracts" name="test_reject_unsupported_v04_profile_policies[lod_policy-lod0_only]" time="0.004" /><testcase classname="tests.unit.test_asset_contracts" name="test_exported_schema_matches_dimension_ranges_and_supported_policies" time="0.001" /><testcase classname="tests.unit.test_asset_contracts" name="test_reject_negative_dimensions" time="0.020" /><testcase classname="tests.unit.test_asset_contracts" name="test_reject_zero_dimensions" time="0.005" /><testcase classname="tests.unit.test_asset_contracts" name="test_reject_non_finite_dimensions[nan]" time="0.008" /><testcase classname="tests.unit.test_asset_contracts" name="test_reject_non_finite_dimensions[inf]" time="0.007" /><testcase classname="tests.unit.test_asset_contracts" name="test_reject_non_finite_dimensions[-inf]" time="0.057" /><testcase classname="tests.unit.test_asset_contracts" name="test_reject_excessive_dimension" time="0.012" /><testcase classname="tests.unit.test_asset_contracts" name="test_reject_invalid_lod_order" time="0.009" /><testcase classname="tests.unit.test_asset_contracts" name="test_reject_invalid_texture_dimension" time="0.010" /><testcase classname="tests.unit.test_asset_contracts" name="test_reject_path_traversal_in_asset_id" time="0.006" /><testcase classname="tests.unit.test_asset_contracts" name="test_reject_absolute_or_traversal_import_path" time="0.008" /><testcase classname="tests.unit.test_asset_contracts" name="test_reject_path_with_trailing_spaces_before_normalization[assets/prop /mesh.glb]" time="0.007" /><testcase classname="tests.unit.test_asset_contracts" name="test_reject_path_with_trailing_spaces_before_normalization[assets/prop/ ]" time="0.035" /><testcase classname="tests.unit.test_asset_contracts" name="test_reject_asset_id_with_outer_whitespace" time="0.009" /><testcase classname="tests.unit.test_asset_contracts" name="test_reject_import_path_with_outer_whitespace" time="0.031" /><testcase classname="tests.unit.test_asset_contracts" name="test_parse_yaml_string" time="0.069" /><testcase classname="tests.unit.test_asset_contracts" name="test_cost_record_honest_defaults" time="0.002" /><testcase classname="tests.unit.test_asset_contracts" name="test_asset_revision_lifecycle_neutrality" time="0.003" /><testcase classname="tests.unit.test_asset_evidence_packaging" name="test_bundled_cold_verifier_matches_source_script" time="0.009" /><testcase classname="tests.unit.test_asset_persistence" name="test_asset_revision_monotonic_allocation" time="0.482" /><testcase classname="tests.unit.test_asset_persistence" name="test_asset_revision_immutability_and_artifacts" time="0.708" /><testcase classname="tests.unit.test_asset_persistence" name="test_asset_revision_runtime_evidence_is_append_only" time="0.381" /><testcase classname="tests.unit.test_asset_persistence" name="test_asset_revision_allocation_is_concurrent_and_monotonic" time="0.437" /><testcase classname="tests.unit.test_asset_persistence" name="test_provider_operation_intent_repository" time="0.371" /><testcase classname="tests.unit.test_blender_processor_paths" name="test_processor_refuses_existing_output_or_report_without_modification" time="0.127" /><testcase classname="tests.unit.test_blender_processor_paths" name="test_processor_refuses_report_path_equal_to_raw" time="0.073" /><testcase classname="tests.unit.test_blender_processor_paths" name="test_processor_refuses_symlink_target_without_running_blender" time="0.167" /><testcase classname="tests.unit.test_closeout_evidence" name="test_valid_bundle_verifies_cold" time="2.745" /><testcase classname="tests.unit.test_closeout_evidence" name="test_builder_copies_only_catalogued_files_and_rejects_nonempty_output" time="1.193" /><testcase classname="tests.unit.test_closeout_evidence" name="test_missing_mandatory_observation_is_rejected" time="0.527" /><testcase classname="tests.unit.test_closeout_evidence" name="test_modified_log_is_rejected_by_hash" time="0.220" /><testcase classname="tests.unit.test_closeout_evidence" name="test_mixed_execution_fails_relationship_even_with_updated_hash" time="0.225" /><testcase classname="tests.unit.test_closeout_evidence" name="test_unsafe_bundle_paths_rejected[../outside]" time="0.002" /><testcase classname="tests.unit.test_closeout_evidence" name="test_unsafe_bundle_paths_rejected[C:/outside]" time="0.001" /><testcase classname="tests.unit.test_closeout_evidence" name="test_unsafe_bundle_paths_rejected[a//b]" time="0.001" /><testcase classname="tests.unit.test_closeout_evidence" name="test_unsafe_bundle_paths_rejected[a/./b]" time="0.001" /><testcase classname="tests.unit.test_closeout_evidence" name="test_unsafe_bundle_paths_rejected[a/../b]" time="0.001" /><testcase classname="tests.unit.test_closeout_evidence" name="test_unsafe_bundle_paths_rejected[a/file:stream]" time="0.006" /><testcase classname="tests.unit.test_closeout_evidence" name="test_unsafe_bundle_paths_rejected[a\\b]" time="0.010" /><testcase classname="tests.unit.test_closeout_evidence" name="test_capture_bundle_binds_images_and_rejects_broken_evidence" time="2.186" /><testcase classname="tests.unit.test_closeout_evidence" name="test_swapped_unlisted_review_png_is_rejected" time="0.494" /><testcase classname="tests.unit.test_closeout_evidence" name="test_bound_review_html_rejects_displayed_image_tampering" time="3.755" /><testcase classname="tests.unit.test_concept_ingest" name="test_verify_png_image_valid_and_bounded" time="0.076" /><testcase classname="tests.unit.test_concept_ingest" name="test_verify_png_image_invalid_header" time="0.123" /><testcase classname="tests.unit.test_concept_ingest" name="test_verify_png_image_nonexistent" time="0.022" /><testcase classname="tests.unit.test_concept_ingest" name="test_verify_png_image_rejects_size_and_pixel_limits" time="0.202" /><testcase classname="tests.unit.test_concept_ingest" name="test_fake_image_generation_provider" time="0.144" /><testcase classname="tests.unit.test_concept_ingest" name="test_ingest_without_sidecar_has_unknown_generation_metadata" time="0.153" /><testcase classname="tests.unit.test_concept_ingest" name="test_ingest_matches_sidecar_image_hash_and_records_sidecar_hash" time="0.116" /><testcase classname="tests.unit.test_concept_ingest" name="test_epoch_zero_timestamp_is_valid_not_treated_as_missing" time="0.410" /><testcase classname="tests.unit.test_concept_ingest" name="test_local_generation_claim_requires_provider_and_timestamp" time="0.082" /><testcase classname="tests.unit.test_concept_ingest" name="test_unrelated_named_sidecar_is_not_guessed" time="0.132" /><testcase classname="tests.unit.test_concept_ingest" name="test_unknown_sidecar_provider_remains_unknown_and_imported" time="0.136" /><testcase classname="tests.unit.test_concept_ingest" name="test_explicit_invalid_sidecar_fails[missing]" time="0.064" /><testcase classname="tests.unit.test_concept_ingest" name="test_explicit_invalid_sidecar_fails[malformed]" time="0.101" /><testcase classname="tests.unit.test_concept_ingest" name="test_explicit_invalid_sidecar_fails[mismatch]" time="0.242" /><testcase classname="tests.unit.test_concept_ingest" name="test_explicit_invalid_sidecar_fails[bad_hash]" time="0.270" /><testcase classname="tests.unit.test_concept_ingest" name="test_invalid_sidecar_timestamp_fails[nan]" time="0.161" /><testcase classname="tests.unit.test_concept_ingest" name="test_invalid_sidecar_timestamp_fails[inf]" time="0.196" /><testcase classname="tests.unit.test_concept_ingest" name="test_invalid_sidecar_timestamp_fails[not a timestamp]" time="0.252" /><testcase classname="tests.unit.test_concept_ingest" name="test_malformed_automatic_sidecar_is_not_ignored" time="0.069" /><testcase classname="tests.unit.test_concept_ingest" name="test_destination_must_not_exist_or_be_a_symlink" time="0.129"><skipped type="pytest.skip" message="Symlink creation is unavailable on this host">C:\Users\lenovo\devel\ai-game-factory\tests\unit\test_concept_ingest.py:252: Symlink creation is unavailable on this host</skipped></testcase><testcase classname="tests.unit.test_concept_ingest" name="test_ingest_rejects_invalid_spec_fingerprint" time="0.016" /><testcase classname="tests.unit.test_config.TestConfigLoader" name="test_init_project_idempotent_and_non_destructive" time="0.225" /><testcase classname="tests.unit.test_config.TestConfigLoader" name="test_unknown_field_rejected" time="0.060" /><testcase classname="tests.unit.test_config.TestConfigLoader" name="test_unsupported_schema_version_rejected" time="0.037" /><testcase classname="tests.unit.test_config.TestConfigLoader" name="test_non_finite_or_negative_budgets_rejected[-1]" time="0.078" /><testcase classname="tests.unit.test_config.TestConfigLoader" name="test_non_finite_or_negative_budgets_rejected[.nan]" time="0.028" /><testcase classname="tests.unit.test_config.TestConfigLoader" name="test_non_finite_or_negative_budgets_rejected[.inf]" time="0.045" /><testcase classname="tests.unit.test_config.TestConfigLoader" name="test_secret_field_and_missing_schema_version_rejected" time="0.040" /><testcase classname="tests.unit.test_config.TestConfigLoader" name="test_user_defaults_are_overridden_by_project_values" time="0.036" /><testcase classname="tests.unit.test_config.TestConfigLoader" name="test_unicode_project_name_generates_valid_ascii_id" time="0.166" /><testcase classname="tests.unit.test_config.TestConfigLoader" name="test_malformed_yaml_rejected" time="0.047" /><testcase classname="tests.unit.test_config.TestConfigLoader" name="test_init_rejects_factory_junction_escape_without_touching_target" time="2.276" /><testcase classname="tests.unit.test_config.TestConfigLoader" name="test_init_rejects_state_junction_escape_without_touching_target" time="2.305" /><testcase classname="tests.unit.test_dag.TestWorkflowDAG" name="test_linear_dependencies" time="0.001" /><testcase classname="tests.unit.test_dag.TestWorkflowDAG" name="test_fan_out_and_fan_in" time="0.001" /><testcase classname="tests.unit.test_dag.TestWorkflowDAG" name="test_independent_tasks" time="0.001" /><testcase classname="tests.unit.test_dag.TestWorkflowDAG" name="test_direct_cycle_detected" time="0.001" /><testcase classname="tests.unit.test_dag.TestWorkflowDAG" name="test_indirect_cycle_detected" time="0.001" /><testcase classname="tests.unit.test_dag.TestWorkflowDAG" name="test_self_dependency_detected" time="0.007" /><testcase classname="tests.unit.test_dag.TestWorkflowDAG" name="test_missing_dependency_detected" time="0.003" /><testcase classname="tests.unit.test_dag.TestWorkflowDAG" name="test_duplicate_task_id_detected" time="0.002" /><testcase classname="tests.unit.test_dag.TestWorkflowDAG" name="test_downstream_query_and_failure_propagation" time="0.002" /><testcase classname="tests.unit.test_glb_validator" name="test_validator_passes_real_geometry_textured_fixture" time="0.118" /><testcase classname="tests.unit.test_glb_validator" name="test_validator_rejects_truncated_glb_and_out_of_bounds_accessor" time="0.151" /><testcase classname="tests.unit.test_glb_validator" name="test_validator_enforces_budgets_and_lod_collider_geometry" time="0.773"><failure message="KeyError: 'materials.budget'">tmp_path = WindowsPath('C:/Users/lenovo/devel/ai-game-factory/.verification/v04-regression-next/test_validator_enforces_budget0')
+
+    def test_validator_enforces_budgets_and_lod_collider_geometry(tmp_path: Path) -&gt; None:
+        path = tmp_path / "asset.glb"
+        create_box_glb(
+            include_lod1=True,
+            include_collider=True,
+            num_materials=3,
+            include_texture=True,
+            texture_size=(4096, 4096),
+            output_path=path,
+        )
+        rules = {f.rule_id: f.severity.value for f in validate_glb(path, _spec()).findings}
+&gt;       assert rules["materials.budget"] == "FAIL"
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'materials.budget'
+
+tests\unit\test_glb_validator.py:84: KeyError</failure></testcase><testcase classname="tests.unit.test_glb_validator" name="test_validator_catches_processed_asset_mutations" time="0.124" /><testcase classname="tests.unit.test_glb_validator" name="test_validator_rejects_missing_uv_for_texture_and_external_references" time="0.073" /><testcase classname="tests.unit.test_glb_validator" name="test_validator_decodes_texture_stream_and_validates_all_material_slots" time="0.214" /><testcase classname="tests.unit.test_godot_capture" name="test_v02_scenario_stays_headless_and_capture_schema_rejects_other_sizes" time="0.008" /><testcase classname="tests.unit.test_godot_capture" name="test_binary_read_preserves_png_signature" time="0.035" /><testcase classname="tests.unit.test_godot_capture" name="test_png_decode_rejects_header_only_and_wrong_size" time="0.374" /><testcase classname="tests.unit.test_godot_capture" name="test_fixture_roi_fails_when_health_bar_ignores_hp" time="0.025" /><testcase classname="tests.unit.test_godot_capture" name="test_review_html_escapes_markup_and_rejects_remote_images" time="0.001" /><testcase classname="tests.unit.test_godot_contracts" name="test_load_fixture_scenario_and_build_oracle_free_request" time="0.018" /><testcase classname="tests.unit.test_godot_contracts" name="test_scenario_rejects_invalid_fields_and_values[change0-schema_version]" time="0.006" /><testcase classname="tests.unit.test_godot_contracts" name="test_scenario_rejects_invalid_fields_and_values[change1-unknown]" time="0.001" /><testcase classname="tests.unit.test_godot_contracts" name="test_scenario_rejects_invalid_fields_and_values[change2-scene]" time="0.002" /><testcase classname="tests.unit.test_godot_contracts" name="test_scenario_rejects_invalid_fields_and_values[change3-scene]" time="0.003" /><testcase classname="tests.unit.test_godot_contracts" name="test_scenario_rejects_invalid_fields_and_values[change4-scene]" time="0.002" /><testcase classname="tests.unit.test_godot_contracts" name="test_scenario_rejects_invalid_fields_and_values[change5-scene]" time="0.004" /><testcase classname="tests.unit.test_godot_contracts" name="test_scenario_rejects_invalid_fields_and_values[change6-scene]" time="0.002" /><testcase classname="tests.unit.test_godot_contracts" name="test_scenario_rejects_invalid_fields_and_values[change7-scene]" time="0.002" /><testcase classname="tests.unit.test_godot_contracts" name="test_scenario_rejects_invalid_fields_and_values[change8-scene]" time="0.002" /><testcase classname="tests.unit.test_godot_contracts" name="test_scenario_rejects_invalid_fields_and_values[change9-scene]" time="0.001" /><testcase classname="tests.unit.test_godot_contracts" name="test_scenario_rejects_invalid_fields_and_values[change10-max_tick]" time="0.002" /><testcase classname="tests.unit.test_godot_contracts" name="test_scenario_rejects_invalid_fields_and_values[change11-finite]" time="0.002" /><testcase classname="tests.unit.test_godot_contracts" name="test_scenario_rejects_invalid_fields_and_values[change12-action]" time="0.001" /><testcase classname="tests.unit.test_godot_contracts" name="test_scenario_rejects_invalid_fields_and_values[change13-amount]" time="0.005" /><testcase classname="tests.unit.test_godot_contracts" name="test_scenario_rejects_invalid_fields_and_values[change14-does not accept amount]" time="0.002" /><testcase classname="tests.unit.test_godot_contracts" name="test_scenario_rejects_invalid_fields_and_values[change15-tick 0]" time="0.006" /><testcase classname="tests.unit.test_godot_contracts" name="test_scenario_rejects_invalid_fields_and_values[change16-expected]" time="0.004" /><testcase classname="tests.unit.test_godot_contracts" name="test_scenario_rejects_invalid_fields_and_values[change17-at least 1 item]" time="0.002" /><testcase classname="tests.unit.test_godot_contracts" name="test_scenario_rejects_duplicate_json_keys" time="0.053" /><testcase classname="tests.unit.test_godot_contracts" name="test_scenario_size_limit_is_enforced" time="0.545" /><testcase classname="tests.unit.test_godot_contracts" name="test_scenario_path_must_be_a_regular_file" time="0.020" /><testcase classname="tests.unit.test_godot_contracts" name="test_schema_scene_pattern_rejects_non_normalized_paths" time="0.002" /><testcase classname="tests.unit.test_godot_contracts" name="test_observation_is_bound_to_execution_scenario_and_requested_ticks" time="0.004" /><testcase classname="tests.unit.test_godot_contracts" name="test_observation_rejects_report_supplied_oracle_or_spoofed_state" time="0.002" /><testcase classname="tests.unit.test_godot_contracts" name="test_python_assertions_compare_expected_values_to_observed_state" time="0.002" /><testcase classname="tests.unit.test_godot_contracts" name="test_assertion_operators_are_inclusive[equals-5-5-True]" time="0.004" /><testcase classname="tests.unit.test_godot_contracts" name="test_assertion_operators_are_inclusive[minimum-5-5-True]" time="0.003" /><testcase classname="tests.unit.test_godot_contracts" name="test_assertion_operators_are_inclusive[minimum-6-5-False]" time="0.002" /><testcase classname="tests.unit.test_godot_contracts" name="test_assertion_operators_are_inclusive[maximum-5-5-True]" time="0.008" /><testcase classname="tests.unit.test_godot_contracts" name="test_assertion_operators_are_inclusive[maximum-4-5-False]" time="0.004" /><testcase classname="tests.unit.test_godot_staging" name="test_manifest_excludes_scenario_state_caches_and_secrets" time="0.170" /><testcase classname="tests.unit.test_godot_staging" name="test_manifest_enforces_file_and_total_byte_bounds" time="0.063" /><testcase classname="tests.unit.test_godot_staging" name="test_create_stage_is_attempt_scoped_and_preserves_original_project" time="0.853" /><testcase classname="tests.unit.test_godot_staging" name="test_source_change_after_preflight_fingerprint_is_rejected" time="0.302" /><testcase classname="tests.unit.test_godot_staging" name="test_source_change_between_manifest_and_copy_is_rejected" time="0.242" /><testcase classname="tests.unit.test_godot_staging" name="test_manifest_rejects_symlinked_file_when_supported" time="0.110"><skipped type="pytest.skip" message="Symlink creation unavailable on this host: [WinError 1314] Gereken ayrıcalık istemci tarafından sağlanmıyor: 'C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\v04-regression-next\\test_manifest_rejects_symlinke0\\outside.txt' -&gt; 'C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\v04-regression-next\\test_manifest_rejects_symlinke0\\game\\linked.txt'">C:\Users\lenovo\devel\ai-game-factory\tests\unit\test_godot_staging.py:198: Symlink creation unavailable on this host: [WinError 1314] Gereken ayrıcalık istemci tarafından sağlanmıyor: 'C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\v04-regression-next\\test_manifest_rejects_symlinke0\\outside.txt' -&gt; 'C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\v04-regression-next\\test_manifest_rejects_symlinke0\\game\\linked.txt'</skipped></testcase><testcase classname="tests.unit.test_godot_staging" name="test_manifest_rejects_linked_source_directory" time="2.731" /><testcase classname="tests.unit.test_godot_staging" name="test_stager_rejects_root_directory_link" time="4.481" /><testcase classname="tests.unit.test_godot_staging" name="test_attempt_parent_link_is_rejected_before_writing_outside_scratch" time="3.325" /><testcase classname="tests.unit.test_meshy_adapter" name="test_operation_scope_rejects_invalid_explicit_task_cost[None]" time="0.302" /><testcase classname="tests.unit.test_meshy_adapter" name="test_operation_scope_rejects_invalid_explicit_task_cost[UNKNOWN]" time="0.337" /><testcase classname="tests.unit.test_meshy_adapter" name="test_operation_scope_rejects_invalid_explicit_task_cost[bad]" time="0.335" /><testcase classname="tests.unit.test_meshy_adapter" name="test_operation_scope_rejects_invalid_explicit_task_cost[True]" time="0.249" /><testcase classname="tests.unit.test_meshy_adapter" name="test_operation_scope_rejects_invalid_explicit_task_cost[-1]" time="0.502" /><testcase classname="tests.unit.test_meshy_adapter" name="test_operation_scope_rejects_invalid_explicit_task_cost[inf]" time="0.241" /><testcase classname="tests.unit.test_meshy_adapter" name="test_meshy_cli_runner_doctor_available" time="0.003" /><testcase classname="tests.unit.test_meshy_adapter" name="test_meshy_cli_runner_doctor_distinguishes_credential_missing" time="0.002" /><testcase classname="tests.unit.test_meshy_adapter" name="test_meshy_doctor_passes_only_host_api_key_and_trusts_cli_sources" time="0.004" /><testcase classname="tests.unit.test_meshy_adapter" name="test_meshy_cli_runner_doctor_detects_wrong_version" time="0.142" /><testcase classname="tests.unit.test_meshy_adapter" name="test_meshy_mandatory_intent_repo" time="0.004" /><testcase classname="tests.unit.test_meshy_adapter" name="test_meshy_rejects_placeholder_or_missing_parameters" time="0.137" /><testcase classname="tests.unit.test_meshy_adapter" name="test_meshy_provider_blocks_paid_calls_by_default" time="0.337" /><testcase classname="tests.unit.test_meshy_adapter" name="test_meshy_provider_uncertain_crash_recovery" time="0.480" /><testcase classname="tests.unit.test_meshy_adapter" name="test_meshy_provider_queries_existing_task_without_re_creating" time="0.291" /><testcase classname="tests.unit.test_meshy_adapter" name="test_meshy_create_enforces_2k_and_smart_topology_within_budget" time="0.258" /><testcase classname="tests.unit.test_meshy_adapter" name="test_actual_workflow_shape_preserves_unknown_estimate_and_binds_nested_spec" time="0.180" /><testcase classname="tests.unit.test_meshy_adapter" name="test_actual_workflow_shape_rejects_unbound_polycount_and_estimate[overrides0-does not match nested specification]" time="0.120" /><testcase classname="tests.unit.test_meshy_adapter" name="test_actual_workflow_shape_rejects_unbound_polycount_and_estimate[overrides1-does not match authoritative task estimate]" time="0.157" /><testcase classname="tests.unit.test_meshy_adapter" name="test_meshy_create_failure_classified_as_uncertain" time="0.565" /><testcase classname="tests.unit.test_meshy_adapter" name="test_meshy_download_glb_bounded_and_hashed" time="0.032" /><testcase classname="tests.unit.test_meshy_adapter" name="test_concurrency_race_exactly_one_create" time="0.558" /><testcase classname="tests.unit.test_meshy_adapter" name="test_approval_verification_missing_rejected_or_forged" time="1.517" /><testcase classname="tests.unit.test_meshy_adapter" name="test_revision_and_concept_hash_binding" time="0.640" /><testcase classname="tests.unit.test_meshy_adapter" name="test_cost_validation_and_unknown_handling" time="0.003" /><testcase classname="tests.unit.test_meshy_adapter" name="test_unsafe_target_polycount_denied_before_intent" time="0.464" /><testcase classname="tests.unit.test_meshy_adapter" name="test_download_rejects_preexisting_stale_file" time="0.047" /><testcase classname="tests.unit.test_meshy_adapter" name="test_download_rejects_symlink_and_path_escape" time="0.059" /><testcase classname="tests.unit.test_meshy_adapter" name="test_download_rejects_hash_mismatch_and_oversize" time="0.101" /><testcase classname="tests.unit.test_meshy_adapter" name="test_get_task_normalizes_v1_and_validates_task_id" time="0.034" /><testcase classname="tests.unit.test_meshy_adapter" name="test_existing_intent_identity_mismatch_fails" time="0.241" /><testcase classname="tests.unit.test_meshy_adapter" name="test_tampered_request_parameters_rejected_zero_create" time="0.171" /><testcase classname="tests.unit.test_meshy_adapter" name="test_tampered_authoritative_task_params_after_approval_rejected_zero_create" time="0.709" /><testcase classname="tests.unit.test_meshy_adapter" name="test_download_rejects_non_completed_envelope_state" time="0.475" /><testcase classname="tests.unit.test_meshy_adapter" name="test_download_rejects_unsuccessful_or_non_written_file_status" time="0.301" /><testcase classname="tests.unit.test_meshy_adapter" name="test_download_requires_exactly_one_written_glb" time="0.048" /><testcase classname="tests.unit.test_meshy_adapter" name="test_download_rejects_invalid_bytes_values" time="0.705" /><testcase classname="tests.unit.test_meshy_adapter" name="test_get_task_terminal_unsuccessful_persists_failed_never_resubmits" time="2.356" /><testcase classname="tests.unit.test_meshy_adapter" name="test_two_approved_tasks_same_asset_revision_race_creates_at_most_once" time="1.027" /><testcase classname="tests.unit.test_path_guard.TestPathGuard" name="test_safe_relative_path" time="0.017" /><testcase classname="tests.unit.test_path_guard.TestPathGuard" name="test_traversal_attack_rejected" time="0.106" /><testcase classname="tests.unit.test_path_guard.TestPathGuard" name="test_traversal_with_nested_dots" time="0.173" /><testcase classname="tests.unit.test_path_guard.TestPathGuard" name="test_unc_path_rejected" time="0.116" /><testcase classname="tests.unit.test_path_guard.TestPathGuard" name="test_empty_path_rejected" time="0.144" /><testcase classname="tests.unit.test_path_guard.TestPathGuard" name="test_ensure_safe_parent_creates_directories" time="0.250" /><testcase classname="tests.unit.test_path_guard.TestPathGuard" name="test_symlink_escape_rejected_if_pointing_outside" time="0.149"><skipped type="pytest.skip" message="Symlink creation not supported or permitted in this test environment">C:\Users\lenovo\devel\ai-game-factory\tests\unit\test_path_guard.py:56: Symlink creation not supported or permitted in this test environment</skipped></testcase><testcase classname="tests.unit.test_path_guard.TestPathGuard" name="test_windows_special_paths_rejected_on_all_platforms[safe.txt:secret]" time="0.173" /><testcase classname="tests.unit.test_path_guard.TestPathGuard" name="test_windows_special_paths_rejected_on_all_platforms[CON]" time="0.088" /><testcase classname="tests.unit.test_path_guard.TestPathGuard" name="test_windows_special_paths_rejected_on_all_platforms[NUL.txt]" time="0.075" /><testcase classname="tests.unit.test_path_guard.TestPathGuard" name="test_windows_special_paths_rejected_on_all_platforms[folder/name. ]" time="0.145" /><testcase classname="tests.unit.test_path_guard.TestPathGuard" name="test_symlink_parent_escape_rejected_for_missing_leaf" time="0.018"><skipped type="pytest.skip" message="Symlink creation not supported or permitted in this test environment">C:\Users\lenovo\devel\ai-game-factory\tests\unit\test_path_guard.py:80: Symlink creation not supported or permitted in this test environment</skipped></testcase><testcase classname="tests.unit.test_policy.TestPolicyEngine" name="test_local_read_allowed_without_approval" time="0.005" /><testcase classname="tests.unit.test_policy.TestPolicyEngine" name="test_visual_review_requires_approval_even_when_process_execution_does_not" time="0.063" /><testcase classname="tests.unit.test_policy.TestPolicyEngine" name="test_process_execution_allowed_without_approval" time="0.017" /><testcase classname="tests.unit.test_policy.TestPolicyEngine" name="test_managed_process_write_obeys_existing_repository_write_policy" time="0.083" /><testcase classname="tests.unit.test_policy.TestPolicyEngine" name="test_process_approval_policy_applies_without_managed_write" time="0.002" /><testcase classname="tests.unit.test_policy.TestPolicyEngine" name="test_free_external_allowed_without_approval" time="0.017" /><testcase classname="tests.unit.test_policy.TestPolicyEngine" name="test_repo_write_without_approval_when_rule_disabled" time="0.008" /><testcase classname="tests.unit.test_policy.TestPolicyEngine" name="test_repo_write_requires_approval_when_configured" time="0.003" /><testcase classname="tests.unit.test_policy.TestPolicyEngine" name="test_paid_operation_blocked_without_approval" time="0.004" /><testcase classname="tests.unit.test_policy.TestPolicyEngine" name="test_paid_operation_allowed_with_approval" time="0.003" /><testcase classname="tests.unit.test_policy.TestPolicyEngine" name="test_destructive_operation_blocked_without_approval" time="0.004" /><testcase classname="tests.unit.test_policy.TestPolicyEngine" name="test_destructive_operation_allowed_with_approval" time="0.003" /><testcase classname="tests.unit.test_policy.TestPolicyEngine" name="test_budget_exceeded_per_operation" time="0.020" /><testcase classname="tests.unit.test_policy.TestPolicyEngine" name="test_budget_exceeded_total_project" time="0.011" /><testcase classname="tests.unit.test_policy.TestPolicyEngine" name="test_external_cost_classes_require_approval_even_for_free_operation[METERED]" time="0.001" /><testcase classname="tests.unit.test_policy.TestPolicyEngine" name="test_external_cost_classes_require_approval_even_for_free_operation[PAID]" time="0.011" /><testcase classname="tests.unit.test_policy.TestPolicyEngine" name="test_external_cost_classes_require_approval_even_for_free_operation[EXPENSIVE]" time="0.013" /><testcase classname="tests.unit.test_policy.TestPolicyEngine" name="test_invalid_estimated_cost_is_rejected[-1.0]" time="0.012" /><testcase classname="tests.unit.test_policy.TestPolicyEngine" name="test_invalid_estimated_cost_is_rejected[nan]" time="0.011" /><testcase classname="tests.unit.test_policy.TestPolicyEngine" name="test_invalid_estimated_cost_is_rejected[inf]" time="0.005" /><testcase classname="tests.unit.test_policy.TestPolicyEngine" name="test_invalid_estimated_cost_is_rejected[-inf]" time="0.007" /><testcase classname="tests.unit.test_policy.TestPolicyEngine" name="test_invalid_budget_configuration_is_rejected[-1.0-max_operation_cost]" time="0.002" /><testcase classname="tests.unit.test_policy.TestPolicyEngine" name="test_invalid_budget_configuration_is_rejected[-1.0-project_budget]" time="0.001" /><testcase classname="tests.unit.test_policy.TestPolicyEngine" name="test_invalid_budget_configuration_is_rejected[nan-max_operation_cost]" time="0.003" /><testcase classname="tests.unit.test_policy.TestPolicyEngine" name="test_invalid_budget_configuration_is_rejected[nan-project_budget]" time="0.006" /><testcase classname="tests.unit.test_policy.TestPolicyEngine" name="test_invalid_budget_configuration_is_rejected[inf-max_operation_cost]" time="0.005" /><testcase classname="tests.unit.test_policy.TestPolicyEngine" name="test_invalid_budget_configuration_is_rejected[inf-project_budget]" time="0.002" /><testcase classname="tests.unit.test_policy.TestPolicyEngine" name="test_invalid_current_spend_is_rejected[-1.0]" time="0.017" /><testcase classname="tests.unit.test_policy.TestPolicyEngine" name="test_invalid_current_spend_is_rejected[nan]" time="0.003" /><testcase classname="tests.unit.test_policy.TestPolicyEngine" name="test_invalid_current_spend_is_rejected[inf]" time="0.043" /><testcase classname="tests.unit.test_redaction.TestSecretRedactor" name="test_redact_bearer_token" time="0.001" /><testcase classname="tests.unit.test_redaction.TestSecretRedactor" name="test_redact_api_key_syntax" time="0.004" /><testcase classname="tests.unit.test_redaction.TestSecretRedactor" name="test_redact_sk_prefixed_keys" time="0.002" /><testcase classname="tests.unit.test_redaction.TestSecretRedactor" name="test_redact_custom_exact_secrets" time="0.016" /><testcase classname="tests.unit.test_redaction.TestSecretRedactor" name="test_redact_nested_dictionary" time="0.017" /><testcase classname="tests.unit.test_redaction.TestSecretRedactor" name="test_normal_text_untouched" time="0.004" /><testcase classname="tests.unit.test_redaction.TestSecretRedactor" name="test_redact_short_punctuated_password_and_auth_headers" time="0.053" /><testcase classname="tests.unit.test_redaction.TestSecretRedactor" name="test_redact_data_recurses_through_tuples" time="0.009" /><testcase classname="tests.unit.test_state_machine.TestTaskStateMachine" name="test_valid_transitions" time="0.011" /><testcase classname="tests.unit.test_state_machine.TestTaskStateMachine" name="test_invalid_transitions" time="0.009" /><testcase classname="tests.unit.test_state_machine.TestWorkflowStateMachine" name="test_valid_transitions" time="0.017" /><testcase classname="tests.unit.test_state_machine.TestWorkflowStateMachine" name="test_invalid_transitions" time="0.011" /></testsuite></testsuites>

@@ -1,0 +1,12 @@
+Collecting setuptools>=61.0
+  Using cached setuptools-84.0.0-py3-none-any.whl.metadata (6.6 kB)
+Collecting wheel
+  Using cached wheel-0.48.0-py3-none-any.whl.metadata (2.3 kB)
+Requirement already satisfied: packaging>=24.0 in c:\users\lenovo\devel\ai-game-factory\.verification\v04-wheel-env\lib\site-packages (from wheel) (26.3)
+Using cached setuptools-84.0.0-py3-none-any.whl (818 kB)
+Using cached wheel-0.48.0-py3-none-any.whl (33 kB)
+Installing collected packages: wheel, setuptools
+Successfully installed setuptools-84.0.0 wheel-0.48.0
+
+[notice] A new release of pip is available: 25.0.1 -> 26.2.1
+[notice] To update, run: C:\Users\lenovo\devel\ai-game-factory\.verification\v04-wheel-env\Scripts\python.exe -m pip install --upgrade pip

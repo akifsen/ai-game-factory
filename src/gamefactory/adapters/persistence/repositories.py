@@ -5,10 +5,12 @@ details to the domain layer.
 """
 
 import json
-from dataclasses import replace
+import sqlite3
+from dataclasses import asdict, dataclass, field, replace
 from typing import Any
 
 from gamefactory.adapters.persistence.database import Database
+from gamefactory.core.domain.asset_contracts import AssetRevision
 from gamefactory.core.domain.errors import ValidationError
 from gamefactory.core.domain.models import (
     ApprovalRequest,
@@ -220,23 +222,47 @@ class WorkflowRepository:
             )
 
     def save_with_tasks(
-        self, workflow: Workflow, tasks: list[Task], event: AuditEvent | None = None
+        self,
+        workflow: Workflow,
+        tasks: list[Task],
+        event: AuditEvent | None = None,
+        *,
+        allow_existing_empty_placeholder: bool = False,
     ) -> None:
         """Atomically register a workflow, its complete task set, and audit trail."""
         for task in tasks:
             _validate_task_parameters(task)
         with self.db.transaction() as conn:
-            conn.execute(
-                "INSERT INTO workflows (id, project_id, name, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)",
-                (
-                    workflow.id,
-                    workflow.project_id,
-                    workflow.name,
-                    workflow.status.value,
-                    workflow.created_at,
-                    workflow.updated_at,
-                ),
-            )
+            existing = conn.execute(
+                "SELECT project_id, status FROM workflows WHERE id = ?", (workflow.id,)
+            ).fetchone()
+            if existing is not None:
+                existing_tasks = conn.execute(
+                    "SELECT 1 FROM tasks WHERE workflow_id = ? LIMIT 1", (workflow.id,)
+                ).fetchone()
+                if (
+                    not allow_existing_empty_placeholder
+                    or existing["project_id"] != workflow.project_id
+                    or existing["status"] != WorkflowStatus.PENDING.value
+                    or existing_tasks is not None
+                ):
+                    raise sqlite3.IntegrityError("workflow ID already exists")
+                conn.execute(
+                    "UPDATE workflows SET name=?, updated_at=? WHERE id=?",
+                    (workflow.name, workflow.updated_at, workflow.id),
+                )
+            else:
+                conn.execute(
+                    "INSERT INTO workflows (id, project_id, name, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)",
+                    (
+                        workflow.id,
+                        workflow.project_id,
+                        workflow.name,
+                        workflow.status.value,
+                        workflow.created_at,
+                        workflow.updated_at,
+                    ),
+                )
             for task in tasks:
                 conn.execute(
                     "INSERT INTO tasks (id, workflow_id, name, task_type, cost_class, depends_on_json, status, parameters_json, max_retries, timeout_seconds, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
@@ -972,3 +998,476 @@ class ProviderInvocationRepository:
             return int(row["n"])
         finally:
             conn.close()
+
+
+@dataclass
+class ProviderOperationIntent:
+    """Durable record of intent to invoke an external or paid provider operation."""
+
+    id: str
+    workflow_id: str
+    task_id: str
+    asset_id: str
+    revision_number: int
+    provider: str
+    operation: str
+    concept_hash: str
+    request_fingerprint: str
+    approval_id: str
+    estimated_cost: float | None = None
+    actual_cost: float | None = None
+    cost_unit: str = "credits"
+    external_task_id: str | None = None
+    status: str = "INTENDED"  # INTENDED, SUBMITTING, SUBMITTED, SUCCEEDED, FAILED, UNCERTAIN
+    created_at: str = field(default_factory=utc_now_iso)
+    updated_at: str = field(default_factory=utc_now_iso)
+
+    def to_dict(self) -> dict[str, Any]:
+        return asdict(self)
+
+
+class AssetRevisionRepository:
+    """Persistence repository for monotonic, immutable asset revisions.
+
+    Workflow tasks maintain authoritative lifecycle phase; AssetRevision tracks
+    workflow_id and immutable spec/artifact relationships. Monotonic revisions
+    are allocated atomically under SQLite transactions.
+    """
+
+    def __init__(self, db: Database) -> None:
+        self.db = db
+
+    def allocate_revision(
+        self,
+        asset_id: str,
+        workflow_id: str,
+        spec_hash: str,
+        concept_hash: str | None = None,
+        raw_glb_hash: str | None = None,
+        processed_glb_hash: str | None = None,
+        validation_report_hash: str | None = None,
+        runtime_evidence_hashes: list[str] | None = None,
+    ) -> AssetRevision:
+        """Atomically allocate the next monotonic revision for an asset."""
+        now = utc_now_iso()
+        runtime_hashes = runtime_evidence_hashes or []
+        with self.db.transaction() as conn:
+            conn.execute("BEGIN IMMEDIATE")
+            row = conn.execute(
+                "SELECT COALESCE(MAX(revision_number), 0) AS max_rev FROM asset_revisions WHERE asset_id = ?;",
+                (asset_id,),
+            ).fetchone()
+            next_rev = int(row["max_rev"]) + 1
+
+            conn.execute(
+                """
+                INSERT INTO asset_revisions (
+                    asset_id, revision_number, workflow_id, spec_hash,
+                    concept_hash, raw_glb_hash, processed_glb_hash,
+                    validation_report_hash, runtime_evidence_hashes_json,
+                    created_at, updated_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+                """,
+                (
+                    asset_id,
+                    next_rev,
+                    workflow_id,
+                    spec_hash,
+                    concept_hash,
+                    raw_glb_hash,
+                    processed_glb_hash,
+                    validation_report_hash,
+                    json.dumps(runtime_hashes),
+                    now,
+                    now,
+                ),
+            )
+
+            return AssetRevision(
+                asset_id=asset_id,
+                revision_number=next_rev,
+                workflow_id=workflow_id,
+                spec_hash=spec_hash,
+                concept_hash=concept_hash,
+                raw_glb_hash=raw_glb_hash,
+                processed_glb_hash=processed_glb_hash,
+                validation_report_hash=validation_report_hash,
+                runtime_evidence_hashes=runtime_hashes,
+                created_at=now,
+                updated_at=now,
+            )
+
+    def save(self, revision: AssetRevision) -> None:
+        """Save a revision, inserting or updating artifact hashes without overwriting spec_hash or workflow_id."""
+        with self.db.transaction() as conn:
+            conn.execute("BEGIN IMMEDIATE")
+            existing = conn.execute(
+                "SELECT spec_hash, workflow_id, concept_hash, raw_glb_hash, processed_glb_hash, validation_report_hash, runtime_evidence_hashes_json FROM asset_revisions WHERE asset_id = ? AND revision_number = ?;",
+                (revision.asset_id, revision.revision_number),
+            ).fetchone()
+
+            if existing is None:
+                conn.execute(
+                    """
+                    INSERT INTO asset_revisions (
+                        asset_id, revision_number, workflow_id, spec_hash,
+                        concept_hash, raw_glb_hash, processed_glb_hash,
+                        validation_report_hash, runtime_evidence_hashes_json,
+                        created_at, updated_at
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+                    """,
+                    (
+                        revision.asset_id,
+                        revision.revision_number,
+                        revision.workflow_id,
+                        revision.spec_hash,
+                        revision.concept_hash,
+                        revision.raw_glb_hash,
+                        revision.processed_glb_hash,
+                        revision.validation_report_hash,
+                        json.dumps(revision.runtime_evidence_hashes),
+                        revision.created_at,
+                        revision.updated_at,
+                    ),
+                )
+            else:
+                if existing["spec_hash"] != revision.spec_hash:
+                    raise ValueError(
+                        f"Cannot overwrite immutable spec_hash for revision {revision.revision_number} of '{revision.asset_id}'"
+                    )
+                if existing["workflow_id"] != revision.workflow_id:
+                    raise ValueError(
+                        f"Cannot overwrite workflow_id for revision {revision.revision_number} of '{revision.asset_id}'"
+                    )
+                immutable_artifacts = (
+                    "concept_hash",
+                    "raw_glb_hash",
+                    "processed_glb_hash",
+                    "validation_report_hash",
+                )
+                for field_name in immutable_artifacts:
+                    saved_value = existing[field_name]
+                    proposed_value = getattr(revision, field_name)
+                    if saved_value is not None and proposed_value != saved_value:
+                        raise ValueError(
+                            f"Cannot overwrite immutable {field_name} for revision "
+                            f"{revision.revision_number} of '{revision.asset_id}'"
+                        )
+                saved_runtime_hashes = json.loads(existing["runtime_evidence_hashes_json"])
+                proposed_runtime_hashes = revision.runtime_evidence_hashes
+                if (
+                    len(proposed_runtime_hashes) < len(saved_runtime_hashes)
+                    or proposed_runtime_hashes[: len(saved_runtime_hashes)] != saved_runtime_hashes
+                ):
+                    raise ValueError(
+                        f"Cannot remove or change immutable runtime evidence hashes for revision "
+                        f"{revision.revision_number} of '{revision.asset_id}'"
+                    )
+                conn.execute(
+                    """
+                    UPDATE asset_revisions SET
+                        concept_hash = ?,
+                        raw_glb_hash = ?,
+                        processed_glb_hash = ?,
+                        validation_report_hash = ?,
+                        runtime_evidence_hashes_json = ?,
+                        updated_at = ?
+                    WHERE asset_id = ? AND revision_number = ?;
+                    """,
+                    (
+                        revision.concept_hash,
+                        revision.raw_glb_hash,
+                        revision.processed_glb_hash,
+                        revision.validation_report_hash,
+                        json.dumps(revision.runtime_evidence_hashes),
+                        revision.updated_at or utc_now_iso(),
+                        revision.asset_id,
+                        revision.revision_number,
+                    ),
+                )
+
+    def get(self, asset_id: str, revision_number: int) -> AssetRevision | None:
+        conn = self.db.connect()
+        try:
+            row = conn.execute(
+                "SELECT * FROM asset_revisions WHERE asset_id = ? AND revision_number = ?;",
+                (asset_id, revision_number),
+            ).fetchone()
+            if not row:
+                return None
+            return self._row_to_revision(row)
+        finally:
+            conn.close()
+
+    def get_latest(self, asset_id: str) -> AssetRevision | None:
+        conn = self.db.connect()
+        try:
+            row = conn.execute(
+                "SELECT * FROM asset_revisions WHERE asset_id = ? ORDER BY revision_number DESC LIMIT 1;",
+                (asset_id,),
+            ).fetchone()
+            if not row:
+                return None
+            return self._row_to_revision(row)
+        finally:
+            conn.close()
+
+    def list_by_asset(self, asset_id: str) -> list[AssetRevision]:
+        conn = self.db.connect()
+        try:
+            rows = conn.execute(
+                "SELECT * FROM asset_revisions WHERE asset_id = ? ORDER BY revision_number ASC;",
+                (asset_id,),
+            ).fetchall()
+            return [self._row_to_revision(row) for row in rows]
+        finally:
+            conn.close()
+
+    def list_by_workflow(self, workflow_id: str) -> list[AssetRevision]:
+        conn = self.db.connect()
+        try:
+            rows = conn.execute(
+                "SELECT * FROM asset_revisions WHERE workflow_id = ? ORDER BY created_at ASC;",
+                (workflow_id,),
+            ).fetchall()
+            return [self._row_to_revision(row) for row in rows]
+        finally:
+            conn.close()
+
+    def _row_to_revision(self, row: Any) -> AssetRevision:
+        return AssetRevision(
+            asset_id=row["asset_id"],
+            revision_number=row["revision_number"],
+            workflow_id=row["workflow_id"],
+            spec_hash=row["spec_hash"],
+            concept_hash=row["concept_hash"],
+            raw_glb_hash=row["raw_glb_hash"],
+            processed_glb_hash=row["processed_glb_hash"],
+            validation_report_hash=row["validation_report_hash"],
+            runtime_evidence_hashes=json.loads(row["runtime_evidence_hashes_json"]),
+            created_at=row["created_at"],
+            updated_at=row["updated_at"],
+        )
+
+
+class ProviderOperationIntentRepository:
+    """Persistence repository for pre-submission durable intent and recovery."""
+
+    def __init__(self, db: Database) -> None:
+        self.db = db
+
+    def save(self, intent: ProviderOperationIntent) -> None:
+        with self.db.transaction() as conn:
+            conn.execute("BEGIN IMMEDIATE")
+            conn.execute(
+                """
+                INSERT INTO provider_operation_intents (
+                    id, workflow_id, task_id, asset_id, revision_number,
+                    provider, operation, concept_hash, request_fingerprint,
+                    approval_id, estimated_cost, actual_cost, cost_unit,
+                    external_task_id, status, created_at, updated_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ON CONFLICT(id) DO UPDATE SET
+                    external_task_id = excluded.external_task_id,
+                    actual_cost = excluded.actual_cost,
+                    status = excluded.status,
+                    updated_at = excluded.updated_at;
+                """,
+                (
+                    intent.id,
+                    intent.workflow_id,
+                    intent.task_id,
+                    intent.asset_id,
+                    intent.revision_number,
+                    intent.provider,
+                    intent.operation,
+                    intent.concept_hash,
+                    intent.request_fingerprint,
+                    intent.approval_id,
+                    intent.estimated_cost,
+                    intent.actual_cost,
+                    intent.cost_unit,
+                    intent.external_task_id,
+                    intent.status,
+                    intent.created_at,
+                    intent.updated_at,
+                ),
+            )
+
+    def claim_intent(self, intent: ProviderOperationIntent) -> tuple[ProviderOperationIntent, bool]:
+        """Atomically claim intent for an operation using BEGIN IMMEDIATE.
+
+        Returns (claimed_intent, True) if newly claimed (winner).
+        Returns (existing_intent, False) if an intent with the same task_id,
+        request_fingerprint, or (asset_id, revision_number, provider, operation)
+        already exists.
+        """
+        with self.db.transaction() as conn:
+            conn.execute("BEGIN IMMEDIATE")
+            row = conn.execute(
+                """
+                SELECT * FROM provider_operation_intents
+                WHERE task_id = ?
+                   OR request_fingerprint = ?
+                   OR (asset_id = ? AND revision_number = ? AND provider = ? AND operation = ?)
+                ORDER BY created_at ASC LIMIT 1;
+                """,
+                (
+                    intent.task_id,
+                    intent.request_fingerprint,
+                    intent.asset_id,
+                    intent.revision_number,
+                    intent.provider,
+                    intent.operation,
+                ),
+            ).fetchone()
+            if row is not None:
+                return self._row_to_intent(row), False
+
+            try:
+                conn.execute(
+                    """
+                    INSERT INTO provider_operation_intents (
+                        id, workflow_id, task_id, asset_id, revision_number,
+                        provider, operation, concept_hash, request_fingerprint,
+                        approval_id, estimated_cost, actual_cost, cost_unit,
+                        external_task_id, status, created_at, updated_at
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+                    """,
+                    (
+                        intent.id,
+                        intent.workflow_id,
+                        intent.task_id,
+                        intent.asset_id,
+                        intent.revision_number,
+                        intent.provider,
+                        intent.operation,
+                        intent.concept_hash,
+                        intent.request_fingerprint,
+                        intent.approval_id,
+                        intent.estimated_cost,
+                        intent.actual_cost,
+                        intent.cost_unit,
+                        intent.external_task_id,
+                        intent.status,
+                        intent.created_at,
+                        intent.updated_at,
+                    ),
+                )
+                return intent, True
+            except sqlite3.IntegrityError:
+                existing_row = conn.execute(
+                    """
+                    SELECT * FROM provider_operation_intents
+                    WHERE task_id = ?
+                       OR request_fingerprint = ?
+                       OR (asset_id = ? AND revision_number = ? AND provider = ? AND operation = ?)
+                    ORDER BY created_at ASC LIMIT 1;
+                    """,
+                    (
+                        intent.task_id,
+                        intent.request_fingerprint,
+                        intent.asset_id,
+                        intent.revision_number,
+                        intent.provider,
+                        intent.operation,
+                    ),
+                ).fetchone()
+                if existing_row is not None:
+                    return self._row_to_intent(existing_row), False
+                raise
+
+    atomic_claim = claim_intent
+
+    def get(self, intent_id: str) -> ProviderOperationIntent | None:
+        conn = self.db.connect()
+        try:
+            row = conn.execute(
+                "SELECT * FROM provider_operation_intents WHERE id = ?;", (intent_id,)
+            ).fetchone()
+            if not row:
+                return None
+            return self._row_to_intent(row)
+        finally:
+            conn.close()
+
+    def get_by_task(self, task_id: str) -> ProviderOperationIntent | None:
+        conn = self.db.connect()
+        try:
+            row = conn.execute(
+                "SELECT * FROM provider_operation_intents WHERE task_id = ? ORDER BY created_at DESC LIMIT 1;",
+                (task_id,),
+            ).fetchone()
+            if not row:
+                return None
+            return self._row_to_intent(row)
+        finally:
+            conn.close()
+
+    def get_by_fingerprint(self, fingerprint: str) -> ProviderOperationIntent | None:
+        conn = self.db.connect()
+        try:
+            row = conn.execute(
+                "SELECT * FROM provider_operation_intents WHERE request_fingerprint = ? ORDER BY created_at DESC LIMIT 1;",
+                (fingerprint,),
+            ).fetchone()
+            if not row:
+                return None
+            return self._row_to_intent(row)
+        finally:
+            conn.close()
+
+    def get_by_asset_revision(
+        self,
+        asset_id: str,
+        revision_number: int,
+        provider: str = "meshy",
+        operation: str = "image-to-3d",
+    ) -> ProviderOperationIntent | None:
+        conn = self.db.connect()
+        try:
+            row = conn.execute(
+                """
+                SELECT * FROM provider_operation_intents
+                WHERE asset_id = ? AND revision_number = ? AND provider = ? AND operation = ?
+                ORDER BY created_at DESC LIMIT 1;
+                """,
+                (asset_id, revision_number, provider, operation),
+            ).fetchone()
+            if not row:
+                return None
+            return self._row_to_intent(row)
+        finally:
+            conn.close()
+
+    def list_by_workflow(self, workflow_id: str) -> list[ProviderOperationIntent]:
+        conn = self.db.connect()
+        try:
+            rows = conn.execute(
+                "SELECT * FROM provider_operation_intents WHERE workflow_id = ? ORDER BY created_at ASC;",
+                (workflow_id,),
+            ).fetchall()
+            return [self._row_to_intent(row) for row in rows]
+        finally:
+            conn.close()
+
+    def _row_to_intent(self, row: Any) -> ProviderOperationIntent:
+        return ProviderOperationIntent(
+            id=row["id"],
+            workflow_id=row["workflow_id"],
+            task_id=row["task_id"],
+            asset_id=row["asset_id"],
+            revision_number=row["revision_number"],
+            provider=row["provider"],
+            operation=row["operation"],
+            concept_hash=row["concept_hash"],
+            request_fingerprint=row["request_fingerprint"],
+            approval_id=row["approval_id"],
+            estimated_cost=row["estimated_cost"],
+            actual_cost=row["actual_cost"],
+            cost_unit=row["cost_unit"],
+            external_task_id=row["external_task_id"],
+            status=row["status"],
+            created_at=row["created_at"],
+            updated_at=row["updated_at"],
+        )

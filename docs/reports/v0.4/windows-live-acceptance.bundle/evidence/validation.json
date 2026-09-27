@@ -1,0 +1,136 @@
+{
+  "evaluated_at": "2026-09-27T11:39:19.560788+00:00",
+  "findings": [
+    {
+      "actual": "parsed",
+      "artifact": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\gamefactory-asset-acceptance-7x073c9g\\project\\.gamefactory\\assets\\prop_acceptance_crate_01\\r001\\processed-attempt-1.glb",
+      "expected": "GLB 2.0 with bounded embedded buffers",
+      "message": "GLB structure and accessors are valid",
+      "rule_id": "glb.parse",
+      "severity": "PASS"
+    },
+    {
+      "actual": "d49128457bf72eb11602673d0f6a90bd7e50a29314b4ae2fb792d60bf4b4498f",
+      "artifact": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\gamefactory-asset-acceptance-7x073c9g\\project\\.gamefactory\\assets\\prop_acceptance_crate_01\\r001\\processed-attempt-1.glb",
+      "expected": "SHA-256 recorded",
+      "message": "Artifact hash computed",
+      "rule_id": "glb.hash",
+      "severity": "PASS"
+    },
+    {
+      "actual": "['COL_prop_acceptance_crate_01', 'SM_prop_acceptance_crate_01_LOD0', 'SM_prop_acceptance_crate_01_LOD1']",
+      "artifact": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\gamefactory-asset-acceptance-7x073c9g\\project\\.gamefactory\\assets\\prop_acceptance_crate_01\\r001\\processed-attempt-1.glb",
+      "expected": "unique mesh node names",
+      "message": "Duplicate names are ambiguous during engine import",
+      "rule_id": "nodes.unique",
+      "severity": "PASS"
+    },
+    {
+      "actual": "['COL_prop_acceptance_crate_01', 'SM_prop_acceptance_crate_01_LOD0', 'SM_prop_acceptance_crate_01_LOD1']",
+      "artifact": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\gamefactory-asset-acceptance-7x073c9g\\project\\.gamefactory\\assets\\prop_acceptance_crate_01\\r001\\processed-attempt-1.glb",
+      "expected": "exactly SM_prop_acceptance_crate_01_LOD0, SM_prop_acceptance_crate_01_LOD1, COL_prop_acceptance_crate_01",
+      "message": "Unexpected or missing mesh nodes are rejected",
+      "rule_id": "nodes.profile",
+      "severity": "PASS"
+    },
+    {
+      "actual": "30 triangles",
+      "artifact": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\gamefactory-asset-acceptance-7x073c9g\\project\\.gamefactory\\assets\\prop_acceptance_crate_01\\r001\\processed-attempt-1.glb",
+      "expected": "nonempty triangle geometry",
+      "message": "Actual POSITION and index data decoded",
+      "rule_id": "mesh.nonempty",
+      "severity": "PASS"
+    },
+    {
+      "actual": "present",
+      "artifact": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\gamefactory-asset-acceptance-7x073c9g\\project\\.gamefactory\\assets\\prop_acceptance_crate_01\\r001\\processed-attempt-1.glb",
+      "expected": "LOD0 mesh geometry",
+      "message": "LOD0 node must reference nonempty triangles",
+      "rule_id": "lod0.present",
+      "severity": "PASS"
+    },
+    {
+      "actual": "present",
+      "artifact": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\gamefactory-asset-acceptance-7x073c9g\\project\\.gamefactory\\assets\\prop_acceptance_crate_01\\r001\\processed-attempt-1.glb",
+      "expected": "LOD1 mesh geometry when required",
+      "message": "LOD1 node must reference nonempty triangles",
+      "rule_id": "lod1.present",
+      "severity": "PASS"
+    },
+    {
+      "actual": "1 collider mesh(es)",
+      "artifact": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\gamefactory-asset-acceptance-7x073c9g\\project\\.gamefactory\\assets\\prop_acceptance_crate_01\\r001\\processed-attempt-1.glb",
+      "expected": "axis-aligned box geometry matching visual bounds",
+      "message": "Collider decoded vertices and triangles are checked against visual bounds",
+      "rule_id": "collider.geometry",
+      "severity": "PASS"
+    },
+    {
+      "actual": "12",
+      "artifact": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\gamefactory-asset-acceptance-7x073c9g\\project\\.gamefactory\\assets\\prop_acceptance_crate_01\\r001\\processed-attempt-1.glb",
+      "expected": "<= 20000",
+      "message": "LOD0 triangle budget",
+      "rule_id": "geometry.lod0_budget",
+      "severity": "PASS"
+    },
+    {
+      "actual": "6",
+      "artifact": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\gamefactory-asset-acceptance-7x073c9g\\project\\.gamefactory\\assets\\prop_acceptance_crate_01\\r001\\processed-attempt-1.glb",
+      "expected": "<= 10000",
+      "message": "LOD1 triangle budget",
+      "rule_id": "geometry.lod1_budget",
+      "severity": "PASS"
+    },
+    {
+      "actual": "1",
+      "artifact": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\gamefactory-asset-acceptance-7x073c9g\\project\\.gamefactory\\assets\\prop_acceptance_crate_01\\r001\\processed-attempt-1.glb",
+      "expected": "<= 2",
+      "message": "Declared material count in GLB",
+      "rule_id": "materials.budget",
+      "severity": "PASS"
+    },
+    {
+      "actual": "64",
+      "artifact": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\gamefactory-asset-acceptance-7x073c9g\\project\\.gamefactory\\assets\\prop_acceptance_crate_01\\r001\\processed-attempt-1.glb",
+      "expected": "<= 2048px",
+      "message": "Embedded texture dimensions decoded from image bytes",
+      "rule_id": "textures.dimension",
+      "severity": "PASS"
+    },
+    {
+      "actual": "[1.2000000476837158, 1.0, 1.0]",
+      "artifact": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\gamefactory-asset-acceptance-7x073c9g\\project\\.gamefactory\\assets\\prop_acceptance_crate_01\\r001\\processed-attempt-1.glb",
+      "expected": "X/Y/Z = [1.2, 1.0, 1.0]m \u00b1 0.01m",
+      "message": "Dimensions measured from transformed decoded vertices",
+      "rule_id": "scale.bounds",
+      "severity": "PASS"
+    },
+    {
+      "actual": "min=[-0.6000000238418579, 0.0, -0.5], max=[0.6000000238418579, 1.0, 0.5]",
+      "artifact": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\gamefactory-asset-acceptance-7x073c9g\\project\\.gamefactory\\assets\\prop_acceptance_crate_01\\r001\\processed-attempt-1.glb",
+      "expected": "bottom_center",
+      "message": "Origin evaluated from transformed geometry",
+      "rule_id": "origin.policy",
+      "severity": "PASS"
+    },
+    {
+      "actual": "((-0.6000000238418579, 0.5, -0.5),)",
+      "artifact": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\gamefactory-asset-acceptance-7x073c9g\\project\\.gamefactory\\assets\\prop_acceptance_crate_01\\r001\\processed-attempt-1.glb",
+      "expected": "LOD1 bounds match LOD0 \u00b1 0.01m",
+      "message": "LOD1 geometry must preserve the visual envelope",
+      "rule_id": "lod1.bounds",
+      "severity": "PASS"
+    },
+    {
+      "actual": "identity",
+      "artifact": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\gamefactory-asset-acceptance-7x073c9g\\project\\.gamefactory\\assets\\prop_acceptance_crate_01\\r001\\processed-attempt-1.glb",
+      "expected": "mesh nodes carry no residual transforms; +Y up/-Z front coordinates",
+      "message": "Coordinate convention is checked through node transforms and world-space bounds",
+      "rule_id": "orientation.identity",
+      "severity": "PASS"
+    }
+  ],
+  "passed": true,
+  "status": "PASS",
+  "summary": "Passed with 0 failing rule(s)"
+}

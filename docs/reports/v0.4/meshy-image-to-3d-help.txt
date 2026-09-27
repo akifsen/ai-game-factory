@@ -1,0 +1,57 @@
+Usage: meshy-cli image-to-3d create [options]
+
+Create an image-to-3d task
+
+Options:
+  --image-url <src>           reference image; http(s) URL or local file path
+  --input-task-id <id>        alternative to --image-url: a SUCCEEDED
+                              text-to-image or image-to-image task whose output
+                              becomes the source image
+  --model-type <kind>         standard (default; meshy-7 full-detail generation)
+                              | smart-topology (meshy-t2 component-aware
+                              low-poly: clean topology, separated parts)
+                              (choices: "standard", "smart-topology")
+  --target-polycount <n>      smart-topology only: target triangle count,
+                              100-15000 (default: 10000). For standard outputs
+                              use remesh
+  --ultra-mode <bool>         standard mode only: extra Meshy 7 pass for finer
+                              surface detail (default: false; billed on top of
+                              the mesh)
+  --should-texture <bool>     generate textures (default: false — draft white
+                              mesh, the preview stage; texture later with
+                              retexture)
+  --enable-pbr <bool>         generate normal/metallic/roughness/emission maps
+                              (default: true, so game-engine imports carry the
+                              full map set)
+  --texture-prompt <text>     text guidance for texturing (max 600 chars)
+  --texture-resolution <res>  base color texture size (default: 4k) (choices:
+                              "2k", "4k", "8k")
+  --pose-mode <pose>          a-pose | t-pose pre-pose characters for rigging;
+                              auto (default) lets the model decide (choices:
+                              "a-pose", "t-pose", "auto")
+  --image-enhancement <bool>  optimize the input image before processing
+                              (default: true)
+  --remove-lighting <bool>    strip baked lighting from the base color (default:
+                              true)
+  --target-formats <csv>      glb,obj,fbx,stl,usdz,3mf (default: glb)
+  --save-json <file>          save the full task JSON as received (never
+                              overwrites)
+  --include-raw               v1: include the untouched task response under
+                              result.task.raw
+  --project <dir>             initialised meshy_output project: save
+                              task_<id>.json there and record the task in
+                              metadata.json
+  --stage <name>              stage label for the project record (default:
+                              derived from the task type, e.g. preview | refine
+                              | build)
+  --data <json>               raw JSON payload (or @file.json); merges with
+                              flags (flags win)
+  --async                     submit once and return the task id immediately (no
+                              polling); query later with `get`, `wait` or
+                              `stream` (default: false)
+  --timeout <seconds>         max seconds to poll in sync mode (default: "600")
+  --operation-id <id>         local journal id for this submission; repeating it
+                              returns the recorded outcome instead of submitting
+                              again (local record only, not a server idempotency
+                              key)
+  -h, --help                  display help for command

@@ -1,0 +1,149 @@
+{
+  "actor": "TEST-ONLY-ACCEPTANCE",
+  "approval_id": "APP-f2619701",
+  "approval_type": "final_visual_review",
+  "decided_at": "2026-09-27T11:39:26.769534+00:00",
+  "fingerprint": "d21a67c58ead18a036ce6317b52157fe3d51d8e5722d474e4a51a6caa52bbc14",
+  "inputs": {
+    "parameters": {
+      "asset_dir": ".gamefactory/assets/prop_acceptance_crate_01/r001",
+      "asset_id": "prop_acceptance_crate_01",
+      "budget_reservation": null,
+      "concept_provenance_hash": "3d2bd2103591be6d90af2b3d71b39eb03936b737e8e4b4c78cdb4a7f4574ea5e",
+      "concept_provenance_source": ".acceptance-inputs/concept-provenance.json",
+      "concept_source": ".acceptance-inputs/concept.png",
+      "concept_source_hash": "30329b6163561da25974b95a03e98de51232d4e62364e6883dd0b6cca10cd3ca",
+      "concept_source_type": "imported",
+      "cost_unit": "credits",
+      "provider": "fake",
+      "provider_estimate": 5.0,
+      "revision_number": 1,
+      "specification": {
+        "asset_id": "prop_acceptance_crate_01",
+        "category": "prop",
+        "collider_policy": "box",
+        "dimensions": {
+          "depth_m": 1.0,
+          "height_m": 1.0,
+          "width_m": 1.2
+        },
+        "geometry_budget": {
+          "lod_ratio": 0.5,
+          "max_triangles_lod0": 20000,
+          "max_triangles_lod1": 10000
+        },
+        "intent": "Synthetic acceptance fixture for a stylized sci-fi energy crate",
+        "lod_policy": "lod0_lod1",
+        "material_budget": {
+          "max_materials": 2
+        },
+        "orientation": {
+          "front": "-Z",
+          "up": "+Y"
+        },
+        "origin_policy": "bottom_center",
+        "profile": "static_prop",
+        "schema_version": "0.4.0",
+        "style_constraints": {
+          "detail_density": "medium",
+          "family": "stylized_scifi",
+          "readability": "high",
+          "silhouette": "chunky"
+        },
+        "target_engine": "godot",
+        "target_import_path": "assets/generated/props/prop_acceptance_crate_01/",
+        "texture_budget": {
+          "max_dimension": 2048
+        }
+      },
+      "specification_hash": "0c39f9c806456d06a67cbb196dd790923cf340172d6fd0772e39c1224bf1f012"
+    },
+    "scope": {
+      "artifacts": [
+        [
+          "ART-1a32785a",
+          "e2a0817cdbbc811b6a0185d75edc5af9cf15ee3c4aa7cc8711fb1e0fc31b4140"
+        ],
+        [
+          "ART-1a47d807",
+          "354cfd835bde59fb02e97702bce3846f2234685f9ffee34514295cba0fc1d9d6"
+        ],
+        [
+          "ART-1f702948",
+          "c0471fcfbeedcad6752b6b0744340c1a67d701bca5668d291eaf6d4d4eae0644"
+        ],
+        [
+          "ART-3c8b367f",
+          "cf3ef0ceface3685dd4e45cd9ee8a0ee232cd6761b342da566d59ccd9a8247bd"
+        ],
+        [
+          "ART-468a23ad",
+          "bc4f6f9815b57d9fe28dc28f2370f655257ca83790e36079a0b0a0682646a475"
+        ],
+        [
+          "ART-4ff95cde",
+          "5e9f0e9d9ddec9ffbc64f54f621bd4d4d2082017088c6ab2d759e4f90c486104"
+        ],
+        [
+          "ART-5f43ca7c",
+          "d49128457bf72eb11602673d0f6a90bd7e50a29314b4ae2fb792d60bf4b4498f"
+        ],
+        [
+          "ART-628d67aa",
+          "5d61f9a3594ff3881d63f52f9bf6f7d108c1f5ed6de6fad684dfd80d0638445a"
+        ],
+        [
+          "ART-82ffa674",
+          "90220622f86e1e09019f24efe2b8e2d46b2a5c64da3b652c2d2a703bb2d04a76"
+        ],
+        [
+          "ART-90490584",
+          "b0c9abdab87866c4ed680637acea76742cf95720fb56f719be08dbd78bbaf719"
+        ],
+        [
+          "ART-aedb0f8f",
+          "62fdea1f413ddb474fb756db396a224607ddd8d6a3f2154d2dcef55286b0e83e"
+        ],
+        [
+          "ART-e5c9d92d",
+          "30329b6163561da25974b95a03e98de51232d4e62364e6883dd0b6cca10cd3ca"
+        ],
+        [
+          "ART-f940c446",
+          "64536e6dea4647fc2000306fcdc6a7b375bafc847e8c1408a313376b6ce10a96"
+        ],
+        [
+          "ART-f96dd248",
+          "88e8dac8c042dbc0cab25f3c0392e26eeb782291366d402457212b77390e5274"
+        ]
+      ],
+      "cost_class": "LOCAL",
+      "estimated_cost": 0.0,
+      "handler_context": {
+        "all_artifacts_verified": true,
+        "artifacts": {
+          "asset-concept": "30329b6163561da25974b95a03e98de51232d4e62364e6883dd0b6cca10cd3ca",
+          "asset-processed-glb": "d49128457bf72eb11602673d0f6a90bd7e50a29314b4ae2fb792d60bf4b4498f",
+          "asset-runtime-capture": "5e9f0e9d9ddec9ffbc64f54f621bd4d4d2082017088c6ab2d759e4f90c486104",
+          "asset-runtime-observation": "90220622f86e1e09019f24efe2b8e2d46b2a5c64da3b652c2d2a703bb2d04a76",
+          "asset-validation-report": "bc4f6f9815b57d9fe28dc28f2370f655257ca83790e36079a0b0a0682646a475"
+        },
+        "revision": 1,
+        "runtime_capture_hashes": [
+          "5e9f0e9d9ddec9ffbc64f54f621bd4d4d2082017088c6ab2d759e4f90c486104",
+          "62fdea1f413ddb474fb756db396a224607ddd8d6a3f2154d2dcef55286b0e83e",
+          "c0471fcfbeedcad6752b6b0744340c1a67d701bca5668d291eaf6d4d4eae0644"
+        ],
+        "specification_hash": "0c39f9c806456d06a67cbb196dd790923cf340172d6fd0772e39c1224bf1f012",
+        "workflow_id": "WF-ASSET-087dcc66"
+      },
+      "provider": null,
+      "task_type": "asset_final_review",
+      "workflow_id": "WF-ASSET-087dcc66"
+    }
+  },
+  "revision": 1,
+  "status": "APPROVED",
+  "task_id": "WF-ASSET-087dcc66-FINAL-REVIEW",
+  "workflow_id": "WF-ASSET-087dcc66"
+}

@@ -1,0 +1,4 @@
+run.log:1067 test (windows-latest, 3.11)	Run python -m pytest -ra -p no:cacheprovider	2026-09-27T09:55:11.9165919Z tests/integration/test_process_runner.py::TestProcessRunner::test_parent_exit_descendant_bounded_and_cleaned PASSED [ 34%]
+run.log:1747 test (ubuntu-latest, 3.11)	Run python -m pytest -ra -p no:cacheprovider	2026-09-27T09:53:50.2626111Z tests/integration/test_process_runner.py::TestProcessRunner::test_parent_exit_descendant_bounded_and_cleaned PASSED [ 34%]
+run.log:2352 test (windows-latest, 3.12)	Run python -m pytest -ra -p no:cacheprovider	2026-09-27T09:55:25.0189529Z tests/integration/test_process_runner.py::TestProcessRunner::test_parent_exit_descendant_bounded_and_cleaned PASSED [ 34%]
+run.log:3033 test (ubuntu-latest, 3.12)	Run python -m pytest -ra -p no:cacheprovider	2026-09-27T09:53:51.6629767Z tests/integration/test_process_runner.py::TestProcessRunner::test_parent_exit_descendant_bounded_and_cleaned PASSED [ 34%]

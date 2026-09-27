@@ -1,0 +1,94 @@
+{
+  "actor": "TEST-ONLY-ACCEPTANCE",
+  "approval_id": "APP-2c2a89d6",
+  "approval_type": "paid_generation",
+  "decided_at": "2026-09-27T11:39:14.716118+00:00",
+  "fingerprint": "75a13d7eb323afa475c7ba0430cc07ad4c6965b75ce4d55da4b053561822284d",
+  "inputs": {
+    "parameters": {
+      "asset_dir": ".gamefactory/assets/prop_acceptance_crate_01/r001",
+      "asset_id": "prop_acceptance_crate_01",
+      "budget_reservation": null,
+      "concept_provenance_hash": "3d2bd2103591be6d90af2b3d71b39eb03936b737e8e4b4c78cdb4a7f4574ea5e",
+      "concept_provenance_source": ".acceptance-inputs/concept-provenance.json",
+      "concept_source": ".acceptance-inputs/concept.png",
+      "concept_source_hash": "30329b6163561da25974b95a03e98de51232d4e62364e6883dd0b6cca10cd3ca",
+      "concept_source_type": "imported",
+      "cost": 5.0,
+      "cost_unit": "credits",
+      "estimate_label": "KNOWN",
+      "mandatory_approval_type": "paid_generation",
+      "provider": "fake",
+      "provider_estimate": 5.0,
+      "revision_number": 1,
+      "specification": {
+        "asset_id": "prop_acceptance_crate_01",
+        "category": "prop",
+        "collider_policy": "box",
+        "dimensions": {
+          "depth_m": 1.0,
+          "height_m": 1.0,
+          "width_m": 1.2
+        },
+        "geometry_budget": {
+          "lod_ratio": 0.5,
+          "max_triangles_lod0": 20000,
+          "max_triangles_lod1": 10000
+        },
+        "intent": "Synthetic acceptance fixture for a stylized sci-fi energy crate",
+        "lod_policy": "lod0_lod1",
+        "material_budget": {
+          "max_materials": 2
+        },
+        "orientation": {
+          "front": "-Z",
+          "up": "+Y"
+        },
+        "origin_policy": "bottom_center",
+        "profile": "static_prop",
+        "schema_version": "0.4.0",
+        "style_constraints": {
+          "detail_density": "medium",
+          "family": "stylized_scifi",
+          "readability": "high",
+          "silhouette": "chunky"
+        },
+        "target_engine": "godot",
+        "target_import_path": "assets/generated/props/prop_acceptance_crate_01/",
+        "texture_budget": {
+          "max_dimension": 2048
+        }
+      },
+      "specification_hash": "0c39f9c806456d06a67cbb196dd790923cf340172d6fd0772e39c1224bf1f012"
+    },
+    "scope": {
+      "artifacts": [
+        [
+          "ART-1a32785a",
+          "e2a0817cdbbc811b6a0185d75edc5af9cf15ee3c4aa7cc8711fb1e0fc31b4140"
+        ],
+        [
+          "ART-3c8b367f",
+          "cf3ef0ceface3685dd4e45cd9ee8a0ee232cd6761b342da566d59ccd9a8247bd"
+        ],
+        [
+          "ART-e5c9d92d",
+          "30329b6163561da25974b95a03e98de51232d4e62364e6883dd0b6cca10cd3ca"
+        ],
+        [
+          "ART-f940c446",
+          "64536e6dea4647fc2000306fcdc6a7b375bafc847e8c1408a313376b6ce10a96"
+        ]
+      ],
+      "cost_class": "PAID",
+      "estimated_cost": 5.0,
+      "provider": null,
+      "task_type": "asset_paid_generation",
+      "workflow_id": "WF-ASSET-087dcc66"
+    }
+  },
+  "revision": 1,
+  "status": "APPROVED",
+  "task_id": "WF-ASSET-087dcc66-PAID-GENERATION",
+  "workflow_id": "WF-ASSET-087dcc66"
+}

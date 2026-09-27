@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="1" failures="0" skipped="0" tests="1" time="1.297" timestamp="2026-09-27T15:06:25.433364+03:00" hostname="DESKTOP-LMPJ3VK"><testcase classname="" name="tests.integration.test_godot_capture_pipeline" time="0.000"><error message="collection failure">ImportError while importing test module 'C:\Users\lenovo\devel\ai-game-factory\.verification\v04-windows-final\source\tests\integration\test_godot_capture_pipeline.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+..\..\..\..\..\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\integration\test_godot_capture_pipeline.py:40: in &lt;module&gt;
+    from tests.integration.test_godot_pipeline import FIXTURE, FakeGodotRunner
+E   ModuleNotFoundError: No module named 'tests'</error></testcase></testsuite></testsuites>

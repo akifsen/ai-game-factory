@@ -1,0 +1,38 @@
+{
+  "asset_id": "prop_acceptance_crate_01",
+  "category": "prop",
+  "collider_policy": "box",
+  "dimensions": {
+    "depth_m": 1.0,
+    "height_m": 1.0,
+    "width_m": 1.2
+  },
+  "geometry_budget": {
+    "lod_ratio": 0.5,
+    "max_triangles_lod0": 20000,
+    "max_triangles_lod1": 10000
+  },
+  "intent": "Synthetic acceptance fixture for a stylized sci-fi energy crate",
+  "lod_policy": "lod0_lod1",
+  "material_budget": {
+    "max_materials": 2
+  },
+  "orientation": {
+    "front": "-Z",
+    "up": "+Y"
+  },
+  "origin_policy": "bottom_center",
+  "profile": "static_prop",
+  "schema_version": "0.4.0",
+  "style_constraints": {
+    "detail_density": "medium",
+    "family": "stylized_scifi",
+    "readability": "high",
+    "silhouette": "chunky"
+  },
+  "target_engine": "godot",
+  "target_import_path": "assets/generated/props/prop_acceptance_crate_01/",
+  "texture_budget": {
+    "max_dimension": 2048
+  }
+}

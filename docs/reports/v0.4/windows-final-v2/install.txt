@@ -1,0 +1,6 @@
+Processing c:\users\lenovo\devel\ai-game-factory\.verification\v04-windows-final-v2\dist\gamefactory-0.4.0-py3-none-any.whl
+Installing collected packages: gamefactory
+Successfully installed gamefactory-0.4.0
+
+[notice] A new release of pip is available: 25.0.1 -> 26.2.1
+[notice] To update, run: C:\Users\lenovo\devel\ai-game-factory\.verification\v04-wheel-env\Scripts\python.exe -m pip install --upgrade pip

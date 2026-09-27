@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "status": "FAIL",
+  "started_at": "2026-09-27T12:33:58.545708+00:00",
+  "commands": [],
+  "checks": {},
+  "paid_provider": "fake",
+  "paid_provider_invocations": 0,
+  "source_kind": "scripted synthetic concept fixture; no SDXL or external image provider claim",
+  "error": "AcceptanceFailure: workspace directory must exist: C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\v04-resume-asset",
+  "traceback": "Traceback (most recent call last):\n  File \"C:\\Users\\lenovo\\devel\\ai-game-factory\\scripts\\verify_asset_acceptance.py\", line 509, in main\n    _run(args, result)\n  File \"C:\\Users\\lenovo\\devel\\ai-game-factory\\scripts\\verify_asset_acceptance.py\", line 200, in _run\n    raise AcceptanceFailure(f\"workspace directory must exist: {workspace}\")\nAcceptanceFailure: workspace directory must exist: C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\v04-resume-asset\n",
+  "finished_at": "2026-09-27T12:33:58.561039+00:00"
+}

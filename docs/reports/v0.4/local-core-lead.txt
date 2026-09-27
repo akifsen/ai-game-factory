@@ -1,0 +1,16 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.14, pytest-9.1.1, pluggy-1.6.0
+rootdir: C:\Users\lenovo\devel\ai-game-factory
+configfile: pyproject.toml
+collected 75 items
+
+tests\unit\test_asset_contracts.py ...................................   [ 46%]
+tests\unit\test_asset_persistence.py .....                               [ 53%]
+tests\unit\test_concept_ingest.py ...................s.                  [ 81%]
+tests\unit\test_glb_validator.py ......                                  [ 89%]
+tests\unit\test_blender_processor_paths.py ...                           [ 93%]
+tests\integration\test_blender_processing.py ...                         [ 97%]
+tests\integration\test_process_json_redaction.py ..                      [100%]
+
+- generated xml file: C:\Users\lenovo\devel\ai-game-factory\docs\reports\v0.4\local-core-lead.xml -
+======================== 74 passed, 1 skipped in 8.43s ========================

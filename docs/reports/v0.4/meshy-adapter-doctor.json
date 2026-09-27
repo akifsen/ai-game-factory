@@ -1,0 +1,12 @@
+{
+  "available": true,
+  "status": "AVAILABLE",
+  "cli_version": "0.4.0",
+  "node_version": "v24.13.0",
+  "has_credential": true,
+  "credential_source": "env:MESHY_API_KEY",
+  "details": {
+    "platform": "win32",
+    "local_ready": true
+  }
+}

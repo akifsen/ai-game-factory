@@ -1,0 +1,36 @@
+Usage: meshy-cli download [options]
+
+Download selected assets of a task (from a saved task JSON, a URL, or the API)
+with explicit selection and safe file placement
+
+Options:
+  --task-json <file>    task JSON saved earlier (API task, meta.json or v1
+                        envelope)
+  --url <url>           download exactly one asset URL (no task context)
+  --resource <id>       with --task-id: fetch the task from the API first (one
+                        GET)
+  --task-id <id>        with --resource: the task to fetch
+  --asset <key>         stable asset key to download (repeatable), e.g.
+                        model.glb, thumbnail.primary,
+                        result.basic_animations.walking_glb_url
+  --model-format <fmt>  select the model of this format (glb, obj, fbx, usdz,
+                        stl, 3mf, …)
+  --kind <kind>         select every asset of one kind (choices: "model",
+                        "image", "texture", "thumbnail", "rig", "animation",
+                        "motion", "report")
+  --all                 select every asset
+  --list                list the task's assets and exit without downloading
+  --output-dir <dir>    directory to write into (for several assets); mutually
+                        exclusive with --output/-o
+  --overwrite           replace existing files atomically (never directories or
+                        symlinks)
+  --with-dependencies   for OBJ selections also fetch the MTL and textures
+                        (default)
+  --geometry-only       for OBJ selections fetch the OBJ alone
+  --save-json <file>    save the raw task JSON (API source) alongside
+  --include-raw         v1: include the raw task under result.source.raw
+  --project <dir>       initialised meshy_output project: default output
+                        directory, and the files are recorded in metadata.json
+  --stage <name>        stage label for the project record (default: derived
+                        from the task type)
+  -h, --help            display help for command

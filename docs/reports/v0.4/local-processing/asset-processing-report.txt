@@ -1,0 +1,23 @@
+Asset: prop_energy_crate_01
+
+Artifacts
+Raw SHA-256: b78cb4ceed8ef8ecb7f83c36cd451aae4e027adaaf2369f5d69a2b3adbefb5cd
+Processed SHA-256: 9472550e1e6dd69aca3ec12cab3bc9f10d3aa80ad2fa3bb5c178efafa5d93147
+
+Validation: PASS
+glb.parse                    PASS    expected=GLB 2.0 with bounded embedded buffers; actual=parsed; GLB structure and accessors are valid
+glb.hash                     PASS    expected=SHA-256 recorded; actual=9472550e1e6dd69aca3ec12cab3bc9f10d3aa80ad2fa3bb5c178efafa5d93147; Artifact hash computed
+nodes.unique                 PASS    expected=unique mesh node names; actual=['COL_prop_energy_crate_01', 'SM_prop_energy_crate_01_LOD0', 'SM_prop_energy_crate_01_LOD1']; Duplicate names are ambiguous during engine import
+nodes.profile                PASS    expected=exactly SM_prop_energy_crate_01_LOD0, SM_prop_energy_crate_01_LOD1, COL_prop_energy_crate_01; actual=['COL_prop_energy_crate_01', 'SM_prop_energy_crate_01_LOD0', 'SM_prop_energy_crate_01_LOD1']; Unexpected or missing mesh nodes are rejected
+mesh.nonempty                PASS    expected=nonempty triangle geometry; actual=30 triangles; Actual POSITION and index data decoded
+lod0.present                 PASS    expected=LOD0 mesh geometry; actual=present; LOD0 node must reference nonempty triangles
+lod1.present                 PASS    expected=LOD1 mesh geometry when required; actual=present; LOD1 node must reference nonempty triangles
+collider.geometry            PASS    expected=axis-aligned box geometry matching visual bounds; actual=1 collider mesh(es); Collider decoded vertices and triangles are checked against visual bounds
+geometry.lod0_budget         PASS    expected=<= 20000; actual=12; LOD0 triangle budget
+geometry.lod1_budget         PASS    expected=<= 10000; actual=6; LOD1 triangle budget
+materials.budget             PASS    expected=<= 2; actual=1; Declared material count in GLB
+textures.dimension           PASS    expected=<= 2048px; actual=0; Embedded texture dimensions decoded from image bytes
+scale.bounds                 PASS    expected=X/Y/Z = [1.2, 1.0, 1.0]m ± 0.01m; actual=[1.2000000476837158, 1.0, 1.0]; Dimensions measured from transformed decoded vertices
+origin.policy                PASS    expected=bottom_center; actual=min=[-0.6000000238418579, 0.0, -0.5], max=[0.6000000238418579, 1.0, 0.5]; Origin evaluated from transformed geometry
+lod1.bounds                  PASS    expected=LOD1 bounds match LOD0 ± 0.01m; actual=((-0.6000000238418579, 0.5, -0.5),); LOD1 geometry must preserve the visual envelope
+orientation.identity         PASS    expected=mesh nodes carry no residual transforms; +Y up/-Z front coordinates; actual=identity; Coordinate convention is checked through node transforms and world-space bounds

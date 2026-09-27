@@ -1,0 +1,1 @@
+{"workflow_id":"WF-ASSET-96f68a4f","status":"BLOCKED","pending_approval_id":"APP-9878c627","completed_tasks":[],"failed_tasks":[],"blocked_tasks":["WF-ASSET-96f68a4f-CONCEPT-REVIEW"],"error_message":null,"asset_id":"prop_energy_crate_01","revision":1,"provider":"meshy","operation":"image-to-3d","estimated_cost":"UNKNOWN","budget_reservation":50.0}

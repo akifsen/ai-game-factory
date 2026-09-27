@@ -1,0 +1,737 @@
+{
+  "files": [
+    {
+      "path": ".github/workflows/ci.yml",
+      "sha256": "bab5bf79378c50be47d885f36839c2bfb81a2992c14b14442e96c388a06649d2",
+      "size": 13914
+    },
+    {
+      "path": "README.md",
+      "sha256": "b11af43c8ee7728046b9653f3eafe47df06f590de9446091291f5bb7f4b2fd82",
+      "size": 8805
+    },
+    {
+      "path": "docs/reports/v0.2-closeout/installation.json",
+      "sha256": "dfb93eb6144a7bce469e32b35a33ee359b9528174006d599c446b3d3fe443374",
+      "size": 3777
+    },
+    {
+      "path": "docs/reports/v0.4/concept/README.md",
+      "sha256": "c39e582e26c60ff4a2e841ea342fc4bf91edc5e16cea6b30f8b327846f4d57fd",
+      "size": 1556
+    },
+    {
+      "path": "docs/reports/v0.4/concept/local-sdxl-provenance.json",
+      "sha256": "6eb28b87a19719fe4a581f9ee8dd7c913d7656d6be6210e97fc1cfa10229d46e",
+      "size": 5063
+    },
+    {
+      "path": "docs/reports/v0.4/concept/prop_energy_crate_01.png",
+      "sha256": "be3e9cf1a190fdfb31be85580508f73397217f399c553bd34c18924adc30e25d",
+      "size": 721418
+    },
+    {
+      "path": "examples/godot-verification/Main.tscn",
+      "sha256": "3dadaf4ca52f7e9ed19c21f47ff281f22e1ccbd1855c03e00cc517f71baf38a8",
+      "size": 161
+    },
+    {
+      "path": "examples/godot-verification/VisualMain.tscn",
+      "sha256": "7209330a62a0e9105c60a65bf5951315e32b9632c75a0979128d2e58fa020335",
+      "size": 278
+    },
+    {
+      "path": "examples/godot-verification/main.gd",
+      "sha256": "f729ffbe9c8981c3a08fd424a83eb7bc9f060ef6492e71f33c51cbe897c89b55",
+      "size": 605
+    },
+    {
+      "path": "examples/godot-verification/project.godot",
+      "sha256": "598a8552f3747c23baff8134218faf3d9f0013a397219f3a023b2e8984a7f30e",
+      "size": 287
+    },
+    {
+      "path": "examples/godot-verification/scenario.json",
+      "sha256": "4519e3c0cd2a84bf58325d271fb6ddadb002d6cee32c6c8990b345c5523d73d4",
+      "size": 1026
+    },
+    {
+      "path": "examples/godot-verification/visual-scenario-portrait.json",
+      "sha256": "607867ff59de532699d9b012f833af30499d312ba3932ee175519576197a70ab",
+      "size": 1285
+    },
+    {
+      "path": "examples/godot-verification/visual-scenario.json",
+      "sha256": "8e2e18fa62b23ef930e1238da51e8f83c084186cef7948185a8252c097f99a56",
+      "size": 1276
+    },
+    {
+      "path": "examples/godot-verification/visual_main.gd",
+      "sha256": "d8e0fb9f896e674c51eb18338449d89f08e675fb6ab9f1c7e7d413a372a5a1c7",
+      "size": 4141
+    },
+    {
+      "path": "examples/minimal-godot/Main.tscn",
+      "sha256": "073085956cb847979f9ddd2afd0e38a09d08072b8b99b8c2a4c10225ca59e145",
+      "size": 161
+    },
+    {
+      "path": "examples/minimal-godot/main.gd",
+      "sha256": "820537051c4ccac0da41de731d271b9e7c1dde2a503e9086658668919723e81e",
+      "size": 82
+    },
+    {
+      "path": "examples/minimal-godot/project.godot",
+      "sha256": "5801ac24dee88785d6326464ec6a992e8ded797e90ad496cf4932fec3e74949a",
+      "size": 329
+    },
+    {
+      "path": "pyproject.toml",
+      "sha256": "02240e0b8fe6a10a8d3a79e099102f8175cf4401d6ab73052d38bd683f19c34e",
+      "size": 2198
+    },
+    {
+      "path": "scripts/verify_acceptance.py",
+      "sha256": "a38a5c351571af9063923e4fa53eeae8ee7d909f2195e15627f90601a1954f10",
+      "size": 11865
+    },
+    {
+      "path": "scripts/verify_asset_acceptance.py",
+      "sha256": "9d481426b9835e3708cc16eabc87aade373bbb223050076be17f877c919e658a",
+      "size": 22512
+    },
+    {
+      "path": "scripts/verify_asset_bundle.py",
+      "sha256": "40e1150ee0ebe59c351c37f69b6b357b2c64ffc9ce876a1b2fafe835b0fcf62e",
+      "size": 23165
+    },
+    {
+      "path": "scripts/verify_closeout_evidence.py",
+      "sha256": "8d3e2dd82bd66bf65e785fc863d1fe07448b500d845cbf2de1699bf8f5199960",
+      "size": 23539
+    },
+    {
+      "path": "scripts/verify_godot_acceptance.py",
+      "sha256": "4bc59799687d6fb6054bdb35effcfcdbb147072d76b2a9d0c86e3f71a5797da1",
+      "size": 32999
+    },
+    {
+      "path": "scripts/verify_godot_capture.py",
+      "sha256": "06d38765d195fa12773d4b455534968108a119ff48cf282cdd189f1538a921d7",
+      "size": 11494
+    },
+    {
+      "path": "scripts/verify_godot_live_crash.py",
+      "sha256": "e89f496d6a6ba6d300575a371a41f40f0f9472e542b1a47732c4ed8f306bc7de",
+      "size": 88350
+    },
+    {
+      "path": "scripts/verify_godot_recovery.py",
+      "sha256": "9efb7b7268f9c1f2a95f2670107c315ff172c367cdb1d299156a8da982e18841",
+      "size": 26593
+    },
+    {
+      "path": "scripts/verify_v04_frozen_source.py",
+      "sha256": "1efc29b5494479e4dad7ec978635157d45111a2eba4016f86a5ab1e73f1bb690",
+      "size": 5821
+    },
+    {
+      "path": "src/gamefactory/__init__.py",
+      "sha256": "3ab0b413955e50ade7dfba63df125a8d596f2e6234db30a6b0c38784af23631d",
+      "size": 207
+    },
+    {
+      "path": "src/gamefactory/__main__.py",
+      "sha256": "095dc136991f9d62a180db336a602d439d38a30a97f30d57c3312b839768da7b",
+      "size": 106
+    },
+    {
+      "path": "src/gamefactory/adapters/assets/__init__.py",
+      "sha256": "26e4ee9bd0cf2b7193269d99e91f14cf7089b5516059f4af72c73f0ccc19c994",
+      "size": 77
+    },
+    {
+      "path": "src/gamefactory/adapters/assets/glb_validator.py",
+      "sha256": "a53438421cef9b0b275aa9e5b55777d2253866f564185e51fe18392d651bcfd9",
+      "size": 29394
+    },
+    {
+      "path": "src/gamefactory/adapters/dcc/__init__.py",
+      "sha256": "bc8b0895065c5749c604b773c54470387d52aed90b12aeb10ea06bb2ecdded2d",
+      "size": 233
+    },
+    {
+      "path": "src/gamefactory/adapters/dcc/base.py",
+      "sha256": "fecac0145ff0bfed70edaaff67726c6688c7d92801abe1beb269f64bbd63c09a",
+      "size": 649
+    },
+    {
+      "path": "src/gamefactory/adapters/dcc/blender.py",
+      "sha256": "ce45f851a143f00f70172dc4f2a14b165001dc4a66c5b4343e618d628973b62d",
+      "size": 4335
+    },
+    {
+      "path": "src/gamefactory/adapters/dcc/blender_processor.py",
+      "sha256": "3f63ebf5687b8d89d3f968f61985fb298e4100ba4bf3b7b16d957650811a3f86",
+      "size": 10362
+    },
+    {
+      "path": "src/gamefactory/adapters/engines/__init__.py",
+      "sha256": "2b9391b727ad42cd7f572b778fb3bbf89132d6cb7fdfd79f123e84f1e0891e03",
+      "size": 333
+    },
+    {
+      "path": "src/gamefactory/adapters/engines/base.py",
+      "sha256": "1fb3fc85e9b8eb0fa00dae4d6d98983dad12a948758665e407fb8d448b80ce58",
+      "size": 1195
+    },
+    {
+      "path": "src/gamefactory/adapters/engines/godot.py",
+      "sha256": "4ce0bb077043fc63256043a2389d730c4bf741d225ee60524110ca3da2d7c513",
+      "size": 7746
+    },
+    {
+      "path": "src/gamefactory/adapters/engines/godot_capture_contracts.py",
+      "sha256": "846aaed0b2057c9ba55ec5b35f92b89515033de4fed061c93ce4a3ef4bf02859",
+      "size": 6958
+    },
+    {
+      "path": "src/gamefactory/adapters/engines/godot_contracts.py",
+      "sha256": "4a8db2f4c078f6460943310bfa89c967dddff05ac4d2e0f7ac410d8cbdd17cfd",
+      "size": 13327
+    },
+    {
+      "path": "src/gamefactory/adapters/engines/godot_execution.py",
+      "sha256": "123b7c91cfa6e7c8d0049027ec5bc51604c7645315732d2a4ab335a3fd7d9f5c",
+      "size": 25113
+    },
+    {
+      "path": "src/gamefactory/adapters/engines/godot_image.py",
+      "sha256": "06dd64ab0fecb82b6930de9d61e87cc62927c3d8da6316faa9d33829a51ec5ca",
+      "size": 5226
+    },
+    {
+      "path": "src/gamefactory/adapters/engines/godot_review_html.py",
+      "sha256": "df164e3bc4b0574cdaaa65aceb8ad85600c541478da300a039b73ef43669e789",
+      "size": 4207
+    },
+    {
+      "path": "src/gamefactory/adapters/engines/godot_staging.py",
+      "sha256": "835238e8dbbc28e8c363c049608911b1a4bb20d917704d1c7ca6de14af01363d",
+      "size": 11786
+    },
+    {
+      "path": "src/gamefactory/adapters/external/__init__.py",
+      "sha256": "0382c034bd40536e01766c65b946db09de32873ff399670970896bddf1807f7e",
+      "size": 350
+    },
+    {
+      "path": "src/gamefactory/adapters/external/base.py",
+      "sha256": "5ca4b5d873a448e3ca6527ef57897552563ffd0550c43d168e40c82961708738",
+      "size": 274
+    },
+    {
+      "path": "src/gamefactory/adapters/external/meshy.py",
+      "sha256": "bac526d4e81064e8a085f02bee06bf074287439c21ded17e9ffb6743297e4bf4",
+      "size": 1256
+    },
+    {
+      "path": "src/gamefactory/adapters/external/meshy_cli.py",
+      "sha256": "1385df1dcb8760f58deaafa84266680c7688942d81426d3d36e622089b81afaa",
+      "size": 59786
+    },
+    {
+      "path": "src/gamefactory/adapters/fakes/__init__.py",
+      "sha256": "b238ad743943fcf2164503d2291579dd02a0e8340b7ff09eec52b9bbb4bd4692",
+      "size": 247
+    },
+    {
+      "path": "src/gamefactory/adapters/fakes/fake_provider.py",
+      "sha256": "242a20f59868ce7761162069b532d08564843024b6653fea8eb77487d166e243",
+      "size": 11072
+    },
+    {
+      "path": "src/gamefactory/adapters/fakes/glb_generator.py",
+      "sha256": "f1cf02957f524c9e9aeeaa0cbde2304d13de77ca98bb64484dde63d4311c3dd4",
+      "size": 9301
+    },
+    {
+      "path": "src/gamefactory/adapters/images/__init__.py",
+      "sha256": "cab0d5a603ea274a53b87f42b9c73b1085237646881f4a901710a06542f41692",
+      "size": 581
+    },
+    {
+      "path": "src/gamefactory/adapters/images/base.py",
+      "sha256": "72dc3327ed12b5217a522c114a3d27fc4d7437ff9af4e44d9978fe6c334daff3",
+      "size": 1798
+    },
+    {
+      "path": "src/gamefactory/adapters/images/concept_ingest.py",
+      "sha256": "4262c9e4921d1495f028583b92fd1c0acc249801dfd603b377286879c179aa23",
+      "size": 15436
+    },
+    {
+      "path": "src/gamefactory/adapters/persistence/__init__.py",
+      "sha256": "957853bf9613ae46bf4a016896ef672732d90450c25825d82750b69cc30538d0",
+      "size": 1033
+    },
+    {
+      "path": "src/gamefactory/adapters/persistence/database.py",
+      "sha256": "18081198681ab41b0ddd474643870288da40b6600ee0500493345c1c73591d5c",
+      "size": 1559
+    },
+    {
+      "path": "src/gamefactory/adapters/persistence/migrations.py",
+      "sha256": "74603c13640d0ca05ed8581200815c8e0dc2148978bc65023407926f8640bdc4",
+      "size": 12024
+    },
+    {
+      "path": "src/gamefactory/adapters/persistence/repositories.py",
+      "sha256": "a4610d4d0aff8e040a5de08b7b84767cde1a81d84056eba32005316c98a0b635",
+      "size": 57447
+    },
+    {
+      "path": "src/gamefactory/capabilities/__init__.py",
+      "sha256": "44964770ecc72f986b7313fed3469b753ec8510d8f817c9f4280e086cf0b7fcc",
+      "size": 226
+    },
+    {
+      "path": "src/gamefactory/capabilities/registry.py",
+      "sha256": "09503f662ccb9a6ec6be9413967a22b864f72b5bb5e3b2396fa28884cb7de71c",
+      "size": 10186
+    },
+    {
+      "path": "src/gamefactory/cli/exit_codes.py",
+      "sha256": "20430987a26d6600cb29ebc5c727794d0bcce3aee7d1cbb2a0e776857ac37f33",
+      "size": 369
+    },
+    {
+      "path": "src/gamefactory/cli/main.py",
+      "sha256": "cd5fd3131fddba28ee57e55ae61235c54862682fc15219019744100f22db6c0f",
+      "size": 44896
+    },
+    {
+      "path": "src/gamefactory/config/__init__.py",
+      "sha256": "82806849ff4f278c54f27f458883d5cdb5af98a431f8801be6ed34a4b4b8350d",
+      "size": 360
+    },
+    {
+      "path": "src/gamefactory/config/loader.py",
+      "sha256": "0fe4a998985453291e2fa2744e55b455867a2c6d88673bd80c5eb4110a3e1094",
+      "size": 10501
+    },
+    {
+      "path": "src/gamefactory/config/schema.py",
+      "sha256": "ee3ee3186dfadddece8d532a2365e0d947f7cc8722618724f19375a6c6d59881",
+      "size": 3294
+    },
+    {
+      "path": "src/gamefactory/core/approvals/__init__.py",
+      "sha256": "498b4d875ee3b65369ee134969c4e24fe3006c5ce6b5e39bb046082a9f000182",
+      "size": 199
+    },
+    {
+      "path": "src/gamefactory/core/approvals/approval_service.py",
+      "sha256": "0abdeda8ba7e482636d42072ac4f7c65683e44407fb0d530b77b0e8eba21a586",
+      "size": 5532
+    },
+    {
+      "path": "src/gamefactory/core/approvals/operation_scope.py",
+      "sha256": "3e209877ee9e03dc5a79647533553ab7a436e26fd0de643be2382898c7f92a19",
+      "size": 2024
+    },
+    {
+      "path": "src/gamefactory/core/artifacts/__init__.py",
+      "sha256": "8919e5db7d2d5689c52d384b41ceb8bbdcf197435ebf32744c2fbf675dc45b83",
+      "size": 213
+    },
+    {
+      "path": "src/gamefactory/core/artifacts/artifact_manager.py",
+      "sha256": "e258056105828d6c7fec6d974f292e2f88e6415638c160a7de7fc56063028921",
+      "size": 5107
+    },
+    {
+      "path": "src/gamefactory/core/domain/__init__.py",
+      "sha256": "383c583c029caab6df7a86a8f674040441f15912ef4247e03160ab6df637aa92",
+      "size": 1543
+    },
+    {
+      "path": "src/gamefactory/core/domain/asset_contracts.py",
+      "sha256": "868239d08359144f0d022a60ecdb1ad21bb6903cbc34b6d2dfff6b919e7b51e0",
+      "size": 14885
+    },
+    {
+      "path": "src/gamefactory/core/domain/dag.py",
+      "sha256": "fe1a80ae169260bdf02629e367e156203ae18a863116b28756934c34c7e1a400",
+      "size": 3950
+    },
+    {
+      "path": "src/gamefactory/core/domain/errors.py",
+      "sha256": "9a5873ac5880ad3609fc92b578e541219af750cf3b958b2c20ab686f6a43dc9b",
+      "size": 9058
+    },
+    {
+      "path": "src/gamefactory/core/domain/models.py",
+      "sha256": "9a2912b97beecacd49e00311a03bc9156f57dd49a378edb8a438c77c5c58617b",
+      "size": 6777
+    },
+    {
+      "path": "src/gamefactory/core/domain/state_machine.py",
+      "sha256": "a21aa6dcf1dc94da03f5ed2f6023532a65814000b670eee6315da5ef2c464cd9",
+      "size": 3118
+    },
+    {
+      "path": "src/gamefactory/core/execution/__init__.py",
+      "sha256": "1041092bf92ae8fc1963db1ff241ea10c5e12f3ffcc285bd126fc12755a2aad1",
+      "size": 632
+    },
+    {
+      "path": "src/gamefactory/core/execution/locks.py",
+      "sha256": "e89bac87763148adf0241c1f2292dbe07b82aace1811b4a59798104820ccdf1f",
+      "size": 7706
+    },
+    {
+      "path": "src/gamefactory/core/execution/path_guard.py",
+      "sha256": "2432bb961af05a2725b36e1bebb7589ccce6849011161af37641cf512352f6fd",
+      "size": 4324
+    },
+    {
+      "path": "src/gamefactory/core/execution/process_runner.py",
+      "sha256": "a7e0d5b53827e9ca32f7a74522c698e443975e85d713984b7fd7816f80ecee11",
+      "size": 30426
+    },
+    {
+      "path": "src/gamefactory/core/execution/redaction.py",
+      "sha256": "b09df83c5d87f3a8d33aadea2b58c2248e104963133b7ab6e4335925bcc02e5c",
+      "size": 3280
+    },
+    {
+      "path": "src/gamefactory/core/policies/__init__.py",
+      "sha256": "8b93c3a3f851d9ff1a18cdd6ba060883da5f003bd6d27431063a95834d5788f6",
+      "size": 264
+    },
+    {
+      "path": "src/gamefactory/core/policies/policy_engine.py",
+      "sha256": "93ef21bb8cd7d5b8cd34489e6d9b0d91d1f8b9402ac3ccb25597234954b7b855",
+      "size": 7780
+    },
+    {
+      "path": "src/gamefactory/resources/blender/process_asset.py",
+      "sha256": "17eaacf51ee980b1238d53c5ef03e230baccc476ce304a41e6929bb9a1b15fa0",
+      "size": 9398
+    },
+    {
+      "path": "src/gamefactory/resources/godot/asset_runtime_harness.gd",
+      "sha256": "19ae4fbb471b32c64d6fe1366983b7f7eaba8fb063f7aa81fa70e865dad16db6",
+      "size": 8363
+    },
+    {
+      "path": "src/gamefactory/resources/godot/capture_harness.gd",
+      "sha256": "0a07d1df38f356e1350a21068434ffd9d6ee3aa65b5d74441290e878cefa782a",
+      "size": 13406
+    },
+    {
+      "path": "src/gamefactory/resources/godot/harness.gd",
+      "sha256": "429e7e7961dc65a07741f59d1bc40f883a03754673de27ff2d88a5c0bb5949c1",
+      "size": 8855
+    },
+    {
+      "path": "src/gamefactory/resources/scripts/verify_asset_bundle.py",
+      "sha256": "40e1150ee0ebe59c351c37f69b6b357b2c64ffc9ce876a1b2fafe835b0fcf62e",
+      "size": 23165
+    },
+    {
+      "path": "src/gamefactory/resources/specs/prop_energy_crate_01.yml",
+      "sha256": "d45700fd4f71fa78bdfc2bf30aeeb9b8f4a0c05942541a12a815d36ce318a397",
+      "size": 701
+    },
+    {
+      "path": "src/gamefactory/schemas/asset-spec-0.4.0.schema.json",
+      "sha256": "b636f391cd2d07107d79026fe6ae78c00189051e72c826ebba712dcb12985c9b",
+      "size": 5994
+    },
+    {
+      "path": "src/gamefactory/schemas/godot-observation-0.2.0.schema.json",
+      "sha256": "54f4a05ff912827c834cd1c0b5a121dc78701cdabd8b41ac3a996f9b6ce8b684",
+      "size": 1629
+    },
+    {
+      "path": "src/gamefactory/schemas/godot-scenario-0.2.0.schema.json",
+      "sha256": "8a05226c1aa0a6905e849ab1d785c31d031313ea9c2512bc2b4ca7ae7f447394",
+      "size": 2411
+    },
+    {
+      "path": "src/gamefactory/schemas/project-config-0.1.0.schema.json",
+      "sha256": "34125c739e8c06c27af38938754bab60536985493fe147523c841c13ef7a901d",
+      "size": 3690
+    },
+    {
+      "path": "src/gamefactory/workflows/__init__.py",
+      "sha256": "d0da48c2f2b4927d9fe0a9334bb8e14b239f667c11024502ba8c55631eadc164",
+      "size": 871
+    },
+    {
+      "path": "src/gamefactory/workflows/asset_evidence.py",
+      "sha256": "fb757f5e21292b4f21a8d27c91aeee3d5fbbc53794dd7a8d76c7740697790a78",
+      "size": 16250
+    },
+    {
+      "path": "src/gamefactory/workflows/asset_production.py",
+      "sha256": "f4092e7f67a4e6645db756c167cc669d9b9b9907798cb6ee619b9c213ac50e70",
+      "size": 43671
+    },
+    {
+      "path": "src/gamefactory/workflows/builtin_tasks.py",
+      "sha256": "207c3b5846cfb2d675862bdcee46526e0db1a2cd770ed5c64fc6afda1160664b",
+      "size": 11622
+    },
+    {
+      "path": "src/gamefactory/workflows/definitions.py",
+      "sha256": "ebc2de358b0e22e826ee679dae3d3fa2679266b6bdb7787d278d6c758499f3aa",
+      "size": 5375
+    },
+    {
+      "path": "src/gamefactory/workflows/engine.py",
+      "sha256": "f35a6775c4ff4f79f5b03aaba0694f05697fada606200608dfc27f227922f29b",
+      "size": 53325
+    },
+    {
+      "path": "src/gamefactory/workflows/godot_capture.py",
+      "sha256": "559d5b6dd9fade533e532981619daa30a3ea8bd934db0cf949ebaa147ed597c2",
+      "size": 32232
+    },
+    {
+      "path": "src/gamefactory/workflows/godot_verification.py",
+      "sha256": "d4232c5ac076b28042b156f82ce1bcd9af9b757a975b3d29b6db8abc661df4ad",
+      "size": 27484
+    },
+    {
+      "path": "src/gamefactory/workflows/handlers.py",
+      "sha256": "c79868c82f87c8157ae5619f5ac06b1ac7a0d3a700f07fa1fc861b274c205d9f",
+      "size": 3558
+    },
+    {
+      "path": "src/gamefactory/workflows/ports.py",
+      "sha256": "7038d3a2b7c9ef5903bc02d573b3da2b927884e30f59c211bb4b49ddecebccf6",
+      "size": 868
+    },
+    {
+      "path": "tests/integration/test_asset_cli.py",
+      "sha256": "42dab3b4edf8824f6eec904f0894fc9a1229addd8f4993378b7efc8d2f42ae5e",
+      "size": 6559
+    },
+    {
+      "path": "tests/integration/test_asset_workflow.py",
+      "sha256": "36629ba0047a5765335187c09210fb34a9c4abd7e04f506eabf4cd91685bb87c",
+      "size": 30390
+    },
+    {
+      "path": "tests/integration/test_blender_processing.py",
+      "sha256": "63ab3a7c4c22e33fa80791ef530ebc7d9cced1ddc6a7e7f718c84d9d902133aa",
+      "size": 6782
+    },
+    {
+      "path": "tests/integration/test_capabilities.py",
+      "sha256": "d91c2f941f671bcb0d39c897d3f20775f4bc92487c345a592aeb306e5e773437",
+      "size": 3099
+    },
+    {
+      "path": "tests/integration/test_cli.py",
+      "sha256": "3fc0f83a5076390bf22fde398cc2f9cb81100db98b713fb00e019d61134f6d4e",
+      "size": 6133
+    },
+    {
+      "path": "tests/integration/test_crash_recovery.py",
+      "sha256": "f03ac752809e0407dc3c87851e517abafc9a1a409654b68d099fc97fae75cef4",
+      "size": 5263
+    },
+    {
+      "path": "tests/integration/test_godot_blender_detection.py",
+      "sha256": "e38a7b8eb8754ce6f5c60a486d0426a5a4582a947180c9c759caeeab435a5dc3",
+      "size": 2922
+    },
+    {
+      "path": "tests/integration/test_godot_capture_pipeline.py",
+      "sha256": "385029f7d123ba28b6d14845b89b417924fbdeb8f1849a1bbc9cf8462479e28b",
+      "size": 15320
+    },
+    {
+      "path": "tests/integration/test_godot_pipeline.py",
+      "sha256": "2282da0580361f2e748e20954e9253fb3cc1c2b668c9411559a0c08b5cbfe179",
+      "size": 33354
+    },
+    {
+      "path": "tests/integration/test_godot_real.py",
+      "sha256": "177cbccf77ff81f8458ac3d6e96b599540dccb7b9ea6210b46ebf0962705ff8f",
+      "size": 2419
+    },
+    {
+      "path": "tests/integration/test_locks.py",
+      "sha256": "9e236293a13082b8402aea2cfae51df8237c21acea235f975b45d338113730bc",
+      "size": 4452
+    },
+    {
+      "path": "tests/integration/test_paid_safety.py",
+      "sha256": "9758ba58097348f9672fb737e2510bd499ac958e4ad836c46f801db3a3c2f318",
+      "size": 3461
+    },
+    {
+      "path": "tests/integration/test_persistence.py",
+      "sha256": "72f7d881b6d4be6d153f7577c19df2531bd58fb0478b30271a634ab549998c0c",
+      "size": 12141
+    },
+    {
+      "path": "tests/integration/test_persistence_redaction.py",
+      "sha256": "e8c023f56167ed82bcc060c00a93b80533a655bef6c833a58840c1bf3d25e618",
+      "size": 10592
+    },
+    {
+      "path": "tests/integration/test_process_json_redaction.py",
+      "sha256": "155b2124b6887793d72b36446928283d29d7c539f9cb2c5392e119e67915978d",
+      "size": 1789
+    },
+    {
+      "path": "tests/integration/test_process_metadata.py",
+      "sha256": "47cc1e5d35f3bc6fb7606634453f5e39cdcbcfbb039bc426e715d3330ea3a8b9",
+      "size": 11280
+    },
+    {
+      "path": "tests/integration/test_process_runner.py",
+      "sha256": "114d4065b3d7d74f6cc6fd273ca271f2cccd06c7d92736a0f9d66106439aec4c",
+      "size": 33179
+    },
+    {
+      "path": "tests/integration/test_v02_compatibility.py",
+      "sha256": "0be85c95fe14ccba70ffce6b80ecb81661c1316debe8d3fed0e01601e2c76b9b",
+      "size": 5185
+    },
+    {
+      "path": "tests/integration/test_verify_godot_live_crash.py",
+      "sha256": "a955d1ff05f4c1a40a098380719d277ac41d08a5e494ac661f1e7db21044ad30",
+      "size": 28585
+    },
+    {
+      "path": "tests/integration/test_verify_godot_python_resolution.py",
+      "sha256": "e83c96bfab929cd799c91450ec4aa814fac1b4546216d7a48df2dd96d8d2e9cd",
+      "size": 8818
+    },
+    {
+      "path": "tests/integration/test_workflow_engine.py",
+      "sha256": "290e246d07d150f281a5c857ad260eb7369d69d9a541550a0a0f09248246a198",
+      "size": 3946
+    },
+    {
+      "path": "tests/integration/test_workflow_regressions.py",
+      "sha256": "67919365dfdf45161cfb27fe96dbe922e5a37d1208f03fc10010994298d35129",
+      "size": 18792
+    },
+    {
+      "path": "tests/unit/test_approvals.py",
+      "sha256": "065ec7ec03d779526317c12dc3fdb85246be6b85a2abb625c2a445c848c2d73f",
+      "size": 2698
+    },
+    {
+      "path": "tests/unit/test_artifacts.py",
+      "sha256": "147564e6421ce20e89aa379b7a897a7518b169a0ccba2fd28c28d63e5ea66f28",
+      "size": 2430
+    },
+    {
+      "path": "tests/unit/test_asset_bundle_verifier.py",
+      "sha256": "05f533bcd7f59e3b6a160a2c2b634384972ff3639ed5ef28b446aeca6818ce34",
+      "size": 14509
+    },
+    {
+      "path": "tests/unit/test_asset_contracts.py",
+      "sha256": "59f6dd9cc53d0d22144e427347003b522be1b526c08585f48dec5c79d9a73050",
+      "size": 12030
+    },
+    {
+      "path": "tests/unit/test_asset_evidence_packaging.py",
+      "sha256": "7064ba29cda00026943821bbb86b40f0d68f494edb4a6af86984ff5c65667bae",
+      "size": 382
+    },
+    {
+      "path": "tests/unit/test_asset_persistence.py",
+      "sha256": "76c6299d0ee586c12d15b27b4b60cb2645ec6744c9dbc0965b96f21e26e597e2",
+      "size": 7768
+    },
+    {
+      "path": "tests/unit/test_blender_processor_paths.py",
+      "sha256": "831357a4b67cc1c27613a207ae31f2a4c9062bd3fd5d9bb8547d70bb0e95ba68",
+      "size": 3000
+    },
+    {
+      "path": "tests/unit/test_closeout_evidence.py",
+      "sha256": "0ee8aaa7697088d3db7a138d088804b0aefbfca4aab27c5cce3bc1d6a42b50c2",
+      "size": 21320
+    },
+    {
+      "path": "tests/unit/test_concept_ingest.py",
+      "sha256": "369dc7990acf57be54d7f26ae6322a1fe5f293dc22393bc3acc773c8ff98a786",
+      "size": 10084
+    },
+    {
+      "path": "tests/unit/test_config.py",
+      "sha256": "ae2c420d1278fc48825ef79604606b5bff7678124c0a0e2f8e9683cfcc6ebd1d",
+      "size": 7329
+    },
+    {
+      "path": "tests/unit/test_dag.py",
+      "sha256": "c94ae844fa420ed2d847479fabd92968b0674adc200e0a11d4ae8b5aa4feb496",
+      "size": 4566
+    },
+    {
+      "path": "tests/unit/test_glb_validator.py",
+      "sha256": "d433f06b112dd7c570126a45b1d73bfadcb68f319217e1cf2513439d4098d7d7",
+      "size": 5338
+    },
+    {
+      "path": "tests/unit/test_godot_capture.py",
+      "sha256": "a0ee124cf18bf147e00ade01d62af7cdb4709ff608460ff5de3a3bea490b32fa",
+      "size": 4979
+    },
+    {
+      "path": "tests/unit/test_godot_contracts.py",
+      "sha256": "341e074c65f4c679c1feadac28c135e6ab916921954f67a29674866c8c4291db",
+      "size": 9338
+    },
+    {
+      "path": "tests/unit/test_godot_staging.py",
+      "sha256": "fe952025bfb5b5206b4a7c7a30cec0b7b8debc084546f42f9aeda237d729b2fc",
+      "size": 10065
+    },
+    {
+      "path": "tests/unit/test_meshy_adapter.py",
+      "sha256": "456a3baaa84ba90e405c24fc8f2cebb5adcaec84f291e5ab540b8eb6a3feef20",
+      "size": 66255
+    },
+    {
+      "path": "tests/unit/test_path_guard.py",
+      "sha256": "76d849b5d0572b0ea239991b693860a868f027fbb7b4550cb84ba0f27551641f",
+      "size": 3466
+    },
+    {
+      "path": "tests/unit/test_policy.py",
+      "sha256": "c365d5e08072f546c53ca9cd021b49f265e23951967e02781cea385a77de4f6f",
+      "size": 6887
+    },
+    {
+      "path": "tests/unit/test_redaction.py",
+      "sha256": "0192ff324216c51779d06a762fd6abadaccc0fe331ffa490fa3d86ed086a98f1",
+      "size": 3008
+    },
+    {
+      "path": "tests/unit/test_state_machine.py",
+      "sha256": "d97da2a188899c81660e2b022dce17d9b776053be6847466069b39a520edd8b1",
+      "size": 3352
+    },
+    {
+      "path": "uv.lock",
+      "sha256": "6a31e3c9876be7bbcdd103663367106f291045558124bab38c09b197fb28cb75",
+      "size": 156602
+    }
+  ],
+  "format_version": 1,
+  "git_commit": "334b4fc368ab880d0352728c04548562fe5c6ffe",
+  "source_status_sha256": "7963f5bccde6f35bfaf7c7e603ada24752685c1935540362534d5d5ce43ae148"
+}

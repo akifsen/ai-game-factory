@@ -1,0 +1,314 @@
+* Getting build dependencies for wheel...
+running egg_info
+creating src\gamefactory.egg-info
+writing src\gamefactory.egg-info\PKG-INFO
+writing dependency_links to src\gamefactory.egg-info\dependency_links.txt
+writing entry points to src\gamefactory.egg-info\entry_points.txt
+writing requirements to src\gamefactory.egg-info\requires.txt
+writing top-level names to src\gamefactory.egg-info\top_level.txt
+writing manifest file 'src\gamefactory.egg-info\SOURCES.txt'
+reading manifest file 'src\gamefactory.egg-info\SOURCES.txt'
+writing manifest file 'src\gamefactory.egg-info\SOURCES.txt'
+* Building wheel...
+running bdist_wheel
+running build
+running build_py
+creating build\lib\gamefactory
+copying src\gamefactory\__init__.py -> build\lib\gamefactory
+copying src\gamefactory\__main__.py -> build\lib\gamefactory
+creating build\lib\gamefactory\capabilities
+copying src\gamefactory\capabilities\registry.py -> build\lib\gamefactory\capabilities
+copying src\gamefactory\capabilities\__init__.py -> build\lib\gamefactory\capabilities
+creating build\lib\gamefactory\cli
+copying src\gamefactory\cli\exit_codes.py -> build\lib\gamefactory\cli
+copying src\gamefactory\cli\main.py -> build\lib\gamefactory\cli
+creating build\lib\gamefactory\config
+copying src\gamefactory\config\loader.py -> build\lib\gamefactory\config
+copying src\gamefactory\config\schema.py -> build\lib\gamefactory\config
+copying src\gamefactory\config\__init__.py -> build\lib\gamefactory\config
+creating build\lib\gamefactory\workflows
+copying src\gamefactory\workflows\asset_evidence.py -> build\lib\gamefactory\workflows
+copying src\gamefactory\workflows\asset_production.py -> build\lib\gamefactory\workflows
+copying src\gamefactory\workflows\builtin_tasks.py -> build\lib\gamefactory\workflows
+copying src\gamefactory\workflows\definitions.py -> build\lib\gamefactory\workflows
+copying src\gamefactory\workflows\engine.py -> build\lib\gamefactory\workflows
+copying src\gamefactory\workflows\godot_capture.py -> build\lib\gamefactory\workflows
+copying src\gamefactory\workflows\godot_verification.py -> build\lib\gamefactory\workflows
+copying src\gamefactory\workflows\handlers.py -> build\lib\gamefactory\workflows
+copying src\gamefactory\workflows\ports.py -> build\lib\gamefactory\workflows
+copying src\gamefactory\workflows\__init__.py -> build\lib\gamefactory\workflows
+creating build\lib\gamefactory\adapters\assets
+copying src\gamefactory\adapters\assets\glb_validator.py -> build\lib\gamefactory\adapters\assets
+copying src\gamefactory\adapters\assets\__init__.py -> build\lib\gamefactory\adapters\assets
+creating build\lib\gamefactory\adapters\dcc
+copying src\gamefactory\adapters\dcc\base.py -> build\lib\gamefactory\adapters\dcc
+copying src\gamefactory\adapters\dcc\blender.py -> build\lib\gamefactory\adapters\dcc
+copying src\gamefactory\adapters\dcc\blender_processor.py -> build\lib\gamefactory\adapters\dcc
+copying src\gamefactory\adapters\dcc\__init__.py -> build\lib\gamefactory\adapters\dcc
+creating build\lib\gamefactory\adapters\engines
+copying src\gamefactory\adapters\engines\base.py -> build\lib\gamefactory\adapters\engines
+copying src\gamefactory\adapters\engines\godot.py -> build\lib\gamefactory\adapters\engines
+copying src\gamefactory\adapters\engines\godot_capture_contracts.py -> build\lib\gamefactory\adapters\engines
+copying src\gamefactory\adapters\engines\godot_contracts.py -> build\lib\gamefactory\adapters\engines
+copying src\gamefactory\adapters\engines\godot_execution.py -> build\lib\gamefactory\adapters\engines
+copying src\gamefactory\adapters\engines\godot_image.py -> build\lib\gamefactory\adapters\engines
+copying src\gamefactory\adapters\engines\godot_review_html.py -> build\lib\gamefactory\adapters\engines
+copying src\gamefactory\adapters\engines\godot_staging.py -> build\lib\gamefactory\adapters\engines
+copying src\gamefactory\adapters\engines\__init__.py -> build\lib\gamefactory\adapters\engines
+creating build\lib\gamefactory\adapters\external
+copying src\gamefactory\adapters\external\base.py -> build\lib\gamefactory\adapters\external
+copying src\gamefactory\adapters\external\meshy.py -> build\lib\gamefactory\adapters\external
+copying src\gamefactory\adapters\external\meshy_cli.py -> build\lib\gamefactory\adapters\external
+copying src\gamefactory\adapters\external\__init__.py -> build\lib\gamefactory\adapters\external
+creating build\lib\gamefactory\adapters\fakes
+copying src\gamefactory\adapters\fakes\fake_provider.py -> build\lib\gamefactory\adapters\fakes
+copying src\gamefactory\adapters\fakes\glb_generator.py -> build\lib\gamefactory\adapters\fakes
+copying src\gamefactory\adapters\fakes\__init__.py -> build\lib\gamefactory\adapters\fakes
+creating build\lib\gamefactory\adapters\images
+copying src\gamefactory\adapters\images\base.py -> build\lib\gamefactory\adapters\images
+copying src\gamefactory\adapters\images\concept_ingest.py -> build\lib\gamefactory\adapters\images
+copying src\gamefactory\adapters\images\__init__.py -> build\lib\gamefactory\adapters\images
+creating build\lib\gamefactory\adapters\persistence
+copying src\gamefactory\adapters\persistence\database.py -> build\lib\gamefactory\adapters\persistence
+copying src\gamefactory\adapters\persistence\migrations.py -> build\lib\gamefactory\adapters\persistence
+copying src\gamefactory\adapters\persistence\repositories.py -> build\lib\gamefactory\adapters\persistence
+copying src\gamefactory\adapters\persistence\__init__.py -> build\lib\gamefactory\adapters\persistence
+creating build\lib\gamefactory\core\approvals
+copying src\gamefactory\core\approvals\approval_service.py -> build\lib\gamefactory\core\approvals
+copying src\gamefactory\core\approvals\operation_scope.py -> build\lib\gamefactory\core\approvals
+copying src\gamefactory\core\approvals\__init__.py -> build\lib\gamefactory\core\approvals
+creating build\lib\gamefactory\core\artifacts
+copying src\gamefactory\core\artifacts\artifact_manager.py -> build\lib\gamefactory\core\artifacts
+copying src\gamefactory\core\artifacts\__init__.py -> build\lib\gamefactory\core\artifacts
+creating build\lib\gamefactory\core\domain
+copying src\gamefactory\core\domain\asset_contracts.py -> build\lib\gamefactory\core\domain
+copying src\gamefactory\core\domain\dag.py -> build\lib\gamefactory\core\domain
+copying src\gamefactory\core\domain\errors.py -> build\lib\gamefactory\core\domain
+copying src\gamefactory\core\domain\models.py -> build\lib\gamefactory\core\domain
+copying src\gamefactory\core\domain\state_machine.py -> build\lib\gamefactory\core\domain
+copying src\gamefactory\core\domain\__init__.py -> build\lib\gamefactory\core\domain
+creating build\lib\gamefactory\core\execution
+copying src\gamefactory\core\execution\locks.py -> build\lib\gamefactory\core\execution
+copying src\gamefactory\core\execution\path_guard.py -> build\lib\gamefactory\core\execution
+copying src\gamefactory\core\execution\process_runner.py -> build\lib\gamefactory\core\execution
+copying src\gamefactory\core\execution\redaction.py -> build\lib\gamefactory\core\execution
+copying src\gamefactory\core\execution\__init__.py -> build\lib\gamefactory\core\execution
+creating build\lib\gamefactory\core\policies
+copying src\gamefactory\core\policies\policy_engine.py -> build\lib\gamefactory\core\policies
+copying src\gamefactory\core\policies\__init__.py -> build\lib\gamefactory\core\policies
+creating build\lib\gamefactory\resources\blender
+copying src\gamefactory\resources\blender\process_asset.py -> build\lib\gamefactory\resources\blender
+creating build\lib\gamefactory\resources\scripts
+copying src\gamefactory\resources\scripts\verify_asset_bundle.py -> build\lib\gamefactory\resources\scripts
+running egg_info
+writing src\gamefactory.egg-info\PKG-INFO
+writing dependency_links to src\gamefactory.egg-info\dependency_links.txt
+writing entry points to src\gamefactory.egg-info\entry_points.txt
+writing requirements to src\gamefactory.egg-info\requires.txt
+writing top-level names to src\gamefactory.egg-info\top_level.txt
+reading manifest file 'src\gamefactory.egg-info\SOURCES.txt'
+writing manifest file 'src\gamefactory.egg-info\SOURCES.txt'
+creating build\lib\gamefactory\schemas
+copying src\gamefactory\schemas\asset-spec-0.4.0.schema.json -> build\lib\gamefactory\schemas
+copying src\gamefactory\schemas\godot-observation-0.2.0.schema.json -> build\lib\gamefactory\schemas
+copying src\gamefactory\schemas\godot-scenario-0.2.0.schema.json -> build\lib\gamefactory\schemas
+copying src\gamefactory\schemas\project-config-0.1.0.schema.json -> build\lib\gamefactory\schemas
+creating build\lib\gamefactory\resources\godot
+copying src\gamefactory\resources\godot\asset_runtime_harness.gd -> build\lib\gamefactory\resources\godot
+copying src\gamefactory\resources\godot\capture_harness.gd -> build\lib\gamefactory\resources\godot
+copying src\gamefactory\resources\godot\harness.gd -> build\lib\gamefactory\resources\godot
+creating build\lib\gamefactory\resources\specs
+copying src\gamefactory\resources\specs\prop_energy_crate_01.yml -> build\lib\gamefactory\resources\specs
+installing to build\bdist.win-amd64\wheel
+running install
+running install_lib
+creating build\bdist.win-amd64\wheel
+creating build\bdist.win-amd64\wheel\gamefactory
+creating build\bdist.win-amd64\wheel\gamefactory\adapters
+creating build\bdist.win-amd64\wheel\gamefactory\adapters\assets
+copying build\lib\gamefactory\adapters\assets\glb_validator.py -> build\bdist.win-amd64\wheel\.\gamefactory\adapters\assets
+copying build\lib\gamefactory\adapters\assets\__init__.py -> build\bdist.win-amd64\wheel\.\gamefactory\adapters\assets
+creating build\bdist.win-amd64\wheel\gamefactory\adapters\dcc
+copying build\lib\gamefactory\adapters\dcc\base.py -> build\bdist.win-amd64\wheel\.\gamefactory\adapters\dcc
+copying build\lib\gamefactory\adapters\dcc\blender.py -> build\bdist.win-amd64\wheel\.\gamefactory\adapters\dcc
+copying build\lib\gamefactory\adapters\dcc\blender_processor.py -> build\bdist.win-amd64\wheel\.\gamefactory\adapters\dcc
+copying build\lib\gamefactory\adapters\dcc\__init__.py -> build\bdist.win-amd64\wheel\.\gamefactory\adapters\dcc
+creating build\bdist.win-amd64\wheel\gamefactory\adapters\engines
+copying build\lib\gamefactory\adapters\engines\base.py -> build\bdist.win-amd64\wheel\.\gamefactory\adapters\engines
+copying build\lib\gamefactory\adapters\engines\godot.py -> build\bdist.win-amd64\wheel\.\gamefactory\adapters\engines
+copying build\lib\gamefactory\adapters\engines\godot_capture_contracts.py -> build\bdist.win-amd64\wheel\.\gamefactory\adapters\engines
+copying build\lib\gamefactory\adapters\engines\godot_contracts.py -> build\bdist.win-amd64\wheel\.\gamefactory\adapters\engines
+copying build\lib\gamefactory\adapters\engines\godot_execution.py -> build\bdist.win-amd64\wheel\.\gamefactory\adapters\engines
+copying build\lib\gamefactory\adapters\engines\godot_image.py -> build\bdist.win-amd64\wheel\.\gamefactory\adapters\engines
+copying build\lib\gamefactory\adapters\engines\godot_review_html.py -> build\bdist.win-amd64\wheel\.\gamefactory\adapters\engines
+copying build\lib\gamefactory\adapters\engines\godot_staging.py -> build\bdist.win-amd64\wheel\.\gamefactory\adapters\engines
+copying build\lib\gamefactory\adapters\engines\__init__.py -> build\bdist.win-amd64\wheel\.\gamefactory\adapters\engines
+creating build\bdist.win-amd64\wheel\gamefactory\adapters\external
+copying build\lib\gamefactory\adapters\external\base.py -> build\bdist.win-amd64\wheel\.\gamefactory\adapters\external
+copying build\lib\gamefactory\adapters\external\meshy.py -> build\bdist.win-amd64\wheel\.\gamefactory\adapters\external
+copying build\lib\gamefactory\adapters\external\meshy_cli.py -> build\bdist.win-amd64\wheel\.\gamefactory\adapters\external
+copying build\lib\gamefactory\adapters\external\__init__.py -> build\bdist.win-amd64\wheel\.\gamefactory\adapters\external
+creating build\bdist.win-amd64\wheel\gamefactory\adapters\fakes
+copying build\lib\gamefactory\adapters\fakes\fake_provider.py -> build\bdist.win-amd64\wheel\.\gamefactory\adapters\fakes
+copying build\lib\gamefactory\adapters\fakes\glb_generator.py -> build\bdist.win-amd64\wheel\.\gamefactory\adapters\fakes
+copying build\lib\gamefactory\adapters\fakes\__init__.py -> build\bdist.win-amd64\wheel\.\gamefactory\adapters\fakes
+creating build\bdist.win-amd64\wheel\gamefactory\adapters\images
+copying build\lib\gamefactory\adapters\images\base.py -> build\bdist.win-amd64\wheel\.\gamefactory\adapters\images
+copying build\lib\gamefactory\adapters\images\concept_ingest.py -> build\bdist.win-amd64\wheel\.\gamefactory\adapters\images
+copying build\lib\gamefactory\adapters\images\__init__.py -> build\bdist.win-amd64\wheel\.\gamefactory\adapters\images
+creating build\bdist.win-amd64\wheel\gamefactory\adapters\persistence
+copying build\lib\gamefactory\adapters\persistence\database.py -> build\bdist.win-amd64\wheel\.\gamefactory\adapters\persistence
+copying build\lib\gamefactory\adapters\persistence\migrations.py -> build\bdist.win-amd64\wheel\.\gamefactory\adapters\persistence
+copying build\lib\gamefactory\adapters\persistence\repositories.py -> build\bdist.win-amd64\wheel\.\gamefactory\adapters\persistence
+copying build\lib\gamefactory\adapters\persistence\__init__.py -> build\bdist.win-amd64\wheel\.\gamefactory\adapters\persistence
+creating build\bdist.win-amd64\wheel\gamefactory\capabilities
+copying build\lib\gamefactory\capabilities\registry.py -> build\bdist.win-amd64\wheel\.\gamefactory\capabilities
+copying build\lib\gamefactory\capabilities\__init__.py -> build\bdist.win-amd64\wheel\.\gamefactory\capabilities
+creating build\bdist.win-amd64\wheel\gamefactory\cli
+copying build\lib\gamefactory\cli\exit_codes.py -> build\bdist.win-amd64\wheel\.\gamefactory\cli
+copying build\lib\gamefactory\cli\main.py -> build\bdist.win-amd64\wheel\.\gamefactory\cli
+creating build\bdist.win-amd64\wheel\gamefactory\config
+copying build\lib\gamefactory\config\loader.py -> build\bdist.win-amd64\wheel\.\gamefactory\config
+copying build\lib\gamefactory\config\schema.py -> build\bdist.win-amd64\wheel\.\gamefactory\config
+copying build\lib\gamefactory\config\__init__.py -> build\bdist.win-amd64\wheel\.\gamefactory\config
+creating build\bdist.win-amd64\wheel\gamefactory\core
+creating build\bdist.win-amd64\wheel\gamefactory\core\approvals
+copying build\lib\gamefactory\core\approvals\approval_service.py -> build\bdist.win-amd64\wheel\.\gamefactory\core\approvals
+copying build\lib\gamefactory\core\approvals\operation_scope.py -> build\bdist.win-amd64\wheel\.\gamefactory\core\approvals
+copying build\lib\gamefactory\core\approvals\__init__.py -> build\bdist.win-amd64\wheel\.\gamefactory\core\approvals
+creating build\bdist.win-amd64\wheel\gamefactory\core\artifacts
+copying build\lib\gamefactory\core\artifacts\artifact_manager.py -> build\bdist.win-amd64\wheel\.\gamefactory\core\artifacts
+copying build\lib\gamefactory\core\artifacts\__init__.py -> build\bdist.win-amd64\wheel\.\gamefactory\core\artifacts
+creating build\bdist.win-amd64\wheel\gamefactory\core\domain
+copying build\lib\gamefactory\core\domain\asset_contracts.py -> build\bdist.win-amd64\wheel\.\gamefactory\core\domain
+copying build\lib\gamefactory\core\domain\dag.py -> build\bdist.win-amd64\wheel\.\gamefactory\core\domain
+copying build\lib\gamefactory\core\domain\errors.py -> build\bdist.win-amd64\wheel\.\gamefactory\core\domain
+copying build\lib\gamefactory\core\domain\models.py -> build\bdist.win-amd64\wheel\.\gamefactory\core\domain
+copying build\lib\gamefactory\core\domain\state_machine.py -> build\bdist.win-amd64\wheel\.\gamefactory\core\domain
+copying build\lib\gamefactory\core\domain\__init__.py -> build\bdist.win-amd64\wheel\.\gamefactory\core\domain
+creating build\bdist.win-amd64\wheel\gamefactory\core\execution
+copying build\lib\gamefactory\core\execution\locks.py -> build\bdist.win-amd64\wheel\.\gamefactory\core\execution
+copying build\lib\gamefactory\core\execution\path_guard.py -> build\bdist.win-amd64\wheel\.\gamefactory\core\execution
+copying build\lib\gamefactory\core\execution\process_runner.py -> build\bdist.win-amd64\wheel\.\gamefactory\core\execution
+copying build\lib\gamefactory\core\execution\redaction.py -> build\bdist.win-amd64\wheel\.\gamefactory\core\execution
+copying build\lib\gamefactory\core\execution\__init__.py -> build\bdist.win-amd64\wheel\.\gamefactory\core\execution
+creating build\bdist.win-amd64\wheel\gamefactory\core\policies
+copying build\lib\gamefactory\core\policies\policy_engine.py -> build\bdist.win-amd64\wheel\.\gamefactory\core\policies
+copying build\lib\gamefactory\core\policies\__init__.py -> build\bdist.win-amd64\wheel\.\gamefactory\core\policies
+creating build\bdist.win-amd64\wheel\gamefactory\resources
+creating build\bdist.win-amd64\wheel\gamefactory\resources\blender
+copying build\lib\gamefactory\resources\blender\process_asset.py -> build\bdist.win-amd64\wheel\.\gamefactory\resources\blender
+creating build\bdist.win-amd64\wheel\gamefactory\resources\godot
+copying build\lib\gamefactory\resources\godot\asset_runtime_harness.gd -> build\bdist.win-amd64\wheel\.\gamefactory\resources\godot
+copying build\lib\gamefactory\resources\godot\capture_harness.gd -> build\bdist.win-amd64\wheel\.\gamefactory\resources\godot
+copying build\lib\gamefactory\resources\godot\harness.gd -> build\bdist.win-amd64\wheel\.\gamefactory\resources\godot
+creating build\bdist.win-amd64\wheel\gamefactory\resources\scripts
+copying build\lib\gamefactory\resources\scripts\verify_asset_bundle.py -> build\bdist.win-amd64\wheel\.\gamefactory\resources\scripts
+creating build\bdist.win-amd64\wheel\gamefactory\resources\specs
+copying build\lib\gamefactory\resources\specs\prop_energy_crate_01.yml -> build\bdist.win-amd64\wheel\.\gamefactory\resources\specs
+creating build\bdist.win-amd64\wheel\gamefactory\schemas
+copying build\lib\gamefactory\schemas\asset-spec-0.4.0.schema.json -> build\bdist.win-amd64\wheel\.\gamefactory\schemas
+copying build\lib\gamefactory\schemas\godot-observation-0.2.0.schema.json -> build\bdist.win-amd64\wheel\.\gamefactory\schemas
+copying build\lib\gamefactory\schemas\godot-scenario-0.2.0.schema.json -> build\bdist.win-amd64\wheel\.\gamefactory\schemas
+copying build\lib\gamefactory\schemas\project-config-0.1.0.schema.json -> build\bdist.win-amd64\wheel\.\gamefactory\schemas
+creating build\bdist.win-amd64\wheel\gamefactory\workflows
+copying build\lib\gamefactory\workflows\asset_evidence.py -> build\bdist.win-amd64\wheel\.\gamefactory\workflows
+copying build\lib\gamefactory\workflows\asset_production.py -> build\bdist.win-amd64\wheel\.\gamefactory\workflows
+copying build\lib\gamefactory\workflows\builtin_tasks.py -> build\bdist.win-amd64\wheel\.\gamefactory\workflows
+copying build\lib\gamefactory\workflows\definitions.py -> build\bdist.win-amd64\wheel\.\gamefactory\workflows
+copying build\lib\gamefactory\workflows\engine.py -> build\bdist.win-amd64\wheel\.\gamefactory\workflows
+copying build\lib\gamefactory\workflows\godot_capture.py -> build\bdist.win-amd64\wheel\.\gamefactory\workflows
+copying build\lib\gamefactory\workflows\godot_verification.py -> build\bdist.win-amd64\wheel\.\gamefactory\workflows
+copying build\lib\gamefactory\workflows\handlers.py -> build\bdist.win-amd64\wheel\.\gamefactory\workflows
+copying build\lib\gamefactory\workflows\ports.py -> build\bdist.win-amd64\wheel\.\gamefactory\workflows
+copying build\lib\gamefactory\workflows\__init__.py -> build\bdist.win-amd64\wheel\.\gamefactory\workflows
+copying build\lib\gamefactory\__init__.py -> build\bdist.win-amd64\wheel\.\gamefactory
+copying build\lib\gamefactory\__main__.py -> build\bdist.win-amd64\wheel\.\gamefactory
+running install_egg_info
+Copying src\gamefactory.egg-info to build\bdist.win-amd64\wheel\.\gamefactory-0.4.0-py3.12.egg-info
+running install_scripts
+creating build\bdist.win-amd64\wheel\gamefactory-0.4.0.dist-info\WHEEL
+creating 'C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\v04-windows-final-v3\\dist\\.tmp-9nqo6dh_\\gamefactory-0.4.0-py3-none-any.whl' and adding 'build\\bdist.win-amd64\\wheel' to it
+adding 'gamefactory/__init__.py'
+adding 'gamefactory/__main__.py'
+adding 'gamefactory/adapters/assets/__init__.py'
+adding 'gamefactory/adapters/assets/glb_validator.py'
+adding 'gamefactory/adapters/dcc/__init__.py'
+adding 'gamefactory/adapters/dcc/base.py'
+adding 'gamefactory/adapters/dcc/blender.py'
+adding 'gamefactory/adapters/dcc/blender_processor.py'
+adding 'gamefactory/adapters/engines/__init__.py'
+adding 'gamefactory/adapters/engines/base.py'
+adding 'gamefactory/adapters/engines/godot.py'
+adding 'gamefactory/adapters/engines/godot_capture_contracts.py'
+adding 'gamefactory/adapters/engines/godot_contracts.py'
+adding 'gamefactory/adapters/engines/godot_execution.py'
+adding 'gamefactory/adapters/engines/godot_image.py'
+adding 'gamefactory/adapters/engines/godot_review_html.py'
+adding 'gamefactory/adapters/engines/godot_staging.py'
+adding 'gamefactory/adapters/external/__init__.py'
+adding 'gamefactory/adapters/external/base.py'
+adding 'gamefactory/adapters/external/meshy.py'
+adding 'gamefactory/adapters/external/meshy_cli.py'
+adding 'gamefactory/adapters/fakes/__init__.py'
+adding 'gamefactory/adapters/fakes/fake_provider.py'
+adding 'gamefactory/adapters/fakes/glb_generator.py'
+adding 'gamefactory/adapters/images/__init__.py'
+adding 'gamefactory/adapters/images/base.py'
+adding 'gamefactory/adapters/images/concept_ingest.py'
+adding 'gamefactory/adapters/persistence/__init__.py'
+adding 'gamefactory/adapters/persistence/database.py'
+adding 'gamefactory/adapters/persistence/migrations.py'
+adding 'gamefactory/adapters/persistence/repositories.py'
+adding 'gamefactory/capabilities/__init__.py'
+adding 'gamefactory/capabilities/registry.py'
+adding 'gamefactory/cli/exit_codes.py'
+adding 'gamefactory/cli/main.py'
+adding 'gamefactory/config/__init__.py'
+adding 'gamefactory/config/loader.py'
+adding 'gamefactory/config/schema.py'
+adding 'gamefactory/core/approvals/__init__.py'
+adding 'gamefactory/core/approvals/approval_service.py'
+adding 'gamefactory/core/approvals/operation_scope.py'
+adding 'gamefactory/core/artifacts/__init__.py'
+adding 'gamefactory/core/artifacts/artifact_manager.py'
+adding 'gamefactory/core/domain/__init__.py'
+adding 'gamefactory/core/domain/asset_contracts.py'
+adding 'gamefactory/core/domain/dag.py'
+adding 'gamefactory/core/domain/errors.py'
+adding 'gamefactory/core/domain/models.py'
+adding 'gamefactory/core/domain/state_machine.py'
+adding 'gamefactory/core/execution/__init__.py'
+adding 'gamefactory/core/execution/locks.py'
+adding 'gamefactory/core/execution/path_guard.py'
+adding 'gamefactory/core/execution/process_runner.py'
+adding 'gamefactory/core/execution/redaction.py'
+adding 'gamefactory/core/policies/__init__.py'
+adding 'gamefactory/core/policies/policy_engine.py'
+adding 'gamefactory/resources/blender/process_asset.py'
+adding 'gamefactory/resources/godot/asset_runtime_harness.gd'
+adding 'gamefactory/resources/godot/capture_harness.gd'
+adding 'gamefactory/resources/godot/harness.gd'
+adding 'gamefactory/resources/scripts/verify_asset_bundle.py'
+adding 'gamefactory/resources/specs/prop_energy_crate_01.yml'
+adding 'gamefactory/schemas/asset-spec-0.4.0.schema.json'
+adding 'gamefactory/schemas/godot-observation-0.2.0.schema.json'
+adding 'gamefactory/schemas/godot-scenario-0.2.0.schema.json'
+adding 'gamefactory/schemas/project-config-0.1.0.schema.json'
+adding 'gamefactory/workflows/__init__.py'
+adding 'gamefactory/workflows/asset_evidence.py'
+adding 'gamefactory/workflows/asset_production.py'
+adding 'gamefactory/workflows/builtin_tasks.py'
+adding 'gamefactory/workflows/definitions.py'
+adding 'gamefactory/workflows/engine.py'
+adding 'gamefactory/workflows/godot_capture.py'
+adding 'gamefactory/workflows/godot_verification.py'
+adding 'gamefactory/workflows/handlers.py'
+adding 'gamefactory/workflows/ports.py'
+adding 'gamefactory-0.4.0.dist-info/METADATA'
+adding 'gamefactory-0.4.0.dist-info/WHEEL'
+adding 'gamefactory-0.4.0.dist-info/entry_points.txt'
+adding 'gamefactory-0.4.0.dist-info/top_level.txt'
+adding 'gamefactory-0.4.0.dist-info/RECORD'
+removing build\bdist.win-amd64\wheel
+Successfully built gamefactory-0.4.0-py3-none-any.whl

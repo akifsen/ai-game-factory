@@ -7,7 +7,7 @@ Classifies capabilities as:
 - APPROVAL_REQUIRED
 """
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from enum import StrEnum
 from pathlib import Path
 from typing import Any
@@ -15,6 +15,7 @@ from typing import Any
 from gamefactory.adapters.dcc.blender import BlenderAdapter
 from gamefactory.adapters.engines.godot import GodotAdapter
 from gamefactory.adapters.external.meshy import MeshyProvider
+from gamefactory.adapters.external.meshy_cli import MeshyCliRunner
 
 
 class CapabilityStatus(StrEnum):
@@ -53,10 +54,12 @@ class CapabilityRegistry:
         godot_adapter: GodotAdapter | None = None,
         blender_adapter: BlenderAdapter | None = None,
         meshy_provider: MeshyProvider | None = None,
+        meshy_cli_runner: MeshyCliRunner | None = None,
     ) -> None:
         self.godot_adapter = godot_adapter or GodotAdapter()
         self.blender_adapter = blender_adapter or BlenderAdapter()
         self.meshy_provider = meshy_provider or MeshyProvider()
+        self.meshy_cli_runner = meshy_cli_runner or MeshyCliRunner()
         self._entries: dict[str, CapabilityEntry] = {}
 
     def discover(
@@ -139,21 +142,74 @@ class CapabilityRegistry:
             },
         )
 
-        # 3. Meshy provider boundary
-        is_meshy_configured = self.meshy_provider.is_configured()
-        # Credentials can be present, but no production Meshy transport exists in V0.1.
-        meshy_status = CapabilityStatus.UNAVAILABLE
+        # Local CLI readiness is distinct from authorization and live API acceptance.
+        # Doctor does not submit a model or probe the paid API.
+        meshy = self.meshy_cli_runner.doctor()
+        meshy_status = (
+            CapabilityStatus.APPROVAL_REQUIRED
+            if meshy.status == "AVAILABLE" and meshy.has_credential
+            else CapabilityStatus.MISCONFIGURED
+            if meshy.status in {"MISCONFIGURED", "CREDENTIAL_MISSING"}
+            else CapabilityStatus.UNAVAILABLE
+        )
         entries["asset.3d.meshy"] = CapabilityEntry(
             name="asset.3d.meshy",
-            description="Meshy provider boundary (generation not implemented in V0.1)",
+            description="Meshy CLI 0.4.0 image-to-3D; separate concept and paid approvals required",
             status=meshy_status,
             provider="meshy",
             requires_approval=True,
             details={
-                "is_configured": is_meshy_configured,
+                "is_configured": meshy.has_credential,
                 "cost_class": "PAID",
-                "milestone": "V0.1 boundary only",
-                "implemented": False,
+                "milestone": "V0.4",
+                "implemented": True,
+                "local_status": meshy.status,
+                "cli_version": meshy.cli_version,
+                "node_version": meshy.node_version,
+                "credential_source": meshy.credential_source,
+                "api_verified": False,
+                "generation_verified": False,
+                "details": meshy.details,
+            },
+        )
+
+        for name, description in {
+            "asset.specification.validate": "Strict V0.4 static_prop specification validation",
+            "asset.glb.validate": "Decoded GLB geometry, texture, LOD and collider validation",
+            "asset.concept.ingest": "Bounded PNG ingestion with hash-bound local provenance",
+            "asset.workflow.execute": "Static-prop DAG with concept, paid and final human gates",
+        }.items():
+            entries[name] = CapabilityEntry(name, description, CapabilityStatus.AVAILABLE, "core")
+        entries["asset.blender.process"] = CapabilityEntry(
+            "asset.blender.process",
+            "Deterministic static-prop processing; real execution remains workflow evidence",
+            CapabilityStatus.NOT_VERIFIED if blender_res.available else blender_status,
+            "blender",
+            details={"executable_path": blender_res.executable_path, "processing_probed": False},
+        )
+        # Keep existing identifiers compatible while exposing the V0.4 contract.
+        entries["asset.3d.generate"] = replace(entries["asset.3d.meshy"], name="asset.3d.generate")
+        entries["dcc.blender.process"] = replace(
+            entries["asset.blender.process"], name="dcc.blender.process"
+        )
+        entries["engine.godot.import"] = CapabilityEntry(
+            "engine.godot.import",
+            "Staged GLB import; executable detection is not a successful asset import",
+            CapabilityStatus.NOT_VERIFIED if godot_res.available else godot_status,
+            "godot",
+            details={"executable_path": godot_res.executable_path, "asset_import_probed": False},
+        )
+        entries["image.generate"] = CapabilityEntry(
+            "image.generate",
+            "ImageGenerationProvider contract and external concept ingestion; live generator not probed",
+            CapabilityStatus.NOT_VERIFIED,
+            "external_image_provider",
+            details={
+                "provider_contract_implemented": True,
+                "fake_provider_available": True,
+                "external_generation_verified": False,
+                "ingestion_available": True,
+                "reason": "Generate with an authorized image provider, then ingest hash-bound provenance",
             },
         )
 

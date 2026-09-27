@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import getpass
+import hashlib
 import json
 import os
 import sqlite3
@@ -15,15 +16,18 @@ from typing import Any, NoReturn
 
 from gamefactory import __version__
 from gamefactory.adapters.engines.godot import GodotAdapter
+from gamefactory.adapters.external.meshy_cli import MeshyAssetGenerationProvider, MeshyCliRunner
 from gamefactory.adapters.fakes.fake_provider import FakeAssetGenerationProvider
 from gamefactory.adapters.persistence.database import Database
 from gamefactory.adapters.persistence.migrations import MigrationRunner
 from gamefactory.adapters.persistence.repositories import (
     ApprovalRepository,
     ArtifactRepository,
+    AssetRevisionRepository,
     EvidenceRepository,
     ExecutionRepository,
     ProviderInvocationRepository,
+    ProviderOperationIntentRepository,
     QualityGateRepository,
     TaskRepository,
     WorkflowRepository,
@@ -39,16 +43,22 @@ from gamefactory.cli.exit_codes import (
 )
 from gamefactory.config.loader import ConfigLoader
 from gamefactory.core.approvals.approval_service import ApprovalService
+from gamefactory.core.domain.asset_contracts import parse_asset_specification, spec_fingerprint
 from gamefactory.core.domain.errors import (
     ConfigurationError,
     FactoryError,
     ProviderUnavailable,
     ValidationError,
 )
-from gamefactory.core.domain.models import AuditEvent, generate_id
+from gamefactory.core.domain.models import AuditEvent, CostClass, generate_id
 from gamefactory.core.execution.path_guard import PathGuard, assert_managed_directory
 from gamefactory.core.execution.redaction import redactor
 from gamefactory.core.policies.policy_engine import PolicyEngine, PolicyRule
+from gamefactory.workflows.asset_production import (
+    AssetProductionHandlers,
+    create_asset_production_workflow,
+    register_asset_production_handlers,
+)
 from gamefactory.workflows.definitions import (
     create_demo_workflow,
     create_failure_workflow,
@@ -63,6 +73,7 @@ from gamefactory.workflows.godot_verification import (
     create_godot_verification_workflow,
     register_godot_handlers,
 )
+from gamefactory.workflows.ports import AssetGenerationProvider
 
 
 def _add_common(parser: argparse.ArgumentParser, *, nested: bool = False) -> None:
@@ -143,6 +154,24 @@ def build_parser() -> argparse.ArgumentParser:
     inspect = commands.add_parser("inspect")
     _add_common(inspect, nested=True)
     inspect.add_argument("workflow_id")
+
+    asset_create = commands.add_parser(
+        "asset-create", help="create a gated static-prop production workflow"
+    )
+    _add_common(asset_create, nested=True)
+    asset_create.add_argument("--spec", required=True, help="strict asset-spec-0.4.0 YAML or JSON")
+    asset_create.add_argument("--concept", required=True, help="concept PNG")
+    asset_create.add_argument("--provenance", required=True, help="hashed concept provenance JSON")
+    asset_create.add_argument("--provider", choices=("fake", "meshy"), default="fake")
+    asset_create.add_argument(
+        "--concept-source-type", choices=("imported", "local_generation"), default="imported"
+    )
+    asset_create.add_argument("--dry-run", action="store_true")
+    asset_create.add_argument(
+        "--budget-reservation",
+        type=float,
+        help="maximum budget reservation when provider cost is UNKNOWN; not a cost estimate",
+    )
     return parser
 
 
@@ -199,7 +228,7 @@ def _emit(payload: Any, as_json: bool, human: str | None = None, stream: Any = N
 
 
 def _result_payload(result: Any) -> dict[str, Any]:
-    return {
+    payload = {
         "workflow_id": result.workflow_id,
         "status": result.status.value,
         "pending_approval_id": result.pending_approval_id,
@@ -208,6 +237,9 @@ def _result_payload(result: Any) -> dict[str, Any]:
         "blocked_tasks": result.blocked_tasks,
         "error_message": result.error_message,
     }
+    if getattr(result, "error_code", None) is not None:
+        payload["error_code"] = result.error_code
+    return payload
 
 
 def _result_code(result: Any) -> int:
@@ -322,6 +354,7 @@ def _inspect(db: Database, workflow_id: str) -> dict[str, Any]:
     evidence = [e for task in tasks for e in EvidenceRepository(db).list_by_task(task.id)]
     gates = [g for task in tasks for g in QualityGateRepository(db).list_by_task(task.id)]
     approvals = ApprovalRepository(db).list_by_workflow(workflow_id)
+    asset_intents = ProviderOperationIntentRepository(db).list_by_workflow(workflow_id)
     return {
         "workflow": _jsonable(wf),
         "tasks": [_jsonable(t) for t in tasks],
@@ -330,12 +363,40 @@ def _inspect(db: Database, workflow_id: str) -> dict[str, Any]:
         "evidence": [_jsonable(e) for e in evidence],
         "gates": [_jsonable(g) for g in gates],
         "approvals": [_jsonable(a) for a in approvals],
-        "paid_provider_invocations": ProviderInvocationRepository(db).count(workflow_id),
+        "paid_provider_invocations": ProviderInvocationRepository(db).count(workflow_id)
+        + sum(1 for intent in asset_intents if intent.external_task_id),
+        "paid_provider_invocations_unknown": any(
+            intent.status in {"SUBMITTING", "UNCERTAIN"} and not intent.external_task_id
+            for intent in asset_intents
+        ),
+        "paid_provider_operations": [_jsonable(item) for item in asset_intents],
     }
 
 
 def _report(root: Path, db: Database, workflow_id: str) -> tuple[dict[str, Any], int, str]:
     """Point at the static review snapshot. This command does not approve anything."""
+    workflow = WorkflowRepository(db).get(workflow_id)
+    if workflow is not None and workflow.name.startswith("Asset production:"):
+        from gamefactory.workflows.asset_evidence import export_asset_evidence_bundle
+
+        base = root / ".gamefactory" / "reports" / workflow_id
+        base.mkdir(parents=True, exist_ok=True)
+        number = 1
+        while (base / f"snapshot-{number:03d}").exists():
+            number += 1
+        bundle = export_asset_evidence_bundle(
+            root, db, workflow_id, base / f"snapshot-{number:03d}"
+        )
+        return (
+            {
+                "workflow_id": workflow_id,
+                "bundle": str(bundle),
+                "manifest": str(bundle / "manifest.json"),
+                "review_html": str(bundle / "index.html"),
+            },
+            EXIT_SUCCESS,
+            f"Asset evidence bundle: {bundle}",
+        )
     pages = [
         item
         for item in ArtifactRepository(db).list_by_workflow(workflow_id)
@@ -412,8 +473,203 @@ def _run_workflow(
     return engine.run_workflow(workflow.id)
 
 
-def _engine(root: Path, db: Database, godot_path: str | None = None) -> WorkflowEngine:
-    """Build a CLI engine whose only generation provider is the explicitly named fake."""
+def _create_asset_workflow(
+    root: Path, db: Database, args: argparse.Namespace
+) -> tuple[dict[str, Any], int, str]:
+    cfg = ConfigLoader.load_config(root)
+    spec_path = Path(args.spec).expanduser()
+    if not spec_path.is_absolute():
+        spec_path = root / spec_path
+    specification = parse_asset_specification(spec_path.resolve(strict=True))
+    concept = Path(args.concept).expanduser()
+    if not concept.is_absolute():
+        concept = root / concept
+    provenance = Path(args.provenance).expanduser()
+    if not provenance.is_absolute():
+        provenance = root / provenance
+    concept = concept.resolve(strict=True)
+    provenance = provenance.resolve(strict=True)
+    from gamefactory.adapters.images.concept_ingest import ingest_concept_image
+
+    if args.dry_run:
+        with tempfile.TemporaryDirectory(prefix="gamefactory-asset-dry-run-") as temp:
+            ingest_concept_image(
+                concept,
+                Path(temp) / "concept.png",
+                spec_fingerprint(specification),
+                sidecar_provenance_path=provenance,
+                source_type=args.concept_source_type,
+            )
+        capabilities = CapabilityRegistry().discover(
+            root,
+            args.godot_path if args.godot_path is not None else cfg.engine.executable_path,
+            args.blender_path if args.blender_path is not None else cfg.dcc.blender_path,
+        )
+        reservation_preview = (
+            None
+            if args.provider == "fake"
+            else args.budget_reservation
+            if args.budget_reservation is not None
+            else cfg.policies.max_operation_cost
+        )
+        payload = {
+            "dry_run": True,
+            "asset_id": specification.asset_id,
+            "specification": specification.model_dump(mode="json"),
+            "specification_hash": spec_fingerprint(specification),
+            "concept_sha256": hashlib.sha256(concept.read_bytes()).hexdigest(),
+            "concept_state": "VALIDATED_PENDING_HUMAN_APPROVAL",
+            "provider": args.provider,
+            "operation": "image-to-3d" if args.provider == "meshy" else "fake-image-to-3d",
+            "estimated_cost": "UNKNOWN" if args.provider == "meshy" else 5.0,
+            "budget_reservation": reservation_preview,
+            "required_approvals": ["concept_review", "paid_generation", "final_visual_review"],
+            "expected_steps": [
+                "validate and retain specification, concept, and provenance",
+                "human concept approval",
+                "separately approved provider generation and raw GLB retention",
+                "Blender processing and independent GLB validation",
+                "real Godot import, physics collision check, and rendered captures",
+                "human final runtime visual review",
+            ],
+            "readiness": {
+                "image_generation": capabilities["image.generate"].status.value,
+                "godot": capabilities["engine.godot.import"].status.value,
+                "blender": capabilities["dcc.blender.process"].status.value,
+                "meshy_cli": capabilities["asset.3d.generate"].status.value,
+            },
+            "paid_provider_invocations": 0,
+            "workflow_state_mutated": False,
+            "api_requests": 0,
+        }
+        return (
+            payload,
+            EXIT_SUCCESS,
+            "Dry run passed; no workflow state or provider request was created.",
+        )
+    if args.provider == "fake":
+        estimate = 5.0
+        reservation = None
+    else:
+        estimate = None
+        reservation = args.budget_reservation
+        if reservation is None:
+            reservation = cfg.policies.max_operation_cost
+        if reservation <= 0:
+            raise ConfigurationError(
+                "Meshy estimate is UNKNOWN and policy max_operation_cost is zero; supply a positive --budget-reservation"
+            )
+    engine = _engine(
+        root, db, args.godot_path, args.blender_path, asset_provider_name=args.provider
+    )
+    workflow, tasks = create_asset_production_workflow(
+        cfg.project.id,
+        root,
+        specification,
+        concept,
+        provenance,
+        provider_name=args.provider,
+        provider_estimate=estimate,
+        budget_reservation=reservation,
+        concept_source_type=args.concept_source_type,
+        revision_repository=AssetRevisionRepository(db),
+    )
+    engine.register_workflow(workflow, tasks, allow_existing_empty_placeholder=True)
+    result = engine.run_workflow(workflow.id)
+    payload = _result_payload(result)
+    payload.update(
+        {
+            "asset_id": specification.asset_id,
+            "revision": tasks[0].parameters["revision_number"],
+            "provider": args.provider,
+            "operation": "image-to-3d" if args.provider == "meshy" else "fake-image-to-3d",
+            "estimated_cost": "UNKNOWN" if estimate is None else estimate,
+            "budget_reservation": reservation,
+        }
+    )
+    message = f"Asset workflow {workflow.id} is {result.status.value}; asset={specification.asset_id} revision=r{tasks[0].parameters['revision_number']:03d}"
+    if result.pending_approval_id:
+        approval = ApprovalRepository(db).get(result.pending_approval_id)
+        message += f"; {approval.approval_type if approval else 'approval'} ID={result.pending_approval_id}"
+        if approval and approval.approval_type == "paid_generation":
+            concept_artifact = next(
+                (
+                    a
+                    for a in ArtifactRepository(db).list_by_workflow(workflow.id)
+                    if a.artifact_type == "asset-concept"
+                ),
+                None,
+            )
+            message += f'; provider={args.provider}; operation=image-to-3d; estimate={"UNKNOWN" if estimate is None else estimate}; concept_sha256={concept_artifact.content_hash if concept_artifact else "missing"}; resume: gamefactory --project "{root}" resume {workflow.id}'
+        else:
+            message += f"; review the concept artifact, then approve {result.pending_approval_id} and resume {workflow.id}"
+    return payload, _result_code(result), message
+
+
+def _asset_provider_for_workflow(db: Database, workflow_id: str) -> str | None:
+    tasks = TaskRepository(db).list_by_workflow(workflow_id)
+    for task in tasks:
+        if task.task_type == "asset_paid_generation":
+            value = task.parameters.get("provider")
+            return str(value) if value in {"fake", "meshy"} else None
+    return None
+
+
+def _asset_approval_checkpoint(root: Path, db: Database, approval_id: str) -> dict[str, Any] | None:
+    approval = ApprovalRepository(db).get(approval_id)
+    if approval is None:
+        return None
+    task = TaskRepository(db).get(approval.task_id)
+    if task is None or task.task_type not in {
+        "asset_concept_review",
+        "asset_paid_generation",
+        "asset_final_review",
+    }:
+        return None
+    params = task.parameters
+    concept = next(
+        (
+            item
+            for item in ArtifactRepository(db).list_by_workflow(approval.workflow_id)
+            if item.artifact_type == "asset-concept"
+        ),
+        None,
+    )
+    cfg = ConfigLoader.load_config(root)
+    capabilities = CapabilityRegistry().discover(
+        root, cfg.engine.executable_path, cfg.dcc.blender_path
+    )
+    provider_capability = capabilities.get("asset.3d.generate")
+    return {
+        "asset_id": params.get("asset_id"),
+        "revision": params.get("revision_number"),
+        "approval_type": approval.approval_type,
+        "approval_id": approval.id,
+        "concept_path": concept.relative_path if concept else None,
+        "concept_sha256": concept.content_hash if concept else None,
+        "provider": params.get("provider"),
+        "provider_status": provider_capability.status.value
+        if provider_capability
+        else "NOT_VERIFIED",
+        "operation": "image-to-3d",
+        "estimate": params.get("provider_estimate")
+        if params.get("provider_estimate") is not None
+        else "UNKNOWN",
+        "budget_reservation": params.get("budget_reservation"),
+        "resume_command": f'gamefactory --project "{root}" resume {approval.workflow_id}',
+    }
+
+
+def _engine(
+    root: Path,
+    db: Database,
+    godot_path: str | None = None,
+    blender_path: str | None = None,
+    *,
+    asset_provider_name: str | None = None,
+    allow_paid_calls: bool = False,
+) -> WorkflowEngine:
+    """Build the legacy fake-provider engine or one explicitly selected asset provider."""
     config = ConfigLoader.load_config(root)
     policy = config.policies
     policy_engine = PolicyEngine(
@@ -426,11 +682,23 @@ def _engine(root: Path, db: Database, godot_path: str | None = None) -> Workflow
             project_budget=policy.project_budget,
         )
     )
+    intent_repo = ProviderOperationIntentRepository(db)
+    asset_provider: AssetGenerationProvider
+    if asset_provider_name == "meshy":
+        asset_provider = MeshyAssetGenerationProvider(
+            MeshyCliRunner(), intent_repo=intent_repo, allow_paid_calls=allow_paid_calls
+        )
+    elif asset_provider_name == "fake":
+        asset_provider = FakeAssetGenerationProvider(
+            name="fake", cost_class=CostClass.PAID, intent_repo=intent_repo
+        )
+    else:
+        asset_provider = FakeAssetGenerationProvider()
     engine = WorkflowEngine(
         root,
         db,
         policy_engine=policy_engine,
-        asset_provider=FakeAssetGenerationProvider(),
+        asset_provider=asset_provider,
     )
     register_godot_handlers(
         engine.handler_registry,
@@ -452,6 +720,23 @@ def _engine(root: Path, db: Database, godot_path: str | None = None) -> Workflow
         engine.gate_repo,
         engine.process_runner,
     )
+    if asset_provider_name is not None:
+        asset_handlers = AssetProductionHandlers(
+            root=root,
+            artifacts=engine.art_repo,
+            revisions=AssetRevisionRepository(db),
+            approvals=engine.app_repo,
+            intents=intent_repo,
+            evidence=engine.evi_repo,
+            gates=engine.gate_repo,
+            executions=engine.exec_repo,
+            artifact_manager=engine.artifact_mgr,
+            provider=asset_provider,
+            blender_path=blender_path or ConfigLoader.load_config(root).dcc.blender_path,
+            godot_path=godot_path or ConfigLoader.load_config(root).engine.executable_path,
+            runner=engine.process_runner,
+        )
+        register_asset_production_handlers(engine.handler_registry, asset_handlers)
     return engine
 
 
@@ -572,9 +857,12 @@ def _dispatch(args: argparse.Namespace) -> tuple[Any, int, str | None]:
         "reject",
         "inspect",
         "report",
+        "asset-create",
     }:
         # Explicit path overrides are passed through detection; no failed explicit path falls back.
         db = _db(root)
+        if args.command == "asset-create":
+            return _create_asset_workflow(root, db, args)
         if args.command == "status":
             return _status(root, args.godot_path, args.blender_path), EXIT_SUCCESS, None
         if args.command == "run":
@@ -593,14 +881,47 @@ def _dispatch(args: argparse.Namespace) -> tuple[Any, int, str | None]:
                 message += f"; {result.error_message}"
             return payload, _result_code(result), message
         if args.command == "resume":
-            result = _engine(root, db).run_workflow(args.workflow_id)
+            provider_name = _asset_provider_for_workflow(db, args.workflow_id)
+            result = _engine(
+                root,
+                db,
+                args.godot_path,
+                args.blender_path,
+                asset_provider_name=provider_name,
+                allow_paid_calls=True,
+            ).run_workflow(args.workflow_id)
+            payload = _result_payload(result)
+            message = f"Workflow {result.workflow_id}: {result.status.value}"
+            if result.pending_approval_id:
+                checkpoint = _asset_approval_checkpoint(root, db, result.pending_approval_id)
+                if checkpoint is not None:
+                    payload["asset_checkpoint"] = checkpoint
+                    message += (
+                        f"; {checkpoint['approval_type']} approval {checkpoint['approval_id']}"
+                        f"; asset={checkpoint['asset_id']} revision=r{int(checkpoint['revision']):03d}"
+                        f"; concept={checkpoint['concept_path']} sha256={checkpoint['concept_sha256']}"
+                        f"; provider={checkpoint['provider']} status={checkpoint['provider_status']}"
+                        f"; operation={checkpoint['operation']} estimate={checkpoint['estimate']}"
+                        f"; budget reservation={checkpoint['budget_reservation']}"
+                        f"; resume: {checkpoint['resume_command']}"
+                    )
+                else:
+                    message += f"; approve with gamefactory approve {result.pending_approval_id}, then gamefactory resume {result.workflow_id}"
             return (
-                _result_payload(result),
+                payload,
                 _result_code(result),
-                f"Workflow {result.workflow_id}: {result.status.value}",
+                message,
             )
         if args.command == "retry":
-            result = _engine(root, db).retry_task(args.workflow_id, args.task_id)
+            provider_name = _asset_provider_for_workflow(db, args.workflow_id)
+            result = _engine(
+                root,
+                db,
+                args.godot_path,
+                args.blender_path,
+                asset_provider_name=provider_name,
+                allow_paid_calls=True,
+            ).retry_task(args.workflow_id, args.task_id)
             return (
                 _result_payload(result),
                 _result_code(result),
@@ -613,7 +934,10 @@ def _dispatch(args: argparse.Namespace) -> tuple[Any, int, str | None]:
                 raise ConfigurationError(f"Approval not found: {args.approval_id}")
             current_inputs = None
             if args.command == "approve":
-                engine = _engine(root, db)
+                provider_name = _asset_provider_for_workflow(db, approval.workflow_id)
+                engine = _engine(
+                    root, db, args.godot_path, args.blender_path, asset_provider_name=provider_name
+                )
                 workflow = engine.wf_repo.get(approval.workflow_id)
                 task = engine.task_repo.get(approval.task_id)
                 if workflow is None or task is None:

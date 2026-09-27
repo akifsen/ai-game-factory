@@ -1,0 +1,12 @@
+{
+  "authenticated": true,
+  "source": "env",
+  "profile": null,
+  "base_url_v1": "https://api.meshy.ai/openapi/v1",
+  "profiles": [],
+  "active_profile": null,
+  "verified": true,
+  "balance": {
+    "balance": 2782
+  }
+}

@@ -1,0 +1,1 @@
+{"status": "FAILED", "commands": 7, "report": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.4\\baseline\\godot-headless.json", "workspace": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\v04-baseline-headless\\godot-acceptance-20260927T101537Z-97132f97"}

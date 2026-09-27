@@ -1,0 +1,3 @@
+Found existing installation: gamefactory 0.4.0
+Uninstalling gamefactory-0.4.0:
+  Successfully uninstalled gamefactory-0.4.0

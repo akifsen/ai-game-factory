@@ -76,6 +76,16 @@ def test_png_decode_rejects_header_only_and_wrong_size() -> None:
         decode_png(_png(100, 100), 1280, 720)
 
 
+def test_capture_decode_preserves_other_image_consumers_pixel_budget() -> None:
+    original_limit = Image.MAX_IMAGE_PIXELS
+    decode_png(_png(1280, 720), 1280, 720)
+    assert Image.MAX_IMAGE_PIXELS == original_limit
+    # Asset textures can legitimately be larger than the capture viewport.
+    with Image.open(io.BytesIO(_png(2048, 2048))) as texture:
+        texture.load()
+        assert texture.size == (2048, 2048)
+
+
 def test_fixture_roi_fails_when_health_bar_ignores_hp() -> None:
     image = Image.new("RGBA", (1280, 720), (31, 36, 46, 255))
     for x in range(48, 528):

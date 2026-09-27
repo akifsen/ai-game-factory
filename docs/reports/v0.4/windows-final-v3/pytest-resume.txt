@@ -1,0 +1,55 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.14, pytest-9.1.1, pluggy-1.6.0
+rootdir: C:\Users\lenovo\devel\ai-game-factory
+configfile: pyproject.toml
+testpaths: tests
+collected 484 items
+
+tests\integration\test_asset_cli.py ..                                   [  0%]
+tests\integration\test_asset_workflow.py .....................           [  4%]
+tests\integration\test_blender_processing.py ...                         [  5%]
+tests\integration\test_capabilities.py ......                            [  6%]
+tests\integration\test_cli.py .....                                      [  7%]
+tests\integration\test_crash_recovery.py ..                              [  8%]
+tests\integration\test_godot_blender_detection.py ......                 [  9%]
+tests\integration\test_godot_capture_pipeline.py ........                [ 10%]
+tests\integration\test_godot_pipeline.py ....................            [ 15%]
+tests\integration\test_godot_real.py s                                   [ 15%]
+tests\integration\test_locks.py .....s..                                 [ 16%]
+tests\integration\test_paid_safety.py .                                  [ 17%]
+tests\integration\test_persistence.py ..........                         [ 19%]
+tests\integration\test_persistence_redaction.py ........                 [ 20%]
+tests\integration\test_process_json_redaction.py ..                      [ 21%]
+tests\integration\test_process_metadata.py ...........                   [ 23%]
+tests\integration\test_process_runner.py ...............s...........     [ 29%]
+tests\integration\test_v02_compatibility.py ..                           [ 29%]
+tests\integration\test_verify_godot_live_crash.py .....s................ [ 34%]
+.ss                                                                      [ 34%]
+tests\integration\test_verify_godot_python_resolution.py ............sss [ 37%]
+sss.......                                                               [ 39%]
+tests\integration\test_workflow_engine.py .                              [ 40%]
+tests\integration\test_workflow_regressions.py ....................      [ 44%]
+tests\unit\test_approvals.py ...                                         [ 44%]
+tests\unit\test_artifacts.py ...                                         [ 45%]
+tests\unit\test_asset_bundle_verifier.py ..................              [ 49%]
+tests\unit\test_asset_contracts.py ...................................   [ 56%]
+tests\unit\test_asset_evidence_packaging.py .                            [ 56%]
+tests\unit\test_asset_persistence.py .....                               [ 57%]
+tests\unit\test_blender_processor_paths.py ...                           [ 58%]
+tests\unit\test_closeout_evidence.py ...............                     [ 61%]
+tests\unit\test_concept_ingest.py ...................s.                  [ 65%]
+tests\unit\test_config.py ............                                   [ 68%]
+tests\unit\test_dag.py .........                                         [ 70%]
+tests\unit\test_glb_validator.py ......                                  [ 71%]
+tests\unit\test_godot_capture.py ......                                  [ 72%]
+tests\unit\test_godot_contracts.py ...............................       [ 78%]
+tests\unit\test_godot_staging.py .....s...                               [ 80%]
+tests\unit\test_meshy_adapter.py ....................................... [ 88%]
+                                                                         [ 88%]
+tests\unit\test_path_guard.py ......s....s                               [ 91%]
+tests\unit\test_policy.py ..............................                 [ 97%]
+tests\unit\test_redaction.py ........                                    [ 99%]
+tests\unit\test_state_machine.py ....                                    [100%]
+
+- generated xml file: C:\Users\lenovo\devel\ai-game-factory\.verification\v04-resume-baseline\pytest-host.xml -
+================= 468 passed, 16 skipped in 252.81s (0:04:12) =================

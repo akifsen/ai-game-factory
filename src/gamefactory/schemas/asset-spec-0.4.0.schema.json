@@ -1,0 +1,239 @@
+{
+  "$defs": {
+    "DimensionsConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "width_m": {
+          "description": "Width in meters (X axis)",
+          "maximum": 100.0,
+          "minimum": 0.001,
+          "title": "Width M",
+          "type": "number"
+        },
+        "depth_m": {
+          "description": "Depth in meters (Z axis)",
+          "maximum": 100.0,
+          "minimum": 0.001,
+          "title": "Depth M",
+          "type": "number"
+        },
+        "height_m": {
+          "description": "Height in meters (Y axis)",
+          "maximum": 100.0,
+          "minimum": 0.001,
+          "title": "Height M",
+          "type": "number"
+        }
+      },
+      "required": [
+        "width_m",
+        "depth_m",
+        "height_m"
+      ],
+      "title": "DimensionsConfig",
+      "type": "object"
+    },
+    "GeometryBudgetConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "max_triangles_lod0": {
+          "default": 20000,
+          "maximum": 100000,
+          "minimum": 100,
+          "title": "Max Triangles Lod0",
+          "type": "integer"
+        },
+        "max_triangles_lod1": {
+          "default": 10000,
+          "maximum": 50000,
+          "minimum": 50,
+          "title": "Max Triangles Lod1",
+          "type": "integer"
+        },
+        "lod_ratio": {
+          "default": 0.5,
+          "description": "LOD1 triangles to LOD0 ratio supported by the Blender processor (0.05-0.95)",
+          "maximum": 0.95,
+          "minimum": 0.05,
+          "title": "Lod Ratio",
+          "type": "number"
+        }
+      },
+      "title": "GeometryBudgetConfig",
+      "type": "object"
+    },
+    "MaterialBudgetConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "max_materials": {
+          "default": 2,
+          "maximum": 8,
+          "minimum": 1,
+          "title": "Max Materials",
+          "type": "integer"
+        }
+      },
+      "title": "MaterialBudgetConfig",
+      "type": "object"
+    },
+    "OrientationConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "up": {
+          "const": "+Y",
+          "default": "+Y",
+          "title": "Up",
+          "type": "string"
+        },
+        "front": {
+          "const": "-Z",
+          "default": "-Z",
+          "title": "Front",
+          "type": "string"
+        }
+      },
+      "title": "OrientationConfig",
+      "type": "object"
+    },
+    "StyleConstraintsConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "family": {
+          "default": "stylized_scifi",
+          "maxLength": 100,
+          "minLength": 1,
+          "title": "Family",
+          "type": "string"
+        },
+        "silhouette": {
+          "default": "chunky",
+          "maxLength": 100,
+          "minLength": 1,
+          "title": "Silhouette",
+          "type": "string"
+        },
+        "readability": {
+          "default": "high",
+          "maxLength": 100,
+          "minLength": 1,
+          "title": "Readability",
+          "type": "string"
+        },
+        "detail_density": {
+          "default": "medium",
+          "maxLength": 100,
+          "minLength": 1,
+          "title": "Detail Density",
+          "type": "string"
+        }
+      },
+      "title": "StyleConstraintsConfig",
+      "type": "object"
+    },
+    "TextureBudgetConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "max_dimension": {
+          "default": 2048,
+          "maximum": 4096,
+          "minimum": 256,
+          "title": "Max Dimension",
+          "type": "integer"
+        }
+      },
+      "title": "TextureBudgetConfig",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Strict, versioned specification for a production 3D asset (V0.4).",
+  "properties": {
+    "schema_version": {
+      "const": "0.4.0",
+      "default": "0.4.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "asset_id": {
+      "maxLength": 80,
+      "minLength": 2,
+      "title": "Asset Id",
+      "type": "string"
+    },
+    "category": {
+      "const": "prop",
+      "default": "prop",
+      "title": "Category",
+      "type": "string"
+    },
+    "profile": {
+      "const": "static_prop",
+      "default": "static_prop",
+      "title": "Profile",
+      "type": "string"
+    },
+    "intent": {
+      "maxLength": 500,
+      "minLength": 1,
+      "title": "Intent",
+      "type": "string"
+    },
+    "dimensions": {
+      "$ref": "#/$defs/DimensionsConfig"
+    },
+    "orientation": {
+      "$ref": "#/$defs/OrientationConfig"
+    },
+    "origin_policy": {
+      "default": "bottom_center",
+      "enum": [
+        "bottom_center",
+        "center"
+      ],
+      "title": "Origin Policy",
+      "type": "string"
+    },
+    "geometry_budget": {
+      "$ref": "#/$defs/GeometryBudgetConfig"
+    },
+    "material_budget": {
+      "$ref": "#/$defs/MaterialBudgetConfig"
+    },
+    "texture_budget": {
+      "$ref": "#/$defs/TextureBudgetConfig"
+    },
+    "collider_policy": {
+      "const": "box",
+      "default": "box",
+      "title": "Collider Policy",
+      "type": "string"
+    },
+    "lod_policy": {
+      "const": "lod0_lod1",
+      "default": "lod0_lod1",
+      "title": "Lod Policy",
+      "type": "string"
+    },
+    "style_constraints": {
+      "$ref": "#/$defs/StyleConstraintsConfig"
+    },
+    "target_engine": {
+      "const": "godot",
+      "default": "godot",
+      "title": "Target Engine",
+      "type": "string"
+    },
+    "target_import_path": {
+      "default": "",
+      "title": "Target Import Path",
+      "type": "string"
+    }
+  },
+  "required": [
+    "asset_id",
+    "intent",
+    "dimensions"
+  ],
+  "title": "AssetSpecification",
+  "type": "object"
+}

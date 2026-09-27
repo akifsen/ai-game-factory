@@ -2,7 +2,7 @@
 
 AI Game Factory is local development tooling for coordinating bounded game-development workflows. It stores workflow state, task attempts, artifacts, evidence, approvals, and policy decisions locally. A managed game remains usable without the Factory installed.
 
-V0.3 adds rendered Godot viewport capture: a real Compatibility renderer writes checkpoint PNGs, Python checks those images independently, and a static HTML page waits for a human visual decision. V0.2 headless verification stays available. Meshy generation, Blender processing and AI workers remain outside this release.
+V0.4 adds a gated static-prop pipeline: concept ingestion and human review, separately approved Meshy CLI generation, deterministic Blender processing, decoded GLB validation, and staged Godot runtime/render evidence. The offline review package preserves artifact hashes and approval fingerprints. Real paid generation and final visual approval remain explicit human checkpoints; see the [V0.4 verification report](docs/reports/v0.4-completion-report.md) for the tested scope and current asset status. V0.2 headless verification and V0.3 rendered capture remain available.
 
 ## Install and run
 
@@ -48,7 +48,7 @@ gamefactory artifacts
 
 Replace the example IDs with the workflow and approval IDs returned by the preceding commands.
 
-`run demo` and `run paid-safety` use an explicitly named local fake provider and pause before its paid-classified operation. No real provider transport is available. `run failure` demonstrates a deterministic failure; use `retry <workflow> <task>` to create a new attempt. Workflow IDs are returned by `run` and `status`.
+The legacy V0.1 `run demo` and `run paid-safety` examples use an explicitly named local fake provider and pause before its paid-classified operation. V0.4 asset production has a separate Meshy CLI adapter guarded by concept, paid-operation, and final-review approvals; see the V0.4 section below. `run failure` demonstrates a deterministic failure; use `retry <workflow> <task>` to create a new attempt. Workflow IDs are returned by `run` and `status`.
 
 The CLI accepts `--project DIR` / `-p DIR` and explicit `--godot-path` / `--blender-path` overrides. Invalid explicit paths are reported as misconfigured and never fall back to another executable. Add `--json` before or after a command for compact JSON output. Exit codes are: `0` success, `1` configuration or usage error, `2` workflow failure, `3` approval blocked, `4` tool unavailable/misconfigured, and `5` internal error.
 
@@ -56,7 +56,7 @@ The CLI accepts `--project DIR` / `-p DIR` and explicit `--godot-path` / `--blen
 
 The versioned project contract is `.gamefactory/factory.yml`; the JSON Schema is in `schemas/`. Unknown fields are rejected. User-wide defaults can be set in `%APPDATA%/gamefactory/config.yml` on Windows or `$XDG_CONFIG_HOME/gamefactory/config.yml` (falling back to `~/.config/gamefactory/config.yml`) on Linux/macOS. Precedence is defaults, user config, project config, then explicit command-line executable paths. Do not put credentials in either YAML file; provider secrets belong in environment variables, and no V0.1 command sends them anywhere. Local state is in `.gamefactory/state/factory.db`. State and config paths are checked against project-root escapes before use.
 
-Godot is required only for `godot-verify` and `godot-capture`. Other core workflows remain usable without a renderer. `doctor` does not open a window. Blender is optional and detection-only. Meshy remains unavailable and no real paid-provider operation is implemented.
+Godot is required for `godot-verify`, `godot-capture`, and V0.4 asset runtime verification. Other core workflows remain usable without a renderer. `doctor` does not open a window. Blender is optional for legacy workflows; V0.4 asset production requires its locally detected executable. Meshy readiness reports local CLI configuration separately from paid authorization and generation results.
 
 See [architecture overview](docs/architecture/overview.md), [integration status](docs/integrations/status.md), [development workflow](docs/development/README.md), [acceptance requirements](docs/requirements/03-acceptance.md), and [deferred boundaries](docs/requirements/future-boundaries.md).
 
@@ -113,3 +113,9 @@ gamefactory --project examples/godot-verification resume WORKFLOW_ID
 A technical PASS leaves the workflow blocked for visual review. That approval is not the process-execution approval. Rejecting it does not start another capture. `inspect`, `artifacts`, `retry` and `godot-verify` keep their existing roles.
 
 The published Windows review is `docs/reports/v0.3-rendered/landscape/index.html`. Its human decision is still pending. See [rendered capture](docs/integrations/godot-rendered-capture.md) and the [V0.3 completion report](docs/reports/v0.3-completion-report.md).
+
+## V0.4 asset production
+
+V0.4 adds a gated static-prop production path from a reviewed concept through Meshy image-to-3D, retained raw GLB, deterministic Blender processing, structured validation, staged Godot import/runtime, and Godot-rendered evidence. Concept approval, paid generation approval, and final visual review are separate human decisions. Rejection never triggers automatic regeneration. The real sample concept remains pending human review until an operator explicitly decides.
+
+Start with the [asset production guide](docs/pipelines/asset-production.md), the [Meshy safety guide](docs/integrations/meshy.md), and the [V0.4 work plan](docs/work-plan-v0.4.md). Offline evidence packages can be cold-checked without installed package imports using `python -I scripts/verify_asset_bundle.py <bundle-directory>`. CI and tests must use fake generation only; no Meshy secrets or real paid requests belong in CI.

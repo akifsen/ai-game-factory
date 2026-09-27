@@ -1,0 +1,380 @@
+"""Portable, hash-bound static review export for V0.4 asset workflows."""
+
+from __future__ import annotations
+
+import hashlib
+import html
+import json
+import shutil
+from pathlib import Path
+from typing import Any
+
+from gamefactory.adapters.persistence.repositories import (
+    ApprovalRepository,
+    ArtifactRepository,
+    AssetRevisionRepository,
+    ExecutionRepository,
+    ProviderOperationIntentRepository,
+    TaskRepository,
+    WorkflowRepository,
+)
+from gamefactory.core.approvals.approval_service import compute_operation_hash
+from gamefactory.core.artifacts.artifact_manager import ArtifactManager
+from gamefactory.core.domain.errors import ArtifactError, ValidationError
+from gamefactory.core.execution.path_guard import PathGuard
+
+
+def _write_json(path: Path, value: dict[str, Any]) -> bytes:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(value, sort_keys=True, indent=2) + "\n", encoding="utf-8")
+    return path.read_bytes()
+
+
+def export_asset_evidence_bundle(
+    root: Path | str, db: Any, workflow_id: str, output_dir: Path | str
+) -> Path:
+    """Export verified evidence; final review may still be pending or rejected."""
+    project = Path(root).resolve(strict=True)
+    workflow = WorkflowRepository(db).get(workflow_id)
+    if workflow is None or not workflow.name.startswith("Asset production:"):
+        raise ValidationError("Asset evidence export requires an asset-production workflow")
+    tasks = TaskRepository(db).list_by_workflow(workflow_id)
+    prepare = next((t for t in tasks if t.task_type == "asset_prepare"), None)
+    if prepare is None:
+        raise ArtifactError("Asset specification task is missing")
+    asset_id = str(prepare.parameters["asset_id"])
+    revision_number = int(prepare.parameters["revision_number"])
+    revision = AssetRevisionRepository(db).get(asset_id, revision_number)
+    if revision is None or revision.workflow_id != workflow_id:
+        raise ArtifactError("Asset revision is not linked to this workflow")
+    artifacts = ArtifactRepository(db).list_by_workflow(workflow_id)
+    manager = ArtifactManager(project)
+    for artifact in artifacts:
+        manager.verify_artifact_integrity(artifact)
+    types: dict[str, list[Any]] = {}
+    for item in artifacts:
+        types.setdefault(item.artifact_type, []).append(item)
+    role_types = {
+        "specification": "asset-specification",
+        "concept": "asset-concept",
+        "concept_provenance": "asset-concept-provenance",
+        "raw_glb": "asset-raw-glb",
+        "processed_glb": "asset-processed-glb",
+        "processing_report": "asset-processing-report",
+        "validation": "asset-validation-report",
+        "runtime_observation": "asset-runtime-observation",
+    }
+    selected: dict[str, Any] = {}
+    for role, kind in role_types.items():
+        candidates = types.get(kind, [])
+        if not candidates:
+            raise ArtifactError(f"Missing required evidence artifact: {kind}")
+        selected[role] = candidates[-1]
+    runtime_task = next(t for t in tasks if t.task_type == "asset_godot")
+    runtime_runs = ExecutionRepository(db).list_by_task(runtime_task.id)
+    if not runtime_runs:
+        raise ArtifactError("Runtime execution record is missing")
+    runtime_execution = max(runtime_runs, key=lambda e: e.attempt_number)
+    observation = json.loads(
+        (project / selected["runtime_observation"].relative_path).read_text(encoding="utf-8")
+    )
+    binding = {
+        "workflow_id": workflow_id,
+        "revision": revision_number,
+        "asset_id": asset_id,
+        "execution_id": runtime_execution.id,
+        "attempt_number": runtime_execution.attempt_number,
+        "processed_glb_sha256": selected["processed_glb"].content_hash,
+    }
+    captures = sorted(
+        (
+            a
+            for a in types.get("asset-runtime-capture", [])
+            if runtime_execution.id in a.relative_path
+        ),
+        key=lambda a: a.relative_path,
+    )
+    if len(captures) != 3:
+        raise ArtifactError("Exactly three captures from the bound runtime attempt are required")
+    if any(observation.get(key) != value for key, value in binding.items()):
+        raise ValidationError("Runtime observation does not bind this revision and processed GLB")
+
+    approvals = ApprovalRepository(db).list_by_workflow(workflow_id)
+    from gamefactory.adapters.fakes.fake_provider import FakeAssetGenerationProvider
+    from gamefactory.workflows.asset_production import (
+        AssetProductionHandlers,
+        register_asset_production_handlers,
+    )
+    from gamefactory.workflows.engine import WorkflowEngine
+
+    approval_engine = WorkflowEngine(project, db, asset_provider=None)
+    approval_handlers = AssetProductionHandlers(
+        project,
+        ArtifactRepository(db),
+        AssetRevisionRepository(db),
+        ApprovalRepository(db),
+        ProviderOperationIntentRepository(db),
+        approval_engine.evi_repo,
+        approval_engine.gate_repo,
+        ExecutionRepository(db),
+        ArtifactManager(project),
+        FakeAssetGenerationProvider(),
+    )
+    register_asset_production_handlers(approval_engine.handler_registry, approval_handlers)
+    kinds = {
+        "concept_approval": ("asset_concept_review", "concept_review"),
+        "paid_approval": ("asset_paid_generation", "paid_generation"),
+        "final_approval": ("asset_final_review", "final_visual_review"),
+    }
+    receipt_data: dict[str, tuple[Any, dict[str, Any]]] = {}
+    for role, (task_kind, approval_kind) in kinds.items():
+        approval_task = next(t for t in tasks if t.task_type == task_kind)
+        candidates = [
+            a
+            for a in approvals
+            if a.task_id == approval_task.id and a.approval_type == approval_kind
+        ]
+        if role == "final_approval":
+            candidates = [
+                a
+                for a in candidates
+                if a.status.value in {"PENDING", "APPROVED", "REJECTED", "CHANGES_REQUESTED"}
+            ]
+        else:
+            candidates = [a for a in candidates if a.status.value == "APPROVED"]
+        if not candidates:
+            raise ArtifactError(f"Missing required {approval_kind} approval record")
+        approval = max(candidates, key=lambda a: a.requested_at)
+        inputs = approval_engine.approval_inputs(
+            workflow,
+            approval_task,
+            approval.cost_class,
+            artifact_ids=approval.artifact_ids,
+        )
+        fingerprint = compute_operation_hash(approval.task_id, approval_kind, inputs)
+        if fingerprint != approval.operation_hash:
+            raise ValidationError(
+                f"{approval_kind} fingerprint does not match immutable workflow inputs"
+            )
+        receipt_data[role] = (approval, inputs)
+
+    paid_task_id = next(t.id for t in tasks if t.task_type == "asset_paid_generation")
+    intent = ProviderOperationIntentRepository(db).get_by_task(paid_task_id)
+    if intent is None or not intent.external_task_id or intent.status != "SUCCEEDED":
+        raise ArtifactError("Provider operation is not confirmed successful")
+    paid_receipt = receipt_data["paid_approval"][0]
+    if intent.request_fingerprint != paid_receipt.operation_hash:
+        raise ValidationError("Provider operation fingerprint differs from paid approval")
+    requested_output = Path(output_dir)
+    if not requested_output.is_absolute():
+        requested_output = project / requested_output
+    try:
+        output_relative = requested_output.relative_to(project)
+    except ValueError as exc:
+        raise ValidationError("Evidence bundle output must remain inside the project root") from exc
+    guard = PathGuard(project)
+    output = guard.resolve_safe_path(output_relative)
+    cursor = project
+    for part in output_relative.parts:
+        cursor = cursor / part
+        is_junction = getattr(cursor, "is_junction", lambda: False)()
+        if cursor.is_symlink() or is_junction:
+            raise ValidationError("Evidence bundle output cannot traverse a symlink or junction")
+    output.mkdir(parents=True, exist_ok=False)
+    entries: list[dict[str, Any]] = []
+
+    def add(role: str, source: Path, relative: str, extra: dict[str, Any] | None = None) -> None:
+        destination = output / relative
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(source, destination)
+        data = destination.read_bytes()
+        entries.append(
+            {
+                "role": role,
+                "path": relative,
+                "size": len(data),
+                "sha256": hashlib.sha256(data).hexdigest(),
+                **(extra or {}),
+            }
+        )
+
+    for role, artifact in selected.items():
+        add(
+            role,
+            project / artifact.relative_path,
+            f"evidence/{role}{Path(artifact.relative_path).suffix}",
+        )
+    for artifact in captures:
+        angle = Path(artifact.relative_path).stem
+        if angle not in {"front", "three_quarter", "side"}:
+            raise ValidationError("Unexpected runtime capture angle")
+        add(
+            "runtime_capture",
+            project / artifact.relative_path,
+            f"captures/{angle}.png",
+            {**binding, "angle": angle},
+        )
+    for role, (approval, inputs) in receipt_data.items():
+        receipt = {
+            "approval_id": approval.id,
+            "workflow_id": workflow_id,
+            "revision": revision_number,
+            "task_id": approval.task_id,
+            "approval_type": approval.approval_type,
+            "status": approval.status.value,
+            "actor": approval.actor,
+            "decided_at": approval.decided_at,
+            "inputs": inputs,
+            "fingerprint": approval.operation_hash,
+        }
+        relative = f"evidence/{role}.json"
+        data = _write_json(output / relative, receipt)
+        entries.append(
+            {
+                "role": role,
+                "path": relative,
+                "size": len(data),
+                "sha256": hashlib.sha256(data).hexdigest(),
+            }
+        )
+    provider = {
+        "provider": intent.provider,
+        "operation": intent.operation,
+        "status": intent.status,
+        "external_task_id": intent.external_task_id,
+        "request_fingerprint": intent.request_fingerprint,
+        "actual_cost": intent.actual_cost if intent.actual_cost is not None else "UNKNOWN",
+        "workflow_id": workflow_id,
+        "task_id": intent.task_id,
+        "revision": revision_number,
+        "concept_sha256": intent.concept_hash,
+    }
+    paid_task = next(t for t in tasks if t.task_type == "asset_paid_generation")
+    cost_record = {
+        "estimate": paid_task.parameters["provider_estimate"]
+        if paid_task.parameters["provider_estimate"] is not None
+        else "UNKNOWN",
+        "budget_reservation": paid_task.parameters["budget_reservation"],
+        "actual": provider["actual_cost"],
+        "unit": intent.cost_unit,
+    }
+    for role, relative, value in (
+        ("provider_operation", "evidence/provider-operation.json", provider),
+        ("cost_record", "evidence/cost-record.json", cost_record),
+    ):
+        data = _write_json(output / relative, value)
+        entries.append(
+            {
+                "role": role,
+                "path": relative,
+                "size": len(data),
+                "sha256": hashlib.sha256(data).hexdigest(),
+            }
+        )
+    final = receipt_data["final_approval"][0]
+    concept_entry = next(entry for entry in entries if entry["role"] == "concept")
+    concept_href = html.escape(concept_entry["path"], quote=True)
+    lines = [
+        '<!doctype html><html><head><meta charset="utf-8"><title>Asset evidence review</title></head><body>',
+        f"<h1>{html.escape(asset_id)} revision {revision_number}</h1>",
+        f"<p><strong>{'TEST / FAKE PROVIDER EVIDENCE' if intent.provider.lower().startswith('fake') else 'PROVIDER EVIDENCE'}</strong></p>",
+        f"<p>Technical evidence integrity checked. Human decision: {html.escape(final.status.value)} by {html.escape(final.actor or 'unknown actor')}.</p>",
+    ]
+
+    def add_table(title: str, rows: list[tuple[str, Any]]) -> None:
+        lines.append(f"<h2>{html.escape(title)}</h2><table><tbody>")
+        for label, value in rows:
+            if isinstance(value, (dict, list)):
+                value = json.dumps(value, sort_keys=True, ensure_ascii=False)
+            lines.append(
+                f"<tr><th>{html.escape(label)}</th><td>{html.escape(str(value))}</td></tr>"
+            )
+        lines.append("</tbody></table>")
+
+    spec_payload = json.loads(
+        (project / selected["specification"].relative_path).read_text(encoding="utf-8")
+    )
+    processing_payload = json.loads(
+        (project / selected["processing_report"].relative_path).read_text(encoding="utf-8")
+    )
+    validation_payload = json.loads(
+        (project / selected["validation"].relative_path).read_text(encoding="utf-8")
+    )
+    add_table("Specification", [("Canonical specification", spec_payload)])
+    add_table(
+        "Asset processing",
+        [
+            ("Raw GLB SHA-256", selected["raw_glb"].content_hash),
+            ("Raw GLB bytes", selected["raw_glb"].file_size),
+            ("Processed GLB SHA-256", selected["processed_glb"].content_hash),
+            ("Processed GLB bytes", selected["processed_glb"].file_size),
+            ("Processing report", processing_payload),
+        ],
+    )
+    add_table(
+        "Independent validation",
+        [
+            ("Status", validation_payload.get("status", "UNKNOWN")),
+            ("Summary", validation_payload.get("summary", "")),
+            ("Findings", validation_payload.get("findings", [])),
+        ],
+    )
+    add_table("Provider and cost", [("Provider operation", provider), ("Cost record", cost_record)])
+    add_table(
+        "Human approval receipts",
+        [
+            (
+                role,
+                {
+                    "type": approval.approval_type,
+                    "status": approval.status.value,
+                    "actor": approval.actor,
+                    "fingerprint": approval.operation_hash,
+                },
+            )
+            for role, (approval, _) in receipt_data.items()
+        ],
+    )
+    add_table("Artifact digests", [(entry["role"], entry["sha256"]) for entry in entries])
+    lines.append("<ul>")
+    for entry in entries:
+        label = entry["role"] + (
+            f" ({entry['angle']})" if entry["role"] == "runtime_capture" else ""
+        )
+        href = html.escape(entry["path"], quote=True)
+        lines.append(f'<li><a href="{href}">{html.escape(label)}</a></li>')
+    lines.append(
+        "<table><thead><tr><th>Concept</th><th>Front</th><th>Three-quarter</th><th>Side</th></tr></thead><tbody><tr>"
+    )
+    lines.append(f'<td><img src="{concept_href}" alt="Approved concept" width="320"></td>')
+    capture_by_angle = {
+        entry["angle"]: entry for entry in entries if entry["role"] == "runtime_capture"
+    }
+    for angle in ("front", "three_quarter", "side"):
+        entry = capture_by_angle[angle]
+        lines.append(
+            f'<td><img src="{html.escape(entry["path"], quote=True)}" alt="{angle} view" width="320" height="180"></td>'
+        )
+    lines.append("</tr></tbody></table>")
+    lines.append("</body></html>")
+    (output / "index.html").write_text("\n".join(lines) + "\n", encoding="utf-8")
+    review = (output / "index.html").read_bytes()
+    entries.append(
+        {
+            "role": "review_html",
+            "path": "index.html",
+            "size": len(review),
+            "sha256": hashlib.sha256(review).hexdigest(),
+        }
+    )
+    manifest = {
+        "schema_version": "asset-evidence-0.4.0",
+        **binding,
+        "specification_fingerprint": prepare.parameters["specification_hash"],
+        "final_review": {"decision": final.status.value, "fingerprint": final.operation_hash},
+        "files": entries,
+    }
+    _write_json(output / "manifest.json", manifest)
+    verifier = Path(__file__).parents[1] / "resources" / "scripts" / "verify_asset_bundle.py"
+    shutil.copyfile(verifier, output / "verify_asset_bundle.py")
+    return output

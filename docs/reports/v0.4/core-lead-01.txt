@@ -1,0 +1,13 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.14, pytest-9.1.1, pluggy-1.6.0
+rootdir: C:\Users\lenovo\devel\ai-game-factory
+configfile: pyproject.toml
+collected 45 items
+
+tests\unit\test_asset_contracts.py ........................              [ 53%]
+tests\unit\test_asset_persistence.py ...                                 [ 60%]
+tests\unit\test_meshy_adapter.py ...........                             [ 84%]
+tests\unit\test_concept_ingest.py .......                                [100%]
+
+- generated xml file: C:\Users\lenovo\devel\ai-game-factory\docs\reports\v0.4\core-lead-01.xml -
+============================= 45 passed in 2.32s ==============================

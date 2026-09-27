@@ -1,0 +1,163 @@
+{
+  "created_at": 1790504579.737958,
+  "job_id": "e58caab2-5785-4ff0-ae9e-04099e05397e",
+  "project_id": "75cd27c7-06f4-4e65-946b-4caa5cb3e99d",
+  "asset_id": null,
+  "pipeline_version": "studio-1",
+  "recipe": {
+    "project_id": "75cd27c7-06f4-4e65-946b-4caa5cb3e99d",
+    "asset_id": null,
+    "brief": {
+      "subject": "Single closed sci-fi energy crate, chunky beveled dark slate metal box with cyan light strips, one object centered alone, full object, three-quarter product photograph on plain gray background",
+      "asset_type": "prop",
+      "purpose": "Single-object image-to-3d reference",
+      "silhouette": "one complete readable subject",
+      "camera": "three quarter",
+      "lighting": "soft studio",
+      "material": "stylized",
+      "negative_constraints": [
+        "collage",
+        "grid",
+        "multiple views",
+        "multiple objects",
+        "contact sheet",
+        "text",
+        "letters",
+        "logo",
+        "cropped"
+      ],
+      "references": [],
+      "width": 768,
+      "height": 768,
+      "transparent": false,
+      "isolate_subject": true,
+      "pixel_size": 64,
+      "palette": []
+    },
+    "operation": "generate",
+    "model_id": "sdxl-base",
+    "style_id": null,
+    "profile": "balanced",
+    "seed": 40402,
+    "candidates": 1,
+    "source": null,
+    "frames": [],
+    "strength": 0.35,
+    "scale": 2,
+    "timeout_seconds": 900,
+    "auto_refine": false,
+    "lora_id": null,
+    "conditioning": {
+      "ip_adapter_id": null,
+      "reference_index": 0,
+      "reference_scale": 0.55,
+      "reference_mode": "appearance",
+      "controlnet_id": null,
+      "control_image": null,
+      "control_scale": 0.7
+    },
+    "recolor": null,
+    "consistency_reference": null,
+    "resolved_style": null
+  },
+  "prompt": "Single closed sci-fi energy crate, chunky beveled dark slate metal box with cyan light strips, one object centered alone, full object, three-quarter product photograph on plain gray background, stylized game art, one complete readable subject, three quarter, soft studio, stylized",
+  "negative_prompt": "collage, grid, multiple views, multiple objects, contact sheet, text, letters, logo, cropped",
+  "seed": 40402,
+  "model": {
+    "id": "sdxl-base",
+    "repo": "stabilityai/stable-diffusion-xl-base-1.0",
+    "revision": "462165984030d82259a11f4367a4eed129e94a7b",
+    "license": "openrail++",
+    "capabilities": [
+      "text_to_image",
+      "image_to_image"
+    ],
+    "installed": true,
+    "path": "C:\\Users\\lenovo\\.cache\\huggingface\\hub\\models--stabilityai--stable-diffusion-xl-base-1.0\\snapshots\\462165984030d82259a11f4367a4eed129e94a7b",
+    "weights_bytes": 7105346772,
+    "license_status": "commercial-review-required"
+  },
+  "model_revision": "462165984030d82259a11f4367a4eed129e94a7b",
+  "license_status": "commercial-review-required",
+  "references": [],
+  "style": {},
+  "generation": {
+    "provider": "diffusers_sdxl",
+    "model": {
+      "id": "sdxl-base",
+      "repo": "stabilityai/stable-diffusion-xl-base-1.0",
+      "revision": "462165984030d82259a11f4367a4eed129e94a7b",
+      "license": "openrail++",
+      "capabilities": [
+        "text_to_image",
+        "image_to_image"
+      ],
+      "installed": true,
+      "path": "C:\\Users\\lenovo\\.cache\\huggingface\\hub\\models--stabilityai--stable-diffusion-xl-base-1.0\\snapshots\\462165984030d82259a11f4367a4eed129e94a7b",
+      "weights_bytes": 7105346772,
+      "license_status": "commercial-review-required"
+    },
+    "conditioning": {},
+    "prompt_limits": [
+      {
+        "tokenizer": "tokenizer",
+        "tokens": 60,
+        "limit": 77,
+        "truncated": false
+      },
+      {
+        "tokenizer": "tokenizer_2",
+        "tokens": 60,
+        "limit": 77,
+        "truncated": false
+      }
+    ],
+    "seed": 40402,
+    "width": 768,
+    "height": 768,
+    "steps": 25,
+    "profile": "balanced",
+    "dtype": "float16",
+    "offload": "model",
+    "vae_tiling": true,
+    "peak_vram_allocated_mb": 5233.8,
+    "peak_vram_reserved_mb": 5566.0,
+    "torch": "2.6.0+cu124",
+    "lora": null,
+    "determinism": "same environment/model/profile; cross-device bitwise equality not guaranteed"
+  },
+  "processing": {
+    "operations": []
+  },
+  "sha256": "be3e9cf1a190fdfb31be85580508f73397217f399c553bd34c18924adc30e25d",
+  "quality": {
+    "passed": true,
+    "score": 100.0,
+    "checks": {
+      "decodable": true,
+      "width": 768,
+      "height": 768,
+      "nonempty": true,
+      "content_variance": 4873.69873046875,
+      "has_transparency": false,
+      "binary_alpha": true,
+      "palette_size": 92735,
+      "laplacian_variance": 327.106,
+      "edge_contact": true,
+      "spatial_variance": 4825.998046875,
+      "failures": []
+    },
+    "warnings": [],
+    "unassessed": [
+      "prompt_alignment",
+      "watermark_ocr",
+      "reference_identity",
+      "artistic_quality"
+    ]
+  },
+  "usage_notes": [
+    "Human visual and license review required",
+    "Semantic identity and watermark checks are not assessed"
+  ],
+  "parent_provenance": null
+}

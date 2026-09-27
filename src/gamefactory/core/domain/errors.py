@@ -148,3 +148,111 @@ class ReconciliationRequired(FactoryError):
         super().__init__(message, code="RECONCILIATION_REQUIRED", details=merged)
         self.task_id = task_id
         self.execution_id = execution_id
+
+
+# V0.4 Asset Pipeline Structured Failure Taxonomy (Section 34)
+
+
+class SpecInvalidError(ValidationError):
+    """Raised when an asset specification violates schema or domain constraints."""
+
+    def __init__(self, message: str, details: dict[str, Any] | None = None) -> None:
+        super().__init__(message, details=details)
+        self.code = "SPEC_INVALID"
+
+
+class BudgetBlockedError(BudgetExceeded):
+    """Raised when asset generation or processing is blocked due to budget policy."""
+
+    def __init__(self, message: str, details: dict[str, Any] | None = None) -> None:
+        super().__init__(message, details=details)
+        self.code = "BUDGET_BLOCKED"
+
+
+class ProviderFailedError(FactoryError):
+    """Raised when an asset generation provider returns a failure or fails execution."""
+
+    def __init__(
+        self, message: str, provider: str | None = None, details: dict[str, Any] | None = None
+    ) -> None:
+        merged = details or {}
+        if provider:
+            merged["provider"] = provider
+        super().__init__(message, code="PROVIDER_FAILED", details=merged)
+        self.provider = provider
+
+
+class ProviderUncertainError(ReconciliationRequired):
+    """Raised when provider acceptance is uncertain after a crash or timeout."""
+
+    def __init__(
+        self,
+        message: str,
+        task_id: str,
+        execution_id: str,
+        provider: str | None = None,
+        details: dict[str, Any] | None = None,
+    ) -> None:
+        merged = details or {}
+        if provider:
+            merged["provider"] = provider
+        super().__init__(message, task_id=task_id, execution_id=execution_id, details=merged)
+        self.code = "PROVIDER_UNCERTAIN"
+        self.provider = provider
+
+
+class RawArtifactInvalidError(ArtifactError):
+    """Raised when raw model output from a provider is missing, corrupt, or invalid."""
+
+    def __init__(self, message: str, details: dict[str, Any] | None = None) -> None:
+        super().__init__(message, details=details)
+        self.code = "RAW_ARTIFACT_INVALID"
+
+
+class DccFailedError(ToolExecutionError):
+    """Raised when Blender or DCC processing script execution fails or times out."""
+
+    def __init__(
+        self,
+        message: str,
+        exit_code: int | None = None,
+        stderr: str | None = None,
+        details: dict[str, Any] | None = None,
+    ) -> None:
+        super().__init__(message, exit_code=exit_code, stderr=stderr, details=details)
+        self.code = "DCC_FAILED"
+
+
+class AssetValidationFailedError(ValidationError):
+    """Raised when deterministic asset validation checks fail on the processed asset."""
+
+    def __init__(self, message: str, details: dict[str, Any] | None = None) -> None:
+        super().__init__(message, details=details)
+        self.code = "ASSET_VALIDATION_FAILED"
+
+
+class EngineImportFailedError(FactoryError):
+    """Raised when the game engine fails to import or stage the processed asset."""
+
+    def __init__(self, message: str, details: dict[str, Any] | None = None) -> None:
+        super().__init__(message, code="ENGINE_IMPORT_FAILED", details=details)
+
+
+class RuntimeValidationFailedError(FactoryError):
+    """Raised when in-engine runtime verification or observation checks fail."""
+
+    def __init__(self, message: str, details: dict[str, Any] | None = None) -> None:
+        super().__init__(message, code="RUNTIME_VALIDATION_FAILED", details=details)
+
+
+class VisualReviewRejectedError(FactoryError):
+    """Raised when human reviewer rejects an asset during visual review."""
+
+    def __init__(
+        self, message: str, actor: str | None = None, details: dict[str, Any] | None = None
+    ) -> None:
+        merged = details or {}
+        if actor:
+            merged["actor"] = actor
+        super().__init__(message, code="VISUAL_REVIEW_REJECTED", details=merged)
+        self.actor = actor

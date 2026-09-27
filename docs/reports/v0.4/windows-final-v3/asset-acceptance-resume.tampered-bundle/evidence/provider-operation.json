@@ -1,0 +1,12 @@
+{
+  "actual_cost": 5.0,
+  "concept_sha256": "30329b6163561da25974b95a03e98de51232d4e62364e6883dd0b6cca10cd3ca",
+  "external_task_id": "FAKE-OP-5ead05f126bd093a",
+  "operation": "image-to-3d",
+  "provider": "fake",
+  "request_fingerprint": "2992b5747f525185a230a677fd748d13cad21bad4b9365544c69d33f68feddba",
+  "revision": 1,
+  "status": "SUCCEEDED",
+  "task_id": "WF-ASSET-46b06f44-PAID-GENERATION",
+  "workflow_id": "WF-ASSET-46b06f44"
+}

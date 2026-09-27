@@ -1,0 +1,990 @@
+unformatted: File would be reformatted
+  --> docs\reports\v0.3-rendered\descendant-candidate\freeze_candidate.py:2:1
+   |
+1  | """Record final candidate source and compare all executed snapshot hashes."""
+2  +
+3  | import hashlib
+--------------------------------------------------------------------------------
+9  | root = Path.cwd()
+   - evidence = root / 'docs/reports/v0.3-rendered/descendant-candidate'
+   - tracked = subprocess.check_output(['git', 'ls-files', '-z']).decode().split('\0')
+   - paths = [p for p in tracked if p and (p.startswith(('src/', 'tests/', 'scripts/', 'examples/', '.github/')) or p in ('pyproject.toml', 'README.md'))]
+10 + evidence = root / "docs/reports/v0.3-rendered/descendant-candidate"
+11 + tracked = subprocess.check_output(["git", "ls-files", "-z"]).decode().split("\0")
+12 + paths = [
+13 +     p
+14 +     for p in tracked
+15 +     if p
+16 +     and (
+17 +         p.startswith(("src/", "tests/", "scripts/", "examples/", ".github/"))
+18 +         or p in ("pyproject.toml", "README.md")
+19 +     )
+20 + ]
+21 | hashes = {}
+22 | for name in sorted(paths):
+23 |     data = (root / name).read_bytes()
+   -     hashes[name] = {'sha256_raw': hashlib.sha256(data).hexdigest(), 'sha256_lf': hashlib.sha256(data.replace(b'\r\n', b'\n')).hexdigest()}
+24 +     hashes[name] = {
+25 +         "sha256_raw": hashlib.sha256(data).hexdigest(),
+26 +         "sha256_lf": hashlib.sha256(data.replace(b"\r\n", b"\n")).hexdigest(),
+27 +     }
+28 | comparisons = {}
+   - for label in ('windows-312', 'linux-311', 'linux-312'):
+   -     summary = json.loads((evidence / f'{label}-summary.json').read_text())
+   -     generated = [p for p in summary['source_sha256_lf'] if p.startswith('src/gamefactory.egg-info/')]
+   -     mismatches = [p for p, value in summary['source_sha256_lf'].items() if p not in generated and value != hashes[p]['sha256_lf']]
+29 + for label in ("windows-312", "linux-311", "linux-312"):
+30 +     summary = json.loads((evidence / f"{label}-summary.json").read_text())
+31 +     generated = [
+32 +         p for p in summary["source_sha256_lf"] if p.startswith("src/gamefactory.egg-info/")
+33 +     ]
+34 +     mismatches = [
+35 +         p
+36 +         for p, value in summary["source_sha256_lf"].items()
+37 +         if p not in generated and value != hashes[p]["sha256_lf"]
+38 +     ]
+39 |     assert not mismatches, (label, mismatches)
+   -     comparisons[label] = {'source_match': True, 'excluded_generated_install_metadata': generated, 'commands': summary['commands']}
+   -     assert all(command['exit_code'] == 0 for command in summary['commands']), label
+40 +     comparisons[label] = {
+41 +         "source_match": True,
+42 +         "excluded_generated_install_metadata": generated,
+43 +         "commands": summary["commands"],
+44 +     }
+45 +     assert all(command["exit_code"] == 0 for command in summary["commands"]), label
+46 |     results = {}
+   -     for scope in ('target', 'full'):
+   -         suite = ET.parse(evidence / f'{label}-{scope}.xml').getroot().find('testsuite')
+47 +     for scope in ("target", "full"):
+48 +         suite = ET.parse(evidence / f"{label}-{scope}.xml").getroot().find("testsuite")
+49 |         assert suite is not None
+   -         case = next(c for c in suite.findall('testcase') if c.get('name') == 'test_parent_exit_descendant_bounded_and_cleaned')
+   -         assert not any(case.find(kind) is not None for kind in ('failure', 'error', 'skipped'))
+   -         results[scope] = {'suite': suite.attrib, 'descendant_case': case.attrib, 'descendant_result': 'passed'}
+   -     comparisons[label]['results'] = results
+   - base = subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip()
+   - changed = subprocess.check_output(['git', 'diff', '--name-only'], text=True).splitlines()
+   - manifest = {'base_commit': base, 'candidate': 'uncommitted test-only delta; no final candidate SHA yet', 'source_hashes': hashes, 'validation_source_comparisons': comparisons, 'tracked_files_changed': changed}
+   - (evidence / 'final-source-manifest.json').write_text(json.dumps(manifest, indent=2), encoding='utf-8')
+   - print(json.dumps({'base': base, 'files_hashed': len(hashes), 'validated_snapshots': list(comparisons), 'changed': changed}, indent=2))
+50 +         case = next(
+51 +             c
+52 +             for c in suite.findall("testcase")
+53 +             if c.get("name") == "test_parent_exit_descendant_bounded_and_cleaned"
+54 +         )
+55 +         assert not any(case.find(kind) is not None for kind in ("failure", "error", "skipped"))
+56 +         results[scope] = {
+57 +             "suite": suite.attrib,
+58 +             "descendant_case": case.attrib,
+59 +             "descendant_result": "passed",
+60 +         }
+61 +     comparisons[label]["results"] = results
+62 + base = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
+63 + changed = subprocess.check_output(["git", "diff", "--name-only"], text=True).splitlines()
+64 + manifest = {
+65 +     "base_commit": base,
+66 +     "candidate": "uncommitted test-only delta; no final candidate SHA yet",
+67 +     "source_hashes": hashes,
+68 +     "validation_source_comparisons": comparisons,
+69 +     "tracked_files_changed": changed,
+70 + }
+71 + (evidence / "final-source-manifest.json").write_text(
+72 +     json.dumps(manifest, indent=2), encoding="utf-8"
+73 + )
+74 + print(
+75 +     json.dumps(
+76 +         {
+77 +             "base": base,
+78 +             "files_hashed": len(hashes),
+79 +             "validated_snapshots": list(comparisons),
+80 +             "changed": changed,
+81 +         },
+82 +         indent=2,
+83 +     )
+84 + )
+   |
+
+unformatted: File would be reformatted
+  --> docs\reports\v0.3-rendered\descendant-candidate\validate_candidate.py:2:1
+   |
+1  | """Single-pass final-source validation; preserve all command results."""
+2  +
+3  | import hashlib
+--------------------------------------------------------------------------------
+11 | repo, evidence, label = Path(sys.argv[1]), Path(sys.argv[2]), sys.argv[3]
+   - if sys.platform.startswith('linux'):
+   -     work = Path('/tmp/descendant-candidate')
+12 + if sys.platform.startswith("linux"):
+13 +     work = Path("/tmp/descendant-candidate")
+14 |     work.mkdir(exist_ok=False)
+   -     for name in ('src', 'tests', 'scripts', 'examples'):
+   -         shutil.copytree(repo / name, work / name, ignore=shutil.ignore_patterns('__pycache__', '.godot', '.gamefactory'))
+   -     for name in ('pyproject.toml', 'README.md'):
+15 +     for name in ("src", "tests", "scripts", "examples"):
+16 +         shutil.copytree(
+17 +             repo / name,
+18 +             work / name,
+19 +             ignore=shutil.ignore_patterns("__pycache__", ".godot", ".gamefactory"),
+20 +         )
+21 +     for name in ("pyproject.toml", "README.md"):
+22 |         shutil.copy2(repo / name, work / name)
+23 | else:
+24 |     work = repo
+25 | evidence.mkdir(parents=True, exist_ok=True)
+   - (work / '.verification').mkdir(exist_ok=True)
+   - files = sorted(p for directory in ('src', 'tests', 'scripts') for p in (work / directory).rglob('*') if p.is_file() and '__pycache__' not in p.parts)
+   - record = {'python': sys.version, 'platform': platform.platform(), 'source_sha256_lf': {p.relative_to(work).as_posix(): hashlib.sha256(p.read_bytes().replace(b'\r\n', b'\n')).hexdigest() for p in files}, 'commands': []}
+26 + (work / ".verification").mkdir(exist_ok=True)
+27 + files = sorted(
+28 +     p
+29 +     for directory in ("src", "tests", "scripts")
+30 +     for p in (work / directory).rglob("*")
+31 +     if p.is_file() and "__pycache__" not in p.parts
+32 + )
+33 + record = {
+34 +     "python": sys.version,
+35 +     "platform": platform.platform(),
+36 +     "source_sha256_lf": {
+37 +         p.relative_to(work).as_posix(): hashlib.sha256(
+38 +             p.read_bytes().replace(b"\r\n", b"\n")
+39 +         ).hexdigest()
+40 +         for p in files
+41 +     },
+42 +     "commands": [],
+43 + }
+44 | commands = []
+   - if sys.platform.startswith('linux'):
+   -     commands.append(('install', ['-m', 'pip', 'install', '-e', '.[dev]']))
+   - commands.extend([
+   -     ('target', ['-m', 'pytest', '-ra', '-p', 'no:cacheprovider', 'tests/integration/test_process_runner.py', f'--junitxml={evidence / (label + "-target.xml")}']),
+   -     ('full', ['-m', 'pytest', '-ra', '-p', 'no:cacheprovider', f'--junitxml={evidence / (label + "-full.xml")}']),
+   -     ('ruff-check', ['-m', 'ruff', 'check', 'src', 'tests']),
+   -     ('ruff-format', ['-m', 'ruff', 'format', '--check', 'src', 'tests']),
+   -     ('mypy', ['-m', 'mypy', 'src/gamefactory']),
+   - ])
+45 + if sys.platform.startswith("linux"):
+46 +     commands.append(("install", ["-m", "pip", "install", "-e", ".[dev]"]))
+47 + commands.extend(
+48 +     [
+49 +         (
+50 +             "target",
+51 +             [
+52 +                 "-m",
+53 +                 "pytest",
+54 +                 "-ra",
+55 +                 "-p",
+56 +                 "no:cacheprovider",
+57 +                 "tests/integration/test_process_runner.py",
+58 +                 f"--junitxml={evidence / (label + '-target.xml')}",
+59 +             ],
+60 +         ),
+61 +         (
+62 +             "full",
+63 +             [
+64 +                 "-m",
+65 +                 "pytest",
+66 +                 "-ra",
+67 +                 "-p",
+68 +                 "no:cacheprovider",
+69 +                 f"--junitxml={evidence / (label + '-full.xml')}",
+70 +             ],
+71 +         ),
+72 +         ("ruff-check", ["-m", "ruff", "check", "src", "tests"]),
+73 +         ("ruff-format", ["-m", "ruff", "format", "--check", "src", "tests"]),
+74 +         ("mypy", ["-m", "mypy", "src/gamefactory"]),
+75 +     ]
+76 + )
+77 | for name, args in commands:
+   -     if name in ('target', 'full'):
+   -         args.append(f'--basetemp={work / ".verification" / (label + "-" + name)}')
+78 +     if name in ("target", "full"):
+79 +         args.append(f"--basetemp={work / '.verification' / (label + '-' + name)}")
+80 |     argv = [sys.executable, *args]
+   -     with (evidence / f'{label}-{name}.txt').open('w', encoding='utf-8') as log:
+81 +     with (evidence / f"{label}-{name}.txt").open("w", encoding="utf-8") as log:
+82 |         try:
+   -             code = subprocess.run(argv, cwd=work, stdout=log, stderr=subprocess.STDOUT, timeout=300).returncode
+83 +             code = subprocess.run(
+84 +                 argv, cwd=work, stdout=log, stderr=subprocess.STDOUT, timeout=300
+85 +             ).returncode
+86 |         except subprocess.TimeoutExpired:
+   -             code = 'TIMEOUT'
+   -     record['commands'].append({'name': name, 'argv': argv, 'exit_code': code})
+   -     (evidence / f'{label}-summary.json').write_text(json.dumps(record, indent=2), encoding='utf-8')
+   -     print(f'{label} {name}: {code}', flush=True)
+   -     if name == 'install' and code != 0:
+87 +             code = "TIMEOUT"
+88 +     record["commands"].append({"name": name, "argv": argv, "exit_code": code})
+89 +     (evidence / f"{label}-summary.json").write_text(json.dumps(record, indent=2), encoding="utf-8")
+90 +     print(f"{label} {name}: {code}", flush=True)
+91 +     if name == "install" and code != 0:
+92 |         break
+   - raise SystemExit(0 if all(c['exit_code'] == 0 for c in record['commands']) else 1)
+93 + raise SystemExit(0 if all(c["exit_code"] == 0 for c in record["commands"]) else 1)
+   |
+
+unformatted: File would be reformatted
+  --> docs\reports\v0.3-rendered\linux-regression-fix\probe_clock.py:2:1
+   |
+1  | """Show the baseline absolute-deadline / internal-elapsed contract deterministically."""
+2  +
+3  | import importlib.util
+--------------------------------------------------------------------------------
+8  |
+   - repo = next(p for p in Path(__file__).resolve().parents if (p / 'pyproject.toml').exists())
+   - root = repo / '.verification/linux-regression-fix'
+   - spec = importlib.util.spec_from_file_location('baseline_verifier', root / 'baseline/scripts/verify_godot_live_crash.py')
+9  + repo = next(p for p in Path(__file__).resolve().parents if (p / "pyproject.toml").exists())
+10 + root = repo / ".verification/linux-regression-fix"
+11 + spec = importlib.util.spec_from_file_location(
+12 +     "baseline_verifier", root / "baseline/scripts/verify_godot_live_crash.py"
+13 + )
+14 | module = importlib.util.module_from_spec(spec)
+--------------------------------------------------------------------------------
+21 |
+22 +
+23 | def poll(fd, timeout):
+   -     polls.append({'at': clock.now, 'timeout': timeout})
+24 +     polls.append({"at": clock.now, "timeout": timeout})
+25 |     clock.now += min(timeout, 0.0078125)  # Early/empty poll returns.
+26 |     return False, None
+27 |
+28 +
+29 | module.time = SimpleNamespace(monotonic=lambda: clock.now)
+   - probe = SimpleNamespace(task_states=lambda pid: {pid: 'R'}, read_exe=lambda pid: '/bin/sleep')
+   - observation = module.wait_for_owned_thread_group(module.LinuxProcessRef(40, '100', -1, 'pidfd'), deadline, probe=probe, poll_pidfd=poll)
+30 + probe = SimpleNamespace(task_states=lambda pid: {pid: "R"}, read_exe=lambda pid: "/bin/sleep")
+31 + observation = module.wait_for_owned_thread_group(
+32 +     module.LinuxProcessRef(40, "100", -1, "pidfd"), deadline, probe=probe, poll_pidfd=poll
+33 + )
+34 | assert clock.now == deadline
+35 | assert observation.elapsed_seconds == 0.046875
+   - assert observation.status == 'unknown'
+   - print(json.dumps({'baseline': '8af661f9e2e407c6ec0ac22a9a9ed91f43d3de92', 'deadline_created_at': 0.0, 'deadline': deadline, 'entry_and_elapsed_start': 0.015625, 'return_time': clock.now, 'observation': observation.as_report(), 'early_empty_polls': polls, 'conclusion': 'Deadline reached exactly; internal elapsed excludes caller-to-entry delay.'}, indent=2))
+36 + assert observation.status == "unknown"
+37 + print(
+38 +     json.dumps(
+39 +         {
+40 +             "baseline": "8af661f9e2e407c6ec0ac22a9a9ed91f43d3de92",
+41 +             "deadline_created_at": 0.0,
+42 +             "deadline": deadline,
+43 +             "entry_and_elapsed_start": 0.015625,
+44 +             "return_time": clock.now,
+45 +             "observation": observation.as_report(),
+46 +             "early_empty_polls": polls,
+47 +             "conclusion": "Deadline reached exactly; internal elapsed excludes caller-to-entry delay.",
+48 +         },
+49 +         indent=2,
+50 +     )
+51 + )
+   |
+
+unformatted: File would be reformatted
+   --> docs\reports\v0.3-rendered\linux-regression-fix\probe_fixture.py:2:1
+    |
+1   | """One-shot supervisor-free A/B diagnostic of the baseline inline fixture."""
+2   +
+3   | import ast
+--------------------------------------------------------------------------------
+11  |
+    - source = pathlib.Path('/repo/.verification/linux-regression-fix/baseline/tests/integration/test_verify_godot_live_crash.py').read_text()
+12  + source = pathlib.Path(
+13  +     "/repo/.verification/linux-regression-fix/baseline/tests/integration/test_verify_godot_live_crash.py"
+14  + ).read_text()
+15  | tree = ast.parse(source)
+    - test = next(n for n in tree.body if isinstance(n, ast.FunctionDef) and n.name == 'test_linux_leader_exit_leaves_worker_alive_until_worker_exits')
+    - script = next(n.value.value for n in test.body if isinstance(n, ast.Assign) and any(isinstance(t, ast.Name) and t.id == 'script' for t in n.targets))
+16  + test = next(
+17  +     n
+18  +     for n in tree.body
+19  +     if isinstance(n, ast.FunctionDef)
+20  +     and n.name == "test_linux_leader_exit_leaves_worker_alive_until_worker_exits"
+21  + )
+22  + script = next(
+23  +     n.value.value
+24  +     for n in test.body
+25  +     if isinstance(n, ast.Assign)
+26  +     and any(isinstance(t, ast.Name) and t.id == "script" for t in n.targets)
+27  + )
+28  | results = []
+    - for variant in ('original', 'without_manual_save_thread'):
+29  + for variant in ("original", "without_manual_save_thread"):
+30  |     code = script
+    -     if variant != 'original':
+    -         code = code.replace('save = ctypes.pythonapi.PyEval_SaveThread\nsave.restype = ctypes.c_void_p\nsave()\n', '')
+31  +     if variant != "original":
+32  +         code = code.replace(
+33  +             "save = ctypes.pythonapi.PyEval_SaveThread\nsave.restype = ctypes.c_void_p\nsave()\n",
+34  +             "",
+35  +         )
+36  |     with tempfile.TemporaryDirectory() as folder:
+37  |         root = pathlib.Path(folder)
+    -         ready, beat, release, stop = [root / n for n in ('ready', 'beat', 'release', 'stop')]
+    -         proc = subprocess.Popen([sys.executable, '-X', 'faulthandler', '-c', code, *map(str, (ready, beat, release, stop))], stderr=subprocess.PIPE, text=True)
+    -         record = {'variant': variant, 'pid': proc.pid}
+38  +         ready, beat, release, stop = [root / n for n in ("ready", "beat", "release", "stop")]
+39  +         proc = subprocess.Popen(
+40  +             [
+41  +                 sys.executable,
+42  +                 "-X",
+43  +                 "faulthandler",
+44  +                 "-c",
+45  +                 code,
+46  +                 *map(str, (ready, beat, release, stop)),
+47  +             ],
+48  +             stderr=subprocess.PIPE,
+49  +             text=True,
+50  +         )
+51  +         record = {"variant": variant, "pid": proc.pid}
+52  |         try:
+53  |             deadline = time.monotonic() + 3
+54  |             while not ready.exists() and time.monotonic() < deadline:
+    -                 time.sleep(.01)
+    -             record['ready'] = ready.exists()
+    -             release.write_text('go')
+55  +                 time.sleep(0.01)
+56  +             record["ready"] = ready.exists()
+57  +             release.write_text("go")
+58  |             deadline = time.monotonic() + 2
+    -             leader = ''
+59  +             leader = ""
+60  |             while time.monotonic() < deadline:
+    -                 raw = pathlib.Path(f'/proc/{proc.pid}/stat').read_text()
+    -                 leader = raw[raw.rfind(')') + 1:].split()[0]
+    -                 if leader == 'Z':
+61  +                 raw = pathlib.Path(f"/proc/{proc.pid}/stat").read_text()
+62  +                 leader = raw[raw.rfind(")") + 1 :].split()[0]
+63  +                 if leader == "Z":
+64  |                     break
+    -                 time.sleep(.01)
+    -             record['leader_state'] = leader
+65  +                 time.sleep(0.01)
+66  +             record["leader_state"] = leader
+67  |             first = beat.read_text() if beat.exists() else None
+68  |             deadline = time.monotonic() + 1
+69  |             second = first
+70  |             while second == first and time.monotonic() < deadline:
+    -                 time.sleep(.01)
+71  +                 time.sleep(0.01)
+72  |                 second = beat.read_text() if beat.exists() else None
+73  |             record.update(first=first, second=second, worker_progress=first != second)
+    -             record['tasks'] = {}
+    -             for stat in pathlib.Path(f'/proc/{proc.pid}/task').glob('*/stat'):
+74  +             record["tasks"] = {}
+75  +             for stat in pathlib.Path(f"/proc/{proc.pid}/task").glob("*/stat"):
+76  |                 raw = stat.read_text()
+    -                 record['tasks'][stat.parent.name] = raw[raw.rfind(')') + 1:].split()[0]
+77  +                 record["tasks"][stat.parent.name] = raw[raw.rfind(")") + 1 :].split()[0]
+78  |         except Exception as exc:
+    -             record['error'] = repr(exc)
+79  +             record["error"] = repr(exc)
+80  |         finally:
+    -             stop.write_text('stop')
+81  +             stop.write_text("stop")
+82  |             try:
+--------------------------------------------------------------------------------
+86  |                 _, stderr = proc.communicate(timeout=2)
+    -                 record['cleanup_killed'] = True
+87  +                 record["cleanup_killed"] = True
+88  |             record.update(exit_code=proc.returncode, stderr=stderr)
+89  |         results.append(record)
+    - print(json.dumps({'python': sys.version, 'platform': platform.platform(), 'supervisor_used': False, 'results': results}, indent=2))
+90  + print(
+91  +     json.dumps(
+92  +         {
+93  +             "python": sys.version,
+94  +             "platform": platform.platform(),
+95  +             "supervisor_used": False,
+96  +             "results": results,
+97  +         },
+98  +         indent=2,
+99  +     )
+100 + )
+    |
+
+unformatted: File would be reformatted
+   --> docs\reports\v0.3-rendered\linux-regression-fix\validate_linux.py:2:1
+    |
+1   | """Fixed five-run series and full validation; records every result without retries."""
+2   +
+3   | import hashlib
+--------------------------------------------------------------------------------
+13  | revision = sys.argv[2]
+    - repo = Path('/repo')
+    - work = Path('/tmp') / ('gf-' + revision)
+    - evidence = Path('/evidence')
+14  + repo = Path("/repo")
+15  + work = Path("/tmp") / ("gf-" + revision)
+16  + evidence = Path("/evidence")
+17  | work.mkdir(exist_ok=False)
+    - for name in ('src', 'tests', 'scripts', 'examples'):
+    -     shutil.copytree(repo / name, work / name, ignore=shutil.ignore_patterns('__pycache__', '.godot', '.gamefactory'))
+    - for name in ('pyproject.toml', 'README.md'):
+18  + for name in ("src", "tests", "scripts", "examples"):
+19  +     shutil.copytree(
+20  +         repo / name,
+21  +         work / name,
+22  +         ignore=shutil.ignore_patterns("__pycache__", ".godot", ".gamefactory"),
+23  +     )
+24  + for name in ("pyproject.toml", "README.md"):
+25  |     shutil.copy2(repo / name, work / name)
+    - manifest = {str(p.relative_to(work)): hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted(work.rglob('*')) if p.is_file()}
+    - record = {'python': sys.version, 'platform': platform.platform(), 'revision': revision, 'manifest': manifest, 'commands': []}
+    - summary = evidence / f'{revision}-{label}-summary.json'
+26  + manifest = {
+27  +     str(p.relative_to(work)): hashlib.sha256(p.read_bytes()).hexdigest()
+28  +     for p in sorted(work.rglob("*"))
+29  +     if p.is_file()
+30  + }
+31  + record = {
+32  +     "python": sys.version,
+33  +     "platform": platform.platform(),
+34  +     "revision": revision,
+35  +     "manifest": manifest,
+36  +     "commands": [],
+37  + }
+38  + summary = evidence / f"{revision}-{label}-summary.json"
+39  +
+40  |
+41  | def run(name, args, timeout=180):
+    -     log = evidence / f'{revision}-{label}-{name}.txt'
+    -     with log.open('w') as output:
+42  +     log = evidence / f"{revision}-{label}-{name}.txt"
+43  +     with log.open("w") as output:
+44  |         try:
+    -             result = subprocess.run(args, cwd=work, stdout=output, stderr=subprocess.STDOUT, timeout=timeout)
+45  +             result = subprocess.run(
+46  +                 args, cwd=work, stdout=output, stderr=subprocess.STDOUT, timeout=timeout
+47  +             )
+48  |             code = result.returncode
+49  |         except subprocess.TimeoutExpired:
+    -             code = 'TIMEOUT'
+    -     record['commands'].append({'name': name, 'argv': args, 'exit_code': code, 'log': log.name})
+50  +             code = "TIMEOUT"
+51  +     record["commands"].append({"name": name, "argv": args, "exit_code": code, "log": log.name})
+52  |     summary.write_text(json.dumps(record, indent=2))
+    -     print(f'{label} {name}: {code}', flush=True)
+53  +     print(f"{label} {name}: {code}", flush=True)
+54  |     return code
+55  |
+    - if run('install', [sys.executable, '-m', 'pip', 'install', '-e', '.[dev]']) != 0:
+56  +
+57  + if run("install", [sys.executable, "-m", "pip", "install", "-e", ".[dev]"]) != 0:
+58  |     raise SystemExit(1)
+    - target = 'tests/integration/test_verify_godot_live_crash.py'
+59  + target = "tests/integration/test_verify_godot_live_crash.py"
+60  | for index in range(1, 6):
+    -     run(f'targeted-{index}', [sys.executable, '-m', 'pytest', '-ra', '-p', 'no:cacheprovider', target, '-k', 'linux_leader_exit_leaves_worker_alive_until_worker_exits or live_process_at_deadline_fails_with_evidence', f'--junitxml=/evidence/{revision}-{label}-targeted-{index}.xml'])
+    - run('full', [sys.executable, '-m', 'pytest', '-ra', '-p', 'no:cacheprovider', f'--junitxml=/evidence/{revision}-{label}-full.xml'], timeout=300)
+    - run('ruff-check', [sys.executable, '-m', 'ruff', 'check', 'src', 'tests', 'scripts/verify_godot_live_crash.py'])
+    - run('ruff-format', [sys.executable, '-m', 'ruff', 'format', '--check', 'src', 'tests', 'scripts/verify_godot_live_crash.py'])
+    - run('mypy', [sys.executable, '-m', 'mypy', 'src/gamefactory', 'scripts/verify_godot_live_crash.py'])
+    - raise SystemExit(0 if all(c['exit_code'] == 0 for c in record['commands']) else 1)
+61  +     run(
+62  +         f"targeted-{index}",
+63  +         [
+64  +             sys.executable,
+65  +             "-m",
+66  +             "pytest",
+67  +             "-ra",
+68  +             "-p",
+69  +             "no:cacheprovider",
+70  +             target,
+71  +             "-k",
+72  +             "linux_leader_exit_leaves_worker_alive_until_worker_exits or live_process_at_deadline_fails_with_evidence",
+73  +             f"--junitxml=/evidence/{revision}-{label}-targeted-{index}.xml",
+74  +         ],
+75  +     )
+76  + run(
+77  +     "full",
+78  +     [
+79  +         sys.executable,
+80  +         "-m",
+81  +         "pytest",
+82  +         "-ra",
+83  +         "-p",
+84  +         "no:cacheprovider",
+85  +         f"--junitxml=/evidence/{revision}-{label}-full.xml",
+86  +     ],
+87  +     timeout=300,
+88  + )
+89  + run(
+90  +     "ruff-check",
+91  +     [sys.executable, "-m", "ruff", "check", "src", "tests", "scripts/verify_godot_live_crash.py"],
+92  + )
+93  + run(
+94  +     "ruff-format",
+95  +     [
+96  +         sys.executable,
+97  +         "-m",
+98  +         "ruff",
+99  +         "format",
+100 +         "--check",
+101 +         "src",
+102 +         "tests",
+103 +         "scripts/verify_godot_live_crash.py",
+104 +     ],
+105 + )
+106 + run("mypy", [sys.executable, "-m", "mypy", "src/gamefactory", "scripts/verify_godot_live_crash.py"])
+107 + raise SystemExit(0 if all(c["exit_code"] == 0 for c in record["commands"]) else 1)
+    |
+
+unformatted: File would be reformatted
+  --> docs\reports\v0.3-rendered\windows-process-timeout\diagnostics\compare.py:10:15
+   |
+9  | repo = Path.cwd()
+   - area = repo / '.verification/windows-process-timeout'
+   - evidence = repo / 'docs/reports/v0.3-rendered/windows-process-timeout'
+   - baseline = repo / '.verification/linux-regression-fix/baseline'
+   - (area / 'runs').mkdir(exist_ok=True)
+   - for name, source in (('base', baseline), ('cand', repo)):
+10 + area = repo / ".verification/windows-process-timeout"
+11 + evidence = repo / "docs/reports/v0.3-rendered/windows-process-timeout"
+12 + baseline = repo / ".verification/linux-regression-fix/baseline"
+13 + (area / "runs").mkdir(exist_ok=True)
+14 + for name, source in (("base", baseline), ("cand", repo)):
+15 |     dest = area / name
+16 |     if dest.exists():
+17 |         continue
+18 |     dest.mkdir(exist_ok=False)
+   -     for directory in ('src', 'tests'):
+   -         shutil.copytree(source / directory, dest / directory, ignore=shutil.ignore_patterns('__pycache__'))
+   -     shutil.copy2(source / 'pyproject.toml', dest / 'pyproject.toml')
+   -     manifest = {str(p.relative_to(dest)): hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted(dest.rglob('*')) if p.is_file()}
+   -     (evidence / (name + '-manifest.json')).write_text(json.dumps(manifest, indent=2))
+19 +     for directory in ("src", "tests"):
+20 +         shutil.copytree(
+21 +             source / directory, dest / directory, ignore=shutil.ignore_patterns("__pycache__")
+22 +         )
+23 +     shutil.copy2(source / "pyproject.toml", dest / "pyproject.toml")
+24 +     manifest = {
+25 +         str(p.relative_to(dest)): hashlib.sha256(p.read_bytes()).hexdigest()
+26 +         for p in sorted(dest.rglob("*"))
+27 +         if p.is_file()
+28 +     }
+29 +     (evidence / (name + "-manifest.json")).write_text(json.dumps(manifest, indent=2))
+30 |
+   - plan = [('b1','base',False), ('c1','cand',False), ('c2','cand',False), ('b2','base',False), ('b3','base',False), ('c3','cand',False), ('b-stage','base',True), ('c-stage','cand',True)]
+   - plan = [('ready-' + label, snapshot, stages) for label, snapshot, stages in plan]
+   - (evidence / 'comparison-plan.json').write_text(json.dumps({'python': sys.executable, 'fixed_attempts': plan, 'outer_process_timeout': 30}, indent=2))
+31 + plan = [
+32 +     ("b1", "base", False),
+33 +     ("c1", "cand", False),
+34 +     ("c2", "cand", False),
+35 +     ("b2", "base", False),
+36 +     ("b3", "base", False),
+37 +     ("c3", "cand", False),
+38 +     ("b-stage", "base", True),
+39 +     ("c-stage", "cand", True),
+40 + ]
+41 + plan = [("ready-" + label, snapshot, stages) for label, snapshot, stages in plan]
+42 + (evidence / "comparison-plan.json").write_text(
+43 +     json.dumps(
+44 +         {"python": sys.executable, "fixed_attempts": plan, "outer_process_timeout": 30}, indent=2
+45 +     )
+46 + )
+47 | outcomes = []
+48 | for label, snapshot, stages in plan:
+49 |     root = area / snapshot
+50 |     env = dict(os.environ)
+   -     env.update(PYTHONPATH=os.pathsep.join((str(area), str(root/'src'), str(root))),
+   -                GF_EXPECTED_SOURCE=str(root/'src'), GF_DIAG_STAGES='1' if stages else '0',
+   -                GF_DIAG_OUTPUT=str(evidence/(label+'.json')), PYTEST_DISABLE_PLUGIN_AUTOLOAD='1')
+   -     args = [sys.executable, '-m', 'pytest', '-ra', '-p', 'no:cacheprovider', '-p', 'diag_plugin',
+   -             'tests/integration/test_process_runner.py::TestProcessRunner::test_parent_exit_descendant_bounded_and_cleaned',
+   -             '--basetemp='+str(area/'runs'/label), '--junitxml='+str(evidence/(label+'.xml'))]
+   -     with (evidence/(label+'.txt')).open('w', encoding='utf-8') as log:
+51 +     env.update(
+52 +         PYTHONPATH=os.pathsep.join((str(area), str(root / "src"), str(root))),
+53 +         GF_EXPECTED_SOURCE=str(root / "src"),
+54 +         GF_DIAG_STAGES="1" if stages else "0",
+55 +         GF_DIAG_OUTPUT=str(evidence / (label + ".json")),
+56 +         PYTEST_DISABLE_PLUGIN_AUTOLOAD="1",
+57 +     )
+58 +     args = [
+59 +         sys.executable,
+60 +         "-m",
+61 +         "pytest",
+62 +         "-ra",
+63 +         "-p",
+64 +         "no:cacheprovider",
+65 +         "-p",
+66 +         "diag_plugin",
+67 +         "tests/integration/test_process_runner.py::TestProcessRunner::test_parent_exit_descendant_bounded_and_cleaned",
+68 +         "--basetemp=" + str(area / "runs" / label),
+69 +         "--junitxml=" + str(evidence / (label + ".xml")),
+70 +     ]
+71 +     with (evidence / (label + ".txt")).open("w", encoding="utf-8") as log:
+72 |         try:
+   -             result = subprocess.run(args, cwd=root, env=env, stdout=log, stderr=subprocess.STDOUT, timeout=30)
+73 +             result = subprocess.run(
+74 +                 args, cwd=root, env=env, stdout=log, stderr=subprocess.STDOUT, timeout=30
+75 +             )
+76 |             code = result.returncode
+77 |         except subprocess.TimeoutExpired:
+   -             code = 'WATCHDOG_TIMEOUT'
+   -     outcomes.append({'attempt': label, 'snapshot': snapshot, 'instrumented': stages, 'exit_code': code, 'argv': args})
+   -     (evidence/'comparison-results.json').write_text(json.dumps(outcomes, indent=2))
+78 +             code = "WATCHDOG_TIMEOUT"
+79 +     outcomes.append(
+80 +         {
+81 +             "attempt": label,
+82 +             "snapshot": snapshot,
+83 +             "instrumented": stages,
+84 +             "exit_code": code,
+85 +             "argv": args,
+86 +         }
+87 +     )
+88 +     (evidence / "comparison-results.json").write_text(json.dumps(outcomes, indent=2))
+89 |     print(label, code, flush=True)
+   |
+
+unformatted: File would be reformatted
+  --> docs\reports\v0.3-rendered\windows-process-timeout\diagnostics\compare_root.py:8:15
+   |
+7  | repo = Path.cwd()
+   - area = repo / '.verification/windows-process-timeout'
+   - evidence = repo / 'docs/reports/v0.3-rendered/windows-process-timeout'
+   - plan = [('root-plain',False,False), ('root-stages',True,False), ('collection-plain',False,True), ('collection-stages',True,True)]
+   - (evidence / 'root-comparison-plan.json').write_text(json.dumps(plan, indent=2))
+8  + area = repo / ".verification/windows-process-timeout"
+9  + evidence = repo / "docs/reports/v0.3-rendered/windows-process-timeout"
+10 + plan = [
+11 +     ("root-plain", False, False),
+12 +     ("root-stages", True, False),
+13 +     ("collection-plain", False, True),
+14 +     ("collection-stages", True, True),
+15 + ]
+16 + (evidence / "root-comparison-plan.json").write_text(json.dumps(plan, indent=2))
+17 | results = []
+18 | for label, stages, collection in plan:
+19 |     env = dict(os.environ)
+   -     env.update(PYTHONPATH=os.pathsep.join((str(area), str(repo/'src'), str(repo))), GF_EXPECTED_SOURCE=str(repo/'src'), GF_DIAG_STAGES='1' if stages else '0', GF_DIAG_OUTPUT=str(evidence/(label+'.json')))
+20 +     env.update(
+21 +         PYTHONPATH=os.pathsep.join((str(area), str(repo / "src"), str(repo))),
+22 +         GF_EXPECTED_SOURCE=str(repo / "src"),
+23 +         GF_DIAG_STAGES="1" if stages else "0",
+24 +         GF_DIAG_OUTPUT=str(evidence / (label + ".json")),
+25 +     )
+26 |     # Preserve normal plugin autoload for comparison with the original failing runs.
+   -     env.pop('PYTEST_DISABLE_PLUGIN_AUTOLOAD', None)
+   -     selection = ['tests', '-k', 'test_parent_exit_descendant_bounded_and_cleaned'] if collection else ['tests/integration/test_process_runner.py::TestProcessRunner::test_parent_exit_descendant_bounded_and_cleaned']
+   -     args = [sys.executable, '-m', 'pytest', '-ra', '-p', 'no:cacheprovider', '-p', 'diag_plugin', *selection, '--basetemp='+str(area/'runs'/label), '--junitxml='+str(evidence/(label+'.xml'))]
+   -     with (evidence/(label+'.txt')).open('w', encoding='utf-8') as log:
+   -         result = subprocess.run(args, cwd=repo, env=env, stdout=log, stderr=subprocess.STDOUT, timeout=30)
+   -     results.append({'label':label, 'stages':stages, 'normal_collection':collection, 'exit_code':result.returncode, 'argv':args})
+   -     (evidence/'root-comparison-results.json').write_text(json.dumps(results, indent=2))
+27 +     env.pop("PYTEST_DISABLE_PLUGIN_AUTOLOAD", None)
+28 +     selection = (
+29 +         ["tests", "-k", "test_parent_exit_descendant_bounded_and_cleaned"]
+30 +         if collection
+31 +         else [
+32 +             "tests/integration/test_process_runner.py::TestProcessRunner::test_parent_exit_descendant_bounded_and_cleaned"
+33 +         ]
+34 +     )
+35 +     args = [
+36 +         sys.executable,
+37 +         "-m",
+38 +         "pytest",
+39 +         "-ra",
+40 +         "-p",
+41 +         "no:cacheprovider",
+42 +         "-p",
+43 +         "diag_plugin",
+44 +         *selection,
+45 +         "--basetemp=" + str(area / "runs" / label),
+46 +         "--junitxml=" + str(evidence / (label + ".xml")),
+47 +     ]
+48 +     with (evidence / (label + ".txt")).open("w", encoding="utf-8") as log:
+49 +         result = subprocess.run(
+50 +             args, cwd=repo, env=env, stdout=log, stderr=subprocess.STDOUT, timeout=30
+51 +         )
+52 +     results.append(
+53 +         {
+54 +             "label": label,
+55 +             "stages": stages,
+56 +             "normal_collection": collection,
+57 +             "exit_code": result.returncode,
+58 +             "argv": args,
+59 +         }
+60 +     )
+61 +     (evidence / "root-comparison-results.json").write_text(json.dumps(results, indent=2))
+62 |     print(label, result.returncode, flush=True)
+   |
+
+unformatted: File would be reformatted
+  --> docs\reports\v0.3-rendered\windows-process-timeout\diagnostics\compare_sequence.py:8:15
+   |
+7  | repo = Path.cwd()
+   - area = repo / '.verification/windows-process-timeout'
+   - evidence = repo / 'docs/reports/v0.3-rendered/windows-process-timeout'
+   - plan = [('module-stages','tests/integration/test_process_runner.py'), ('full-stages','tests')]
+   - (evidence/'sequence-plan.json').write_text(json.dumps(plan, indent=2))
+8  + area = repo / ".verification/windows-process-timeout"
+9  + evidence = repo / "docs/reports/v0.3-rendered/windows-process-timeout"
+10 + plan = [("module-stages", "tests/integration/test_process_runner.py"), ("full-stages", "tests")]
+11 + (evidence / "sequence-plan.json").write_text(json.dumps(plan, indent=2))
+12 | results = []
+13 | for label, selection in plan:
+14 |     env = dict(os.environ)
+   -     env.update(PYTHONPATH=os.pathsep.join((str(area), str(repo/'src'), str(repo))), GF_EXPECTED_SOURCE=str(repo/'src'), GF_DIAG_STAGES='1', GF_DIAG_OUTPUT=str(evidence/(label+'.json')))
+   -     args = [sys.executable, '-m', 'pytest', '-ra', '-p', 'no:cacheprovider', '-p', 'diag_plugin', selection, '--basetemp='+str(area/'runs'/label), '--junitxml='+str(evidence/(label+'.xml'))]
+   -     with (evidence/(label+'.txt')).open('w', encoding='utf-8') as log:
+   -         result = subprocess.run(args, cwd=repo, env=env, stdout=log, stderr=subprocess.STDOUT, timeout=180)
+   -     results.append({'label':label, 'exit_code':result.returncode, 'argv':args})
+   -     (evidence/'sequence-results.json').write_text(json.dumps(results, indent=2))
+15 +     env.update(
+16 +         PYTHONPATH=os.pathsep.join((str(area), str(repo / "src"), str(repo))),
+17 +         GF_EXPECTED_SOURCE=str(repo / "src"),
+18 +         GF_DIAG_STAGES="1",
+19 +         GF_DIAG_OUTPUT=str(evidence / (label + ".json")),
+20 +     )
+21 +     args = [
+22 +         sys.executable,
+23 +         "-m",
+24 +         "pytest",
+25 +         "-ra",
+26 +         "-p",
+27 +         "no:cacheprovider",
+28 +         "-p",
+29 +         "diag_plugin",
+30 +         selection,
+31 +         "--basetemp=" + str(area / "runs" / label),
+32 +         "--junitxml=" + str(evidence / (label + ".xml")),
+33 +     ]
+34 +     with (evidence / (label + ".txt")).open("w", encoding="utf-8") as log:
+35 +         result = subprocess.run(
+36 +             args, cwd=repo, env=env, stdout=log, stderr=subprocess.STDOUT, timeout=180
+37 +         )
+38 +     results.append({"label": label, "exit_code": result.returncode, "argv": args})
+39 +     (evidence / "sequence-results.json").write_text(json.dumps(results, indent=2))
+40 |     print(label, result.returncode, flush=True)
+   |
+
+unformatted: File would be reformatted
+   --> docs\reports\v0.3-rendered\windows-process-timeout\diagnostics\diag_plugin.py:2:1
+    |
+1   | """Temporary, opt-in pytest diagnosis; no product instrumentation."""
+2   +
+3   | import importlib.metadata
+--------------------------------------------------------------------------------
+15  |
+16  +
+17  | def event(name, **data):
+    -     EVENTS.append({'event': name, 'perf_counter': time.perf_counter(), **data})
+18  +     EVENTS.append({"event": name, "perf_counter": time.perf_counter(), **data})
+19  +
+20  |
+21  | def pytest_sessionstart(session):
+22  |     import gamefactory
+23  |     from gamefactory.core.execution import process_runner as module
+    -     expected = Path(os.environ['GF_EXPECTED_SOURCE']).resolve()
+24  +
+25  +     expected = Path(os.environ["GF_EXPECTED_SOURCE"]).resolve()
+26  |     assert Path(gamefactory.__file__).resolve().is_relative_to(expected)
+27  |     assert Path(module.__file__).resolve().is_relative_to(expected)
+    -     META.update(python=sys.executable, version=sys.version, source=str(module.__file__),
+    -                 gamefactory=str(gamefactory.__file__), cwd=str(Path.cwd()),
+    -                 instrumentation=os.environ.get('GF_DIAG_STAGES') == '1',
+    -                 dependencies={n: importlib.metadata.version(n) for n in ('pytest', 'pydantic', 'pyyaml', 'pillow')})
+28  +     META.update(
+29  +         python=sys.executable,
+30  +         version=sys.version,
+31  +         source=str(module.__file__),
+32  +         gamefactory=str(gamefactory.__file__),
+33  +         cwd=str(Path.cwd()),
+34  +         instrumentation=os.environ.get("GF_DIAG_STAGES") == "1",
+35  +         dependencies={
+36  +             n: importlib.metadata.version(n) for n in ("pytest", "pydantic", "pyyaml", "pillow")
+37  +         },
+38  +     )
+39  +
+40  |
+41  | @pytest.fixture(autouse=True)
+42  | def diagnose(request, monkeypatch, tmp_path):
+    -     if request.node.name != 'test_parent_exit_descendant_bounded_and_cleaned':
+43  +     if request.node.name != "test_parent_exit_descendant_bounded_and_cleaned":
+44  |         yield
+45  |         return
+    -     META['linux_module_imported'] = any('test_verify_godot_live_crash' in n for n in sys.modules)
+    -     if os.environ.get('GF_DIAG_STAGES') != '1':
+46  +     META["linux_module_imported"] = any("test_verify_godot_live_crash" in n for n in sys.modules)
+47  +     if os.environ.get("GF_DIAG_STAGES") != "1":
+48  |         yield
+49  |         return
+50  |     from gamefactory.core.execution import process_runner as m
+51  +
+52  |     original_run = m.ProcessRunner.run
+--------------------------------------------------------------------------------
+59  |     source_lines, first_line = inspect.getsourcelines(original_run)
+    -     text_by_line = {first_line+i: text.strip() for i, text in enumerate(source_lines)}
+60  +     text_by_line = {first_line + i: text.strip() for i, text in enumerate(source_lines)}
+61  |     deadline_seen = False
+--------------------------------------------------------------------------------
+66  |             return None
+    -         if kind == 'line':
+67  +         if kind == "line":
+68  |             local = frame.f_locals
+    -             if 'deadline' in local and not deadline_seen:
+    -                 event('runner_deadline', start_time=local['start_time'], deadline=local['deadline'])
+69  +             if "deadline" in local and not deadline_seen:
+70  +                 event("runner_deadline", start_time=local["start_time"], deadline=local["deadline"])
+71  |                 deadline_seen = True
+    -             if text_by_line.get(frame.f_lineno) == 'timed_out = True':
+    -                 event('timeout_branch', line=frame.f_lineno, parent_returncode=local['proc'].returncode,
+    -                       readers_alive=local.get('readers_alive'), observed_now=local.get('now'),
+    -                       timeout_exception=str(local.get('timeout_exc')))
+72  +             if text_by_line.get(frame.f_lineno) == "timed_out = True":
+73  +                 event(
+74  +                     "timeout_branch",
+75  +                     line=frame.f_lineno,
+76  +                     parent_returncode=local["proc"].returncode,
+77  +                     readers_alive=local.get("readers_alive"),
+78  +                     observed_now=local.get("now"),
+79  +                     timeout_exception=str(local.get("timeout_exc")),
+80  +                 )
+81  |         return trace
+82  |
+83  |     class Popen(original_popen):
+84  |         def __init__(self, *args, **kwargs):
+    -             event('popen_begin', executable=str(args[0][0]))
+85  +             event("popen_begin", executable=str(args[0][0]))
+86  |             super().__init__(*args, **kwargs)
+87  |             if self.stdout:
+    -                 streams[id(self.stdout)] = 'stdout'
+88  +                 streams[id(self.stdout)] = "stdout"
+89  |             if self.stderr:
+    -                 streams[id(self.stderr)] = 'stderr'
+    -             event('popen_created', pid=self.pid)
+90  +                 streams[id(self.stderr)] = "stderr"
+91  +             event("popen_created", pid=self.pid)
+92  |
+93  |         def wait(self, timeout=None):
+    -             event('parent_wait_begin', pid=self.pid, timeout=timeout)
+94  +             event("parent_wait_begin", pid=self.pid, timeout=timeout)
+95  |             try:
+96  |                 result = super().wait(timeout)
+97  |             except Exception as exc:
+    -                 event('parent_wait_error', pid=self.pid, exception=type(exc).__name__)
+98  +                 event("parent_wait_error", pid=self.pid, exception=type(exc).__name__)
+99  |                 raise
+    -             event('parent_exit_observed', pid=self.pid, exit_code=result)
+100 +             event("parent_exit_observed", pid=self.pid, exit_code=result)
+101 |             return result
+102 |
+103 |     def attach(proc):
+    -         event('job_attach_begin', pid=proc.pid)
+104 +         event("job_attach_begin", pid=proc.pid)
+105 |         result = original_attach(proc)
+    -         event('job_attach_end', handle=result)
+106 +         event("job_attach_end", handle=result)
+107 |         return result
+108 |
+109 |     def close(job):
+    -         event('job_cleanup_begin', handle=job)
+110 +         event("job_cleanup_begin", handle=job)
+111 |         try:
+112 |             return original_close(job)
+113 |         finally:
+    -             event('job_cleanup_return', handle=job)
+114 +             event("job_cleanup_return", handle=job)
+115 |
+116 |     def kill(proc):
+    -         event('kill_tree_begin', pid=proc.pid)
+117 +         event("kill_tree_begin", pid=proc.pid)
+118 |         try:
+119 |             return original_kill(proc)
+120 |         finally:
+    -             event('kill_tree_return', pid=proc.pid)
+121 +             event("kill_tree_return", pid=proc.pid)
+122 |
+123 |     def read(stream, max_bytes=m._MAX_CAPTURE_CHARS):
+    -         channel = streams.get(id(stream), 'unknown')
+    -         event('reader_begin', channel=channel)
+124 +         channel = streams.get(id(stream), "unknown")
+125 +         event("reader_begin", channel=channel)
+126 |         result = original_read(stream, max_bytes)
+    -         event('reader_completed', channel=channel, eof=result.read_completed, bytes=len(result.data))
+127 +         event(
+128 +             "reader_completed", channel=channel, eof=result.read_completed, bytes=len(result.data)
+129 +         )
+130 |         return result
+131 |
+132 |     def run(self, command):
+133 |         # Separate instrumented trials only: add child checkpoints to this test's existing fixture.
+    -         descendant = Path(command.cwd) / 'grandchild.py'
+    -         descendant_log = tmp_path / 'descendant-ready.json'
+    -         parent_log = tmp_path / 'parent-exit-requested.json'
+134 +         descendant = Path(command.cwd) / "grandchild.py"
+135 +         descendant_log = tmp_path / "descendant-ready.json"
+136 +         parent_log = tmp_path / "parent-exit-requested.json"
+137 |         descendant.write_text(
+    -             'import os,json,time\n'
+138 +             "import os,json,time\n"
+139 |             f'open({str(descendant_log)!r}, "w").write(json.dumps({{"event":"descendant_ready","perf_counter":time.perf_counter(),"pid":os.getpid()}}))\n'
+    -             + descendant.read_text(), encoding='utf-8')
+140 +             + descendant.read_text(),
+141 +             encoding="utf-8",
+142 +         )
+143 |         from dataclasses import replace
+144 +
+145 |         args = list(command.args)
+    -         args[-1] = args[-1].replace('sys.exit(0)',
+    -             'import os,json,time; '
+    -             f'open({str(parent_log)!r}, "w").write(json.dumps({{"event":"parent_exit_requested","perf_counter":time.perf_counter(),"pid":os.getpid()}})); sys.exit(0)')
+146 +         args[-1] = args[-1].replace(
+147 +             "sys.exit(0)",
+148 +             "import os,json,time; "
+149 +             f'open({str(parent_log)!r}, "w").write(json.dumps({{"event":"parent_exit_requested","perf_counter":time.perf_counter(),"pid":os.getpid()}})); sys.exit(0)',
+150 +         )
+151 |         command = replace(command, args=args)
+152 |         previous = sys.gettrace()
+    -         event('runner_call', timeout=command.timeout_seconds)
+153 +         event("runner_call", timeout=command.timeout_seconds)
+154 |         sys.settrace(trace)
+155 |         try:
+156 |             result = original_run(self, command)
+    -             event('runner_return', result=result.to_dict())
+157 +             event("runner_return", result=result.to_dict())
+158 |             return result
+159 |         except Exception as exc:
+    -             event('runner_exception', exception=type(exc).__name__, details=getattr(exc, 'details', {}))
+160 +             event(
+161 +                 "runner_exception",
+162 +                 exception=type(exc).__name__,
+163 +                 details=getattr(exc, "details", {}),
+164 +             )
+165 |             raise
+--------------------------------------------------------------------------------
+171 |                 else:
+    -                     event('checkpoint_absent', file=path.name)
+172 +                     event("checkpoint_absent", file=path.name)
+173 |
+    -     monkeypatch.setattr(m.subprocess, 'Popen', Popen)
+    -     monkeypatch.setattr(m.ProcessRunner, '_attach_windows_job', staticmethod(attach))
+    -     monkeypatch.setattr(m.ProcessRunner, '_close_windows_job', staticmethod(close))
+    -     monkeypatch.setattr(m.ProcessRunner, '_kill_tree', staticmethod(kill))
+    -     monkeypatch.setattr(m.ProcessRunner, '_read_bounded', staticmethod(read))
+    -     monkeypatch.setattr(m.ProcessRunner, 'run', run)
+174 +     monkeypatch.setattr(m.subprocess, "Popen", Popen)
+175 +     monkeypatch.setattr(m.ProcessRunner, "_attach_windows_job", staticmethod(attach))
+176 +     monkeypatch.setattr(m.ProcessRunner, "_close_windows_job", staticmethod(close))
+177 +     monkeypatch.setattr(m.ProcessRunner, "_kill_tree", staticmethod(kill))
+178 +     monkeypatch.setattr(m.ProcessRunner, "_read_bounded", staticmethod(read))
+179 +     monkeypatch.setattr(m.ProcessRunner, "run", run)
+180 |     yield
+181 |
+182 +
+183 | def pytest_sessionfinish(session, exitstatus):
+    -     META['pytest_exit_code'] = int(exitstatus)
+    -     Path(os.environ['GF_DIAG_OUTPUT']).write_text(json.dumps({'metadata': META, 'events': sorted(EVENTS, key=lambda e:e['perf_counter'])}, indent=2), encoding='utf-8')
+184 +     META["pytest_exit_code"] = int(exitstatus)
+185 +     Path(os.environ["GF_DIAG_OUTPUT"]).write_text(
+186 +         json.dumps(
+187 +             {"metadata": META, "events": sorted(EVENTS, key=lambda e: e["perf_counter"])}, indent=2
+188 +         ),
+189 +         encoding="utf-8",
+190 +     )
+    |
+
+9 files would be reformatted, 146 files already formatted

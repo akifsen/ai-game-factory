@@ -1,0 +1,25 @@
+{
+  "engine_api": {
+    "adapter_name": "llvmpipe (LLVM 20.1.2, 256 bits)",
+    "adapter_vendor": "Mesa",
+    "display_server": "X11",
+    "os_name": "Linux",
+    "rendering_driver": "opengl3",
+    "rendering_method": "gl_compatibility",
+    "source": "engine_api",
+    "viewport_height": 720,
+    "viewport_width": 1280
+  },
+  "engine_source": "engine_api",
+  "process_log": "OpenGL API 4.5 (Core Profile) Mesa 25.2.8-0ubuntu0.24.04.2 - Compatibility - Using Device: Mesa - llvmpipe (LLVM 20.1.2, 256 bits)",
+  "process_log_source": "process_log",
+  "requested": {
+    "audio_driver": "Dummy",
+    "display_driver": "x11",
+    "rendering_driver": "opengl3",
+    "rendering_method": "gl_compatibility",
+    "resolution": "1280x720",
+    "software_rendering_requested": "1",
+    "window_mode": "windowed"
+  }
+}

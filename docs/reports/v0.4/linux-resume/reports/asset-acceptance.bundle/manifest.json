@@ -1,0 +1,139 @@
+{
+  "asset_id": "prop_acceptance_crate_01",
+  "attempt_number": 1,
+  "execution_id": "EXEC-9add9bc3",
+  "files": [
+    {
+      "path": "evidence/specification.json",
+      "role": "specification",
+      "sha256": "6a6f6c719b5a197e218cc1505eed3638aa76b361180827da567948ffc8dbe11e",
+      "size": 908
+    },
+    {
+      "path": "evidence/concept.png",
+      "role": "concept",
+      "sha256": "30329b6163561da25974b95a03e98de51232d4e62364e6883dd0b6cca10cd3ca",
+      "size": 898
+    },
+    {
+      "path": "evidence/concept_provenance.json",
+      "role": "concept_provenance",
+      "sha256": "abc742b538e5b5a8943eb890a4a0386cf83ef13234cdb8fa85e7d8f59a762d1a",
+      "size": 842
+    },
+    {
+      "path": "evidence/raw_glb.glb",
+      "role": "raw_glb",
+      "sha256": "f91a1cf6e91d85f8dc3f54a40221b940fcd0f5d3017e63535bc2b021f8d9be83",
+      "size": 1604
+    },
+    {
+      "path": "evidence/processed_glb.glb",
+      "role": "processed_glb",
+      "sha256": "e3ad33cc3bae1f2172685a380edbfd2291e242ebcf13ccd8df63c0c9db9b902b",
+      "size": 5468
+    },
+    {
+      "path": "evidence/processing_report.json",
+      "role": "processing_report",
+      "sha256": "999205ddf49809489bf49fa9857d50ce9c042739b5449b5b21544a129175b172",
+      "size": 1385
+    },
+    {
+      "path": "evidence/validation.json",
+      "role": "validation",
+      "sha256": "f11a93644613a4c171722f586f2d32a920500411ff85ee9a750977f60c14e271",
+      "size": 6855
+    },
+    {
+      "path": "evidence/runtime_observation.json",
+      "role": "runtime_observation",
+      "sha256": "3742be44bd2deb68314a4d78877487dcf22e757d028cef982cba8fab2d5d1825",
+      "size": 688
+    },
+    {
+      "angle": "front",
+      "asset_id": "prop_acceptance_crate_01",
+      "attempt_number": 1,
+      "execution_id": "EXEC-9add9bc3",
+      "path": "captures/front.png",
+      "processed_glb_sha256": "e3ad33cc3bae1f2172685a380edbfd2291e242ebcf13ccd8df63c0c9db9b902b",
+      "revision": 1,
+      "role": "runtime_capture",
+      "sha256": "9a6fc699fb15bc56c1efa996caeaec06def7c58389836cb804dd4a8904ee8642",
+      "size": 17969,
+      "workflow_id": "WF-ASSET-ea6422c5"
+    },
+    {
+      "angle": "side",
+      "asset_id": "prop_acceptance_crate_01",
+      "attempt_number": 1,
+      "execution_id": "EXEC-9add9bc3",
+      "path": "captures/side.png",
+      "processed_glb_sha256": "e3ad33cc3bae1f2172685a380edbfd2291e242ebcf13ccd8df63c0c9db9b902b",
+      "revision": 1,
+      "role": "runtime_capture",
+      "sha256": "c2f47946074ad8a6a08c768887d9954a6d5e5b51f554796b427d00cb43fae641",
+      "size": 9806,
+      "workflow_id": "WF-ASSET-ea6422c5"
+    },
+    {
+      "angle": "three_quarter",
+      "asset_id": "prop_acceptance_crate_01",
+      "attempt_number": 1,
+      "execution_id": "EXEC-9add9bc3",
+      "path": "captures/three_quarter.png",
+      "processed_glb_sha256": "e3ad33cc3bae1f2172685a380edbfd2291e242ebcf13ccd8df63c0c9db9b902b",
+      "revision": 1,
+      "role": "runtime_capture",
+      "sha256": "58ca7aea288e6440403d73d0c7ea594c28fa5ed3c45d16f6fcae7c392a2b124e",
+      "size": 17654,
+      "workflow_id": "WF-ASSET-ea6422c5"
+    },
+    {
+      "path": "evidence/concept_approval.json",
+      "role": "concept_approval",
+      "sha256": "4b696466b81093dd3f06c347e7cbd6b80b2e9723a276366a8cfc7f21a73e50f2",
+      "size": 3625
+    },
+    {
+      "path": "evidence/paid_approval.json",
+      "role": "paid_approval",
+      "sha256": "4e95c33890adcc60bfaaf500284ac50ed62a6ae943584d94b64aa2eabe3f97e5",
+      "size": 3132
+    },
+    {
+      "path": "evidence/final_approval.json",
+      "role": "final_approval",
+      "sha256": "6e5da00ac30d31f72ddee32d852cf2471f1f6ef9edbd0b626e53878ff0b3fd99",
+      "size": 5331
+    },
+    {
+      "path": "evidence/provider-operation.json",
+      "role": "provider_operation",
+      "sha256": "2b01aed995699407f08e7bc0cbe433026ce5385b20b4ac97635d07507b9f6d05",
+      "size": 438
+    },
+    {
+      "path": "evidence/cost-record.json",
+      "role": "cost_record",
+      "sha256": "63c970b831c8faa182d885fc7e12ac9b678c0cec4dc3683e3d7df57fec5d84c5",
+      "size": 90
+    },
+    {
+      "path": "index.html",
+      "role": "review_html",
+      "sha256": "37bd7901db8ce8cff9ddcf7c0cae2c69553874b94c411a22df835d28824b0450",
+      "size": 16912
+    }
+  ],
+  "final_review": {
+    "decision": "APPROVED",
+    "fingerprint": "cdd76d45a1ba34e3246a4f7bf39f385e539360f63c2ff2f920851391ec9be157"
+  },
+  "processed_glb_sha256": "e3ad33cc3bae1f2172685a380edbfd2291e242ebcf13ccd8df63c0c9db9b902b",
+  "revision": 1,
+  "schema_version": "asset-evidence-0.4.0",
+  "specification_fingerprint": "0c39f9c806456d06a67cbb196dd790923cf340172d6fd0772e39c1224bf1f012",
+  "workflow_id": "WF-ASSET-ea6422c5"
+}

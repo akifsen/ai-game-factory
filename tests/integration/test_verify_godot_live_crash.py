@@ -112,7 +112,7 @@ def test_controlled_fixture_preparation(tmp_path: Path) -> None:
 def test_wrapper_intercepts_subprocess_launch(tmp_path: Path) -> None:
     """Test-only entry wrapper must intercept subprocess.Popen and prove counted."""
     launch_log = tmp_path / "probe-observations.jsonl"
-    installed_python = Path(sys.executable).resolve()
+    installed_python = Path(sys.executable).absolute()
     script_path = REPO_ROOT / "scripts" / "verify_godot_live_crash.py"
 
     cmd = [
@@ -177,13 +177,13 @@ def test_real_godot_live_crash(tmp_path: Path) -> None:
     installed_python_env = os.environ.get("GAMEFACTORY_INSTALLED_PYTHON")
     installed_cli_env = os.environ.get("GAMEFACTORY_INSTALLED_CLI")
     if installed_python_env and installed_cli_env:
-        installed_python = Path(installed_python_env).resolve()
+        installed_python = Path(installed_python_env).absolute()
         installed_cli = Path(installed_cli_env).resolve()
     else:
         cli_name = "gamefactory.exe" if sys.platform == "win32" else "gamefactory"
         sibling_cli = Path(sys.executable).parent / cli_name
         if sibling_cli.is_file():
-            installed_python = Path(sys.executable).resolve()
+            installed_python = Path(sys.executable).absolute()
             installed_cli = sibling_cli.resolve()
         else:
             install_json = REPO_ROOT / "docs" / "reports" / "v0.2-closeout" / "installation.json"
@@ -192,7 +192,7 @@ def test_real_godot_live_crash(tmp_path: Path) -> None:
                 p = data.get("installed_python")
                 c = data.get("installed_cli")
                 if p and c and Path(p).is_file() and Path(c).is_file():
-                    installed_python = Path(p).resolve()
+                    installed_python = Path(p).absolute()
                     installed_cli = Path(c).resolve()
                 else:
                     pytest.skip(

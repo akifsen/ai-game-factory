@@ -1,0 +1,772 @@
+{
+  "tested_source_sha": "334b4fc368ab880d0352728c04548562fe5c6ffe",
+  "manifest": "docs/reports/v0.3-rendered/descendant-candidate/final-source-manifest.json",
+  "file_count": 109,
+  "all_match": true,
+  "files": [
+    {
+      "path": ".github/workflows/ci.yml",
+      "expected_lf": "18d911137f19ad301b987e3fcf61291bce4ef7a2231eae28e0391de7e075e3b4",
+      "commit_lf": "18d911137f19ad301b987e3fcf61291bce4ef7a2231eae28e0391de7e075e3b4",
+      "local_lf": "18d911137f19ad301b987e3fcf61291bce4ef7a2231eae28e0391de7e075e3b4",
+      "match": true
+    },
+    {
+      "path": "README.md",
+      "expected_lf": "a1144e556c2ec0b4822921ad43231924c91f22252514b96da0aae9fcb2a392f4",
+      "commit_lf": "a1144e556c2ec0b4822921ad43231924c91f22252514b96da0aae9fcb2a392f4",
+      "local_lf": "a1144e556c2ec0b4822921ad43231924c91f22252514b96da0aae9fcb2a392f4",
+      "match": true
+    },
+    {
+      "path": "examples/godot-verification/Main.tscn",
+      "expected_lf": "3dadaf4ca52f7e9ed19c21f47ff281f22e1ccbd1855c03e00cc517f71baf38a8",
+      "commit_lf": "3dadaf4ca52f7e9ed19c21f47ff281f22e1ccbd1855c03e00cc517f71baf38a8",
+      "local_lf": "3dadaf4ca52f7e9ed19c21f47ff281f22e1ccbd1855c03e00cc517f71baf38a8",
+      "match": true
+    },
+    {
+      "path": "examples/godot-verification/VisualMain.tscn",
+      "expected_lf": "7209330a62a0e9105c60a65bf5951315e32b9632c75a0979128d2e58fa020335",
+      "commit_lf": "7209330a62a0e9105c60a65bf5951315e32b9632c75a0979128d2e58fa020335",
+      "local_lf": "7209330a62a0e9105c60a65bf5951315e32b9632c75a0979128d2e58fa020335",
+      "match": true
+    },
+    {
+      "path": "examples/godot-verification/main.gd",
+      "expected_lf": "f729ffbe9c8981c3a08fd424a83eb7bc9f060ef6492e71f33c51cbe897c89b55",
+      "commit_lf": "f729ffbe9c8981c3a08fd424a83eb7bc9f060ef6492e71f33c51cbe897c89b55",
+      "local_lf": "f729ffbe9c8981c3a08fd424a83eb7bc9f060ef6492e71f33c51cbe897c89b55",
+      "match": true
+    },
+    {
+      "path": "examples/godot-verification/project.godot",
+      "expected_lf": "598a8552f3747c23baff8134218faf3d9f0013a397219f3a023b2e8984a7f30e",
+      "commit_lf": "598a8552f3747c23baff8134218faf3d9f0013a397219f3a023b2e8984a7f30e",
+      "local_lf": "598a8552f3747c23baff8134218faf3d9f0013a397219f3a023b2e8984a7f30e",
+      "match": true
+    },
+    {
+      "path": "examples/godot-verification/scenario.json",
+      "expected_lf": "4519e3c0cd2a84bf58325d271fb6ddadb002d6cee32c6c8990b345c5523d73d4",
+      "commit_lf": "4519e3c0cd2a84bf58325d271fb6ddadb002d6cee32c6c8990b345c5523d73d4",
+      "local_lf": "4519e3c0cd2a84bf58325d271fb6ddadb002d6cee32c6c8990b345c5523d73d4",
+      "match": true
+    },
+    {
+      "path": "examples/godot-verification/visual-scenario-portrait.json",
+      "expected_lf": "607867ff59de532699d9b012f833af30499d312ba3932ee175519576197a70ab",
+      "commit_lf": "607867ff59de532699d9b012f833af30499d312ba3932ee175519576197a70ab",
+      "local_lf": "607867ff59de532699d9b012f833af30499d312ba3932ee175519576197a70ab",
+      "match": true
+    },
+    {
+      "path": "examples/godot-verification/visual-scenario.json",
+      "expected_lf": "8e2e18fa62b23ef930e1238da51e8f83c084186cef7948185a8252c097f99a56",
+      "commit_lf": "8e2e18fa62b23ef930e1238da51e8f83c084186cef7948185a8252c097f99a56",
+      "local_lf": "8e2e18fa62b23ef930e1238da51e8f83c084186cef7948185a8252c097f99a56",
+      "match": true
+    },
+    {
+      "path": "examples/godot-verification/visual_main.gd",
+      "expected_lf": "d8e0fb9f896e674c51eb18338449d89f08e675fb6ab9f1c7e7d413a372a5a1c7",
+      "commit_lf": "d8e0fb9f896e674c51eb18338449d89f08e675fb6ab9f1c7e7d413a372a5a1c7",
+      "local_lf": "d8e0fb9f896e674c51eb18338449d89f08e675fb6ab9f1c7e7d413a372a5a1c7",
+      "match": true
+    },
+    {
+      "path": "examples/minimal-godot/Main.tscn",
+      "expected_lf": "073085956cb847979f9ddd2afd0e38a09d08072b8b99b8c2a4c10225ca59e145",
+      "commit_lf": "073085956cb847979f9ddd2afd0e38a09d08072b8b99b8c2a4c10225ca59e145",
+      "local_lf": "073085956cb847979f9ddd2afd0e38a09d08072b8b99b8c2a4c10225ca59e145",
+      "match": true
+    },
+    {
+      "path": "examples/minimal-godot/main.gd",
+      "expected_lf": "820537051c4ccac0da41de731d271b9e7c1dde2a503e9086658668919723e81e",
+      "commit_lf": "820537051c4ccac0da41de731d271b9e7c1dde2a503e9086658668919723e81e",
+      "local_lf": "820537051c4ccac0da41de731d271b9e7c1dde2a503e9086658668919723e81e",
+      "match": true
+    },
+    {
+      "path": "examples/minimal-godot/project.godot",
+      "expected_lf": "5801ac24dee88785d6326464ec6a992e8ded797e90ad496cf4932fec3e74949a",
+      "commit_lf": "5801ac24dee88785d6326464ec6a992e8ded797e90ad496cf4932fec3e74949a",
+      "local_lf": "5801ac24dee88785d6326464ec6a992e8ded797e90ad496cf4932fec3e74949a",
+      "match": true
+    },
+    {
+      "path": "pyproject.toml",
+      "expected_lf": "4e0c95cc6b654a3da6449b154ef8bbe729f0ce2b790956eb0a879fb275dae5aa",
+      "commit_lf": "4e0c95cc6b654a3da6449b154ef8bbe729f0ce2b790956eb0a879fb275dae5aa",
+      "local_lf": "4e0c95cc6b654a3da6449b154ef8bbe729f0ce2b790956eb0a879fb275dae5aa",
+      "match": true
+    },
+    {
+      "path": "scripts/verify_acceptance.py",
+      "expected_lf": "a38a5c351571af9063923e4fa53eeae8ee7d909f2195e15627f90601a1954f10",
+      "commit_lf": "a38a5c351571af9063923e4fa53eeae8ee7d909f2195e15627f90601a1954f10",
+      "local_lf": "a38a5c351571af9063923e4fa53eeae8ee7d909f2195e15627f90601a1954f10",
+      "match": true
+    },
+    {
+      "path": "scripts/verify_closeout_evidence.py",
+      "expected_lf": "8d3e2dd82bd66bf65e785fc863d1fe07448b500d845cbf2de1699bf8f5199960",
+      "commit_lf": "8d3e2dd82bd66bf65e785fc863d1fe07448b500d845cbf2de1699bf8f5199960",
+      "local_lf": "8d3e2dd82bd66bf65e785fc863d1fe07448b500d845cbf2de1699bf8f5199960",
+      "match": true
+    },
+    {
+      "path": "scripts/verify_godot_acceptance.py",
+      "expected_lf": "4bc59799687d6fb6054bdb35effcfcdbb147072d76b2a9d0c86e3f71a5797da1",
+      "commit_lf": "4bc59799687d6fb6054bdb35effcfcdbb147072d76b2a9d0c86e3f71a5797da1",
+      "local_lf": "4bc59799687d6fb6054bdb35effcfcdbb147072d76b2a9d0c86e3f71a5797da1",
+      "match": true
+    },
+    {
+      "path": "scripts/verify_godot_capture.py",
+      "expected_lf": "06d38765d195fa12773d4b455534968108a119ff48cf282cdd189f1538a921d7",
+      "commit_lf": "06d38765d195fa12773d4b455534968108a119ff48cf282cdd189f1538a921d7",
+      "local_lf": "06d38765d195fa12773d4b455534968108a119ff48cf282cdd189f1538a921d7",
+      "match": true
+    },
+    {
+      "path": "scripts/verify_godot_live_crash.py",
+      "expected_lf": "1415c0924aa66e866e9d90abc59056b09a94a90f7085fdbca98bd3d62a161f55",
+      "commit_lf": "1415c0924aa66e866e9d90abc59056b09a94a90f7085fdbca98bd3d62a161f55",
+      "local_lf": "1415c0924aa66e866e9d90abc59056b09a94a90f7085fdbca98bd3d62a161f55",
+      "match": true
+    },
+    {
+      "path": "scripts/verify_godot_recovery.py",
+      "expected_lf": "9efb7b7268f9c1f2a95f2670107c315ff172c367cdb1d299156a8da982e18841",
+      "commit_lf": "9efb7b7268f9c1f2a95f2670107c315ff172c367cdb1d299156a8da982e18841",
+      "local_lf": "9efb7b7268f9c1f2a95f2670107c315ff172c367cdb1d299156a8da982e18841",
+      "match": true
+    },
+    {
+      "path": "src/gamefactory/__init__.py",
+      "expected_lf": "f0c3b2e10899db048c0802e3af0f6bdbdcaf30ef62da78103b4b1aa820dc45b3",
+      "commit_lf": "f0c3b2e10899db048c0802e3af0f6bdbdcaf30ef62da78103b4b1aa820dc45b3",
+      "local_lf": "f0c3b2e10899db048c0802e3af0f6bdbdcaf30ef62da78103b4b1aa820dc45b3",
+      "match": true
+    },
+    {
+      "path": "src/gamefactory/__main__.py",
+      "expected_lf": "095dc136991f9d62a180db336a602d439d38a30a97f30d57c3312b839768da7b",
+      "commit_lf": "095dc136991f9d62a180db336a602d439d38a30a97f30d57c3312b839768da7b",
+      "local_lf": "095dc136991f9d62a180db336a602d439d38a30a97f30d57c3312b839768da7b",
+      "match": true
+    },
+    {
+      "path": "src/gamefactory/adapters/dcc/__init__.py",
+      "expected_lf": "bc8b0895065c5749c604b773c54470387d52aed90b12aeb10ea06bb2ecdded2d",
+      "commit_lf": "bc8b0895065c5749c604b773c54470387d52aed90b12aeb10ea06bb2ecdded2d",
+      "local_lf": "bc8b0895065c5749c604b773c54470387d52aed90b12aeb10ea06bb2ecdded2d",
+      "match": true
+    },
+    {
+      "path": "src/gamefactory/adapters/dcc/base.py",
+      "expected_lf": "fecac0145ff0bfed70edaaff67726c6688c7d92801abe1beb269f64bbd63c09a",
+      "commit_lf": "fecac0145ff0bfed70edaaff67726c6688c7d92801abe1beb269f64bbd63c09a",
+      "local_lf": "fecac0145ff0bfed70edaaff67726c6688c7d92801abe1beb269f64bbd63c09a",
+      "match": true
+    },
+    {
+      "path": "src/gamefactory/adapters/dcc/blender.py",
+      "expected_lf": "ce45f851a143f00f70172dc4f2a14b165001dc4a66c5b4343e618d628973b62d",
+      "commit_lf": "ce45f851a143f00f70172dc4f2a14b165001dc4a66c5b4343e618d628973b62d",
+      "local_lf": "ce45f851a143f00f70172dc4f2a14b165001dc4a66c5b4343e618d628973b62d",
+      "match": true
+    },
+    {
+      "path": "src/gamefactory/adapters/engines/__init__.py",
+      "expected_lf": "2b9391b727ad42cd7f572b778fb3bbf89132d6cb7fdfd79f123e84f1e0891e03",
+      "commit_lf": "2b9391b727ad42cd7f572b778fb3bbf89132d6cb7fdfd79f123e84f1e0891e03",
+      "local_lf": "2b9391b727ad42cd7f572b778fb3bbf89132d6cb7fdfd79f123e84f1e0891e03",
+      "match": true
+    },
+    {
+      "path": "src/gamefactory/adapters/engines/base.py",
+      "expected_lf": "1fb3fc85e9b8eb0fa00dae4d6d98983dad12a948758665e407fb8d448b80ce58",
+      "commit_lf": "1fb3fc85e9b8eb0fa00dae4d6d98983dad12a948758665e407fb8d448b80ce58",
+      "local_lf": "1fb3fc85e9b8eb0fa00dae4d6d98983dad12a948758665e407fb8d448b80ce58",
+      "match": true
+    },
+    {
+      "path": "src/gamefactory/adapters/engines/godot.py",
+      "expected_lf": "4ce0bb077043fc63256043a2389d730c4bf741d225ee60524110ca3da2d7c513",
+      "commit_lf": "4ce0bb077043fc63256043a2389d730c4bf741d225ee60524110ca3da2d7c513",
+      "local_lf": "4ce0bb077043fc63256043a2389d730c4bf741d225ee60524110ca3da2d7c513",
+      "match": true
+    },
+    {
+      "path": "src/gamefactory/adapters/engines/godot_capture_contracts.py",
+      "expected_lf": "846aaed0b2057c9ba55ec5b35f92b89515033de4fed061c93ce4a3ef4bf02859",
+      "commit_lf": "846aaed0b2057c9ba55ec5b35f92b89515033de4fed061c93ce4a3ef4bf02859",
+      "local_lf": "846aaed0b2057c9ba55ec5b35f92b89515033de4fed061c93ce4a3ef4bf02859",
+      "match": true
+    },
+    {
+      "path": "src/gamefactory/adapters/engines/godot_contracts.py",
+      "expected_lf": "4a8db2f4c078f6460943310bfa89c967dddff05ac4d2e0f7ac410d8cbdd17cfd",
+      "commit_lf": "4a8db2f4c078f6460943310bfa89c967dddff05ac4d2e0f7ac410d8cbdd17cfd",
+      "local_lf": "4a8db2f4c078f6460943310bfa89c967dddff05ac4d2e0f7ac410d8cbdd17cfd",
+      "match": true
+    },
+    {
+      "path": "src/gamefactory/adapters/engines/godot_execution.py",
+      "expected_lf": "123b7c91cfa6e7c8d0049027ec5bc51604c7645315732d2a4ab335a3fd7d9f5c",
+      "commit_lf": "123b7c91cfa6e7c8d0049027ec5bc51604c7645315732d2a4ab335a3fd7d9f5c",
+      "local_lf": "123b7c91cfa6e7c8d0049027ec5bc51604c7645315732d2a4ab335a3fd7d9f5c",
+      "match": true
+    },
+    {
+      "path": "src/gamefactory/adapters/engines/godot_image.py",
+      "expected_lf": "0da326d461b233d0f883bffc4cf82b89588affaf6841ce301d10980a62872ace",
+      "commit_lf": "0da326d461b233d0f883bffc4cf82b89588affaf6841ce301d10980a62872ace",
+      "local_lf": "0da326d461b233d0f883bffc4cf82b89588affaf6841ce301d10980a62872ace",
+      "match": true
+    },
+    {
+      "path": "src/gamefactory/adapters/engines/godot_review_html.py",
+      "expected_lf": "df164e3bc4b0574cdaaa65aceb8ad85600c541478da300a039b73ef43669e789",
+      "commit_lf": "df164e3bc4b0574cdaaa65aceb8ad85600c541478da300a039b73ef43669e789",
+      "local_lf": "df164e3bc4b0574cdaaa65aceb8ad85600c541478da300a039b73ef43669e789",
+      "match": true
+    },
+    {
+      "path": "src/gamefactory/adapters/engines/godot_staging.py",
+      "expected_lf": "5f51ca9e992f9109581fe2337483b7d54ed07292038b62a343bfb5e24cb1266d",
+      "commit_lf": "5f51ca9e992f9109581fe2337483b7d54ed07292038b62a343bfb5e24cb1266d",
+      "local_lf": "5f51ca9e992f9109581fe2337483b7d54ed07292038b62a343bfb5e24cb1266d",
+      "match": true
+    },
+    {
+      "path": "src/gamefactory/adapters/external/__init__.py",
+      "expected_lf": "0382c034bd40536e01766c65b946db09de32873ff399670970896bddf1807f7e",
+      "commit_lf": "0382c034bd40536e01766c65b946db09de32873ff399670970896bddf1807f7e",
+      "local_lf": "0382c034bd40536e01766c65b946db09de32873ff399670970896bddf1807f7e",
+      "match": true
+    },
+    {
+      "path": "src/gamefactory/adapters/external/base.py",
+      "expected_lf": "5ca4b5d873a448e3ca6527ef57897552563ffd0550c43d168e40c82961708738",
+      "commit_lf": "5ca4b5d873a448e3ca6527ef57897552563ffd0550c43d168e40c82961708738",
+      "local_lf": "5ca4b5d873a448e3ca6527ef57897552563ffd0550c43d168e40c82961708738",
+      "match": true
+    },
+    {
+      "path": "src/gamefactory/adapters/external/meshy.py",
+      "expected_lf": "bac526d4e81064e8a085f02bee06bf074287439c21ded17e9ffb6743297e4bf4",
+      "commit_lf": "bac526d4e81064e8a085f02bee06bf074287439c21ded17e9ffb6743297e4bf4",
+      "local_lf": "bac526d4e81064e8a085f02bee06bf074287439c21ded17e9ffb6743297e4bf4",
+      "match": true
+    },
+    {
+      "path": "src/gamefactory/adapters/fakes/__init__.py",
+      "expected_lf": "b238ad743943fcf2164503d2291579dd02a0e8340b7ff09eec52b9bbb4bd4692",
+      "commit_lf": "b238ad743943fcf2164503d2291579dd02a0e8340b7ff09eec52b9bbb4bd4692",
+      "local_lf": "b238ad743943fcf2164503d2291579dd02a0e8340b7ff09eec52b9bbb4bd4692",
+      "match": true
+    },
+    {
+      "path": "src/gamefactory/adapters/fakes/fake_provider.py",
+      "expected_lf": "0995dfb00c321a34bd1cc5901e0f46da9bb809fea4435176d6a042b339ba734f",
+      "commit_lf": "0995dfb00c321a34bd1cc5901e0f46da9bb809fea4435176d6a042b339ba734f",
+      "local_lf": "0995dfb00c321a34bd1cc5901e0f46da9bb809fea4435176d6a042b339ba734f",
+      "match": true
+    },
+    {
+      "path": "src/gamefactory/adapters/persistence/__init__.py",
+      "expected_lf": "76dbc9e741b0a67becb3347ea3fc6a791ecd1b855a6a0a33f74aa2d91d299f13",
+      "commit_lf": "76dbc9e741b0a67becb3347ea3fc6a791ecd1b855a6a0a33f74aa2d91d299f13",
+      "local_lf": "76dbc9e741b0a67becb3347ea3fc6a791ecd1b855a6a0a33f74aa2d91d299f13",
+      "match": true
+    },
+    {
+      "path": "src/gamefactory/adapters/persistence/database.py",
+      "expected_lf": "18081198681ab41b0ddd474643870288da40b6600ee0500493345c1c73591d5c",
+      "commit_lf": "18081198681ab41b0ddd474643870288da40b6600ee0500493345c1c73591d5c",
+      "local_lf": "18081198681ab41b0ddd474643870288da40b6600ee0500493345c1c73591d5c",
+      "match": true
+    },
+    {
+      "path": "src/gamefactory/adapters/persistence/migrations.py",
+      "expected_lf": "30d6129b3831499edc0fa1b2f88aa277fbb08c255cef1b56a67d21743626c357",
+      "commit_lf": "30d6129b3831499edc0fa1b2f88aa277fbb08c255cef1b56a67d21743626c357",
+      "local_lf": "30d6129b3831499edc0fa1b2f88aa277fbb08c255cef1b56a67d21743626c357",
+      "match": true
+    },
+    {
+      "path": "src/gamefactory/adapters/persistence/repositories.py",
+      "expected_lf": "ec3bd7a934cbb06a8c7641f80598ab249739f3bd3befd19f5eff53f644bd0a97",
+      "commit_lf": "ec3bd7a934cbb06a8c7641f80598ab249739f3bd3befd19f5eff53f644bd0a97",
+      "local_lf": "ec3bd7a934cbb06a8c7641f80598ab249739f3bd3befd19f5eff53f644bd0a97",
+      "match": true
+    },
+    {
+      "path": "src/gamefactory/capabilities/__init__.py",
+      "expected_lf": "44964770ecc72f986b7313fed3469b753ec8510d8f817c9f4280e086cf0b7fcc",
+      "commit_lf": "44964770ecc72f986b7313fed3469b753ec8510d8f817c9f4280e086cf0b7fcc",
+      "local_lf": "44964770ecc72f986b7313fed3469b753ec8510d8f817c9f4280e086cf0b7fcc",
+      "match": true
+    },
+    {
+      "path": "src/gamefactory/capabilities/registry.py",
+      "expected_lf": "7500afe7246fadba620f9ad9164e8c558982c30e8bef05addf93f64494540566",
+      "commit_lf": "7500afe7246fadba620f9ad9164e8c558982c30e8bef05addf93f64494540566",
+      "local_lf": "7500afe7246fadba620f9ad9164e8c558982c30e8bef05addf93f64494540566",
+      "match": true
+    },
+    {
+      "path": "src/gamefactory/cli/exit_codes.py",
+      "expected_lf": "20430987a26d6600cb29ebc5c727794d0bcce3aee7d1cbb2a0e776857ac37f33",
+      "commit_lf": "20430987a26d6600cb29ebc5c727794d0bcce3aee7d1cbb2a0e776857ac37f33",
+      "local_lf": "20430987a26d6600cb29ebc5c727794d0bcce3aee7d1cbb2a0e776857ac37f33",
+      "match": true
+    },
+    {
+      "path": "src/gamefactory/cli/main.py",
+      "expected_lf": "6e6ab33a9768fdfa0fc35762dbcf45591cb6fc06bd0916a44a8111345b637291",
+      "commit_lf": "6e6ab33a9768fdfa0fc35762dbcf45591cb6fc06bd0916a44a8111345b637291",
+      "local_lf": "6e6ab33a9768fdfa0fc35762dbcf45591cb6fc06bd0916a44a8111345b637291",
+      "match": true
+    },
+    {
+      "path": "src/gamefactory/config/__init__.py",
+      "expected_lf": "82806849ff4f278c54f27f458883d5cdb5af98a431f8801be6ed34a4b4b8350d",
+      "commit_lf": "82806849ff4f278c54f27f458883d5cdb5af98a431f8801be6ed34a4b4b8350d",
+      "local_lf": "82806849ff4f278c54f27f458883d5cdb5af98a431f8801be6ed34a4b4b8350d",
+      "match": true
+    },
+    {
+      "path": "src/gamefactory/config/loader.py",
+      "expected_lf": "0fe4a998985453291e2fa2744e55b455867a2c6d88673bd80c5eb4110a3e1094",
+      "commit_lf": "0fe4a998985453291e2fa2744e55b455867a2c6d88673bd80c5eb4110a3e1094",
+      "local_lf": "0fe4a998985453291e2fa2744e55b455867a2c6d88673bd80c5eb4110a3e1094",
+      "match": true
+    },
+    {
+      "path": "src/gamefactory/config/schema.py",
+      "expected_lf": "ee3ee3186dfadddece8d532a2365e0d947f7cc8722618724f19375a6c6d59881",
+      "commit_lf": "ee3ee3186dfadddece8d532a2365e0d947f7cc8722618724f19375a6c6d59881",
+      "local_lf": "ee3ee3186dfadddece8d532a2365e0d947f7cc8722618724f19375a6c6d59881",
+      "match": true
+    },
+    {
+      "path": "src/gamefactory/core/approvals/__init__.py",
+      "expected_lf": "498b4d875ee3b65369ee134969c4e24fe3006c5ce6b5e39bb046082a9f000182",
+      "commit_lf": "498b4d875ee3b65369ee134969c4e24fe3006c5ce6b5e39bb046082a9f000182",
+      "local_lf": "498b4d875ee3b65369ee134969c4e24fe3006c5ce6b5e39bb046082a9f000182",
+      "match": true
+    },
+    {
+      "path": "src/gamefactory/core/approvals/approval_service.py",
+      "expected_lf": "0abdeda8ba7e482636d42072ac4f7c65683e44407fb0d530b77b0e8eba21a586",
+      "commit_lf": "0abdeda8ba7e482636d42072ac4f7c65683e44407fb0d530b77b0e8eba21a586",
+      "local_lf": "0abdeda8ba7e482636d42072ac4f7c65683e44407fb0d530b77b0e8eba21a586",
+      "match": true
+    },
+    {
+      "path": "src/gamefactory/core/artifacts/__init__.py",
+      "expected_lf": "8919e5db7d2d5689c52d384b41ceb8bbdcf197435ebf32744c2fbf675dc45b83",
+      "commit_lf": "8919e5db7d2d5689c52d384b41ceb8bbdcf197435ebf32744c2fbf675dc45b83",
+      "local_lf": "8919e5db7d2d5689c52d384b41ceb8bbdcf197435ebf32744c2fbf675dc45b83",
+      "match": true
+    },
+    {
+      "path": "src/gamefactory/core/artifacts/artifact_manager.py",
+      "expected_lf": "e258056105828d6c7fec6d974f292e2f88e6415638c160a7de7fc56063028921",
+      "commit_lf": "e258056105828d6c7fec6d974f292e2f88e6415638c160a7de7fc56063028921",
+      "local_lf": "e258056105828d6c7fec6d974f292e2f88e6415638c160a7de7fc56063028921",
+      "match": true
+    },
+    {
+      "path": "src/gamefactory/core/domain/__init__.py",
+      "expected_lf": "383c583c029caab6df7a86a8f674040441f15912ef4247e03160ab6df637aa92",
+      "commit_lf": "383c583c029caab6df7a86a8f674040441f15912ef4247e03160ab6df637aa92",
+      "local_lf": "383c583c029caab6df7a86a8f674040441f15912ef4247e03160ab6df637aa92",
+      "match": true
+    },
+    {
+      "path": "src/gamefactory/core/domain/dag.py",
+      "expected_lf": "fe1a80ae169260bdf02629e367e156203ae18a863116b28756934c34c7e1a400",
+      "commit_lf": "fe1a80ae169260bdf02629e367e156203ae18a863116b28756934c34c7e1a400",
+      "local_lf": "fe1a80ae169260bdf02629e367e156203ae18a863116b28756934c34c7e1a400",
+      "match": true
+    },
+    {
+      "path": "src/gamefactory/core/domain/errors.py",
+      "expected_lf": "7c9a7fa07866ed729a9c12b370b1eabab9e6ef9028e88413763ee2b1bae23d18",
+      "commit_lf": "7c9a7fa07866ed729a9c12b370b1eabab9e6ef9028e88413763ee2b1bae23d18",
+      "local_lf": "7c9a7fa07866ed729a9c12b370b1eabab9e6ef9028e88413763ee2b1bae23d18",
+      "match": true
+    },
+    {
+      "path": "src/gamefactory/core/domain/models.py",
+      "expected_lf": "9a2912b97beecacd49e00311a03bc9156f57dd49a378edb8a438c77c5c58617b",
+      "commit_lf": "9a2912b97beecacd49e00311a03bc9156f57dd49a378edb8a438c77c5c58617b",
+      "local_lf": "9a2912b97beecacd49e00311a03bc9156f57dd49a378edb8a438c77c5c58617b",
+      "match": true
+    },
+    {
+      "path": "src/gamefactory/core/domain/state_machine.py",
+      "expected_lf": "a21aa6dcf1dc94da03f5ed2f6023532a65814000b670eee6315da5ef2c464cd9",
+      "commit_lf": "a21aa6dcf1dc94da03f5ed2f6023532a65814000b670eee6315da5ef2c464cd9",
+      "local_lf": "a21aa6dcf1dc94da03f5ed2f6023532a65814000b670eee6315da5ef2c464cd9",
+      "match": true
+    },
+    {
+      "path": "src/gamefactory/core/execution/__init__.py",
+      "expected_lf": "1041092bf92ae8fc1963db1ff241ea10c5e12f3ffcc285bd126fc12755a2aad1",
+      "commit_lf": "1041092bf92ae8fc1963db1ff241ea10c5e12f3ffcc285bd126fc12755a2aad1",
+      "local_lf": "1041092bf92ae8fc1963db1ff241ea10c5e12f3ffcc285bd126fc12755a2aad1",
+      "match": true
+    },
+    {
+      "path": "src/gamefactory/core/execution/locks.py",
+      "expected_lf": "e89bac87763148adf0241c1f2292dbe07b82aace1811b4a59798104820ccdf1f",
+      "commit_lf": "e89bac87763148adf0241c1f2292dbe07b82aace1811b4a59798104820ccdf1f",
+      "local_lf": "e89bac87763148adf0241c1f2292dbe07b82aace1811b4a59798104820ccdf1f",
+      "match": true
+    },
+    {
+      "path": "src/gamefactory/core/execution/path_guard.py",
+      "expected_lf": "2432bb961af05a2725b36e1bebb7589ccce6849011161af37641cf512352f6fd",
+      "commit_lf": "2432bb961af05a2725b36e1bebb7589ccce6849011161af37641cf512352f6fd",
+      "local_lf": "2432bb961af05a2725b36e1bebb7589ccce6849011161af37641cf512352f6fd",
+      "match": true
+    },
+    {
+      "path": "src/gamefactory/core/execution/process_runner.py",
+      "expected_lf": "db59408ee90785a88a339d2634a6153b4243ffb6ffb8a77646aa6ab6d7f24108",
+      "commit_lf": "db59408ee90785a88a339d2634a6153b4243ffb6ffb8a77646aa6ab6d7f24108",
+      "local_lf": "db59408ee90785a88a339d2634a6153b4243ffb6ffb8a77646aa6ab6d7f24108",
+      "match": true
+    },
+    {
+      "path": "src/gamefactory/core/execution/redaction.py",
+      "expected_lf": "b09df83c5d87f3a8d33aadea2b58c2248e104963133b7ab6e4335925bcc02e5c",
+      "commit_lf": "b09df83c5d87f3a8d33aadea2b58c2248e104963133b7ab6e4335925bcc02e5c",
+      "local_lf": "b09df83c5d87f3a8d33aadea2b58c2248e104963133b7ab6e4335925bcc02e5c",
+      "match": true
+    },
+    {
+      "path": "src/gamefactory/core/policies/__init__.py",
+      "expected_lf": "8b93c3a3f851d9ff1a18cdd6ba060883da5f003bd6d27431063a95834d5788f6",
+      "commit_lf": "8b93c3a3f851d9ff1a18cdd6ba060883da5f003bd6d27431063a95834d5788f6",
+      "local_lf": "8b93c3a3f851d9ff1a18cdd6ba060883da5f003bd6d27431063a95834d5788f6",
+      "match": true
+    },
+    {
+      "path": "src/gamefactory/core/policies/policy_engine.py",
+      "expected_lf": "93ef21bb8cd7d5b8cd34489e6d9b0d91d1f8b9402ac3ccb25597234954b7b855",
+      "commit_lf": "93ef21bb8cd7d5b8cd34489e6d9b0d91d1f8b9402ac3ccb25597234954b7b855",
+      "local_lf": "93ef21bb8cd7d5b8cd34489e6d9b0d91d1f8b9402ac3ccb25597234954b7b855",
+      "match": true
+    },
+    {
+      "path": "src/gamefactory/resources/godot/capture_harness.gd",
+      "expected_lf": "0a07d1df38f356e1350a21068434ffd9d6ee3aa65b5d74441290e878cefa782a",
+      "commit_lf": "0a07d1df38f356e1350a21068434ffd9d6ee3aa65b5d74441290e878cefa782a",
+      "local_lf": "0a07d1df38f356e1350a21068434ffd9d6ee3aa65b5d74441290e878cefa782a",
+      "match": true
+    },
+    {
+      "path": "src/gamefactory/resources/godot/harness.gd",
+      "expected_lf": "429e7e7961dc65a07741f59d1bc40f883a03754673de27ff2d88a5c0bb5949c1",
+      "commit_lf": "429e7e7961dc65a07741f59d1bc40f883a03754673de27ff2d88a5c0bb5949c1",
+      "local_lf": "429e7e7961dc65a07741f59d1bc40f883a03754673de27ff2d88a5c0bb5949c1",
+      "match": true
+    },
+    {
+      "path": "src/gamefactory/schemas/godot-observation-0.2.0.schema.json",
+      "expected_lf": "54f4a05ff912827c834cd1c0b5a121dc78701cdabd8b41ac3a996f9b6ce8b684",
+      "commit_lf": "54f4a05ff912827c834cd1c0b5a121dc78701cdabd8b41ac3a996f9b6ce8b684",
+      "local_lf": "54f4a05ff912827c834cd1c0b5a121dc78701cdabd8b41ac3a996f9b6ce8b684",
+      "match": true
+    },
+    {
+      "path": "src/gamefactory/schemas/godot-scenario-0.2.0.schema.json",
+      "expected_lf": "8a05226c1aa0a6905e849ab1d785c31d031313ea9c2512bc2b4ca7ae7f447394",
+      "commit_lf": "8a05226c1aa0a6905e849ab1d785c31d031313ea9c2512bc2b4ca7ae7f447394",
+      "local_lf": "8a05226c1aa0a6905e849ab1d785c31d031313ea9c2512bc2b4ca7ae7f447394",
+      "match": true
+    },
+    {
+      "path": "src/gamefactory/schemas/project-config-0.1.0.schema.json",
+      "expected_lf": "9f8fda522dfcc7230fd2810c16b0c7683ab6e069ac94162cb6503fd5463800ec",
+      "commit_lf": "9f8fda522dfcc7230fd2810c16b0c7683ab6e069ac94162cb6503fd5463800ec",
+      "local_lf": "9f8fda522dfcc7230fd2810c16b0c7683ab6e069ac94162cb6503fd5463800ec",
+      "match": true
+    },
+    {
+      "path": "src/gamefactory/workflows/__init__.py",
+      "expected_lf": "d0da48c2f2b4927d9fe0a9334bb8e14b239f667c11024502ba8c55631eadc164",
+      "commit_lf": "d0da48c2f2b4927d9fe0a9334bb8e14b239f667c11024502ba8c55631eadc164",
+      "local_lf": "d0da48c2f2b4927d9fe0a9334bb8e14b239f667c11024502ba8c55631eadc164",
+      "match": true
+    },
+    {
+      "path": "src/gamefactory/workflows/builtin_tasks.py",
+      "expected_lf": "207c3b5846cfb2d675862bdcee46526e0db1a2cd770ed5c64fc6afda1160664b",
+      "commit_lf": "207c3b5846cfb2d675862bdcee46526e0db1a2cd770ed5c64fc6afda1160664b",
+      "local_lf": "207c3b5846cfb2d675862bdcee46526e0db1a2cd770ed5c64fc6afda1160664b",
+      "match": true
+    },
+    {
+      "path": "src/gamefactory/workflows/definitions.py",
+      "expected_lf": "ebc2de358b0e22e826ee679dae3d3fa2679266b6bdb7787d278d6c758499f3aa",
+      "commit_lf": "ebc2de358b0e22e826ee679dae3d3fa2679266b6bdb7787d278d6c758499f3aa",
+      "local_lf": "ebc2de358b0e22e826ee679dae3d3fa2679266b6bdb7787d278d6c758499f3aa",
+      "match": true
+    },
+    {
+      "path": "src/gamefactory/workflows/engine.py",
+      "expected_lf": "1c1f31e62b2073c21cf5c7504d9e98fd5733009646a66f389cf3190e8af0ebd1",
+      "commit_lf": "1c1f31e62b2073c21cf5c7504d9e98fd5733009646a66f389cf3190e8af0ebd1",
+      "local_lf": "1c1f31e62b2073c21cf5c7504d9e98fd5733009646a66f389cf3190e8af0ebd1",
+      "match": true
+    },
+    {
+      "path": "src/gamefactory/workflows/godot_capture.py",
+      "expected_lf": "559d5b6dd9fade533e532981619daa30a3ea8bd934db0cf949ebaa147ed597c2",
+      "commit_lf": "559d5b6dd9fade533e532981619daa30a3ea8bd934db0cf949ebaa147ed597c2",
+      "local_lf": "559d5b6dd9fade533e532981619daa30a3ea8bd934db0cf949ebaa147ed597c2",
+      "match": true
+    },
+    {
+      "path": "src/gamefactory/workflows/godot_verification.py",
+      "expected_lf": "d4232c5ac076b28042b156f82ce1bcd9af9b757a975b3d29b6db8abc661df4ad",
+      "commit_lf": "d4232c5ac076b28042b156f82ce1bcd9af9b757a975b3d29b6db8abc661df4ad",
+      "local_lf": "d4232c5ac076b28042b156f82ce1bcd9af9b757a975b3d29b6db8abc661df4ad",
+      "match": true
+    },
+    {
+      "path": "src/gamefactory/workflows/handlers.py",
+      "expected_lf": "8f6b082f08026cab8eba9359c30e33cd842adf1eca05d73387cabee876933995",
+      "commit_lf": "8f6b082f08026cab8eba9359c30e33cd842adf1eca05d73387cabee876933995",
+      "local_lf": "8f6b082f08026cab8eba9359c30e33cd842adf1eca05d73387cabee876933995",
+      "match": true
+    },
+    {
+      "path": "src/gamefactory/workflows/ports.py",
+      "expected_lf": "7038d3a2b7c9ef5903bc02d573b3da2b927884e30f59c211bb4b49ddecebccf6",
+      "commit_lf": "7038d3a2b7c9ef5903bc02d573b3da2b927884e30f59c211bb4b49ddecebccf6",
+      "local_lf": "7038d3a2b7c9ef5903bc02d573b3da2b927884e30f59c211bb4b49ddecebccf6",
+      "match": true
+    },
+    {
+      "path": "tests/integration/test_capabilities.py",
+      "expected_lf": "ed69d45dfc0603bc4cd6aa54a2768f05f3d49a59e74704cb431ace47534a4723",
+      "commit_lf": "ed69d45dfc0603bc4cd6aa54a2768f05f3d49a59e74704cb431ace47534a4723",
+      "local_lf": "ed69d45dfc0603bc4cd6aa54a2768f05f3d49a59e74704cb431ace47534a4723",
+      "match": true
+    },
+    {
+      "path": "tests/integration/test_cli.py",
+      "expected_lf": "668697b863dbc223437f3c64d532983ebb80c419db4e996fc391d2015488c6a3",
+      "commit_lf": "668697b863dbc223437f3c64d532983ebb80c419db4e996fc391d2015488c6a3",
+      "local_lf": "668697b863dbc223437f3c64d532983ebb80c419db4e996fc391d2015488c6a3",
+      "match": true
+    },
+    {
+      "path": "tests/integration/test_crash_recovery.py",
+      "expected_lf": "f03ac752809e0407dc3c87851e517abafc9a1a409654b68d099fc97fae75cef4",
+      "commit_lf": "f03ac752809e0407dc3c87851e517abafc9a1a409654b68d099fc97fae75cef4",
+      "local_lf": "f03ac752809e0407dc3c87851e517abafc9a1a409654b68d099fc97fae75cef4",
+      "match": true
+    },
+    {
+      "path": "tests/integration/test_godot_blender_detection.py",
+      "expected_lf": "e38a7b8eb8754ce6f5c60a486d0426a5a4582a947180c9c759caeeab435a5dc3",
+      "commit_lf": "e38a7b8eb8754ce6f5c60a486d0426a5a4582a947180c9c759caeeab435a5dc3",
+      "local_lf": "e38a7b8eb8754ce6f5c60a486d0426a5a4582a947180c9c759caeeab435a5dc3",
+      "match": true
+    },
+    {
+      "path": "tests/integration/test_godot_capture_pipeline.py",
+      "expected_lf": "385029f7d123ba28b6d14845b89b417924fbdeb8f1849a1bbc9cf8462479e28b",
+      "commit_lf": "385029f7d123ba28b6d14845b89b417924fbdeb8f1849a1bbc9cf8462479e28b",
+      "local_lf": "385029f7d123ba28b6d14845b89b417924fbdeb8f1849a1bbc9cf8462479e28b",
+      "match": true
+    },
+    {
+      "path": "tests/integration/test_godot_pipeline.py",
+      "expected_lf": "2282da0580361f2e748e20954e9253fb3cc1c2b668c9411559a0c08b5cbfe179",
+      "commit_lf": "2282da0580361f2e748e20954e9253fb3cc1c2b668c9411559a0c08b5cbfe179",
+      "local_lf": "2282da0580361f2e748e20954e9253fb3cc1c2b668c9411559a0c08b5cbfe179",
+      "match": true
+    },
+    {
+      "path": "tests/integration/test_godot_real.py",
+      "expected_lf": "177cbccf77ff81f8458ac3d6e96b599540dccb7b9ea6210b46ebf0962705ff8f",
+      "commit_lf": "177cbccf77ff81f8458ac3d6e96b599540dccb7b9ea6210b46ebf0962705ff8f",
+      "local_lf": "177cbccf77ff81f8458ac3d6e96b599540dccb7b9ea6210b46ebf0962705ff8f",
+      "match": true
+    },
+    {
+      "path": "tests/integration/test_locks.py",
+      "expected_lf": "9e236293a13082b8402aea2cfae51df8237c21acea235f975b45d338113730bc",
+      "commit_lf": "9e236293a13082b8402aea2cfae51df8237c21acea235f975b45d338113730bc",
+      "local_lf": "9e236293a13082b8402aea2cfae51df8237c21acea235f975b45d338113730bc",
+      "match": true
+    },
+    {
+      "path": "tests/integration/test_paid_safety.py",
+      "expected_lf": "9758ba58097348f9672fb737e2510bd499ac958e4ad836c46f801db3a3c2f318",
+      "commit_lf": "9758ba58097348f9672fb737e2510bd499ac958e4ad836c46f801db3a3c2f318",
+      "local_lf": "9758ba58097348f9672fb737e2510bd499ac958e4ad836c46f801db3a3c2f318",
+      "match": true
+    },
+    {
+      "path": "tests/integration/test_persistence.py",
+      "expected_lf": "72f7d881b6d4be6d153f7577c19df2531bd58fb0478b30271a634ab549998c0c",
+      "commit_lf": "72f7d881b6d4be6d153f7577c19df2531bd58fb0478b30271a634ab549998c0c",
+      "local_lf": "72f7d881b6d4be6d153f7577c19df2531bd58fb0478b30271a634ab549998c0c",
+      "match": true
+    },
+    {
+      "path": "tests/integration/test_persistence_redaction.py",
+      "expected_lf": "e8c023f56167ed82bcc060c00a93b80533a655bef6c833a58840c1bf3d25e618",
+      "commit_lf": "e8c023f56167ed82bcc060c00a93b80533a655bef6c833a58840c1bf3d25e618",
+      "local_lf": "e8c023f56167ed82bcc060c00a93b80533a655bef6c833a58840c1bf3d25e618",
+      "match": true
+    },
+    {
+      "path": "tests/integration/test_process_metadata.py",
+      "expected_lf": "47cc1e5d35f3bc6fb7606634453f5e39cdcbcfbb039bc426e715d3330ea3a8b9",
+      "commit_lf": "47cc1e5d35f3bc6fb7606634453f5e39cdcbcfbb039bc426e715d3330ea3a8b9",
+      "local_lf": "47cc1e5d35f3bc6fb7606634453f5e39cdcbcfbb039bc426e715d3330ea3a8b9",
+      "match": true
+    },
+    {
+      "path": "tests/integration/test_process_runner.py",
+      "expected_lf": "114d4065b3d7d74f6cc6fd273ca271f2cccd06c7d92736a0f9d66106439aec4c",
+      "commit_lf": "114d4065b3d7d74f6cc6fd273ca271f2cccd06c7d92736a0f9d66106439aec4c",
+      "local_lf": "114d4065b3d7d74f6cc6fd273ca271f2cccd06c7d92736a0f9d66106439aec4c",
+      "match": true
+    },
+    {
+      "path": "tests/integration/test_v02_compatibility.py",
+      "expected_lf": "0be85c95fe14ccba70ffce6b80ecb81661c1316debe8d3fed0e01601e2c76b9b",
+      "commit_lf": "0be85c95fe14ccba70ffce6b80ecb81661c1316debe8d3fed0e01601e2c76b9b",
+      "local_lf": "0be85c95fe14ccba70ffce6b80ecb81661c1316debe8d3fed0e01601e2c76b9b",
+      "match": true
+    },
+    {
+      "path": "tests/integration/test_verify_godot_live_crash.py",
+      "expected_lf": "9cfd426a6afa5a95e19c216c6be5860300399fe07cbe778eb855781c25edaad0",
+      "commit_lf": "9cfd426a6afa5a95e19c216c6be5860300399fe07cbe778eb855781c25edaad0",
+      "local_lf": "9cfd426a6afa5a95e19c216c6be5860300399fe07cbe778eb855781c25edaad0",
+      "match": true
+    },
+    {
+      "path": "tests/integration/test_verify_godot_python_resolution.py",
+      "expected_lf": "9cfc74956f7eea9777da7de5f37dc9411045882ae80f02645086bd9e67bf24d0",
+      "commit_lf": "9cfc74956f7eea9777da7de5f37dc9411045882ae80f02645086bd9e67bf24d0",
+      "local_lf": "9cfc74956f7eea9777da7de5f37dc9411045882ae80f02645086bd9e67bf24d0",
+      "match": true
+    },
+    {
+      "path": "tests/integration/test_workflow_engine.py",
+      "expected_lf": "290e246d07d150f281a5c857ad260eb7369d69d9a541550a0a0f09248246a198",
+      "commit_lf": "290e246d07d150f281a5c857ad260eb7369d69d9a541550a0a0f09248246a198",
+      "local_lf": "290e246d07d150f281a5c857ad260eb7369d69d9a541550a0a0f09248246a198",
+      "match": true
+    },
+    {
+      "path": "tests/integration/test_workflow_regressions.py",
+      "expected_lf": "67919365dfdf45161cfb27fe96dbe922e5a37d1208f03fc10010994298d35129",
+      "commit_lf": "67919365dfdf45161cfb27fe96dbe922e5a37d1208f03fc10010994298d35129",
+      "local_lf": "67919365dfdf45161cfb27fe96dbe922e5a37d1208f03fc10010994298d35129",
+      "match": true
+    },
+    {
+      "path": "tests/unit/test_approvals.py",
+      "expected_lf": "065ec7ec03d779526317c12dc3fdb85246be6b85a2abb625c2a445c848c2d73f",
+      "commit_lf": "065ec7ec03d779526317c12dc3fdb85246be6b85a2abb625c2a445c848c2d73f",
+      "local_lf": "065ec7ec03d779526317c12dc3fdb85246be6b85a2abb625c2a445c848c2d73f",
+      "match": true
+    },
+    {
+      "path": "tests/unit/test_artifacts.py",
+      "expected_lf": "147564e6421ce20e89aa379b7a897a7518b169a0ccba2fd28c28d63e5ea66f28",
+      "commit_lf": "147564e6421ce20e89aa379b7a897a7518b169a0ccba2fd28c28d63e5ea66f28",
+      "local_lf": "147564e6421ce20e89aa379b7a897a7518b169a0ccba2fd28c28d63e5ea66f28",
+      "match": true
+    },
+    {
+      "path": "tests/unit/test_closeout_evidence.py",
+      "expected_lf": "0ee8aaa7697088d3db7a138d088804b0aefbfca4aab27c5cce3bc1d6a42b50c2",
+      "commit_lf": "0ee8aaa7697088d3db7a138d088804b0aefbfca4aab27c5cce3bc1d6a42b50c2",
+      "local_lf": "0ee8aaa7697088d3db7a138d088804b0aefbfca4aab27c5cce3bc1d6a42b50c2",
+      "match": true
+    },
+    {
+      "path": "tests/unit/test_config.py",
+      "expected_lf": "ae2c420d1278fc48825ef79604606b5bff7678124c0a0e2f8e9683cfcc6ebd1d",
+      "commit_lf": "ae2c420d1278fc48825ef79604606b5bff7678124c0a0e2f8e9683cfcc6ebd1d",
+      "local_lf": "ae2c420d1278fc48825ef79604606b5bff7678124c0a0e2f8e9683cfcc6ebd1d",
+      "match": true
+    },
+    {
+      "path": "tests/unit/test_dag.py",
+      "expected_lf": "c94ae844fa420ed2d847479fabd92968b0674adc200e0a11d4ae8b5aa4feb496",
+      "commit_lf": "c94ae844fa420ed2d847479fabd92968b0674adc200e0a11d4ae8b5aa4feb496",
+      "local_lf": "c94ae844fa420ed2d847479fabd92968b0674adc200e0a11d4ae8b5aa4feb496",
+      "match": true
+    },
+    {
+      "path": "tests/unit/test_godot_capture.py",
+      "expected_lf": "d29cf08fd4346066c2ecd2f14318d44e9a591e97eb7f2c8feecf0dcdc67d2c55",
+      "commit_lf": "d29cf08fd4346066c2ecd2f14318d44e9a591e97eb7f2c8feecf0dcdc67d2c55",
+      "local_lf": "d29cf08fd4346066c2ecd2f14318d44e9a591e97eb7f2c8feecf0dcdc67d2c55",
+      "match": true
+    },
+    {
+      "path": "tests/unit/test_godot_contracts.py",
+      "expected_lf": "341e074c65f4c679c1feadac28c135e6ab916921954f67a29674866c8c4291db",
+      "commit_lf": "341e074c65f4c679c1feadac28c135e6ab916921954f67a29674866c8c4291db",
+      "local_lf": "341e074c65f4c679c1feadac28c135e6ab916921954f67a29674866c8c4291db",
+      "match": true
+    },
+    {
+      "path": "tests/unit/test_godot_staging.py",
+      "expected_lf": "fe952025bfb5b5206b4a7c7a30cec0b7b8debc084546f42f9aeda237d729b2fc",
+      "commit_lf": "fe952025bfb5b5206b4a7c7a30cec0b7b8debc084546f42f9aeda237d729b2fc",
+      "local_lf": "fe952025bfb5b5206b4a7c7a30cec0b7b8debc084546f42f9aeda237d729b2fc",
+      "match": true
+    },
+    {
+      "path": "tests/unit/test_path_guard.py",
+      "expected_lf": "76d849b5d0572b0ea239991b693860a868f027fbb7b4550cb84ba0f27551641f",
+      "commit_lf": "76d849b5d0572b0ea239991b693860a868f027fbb7b4550cb84ba0f27551641f",
+      "local_lf": "76d849b5d0572b0ea239991b693860a868f027fbb7b4550cb84ba0f27551641f",
+      "match": true
+    },
+    {
+      "path": "tests/unit/test_policy.py",
+      "expected_lf": "c365d5e08072f546c53ca9cd021b49f265e23951967e02781cea385a77de4f6f",
+      "commit_lf": "c365d5e08072f546c53ca9cd021b49f265e23951967e02781cea385a77de4f6f",
+      "local_lf": "c365d5e08072f546c53ca9cd021b49f265e23951967e02781cea385a77de4f6f",
+      "match": true
+    },
+    {
+      "path": "tests/unit/test_redaction.py",
+      "expected_lf": "0192ff324216c51779d06a762fd6abadaccc0fe331ffa490fa3d86ed086a98f1",
+      "commit_lf": "0192ff324216c51779d06a762fd6abadaccc0fe331ffa490fa3d86ed086a98f1",
+      "local_lf": "0192ff324216c51779d06a762fd6abadaccc0fe331ffa490fa3d86ed086a98f1",
+      "match": true
+    },
+    {
+      "path": "tests/unit/test_state_machine.py",
+      "expected_lf": "d97da2a188899c81660e2b022dce17d9b776053be6847466069b39a520edd8b1",
+      "commit_lf": "d97da2a188899c81660e2b022dce17d9b776053be6847466069b39a520edd8b1",
+      "local_lf": "d97da2a188899c81660e2b022dce17d9b776053be6847466069b39a520edd8b1",
+      "match": true
+    }
+  ],
+  "ci_headless_manifest_all_109_match": true
+}

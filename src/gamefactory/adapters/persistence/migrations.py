@@ -166,11 +166,78 @@ def _migration_0004_execution_retry_classification(conn: sqlite3.Connection) -> 
     conn.execute("ALTER TABLE executions ADD COLUMN retryable INTEGER NOT NULL DEFAULT 0")
 
 
+def _migration_0005_asset_operations_and_intent(conn: sqlite3.Connection) -> None:
+    conn.execute(
+        """
+        CREATE TABLE IF NOT EXISTS asset_revisions (
+            asset_id TEXT NOT NULL,
+            revision_number INTEGER NOT NULL,
+            workflow_id TEXT NOT NULL,
+            spec_hash TEXT NOT NULL,
+            concept_hash TEXT,
+            raw_glb_hash TEXT,
+            processed_glb_hash TEXT,
+            validation_report_hash TEXT,
+            runtime_evidence_hashes_json TEXT NOT NULL DEFAULT '[]',
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL,
+            PRIMARY KEY (asset_id, revision_number),
+            FOREIGN KEY(workflow_id) REFERENCES workflows(id) ON DELETE CASCADE
+        );
+        """
+    )
+    conn.execute(
+        """
+        CREATE TABLE IF NOT EXISTS provider_operation_intents (
+            id TEXT PRIMARY KEY,
+            workflow_id TEXT NOT NULL,
+            task_id TEXT NOT NULL UNIQUE,
+            asset_id TEXT NOT NULL,
+            revision_number INTEGER NOT NULL,
+            provider TEXT NOT NULL,
+            operation TEXT NOT NULL,
+            concept_hash TEXT NOT NULL,
+            request_fingerprint TEXT NOT NULL UNIQUE,
+            approval_id TEXT NOT NULL,
+            estimated_cost REAL,
+            actual_cost REAL,
+            cost_unit TEXT NOT NULL DEFAULT 'credits',
+            external_task_id TEXT,
+            status TEXT NOT NULL,
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL,
+            FOREIGN KEY(workflow_id) REFERENCES workflows(id) ON DELETE CASCADE,
+            FOREIGN KEY(task_id) REFERENCES tasks(id) ON DELETE CASCADE
+        );
+        """
+    )
+    conn.execute(
+        "CREATE INDEX IF NOT EXISTS idx_asset_revisions_asset ON asset_revisions(asset_id);"
+    )
+    conn.execute("DROP INDEX IF EXISTS idx_intents_task;")
+    conn.execute(
+        "CREATE UNIQUE INDEX IF NOT EXISTS idx_intents_task ON provider_operation_intents(task_id);"
+    )
+    conn.execute(
+        "CREATE UNIQUE INDEX IF NOT EXISTS idx_intents_fingerprint ON provider_operation_intents(request_fingerprint);"
+    )
+    conn.execute(
+        "CREATE UNIQUE INDEX IF NOT EXISTS idx_intents_external_task ON provider_operation_intents(external_task_id) WHERE external_task_id IS NOT NULL;"
+    )
+    conn.execute(
+        "CREATE INDEX IF NOT EXISTS idx_intents_workflow ON provider_operation_intents(workflow_id);"
+    )
+    conn.execute(
+        "CREATE UNIQUE INDEX IF NOT EXISTS idx_intents_asset_revision_provider_op ON provider_operation_intents(asset_id, revision_number, provider, operation);"
+    )
+
+
 MIGRATIONS: list[tuple[int, str, Callable[[sqlite3.Connection], None]]] = [
     (1, "0001_initial_schema", _migration_0001_initial),
     (2, "0002_provider_invocations", _migration_0002_provider_invocations),
     (3, "0003_execution_cost_metadata", _migration_0003_execution_cost_metadata),
     (4, "0004_execution_retry_classification", _migration_0004_execution_retry_classification),
+    (5, "0005_asset_operations_and_intent", _migration_0005_asset_operations_and_intent),
 ]
 
 

@@ -1,0 +1,13 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.14, pytest-9.1.1, pluggy-1.6.0
+rootdir: C:\Users\lenovo\devel\ai-game-factory
+configfile: pyproject.toml
+collected 47 items
+
+tests\unit\test_meshy_adapter.py ....................................... [ 82%]
+                                                                         [ 82%]
+tests\integration\test_capabilities.py ......                            [ 95%]
+tests\integration\test_process_json_redaction.py ..                      [100%]
+
+- generated xml file: C:\Users\lenovo\devel\ai-game-factory\docs\reports\v0.4\provider-lead.xml -
+============================= 47 passed in 8.60s ==============================

@@ -1,0 +1,5 @@
+renderer_request=gl_compatibility opengl3 x11
+software_rendering_request=LIBGL_ALWAYS_SOFTWARE=1
+note=LIBGL_ALWAYS_SOFTWARE is a process request, not the engine-reported adapter. Read publish/*/render-context.json.
+4.7.2.stable.official.ed1daf0bf
+8d106cbe6144c2dc7e881d61d2429c1a8a76e6b22ef48bd5e48dcf934953f71e  /home/runner/work/_temp/godot/Godot_v4.7.2-stable_linux.x86_64

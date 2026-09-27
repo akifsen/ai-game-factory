@@ -1,0 +1,37 @@
+{
+  "schema_version": "0.3.0",
+  "started_at": "2026-09-27T09:53:42.672442+00:00",
+  "cli": "/home/runner/work/_temp/gamefactory-venv/bin/gamefactory",
+  "godot": "/home/runner/work/_temp/godot/Godot_v4.7.2-stable_linux.x86_64",
+  "human_review": "PENDING",
+  "test_actor_approval_is_not_human_review": true,
+  "checks": {
+    "landscape_pending": {
+      "workflow_id": "WF-CAPTURE-8bd42582",
+      "approval_id": "APP-1cd7d70c",
+      "repeat_workflow_id": "WF-CAPTURE-660e5d24",
+      "review_html": "/home/runner/work/ai-game-factory/ai-game-factory/.verification/ci-godot-rendered/publish/landscape/index.html",
+      "status": "BLOCKED"
+    },
+    "portrait_pending": {
+      "workflow_id": "WF-CAPTURE-3eb23356",
+      "approval_id": "APP-81e409e2",
+      "review_html": "/home/runner/work/ai-game-factory/ai-game-factory/.verification/ci-godot-rendered/publish/portrait/index.html"
+    },
+    "hud_mutation": {
+      "workflow_id": "WF-CAPTURE-c66aef69",
+      "status": "FAILED",
+      "state": "PASS",
+      "visual": "FAIL",
+      "isolated_copy": true
+    },
+    "test_actor_resume": {
+      "workflow_id": "WF-CAPTURE-128f9ba9",
+      "status": "COMPLETED",
+      "actor": "pipeline-test",
+      "counts_as_human_review": false
+    }
+  },
+  "status": "PASS",
+  "completed_at": "2026-09-27T09:54:27.437195+00:00"
+}

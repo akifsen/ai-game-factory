@@ -1,0 +1,95 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.14, pytest-9.1.1, pluggy-1.6.0
+rootdir: C:\Users\lenovo\devel\ai-game-factory
+configfile: pyproject.toml
+testpaths: tests
+collected 408 items
+
+tests\integration\test_blender_processing.py ...                         [  0%]
+tests\integration\test_capabilities.py ..                                [  1%]
+tests\integration\test_cli.py F....                                      [  2%]
+tests\integration\test_crash_recovery.py ..                              [  2%]
+tests\integration\test_godot_blender_detection.py ......                 [  4%]
+tests\integration\test_godot_capture_pipeline.py ........                [  6%]
+tests\integration\test_godot_pipeline.py ....................            [ 11%]
+tests\integration\test_godot_real.py s                                   [ 11%]
+tests\integration\test_locks.py .....s..                                 [ 13%]
+tests\integration\test_paid_safety.py .                                  [ 13%]
+tests\integration\test_persistence.py ..........                         [ 16%]
+tests\integration\test_persistence_redaction.py ........                 [ 18%]
+tests\integration\test_process_metadata.py ...........                   [ 20%]
+tests\integration\test_process_runner.py ...............s...........     [ 27%]
+tests\integration\test_v02_compatibility.py ..                           [ 27%]
+tests\integration\test_verify_godot_live_crash.py .....s................ [ 33%]
+.ss                                                                      [ 34%]
+tests\integration\test_verify_godot_python_resolution.py ........ssss... [ 37%]
+..                                                                       [ 38%]
+tests\integration\test_workflow_engine.py .                              [ 38%]
+tests\integration\test_workflow_regressions.py ....................      [ 43%]
+tests\unit\test_approvals.py ...                                         [ 44%]
+tests\unit\test_artifacts.py ...                                         [ 44%]
+tests\unit\test_asset_contracts.py ...................................   [ 53%]
+tests\unit\test_asset_persistence.py .....                               [ 54%]
+tests\unit\test_blender_processor_paths.py ..s                           [ 55%]
+tests\unit\test_closeout_evidence.py ...............                     [ 59%]
+tests\unit\test_concept_ingest.py ...................s.                  [ 64%]
+tests\unit\test_config.py ............                                   [ 67%]
+tests\unit\test_dag.py .........                                         [ 69%]
+tests\unit\test_glb_validator.py ..F..                                   [ 70%]
+tests\unit\test_godot_capture.py .....                                   [ 71%]
+tests\unit\test_godot_contracts.py ...............................       [ 79%]
+tests\unit\test_godot_staging.py .....s...                               [ 81%]
+tests\unit\test_meshy_adapter.py .....................                   [ 86%]
+tests\unit\test_path_guard.py ......s....s                               [ 89%]
+tests\unit\test_policy.py ..............................                 [ 97%]
+tests\unit\test_redaction.py ........                                    [ 99%]
+tests\unit\test_state_machine.py ....                                    [100%]
+
+================================== FAILURES ===================================
+___________________ test_help_version_and_json_usage_error ____________________
+
+    def test_help_version_and_json_usage_error() -> None:
+        help_result = subprocess.run(
+            [sys.executable, "-m", "gamefactory", "--help"], text=True, capture_output=True
+        )
+        assert help_result.returncode == 0
+        assert "doctor" in help_result.stdout and "run" in help_result.stdout
+    
+        version_result = subprocess.run(
+            [sys.executable, "-m", "gamefactory", "--version"], text=True, capture_output=True
+        )
+        assert version_result.returncode == 0
+>       assert version_result.stdout.strip() == "gamefactory 0.3.0"
+E       AssertionError: assert 'gamefactory 0.4.0' == 'gamefactory 0.3.0'
+E         
+E         - gamefactory 0.3.0
+E         ?               ^
+E         + gamefactory 0.4.0
+E         ?               ^
+
+tests\integration\test_cli.py:39: AssertionError
+__________ test_validator_enforces_budgets_and_lod_collider_geometry __________
+
+tmp_path = WindowsPath('C:/Users/lenovo/devel/ai-game-factory/.verification/v04-regression-interim-host/test_validator_enforces_budget0')
+
+    def test_validator_enforces_budgets_and_lod_collider_geometry(tmp_path: Path) -> None:
+        path = tmp_path / "asset.glb"
+        create_box_glb(
+            include_lod1=True,
+            include_collider=True,
+            num_materials=3,
+            include_texture=True,
+            texture_size=(4096, 4096),
+            output_path=path,
+        )
+        rules = {f.rule_id: f.severity.value for f in validate_glb(path, _spec()).findings}
+>       assert rules["materials.budget"] == "FAIL"
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'materials.budget'
+
+tests\unit\test_glb_validator.py:84: KeyError
+- generated xml file: C:\Users\lenovo\devel\ai-game-factory\docs\reports\v0.4\interim-regression-host.xml -
+=========================== short test summary info ===========================
+FAILED tests/integration/test_cli.py::test_help_version_and_json_usage_error
+FAILED tests/unit/test_glb_validator.py::test_validator_enforces_budgets_and_lod_collider_geometry
+============ 2 failed, 391 passed, 15 skipped in 97.97s (0:01:37) =============

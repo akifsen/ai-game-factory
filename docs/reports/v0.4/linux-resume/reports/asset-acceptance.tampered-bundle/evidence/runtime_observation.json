@@ -1,0 +1,29 @@
+{
+	"asset_id": "prop_acceptance_crate_01",
+	"attempt_number": 1,
+	"collider_proxy_name": "COL_prop_acceptance_crate_01",
+	"collision_shape_present": true,
+	"errors": [],
+	"execution_id": "EXEC-9add9bc3",
+	"mesh_bounds": {
+		"position": [
+			-0.599999964237213,
+			0.0,
+			-0.5
+		],
+		"size": [
+			1.19999992847443,
+			1.0,
+			1.0
+		]
+	},
+	"mesh_name": "SM_prop_acceptance_crate_01_LOD0",
+	"mesh_visible": true,
+	"physics_body_present": true,
+	"physics_ray_hit": true,
+	"processed_glb_sha256": "e3ad33cc3bae1f2172685a380edbfd2291e242ebcf13ccd8df63c0c9db9b902b",
+	"revision": 1,
+	"schema_version": "asset-runtime-observation-0.4.0",
+	"status": "PASS",
+	"workflow_id": "WF-ASSET-ea6422c5"
+}

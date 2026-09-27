@@ -1,7 +1,8 @@
 # AI Game Factory belgeleri
 
-Bu çalışma dört kaynak metindeki 123 bölümü esas alır. Uygulama sınırı **Factory
-Core V0.1**; üretim asset/AI entegrasyonları bu teslimin parçası değildir.
+Bu dizin Factory Core V0.1 ile sonraki Godot ve asset sprintlerinin planlarını,
+mimari kararlarını ve ayrı doğrulama kayıtlarını içerir. Her sürümün güncel kapsamı
+ve kabul durumu kendi kapanış raporunda belirtilir; tarihsel raporlar korunur.
 
 ## Plan ve kapsam
 
@@ -73,3 +74,18 @@ V0.1 reports above remain historical records; V0.2 evidence uses separate files.
 - [ADR 0006: renderer, checkpoints, and human review](adr/0006-rendered-capture-and-visual-review.md)
 - [V0.3 completion report](reports/v0.3-completion-report.md)
 - [Openable Windows review package](reports/v0.3-rendered/README.md)
+
+## V0.4 — Concept ve static prop üretimi
+
+- [57 bölümlük sprint şartnamesi](requirements/v0.4-feature-completion-sprint.md)
+- [Adım adım iş planı ve kapsam eşlemesi](work-plan-v0.4.md)
+- [Asset pipeline ve insan onayları](pipelines/asset-production.md)
+- [Meshy entegrasyonu ve ücretli işlem sınırı](integrations/meshy.md)
+- [Blender işleme sözleşmesi](integrations/blender-asset-processing.md)
+- [ADR 0007: revision ve ücretli üretim](adr/0007-asset-revisions-and-paid-generation.md)
+- [V0.4 mühendislik kararı ve kanıtlar](reports/v0.4-completion-report.md)
+- [İnsan incelemesini bekleyen gerçek concept](reports/v0.4/concept/README.md)
+
+Phase A uygulama doğrulaması, gerçek Meshy üretimi ve nihai insan görsel onayı
+ayrı kabul aşamalarıdır. Fake provider kanıtları gerçek üretim veya insan onayı
+yerine geçmez.

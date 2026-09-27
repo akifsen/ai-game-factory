@@ -1,0 +1,12 @@
+{
+  "axis_probe_expected_gltf_bounds_xyz_m": [
+    1.2,
+    1.6,
+    0.8
+  ],
+  "blender_executable": "C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.EXE",
+  "blender_version": "Blender 5.2.1 LTS",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "python": "3.12.14",
+  "source_kind": "synthetic deterministic test fixture; no paid-provider asset"
+}

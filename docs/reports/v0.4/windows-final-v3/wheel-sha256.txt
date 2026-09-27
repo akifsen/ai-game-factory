@@ -1,0 +1,5 @@
+
+Algorithm : SHA256
+Hash      : FD908C14FBD1DF9E312AF2E1F8A02991F9B8F605EDA0CC07E0CE2C9BF2E9DF37
+Path      : C:\Users\lenovo\devel\ai-game-factory\.verification\v04-windows-final-v3\dist\gamefactory-0.4.0-py3-none-any.whl
+

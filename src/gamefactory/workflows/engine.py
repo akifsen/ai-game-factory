@@ -30,6 +30,7 @@ from gamefactory.core.approvals.approval_service import (
     ApprovalService,
     compute_operation_hash,
 )
+from gamefactory.core.approvals.operation_scope import build_operation_inputs
 from gamefactory.core.artifacts.artifact_manager import ArtifactManager
 from gamefactory.core.domain.dag import WorkflowDAG
 from gamefactory.core.domain.errors import (
@@ -87,6 +88,7 @@ class WorkflowExecutionResult:
     blocked_tasks: list[str]
     pending_approval_id: str | None = None
     error_message: str | None = None
+    error_code: str | None = field(default=None, kw_only=True)
 
     def __post_init__(self) -> None:
         if self.error_message is not None:
@@ -104,7 +106,7 @@ class WorkflowExecutionResult:
             raise ValueError("Workflow result task lists must contain string IDs")
 
     def to_dict(self) -> dict[str, object]:
-        return {
+        data = {
             "schema_version": self.schema_version,
             "workflow_id": self.workflow_id,
             "status": self.status.value,
@@ -114,6 +116,9 @@ class WorkflowExecutionResult:
             "pending_approval_id": self.pending_approval_id,
             "error_message": self.error_message,
         }
+        if self.error_code is not None:
+            data["error_code"] = self.error_code
+        return data
 
 
 class WorkflowEngine:
@@ -161,7 +166,13 @@ class WorkflowEngine:
             ),
         )
 
-    def register_workflow(self, workflow: Workflow, tasks: list[Task]) -> None:
+    def register_workflow(
+        self,
+        workflow: Workflow,
+        tasks: list[Task],
+        *,
+        allow_existing_empty_placeholder: bool = False,
+    ) -> None:
         """Register a new workflow and its tasks, validating the DAG upfront."""
         WorkflowDAG(tasks)  # Validates dependencies and cycle freedom
         if any(task.workflow_id != workflow.id for task in tasks):
@@ -177,6 +188,7 @@ class WorkflowEngine:
                 actor="System",
                 details={"task_count": len(tasks)},
             ),
+            allow_existing_empty_placeholder=allow_existing_empty_placeholder,
         )
 
     def run_workflow(self, workflow_id: str) -> WorkflowExecutionResult:
@@ -234,6 +246,39 @@ class WorkflowEngine:
                             recovery_known_terminal = recovery_callback(wf, t, latest_attempt)
                         except Exception:
                             recovery_known_terminal = False
+                    safe_paid_recovery = bool(
+                        is_paid_or_metered
+                        and handler_profile is not None
+                        and handler_profile.safe_paid_recovery
+                        and recovery_callback is not None
+                        and recovery_known_terminal
+                    )
+                    if safe_paid_recovery:
+                        # The handler has independently verified a durable external task ID.
+                        # Its adapter must query only on the next dispatch; no new request
+                        # may be created for the same task/fingerprint.
+                        latest_attempt.status = ExecutionStatus.FAILED
+                        latest_attempt.error_message = (
+                            "Recovered known provider task; resuming query-only reconciliation"
+                        )
+                        latest_attempt.retryable = True
+                        latest_attempt.completed_at = utc_now_iso()
+                        t.status = TaskStatus.FAILED
+                        self._finalize_execution(
+                            t,
+                            latest_attempt,
+                            AuditEvent(
+                                id=generate_id("AUDIT"),
+                                entity_type="Task",
+                                entity_id=t.id,
+                                action="RECOVERED_KNOWN_PROVIDER_TASK",
+                                actor="WorkflowEngine",
+                                details={"execution_id": latest_attempt.id, "query_only": True},
+                            ),
+                        )
+                        self.task_repo.update_status(t.id, TaskStatus.PENDING)
+                        t.status = TaskStatus.PENDING
+                        continue
                     if is_paid_or_metered or is_conservative_process:
                         if (
                             is_conservative_process
@@ -429,7 +474,18 @@ class WorkflowEngine:
             ExecutionStatus.UNCERTAIN,
         ):
             handler_profile = self.handler_registry.metadata(task.task_type)
+            safe_paid_resume = False
             if (
+                handler_profile is not None
+                and handler_profile.safe_paid_recovery
+                and handler_profile.recovery_check is not None
+                and latest_attempt.status == ExecutionStatus.UNCERTAIN
+            ):
+                try:
+                    safe_paid_resume = handler_profile.recovery_check(wf, task, latest_attempt)
+                except Exception:
+                    safe_paid_resume = False
+            if not safe_paid_resume and (
                 task.task_type == "paid_generation"
                 or task.cost_class
                 in (
@@ -505,6 +561,22 @@ class WorkflowEngine:
             )
         handler_profile = self.handler_registry.metadata(task.task_type)
         estimated_cost = float(task.parameters.get("cost", 0.0))
+        query_only_resume = False
+        if (
+            latest_attempt is not None
+            and handler_profile is not None
+            and handler_profile.safe_paid_recovery
+            and handler_profile.recovery_check is not None
+            and latest_attempt.status in (ExecutionStatus.FAILED, ExecutionStatus.UNCERTAIN)
+        ):
+            try:
+                query_only_resume = handler_profile.recovery_check(wf, task, latest_attempt)
+            except Exception:
+                query_only_resume = False
+        if query_only_resume:
+            # The original attempt already reserves the paid budget. This attempt
+            # can only query/download the known task and must not reserve it twice.
+            estimated_cost = 0.0
 
         # Check if an approval exists
         approvals = [a for a in self.app_repo.list_by_workflow(wf.id) if a.task_id == task.id]
@@ -517,8 +589,17 @@ class WorkflowEngine:
         has_approved_decision = (
             active_approval is not None and active_approval.status == ApprovalStatus.APPROVED
         )
+        declared_mandatory_type = (
+            handler_profile.mandatory_approval_type
+            if handler_profile is not None
+            else task.parameters.get("mandatory_approval_type")
+        )
+        if declared_mandatory_type is not None and not isinstance(declared_mandatory_type, str):
+            raise ValidationError("mandatory_approval_type must be a string")
         approval_type = (
-            "paid_generation"
+            declared_mandatory_type
+            if declared_mandatory_type
+            else "paid_generation"
             if op_type == OperationType.PAID_OPERATION
             else "process_execution"
             if op_type == OperationType.PROCESS_EXECUTION and handler_profile is not None
@@ -556,6 +637,15 @@ class WorkflowEngine:
             )
         except BudgetExceeded as exc:
             return self._block_for_budget(wf, task, exc)
+
+        # Some workflow stages require a distinct human decision regardless of
+        # optional generic policy switches. Preserve budget/denial results above;
+        # this only adds the missing gate after an otherwise permitted operation.
+        if declared_mandatory_type is not None and not has_approved_decision and policy_res.allowed:
+            policy_res.allowed = False
+            policy_res.requires_approval = True
+            policy_res.approval_type = declared_mandatory_type
+            policy_res.reason = f"{declared_mandatory_type} requires an explicit human decision"
 
         if (
             policy_res.requires_approval
@@ -641,6 +731,12 @@ class WorkflowEngine:
                 failed_tasks=[task.id],
                 blocked_tasks=[],
                 error_message=f"Task '{task.id}' rejected by human operator: {active_approval.comment}",
+                error_code=(
+                    "VISUAL_REVIEW_REJECTED"
+                    if task.task_type
+                    in {"asset_concept_review", "asset_paid_generation", "asset_final_review"}
+                    else None
+                ),
             )
 
         # Atomic claim couples the state change and attempt insertion.
@@ -742,7 +838,15 @@ class WorkflowEngine:
                     entity_id=task.id,
                     action="FAILED",
                     actor="WorkflowEngine",
-                    details={"attempt": attempt_num, "error": str(exc)},
+                    details={
+                        "attempt": attempt_num,
+                        "error": str(exc),
+                        **(
+                            {"error_code": getattr(exc, "code", "FACTORY_ERROR")}
+                            if task.task_type.startswith("asset_")
+                            else {}
+                        ),
+                    },
                 ),
             )
 
@@ -756,6 +860,11 @@ class WorkflowEngine:
                     f"Operation outcome is uncertain; reconciliation required: {exc}"
                     if uncertain
                     else str(exc)
+                ),
+                error_code=(
+                    getattr(exc, "code", "FACTORY_ERROR")
+                    if task.task_type.startswith("asset_")
+                    else None
                 ),
             )
 
@@ -773,7 +882,13 @@ class WorkflowEngine:
             workflow.status = WorkflowStatus.BLOCKED
             self.wf_repo.update_status(workflow.id, workflow.status)
         return WorkflowExecutionResult(
-            workflow.id, WorkflowStatus.BLOCKED, [], [], [task.id], error_message=str(error)
+            workflow.id,
+            WorkflowStatus.BLOCKED,
+            [],
+            [],
+            [task.id],
+            error_message=str(error),
+            error_code="BUDGET_BLOCKED" if task.task_type.startswith("asset_") else None,
         )
 
     def _dispatch_task_action(
@@ -847,7 +962,12 @@ class WorkflowEngine:
             raise ArtifactError("Mandatory quality gate and evidence must be recorded")
 
     def approval_inputs(
-        self, workflow: Workflow, task: Task, cost_class: CostClass | None = None
+        self,
+        workflow: Workflow,
+        task: Task,
+        cost_class: CostClass | None = None,
+        *,
+        artifact_ids: list[str] | None = None,
     ) -> dict[str, object]:
         """Return the complete operation scope used at request and dispatch time."""
         profile = self.handler_registry.metadata(task.task_type)
@@ -880,22 +1000,46 @@ class WorkflowEngine:
             }
             effective_class = max((effective_class, provider_class), key=rank.__getitem__)
         artifacts = self.art_repo.list_by_workflow(workflow.id)
-        scope: dict[str, object] = {
-            "workflow_id": workflow.id,
-            "task_type": task.task_type,
-            "cost_class": effective_class.value,
-            "provider": self.asset_provider.name
+        if artifact_ids is not None:
+            allowed = set(artifact_ids)
+            artifacts = [item for item in artifacts if item.id in allowed]
+        elif (
+            profile is not None
+            and profile.safe_paid_recovery
+            and profile.recovery_check is not None
+        ):
+            approvals = [
+                item
+                for item in self.app_repo.list_by_workflow(workflow.id)
+                if item.task_id == task.id and item.status == ApprovalStatus.APPROVED
+            ]
+            prior_attempts = self.exec_repo.list_by_task(task.id)
+            if approvals and prior_attempts:
+                previous = max(prior_attempts, key=lambda item: item.attempt_number)
+                if previous.status in (
+                    ExecutionStatus.FAILED,
+                    ExecutionStatus.UNCERTAIN,
+                ) and profile.recovery_check(workflow, task, previous):
+                    # Query-only recovery must validate the approval against the
+                    # exact pre-dispatch artifact set; post-crash bookkeeping
+                    # artifacts cannot redefine the paid operation.
+                    allowed = set(approvals[0].artifact_ids)
+                    artifacts = [item for item in artifacts if item.id in allowed]
+        handler_context = (
+            profile.approval_context(workflow, task)
+            if profile is not None and profile.approval_context is not None
+            else None
+        )
+        return build_operation_inputs(
+            workflow,
+            task,
+            artifacts,
+            effective_class,
+            self.asset_provider.name
             if task.task_type == "paid_generation" and self.asset_provider
             else None,
-            "artifacts": sorted((item.id, item.content_hash) for item in artifacts),
-            "estimated_cost": float(task.parameters.get("cost", 0.0)),
-        }
-        if profile is not None and profile.approval_context is not None:
-            scope["handler_context"] = profile.approval_context(workflow, task)
-        return {
-            "parameters": task.parameters,
-            "scope": scope,
-        }
+            handler_context,
+        )
 
     def _record_final_workflow_evidence(
         self, workflow: Workflow, task: Task, execution: Execution

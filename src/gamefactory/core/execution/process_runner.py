@@ -1,6 +1,7 @@
 """Controlled process execution with minimal environments and request-scoped redaction."""
 
 import ctypes
+import json
 import math
 import os
 import signal
@@ -60,6 +61,7 @@ class CommandRequest:
     env_overrides: dict[str, str] = field(default_factory=dict)
     timeout_seconds: float = 60.0
     minimal_env: bool = True
+    structured_json_output: bool = False
 
 
 @dataclass
@@ -593,7 +595,36 @@ class ProcessRunner:
         stderr_res = captured.get("stderr", BoundedReadResult(b"", False))
         stdout_str = stdout_res.data.decode("utf-8", errors="replace")
         stderr_str = stderr_res.data.decode("utf-8", errors="replace")
-        stdout_redacted, stdout_redaction_truncated = self._cap_redacted_text(redact(stdout_str))
+        safe_stdout = redact(stdout_str)
+        if request.structured_json_output:
+            # Redact decoded strings before serializing: text regexes can otherwise
+            # consume a JSON closing quote (for example CLI help containing "auth login").
+            # This option never exposes an unredacted fallback on malformed output.
+            def redact_json(value: Any, sensitive: bool = False) -> Any:
+                if isinstance(value, str):
+                    return "[REDACTED]" if sensitive else redact(value)
+                if sensitive and isinstance(value, (int, float)) and not isinstance(value, bool):
+                    return "[REDACTED]"
+                # Booleans/null describe presence, not credential values (doctor
+                # reports credential_sources.env and stored_profile.exists).
+                if isinstance(value, list):
+                    return [redact_json(item, sensitive) for item in value]
+                if isinstance(value, dict):
+                    return {
+                        redact(key): redact_json(
+                            item,
+                            sensitive
+                            or any(part in key.upper() for part in _SENSITIVE_ENV_SUBSTRINGS),
+                        )
+                        for key, item in value.items()
+                    }
+                return value
+
+            try:
+                safe_stdout = json.dumps(redact_json(json.loads(stdout_str)), allow_nan=False)
+            except (ValueError, TypeError, RecursionError):
+                pass
+        stdout_redacted, stdout_redaction_truncated = self._cap_redacted_text(safe_stdout)
         stderr_redacted, stderr_redaction_truncated = self._cap_redacted_text(redact(stderr_str))
         stdout_truncated = stdout_res.truncated or stdout_redaction_truncated
         stderr_truncated = stderr_res.truncated or stderr_redaction_truncated

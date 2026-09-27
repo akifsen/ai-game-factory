@@ -20,10 +20,12 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
+from scripts.verify_asset_acceptance import _resolve_python as asset_resolve_python  # noqa: E402
 from scripts.verify_godot_live_crash import _resolve_python as live_resolve_python  # noqa: E402
 from scripts.verify_godot_recovery import _resolve_python as recovery_resolve_python  # noqa: E402
 
 RESOLVERS = [
+    pytest.param(asset_resolve_python, id="asset_acceptance"),
     pytest.param(recovery_resolve_python, id="recovery"),
     pytest.param(live_resolve_python, id="live_crash"),
 ]

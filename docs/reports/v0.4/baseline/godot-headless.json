@@ -1,0 +1,1385 @@
+{
+  "schema_version": 1,
+  "status": "FAILED",
+  "started_at": "2026-09-27T10:15:37.370503+00:00",
+  "cli": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.venv\\Scripts\\gamefactory.exe",
+  "fixture": "C:\\Users\\lenovo\\devel\\ai-game-factory\\examples\\godot-verification",
+  "godot": "C:\\Users\\lenovo\\devel\\godot\\Godot_v4.7.2-stable_win64.exe\\Godot_v4.7.2-stable_win64_console.exe",
+  "workspace": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\v04-baseline-headless\\godot-acceptance-20260927T101537Z-97132f97",
+  "commands": [
+    {
+      "argv": [
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.venv\\Scripts\\gamefactory.exe",
+        "--version"
+      ],
+      "cwd": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\v04-baseline-headless\\godot-acceptance-20260927T101537Z-97132f97",
+      "exit_code": 0,
+      "stdout": "gamefactory 0.3.0\n",
+      "stderr": "",
+      "timed_out": false
+    },
+    {
+      "argv": [
+        "C:\\Users\\lenovo\\devel\\godot\\Godot_v4.7.2-stable_win64.exe\\Godot_v4.7.2-stable_win64_console.exe",
+        "--version"
+      ],
+      "cwd": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\v04-baseline-headless\\godot-acceptance-20260927T101537Z-97132f97",
+      "exit_code": 0,
+      "stdout": "4.7.2.stable.official.ed1daf0bf\n",
+      "stderr": "",
+      "timed_out": false
+    },
+    {
+      "argv": [
+        "C:\\Users\\lenovo\\devel\\godot\\Godot_v4.7.2-stable_win64.exe\\Godot_v4.7.2-stable_win64_console.exe",
+        "--help"
+      ],
+      "cwd": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\v04-baseline-headless\\godot-acceptance-20260927T101537Z-97132f97",
+      "exit_code": 0,
+      "stdout": "\u001b[38;5;39mGodot Engine\u001b[0m v4.7.2.stable.official.ed1daf0bf - \u001b[4mhttps://godotengine.org\u001b[0m\n\u001b[90mFree and open source software under the terms of the MIT license.\u001b[0m\n\u001b[90m(c) 2014-present Godot Engine contributors. (c) 2007-present Juan Linietsky, Ariel Manzur.\u001b[0m\n\n\u001b[1;93mUsage:\u001b[0m\n  C:\\Users\\lenovo\\devel\\godot\\Godot_v4.7.2-stable_win64.exe\\Godot_v4.7.2-stable_win64.exe \u001b[96m[options] [path to \"project.godot\" file]\u001b[0m\n\n\u001b[1;93mOption legend (this build = editor):\u001b[0m\n  \u001b[1;92mR\u001b[0m  Available in editor builds, debug export templates and release export templates.\n  \u001b[1;94mD\u001b[0m  Available in editor builds and debug export templates only.\n  \u001b[1;93mX\u001b[0m  Only available in editor builds, and export templates compiled with `disable_path_overrides=false`.\n  \u001b[1;91mE\u001b[0m  Only available in editor builds.\n\n\u001b[1;93mGeneral options:\u001b[0m\n  \u001b[92m-h, --help                        \u001b[1;92mR\u001b[0m  Display this help message.\n  \u001b[92m--version                         \u001b[1;92mR\u001b[0m  Display the version string.\n  \u001b[92m-v, --verbose                     \u001b[1;92mR\u001b[0m  Use verbose stdout mode.\n  \u001b[92m--quiet                           \u001b[1;92mR\u001b[0m  Quiet mode, silences stdout messages. Errors are still displayed.\n  \u001b[92m--no-header                       \u001b[1;92mR\u001b[0m  Do not print engine version and rendering driver/method header on startup.\n\n\u001b[1;93mRun options:\u001b[0m\n  \u001b[92m--, ++                            \u001b[1;92mR\u001b[0m  Separator for user-provided arguments. Following arguments are not used by the engine, but can be read from `OS.get_cmdline_user_args()`.\n  \u001b[92m-e, --editor                      \u001b[1;91mE\u001b[0m  Start the editor instead of running the scene.\n  \u001b[92m-p, --project-manager             \u001b[1;91mE\u001b[0m  Start the project manager, even if a project is auto-detected.\n  \u001b[92m--recovery-mode                   \u001b[1;91mE\u001b[0m  Start the editor in recovery mode, which disables features that can typically cause startup crashes, such as tool scripts, editor plugins, GDExtension addons, and others.\n  \u001b[92m--debug-server \u001b[95m<uri>\u001b[0m              \u001b[1;91mE\u001b[0m  Start the editor debug server (<protocol>://<host/IP>[:port], e.g. tcp://127.0.0.1:6007)\n  \u001b[92m--dap-port \u001b[95m<port>\u001b[0m                 \u001b[1;91mE\u001b[0m  Use the specified port for the GDScript Debug Adapter Protocol. Recommended port range [1024, 49151].\n  \u001b[92m--lsp-port \u001b[95m<port>\u001b[0m                 \u001b[1;91mE\u001b[0m  Use the specified port for the GDScript Language Server Protocol. Recommended port range [1024, 49151].\n  \u001b[92m--quit                            \u001b[1;92mR\u001b[0m  Quit after the first iteration.\n  \u001b[92m--quit-after \u001b[95m<int>\u001b[0m                \u001b[1;92mR\u001b[0m  Quit after the given number of iterations. Set to 0 to disable.\n  \u001b[92m-l, --language \u001b[95m<locale>\u001b[0m           \u001b[1;92mR\u001b[0m  Use a specific locale (<locale> being a two-letter code).\n  \u001b[92m--path \u001b[95m<directory>\u001b[0m                \u001b[1;93mX\u001b[0m  Path to a project (<directory> must contain a \"project.godot\" file).\n  \u001b[92m--scene \u001b[95m<path>\u001b[0m                    \u001b[1;93mX\u001b[0m  Path or UID of a scene in the project that should be started.\n  \u001b[92m--main-pack \u001b[95m<file>\u001b[0m                \u001b[1;93mX\u001b[0m  Path to a pack (.pck) file to load.\n  \u001b[92m--render-thread \u001b[95m<mode>\u001b[0m            \u001b[1;92mR\u001b[0m  Render thread mode (\"unsafe\" [deprecated], \"safe\", \"separate\").\n  \u001b[92m--remote-fs \u001b[95m<address>\u001b[0m             \u001b[1;94mD\u001b[0m  Remote filesystem (<host/IP>[:<port>] address).\n  \u001b[92m--remote-fs-password \u001b[95m<password>\u001b[0m   \u001b[1;94mD\u001b[0m  Password for remote filesystem.\n  \u001b[92m--audio-driver \u001b[95m<driver>\u001b[0m           \u001b[1;92mR\u001b[0m  Audio driver [\"WASAPI\", \"Dummy\"].\n  \u001b[92m--display-driver \u001b[95m<driver>\u001b[0m         \u001b[1;92mR\u001b[0m  Display driver (and rendering driver) [\"windows\" (\"vulkan\", \"d3d12\", \"opengl3\", \"opengl3_angle\", \"dummy\"), \"headless\" (\"dummy\")].\n  \u001b[92m--audio-output-latency \u001b[95m<ms>\u001b[0m       \u001b[1;92mR\u001b[0m  Override audio output latency in milliseconds (default is 15 ms).\n  \u001b[92m                                   \u001b[0m  \u001b[90mLower values make sound playback more reactive but increase CPU usage, and may result in audio cracking if the CPU can't keep up.\n  \u001b[92m--rendering-method \u001b[95m<renderer>\u001b[0m     \u001b[1;92mR\u001b[0m  Renderer name. Requires driver support.\n  \u001b[92m--rendering-driver \u001b[95m<driver>\u001b[0m       \u001b[1;92mR\u001b[0m  Rendering driver (depends on display driver).\n  \u001b[92m--gpu-index \u001b[95m<device_index>\u001b[0m        \u001b[1;92mR\u001b[0m  Use a specific GPU (only available on the Forward+/Mobile renderers; run with --verbose to get a list of available devices).\n  \u001b[92m--text-driver \u001b[95m<driver>\u001b[0m            \u001b[1;92mR\u001b[0m  Text driver (used for font rendering, bidirectional support and shaping).\n  \u001b[92m--tablet-driver \u001b[95m<driver>\u001b[0m          \u001b[1;92mR\u001b[0m  Pen tablet input driver.\n  \u001b[92m--headless                        \u001b[1;92mR\u001b[0m  Enable headless mode (--display-driver headless --audio-driver Dummy). Useful for servers and with --script.\n  \u001b[92m--log-file \u001b[95m<file>\u001b[0m                 \u001b[1;92mR\u001b[0m  Write output/error log to the specified path instead of the default location defined by the project.\n  \u001b[92m                                   \u001b[0m  \u001b[90m<file> path should be absolute or relative to the project directory.\n  \u001b[92m--write-movie \u001b[95m<file>\u001b[0m              \u001b[1;92mR\u001b[0m  Write a video to the specified path (usually with .avi or .png extension).\n  \u001b[92m                                   \u001b[0m  \u001b[90m--fixed-fps is forced when enabled, but it can be used to change movie FPS.\n  \u001b[92m                                   \u001b[0m  \u001b[90m--disable-vsync can speed up movie writing but makes interaction more difficult.\n  \u001b[92m                                   \u001b[0m  \u001b[90m--quit-after can be used to specify the number of frames to write.\n\n\u001b[1;93mDisplay options:\u001b[0m\n  \u001b[92m-f, --fullscreen                  \u001b[1;92mR\u001b[0m  Request fullscreen mode.\n  \u001b[92m-m, --maximized                   \u001b[1;92mR\u001b[0m  Request a maximized window.\n  \u001b[92m-w, --windowed                    \u001b[1;92mR\u001b[0m  Request windowed mode.\n  \u001b[92m-t, --always-on-top               \u001b[1;92mR\u001b[0m  Request an always-on-top window.\n  \u001b[92m--resolution \u001b[95m<W>\u001b[0mx\u001b[95m<H>\u001b[0m              \u001b[1;92mR\u001b[0m  Request window resolution.\n  \u001b[92m--position \u001b[95m<X>\u001b[0m,\u001b[95m<Y>\u001b[0m                \u001b[1;92mR\u001b[0m  Request window position.\n  \u001b[92m--screen \u001b[95m<N>\u001b[0m                      \u001b[1;92mR\u001b[0m  Request window screen.\n  \u001b[92m--single-window                   \u001b[1;92mR\u001b[0m  Use a single window (no separate subwindows).\n  \u001b[92m--xr-mode \u001b[95m<mode>\u001b[0m                  \u001b[1;92mR\u001b[0m  Select XR (Extended Reality) mode [\"default\", \"off\", \"on\"].\n  \u001b[92m--wid \u001b[95m<window_id>\u001b[0m                 \u001b[1;92mR\u001b[0m  Request parented to window.\n  \u001b[92m--accessibility \u001b[95m<mode>\u001b[0m            \u001b[1;92mR\u001b[0m  Select accessibility mode ['auto' (when screen reader is running, default), 'always', 'disabled'].\n  \u001b[92m--accessibility-driver \u001b[95m<driver>\u001b[0m   \u001b[1;92mR\u001b[0m  Select accessibility driver ['accesskit', 'dummy'].\n\n\u001b[1;93mDebug options:\u001b[0m\n  \u001b[92m-d, --debug                       \u001b[1;92mR\u001b[0m  Debug (local stdout debugger).\n  \u001b[92m-b, --breakpoints                 \u001b[1;92mR\u001b[0m  Breakpoint list as source::line comma-separated pairs, no spaces (use %%20 instead).\n  \u001b[92m--ignore-error-breaks             \u001b[1;92mR\u001b[0m  If debugger is connected, prevents sending error breakpoints.\n  \u001b[92m--profiling                       \u001b[1;92mR\u001b[0m  Enable profiling in the script debugger.\n  \u001b[92m--gpu-profile                     \u001b[1;92mR\u001b[0m  Show a GPU profile of the tasks that took the most time during frame rendering.\n  \u001b[92m--gpu-validation                  \u001b[1;92mR\u001b[0m  Enable graphics API validation layers for debugging.\n  \u001b[92m--gpu-abort                       \u001b[1;94mD\u001b[0m  Abort on graphics API usage errors (usually validation layer errors). May help see the problem if your system freezes.\n  \u001b[92m--generate-spirv-debug-info       \u001b[1;92mR\u001b[0m  Generate SPIR-V debug information (Vulkan only). This allows source-level shader debugging with RenderDoc.\n  \u001b[92m--extra-gpu-memory-tracking       \u001b[1;92mR\u001b[0m  Enables additional memory tracking (see class reference for `RenderingDevice.get_driver_and_device_memory_report()` and linked methods). Currently only implemented for Vulkan. Enabling this feature may cause crashes on some systems due to buggy drivers or bugs in the Vulkan Loader. See https://github.com/godotengine/godot/issues/95967\n  \u001b[92m--accurate-breadcrumbs            \u001b[1;92mR\u001b[0m  Force barriers between breadcrumbs. Useful for narrowing down a command causing GPU resets. Currently only implemented for Vulkan.\n  \u001b[92m--remote-debug \u001b[95m<uri>\u001b[0m              \u001b[1;92mR\u001b[0m  Remote debug (<protocol>://<host/IP>[:<port>], e.g. tcp://127.0.0.1:6007).\n  \u001b[92m--single-threaded-scene           \u001b[1;92mR\u001b[0m  Force scene tree to run in single-threaded mode. Sub-thread groups are disabled and run on the main thread.\n  \u001b[92m--debug-collisions                \u001b[1;94mD\u001b[0m  Show collision shapes when running the scene.\n  \u001b[92m--debug-paths                     \u001b[1;94mD\u001b[0m  Show path lines when running the scene.\n  \u001b[92m--debug-navigation                \u001b[1;94mD\u001b[0m  Show navigation polygons when running the scene.\n  \u001b[92m--debug-avoidance                 \u001b[1;94mD\u001b[0m  Show navigation avoidance debug visuals when running the scene.\n  \u001b[92m--debug-stringnames               \u001b[1;94mD\u001b[0m  Print all StringName allocations to stdout when the engine quits.\n  \u001b[92m--debug-canvas-item-redraw        \u001b[1;94mD\u001b[0m  Display a rectangle each time a canvas item requests a redraw (useful to troubleshoot low processor mode).\n  \u001b[92m--max-fps \u001b[95m<fps>\u001b[0m                   \u001b[1;92mR\u001b[0m  Set a maximum number of frames per second rendered (can be used to limit power usage). A value of 0 results in unlimited framerate.\n  \u001b[92m--frame-delay \u001b[95m<ms>\u001b[0m                \u001b[1;92mR\u001b[0m  Simulate high CPU load (delay each frame by <ms> milliseconds). Do not use as a FPS limiter; use --max-fps instead.\n  \u001b[92m--time-scale \u001b[95m<scale>\u001b[0m              \u001b[1;92mR\u001b[0m  Force time scale (higher values are faster, 1.0 is normal speed).\n  \u001b[92m--disable-vsync                   \u001b[1;92mR\u001b[0m  Forces disabling of vertical synchronization, even if enabled in the project settings. Does not override driver-level V-Sync enforcement.\n  \u001b[92m--disable-render-loop             \u001b[1;92mR\u001b[0m  Disable render loop so rendering only occurs when called explicitly from script.\n  \u001b[92m--disable-crash-handler           \u001b[1;92mR\u001b[0m  Disable crash handler when supported by the platform code.\n  \u001b[92m--fixed-fps \u001b[95m<fps>\u001b[0m                 \u001b[1;92mR\u001b[0m  Force a fixed number of frames per second. This setting disables real-time synchronization.\n  \u001b[92m--delta-smoothing \u001b[95m<enable>\u001b[0m        \u001b[1;92mR\u001b[0m  Enable or disable frame delta smoothing [\"enable\", \"disable\"].\n  \u001b[92m--print-fps                       \u001b[1;92mR\u001b[0m  Print the frames per second to the stdout.\n  \u001b[92m--editor-pseudolocalization       \u001b[1;91mE\u001b[0m  Enable pseudolocalization for the editor and the project manager.\n\n\u001b[1;93mStandalone tools:\u001b[0m\n  \u001b[92m-s, --script \u001b[95m<script>\u001b[0m             \u001b[1;93mX\u001b[0m  Run a script.\n  \u001b[92m--main-loop \u001b[95m<main_loop_name>\u001b[0m      \u001b[1;93mX\u001b[0m  Run a MainLoop specified by its global class name.\n  \u001b[92m--check-only                      \u001b[1;93mX\u001b[0m  Only parse for errors and quit (use with --script).\n  \u001b[92m--import                          \u001b[1;91mE\u001b[0m  Starts the editor, waits for any resources to be imported, and then quits.\n  \u001b[92m--export-release \u001b[95m<preset>\u001b[0m \u001b[95m<path>\u001b[0m  \u001b[1;91mE\u001b[0m  Export the project in release mode using the given preset and output path. The preset name should match one defined in \"export_presets.cfg\".\n  \u001b[92m                                   \u001b[0m  \u001b[90m<path> should be absolute or relative to the project directory, and include the filename for the binary (e.g. \"builds/game.exe\").\n  \u001b[92m                                   \u001b[0m  \u001b[90mThe target directory must exist.\n  \u001b[92m--export-debug \u001b[95m<preset>\u001b[0m \u001b[95m<path>\u001b[0m    \u001b[1;91mE\u001b[0m  Export the project in debug mode using the given preset and output path. See --export-release description for other considerations.\n  \u001b[92m--export-pack \u001b[95m<preset>\u001b[0m \u001b[95m<path>\u001b[0m     \u001b[1;91mE\u001b[0m  Export the project data only using the given preset and output path. The <path> extension determines whether it will be in PCK or ZIP format.\n  \u001b[92m--export-patch \u001b[95m<preset>\u001b[0m \u001b[95m<path>\u001b[0m    \u001b[1;91mE\u001b[0m  Export pack with changed files only. See --export-pack description for other considerations.\n  \u001b[92m--patches \u001b[95m<paths>\u001b[0m                 \u001b[1;91mE\u001b[0m  List of patches to use with --export-patch. The list is comma-separated.\n  \u001b[92m--install-android-build-template  \u001b[1;91mE\u001b[0m  Install the Android build template. Used in conjunction with --export-release or --export-debug.\n  \u001b[92m--convert-3to4                     \u001b[0m  \n  \u001b[92m  \u001b[96m[max_file_kb]\u001b[0m \u001b[96m[max_line_size]\u001b[0m   \u001b[1;91mE\u001b[0m  Converts project from Godot 3.x to Godot 4.x.\n  \u001b[92m--validate-conversion-3to4         \u001b[0m  \n  \u001b[92m  \u001b[96m[max_file_kb]\u001b[0m \u001b[96m[max_line_size]\u001b[0m   \u001b[1;91mE\u001b[0m  Shows what elements will be renamed when converting project from Godot 3.x to Godot 4.x.\n  \u001b[92m--doctool \u001b[96m[path]\u001b[0m                  \u001b[1;91mE\u001b[0m  Dump the engine API reference to the given <path> (defaults to current directory) in XML format, merging if existing files are found.\n  \u001b[92m--no-docbase                      \u001b[1;91mE\u001b[0m  Disallow dumping the base types (used with --doctool).\n  \u001b[92m--gdextension-docs                \u001b[1;91mE\u001b[0m  Rather than dumping the engine API, generate API reference from all the GDExtensions loaded in the current project (used with --doctool).\n  \u001b[92m--gdscript-docs \u001b[95m<path>\u001b[0m            \u001b[1;91mE\u001b[0m  Rather than dumping the engine API, generate API reference from the inline documentation in the GDScript files found in <path> (used with --doctool).\n  \u001b[92m--build-solutions                 \u001b[1;91mE\u001b[0m  Build the scripting solutions (e.g. for C# projects). Implies --editor and requires a valid project to edit.\n  \u001b[92m--dump-gdextension-interface      \u001b[1;91mE\u001b[0m  Generate a GDExtension header file \"gdextension_interface.h\" in the current folder. This file is the base file required to implement a GDExtension.\n  \u001b[92m--dump-gdextension-interface-json  \u001b[1;91mE\u001b[0m  Generate a JSON dump of the GDExtension interface named \"gdextension_interface.json\" in the current folder.\n  \u001b[92m--dump-extension-api              \u001b[1;91mE\u001b[0m  Generate a JSON dump of the Godot API for GDExtension bindings named \"extension_api.json\" in the current folder.\n  \u001b[92m--dump-extension-api-with-docs    \u001b[1;91mE\u001b[0m  Generate JSON dump of the Godot API like the previous option, but including documentation.\n  \u001b[92m--validate-extension-api \u001b[95m<path>\u001b[0m   \u001b[1;91mE\u001b[0m  Validate an extension API file dumped (with one of the two previous options) from a previous version of the engine to ensure API compatibility.\n  \u001b[92m                                   \u001b[0m  \u001b[90mIf incompatibilities or errors are detected, the exit code will be non-zero.\n  \u001b[92m--benchmark                       \u001b[1;91mE\u001b[0m  Benchmark the run time and print it to console.\n  \u001b[92m--benchmark-file \u001b[95m<path>\u001b[0m           \u001b[1;91mE\u001b[0m  Benchmark the run time and save it to a given file in JSON format. The path should be absolute.\n\n",
+      "stderr": "",
+      "timed_out": false
+    },
+    {
+      "argv": [
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.venv\\Scripts\\gamefactory.exe",
+        "--json",
+        "--project",
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\v04-baseline-headless\\godot-acceptance-20260927T101537Z-97132f97\\fixture game Ω",
+        "--godot-path",
+        "C:\\Users\\lenovo\\devel\\godot\\Godot_v4.7.2-stable_win64.exe\\Godot_v4.7.2-stable_win64_console.exe",
+        "init"
+      ],
+      "cwd": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\v04-baseline-headless\\godot-acceptance-20260927T101537Z-97132f97\\fixture game Ω",
+      "exit_code": 0,
+      "stdout": "{\"project_root\":\"C:\\\\Users\\\\lenovo\\\\devel\\\\ai-game-factory\\\\.verification\\\\v04-baseline-headless\\\\godot-acceptance-20260927T101537Z-97132f97\\\\fixture game Ω\",\"project_id\":\"factory-godot-verification-fixture\",\"project_name\":\"Factory Godot Verification Fixture\",\"already_initialized\":false,\"godot_project\":true,\"main_scene\":\"res://Main.tscn\",\"scripts\":2,\"scenes\":2,\"test_files\":0,\"exports\":false,\"git\":true,\"discovery_file\":\"C:\\\\Users\\\\lenovo\\\\devel\\\\ai-game-factory\\\\.verification\\\\v04-baseline-headless\\\\godot-acceptance-20260927T101537Z-97132f97\\\\fixture game Ω\\\\.gamefactory\\\\discovery.json\"}\n",
+      "stderr": "",
+      "timed_out": false,
+      "json": {
+        "project_root": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\v04-baseline-headless\\godot-acceptance-20260927T101537Z-97132f97\\fixture game Ω",
+        "project_id": "factory-godot-verification-fixture",
+        "project_name": "Factory Godot Verification Fixture",
+        "already_initialized": false,
+        "godot_project": true,
+        "main_scene": "res://Main.tscn",
+        "scripts": 2,
+        "scenes": 2,
+        "test_files": 0,
+        "exports": false,
+        "git": true,
+        "discovery_file": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\v04-baseline-headless\\godot-acceptance-20260927T101537Z-97132f97\\fixture game Ω\\.gamefactory\\discovery.json"
+      }
+    },
+    {
+      "argv": [
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.venv\\Scripts\\gamefactory.exe",
+        "--json",
+        "--project",
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\v04-baseline-headless\\godot-acceptance-20260927T101537Z-97132f97\\fixture game Ω",
+        "--godot-path",
+        "C:\\Users\\lenovo\\devel\\godot\\Godot_v4.7.2-stable_win64.exe\\Godot_v4.7.2-stable_win64_console.exe",
+        "run",
+        "godot-verify",
+        "--scenario",
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\v04-baseline-headless\\godot-acceptance-20260927T101537Z-97132f97\\fixture game Ω\\scenario.json"
+      ],
+      "cwd": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\v04-baseline-headless\\godot-acceptance-20260927T101537Z-97132f97\\fixture game Ω",
+      "exit_code": 2,
+      "stdout": "{\"workflow_id\":\"WF-GODOT-eb87de16\",\"status\":\"FAILED\",\"pending_approval_id\":null,\"completed_tasks\":[],\"failed_tasks\":[\"WF-GODOT-eb87de16-EXECUTE\"],\"blocked_tasks\":[],\"error_message\":\"Godot project import failed\"}\n",
+      "stderr": "",
+      "timed_out": false,
+      "json": {
+        "workflow_id": "WF-GODOT-eb87de16",
+        "status": "FAILED",
+        "pending_approval_id": null,
+        "completed_tasks": [],
+        "failed_tasks": [
+          "WF-GODOT-eb87de16-EXECUTE"
+        ],
+        "blocked_tasks": [],
+        "error_message": "Godot project import failed"
+      }
+    },
+    {
+      "argv": [
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.venv\\Scripts\\gamefactory.exe",
+        "--json",
+        "--project",
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\v04-baseline-headless\\godot-acceptance-20260927T101537Z-97132f97\\fixture game Ω",
+        "--godot-path",
+        "C:\\Users\\lenovo\\devel\\godot\\Godot_v4.7.2-stable_win64.exe\\Godot_v4.7.2-stable_win64_console.exe",
+        "inspect",
+        "WF-GODOT-eb87de16"
+      ],
+      "cwd": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\v04-baseline-headless\\godot-acceptance-20260927T101537Z-97132f97\\fixture game Ω",
+      "exit_code": 0,
+      "stdout": "{\"workflow\":{\"id\":\"WF-GODOT-eb87de16\",\"project_id\":\"factory-godot-verification-fixture\",\"name\":\"Godot headless verification: fixture-smoke\",\"status\":\"FAILED\",\"created_at\":\"2026-09-27T10:15:44.314973+00:00\",\"updated_at\":\"2026-09-27T10:16:00.358651+00:00\"},\"tasks\":[{\"id\":\"WF-GODOT-eb87de16-EXECUTE\",\"workflow_id\":\"WF-GODOT-eb87de16\",\"name\":\"Stage, import, and execute Godot scenario\",\"task_type\":\"godot_execute\",\"cost_class\":\"LOCAL\",\"depends_on\":[],\"status\":\"FAILED\",\"parameters\":{\"scenario_file\":\"C:\\\\Users\\\\lenovo\\\\devel\\\\ai-game-factory\\\\.verification\\\\v04-baseline-headless\\\\godot-acceptance-20260927T101537Z-97132f97\\\\fixture game Ω\\\\scenario.json\",\"scenario_snapshot\":{\"schema_version\":\"0.2.0\",\"scenario_id\":\"fixture-smoke\",\"scene\":\"res://Main.tscn\",\"max_tick\":90,\"timeout_seconds\":30.0,\"import_timeout_seconds\":30.0,\"actions\":[{\"tick\":30,\"action\":\"apply_damage\",\"amount\":20},{\"tick\":60,\"action\":\"defeat_enemy\"},{\"tick\":90,\"action\":\"apply_damage\",\"amount\":40}],\"snapshots\":[0,30,60,90],\"assertions\":[{\"id\":\"initial-player-hp\",\"tick\":0,\"field\":\"player_hp\",\"operator\":\"equals\",\"expected\":100},{\"id\":\"post-damage-player-hp\",\"tick\":30,\"field\":\"player_hp\",\"operator\":\"equals\",\"expected\":80},{\"id\":\"post-enemy-score\",\"tick\":60,\"field\":\"score\",\"operator\":\"equals\",\"expected\":100},{\"id\":\"final-player-hp\",\"tick\":90,\"field\":\"player_hp\",\"operator\":\"equals\",\"expected\":40},{\"id\":\"final-enemies\",\"tick\":90,\"field\":\"enemies_remaining\",\"operator\":\"equals\",\"expected\":2},{\"id\":\"final-score\",\"tick\":90,\"field\":\"score\",\"operator\":\"equals\",\"expected\":100}]},\"scenario_fingerprint\":\"831c75b5537606b349c630f578079a72b09e258fd5af52cca8c52a16b5a51246\",\"source_manifest_hash\":\"5a9e149aa103949ecb62b680a087cc39e95058f428ab9583d1b104925cc42dd4\",\"executable_path\":\"C:\\\\Users\\\\lenovo\\\\devel\\\\godot\\\\Godot_v4.7.2-stable_win64.exe\\\\Godot_v4.7.2-stable_win64_console.exe\",\"executable_sha256\":\"c8f0a6bc45a19b33541501e57f6f7cd972ab18453743266339d495cbbe846643\",\"harness_sha256\":\"429e7e7961dc65a07741f59d1bc40f883a03754673de27ff2d88a5c0bb5949c1\",\"scene_sha256\":\"3dadaf4ca52f7e9ed19c21f47ff281f22e1ccbd1855c03e00cc517f71baf38a8\"},\"max_retries\":1,\"timeout_seconds\":90.0,\"created_at\":\"2026-09-27T10:15:44.314973+00:00\",\"updated_at\":\"2026-09-27T10:16:00.346912+00:00\"},{\"id\":\"WF-GODOT-eb87de16-VALIDATE\",\"workflow_id\":\"WF-GODOT-eb87de16\",\"name\":\"Independently validate Godot observations\",\"task_type\":\"godot_validate\",\"cost_class\":\"LOCAL\",\"depends_on\":[\"WF-GODOT-eb87de16-EXECUTE\"],\"status\":\"PENDING\",\"parameters\":{\"execute_task_id\":\"WF-GODOT-eb87de16-EXECUTE\"},\"max_retries\":1,\"timeout_seconds\":60.0,\"created_at\":\"2026-09-27T10:15:44.314973+00:00\",\"updated_at\":\"2026-09-27T10:15:44.314973+00:00\"},{\"id\":\"WF-GODOT-eb87de16-EVIDENCE\",\"workflow_id\":\"WF-GODOT-eb87de16\",\"name\":\"Record final quality evidence\",\"task_type\":\"record_evidence\",\"cost_class\":\"LOCAL\",\"depends_on\":[\"WF-GODOT-eb87de16-VALIDATE\"],\"status\":\"PENDING\",\"parameters\":{},\"max_retries\":1,\"timeout_seconds\":60.0,\"created_at\":\"2026-09-27T10:15:44.314973+00:00\",\"updated_at\":\"2026-09-27T10:15:44.314973+00:00\"}],\"executions\":[{\"id\":\"EXEC-a126ed6e\",\"task_id\":\"WF-GODOT-eb87de16-EXECUTE\",\"attempt_number\":1,\"status\":\"FAILED\",\"started_at\":\"2026-09-27T10:15:44.523423+00:00\",\"completed_at\":\"2026-09-27T10:16:00.344392+00:00\",\"external_op_id\":null,\"pid\":null,\"host\":null,\"error_message\":\"Godot project import failed\",\"exit_code\":null,\"stdout\":null,\"stderr\":null,\"cost\":0.0,\"estimated_cost\":0.0,\"cost_unit\":\"provider_units\",\"provider\":null,\"retryable\":true}],\"artifacts\":[{\"id\":\"ART-e8190627\",\"workflow_id\":\"WF-GODOT-eb87de16\",\"task_id\":\"WF-GODOT-eb87de16-EXECUTE\",\"artifact_type\":\"godot-source-manifest\",\"producer\":\"GodotVerificationHandler\",\"relative_path\":\".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/source-manifest.json\",\"content_hash\":\"9e81b7a7bed564a715323b0ed199adc47f24ba0befab8670004c15c50495224a\",\"file_size\":1406,\"validation_state\":\"VALID\",\"created_at\":\"2026-09-27T10:15:44.709008+00:00\"},{\"id\":\"ART-418d5f46\",\"workflow_id\":\"WF-GODOT-eb87de16\",\"task_id\":\"WF-GODOT-eb87de16-EXECUTE\",\"artifact_type\":\"godot-scenario-snapshot\",\"producer\":\"GodotVerificationHandler\",\"relative_path\":\".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/scenario-snapshot.json\",\"content_hash\":\"53f5cf62c152269cb73a13e6d7fb26e86b4d0fd5ddd30e40e7faaa04ac12aa32\",\"file_size\":1404,\"validation_state\":\"VALID\",\"created_at\":\"2026-09-27T10:15:44.766451+00:00\"},{\"id\":\"ART-cd28bfcc\",\"workflow_id\":\"WF-GODOT-eb87de16\",\"task_id\":\"WF-GODOT-eb87de16-EXECUTE\",\"artifact_type\":\"godot-process-journal\",\"producer\":\"GodotVerificationHandler\",\"relative_path\":\".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/version.json\",\"content_hash\":\"44a083165715c17ed46248f06a2170ca46226cd5a6c9735880495d7375631ec0\",\"file_size\":1213,\"validation_state\":\"VALID\",\"created_at\":\"2026-09-27T10:15:44.855374+00:00\"},{\"id\":\"ART-b1c30ba4\",\"workflow_id\":\"WF-GODOT-eb87de16\",\"task_id\":\"WF-GODOT-eb87de16-EXECUTE\",\"artifact_type\":\"godot-process-journal\",\"producer\":\"GodotVerificationHandler\",\"relative_path\":\".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/version-terminal.json\",\"content_hash\":\"6a335e8d390f04ce91d72ac84d5ed0ce62c77239f2444bfef5155f5203c2bbad\",\"file_size\":908,\"validation_state\":\"VALID\",\"created_at\":\"2026-09-27T10:15:46.353271+00:00\"},{\"id\":\"ART-0042036e\",\"workflow_id\":\"WF-GODOT-eb87de16\",\"task_id\":\"WF-GODOT-eb87de16-EXECUTE\",\"artifact_type\":\"godot-process-journal\",\"producer\":\"GodotVerificationHandler\",\"relative_path\":\".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/help.json\",\"content_hash\":\"58eaf4a7af583ecca320202de65c4f3065f66dde029376beb7fefb16f18fa5a5\",\"file_size\":1204,\"validation_state\":\"VALID\",\"created_at\":\"2026-09-27T10:15:46.414355+00:00\"},{\"id\":\"ART-d9c98104\",\"workflow_id\":\"WF-GODOT-eb87de16\",\"task_id\":\"WF-GODOT-eb87de16-EXECUTE\",\"artifact_type\":\"godot-process-journal\",\"producer\":\"GodotVerificationHandler\",\"relative_path\":\".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/help-terminal.json\",\"content_hash\":\"0e5d51293c158dca0c88b07eaed089cd59145a1a0df190fba07a30865f7211f9\",\"file_size\":902,\"validation_state\":\"VALID\",\"created_at\":\"2026-09-27T10:15:47.747919+00:00\"},{\"id\":\"ART-d985ee87\",\"workflow_id\":\"WF-GODOT-eb87de16\",\"task_id\":\"WF-GODOT-eb87de16-EXECUTE\",\"artifact_type\":\"godot-process-journal\",\"producer\":\"GodotVerificationHandler\",\"relative_path\":\".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/import.json\",\"content_hash\":\"1efbf077e7d372ab612e54919403e7131b29c0226d87e70543fee596623aa193\",\"file_size\":1465,\"validation_state\":\"VALID\",\"created_at\":\"2026-09-27T10:15:47.833032+00:00\"},{\"id\":\"ART-8127a94e\",\"workflow_id\":\"WF-GODOT-eb87de16\",\"task_id\":\"WF-GODOT-eb87de16-EXECUTE\",\"artifact_type\":\"godot-process-journal\",\"producer\":\"GodotVerificationHandler\",\"relative_path\":\".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/import-terminal.json\",\"content_hash\":\"75b28ecff134e01673e6420e6374faf7fef2da7a30e372fed21457b95d200182\",\"file_size\":906,\"validation_state\":\"VALID\",\"created_at\":\"2026-09-27T10:15:59.995854+00:00\"},{\"id\":\"ART-5da71d29\",\"workflow_id\":\"WF-GODOT-eb87de16\",\"task_id\":\"WF-GODOT-eb87de16-EXECUTE\",\"artifact_type\":\"godot-help-process\",\"producer\":\"GodotVerificationHandler\",\"relative_path\":\".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/help-process.json\",\"content_hash\":\"1f91e9ffd8ebd76eb3c7780dadb7d343ae91d87ba350e83c5076dffdfe8dfb8b\",\"file_size\":1369,\"validation_state\":\"VALID\",\"created_at\":\"2026-09-27T10:16:00.041555+00:00\"},{\"id\":\"ART-8f1981c7\",\"workflow_id\":\"WF-GODOT-eb87de16\",\"task_id\":\"WF-GODOT-eb87de16-EXECUTE\",\"artifact_type\":\"godot-help-stderr\",\"producer\":\"GodotVerificationHandler\",\"relative_path\":\".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/help-stderr.log\",\"content_hash\":\"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\",\"file_size\":0,\"validation_state\":\"VALID\",\"created_at\":\"2026-09-27T10:16:00.056658+00:00\"},{\"id\":\"ART-327d1ffb\",\"workflow_id\":\"WF-GODOT-eb87de16\",\"task_id\":\"WF-GODOT-eb87de16-EXECUTE\",\"artifact_type\":\"godot-help-stdout\",\"producer\":\"GodotVerificationHandler\",\"relative_path\":\".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/help-stdout.log\",\"content_hash\":\"a0312b699fc3404bb43aa3a2fd65cd61afc49b5a5beeb2c7d6ed4071aa9b6204\",\"file_size\":15534,\"validation_state\":\"VALID\",\"created_at\":\"2026-09-27T10:16:00.116918+00:00\"},{\"id\":\"ART-519e367f\",\"workflow_id\":\"WF-GODOT-eb87de16\",\"task_id\":\"WF-GODOT-eb87de16-EXECUTE\",\"artifact_type\":\"godot-import-process\",\"producer\":\"GodotVerificationHandler\",\"relative_path\":\".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/import-process.json\",\"content_hash\":\"994615954d982ea5d681d1bba1b622b719655c2e2d4e0d51d2ac8df88e09a4e1\",\"file_size\":1623,\"validation_state\":\"VALID\",\"created_at\":\"2026-09-27T10:16:00.162716+00:00\"},{\"id\":\"ART-309b8e00\",\"workflow_id\":\"WF-GODOT-eb87de16\",\"task_id\":\"WF-GODOT-eb87de16-EXECUTE\",\"artifact_type\":\"godot-import-stderr\",\"producer\":\"GodotVerificationHandler\",\"relative_path\":\".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/import-stderr.log\",\"content_hash\":\"354f6b41afac0af85c870c4ddfdbe208e44ad5223ae6d89aba867d4090718998\",\"file_size\":125,\"validation_state\":\"VALID\",\"created_at\":\"2026-09-27T10:16:00.186353+00:00\"},{\"id\":\"ART-21484c40\",\"workflow_id\":\"WF-GODOT-eb87de16\",\"task_id\":\"WF-GODOT-eb87de16-EXECUTE\",\"artifact_type\":\"godot-import-stdout\",\"producer\":\"GodotVerificationHandler\",\"relative_path\":\".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/import-stdout.log\",\"content_hash\":\"dacb5f606f005fcd5ef116855d9eb01556b273f8506b966dc8b804da62ada4b8\",\"file_size\":1474,\"validation_state\":\"VALID\",\"created_at\":\"2026-09-27T10:16:00.220028+00:00\"},{\"id\":\"ART-3e979ae0\",\"workflow_id\":\"WF-GODOT-eb87de16\",\"task_id\":\"WF-GODOT-eb87de16-EXECUTE\",\"artifact_type\":\"godot-runtime-request\",\"producer\":\"GodotVerificationHandler\",\"relative_path\":\".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/runtime-request.json\",\"content_hash\":\"24e427d1c0be1f433e9f66eb68d0f5f6b378f79422b2b5795cf7bd617d952ed2\",\"file_size\":381,\"validation_state\":\"VALID\",\"created_at\":\"2026-09-27T10:16:00.249719+00:00\"},{\"id\":\"ART-620bbcad\",\"workflow_id\":\"WF-GODOT-eb87de16\",\"task_id\":\"WF-GODOT-eb87de16-EXECUTE\",\"artifact_type\":\"godot-version-process\",\"producer\":\"GodotVerificationHandler\",\"relative_path\":\".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/version-process.json\",\"content_hash\":\"7caa2c368d2368e977efc3cee8d6e778c86d8fcf8f2020ddb74a270b155e85e5\",\"file_size\":1374,\"validation_state\":\"VALID\",\"created_at\":\"2026-09-27T10:16:00.291491+00:00\"},{\"id\":\"ART-650a2c35\",\"workflow_id\":\"WF-GODOT-eb87de16\",\"task_id\":\"WF-GODOT-eb87de16-EXECUTE\",\"artifact_type\":\"godot-version-stderr\",\"producer\":\"GodotVerificationHandler\",\"relative_path\":\".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/version-stderr.log\",\"content_hash\":\"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\",\"file_size\":0,\"validation_state\":\"VALID\",\"created_at\":\"2026-09-27T10:16:00.307959+00:00\"},{\"id\":\"ART-46978a89\",\"workflow_id\":\"WF-GODOT-eb87de16\",\"task_id\":\"WF-GODOT-eb87de16-EXECUTE\",\"artifact_type\":\"godot-version-stdout\",\"producer\":\"GodotVerificationHandler\",\"relative_path\":\".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/version-stdout.log\",\"content_hash\":\"bf8803022b574250bb04dea65053a46b7c58570725316c1f7fe2aa6735706498\",\"file_size\":33,\"validation_state\":\"VALID\",\"created_at\":\"2026-09-27T10:16:00.335396+00:00\"}],\"evidence\":[],\"gates\":[],\"approvals\":[],\"paid_provider_invocations\":0}\n",
+      "stderr": "",
+      "timed_out": false,
+      "json": {
+        "workflow": {
+          "id": "WF-GODOT-eb87de16",
+          "project_id": "factory-godot-verification-fixture",
+          "name": "Godot headless verification: fixture-smoke",
+          "status": "FAILED",
+          "created_at": "2026-09-27T10:15:44.314973+00:00",
+          "updated_at": "2026-09-27T10:16:00.358651+00:00"
+        },
+        "tasks": [
+          {
+            "id": "WF-GODOT-eb87de16-EXECUTE",
+            "workflow_id": "WF-GODOT-eb87de16",
+            "name": "Stage, import, and execute Godot scenario",
+            "task_type": "godot_execute",
+            "cost_class": "LOCAL",
+            "depends_on": [],
+            "status": "FAILED",
+            "parameters": {
+              "scenario_file": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\v04-baseline-headless\\godot-acceptance-20260927T101537Z-97132f97\\fixture game Ω\\scenario.json",
+              "scenario_snapshot": {
+                "schema_version": "0.2.0",
+                "scenario_id": "fixture-smoke",
+                "scene": "res://Main.tscn",
+                "max_tick": 90,
+                "timeout_seconds": 30.0,
+                "import_timeout_seconds": 30.0,
+                "actions": [
+                  {
+                    "tick": 30,
+                    "action": "apply_damage",
+                    "amount": 20
+                  },
+                  {
+                    "tick": 60,
+                    "action": "defeat_enemy"
+                  },
+                  {
+                    "tick": 90,
+                    "action": "apply_damage",
+                    "amount": 40
+                  }
+                ],
+                "snapshots": [
+                  0,
+                  30,
+                  60,
+                  90
+                ],
+                "assertions": [
+                  {
+                    "id": "initial-player-hp",
+                    "tick": 0,
+                    "field": "player_hp",
+                    "operator": "equals",
+                    "expected": 100
+                  },
+                  {
+                    "id": "post-damage-player-hp",
+                    "tick": 30,
+                    "field": "player_hp",
+                    "operator": "equals",
+                    "expected": 80
+                  },
+                  {
+                    "id": "post-enemy-score",
+                    "tick": 60,
+                    "field": "score",
+                    "operator": "equals",
+                    "expected": 100
+                  },
+                  {
+                    "id": "final-player-hp",
+                    "tick": 90,
+                    "field": "player_hp",
+                    "operator": "equals",
+                    "expected": 40
+                  },
+                  {
+                    "id": "final-enemies",
+                    "tick": 90,
+                    "field": "enemies_remaining",
+                    "operator": "equals",
+                    "expected": 2
+                  },
+                  {
+                    "id": "final-score",
+                    "tick": 90,
+                    "field": "score",
+                    "operator": "equals",
+                    "expected": 100
+                  }
+                ]
+              },
+              "scenario_fingerprint": "831c75b5537606b349c630f578079a72b09e258fd5af52cca8c52a16b5a51246",
+              "source_manifest_hash": "5a9e149aa103949ecb62b680a087cc39e95058f428ab9583d1b104925cc42dd4",
+              "executable_path": "C:\\Users\\lenovo\\devel\\godot\\Godot_v4.7.2-stable_win64.exe\\Godot_v4.7.2-stable_win64_console.exe",
+              "executable_sha256": "c8f0a6bc45a19b33541501e57f6f7cd972ab18453743266339d495cbbe846643",
+              "harness_sha256": "429e7e7961dc65a07741f59d1bc40f883a03754673de27ff2d88a5c0bb5949c1",
+              "scene_sha256": "3dadaf4ca52f7e9ed19c21f47ff281f22e1ccbd1855c03e00cc517f71baf38a8"
+            },
+            "max_retries": 1,
+            "timeout_seconds": 90.0,
+            "created_at": "2026-09-27T10:15:44.314973+00:00",
+            "updated_at": "2026-09-27T10:16:00.346912+00:00"
+          },
+          {
+            "id": "WF-GODOT-eb87de16-VALIDATE",
+            "workflow_id": "WF-GODOT-eb87de16",
+            "name": "Independently validate Godot observations",
+            "task_type": "godot_validate",
+            "cost_class": "LOCAL",
+            "depends_on": [
+              "WF-GODOT-eb87de16-EXECUTE"
+            ],
+            "status": "PENDING",
+            "parameters": {
+              "execute_task_id": "WF-GODOT-eb87de16-EXECUTE"
+            },
+            "max_retries": 1,
+            "timeout_seconds": 60.0,
+            "created_at": "2026-09-27T10:15:44.314973+00:00",
+            "updated_at": "2026-09-27T10:15:44.314973+00:00"
+          },
+          {
+            "id": "WF-GODOT-eb87de16-EVIDENCE",
+            "workflow_id": "WF-GODOT-eb87de16",
+            "name": "Record final quality evidence",
+            "task_type": "record_evidence",
+            "cost_class": "LOCAL",
+            "depends_on": [
+              "WF-GODOT-eb87de16-VALIDATE"
+            ],
+            "status": "PENDING",
+            "parameters": {},
+            "max_retries": 1,
+            "timeout_seconds": 60.0,
+            "created_at": "2026-09-27T10:15:44.314973+00:00",
+            "updated_at": "2026-09-27T10:15:44.314973+00:00"
+          }
+        ],
+        "executions": [
+          {
+            "id": "EXEC-a126ed6e",
+            "task_id": "WF-GODOT-eb87de16-EXECUTE",
+            "attempt_number": 1,
+            "status": "FAILED",
+            "started_at": "2026-09-27T10:15:44.523423+00:00",
+            "completed_at": "2026-09-27T10:16:00.344392+00:00",
+            "external_op_id": null,
+            "pid": null,
+            "host": null,
+            "error_message": "Godot project import failed",
+            "exit_code": null,
+            "stdout": null,
+            "stderr": null,
+            "cost": 0.0,
+            "estimated_cost": 0.0,
+            "cost_unit": "provider_units",
+            "provider": null,
+            "retryable": true
+          }
+        ],
+        "artifacts": [
+          {
+            "id": "ART-e8190627",
+            "workflow_id": "WF-GODOT-eb87de16",
+            "task_id": "WF-GODOT-eb87de16-EXECUTE",
+            "artifact_type": "godot-source-manifest",
+            "producer": "GodotVerificationHandler",
+            "relative_path": ".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/source-manifest.json",
+            "content_hash": "9e81b7a7bed564a715323b0ed199adc47f24ba0befab8670004c15c50495224a",
+            "file_size": 1406,
+            "validation_state": "VALID",
+            "created_at": "2026-09-27T10:15:44.709008+00:00"
+          },
+          {
+            "id": "ART-418d5f46",
+            "workflow_id": "WF-GODOT-eb87de16",
+            "task_id": "WF-GODOT-eb87de16-EXECUTE",
+            "artifact_type": "godot-scenario-snapshot",
+            "producer": "GodotVerificationHandler",
+            "relative_path": ".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/scenario-snapshot.json",
+            "content_hash": "53f5cf62c152269cb73a13e6d7fb26e86b4d0fd5ddd30e40e7faaa04ac12aa32",
+            "file_size": 1404,
+            "validation_state": "VALID",
+            "created_at": "2026-09-27T10:15:44.766451+00:00"
+          },
+          {
+            "id": "ART-cd28bfcc",
+            "workflow_id": "WF-GODOT-eb87de16",
+            "task_id": "WF-GODOT-eb87de16-EXECUTE",
+            "artifact_type": "godot-process-journal",
+            "producer": "GodotVerificationHandler",
+            "relative_path": ".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/version.json",
+            "content_hash": "44a083165715c17ed46248f06a2170ca46226cd5a6c9735880495d7375631ec0",
+            "file_size": 1213,
+            "validation_state": "VALID",
+            "created_at": "2026-09-27T10:15:44.855374+00:00"
+          },
+          {
+            "id": "ART-b1c30ba4",
+            "workflow_id": "WF-GODOT-eb87de16",
+            "task_id": "WF-GODOT-eb87de16-EXECUTE",
+            "artifact_type": "godot-process-journal",
+            "producer": "GodotVerificationHandler",
+            "relative_path": ".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/version-terminal.json",
+            "content_hash": "6a335e8d390f04ce91d72ac84d5ed0ce62c77239f2444bfef5155f5203c2bbad",
+            "file_size": 908,
+            "validation_state": "VALID",
+            "created_at": "2026-09-27T10:15:46.353271+00:00"
+          },
+          {
+            "id": "ART-0042036e",
+            "workflow_id": "WF-GODOT-eb87de16",
+            "task_id": "WF-GODOT-eb87de16-EXECUTE",
+            "artifact_type": "godot-process-journal",
+            "producer": "GodotVerificationHandler",
+            "relative_path": ".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/help.json",
+            "content_hash": "58eaf4a7af583ecca320202de65c4f3065f66dde029376beb7fefb16f18fa5a5",
+            "file_size": 1204,
+            "validation_state": "VALID",
+            "created_at": "2026-09-27T10:15:46.414355+00:00"
+          },
+          {
+            "id": "ART-d9c98104",
+            "workflow_id": "WF-GODOT-eb87de16",
+            "task_id": "WF-GODOT-eb87de16-EXECUTE",
+            "artifact_type": "godot-process-journal",
+            "producer": "GodotVerificationHandler",
+            "relative_path": ".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/help-terminal.json",
+            "content_hash": "0e5d51293c158dca0c88b07eaed089cd59145a1a0df190fba07a30865f7211f9",
+            "file_size": 902,
+            "validation_state": "VALID",
+            "created_at": "2026-09-27T10:15:47.747919+00:00"
+          },
+          {
+            "id": "ART-d985ee87",
+            "workflow_id": "WF-GODOT-eb87de16",
+            "task_id": "WF-GODOT-eb87de16-EXECUTE",
+            "artifact_type": "godot-process-journal",
+            "producer": "GodotVerificationHandler",
+            "relative_path": ".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/import.json",
+            "content_hash": "1efbf077e7d372ab612e54919403e7131b29c0226d87e70543fee596623aa193",
+            "file_size": 1465,
+            "validation_state": "VALID",
+            "created_at": "2026-09-27T10:15:47.833032+00:00"
+          },
+          {
+            "id": "ART-8127a94e",
+            "workflow_id": "WF-GODOT-eb87de16",
+            "task_id": "WF-GODOT-eb87de16-EXECUTE",
+            "artifact_type": "godot-process-journal",
+            "producer": "GodotVerificationHandler",
+            "relative_path": ".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/import-terminal.json",
+            "content_hash": "75b28ecff134e01673e6420e6374faf7fef2da7a30e372fed21457b95d200182",
+            "file_size": 906,
+            "validation_state": "VALID",
+            "created_at": "2026-09-27T10:15:59.995854+00:00"
+          },
+          {
+            "id": "ART-5da71d29",
+            "workflow_id": "WF-GODOT-eb87de16",
+            "task_id": "WF-GODOT-eb87de16-EXECUTE",
+            "artifact_type": "godot-help-process",
+            "producer": "GodotVerificationHandler",
+            "relative_path": ".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/help-process.json",
+            "content_hash": "1f91e9ffd8ebd76eb3c7780dadb7d343ae91d87ba350e83c5076dffdfe8dfb8b",
+            "file_size": 1369,
+            "validation_state": "VALID",
+            "created_at": "2026-09-27T10:16:00.041555+00:00"
+          },
+          {
+            "id": "ART-8f1981c7",
+            "workflow_id": "WF-GODOT-eb87de16",
+            "task_id": "WF-GODOT-eb87de16-EXECUTE",
+            "artifact_type": "godot-help-stderr",
+            "producer": "GodotVerificationHandler",
+            "relative_path": ".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/help-stderr.log",
+            "content_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "file_size": 0,
+            "validation_state": "VALID",
+            "created_at": "2026-09-27T10:16:00.056658+00:00"
+          },
+          {
+            "id": "ART-327d1ffb",
+            "workflow_id": "WF-GODOT-eb87de16",
+            "task_id": "WF-GODOT-eb87de16-EXECUTE",
+            "artifact_type": "godot-help-stdout",
+            "producer": "GodotVerificationHandler",
+            "relative_path": ".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/help-stdout.log",
+            "content_hash": "a0312b699fc3404bb43aa3a2fd65cd61afc49b5a5beeb2c7d6ed4071aa9b6204",
+            "file_size": 15534,
+            "validation_state": "VALID",
+            "created_at": "2026-09-27T10:16:00.116918+00:00"
+          },
+          {
+            "id": "ART-519e367f",
+            "workflow_id": "WF-GODOT-eb87de16",
+            "task_id": "WF-GODOT-eb87de16-EXECUTE",
+            "artifact_type": "godot-import-process",
+            "producer": "GodotVerificationHandler",
+            "relative_path": ".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/import-process.json",
+            "content_hash": "994615954d982ea5d681d1bba1b622b719655c2e2d4e0d51d2ac8df88e09a4e1",
+            "file_size": 1623,
+            "validation_state": "VALID",
+            "created_at": "2026-09-27T10:16:00.162716+00:00"
+          },
+          {
+            "id": "ART-309b8e00",
+            "workflow_id": "WF-GODOT-eb87de16",
+            "task_id": "WF-GODOT-eb87de16-EXECUTE",
+            "artifact_type": "godot-import-stderr",
+            "producer": "GodotVerificationHandler",
+            "relative_path": ".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/import-stderr.log",
+            "content_hash": "354f6b41afac0af85c870c4ddfdbe208e44ad5223ae6d89aba867d4090718998",
+            "file_size": 125,
+            "validation_state": "VALID",
+            "created_at": "2026-09-27T10:16:00.186353+00:00"
+          },
+          {
+            "id": "ART-21484c40",
+            "workflow_id": "WF-GODOT-eb87de16",
+            "task_id": "WF-GODOT-eb87de16-EXECUTE",
+            "artifact_type": "godot-import-stdout",
+            "producer": "GodotVerificationHandler",
+            "relative_path": ".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/import-stdout.log",
+            "content_hash": "dacb5f606f005fcd5ef116855d9eb01556b273f8506b966dc8b804da62ada4b8",
+            "file_size": 1474,
+            "validation_state": "VALID",
+            "created_at": "2026-09-27T10:16:00.220028+00:00"
+          },
+          {
+            "id": "ART-3e979ae0",
+            "workflow_id": "WF-GODOT-eb87de16",
+            "task_id": "WF-GODOT-eb87de16-EXECUTE",
+            "artifact_type": "godot-runtime-request",
+            "producer": "GodotVerificationHandler",
+            "relative_path": ".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/runtime-request.json",
+            "content_hash": "24e427d1c0be1f433e9f66eb68d0f5f6b378f79422b2b5795cf7bd617d952ed2",
+            "file_size": 381,
+            "validation_state": "VALID",
+            "created_at": "2026-09-27T10:16:00.249719+00:00"
+          },
+          {
+            "id": "ART-620bbcad",
+            "workflow_id": "WF-GODOT-eb87de16",
+            "task_id": "WF-GODOT-eb87de16-EXECUTE",
+            "artifact_type": "godot-version-process",
+            "producer": "GodotVerificationHandler",
+            "relative_path": ".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/version-process.json",
+            "content_hash": "7caa2c368d2368e977efc3cee8d6e778c86d8fcf8f2020ddb74a270b155e85e5",
+            "file_size": 1374,
+            "validation_state": "VALID",
+            "created_at": "2026-09-27T10:16:00.291491+00:00"
+          },
+          {
+            "id": "ART-650a2c35",
+            "workflow_id": "WF-GODOT-eb87de16",
+            "task_id": "WF-GODOT-eb87de16-EXECUTE",
+            "artifact_type": "godot-version-stderr",
+            "producer": "GodotVerificationHandler",
+            "relative_path": ".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/version-stderr.log",
+            "content_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "file_size": 0,
+            "validation_state": "VALID",
+            "created_at": "2026-09-27T10:16:00.307959+00:00"
+          },
+          {
+            "id": "ART-46978a89",
+            "workflow_id": "WF-GODOT-eb87de16",
+            "task_id": "WF-GODOT-eb87de16-EXECUTE",
+            "artifact_type": "godot-version-stdout",
+            "producer": "GodotVerificationHandler",
+            "relative_path": ".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/version-stdout.log",
+            "content_hash": "bf8803022b574250bb04dea65053a46b7c58570725316c1f7fe2aa6735706498",
+            "file_size": 33,
+            "validation_state": "VALID",
+            "created_at": "2026-09-27T10:16:00.335396+00:00"
+          }
+        ],
+        "evidence": [],
+        "gates": [],
+        "approvals": [],
+        "paid_provider_invocations": 0
+      }
+    },
+    {
+      "argv": [
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.venv\\Scripts\\gamefactory.exe",
+        "--json",
+        "--project",
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\v04-baseline-headless\\godot-acceptance-20260927T101537Z-97132f97\\fixture game Ω",
+        "--godot-path",
+        "C:\\Users\\lenovo\\devel\\godot\\Godot_v4.7.2-stable_win64.exe\\Godot_v4.7.2-stable_win64_console.exe",
+        "artifacts",
+        "--workflow",
+        "WF-GODOT-eb87de16"
+      ],
+      "cwd": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\v04-baseline-headless\\godot-acceptance-20260927T101537Z-97132f97\\fixture game Ω",
+      "exit_code": 0,
+      "stdout": "[{\"id\":\"ART-e8190627\",\"workflow_id\":\"WF-GODOT-eb87de16\",\"task_id\":\"WF-GODOT-eb87de16-EXECUTE\",\"artifact_type\":\"godot-source-manifest\",\"producer\":\"GodotVerificationHandler\",\"relative_path\":\".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/source-manifest.json\",\"content_hash\":\"9e81b7a7bed564a715323b0ed199adc47f24ba0befab8670004c15c50495224a\",\"file_size\":1406,\"validation_state\":\"VALID\",\"created_at\":\"2026-09-27T10:15:44.709008+00:00\"},{\"id\":\"ART-418d5f46\",\"workflow_id\":\"WF-GODOT-eb87de16\",\"task_id\":\"WF-GODOT-eb87de16-EXECUTE\",\"artifact_type\":\"godot-scenario-snapshot\",\"producer\":\"GodotVerificationHandler\",\"relative_path\":\".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/scenario-snapshot.json\",\"content_hash\":\"53f5cf62c152269cb73a13e6d7fb26e86b4d0fd5ddd30e40e7faaa04ac12aa32\",\"file_size\":1404,\"validation_state\":\"VALID\",\"created_at\":\"2026-09-27T10:15:44.766451+00:00\"},{\"id\":\"ART-cd28bfcc\",\"workflow_id\":\"WF-GODOT-eb87de16\",\"task_id\":\"WF-GODOT-eb87de16-EXECUTE\",\"artifact_type\":\"godot-process-journal\",\"producer\":\"GodotVerificationHandler\",\"relative_path\":\".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/version.json\",\"content_hash\":\"44a083165715c17ed46248f06a2170ca46226cd5a6c9735880495d7375631ec0\",\"file_size\":1213,\"validation_state\":\"VALID\",\"created_at\":\"2026-09-27T10:15:44.855374+00:00\"},{\"id\":\"ART-b1c30ba4\",\"workflow_id\":\"WF-GODOT-eb87de16\",\"task_id\":\"WF-GODOT-eb87de16-EXECUTE\",\"artifact_type\":\"godot-process-journal\",\"producer\":\"GodotVerificationHandler\",\"relative_path\":\".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/version-terminal.json\",\"content_hash\":\"6a335e8d390f04ce91d72ac84d5ed0ce62c77239f2444bfef5155f5203c2bbad\",\"file_size\":908,\"validation_state\":\"VALID\",\"created_at\":\"2026-09-27T10:15:46.353271+00:00\"},{\"id\":\"ART-0042036e\",\"workflow_id\":\"WF-GODOT-eb87de16\",\"task_id\":\"WF-GODOT-eb87de16-EXECUTE\",\"artifact_type\":\"godot-process-journal\",\"producer\":\"GodotVerificationHandler\",\"relative_path\":\".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/help.json\",\"content_hash\":\"58eaf4a7af583ecca320202de65c4f3065f66dde029376beb7fefb16f18fa5a5\",\"file_size\":1204,\"validation_state\":\"VALID\",\"created_at\":\"2026-09-27T10:15:46.414355+00:00\"},{\"id\":\"ART-d9c98104\",\"workflow_id\":\"WF-GODOT-eb87de16\",\"task_id\":\"WF-GODOT-eb87de16-EXECUTE\",\"artifact_type\":\"godot-process-journal\",\"producer\":\"GodotVerificationHandler\",\"relative_path\":\".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/help-terminal.json\",\"content_hash\":\"0e5d51293c158dca0c88b07eaed089cd59145a1a0df190fba07a30865f7211f9\",\"file_size\":902,\"validation_state\":\"VALID\",\"created_at\":\"2026-09-27T10:15:47.747919+00:00\"},{\"id\":\"ART-d985ee87\",\"workflow_id\":\"WF-GODOT-eb87de16\",\"task_id\":\"WF-GODOT-eb87de16-EXECUTE\",\"artifact_type\":\"godot-process-journal\",\"producer\":\"GodotVerificationHandler\",\"relative_path\":\".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/import.json\",\"content_hash\":\"1efbf077e7d372ab612e54919403e7131b29c0226d87e70543fee596623aa193\",\"file_size\":1465,\"validation_state\":\"VALID\",\"created_at\":\"2026-09-27T10:15:47.833032+00:00\"},{\"id\":\"ART-8127a94e\",\"workflow_id\":\"WF-GODOT-eb87de16\",\"task_id\":\"WF-GODOT-eb87de16-EXECUTE\",\"artifact_type\":\"godot-process-journal\",\"producer\":\"GodotVerificationHandler\",\"relative_path\":\".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/import-terminal.json\",\"content_hash\":\"75b28ecff134e01673e6420e6374faf7fef2da7a30e372fed21457b95d200182\",\"file_size\":906,\"validation_state\":\"VALID\",\"created_at\":\"2026-09-27T10:15:59.995854+00:00\"},{\"id\":\"ART-5da71d29\",\"workflow_id\":\"WF-GODOT-eb87de16\",\"task_id\":\"WF-GODOT-eb87de16-EXECUTE\",\"artifact_type\":\"godot-help-process\",\"producer\":\"GodotVerificationHandler\",\"relative_path\":\".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/help-process.json\",\"content_hash\":\"1f91e9ffd8ebd76eb3c7780dadb7d343ae91d87ba350e83c5076dffdfe8dfb8b\",\"file_size\":1369,\"validation_state\":\"VALID\",\"created_at\":\"2026-09-27T10:16:00.041555+00:00\"},{\"id\":\"ART-8f1981c7\",\"workflow_id\":\"WF-GODOT-eb87de16\",\"task_id\":\"WF-GODOT-eb87de16-EXECUTE\",\"artifact_type\":\"godot-help-stderr\",\"producer\":\"GodotVerificationHandler\",\"relative_path\":\".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/help-stderr.log\",\"content_hash\":\"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\",\"file_size\":0,\"validation_state\":\"VALID\",\"created_at\":\"2026-09-27T10:16:00.056658+00:00\"},{\"id\":\"ART-327d1ffb\",\"workflow_id\":\"WF-GODOT-eb87de16\",\"task_id\":\"WF-GODOT-eb87de16-EXECUTE\",\"artifact_type\":\"godot-help-stdout\",\"producer\":\"GodotVerificationHandler\",\"relative_path\":\".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/help-stdout.log\",\"content_hash\":\"a0312b699fc3404bb43aa3a2fd65cd61afc49b5a5beeb2c7d6ed4071aa9b6204\",\"file_size\":15534,\"validation_state\":\"VALID\",\"created_at\":\"2026-09-27T10:16:00.116918+00:00\"},{\"id\":\"ART-519e367f\",\"workflow_id\":\"WF-GODOT-eb87de16\",\"task_id\":\"WF-GODOT-eb87de16-EXECUTE\",\"artifact_type\":\"godot-import-process\",\"producer\":\"GodotVerificationHandler\",\"relative_path\":\".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/import-process.json\",\"content_hash\":\"994615954d982ea5d681d1bba1b622b719655c2e2d4e0d51d2ac8df88e09a4e1\",\"file_size\":1623,\"validation_state\":\"VALID\",\"created_at\":\"2026-09-27T10:16:00.162716+00:00\"},{\"id\":\"ART-309b8e00\",\"workflow_id\":\"WF-GODOT-eb87de16\",\"task_id\":\"WF-GODOT-eb87de16-EXECUTE\",\"artifact_type\":\"godot-import-stderr\",\"producer\":\"GodotVerificationHandler\",\"relative_path\":\".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/import-stderr.log\",\"content_hash\":\"354f6b41afac0af85c870c4ddfdbe208e44ad5223ae6d89aba867d4090718998\",\"file_size\":125,\"validation_state\":\"VALID\",\"created_at\":\"2026-09-27T10:16:00.186353+00:00\"},{\"id\":\"ART-21484c40\",\"workflow_id\":\"WF-GODOT-eb87de16\",\"task_id\":\"WF-GODOT-eb87de16-EXECUTE\",\"artifact_type\":\"godot-import-stdout\",\"producer\":\"GodotVerificationHandler\",\"relative_path\":\".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/import-stdout.log\",\"content_hash\":\"dacb5f606f005fcd5ef116855d9eb01556b273f8506b966dc8b804da62ada4b8\",\"file_size\":1474,\"validation_state\":\"VALID\",\"created_at\":\"2026-09-27T10:16:00.220028+00:00\"},{\"id\":\"ART-3e979ae0\",\"workflow_id\":\"WF-GODOT-eb87de16\",\"task_id\":\"WF-GODOT-eb87de16-EXECUTE\",\"artifact_type\":\"godot-runtime-request\",\"producer\":\"GodotVerificationHandler\",\"relative_path\":\".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/runtime-request.json\",\"content_hash\":\"24e427d1c0be1f433e9f66eb68d0f5f6b378f79422b2b5795cf7bd617d952ed2\",\"file_size\":381,\"validation_state\":\"VALID\",\"created_at\":\"2026-09-27T10:16:00.249719+00:00\"},{\"id\":\"ART-620bbcad\",\"workflow_id\":\"WF-GODOT-eb87de16\",\"task_id\":\"WF-GODOT-eb87de16-EXECUTE\",\"artifact_type\":\"godot-version-process\",\"producer\":\"GodotVerificationHandler\",\"relative_path\":\".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/version-process.json\",\"content_hash\":\"7caa2c368d2368e977efc3cee8d6e778c86d8fcf8f2020ddb74a270b155e85e5\",\"file_size\":1374,\"validation_state\":\"VALID\",\"created_at\":\"2026-09-27T10:16:00.291491+00:00\"},{\"id\":\"ART-650a2c35\",\"workflow_id\":\"WF-GODOT-eb87de16\",\"task_id\":\"WF-GODOT-eb87de16-EXECUTE\",\"artifact_type\":\"godot-version-stderr\",\"producer\":\"GodotVerificationHandler\",\"relative_path\":\".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/version-stderr.log\",\"content_hash\":\"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\",\"file_size\":0,\"validation_state\":\"VALID\",\"created_at\":\"2026-09-27T10:16:00.307959+00:00\"},{\"id\":\"ART-46978a89\",\"workflow_id\":\"WF-GODOT-eb87de16\",\"task_id\":\"WF-GODOT-eb87de16-EXECUTE\",\"artifact_type\":\"godot-version-stdout\",\"producer\":\"GodotVerificationHandler\",\"relative_path\":\".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/version-stdout.log\",\"content_hash\":\"bf8803022b574250bb04dea65053a46b7c58570725316c1f7fe2aa6735706498\",\"file_size\":33,\"validation_state\":\"VALID\",\"created_at\":\"2026-09-27T10:16:00.335396+00:00\"}]\n",
+      "stderr": "",
+      "timed_out": false,
+      "json": [
+        {
+          "id": "ART-e8190627",
+          "workflow_id": "WF-GODOT-eb87de16",
+          "task_id": "WF-GODOT-eb87de16-EXECUTE",
+          "artifact_type": "godot-source-manifest",
+          "producer": "GodotVerificationHandler",
+          "relative_path": ".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/source-manifest.json",
+          "content_hash": "9e81b7a7bed564a715323b0ed199adc47f24ba0befab8670004c15c50495224a",
+          "file_size": 1406,
+          "validation_state": "VALID",
+          "created_at": "2026-09-27T10:15:44.709008+00:00"
+        },
+        {
+          "id": "ART-418d5f46",
+          "workflow_id": "WF-GODOT-eb87de16",
+          "task_id": "WF-GODOT-eb87de16-EXECUTE",
+          "artifact_type": "godot-scenario-snapshot",
+          "producer": "GodotVerificationHandler",
+          "relative_path": ".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/scenario-snapshot.json",
+          "content_hash": "53f5cf62c152269cb73a13e6d7fb26e86b4d0fd5ddd30e40e7faaa04ac12aa32",
+          "file_size": 1404,
+          "validation_state": "VALID",
+          "created_at": "2026-09-27T10:15:44.766451+00:00"
+        },
+        {
+          "id": "ART-cd28bfcc",
+          "workflow_id": "WF-GODOT-eb87de16",
+          "task_id": "WF-GODOT-eb87de16-EXECUTE",
+          "artifact_type": "godot-process-journal",
+          "producer": "GodotVerificationHandler",
+          "relative_path": ".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/version.json",
+          "content_hash": "44a083165715c17ed46248f06a2170ca46226cd5a6c9735880495d7375631ec0",
+          "file_size": 1213,
+          "validation_state": "VALID",
+          "created_at": "2026-09-27T10:15:44.855374+00:00"
+        },
+        {
+          "id": "ART-b1c30ba4",
+          "workflow_id": "WF-GODOT-eb87de16",
+          "task_id": "WF-GODOT-eb87de16-EXECUTE",
+          "artifact_type": "godot-process-journal",
+          "producer": "GodotVerificationHandler",
+          "relative_path": ".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/version-terminal.json",
+          "content_hash": "6a335e8d390f04ce91d72ac84d5ed0ce62c77239f2444bfef5155f5203c2bbad",
+          "file_size": 908,
+          "validation_state": "VALID",
+          "created_at": "2026-09-27T10:15:46.353271+00:00"
+        },
+        {
+          "id": "ART-0042036e",
+          "workflow_id": "WF-GODOT-eb87de16",
+          "task_id": "WF-GODOT-eb87de16-EXECUTE",
+          "artifact_type": "godot-process-journal",
+          "producer": "GodotVerificationHandler",
+          "relative_path": ".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/help.json",
+          "content_hash": "58eaf4a7af583ecca320202de65c4f3065f66dde029376beb7fefb16f18fa5a5",
+          "file_size": 1204,
+          "validation_state": "VALID",
+          "created_at": "2026-09-27T10:15:46.414355+00:00"
+        },
+        {
+          "id": "ART-d9c98104",
+          "workflow_id": "WF-GODOT-eb87de16",
+          "task_id": "WF-GODOT-eb87de16-EXECUTE",
+          "artifact_type": "godot-process-journal",
+          "producer": "GodotVerificationHandler",
+          "relative_path": ".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/help-terminal.json",
+          "content_hash": "0e5d51293c158dca0c88b07eaed089cd59145a1a0df190fba07a30865f7211f9",
+          "file_size": 902,
+          "validation_state": "VALID",
+          "created_at": "2026-09-27T10:15:47.747919+00:00"
+        },
+        {
+          "id": "ART-d985ee87",
+          "workflow_id": "WF-GODOT-eb87de16",
+          "task_id": "WF-GODOT-eb87de16-EXECUTE",
+          "artifact_type": "godot-process-journal",
+          "producer": "GodotVerificationHandler",
+          "relative_path": ".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/import.json",
+          "content_hash": "1efbf077e7d372ab612e54919403e7131b29c0226d87e70543fee596623aa193",
+          "file_size": 1465,
+          "validation_state": "VALID",
+          "created_at": "2026-09-27T10:15:47.833032+00:00"
+        },
+        {
+          "id": "ART-8127a94e",
+          "workflow_id": "WF-GODOT-eb87de16",
+          "task_id": "WF-GODOT-eb87de16-EXECUTE",
+          "artifact_type": "godot-process-journal",
+          "producer": "GodotVerificationHandler",
+          "relative_path": ".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/import-terminal.json",
+          "content_hash": "75b28ecff134e01673e6420e6374faf7fef2da7a30e372fed21457b95d200182",
+          "file_size": 906,
+          "validation_state": "VALID",
+          "created_at": "2026-09-27T10:15:59.995854+00:00"
+        },
+        {
+          "id": "ART-5da71d29",
+          "workflow_id": "WF-GODOT-eb87de16",
+          "task_id": "WF-GODOT-eb87de16-EXECUTE",
+          "artifact_type": "godot-help-process",
+          "producer": "GodotVerificationHandler",
+          "relative_path": ".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/help-process.json",
+          "content_hash": "1f91e9ffd8ebd76eb3c7780dadb7d343ae91d87ba350e83c5076dffdfe8dfb8b",
+          "file_size": 1369,
+          "validation_state": "VALID",
+          "created_at": "2026-09-27T10:16:00.041555+00:00"
+        },
+        {
+          "id": "ART-8f1981c7",
+          "workflow_id": "WF-GODOT-eb87de16",
+          "task_id": "WF-GODOT-eb87de16-EXECUTE",
+          "artifact_type": "godot-help-stderr",
+          "producer": "GodotVerificationHandler",
+          "relative_path": ".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/help-stderr.log",
+          "content_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "file_size": 0,
+          "validation_state": "VALID",
+          "created_at": "2026-09-27T10:16:00.056658+00:00"
+        },
+        {
+          "id": "ART-327d1ffb",
+          "workflow_id": "WF-GODOT-eb87de16",
+          "task_id": "WF-GODOT-eb87de16-EXECUTE",
+          "artifact_type": "godot-help-stdout",
+          "producer": "GodotVerificationHandler",
+          "relative_path": ".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/help-stdout.log",
+          "content_hash": "a0312b699fc3404bb43aa3a2fd65cd61afc49b5a5beeb2c7d6ed4071aa9b6204",
+          "file_size": 15534,
+          "validation_state": "VALID",
+          "created_at": "2026-09-27T10:16:00.116918+00:00"
+        },
+        {
+          "id": "ART-519e367f",
+          "workflow_id": "WF-GODOT-eb87de16",
+          "task_id": "WF-GODOT-eb87de16-EXECUTE",
+          "artifact_type": "godot-import-process",
+          "producer": "GodotVerificationHandler",
+          "relative_path": ".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/import-process.json",
+          "content_hash": "994615954d982ea5d681d1bba1b622b719655c2e2d4e0d51d2ac8df88e09a4e1",
+          "file_size": 1623,
+          "validation_state": "VALID",
+          "created_at": "2026-09-27T10:16:00.162716+00:00"
+        },
+        {
+          "id": "ART-309b8e00",
+          "workflow_id": "WF-GODOT-eb87de16",
+          "task_id": "WF-GODOT-eb87de16-EXECUTE",
+          "artifact_type": "godot-import-stderr",
+          "producer": "GodotVerificationHandler",
+          "relative_path": ".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/import-stderr.log",
+          "content_hash": "354f6b41afac0af85c870c4ddfdbe208e44ad5223ae6d89aba867d4090718998",
+          "file_size": 125,
+          "validation_state": "VALID",
+          "created_at": "2026-09-27T10:16:00.186353+00:00"
+        },
+        {
+          "id": "ART-21484c40",
+          "workflow_id": "WF-GODOT-eb87de16",
+          "task_id": "WF-GODOT-eb87de16-EXECUTE",
+          "artifact_type": "godot-import-stdout",
+          "producer": "GodotVerificationHandler",
+          "relative_path": ".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/import-stdout.log",
+          "content_hash": "dacb5f606f005fcd5ef116855d9eb01556b273f8506b966dc8b804da62ada4b8",
+          "file_size": 1474,
+          "validation_state": "VALID",
+          "created_at": "2026-09-27T10:16:00.220028+00:00"
+        },
+        {
+          "id": "ART-3e979ae0",
+          "workflow_id": "WF-GODOT-eb87de16",
+          "task_id": "WF-GODOT-eb87de16-EXECUTE",
+          "artifact_type": "godot-runtime-request",
+          "producer": "GodotVerificationHandler",
+          "relative_path": ".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/runtime-request.json",
+          "content_hash": "24e427d1c0be1f433e9f66eb68d0f5f6b378f79422b2b5795cf7bd617d952ed2",
+          "file_size": 381,
+          "validation_state": "VALID",
+          "created_at": "2026-09-27T10:16:00.249719+00:00"
+        },
+        {
+          "id": "ART-620bbcad",
+          "workflow_id": "WF-GODOT-eb87de16",
+          "task_id": "WF-GODOT-eb87de16-EXECUTE",
+          "artifact_type": "godot-version-process",
+          "producer": "GodotVerificationHandler",
+          "relative_path": ".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/version-process.json",
+          "content_hash": "7caa2c368d2368e977efc3cee8d6e778c86d8fcf8f2020ddb74a270b155e85e5",
+          "file_size": 1374,
+          "validation_state": "VALID",
+          "created_at": "2026-09-27T10:16:00.291491+00:00"
+        },
+        {
+          "id": "ART-650a2c35",
+          "workflow_id": "WF-GODOT-eb87de16",
+          "task_id": "WF-GODOT-eb87de16-EXECUTE",
+          "artifact_type": "godot-version-stderr",
+          "producer": "GodotVerificationHandler",
+          "relative_path": ".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/version-stderr.log",
+          "content_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "file_size": 0,
+          "validation_state": "VALID",
+          "created_at": "2026-09-27T10:16:00.307959+00:00"
+        },
+        {
+          "id": "ART-46978a89",
+          "workflow_id": "WF-GODOT-eb87de16",
+          "task_id": "WF-GODOT-eb87de16-EXECUTE",
+          "artifact_type": "godot-version-stdout",
+          "producer": "GodotVerificationHandler",
+          "relative_path": ".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/version-stdout.log",
+          "content_hash": "bf8803022b574250bb04dea65053a46b7c58570725316c1f7fe2aa6735706498",
+          "file_size": 33,
+          "validation_state": "VALID",
+          "created_at": "2026-09-27T10:16:00.335396+00:00"
+        }
+      ]
+    }
+  ],
+  "checks": {
+    "unexpected_workflow_failures": [
+      {
+        "response": {
+          "workflow_id": "WF-GODOT-eb87de16",
+          "status": "FAILED",
+          "pending_approval_id": null,
+          "completed_tasks": [],
+          "failed_tasks": [
+            "WF-GODOT-eb87de16-EXECUTE"
+          ],
+          "blocked_tasks": [],
+          "error_message": "Godot project import failed"
+        },
+        "inspect": {
+          "workflow": {
+            "id": "WF-GODOT-eb87de16",
+            "project_id": "factory-godot-verification-fixture",
+            "name": "Godot headless verification: fixture-smoke",
+            "status": "FAILED",
+            "created_at": "2026-09-27T10:15:44.314973+00:00",
+            "updated_at": "2026-09-27T10:16:00.358651+00:00"
+          },
+          "tasks": [
+            {
+              "id": "WF-GODOT-eb87de16-EXECUTE",
+              "workflow_id": "WF-GODOT-eb87de16",
+              "name": "Stage, import, and execute Godot scenario",
+              "task_type": "godot_execute",
+              "cost_class": "LOCAL",
+              "depends_on": [],
+              "status": "FAILED",
+              "parameters": {
+                "scenario_file": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\v04-baseline-headless\\godot-acceptance-20260927T101537Z-97132f97\\fixture game Ω\\scenario.json",
+                "scenario_snapshot": {
+                  "schema_version": "0.2.0",
+                  "scenario_id": "fixture-smoke",
+                  "scene": "res://Main.tscn",
+                  "max_tick": 90,
+                  "timeout_seconds": 30.0,
+                  "import_timeout_seconds": 30.0,
+                  "actions": [
+                    {
+                      "tick": 30,
+                      "action": "apply_damage",
+                      "amount": 20
+                    },
+                    {
+                      "tick": 60,
+                      "action": "defeat_enemy"
+                    },
+                    {
+                      "tick": 90,
+                      "action": "apply_damage",
+                      "amount": 40
+                    }
+                  ],
+                  "snapshots": [
+                    0,
+                    30,
+                    60,
+                    90
+                  ],
+                  "assertions": [
+                    {
+                      "id": "initial-player-hp",
+                      "tick": 0,
+                      "field": "player_hp",
+                      "operator": "equals",
+                      "expected": 100
+                    },
+                    {
+                      "id": "post-damage-player-hp",
+                      "tick": 30,
+                      "field": "player_hp",
+                      "operator": "equals",
+                      "expected": 80
+                    },
+                    {
+                      "id": "post-enemy-score",
+                      "tick": 60,
+                      "field": "score",
+                      "operator": "equals",
+                      "expected": 100
+                    },
+                    {
+                      "id": "final-player-hp",
+                      "tick": 90,
+                      "field": "player_hp",
+                      "operator": "equals",
+                      "expected": 40
+                    },
+                    {
+                      "id": "final-enemies",
+                      "tick": 90,
+                      "field": "enemies_remaining",
+                      "operator": "equals",
+                      "expected": 2
+                    },
+                    {
+                      "id": "final-score",
+                      "tick": 90,
+                      "field": "score",
+                      "operator": "equals",
+                      "expected": 100
+                    }
+                  ]
+                },
+                "scenario_fingerprint": "831c75b5537606b349c630f578079a72b09e258fd5af52cca8c52a16b5a51246",
+                "source_manifest_hash": "5a9e149aa103949ecb62b680a087cc39e95058f428ab9583d1b104925cc42dd4",
+                "executable_path": "C:\\Users\\lenovo\\devel\\godot\\Godot_v4.7.2-stable_win64.exe\\Godot_v4.7.2-stable_win64_console.exe",
+                "executable_sha256": "c8f0a6bc45a19b33541501e57f6f7cd972ab18453743266339d495cbbe846643",
+                "harness_sha256": "429e7e7961dc65a07741f59d1bc40f883a03754673de27ff2d88a5c0bb5949c1",
+                "scene_sha256": "3dadaf4ca52f7e9ed19c21f47ff281f22e1ccbd1855c03e00cc517f71baf38a8"
+              },
+              "max_retries": 1,
+              "timeout_seconds": 90.0,
+              "created_at": "2026-09-27T10:15:44.314973+00:00",
+              "updated_at": "2026-09-27T10:16:00.346912+00:00"
+            },
+            {
+              "id": "WF-GODOT-eb87de16-VALIDATE",
+              "workflow_id": "WF-GODOT-eb87de16",
+              "name": "Independently validate Godot observations",
+              "task_type": "godot_validate",
+              "cost_class": "LOCAL",
+              "depends_on": [
+                "WF-GODOT-eb87de16-EXECUTE"
+              ],
+              "status": "PENDING",
+              "parameters": {
+                "execute_task_id": "WF-GODOT-eb87de16-EXECUTE"
+              },
+              "max_retries": 1,
+              "timeout_seconds": 60.0,
+              "created_at": "2026-09-27T10:15:44.314973+00:00",
+              "updated_at": "2026-09-27T10:15:44.314973+00:00"
+            },
+            {
+              "id": "WF-GODOT-eb87de16-EVIDENCE",
+              "workflow_id": "WF-GODOT-eb87de16",
+              "name": "Record final quality evidence",
+              "task_type": "record_evidence",
+              "cost_class": "LOCAL",
+              "depends_on": [
+                "WF-GODOT-eb87de16-VALIDATE"
+              ],
+              "status": "PENDING",
+              "parameters": {},
+              "max_retries": 1,
+              "timeout_seconds": 60.0,
+              "created_at": "2026-09-27T10:15:44.314973+00:00",
+              "updated_at": "2026-09-27T10:15:44.314973+00:00"
+            }
+          ],
+          "executions": [
+            {
+              "id": "EXEC-a126ed6e",
+              "task_id": "WF-GODOT-eb87de16-EXECUTE",
+              "attempt_number": 1,
+              "status": "FAILED",
+              "started_at": "2026-09-27T10:15:44.523423+00:00",
+              "completed_at": "2026-09-27T10:16:00.344392+00:00",
+              "external_op_id": null,
+              "pid": null,
+              "host": null,
+              "error_message": "Godot project import failed",
+              "exit_code": null,
+              "stdout": null,
+              "stderr": null,
+              "cost": 0.0,
+              "estimated_cost": 0.0,
+              "cost_unit": "provider_units",
+              "provider": null,
+              "retryable": true
+            }
+          ],
+          "artifacts": [
+            {
+              "id": "ART-e8190627",
+              "workflow_id": "WF-GODOT-eb87de16",
+              "task_id": "WF-GODOT-eb87de16-EXECUTE",
+              "artifact_type": "godot-source-manifest",
+              "producer": "GodotVerificationHandler",
+              "relative_path": ".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/source-manifest.json",
+              "content_hash": "9e81b7a7bed564a715323b0ed199adc47f24ba0befab8670004c15c50495224a",
+              "file_size": 1406,
+              "validation_state": "VALID",
+              "created_at": "2026-09-27T10:15:44.709008+00:00"
+            },
+            {
+              "id": "ART-418d5f46",
+              "workflow_id": "WF-GODOT-eb87de16",
+              "task_id": "WF-GODOT-eb87de16-EXECUTE",
+              "artifact_type": "godot-scenario-snapshot",
+              "producer": "GodotVerificationHandler",
+              "relative_path": ".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/scenario-snapshot.json",
+              "content_hash": "53f5cf62c152269cb73a13e6d7fb26e86b4d0fd5ddd30e40e7faaa04ac12aa32",
+              "file_size": 1404,
+              "validation_state": "VALID",
+              "created_at": "2026-09-27T10:15:44.766451+00:00"
+            },
+            {
+              "id": "ART-cd28bfcc",
+              "workflow_id": "WF-GODOT-eb87de16",
+              "task_id": "WF-GODOT-eb87de16-EXECUTE",
+              "artifact_type": "godot-process-journal",
+              "producer": "GodotVerificationHandler",
+              "relative_path": ".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/version.json",
+              "content_hash": "44a083165715c17ed46248f06a2170ca46226cd5a6c9735880495d7375631ec0",
+              "file_size": 1213,
+              "validation_state": "VALID",
+              "created_at": "2026-09-27T10:15:44.855374+00:00"
+            },
+            {
+              "id": "ART-b1c30ba4",
+              "workflow_id": "WF-GODOT-eb87de16",
+              "task_id": "WF-GODOT-eb87de16-EXECUTE",
+              "artifact_type": "godot-process-journal",
+              "producer": "GodotVerificationHandler",
+              "relative_path": ".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/version-terminal.json",
+              "content_hash": "6a335e8d390f04ce91d72ac84d5ed0ce62c77239f2444bfef5155f5203c2bbad",
+              "file_size": 908,
+              "validation_state": "VALID",
+              "created_at": "2026-09-27T10:15:46.353271+00:00"
+            },
+            {
+              "id": "ART-0042036e",
+              "workflow_id": "WF-GODOT-eb87de16",
+              "task_id": "WF-GODOT-eb87de16-EXECUTE",
+              "artifact_type": "godot-process-journal",
+              "producer": "GodotVerificationHandler",
+              "relative_path": ".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/help.json",
+              "content_hash": "58eaf4a7af583ecca320202de65c4f3065f66dde029376beb7fefb16f18fa5a5",
+              "file_size": 1204,
+              "validation_state": "VALID",
+              "created_at": "2026-09-27T10:15:46.414355+00:00"
+            },
+            {
+              "id": "ART-d9c98104",
+              "workflow_id": "WF-GODOT-eb87de16",
+              "task_id": "WF-GODOT-eb87de16-EXECUTE",
+              "artifact_type": "godot-process-journal",
+              "producer": "GodotVerificationHandler",
+              "relative_path": ".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/help-terminal.json",
+              "content_hash": "0e5d51293c158dca0c88b07eaed089cd59145a1a0df190fba07a30865f7211f9",
+              "file_size": 902,
+              "validation_state": "VALID",
+              "created_at": "2026-09-27T10:15:47.747919+00:00"
+            },
+            {
+              "id": "ART-d985ee87",
+              "workflow_id": "WF-GODOT-eb87de16",
+              "task_id": "WF-GODOT-eb87de16-EXECUTE",
+              "artifact_type": "godot-process-journal",
+              "producer": "GodotVerificationHandler",
+              "relative_path": ".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/import.json",
+              "content_hash": "1efbf077e7d372ab612e54919403e7131b29c0226d87e70543fee596623aa193",
+              "file_size": 1465,
+              "validation_state": "VALID",
+              "created_at": "2026-09-27T10:15:47.833032+00:00"
+            },
+            {
+              "id": "ART-8127a94e",
+              "workflow_id": "WF-GODOT-eb87de16",
+              "task_id": "WF-GODOT-eb87de16-EXECUTE",
+              "artifact_type": "godot-process-journal",
+              "producer": "GodotVerificationHandler",
+              "relative_path": ".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/import-terminal.json",
+              "content_hash": "75b28ecff134e01673e6420e6374faf7fef2da7a30e372fed21457b95d200182",
+              "file_size": 906,
+              "validation_state": "VALID",
+              "created_at": "2026-09-27T10:15:59.995854+00:00"
+            },
+            {
+              "id": "ART-5da71d29",
+              "workflow_id": "WF-GODOT-eb87de16",
+              "task_id": "WF-GODOT-eb87de16-EXECUTE",
+              "artifact_type": "godot-help-process",
+              "producer": "GodotVerificationHandler",
+              "relative_path": ".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/help-process.json",
+              "content_hash": "1f91e9ffd8ebd76eb3c7780dadb7d343ae91d87ba350e83c5076dffdfe8dfb8b",
+              "file_size": 1369,
+              "validation_state": "VALID",
+              "created_at": "2026-09-27T10:16:00.041555+00:00"
+            },
+            {
+              "id": "ART-8f1981c7",
+              "workflow_id": "WF-GODOT-eb87de16",
+              "task_id": "WF-GODOT-eb87de16-EXECUTE",
+              "artifact_type": "godot-help-stderr",
+              "producer": "GodotVerificationHandler",
+              "relative_path": ".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/help-stderr.log",
+              "content_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "file_size": 0,
+              "validation_state": "VALID",
+              "created_at": "2026-09-27T10:16:00.056658+00:00"
+            },
+            {
+              "id": "ART-327d1ffb",
+              "workflow_id": "WF-GODOT-eb87de16",
+              "task_id": "WF-GODOT-eb87de16-EXECUTE",
+              "artifact_type": "godot-help-stdout",
+              "producer": "GodotVerificationHandler",
+              "relative_path": ".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/help-stdout.log",
+              "content_hash": "a0312b699fc3404bb43aa3a2fd65cd61afc49b5a5beeb2c7d6ed4071aa9b6204",
+              "file_size": 15534,
+              "validation_state": "VALID",
+              "created_at": "2026-09-27T10:16:00.116918+00:00"
+            },
+            {
+              "id": "ART-519e367f",
+              "workflow_id": "WF-GODOT-eb87de16",
+              "task_id": "WF-GODOT-eb87de16-EXECUTE",
+              "artifact_type": "godot-import-process",
+              "producer": "GodotVerificationHandler",
+              "relative_path": ".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/import-process.json",
+              "content_hash": "994615954d982ea5d681d1bba1b622b719655c2e2d4e0d51d2ac8df88e09a4e1",
+              "file_size": 1623,
+              "validation_state": "VALID",
+              "created_at": "2026-09-27T10:16:00.162716+00:00"
+            },
+            {
+              "id": "ART-309b8e00",
+              "workflow_id": "WF-GODOT-eb87de16",
+              "task_id": "WF-GODOT-eb87de16-EXECUTE",
+              "artifact_type": "godot-import-stderr",
+              "producer": "GodotVerificationHandler",
+              "relative_path": ".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/import-stderr.log",
+              "content_hash": "354f6b41afac0af85c870c4ddfdbe208e44ad5223ae6d89aba867d4090718998",
+              "file_size": 125,
+              "validation_state": "VALID",
+              "created_at": "2026-09-27T10:16:00.186353+00:00"
+            },
+            {
+              "id": "ART-21484c40",
+              "workflow_id": "WF-GODOT-eb87de16",
+              "task_id": "WF-GODOT-eb87de16-EXECUTE",
+              "artifact_type": "godot-import-stdout",
+              "producer": "GodotVerificationHandler",
+              "relative_path": ".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/import-stdout.log",
+              "content_hash": "dacb5f606f005fcd5ef116855d9eb01556b273f8506b966dc8b804da62ada4b8",
+              "file_size": 1474,
+              "validation_state": "VALID",
+              "created_at": "2026-09-27T10:16:00.220028+00:00"
+            },
+            {
+              "id": "ART-3e979ae0",
+              "workflow_id": "WF-GODOT-eb87de16",
+              "task_id": "WF-GODOT-eb87de16-EXECUTE",
+              "artifact_type": "godot-runtime-request",
+              "producer": "GodotVerificationHandler",
+              "relative_path": ".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/runtime-request.json",
+              "content_hash": "24e427d1c0be1f433e9f66eb68d0f5f6b378f79422b2b5795cf7bd617d952ed2",
+              "file_size": 381,
+              "validation_state": "VALID",
+              "created_at": "2026-09-27T10:16:00.249719+00:00"
+            },
+            {
+              "id": "ART-620bbcad",
+              "workflow_id": "WF-GODOT-eb87de16",
+              "task_id": "WF-GODOT-eb87de16-EXECUTE",
+              "artifact_type": "godot-version-process",
+              "producer": "GodotVerificationHandler",
+              "relative_path": ".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/version-process.json",
+              "content_hash": "7caa2c368d2368e977efc3cee8d6e778c86d8fcf8f2020ddb74a270b155e85e5",
+              "file_size": 1374,
+              "validation_state": "VALID",
+              "created_at": "2026-09-27T10:16:00.291491+00:00"
+            },
+            {
+              "id": "ART-650a2c35",
+              "workflow_id": "WF-GODOT-eb87de16",
+              "task_id": "WF-GODOT-eb87de16-EXECUTE",
+              "artifact_type": "godot-version-stderr",
+              "producer": "GodotVerificationHandler",
+              "relative_path": ".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/version-stderr.log",
+              "content_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "file_size": 0,
+              "validation_state": "VALID",
+              "created_at": "2026-09-27T10:16:00.307959+00:00"
+            },
+            {
+              "id": "ART-46978a89",
+              "workflow_id": "WF-GODOT-eb87de16",
+              "task_id": "WF-GODOT-eb87de16-EXECUTE",
+              "artifact_type": "godot-version-stdout",
+              "producer": "GodotVerificationHandler",
+              "relative_path": ".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/version-stdout.log",
+              "content_hash": "bf8803022b574250bb04dea65053a46b7c58570725316c1f7fe2aa6735706498",
+              "file_size": 33,
+              "validation_state": "VALID",
+              "created_at": "2026-09-27T10:16:00.335396+00:00"
+            }
+          ],
+          "evidence": [],
+          "gates": [],
+          "approvals": [],
+          "paid_provider_invocations": 0
+        },
+        "artifacts": [
+          {
+            "id": "ART-e8190627",
+            "workflow_id": "WF-GODOT-eb87de16",
+            "task_id": "WF-GODOT-eb87de16-EXECUTE",
+            "artifact_type": "godot-source-manifest",
+            "producer": "GodotVerificationHandler",
+            "relative_path": ".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/source-manifest.json",
+            "content_hash": "9e81b7a7bed564a715323b0ed199adc47f24ba0befab8670004c15c50495224a",
+            "file_size": 1406,
+            "validation_state": "VALID",
+            "created_at": "2026-09-27T10:15:44.709008+00:00"
+          },
+          {
+            "id": "ART-418d5f46",
+            "workflow_id": "WF-GODOT-eb87de16",
+            "task_id": "WF-GODOT-eb87de16-EXECUTE",
+            "artifact_type": "godot-scenario-snapshot",
+            "producer": "GodotVerificationHandler",
+            "relative_path": ".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/scenario-snapshot.json",
+            "content_hash": "53f5cf62c152269cb73a13e6d7fb26e86b4d0fd5ddd30e40e7faaa04ac12aa32",
+            "file_size": 1404,
+            "validation_state": "VALID",
+            "created_at": "2026-09-27T10:15:44.766451+00:00"
+          },
+          {
+            "id": "ART-cd28bfcc",
+            "workflow_id": "WF-GODOT-eb87de16",
+            "task_id": "WF-GODOT-eb87de16-EXECUTE",
+            "artifact_type": "godot-process-journal",
+            "producer": "GodotVerificationHandler",
+            "relative_path": ".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/version.json",
+            "content_hash": "44a083165715c17ed46248f06a2170ca46226cd5a6c9735880495d7375631ec0",
+            "file_size": 1213,
+            "validation_state": "VALID",
+            "created_at": "2026-09-27T10:15:44.855374+00:00"
+          },
+          {
+            "id": "ART-b1c30ba4",
+            "workflow_id": "WF-GODOT-eb87de16",
+            "task_id": "WF-GODOT-eb87de16-EXECUTE",
+            "artifact_type": "godot-process-journal",
+            "producer": "GodotVerificationHandler",
+            "relative_path": ".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/version-terminal.json",
+            "content_hash": "6a335e8d390f04ce91d72ac84d5ed0ce62c77239f2444bfef5155f5203c2bbad",
+            "file_size": 908,
+            "validation_state": "VALID",
+            "created_at": "2026-09-27T10:15:46.353271+00:00"
+          },
+          {
+            "id": "ART-0042036e",
+            "workflow_id": "WF-GODOT-eb87de16",
+            "task_id": "WF-GODOT-eb87de16-EXECUTE",
+            "artifact_type": "godot-process-journal",
+            "producer": "GodotVerificationHandler",
+            "relative_path": ".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/help.json",
+            "content_hash": "58eaf4a7af583ecca320202de65c4f3065f66dde029376beb7fefb16f18fa5a5",
+            "file_size": 1204,
+            "validation_state": "VALID",
+            "created_at": "2026-09-27T10:15:46.414355+00:00"
+          },
+          {
+            "id": "ART-d9c98104",
+            "workflow_id": "WF-GODOT-eb87de16",
+            "task_id": "WF-GODOT-eb87de16-EXECUTE",
+            "artifact_type": "godot-process-journal",
+            "producer": "GodotVerificationHandler",
+            "relative_path": ".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/help-terminal.json",
+            "content_hash": "0e5d51293c158dca0c88b07eaed089cd59145a1a0df190fba07a30865f7211f9",
+            "file_size": 902,
+            "validation_state": "VALID",
+            "created_at": "2026-09-27T10:15:47.747919+00:00"
+          },
+          {
+            "id": "ART-d985ee87",
+            "workflow_id": "WF-GODOT-eb87de16",
+            "task_id": "WF-GODOT-eb87de16-EXECUTE",
+            "artifact_type": "godot-process-journal",
+            "producer": "GodotVerificationHandler",
+            "relative_path": ".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/import.json",
+            "content_hash": "1efbf077e7d372ab612e54919403e7131b29c0226d87e70543fee596623aa193",
+            "file_size": 1465,
+            "validation_state": "VALID",
+            "created_at": "2026-09-27T10:15:47.833032+00:00"
+          },
+          {
+            "id": "ART-8127a94e",
+            "workflow_id": "WF-GODOT-eb87de16",
+            "task_id": "WF-GODOT-eb87de16-EXECUTE",
+            "artifact_type": "godot-process-journal",
+            "producer": "GodotVerificationHandler",
+            "relative_path": ".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/import-terminal.json",
+            "content_hash": "75b28ecff134e01673e6420e6374faf7fef2da7a30e372fed21457b95d200182",
+            "file_size": 906,
+            "validation_state": "VALID",
+            "created_at": "2026-09-27T10:15:59.995854+00:00"
+          },
+          {
+            "id": "ART-5da71d29",
+            "workflow_id": "WF-GODOT-eb87de16",
+            "task_id": "WF-GODOT-eb87de16-EXECUTE",
+            "artifact_type": "godot-help-process",
+            "producer": "GodotVerificationHandler",
+            "relative_path": ".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/help-process.json",
+            "content_hash": "1f91e9ffd8ebd76eb3c7780dadb7d343ae91d87ba350e83c5076dffdfe8dfb8b",
+            "file_size": 1369,
+            "validation_state": "VALID",
+            "created_at": "2026-09-27T10:16:00.041555+00:00"
+          },
+          {
+            "id": "ART-8f1981c7",
+            "workflow_id": "WF-GODOT-eb87de16",
+            "task_id": "WF-GODOT-eb87de16-EXECUTE",
+            "artifact_type": "godot-help-stderr",
+            "producer": "GodotVerificationHandler",
+            "relative_path": ".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/help-stderr.log",
+            "content_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "file_size": 0,
+            "validation_state": "VALID",
+            "created_at": "2026-09-27T10:16:00.056658+00:00"
+          },
+          {
+            "id": "ART-327d1ffb",
+            "workflow_id": "WF-GODOT-eb87de16",
+            "task_id": "WF-GODOT-eb87de16-EXECUTE",
+            "artifact_type": "godot-help-stdout",
+            "producer": "GodotVerificationHandler",
+            "relative_path": ".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/help-stdout.log",
+            "content_hash": "a0312b699fc3404bb43aa3a2fd65cd61afc49b5a5beeb2c7d6ed4071aa9b6204",
+            "file_size": 15534,
+            "validation_state": "VALID",
+            "created_at": "2026-09-27T10:16:00.116918+00:00"
+          },
+          {
+            "id": "ART-519e367f",
+            "workflow_id": "WF-GODOT-eb87de16",
+            "task_id": "WF-GODOT-eb87de16-EXECUTE",
+            "artifact_type": "godot-import-process",
+            "producer": "GodotVerificationHandler",
+            "relative_path": ".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/import-process.json",
+            "content_hash": "994615954d982ea5d681d1bba1b622b719655c2e2d4e0d51d2ac8df88e09a4e1",
+            "file_size": 1623,
+            "validation_state": "VALID",
+            "created_at": "2026-09-27T10:16:00.162716+00:00"
+          },
+          {
+            "id": "ART-309b8e00",
+            "workflow_id": "WF-GODOT-eb87de16",
+            "task_id": "WF-GODOT-eb87de16-EXECUTE",
+            "artifact_type": "godot-import-stderr",
+            "producer": "GodotVerificationHandler",
+            "relative_path": ".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/import-stderr.log",
+            "content_hash": "354f6b41afac0af85c870c4ddfdbe208e44ad5223ae6d89aba867d4090718998",
+            "file_size": 125,
+            "validation_state": "VALID",
+            "created_at": "2026-09-27T10:16:00.186353+00:00"
+          },
+          {
+            "id": "ART-21484c40",
+            "workflow_id": "WF-GODOT-eb87de16",
+            "task_id": "WF-GODOT-eb87de16-EXECUTE",
+            "artifact_type": "godot-import-stdout",
+            "producer": "GodotVerificationHandler",
+            "relative_path": ".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/import-stdout.log",
+            "content_hash": "dacb5f606f005fcd5ef116855d9eb01556b273f8506b966dc8b804da62ada4b8",
+            "file_size": 1474,
+            "validation_state": "VALID",
+            "created_at": "2026-09-27T10:16:00.220028+00:00"
+          },
+          {
+            "id": "ART-3e979ae0",
+            "workflow_id": "WF-GODOT-eb87de16",
+            "task_id": "WF-GODOT-eb87de16-EXECUTE",
+            "artifact_type": "godot-runtime-request",
+            "producer": "GodotVerificationHandler",
+            "relative_path": ".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/runtime-request.json",
+            "content_hash": "24e427d1c0be1f433e9f66eb68d0f5f6b378f79422b2b5795cf7bd617d952ed2",
+            "file_size": 381,
+            "validation_state": "VALID",
+            "created_at": "2026-09-27T10:16:00.249719+00:00"
+          },
+          {
+            "id": "ART-620bbcad",
+            "workflow_id": "WF-GODOT-eb87de16",
+            "task_id": "WF-GODOT-eb87de16-EXECUTE",
+            "artifact_type": "godot-version-process",
+            "producer": "GodotVerificationHandler",
+            "relative_path": ".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/version-process.json",
+            "content_hash": "7caa2c368d2368e977efc3cee8d6e778c86d8fcf8f2020ddb74a270b155e85e5",
+            "file_size": 1374,
+            "validation_state": "VALID",
+            "created_at": "2026-09-27T10:16:00.291491+00:00"
+          },
+          {
+            "id": "ART-650a2c35",
+            "workflow_id": "WF-GODOT-eb87de16",
+            "task_id": "WF-GODOT-eb87de16-EXECUTE",
+            "artifact_type": "godot-version-stderr",
+            "producer": "GodotVerificationHandler",
+            "relative_path": ".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/version-stderr.log",
+            "content_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "file_size": 0,
+            "validation_state": "VALID",
+            "created_at": "2026-09-27T10:16:00.307959+00:00"
+          },
+          {
+            "id": "ART-46978a89",
+            "workflow_id": "WF-GODOT-eb87de16",
+            "task_id": "WF-GODOT-eb87de16-EXECUTE",
+            "artifact_type": "godot-version-stdout",
+            "producer": "GodotVerificationHandler",
+            "relative_path": ".gamefactory/artifacts/godot/WF-GODOT-eb87de16/WF-GODOT-eb87de16-EXECUTE/EXEC-a126ed6e/version-stdout.log",
+            "content_hash": "bf8803022b574250bb04dea65053a46b7c58570725316c1f7fe2aa6735706498",
+            "file_size": 33,
+            "validation_state": "VALID",
+            "created_at": "2026-09-27T10:16:00.335396+00:00"
+          }
+        ]
+      }
+    ]
+  },
+  "projects": [
+    {
+      "name": "fixture game Ω",
+      "path": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\v04-baseline-headless\\godot-acceptance-20260927T101537Z-97132f97\\fixture game Ω",
+      "source_hashes_before": {
+        "main.gd": "f729ffbe9c8981c3a08fd424a83eb7bc9f060ef6492e71f33c51cbe897c89b55",
+        "Main.tscn": "3dadaf4ca52f7e9ed19c21f47ff281f22e1ccbd1855c03e00cc517f71baf38a8",
+        "project.godot": "598a8552f3747c23baff8134218faf3d9f0013a397219f3a023b2e8984a7f30e",
+        "scenario.json": "4519e3c0cd2a84bf58325d271fb6ddadb002d6cee32c6c8990b345c5523d73d4",
+        "visual-scenario-portrait.json": "607867ff59de532699d9b012f833af30499d312ba3932ee175519576197a70ab",
+        "visual-scenario.json": "8e2e18fa62b23ef930e1238da51e8f83c084186cef7948185a8252c097f99a56",
+        "visual_main.gd": "d8e0fb9f896e674c51eb18338449d89f08e675fb6ab9f1c7e7d413a372a5a1c7",
+        "VisualMain.tscn": "7209330a62a0e9105c60a65bf5951315e32b9632c75a0979128d2e58fa020335"
+      }
+    }
+  ],
+  "godot_version": "4.7.2.stable.official.ed1daf0bf",
+  "godot_help_observed": "\u001b[38;5;39mGodot Engine\u001b[0m v4.7.2.stable.official.ed1daf0bf - \u001b[4mhttps://godotengine.org\u001b[0m\n\u001b[90mFree and open source software under the terms of the MIT license.\u001b[0m\n\u001b[90m(c) 2014-present Godot Engine contributors. (c) 2007-present Juan Linietsky, Ariel Manzur.\u001b[0m\n\n\u001b[1;93mUsage:\u001b[0m\n  C:\\Users\\lenovo\\devel\\godot\\Godot_v4.7.2-stable_win64.exe\\Godot_v4.7.2-stable_win64.exe \u001b[96m[options] [path to \"project.godot\" file]\u001b[0m\n\n\u001b[1;93mOption legend (this build = editor):\u001b[0m\n  \u001b[1;92mR\u001b[0m  Available in editor builds, debug export templates and release export templates.\n  \u001b[1;94mD\u001b[0m  Available in editor builds and debug export templates only.\n  \u001b[1;93mX\u001b[0m  Only available in editor builds, and export templates compiled with `disable_path_overrides=false`.\n  \u001b[1;91mE\u001b[0m  Only available in editor builds.\n\n\u001b[1;93mGeneral options:\u001b[0m\n  \u001b[92m-h, --help                        \u001b[1;92mR\u001b[0m  Display this help message.\n  \u001b[92m--version                         \u001b[1;92mR\u001b[0m  Display the version string.\n  \u001b[92m-v, --verbose                     \u001b[1;92mR\u001b[0m  Use verbose stdout mode.\n  \u001b[92m--quiet                           \u001b[1;92mR\u001b[0m  Quiet mode, silences stdout messages. Errors are still displayed.\n  \u001b[92m--no-header                       \u001b[1;92mR\u001b[0m  Do not print engine version and rendering driver/method header on startup.\n\n\u001b[1;93mRun options:\u001b[0m\n  \u001b[92m--, ++                            \u001b[1;92mR\u001b[0m  Separator for user-provided arguments. Following arguments are not used by the engine, but can be read from `OS.get_cmdline_user_args()`.\n  \u001b[92m-e, --editor                      \u001b[1;91mE\u001b[0m  Start the editor instead of running the scene.\n  \u001b[92m-p, --project-manager             \u001b[1;91mE\u001b[0m  Start the project manager, even if a project is auto-detected.\n  \u001b[92m--recovery-mode                   \u001b[1;91mE\u001b[0m  Start the editor in recovery mode, which disables features that can typically cause startup crashes, such as tool scripts, editor plugins, GDExtension addons, and others.\n  \u001b[92m--debug-server \u001b[95m<uri>\u001b[0m              \u001b[1;91mE\u001b[0m  Start the editor debug server (<protocol>://<host/IP>[:port], e.g. tcp://127.0.0.1:6007)\n  \u001b[92m--dap-port \u001b[95m<port>\u001b[0m                 \u001b[1;91mE\u001b[0m  Use the specified port for the GDScript Debug Adapter Protocol. Recommended port range [1024, 49151].\n  \u001b[92m--lsp-port \u001b[95m<port>\u001b[0m                 \u001b[1;91mE\u001b[0m  Use the specified port for the GDScript Language Server Protocol. Recommended port range [1024, 49151].\n  \u001b[92m--quit                            \u001b[1;92mR\u001b[0m  Quit after the first iteration.\n  \u001b[92m--quit-after \u001b[95m<int>\u001b[0m                \u001b[1;92mR\u001b[0m  Quit after the given number of iterations. Set to 0 to disable.\n  \u001b[92m-l, --language \u001b[95m<locale>\u001b[0m           \u001b[1;92mR\u001b[0m  Use a specific locale (<locale> being a two-letter code).\n  \u001b[92m--path \u001b[95m<directory>\u001b[0m                \u001b[1;93mX\u001b[0m  Path to a project (<directory> must contain a \"project.godot\" file).\n  \u001b[92m--scene \u001b[95m<path>\u001b[0m                    \u001b[1;93mX\u001b[0m  Path or UID of a scene in the project that should be started.\n  \u001b[92m--main-pack \u001b[95m<file>\u001b[0m                \u001b[1;93mX\u001b[0m  Path to a pack (.pck) file to load.\n  \u001b[92m--render-thread \u001b[95m<mode>\u001b[0m            \u001b[1;92mR\u001b[0m  Render thread mode (\"unsafe\" [deprecated], \"safe\", \"separate\").\n  \u001b[92m--remote-fs \u001b[95m<address>\u001b[0m             \u001b[1;94mD\u001b[0m  Remote filesystem (<host/IP>[:<port>] address).\n  \u001b[92m--remote-fs-password \u001b[95m<password>\u001b[0m   \u001b[1;94mD\u001b[0m  Password for remote filesystem.\n  \u001b[92m--audio-driver \u001b[95m<driver>\u001b[0m           \u001b[1;92mR\u001b[0m  Audio driver [\"WASAPI\", \"Dummy\"].\n  \u001b[92m--display-driver \u001b[95m<driver>\u001b[0m         \u001b[1;92mR\u001b[0m  Display driver (and rendering driver) [\"windows\" (\"vulkan\", \"d3d12\", \"opengl3\", \"opengl3_angle\", \"dummy\"), \"headless\" (\"dummy\")].\n  \u001b[92m--audio-output-latency \u001b[95m<ms>\u001b[0m       \u001b[1;92mR\u001b[0m  Override audio output latency in milliseconds (default is 15 ms).\n  \u001b[92m                                   \u001b[0m  \u001b[90mLower values make sound playback more reactive but increase CPU usage, and may result in audio cracking if the CPU can't keep up.\n  \u001b[92m--rendering-method \u001b[95m<renderer>\u001b[0m     \u001b[1;92mR\u001b[0m  Renderer name. Requires driver support.\n  \u001b[92m--rendering-driver \u001b[95m<driver>\u001b[0m       \u001b[1;92mR\u001b[0m  Rendering driver (depends on display driver).\n  \u001b[92m--gpu-index \u001b[95m<device_index>\u001b[0m        \u001b[1;92mR\u001b[0m  Use a specific GPU (only available on the Forward+/Mobile renderers; run with --verbose to get a list of available devices).\n  \u001b[92m--text-driver \u001b[95m<driver>\u001b[0m            \u001b[1;92mR\u001b[0m  Text driver (used for font rendering, bidirectional support and shaping).\n  \u001b[92m--tablet-driver \u001b[95m<driver>\u001b[0m          \u001b[1;92mR\u001b[0m  Pen tablet input driver.\n  \u001b[92m--headless                        \u001b[1;92mR\u001b[0m  Enable headless mode (--display-driver headless --audio-driver Dummy). Useful for servers and with --script.\n  \u001b[92m--log-file \u001b[95m<file>\u001b[0m                 \u001b[1;92mR\u001b[0m  Write output/error log to the specified path instead of the default location defined by the project.\n  \u001b[92m                                   \u001b[0m  \u001b[90m<file> path should be absolute or relative to the project directory.\n  \u001b[92m--write-movie \u001b[95m<file>\u001b[0m              \u001b[1;92mR\u001b[0m  Write a video to the specified path (usually with .avi or .png extension).\n  \u001b[92m                                   \u001b[0m  \u001b[90m--fixed-fps is forced when enabled, but it can be used to change movie FPS.\n  \u001b[92m                                   \u001b[0m  \u001b[90m--disable-vsync can speed up movie writing but makes interaction more difficult.\n  \u001b[92m                                   \u001b[0m  \u001b[90m--quit-after can be used to specify the number of frames to write.\n\n\u001b[1;93mDisplay options:\u001b[0m\n  \u001b[92m-f, --fullscreen                  \u001b[1;92mR\u001b[0m  Request fullscreen mode.\n  \u001b[92m-m, --maximized                   \u001b[1;92mR\u001b[0m  Request a maximized window.\n  \u001b[92m-w, --windowed                    \u001b[1;92mR\u001b[0m  Request windowed mode.\n  \u001b[92m-t, --always-on-top               \u001b[1;92mR\u001b[0m  Request an always-on-top window.\n  \u001b[92m--resolution \u001b[95m<W>\u001b[0mx\u001b[95m<H>\u001b[0m              \u001b[1;92mR\u001b[0m  Request window resolution.\n  \u001b[92m--position \u001b[95m<X>\u001b[0m,\u001b[95m<Y>\u001b[0m                \u001b[1;92mR\u001b[0m  Request window position.\n  \u001b[92m--screen \u001b[95m<N>\u001b[0m                      \u001b[1;92mR\u001b[0m  Request window screen.\n  \u001b[92m--single-window                   \u001b[1;92mR\u001b[0m  Use a single window (no separate subwindows).\n  \u001b[92m--xr-mode \u001b[95m<mode>\u001b[0m                  \u001b[1;92mR\u001b[0m  Select XR (Extended Reality) mode [\"default\", \"off\", \"on\"].\n  \u001b[92m--wid \u001b[95m<window_id>\u001b[0m                 \u001b[1;92mR\u001b[0m  Request parented to window.\n  \u001b[92m--accessibility \u001b[95m<mode>\u001b[0m            \u001b[1;92mR\u001b[0m  Select accessibility mode ['auto' (when screen reader is running, default), 'always', 'disabled'].\n  \u001b[92m--accessibility-driver \u001b[95m<driver>\u001b[0m   \u001b[1;92mR\u001b[0m  Select accessibility driver ['accesskit', 'dummy'].\n\n\u001b[1;93mDebug options:\u001b[0m\n  \u001b[92m-d, --debug                       \u001b[1;92mR\u001b[0m  Debug (local stdout debugger).\n  \u001b[92m-b, --breakpoints                 \u001b[1;92mR\u001b[0m  Breakpoint list as source::line comma-separated pairs, no spaces (use %%20 instead).\n  \u001b[92m--ignore-error-breaks             \u001b[1;92mR\u001b[0m  If debugger is connected, prevents sending error breakpoints.\n  \u001b[92m--profiling                       \u001b[1;92mR\u001b[0m  Enable profiling in the script debugger.\n  \u001b[92m--gpu-profile                     \u001b[1;92mR\u001b[0m  Show a GPU profile of the tasks that took the most time during frame rendering.\n  \u001b[92m--gpu-validation                  \u001b[1;92mR\u001b[0m  Enable graphics API validation layers for debugging.\n  \u001b[92m--gpu-abort                       \u001b[1;94mD\u001b[0m  Abort on graphics API usage errors (usually validation layer errors). May help see the problem if your system freezes.\n  \u001b[92m--generate-spirv-debug-info       \u001b[1;92mR\u001b[0m  Generate SPIR-V debug information (Vulkan only). This allows source-level shader debugging with RenderDoc.\n  \u001b[92m--extra-gpu-memory-tracking       \u001b[1;92mR\u001b[0m  Enables additional memory tracking (see class reference for `RenderingDevice.get_driver_and_device_memory_report()` and linked methods). Currently only implemented for Vulkan. Enabling this feature may cause crashes on some systems due to buggy drivers or bugs in the Vulkan Loader. See https://github.com/godotengine/godot/issues/95967\n  \u001b[92m--accurate-breadcrumbs            \u001b[1;92mR\u001b[0m  Force barriers between breadcrumbs. Useful for narrowing down a command causing GPU resets. Currently only implemented for Vulkan.\n  \u001b[92m--remote-debug \u001b[95m<uri>\u001b[0m              \u001b[1;92mR\u001b[0m  Remote debug (<protocol>://<host/IP>[:<port>], e.g. tcp://127.0.0.1:6007).\n  \u001b[92m--single-threaded-scene           \u001b[1;92mR\u001b[0m  Force scene tree to run in single-threaded mode. Sub-thread groups are disabled and run on the main thread.\n  \u001b[92m--debug-collisions                \u001b[1;94mD\u001b[0m  Show collision shapes when running the scene.\n  \u001b[92m--debug-paths                     \u001b[1;94mD\u001b[0m  Show path lines when running the scene.\n  \u001b[92m--debug-navigation                \u001b[1;94mD\u001b[0m  Show navigation polygons when running the scene.\n  \u001b[92m--debug-avoidance                 \u001b[1;94mD\u001b[0m  Show navigation avoidance debug visuals when running the scene.\n  \u001b[92m--debug-stringnames               \u001b[1;94mD\u001b[0m  Print all StringName allocations to stdout when the engine quits.\n  \u001b[92m--debug-canvas-item-redraw        \u001b[1;94mD\u001b[0m  Display a rectangle each time a canvas item requests a redraw (useful to troubleshoot low processor mode).\n  \u001b[92m--max-fps \u001b[95m<fps>\u001b[0m                   \u001b[1;92mR\u001b[0m  Set a maximum number of frames per second rendered (can be used to limit power usage). A value of 0 results in unlimited framerate.\n  \u001b[92m--frame-delay \u001b[95m<ms>\u001b[0m                \u001b[1;92mR\u001b[0m  Simulate high CPU load (delay each frame by <ms> milliseconds). Do not use as a FPS limiter; use --max-fps instead.\n  \u001b[92m--time-scale \u001b[95m<scale>\u001b[0m              \u001b[1;92mR\u001b[0m  Force time scale (higher values are faster, 1.0 is normal speed).\n  \u001b[92m--disable-vsync                   \u001b[1;92mR\u001b[0m  Forces disabling of vertical synchronization, even if enabled in the project settings. Does not override driver-level V-Sync enforcement.\n  \u001b[92m--disable-render-loop             \u001b[1;92mR\u001b[0m  Disable render loop so rendering only occurs when called explicitly from script.\n  \u001b[92m--disable-crash-handler           \u001b[1;92mR\u001b[0m  Disable crash handler when supported by the platform code.\n  \u001b[92m--fixed-fps \u001b[95m<fps>\u001b[0m                 \u001b[1;92mR\u001b[0m  Force a fixed number of frames per second. This setting disables real-time synchronization.\n  \u001b[92m--delta-smoothing \u001b[95m<enable>\u001b[0m        \u001b[1;92mR\u001b[0m  Enable or disable frame delta smoothing [\"enable\", \"disable\"].\n  \u001b[92m--print-fps                       \u001b[1;92mR\u001b[0m  Print the frames per second to the stdout.\n  \u001b[92m--editor-pseudolocalization       \u001b[1;91mE\u001b[0m  Enable pseudolocalization for the editor and the project manager.\n\n\u001b[1;93mStandalone tools:\u001b[0m\n  \u001b[92m-s, --script \u001b[95m<script>\u001b[0m             \u001b[1;93mX\u001b[0m  Run a script.\n  \u001b[92m--main-loop \u001b[95m<main_loop_name>\u001b[0m      \u001b[1;93mX\u001b[0m  Run a MainLoop specified by its global class name.\n  \u001b[92m--check-only                      \u001b[1;93mX\u001b[0m  Only parse for errors and quit (use with --script).\n  \u001b[92m--import                          \u001b[1;91mE\u001b[0m  Starts the editor, waits for any resources to be imported, and then quits.\n  \u001b[92m--export-release \u001b[95m<preset>\u001b[0m \u001b[95m<path>\u001b[0m  \u001b[1;91mE\u001b[0m  Export the project in release mode using the given preset and output path. The preset name should match one defined in \"export_presets.cfg\".\n  \u001b[92m                                   \u001b[0m  \u001b[90m<path> should be absolute or relative to the project directory, and include the filename for the binary (e.g. \"builds/game.exe\").\n  \u001b[92m                                   \u001b[0m  \u001b[90mThe target directory must exist.\n  \u001b[92m--export-debug \u001b[95m<preset>\u001b[0m \u001b[95m<path>\u001b[0m    \u001b[1;91mE\u001b[0m  Export the project in debug mode using the given preset and output path. See --export-release description for other considerations.\n  \u001b[92m--export-pack \u001b[95m<preset>\u001b[0m \u001b[95m<path>\u001b[0m     \u001b[1;91mE\u001b[0m  Export the project data only using the given preset and output path. The <path> extension determines whether it will be in PCK or ZIP format.\n  \u001b[92m--export-patch \u001b[95m<preset>\u001b[0m \u001b[95m<path>\u001b[0m    \u001b[1;91mE\u001b[0m  Export pack with changed files only. See --export-pack description for other considerations.\n  \u001b[92m--patches \u001b[95m<paths>\u001b[0m                 \u001b[1;91mE\u001b[0m  List of patches to use with --export-patch. The list is comma-separated.\n  \u001b[92m--install-android-build-template  \u001b[1;91mE\u001b[0m  Install the Android build template. Used in conjunction with --export-release or --export-debug.\n  \u001b[92m--convert-3to4                     \u001b[0m  \n  \u001b[92m  \u001b[96m[max_file_kb]\u001b[0m \u001b[96m[max_line_size]\u001b[0m   \u001b[1;91mE\u001b[0m  Converts project from Godot 3.x to Godot 4.x.\n  \u001b[92m--validate-conversion-3to4         \u001b[0m  \n  \u001b[92m  \u001b[96m[max_file_kb]\u001b[0m \u001b[96m[max_line_size]\u001b[0m   \u001b[1;91mE\u001b[0m  Shows what elements will be renamed when converting project from Godot 3.x to Godot 4.x.\n  \u001b[92m--doctool \u001b[96m[path]\u001b[0m                  \u001b[1;91mE\u001b[0m  Dump the engine API reference to the given <path> (defaults to current directory) in XML format, merging if existing files are found.\n  \u001b[92m--no-docbase                      \u001b[1;91mE\u001b[0m  Disallow dumping the base types (used with --doctool).\n  \u001b[92m--gdextension-docs                \u001b[1;91mE\u001b[0m  Rather than dumping the engine API, generate API reference from all the GDExtensions loaded in the current project (used with --doctool).\n  \u001b[92m--gdscript-docs \u001b[95m<path>\u001b[0m            \u001b[1;91mE\u001b[0m  Rather than dumping the engine API, generate API reference from the inline documentation in the GDScript files found in <path> (used with --doctool).\n  \u001b[92m--build-solutions                 \u001b[1;91mE\u001b[0m  Build the scripting solutions (e.g. for C# projects). Implies --editor and requires a valid project to edit.\n  \u001b[92m--dump-gdextension-interface      \u001b[1;91mE\u001b[0m  Generate a GDExtension header file \"gdextension_interface.h\" in the current folder. This file is the base file required to implement a GDExtension.\n  \u001b[92m--dump-gdextension-interface-json  \u001b[1;91mE\u001b[0m  Generate a JSON dump of the GDExtension interface named \"gdextension_interface.json\" in the current folder.\n  \u001b[92m--dump-extension-api              \u001b[1;91mE\u001b[0m  Generate a JSON dump of the Godot API for GDExtension bindings named \"extension_api.json\" in the current folder.\n  \u001b[92m--dump-extension-api-with-docs    \u001b[1;91mE\u001b[0m  Generate JSON dump of the Godot API like the previous option, but including documentation.\n  \u001b[92m--validate-extension-api \u001b[95m<path>\u001b[0m   \u001b[1;91mE\u001b[0m  Validate an extension API file dumped (with one of the two previous options) from a previous version of the engine to ensure API compatibility.\n  \u001b[92m                                   \u001b[0m  \u001b[90mIf incompatibilities or errors are detected, the exit code will be non-zero.\n  \u001b[92m--benchmark                       \u001b[1;91mE\u001b[0m  Benchmark the run time and print it to console.\n  \u001b[92m--benchmark-file \u001b[95m<path>\u001b[0m           \u001b[1;91mE\u001b[0m  Benchmark the run time and save it to a given file in JSON format. The path should be absolute.\n\n",
+  "failure": "AcceptanceFailure: Unexpected exit 2, expected [0]: {'argv': ['C:\\\\Users\\\\lenovo\\\\devel\\\\ai-game-factory\\\\.venv\\\\Scripts\\\\gamefactory.exe', '--json', '--project', 'C:\\\\Users\\\\lenovo\\\\devel\\\\ai-game-factory\\\\.verification\\\\v04-baseline-headless\\\\godot-acceptance-20260927T101537Z-97132f97\\\\fixture game Ω', '--godot-path', 'C:\\\\Users\\\\lenovo\\\\devel\\\\godot\\\\Godot_v4.7.2-stable_win64.exe\\\\Godot_v4.7.2-stable_win64_console.exe', 'run', 'godot-verify', '--scenario', 'C:\\\\Users\\\\lenovo\\\\devel\\\\ai-game-factory\\\\.verification\\\\v04-baseline-headless\\\\godot-acceptance-20260927T101537Z-97132f97\\\\fixture game Ω\\\\scenario.json'], 'cwd': 'C:\\\\Users\\\\lenovo\\\\devel\\\\ai-game-factory\\\\.verification\\\\v04-baseline-headless\\\\godot-acceptance-20260927T101537Z-97132f97\\\\fixture game Ω', 'exit_code': 2, 'stdout': '{\"workflow_id\":\"WF-GODOT-eb87de16\",\"status\":\"FAILED\",\"pending_approval_id\":null,\"completed_tasks\":[],\"failed_tasks\":[\"WF-GODOT-eb87de16-EXECUTE\"],\"blocked_tasks\":[],\"error_message\":\"Godot project import failed\"}\\n', 'stderr': '', 'timed_out': False, 'json': {'workflow_id': 'WF-GODOT-eb87de16', 'status': 'FAILED', 'pending_approval_id': None, 'completed_tasks': [], 'failed_tasks': ['WF-GODOT-eb87de16-EXECUTE'], 'blocked_tasks': [], 'error_message': 'Godot project import failed'}}",
+  "traceback": "Traceback (most recent call last):\n  File \"C:\\Users\\lenovo\\devel\\ai-game-factory\\scripts\\verify_godot_acceptance.py\", line 300, in main\n    _, response = factory(project, \"run\", \"godot-verify\", \"--scenario\", str(scenario))\n                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\lenovo\\devel\\ai-game-factory\\scripts\\verify_godot_acceptance.py\", line 170, in factory\n    proc, payload = run(argv, expected=expected, cwd=project)\n                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\lenovo\\devel\\ai-game-factory\\scripts\\verify_godot_acceptance.py\", line 146, in run\n    raise AcceptanceFailure(\nAcceptanceFailure: Unexpected exit 2, expected [0]: {'argv': ['C:\\\\Users\\\\lenovo\\\\devel\\\\ai-game-factory\\\\.venv\\\\Scripts\\\\gamefactory.exe', '--json', '--project', 'C:\\\\Users\\\\lenovo\\\\devel\\\\ai-game-factory\\\\.verification\\\\v04-baseline-headless\\\\godot-acceptance-20260927T101537Z-97132f97\\\\fixture game Ω', '--godot-path', 'C:\\\\Users\\\\lenovo\\\\devel\\\\godot\\\\Godot_v4.7.2-stable_win64.exe\\\\Godot_v4.7.2-stable_win64_console.exe', 'run', 'godot-verify', '--scenario', 'C:\\\\Users\\\\lenovo\\\\devel\\\\ai-game-factory\\\\.verification\\\\v04-baseline-headless\\\\godot-acceptance-20260927T101537Z-97132f97\\\\fixture game Ω\\\\scenario.json'], 'cwd': 'C:\\\\Users\\\\lenovo\\\\devel\\\\ai-game-factory\\\\.verification\\\\v04-baseline-headless\\\\godot-acceptance-20260927T101537Z-97132f97\\\\fixture game Ω', 'exit_code': 2, 'stdout': '{\"workflow_id\":\"WF-GODOT-eb87de16\",\"status\":\"FAILED\",\"pending_approval_id\":null,\"completed_tasks\":[],\"failed_tasks\":[\"WF-GODOT-eb87de16-EXECUTE\"],\"blocked_tasks\":[],\"error_message\":\"Godot project import failed\"}\\n', 'stderr': '', 'timed_out': False, 'json': {'workflow_id': 'WF-GODOT-eb87de16', 'status': 'FAILED', 'pending_approval_id': None, 'completed_tasks': [], 'failed_tasks': ['WF-GODOT-eb87de16-EXECUTE'], 'blocked_tasks': [], 'error_message': 'Godot project import failed'}}\n",
+  "finished_at": "2026-09-27T10:16:01.506212+00:00"
+}

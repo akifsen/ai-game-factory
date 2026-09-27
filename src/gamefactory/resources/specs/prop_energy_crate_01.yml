@@ -1,0 +1,38 @@
+schema_version: "0.4.0"
+asset_id: "prop_energy_crate_01"
+category: "prop"
+profile: "static_prop"
+intent: "Stylized Sci-Fi Energy Crate for in-game prop placement"
+
+dimensions:
+  width_m: 1.2
+  depth_m: 1.0
+  height_m: 1.0
+
+orientation:
+  up: "+Y"
+  front: "-Z"
+
+origin_policy: "bottom_center"
+
+geometry_budget:
+  max_triangles_lod0: 20000
+  max_triangles_lod1: 10000
+
+material_budget:
+  max_materials: 2
+
+texture_budget:
+  max_dimension: 2048
+
+collider_policy: "box"
+lod_policy: "lod0_lod1"
+
+style_constraints:
+  family: "stylized_scifi"
+  silhouette: "chunky"
+  readability: "high"
+  detail_density: "medium"
+
+target_engine: "godot"
+target_import_path: "assets/generated/props/prop_energy_crate_01/"

@@ -60,12 +60,10 @@ def decode_png(raw: bytes, expected_width: int, expected_height: int) -> Decoded
         raise ImageValidationError("file is not a PNG")
     if len(raw) > MAX_PNG_BYTES:
         raise ImageValidationError("PNG exceeds the byte limit")
-    if expected_width * expected_height > MAX_PIXELS:
+    if expected_width <= 0 or expected_height <= 0 or expected_width * expected_height > MAX_PIXELS:
         raise ImageValidationError("requested viewport exceeds the pixel limit")
-    Image.MAX_IMAGE_PIXELS = MAX_PIXELS
     try:
         with Image.open(io.BytesIO(raw)) as image:
-            image.load()
             if image.format != "PNG":
                 raise ImageValidationError("decoded image is not a PNG")
             if image.mode not in ("RGB", "RGBA"):
@@ -75,6 +73,9 @@ def decode_png(raw: bytes, expected_width: int, expected_height: int) -> Decoded
                     f"image size {image.width}x{image.height} does not match "
                     f"{expected_width}x{expected_height}"
                 )
+            # Inspect the header before allocating decoded pixels. Do not change
+            # Pillow's process-wide limit: asset textures have separate budgets.
+            image.load()
             copied = image.copy()
     except (UnidentifiedImageError, OSError, ValueError, Image.DecompressionBombError) as exc:
         raise ImageValidationError(f"PNG could not be fully decoded: {exc}") from exc

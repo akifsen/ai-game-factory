@@ -1,0 +1,14 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.14, pytest-9.1.1, pluggy-1.6.0
+rootdir: /tmp/v04-resume-build/source
+configfile: pyproject.toml
+collected 51 items
+
+tests/integration/test_godot_real.py .                                   [  1%]
+tests/integration/test_verify_godot_live_crash.py ...................... [ 45%]
+...                                                                      [ 50%]
+tests/integration/test_verify_godot_python_resolution.py ............... [ 80%]
+..........                                                               [100%]
+
+- generated xml file: /tmp/v04-resume-evidence/reports/pytest-launcher-correction.xml -
+======================== 51 passed in 93.84s (0:01:33) =========================

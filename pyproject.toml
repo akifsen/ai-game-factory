@@ -44,7 +44,14 @@ where = ["src"]
 version = {attr = "gamefactory.__version__"}
 
 [tool.setuptools.package-data]
-gamefactory = ["schemas/*.json", "resources/godot/*.gd"]
+gamefactory = [
+    "schemas/*.json",
+    "resources/godot/*.gd",
+    "resources/blender/*.py",
+    "resources/specs/*.yml",
+    "resources/specs/*.json",
+    "resources/scripts/*.py",
+]
 
 [tool.ruff]
 line-length = 100

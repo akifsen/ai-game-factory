@@ -1,0 +1,215 @@
+I001 [*] Import block is un-sorted or un-formatted
+ --> docs\reports\v0.3-rendered\descendant-candidate\freeze_candidate.py:2:1
+  |
+1 |   """Record final candidate source and compare all executed snapshot hashes."""
+2 | / import hashlib
+3 | | import json
+4 | | from pathlib import Path
+5 | | import subprocess
+6 | | import xml.etree.ElementTree as ET
+  | |__________________________________^
+7 |
+8 |   root = Path.cwd()
+  |
+help: Organize imports
+  |
+3 | import json
+  - from pathlib import Path
+4 | import subprocess
+5 | import xml.etree.ElementTree as ET
+6 + from pathlib import Path
+7 |
+  |
+
+I001 [*] Import block is un-sorted or un-formatted
+  --> docs\reports\v0.3-rendered\descendant-candidate\validate_candidate.py:2:1
+   |
+ 1 |   """Single-pass final-source validation; preserve all command results."""
+ 2 | / import hashlib
+ 3 | | import json
+ 4 | | from pathlib import Path
+ 5 | | import platform
+ 6 | | import shutil
+ 7 | | import subprocess
+ 8 | | import sys
+   | |__________^
+ 9 |
+10 |   repo, evidence, label = Path(sys.argv[1]), Path(sys.argv[2]), sys.argv[3]
+   |
+help: Organize imports
+  |
+3 | import json
+  - from pathlib import Path
+4 | import platform
+5 | import shutil
+6 | import subprocess
+7 | import sys
+8 + from pathlib import Path
+9 |
+  |
+
+I001 [*] Import block is un-sorted or un-formatted
+ --> docs\reports\v0.3-rendered\linux-regression-fix\probe_clock.py:2:1
+  |
+1 |   """Show the baseline absolute-deadline / internal-elapsed contract deterministically."""
+2 | / import importlib.util
+3 | | import json
+4 | | from pathlib import Path
+5 | | import sys
+6 | | from types import SimpleNamespace
+  | |_________________________________^
+7 |
+8 |   repo = next(p for p in Path(__file__).resolve().parents if (p / 'pyproject.toml').exists())
+  |
+help: Organize imports
+  |
+3 | import json
+4 + import sys
+5 | from pathlib import Path
+  - import sys
+6 | from types import SimpleNamespace
+  |
+
+I001 [*] Import block is un-sorted or un-formatted
+  --> docs\reports\v0.3-rendered\linux-regression-fix\validate_linux.py:2:1
+   |
+ 1 |   """Fixed five-run series and full validation; records every result without retries."""
+ 2 | / import hashlib
+ 3 | | import json
+ 4 | | import os
+ 5 | | from pathlib import Path
+ 6 | | import platform
+ 7 | | import shutil
+ 8 | | import subprocess
+ 9 | | import sys
+   | |__________^
+10 |
+11 |   label = sys.argv[1]
+   |
+help: Organize imports
+   |
+4  | import os
+   - from pathlib import Path
+5  | import platform
+6  | import shutil
+7  | import subprocess
+8  | import sys
+9  + from pathlib import Path
+10 |
+   |
+
+F401 [*] `os` imported but unused
+ --> docs\reports\v0.3-rendered\linux-regression-fix\validate_linux.py:4:8
+  |
+2 | import hashlib
+3 | import json
+4 | import os
+  |        ^^
+5 | from pathlib import Path
+6 | import platform
+  |
+help: Remove unused import: `os`
+  |
+3 | import json
+  - import os
+4 | from pathlib import Path
+  |
+
+I001 [*] Import block is un-sorted or un-formatted
+ --> docs\reports\v0.3-rendered\windows-process-timeout\diagnostics\compare.py:1:1
+  |
+1 | / import hashlib
+2 | | import json
+3 | | import os
+4 | | from pathlib import Path
+5 | | import shutil
+6 | | import subprocess
+7 | | import sys
+  | |__________^
+8 |
+9 |   repo = Path.cwd()
+  |
+help: Organize imports
+  |
+3 | import os
+  - from pathlib import Path
+4 | import shutil
+5 | import subprocess
+6 | import sys
+7 + from pathlib import Path
+8 |
+  |
+
+I001 [*] Import block is un-sorted or un-formatted
+ --> docs\reports\v0.3-rendered\windows-process-timeout\diagnostics\compare_root.py:1:1
+  |
+1 | / import json
+2 | | import os
+3 | | from pathlib import Path
+4 | | import subprocess
+5 | | import sys
+  | |__________^
+6 |
+7 |   repo = Path.cwd()
+  |
+help: Organize imports
+  |
+2 | import os
+  - from pathlib import Path
+3 | import subprocess
+4 | import sys
+5 + from pathlib import Path
+6 |
+  |
+
+I001 [*] Import block is un-sorted or un-formatted
+ --> docs\reports\v0.3-rendered\windows-process-timeout\diagnostics\compare_sequence.py:1:1
+  |
+1 | / import json
+2 | | import os
+3 | | from pathlib import Path
+4 | | import subprocess
+5 | | import sys
+  | |__________^
+6 |
+7 |   repo = Path.cwd()
+  |
+help: Organize imports
+  |
+2 | import os
+  - from pathlib import Path
+3 | import subprocess
+4 | import sys
+5 + from pathlib import Path
+6 |
+  |
+
+I001 [*] Import block is un-sorted or un-formatted
+  --> docs\reports\v0.3-rendered\windows-process-timeout\diagnostics\diag_plugin.py:2:1
+   |
+ 1 |   """Temporary, opt-in pytest diagnosis; no product instrumentation."""
+ 2 | / import importlib.metadata
+ 3 | | import inspect
+ 4 | | import json
+ 5 | | import os
+ 6 | | from pathlib import Path
+ 7 | | import sys
+ 8 | | import time
+ 9 | |
+10 | | import pytest
+   | |_____________^
+11 |
+12 |   EVENTS = []
+   |
+help: Organize imports
+  |
+5 | import os
+  - from pathlib import Path
+6 | import sys
+7 | import time
+8 + from pathlib import Path
+9 |
+  |
+
+Found 9 errors.
+[*] 9 fixable with the `--fix` option.
