@@ -6,6 +6,7 @@ import json
 import os
 import subprocess
 import sys
+import time
 from pathlib import Path
 
 import pytest
@@ -16,12 +17,19 @@ if str(REPO_ROOT) not in sys.path:
 
 from scripts.verify_godot_live_crash import (  # noqa: E402
     CheckFailure,
+    LinuxProcessRef,
+    RealProcProbe,
     _check_sentinel_alive,
     _cleanup_sentinel,
     _get_process_identity,
     _prepare_controlled_fixture,
     _spawn_sentinel,
     _win32_close_handle,
+    observe_owned_posix,
+    open_owned_linux_process,
+    poll_linux_pidfd,
+    signal_retained_process,
+    wait_for_owned_thread_group,
 )
 
 
@@ -251,10 +259,302 @@ def test_real_godot_live_crash(tmp_path: Path) -> None:
 
 @pytest.mark.parametrize(
     "reason",
-    ["os_error: denied", "malformed_stat", "starttime_mismatch: reused", "exe_mismatch: other"],
+    [
+        "os_error: denied",
+        "os_error: [Errno 2] No such file or directory: '/proc/3117/exe'",
+        "malformed_stat",
+        "starttime_mismatch: reused",
+        "exe_mismatch: other",
+    ],
 )
 def test_unknown_child_state_is_not_successful_cleanup(reason: str) -> None:
     from scripts.verify_godot_live_crash import _require_terminal_posix_reason
 
     with pytest.raises(CheckFailure, match="Cannot confirm"):
         _require_terminal_posix_reason(reason)
+
+
+class _Proc:
+    def __init__(
+        self,
+        tasks: dict[int, str] | None | BaseException,
+        exe: str | BaseException,
+        start: str | None | BaseException = "100",
+    ) -> None:
+        self._tasks = tasks
+        self._exe = exe
+        self._start = start
+
+    def task_states(self, pid: int) -> dict[int, str] | None:
+        if isinstance(self._tasks, BaseException):
+            raise type(self._tasks)(*self._tasks.args)
+        return self._tasks
+
+    def read_exe(self, pid: int) -> str:
+        if isinstance(self._exe, BaseException):
+            raise type(self._exe)(*self._exe.args)
+        return self._exe
+
+    def starttime(self, pid: int) -> str | None:
+        if isinstance(self._start, BaseException):
+            raise type(self._start)(*self._start.args)
+        return self._start
+
+
+def _enoent(pid: int) -> FileNotFoundError:
+    return FileNotFoundError(2, "No such file or directory", f"/proc/{pid}/exe")
+
+
+def _ref(pid: int = 40, starttime: str = "100", pidfd: int = -1) -> LinuxProcessRef:
+    return LinuxProcessRef(pid=pid, starttime=starttime, pidfd=pidfd, method="pidfd")
+
+
+def test_live_thread_group_is_not_terminal() -> None:
+    obs = observe_owned_posix(40, pidfd_readable=False, probe=_Proc({40: "S"}, "/usr/bin/python"))
+    assert obs.status == "alive"
+    assert obs.reason == "live_threads"
+
+
+def test_unreaped_zombie_is_terminal_only_with_pidfd() -> None:
+    probe = _Proc({40: "Z"}, _enoent(40))
+    confirmed = observe_owned_posix(40, pidfd_readable=True, probe=probe)
+    assert confirmed.status == "terminal"
+    assert confirmed.reason == "pidfd_readable_thread_group_exited"
+    assert confirmed.method == "pidfd"
+    unconfirmed = observe_owned_posix(40, pidfd_readable=False, probe=probe)
+    assert unconfirmed.status == "unknown"
+    assert unconfirmed.reason == "leader_exit_without_pidfd"
+
+
+def test_leader_zombie_with_live_worker_is_not_terminal() -> None:
+    probe = _Proc({40: "Z", 41: "S"}, _enoent(40))
+    obs = observe_owned_posix(40, pidfd_readable=True, probe=probe)
+    assert obs.status == "alive"
+    assert obs.leader_state == "Z"
+    assert obs.exe_result is not None and obs.exe_result.startswith("error:")
+    assert 41 in (obs.task_ids or [])
+
+
+def test_exe_enoent_between_reads_is_not_success_or_uncaught() -> None:
+    torn = observe_owned_posix(
+        40,
+        pidfd_readable=False,
+        probe=_Proc(_enoent(40), _enoent(40)),
+    )
+    assert torn.status == "unknown"
+    assert torn.reason.startswith("torn_proc_read:")
+
+    class _Flip:
+        def __init__(self) -> None:
+            self.calls = 0
+
+        def task_states(self, pid: int) -> dict[int, str] | None:
+            self.calls += 1
+            if self.calls == 1:
+                raise _enoent(pid)
+            return None
+
+        def read_exe(self, pid: int) -> str:
+            raise _enoent(pid)
+
+        def starttime(self, pid: int) -> str | None:
+            return None
+
+    flip = _Flip()
+    obs = wait_for_owned_thread_group(
+        _ref(),
+        time.monotonic() + 1.0,
+        probe=flip,
+        poll_pidfd=lambda _fd, _timeout: (True, None),
+    )
+    assert flip.calls >= 2
+    assert obs.status == "terminal"
+    assert obs.reason == "pidfd_readable_proc_gone"
+
+
+def test_permission_error_stays_unknown() -> None:
+    probe = _Proc(PermissionError(13, "Permission denied", "/proc/40/task"), "/bin/x")
+    obs = wait_for_owned_thread_group(
+        _ref(),
+        time.monotonic() + 1.0,
+        probe=probe,
+        poll_pidfd=lambda _fd, _timeout: (True, None),
+    )
+    assert obs.status == "unknown"
+    assert obs.reason.startswith("permission:")
+
+
+def test_starttime_mismatch_does_not_signal() -> None:
+    calls: list[tuple[int, int]] = []
+    probe = _Proc({40: "S"}, "/bin/other", start="999")
+    with pytest.raises(CheckFailure, match="refusing to signal"):
+        signal_retained_process(
+            _ref(pidfd=7),
+            9,
+            probe=probe,
+            sender=lambda fd, sig: calls.append((fd, sig)),
+        )
+    assert calls == []
+
+
+def test_matching_identity_signals_the_retained_fd_not_a_pid() -> None:
+    calls: list[tuple[int, int]] = []
+    probe = _Proc({40: "S"}, "/bin/same", start="100")
+    signal_retained_process(
+        _ref(pidfd=7),
+        9,
+        probe=probe,
+        sender=lambda fd, sig: calls.append((fd, sig)),
+    )
+    assert calls == [(7, 9)]
+
+
+def test_live_process_at_deadline_fails_with_evidence() -> None:
+    obs = wait_for_owned_thread_group(
+        _ref(),
+        time.monotonic() + 0.05,
+        probe=_Proc({40: "R"}, "/bin/sleep"),
+        poll_pidfd=lambda _fd, timeout: (False, None) if timeout >= 0 else (False, None),
+    )
+    assert obs.status == "unknown"
+    assert obs.reason.startswith("deadline:")
+    assert "alive" in obs.reason
+    assert obs.leader_state == "R"
+    assert obs.elapsed_seconds is not None and obs.elapsed_seconds >= 0.05
+
+
+def test_process_ref_closes_descriptor_when_observation_fails() -> None:
+    read_fd, write_fd = os.pipe()
+    os.close(write_fd)
+    ref = LinuxProcessRef(pid=1, starttime="1", pidfd=read_fd, method="pidfd")
+    with pytest.raises(RuntimeError, match="boom"):
+        with ref:
+            raise RuntimeError("boom")
+    assert ref.pidfd == -1
+    with pytest.raises(OSError):
+        os.read(read_fd, 1)
+
+
+def test_pidfd_reference_is_not_offered_outside_linux() -> None:
+    if sys.platform.startswith("linux"):
+        return
+    with pytest.raises(CheckFailure, match="Linux-only"):
+        open_owned_linux_process(os.getpid(), Path(sys.executable), "1")
+
+
+@pytest.mark.skipif(not sys.platform.startswith("linux"), reason="Linux pidfd thread group")
+def test_linux_unreaped_exit_is_observed_without_waitpid() -> None:
+    proc = subprocess.Popen(
+        [sys.executable, "-c", "import sys; sys.stdin.read(1)"],
+        stdin=subprocess.PIPE,
+    )
+    ref: LinuxProcessRef | None = None
+    try:
+        assert proc.stdin is not None
+        starttime = RealProcProbe().starttime(proc.pid)
+        assert starttime is not None
+        ref = open_owned_linux_process(proc.pid, Path(sys.executable), starttime)
+        alive = observe_owned_posix(proc.pid, pidfd_readable=False, probe=RealProcProbe())
+        assert alive.status == "alive"
+        proc.stdin.write(b"x")
+        proc.stdin.close()
+        obs = wait_for_owned_thread_group(ref, time.monotonic() + 2.0)
+        assert obs.status == "terminal"
+        assert obs.method == "pidfd"
+        assert proc.wait(timeout=2) == 0
+    finally:
+        if ref is not None:
+            ref.close()
+        if proc.poll() is None:
+            proc.kill()
+            proc.wait(timeout=2)
+
+
+@pytest.mark.skipif(not sys.platform.startswith("linux"), reason="Linux pidfd thread group")
+def test_linux_leader_exit_leaves_worker_alive_until_worker_exits(tmp_path: Path) -> None:
+    """Not a Godot render. Proves leader Z or exe ENOENT is not process termination."""
+    ready = tmp_path / "ready"
+    beat = tmp_path / "beat"
+    release = tmp_path / "release"
+    stop = tmp_path / "stop"
+    script = r"""
+import ctypes, os, platform, sys, threading, time
+ready, beat, release, stop = sys.argv[1:5]
+
+def worker():
+    while not os.path.exists(stop):
+        temporary = beat + ".tmp"
+        with open(temporary, "w", encoding="utf-8") as handle:
+            handle.write(str(time.monotonic()))
+        os.replace(temporary, beat)
+        time.sleep(0.05)
+
+threading.Thread(target=worker, daemon=False).start()
+time.sleep(0.2)
+with open(ready, "w", encoding="utf-8") as handle:
+    handle.write("ready")
+while not os.path.exists(release):
+    time.sleep(0.02)
+numbers = {"x86_64": 60, "aarch64": 93, "i386": 1, "i686": 1}
+number = numbers.get(platform.machine())
+if number is None:
+    raise SystemExit("unsupported machine")
+save = ctypes.pythonapi.PyEval_SaveThread
+save.restype = ctypes.c_void_p
+save()
+libc = ctypes.CDLL(None, use_errno=True)
+libc.syscall.restype = ctypes.c_long
+libc.syscall.argtypes = [ctypes.c_long, ctypes.c_int]
+libc.syscall(number, 0)
+"""
+    proc = subprocess.Popen(
+        [sys.executable, "-c", script, str(ready), str(beat), str(release), str(stop)]
+    )
+    ref: LinuxProcessRef | None = None
+    try:
+        deadline = time.monotonic() + 3
+        while not ready.is_file():
+            if time.monotonic() > deadline:
+                raise AssertionError(f"worker did not become ready: {proc.poll()}")
+            time.sleep(0.02)
+        starttime = RealProcProbe().starttime(proc.pid)
+        assert starttime is not None
+        ref = open_owned_linux_process(proc.pid, Path(sys.executable), starttime)
+        release.write_text("go\n", encoding="utf-8")
+        leader_deadline = time.monotonic() + 2
+        leader_state = ""
+        while time.monotonic() < leader_deadline:
+            text = Path(f"/proc/{proc.pid}/stat")
+            if text.is_file():
+                raw = text.read_text(encoding="utf-8")
+                paren = raw.rfind(")")
+                leader_state = raw[paren + 1 :].split()[0] if paren != -1 else ""
+            if leader_state == "Z":
+                break
+            time.sleep(0.02)
+        assert leader_state == "Z", leader_state
+        first = beat.read_text(encoding="utf-8")
+        time.sleep(0.2)
+        second = beat.read_text(encoding="utf-8")
+        assert second != first
+        states = RealProcProbe().task_states(proc.pid)
+        assert states is not None
+        assert any(tid != proc.pid and state not in {"Z", "X"} for tid, state in states.items())
+        readable, poll_err = poll_linux_pidfd(ref.pidfd, 0.05)
+        assert poll_err is None
+        obs = observe_owned_posix(proc.pid, pidfd_readable=readable, probe=RealProcProbe())
+        assert obs.status == "alive"
+        assert obs.leader_state == "Z"
+        stop.write_text("stop\n", encoding="utf-8")
+        done = wait_for_owned_thread_group(ref, time.monotonic() + 2.0)
+        assert done.status == "terminal"
+        assert done.method == "pidfd"
+        assert done.reason.startswith("pidfd_readable_")
+        proc.wait(timeout=2)
+    finally:
+        stop.write_text("stop\n", encoding="utf-8")
+        if ref is not None:
+            ref.close()
+        if proc.poll() is None:
+            proc.kill()
+            proc.wait(timeout=2)

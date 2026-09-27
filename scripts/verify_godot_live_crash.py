@@ -23,6 +23,7 @@ import ctypes
 import hashlib
 import json
 import os
+import select
 import signal
 import subprocess
 import sys
@@ -30,9 +31,11 @@ import threading
 import time
 import traceback
 import uuid
+from collections.abc import Callable
+from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, Protocol
 
 if sys.platform == "win32":
     from ctypes import wintypes
@@ -250,13 +253,7 @@ def _get_process_identity(pid: int, expected_exe: Path) -> tuple[dict[str, Any],
             raise CheckFailure(f"Failed to readlink /proc/{pid}/exe: {err}") from err
 
         exe_path = Path(raw_link).resolve()
-        expected_resolved = expected_exe.resolve()
-        expected_candidates = {
-            expected_resolved,
-            expected_resolved.with_name(
-                expected_resolved.stem.removesuffix("_console") + expected_resolved.suffix
-            ),
-        }
+        expected_candidates = _linux_exe_candidates(expected_exe)
         if exe_path not in expected_candidates:
             raise CheckFailure(
                 f"Process PID {pid} executable mismatch: found '{exe_path}', expected one of {expected_candidates}"
@@ -274,6 +271,23 @@ def _get_process_identity(pid: int, expected_exe: Path) -> tuple[dict[str, Any],
             "is_alive": True,
             "platform": "posix",
         }, None
+
+
+def _linux_exe_candidates(expected_exe: Path) -> set[Path]:
+    expected_resolved = expected_exe.resolve()
+    return {
+        expected_resolved,
+        expected_resolved.with_name(
+            expected_resolved.stem.removesuffix("_console") + expected_resolved.suffix
+        ),
+    }
+
+
+def _stat_fields(stat_text: str) -> list[str]:
+    paren_idx = stat_text.rfind(")")
+    if paren_idx == -1:
+        return []
+    return stat_text[paren_idx + 1 :].split()
 
 
 def _require_terminal_posix_reason(reason: str) -> None:
@@ -320,6 +334,381 @@ def _revalidate_posix_child(
         return True, "valid"
     except OSError as err:
         return False, f"os_error: {err}"
+
+
+class ProcProbe(Protocol):
+    """Injectable /proc view. Exe ENOENT is evidence, not a terminal decision."""
+
+    def task_states(self, pid: int) -> dict[int, str] | None: ...
+
+    def read_exe(self, pid: int) -> str: ...
+
+    def starttime(self, pid: int) -> str | None: ...
+
+
+class RealProcProbe:
+    def task_states(self, pid: int) -> dict[int, str] | None:
+        root = Path(f"/proc/{pid}/task")
+        if not root.is_dir():
+            return None
+        try:
+            names = [entry.name for entry in root.iterdir()]
+        except FileNotFoundError:
+            return None
+        states: dict[int, str] = {}
+        for name in names:
+            if not name.isdigit():
+                continue
+            try:
+                text = (root / name / "stat").read_text(encoding="utf-8")
+            except FileNotFoundError:
+                continue
+            fields = _stat_fields(text)
+            if fields:
+                states[int(name)] = fields[0]
+        return states
+
+    def read_exe(self, pid: int) -> str:
+        return os.readlink(f"/proc/{pid}/exe")
+
+    def starttime(self, pid: int) -> str | None:
+        path = Path(f"/proc/{pid}/stat")
+        if not path.is_file():
+            return None
+        fields = _stat_fields(path.read_text(encoding="utf-8"))
+        if len(fields) < 20:
+            raise CheckFailure(f"Malformed /proc/{pid}/stat while confirming identity")
+        return fields[19]
+
+
+@dataclass
+class PosixLifeObservation:
+    status: str
+    method: str
+    reason: str
+    leader_state: str | None = None
+    task_ids: list[int] | None = None
+    exe_result: str | None = None
+    elapsed_seconds: float | None = None
+    pidfd_readable: bool | None = None
+
+    def as_report(self) -> dict[str, Any]:
+        return {
+            "status": self.status,
+            "method": self.method,
+            "reason": self.reason,
+            "leader_state": self.leader_state,
+            "task_ids": self.task_ids,
+            "exe_result": self.exe_result,
+            "elapsed_seconds": self.elapsed_seconds,
+            "pidfd_readable": self.pidfd_readable,
+        }
+
+
+class LinuxProcessRef:
+    """Process-scoped pidfd. flags=0 tracks the thread group, not one thread."""
+
+    def __init__(self, pid: int, starttime: str, pidfd: int, method: str) -> None:
+        self.pid = pid
+        self.starttime = starttime
+        self.pidfd = pidfd
+        self.method = method
+
+    def close(self) -> None:
+        if self.pidfd >= 0:
+            os.close(self.pidfd)
+            self.pidfd = -1
+
+    def __enter__(self) -> LinuxProcessRef:
+        return self
+
+    def __exit__(self, *_args: object) -> None:
+        self.close()
+
+
+def _pidfd_described_pid(pidfd: int) -> int:
+    path = Path(f"/proc/self/fdinfo/{pidfd}")
+    try:
+        text = path.read_text(encoding="utf-8")
+    except OSError as err:
+        raise CheckFailure(f"pidfd fdinfo unreadable: {err}") from err
+    for line in text.splitlines():
+        if line.startswith("Pid:"):
+            return int(line.split(":", 1)[1].strip())
+    raise CheckFailure("pidfd fdinfo has no Pid field")
+
+
+def open_owned_linux_process(
+    pid: int, expected_exe: Path, expected_starttime: str
+) -> LinuxProcessRef:
+    """Open a process-level pidfd while the verified process is still alive."""
+    if not sys.platform.startswith("linux"):
+        raise CheckFailure("pidfd process references are Linux-only")
+    opener = getattr(os, "pidfd_open", None)
+    if opener is None:
+        raise CheckFailure(
+            "Linux pidfd_open is unavailable in this Python; "
+            "refusing to treat /proc uncertainty as child termination"
+        )
+    probe = RealProcProbe()
+    current = probe.starttime(pid)
+    if current != expected_starttime:
+        raise CheckFailure(
+            f"PID {pid} starttime changed before pidfd_open: {current} != {expected_starttime}"
+        )
+    try:
+        raw_exe = probe.read_exe(pid)
+    except OSError as err:
+        raise CheckFailure(
+            f"Refusing pidfd_open for PID {pid} without a stable executable: {err}"
+        ) from err
+    candidates = _linux_exe_candidates(expected_exe)
+    if Path(raw_exe).resolve() not in candidates or raw_exe.endswith(" (deleted)"):
+        raise CheckFailure(f"PID {pid} executable mismatch before pidfd_open: {raw_exe}")
+    try:
+        opened = opener(pid, 0)
+    except PermissionError as err:
+        raise CheckFailure(
+            f"Linux pidfd_open was denied for PID {pid}: {err}; termination stays unconfirmed"
+        ) from err
+    except OSError as err:
+        raise CheckFailure(
+            f"Linux pidfd_open failed for PID {pid}: {err}; termination stays unconfirmed"
+        ) from err
+    if not isinstance(opened, int):
+        raise CheckFailure("pidfd_open did not return a file descriptor")
+    pidfd = opened
+    try:
+        described = _pidfd_described_pid(pidfd)
+        if described != pid:
+            raise CheckFailure(f"pidfd describes PID {described}, not the verified PID {pid}")
+        again = probe.starttime(pid)
+        if again != expected_starttime:
+            raise CheckFailure(
+                f"PID {pid} identity changed while opening pidfd: {again} != {expected_starttime}"
+            )
+    except Exception:
+        os.close(pidfd)
+        raise
+    return LinuxProcessRef(pid=pid, starttime=expected_starttime, pidfd=pidfd, method="pidfd")
+
+
+def poll_linux_pidfd(pidfd: int, timeout_seconds: float) -> tuple[bool, str | None]:
+    if pidfd < 0:
+        return False, "invalid pidfd"
+    if timeout_seconds < 0:
+        timeout_seconds = 0
+    poll_type = getattr(select, "poll", None)
+    pollin = getattr(select, "POLLIN", None)
+    if poll_type is None or pollin is None:
+        return False, "select.poll is unavailable"
+    poller = poll_type()
+    poller.register(pidfd, pollin)
+    try:
+        events = poller.poll(int(timeout_seconds * 1000))
+    except OSError as err:
+        return False, f"{type(err).__name__}: {err}"
+    return bool(events), None
+
+
+def observe_owned_posix(
+    pid: int, *, pidfd_readable: bool | None, probe: ProcProbe
+) -> PosixLifeObservation:
+    """Classify thread-group life. Leader Z or exe ENOENT alone is not terminal."""
+    try:
+        tasks = probe.task_states(pid)
+    except PermissionError as err:
+        return PosixLifeObservation(
+            "unknown", "pidfd", f"permission: {err}", pidfd_readable=pidfd_readable
+        )
+    except OSError as err:
+        return PosixLifeObservation(
+            "unknown", "pidfd", f"torn_proc_read: {err}", pidfd_readable=pidfd_readable
+        )
+
+    exe_result: str | None
+    try:
+        exe_result = probe.read_exe(pid)
+    except PermissionError as err:
+        return PosixLifeObservation(
+            "unknown", "pidfd", f"permission: {err}", pidfd_readable=pidfd_readable
+        )
+    except OSError as err:
+        exe_result = f"error: {err}"
+
+    if tasks is None:
+        exe_gone = exe_result is not None and exe_result.startswith("error:")
+        if pidfd_readable is True and exe_gone:
+            return PosixLifeObservation(
+                "terminal",
+                "pidfd",
+                "pidfd_readable_proc_gone",
+                exe_result=exe_result,
+                pidfd_readable=True,
+            )
+        return PosixLifeObservation(
+            "unknown",
+            "pidfd",
+            "proc_missing_without_pidfd",
+            exe_result=exe_result,
+            pidfd_readable=pidfd_readable,
+        )
+    if not tasks:
+        return PosixLifeObservation(
+            "unknown",
+            "pidfd",
+            "empty_task_list",
+            exe_result=exe_result,
+            pidfd_readable=pidfd_readable,
+        )
+
+    leader_state = tasks.get(pid)
+    live = [tid for tid, state in tasks.items() if state not in {"Z", "X"}]
+    if live:
+        return PosixLifeObservation(
+            "alive",
+            "pidfd",
+            "live_threads",
+            leader_state=leader_state,
+            task_ids=sorted(tasks),
+            exe_result=exe_result,
+            pidfd_readable=pidfd_readable,
+        )
+    if pidfd_readable is True:
+        return PosixLifeObservation(
+            "terminal",
+            "pidfd",
+            "pidfd_readable_thread_group_exited",
+            leader_state=leader_state,
+            task_ids=sorted(tasks),
+            exe_result=exe_result,
+            pidfd_readable=True,
+        )
+    return PosixLifeObservation(
+        "unknown",
+        "pidfd",
+        "leader_exit_without_pidfd",
+        leader_state=leader_state,
+        task_ids=sorted(tasks),
+        exe_result=exe_result,
+        pidfd_readable=pidfd_readable,
+    )
+
+
+def wait_for_owned_thread_group(
+    ref: LinuxProcessRef,
+    deadline: float,
+    probe: ProcProbe | None = None,
+    poll_pidfd: Callable[[int, float], tuple[bool, str | None]] | None = None,
+) -> PosixLifeObservation:
+    """Poll the retained pidfd until the monotonic deadline. Uncertainty is not success."""
+    view = probe if probe is not None else RealProcProbe()
+    poll = poll_pidfd if poll_pidfd is not None else poll_linux_pidfd
+    started = time.monotonic()
+    last: PosixLifeObservation | None = None
+    while True:
+        now = time.monotonic()
+        remaining = deadline - now
+        if remaining <= 0:
+            if last is None:
+                last = observe_owned_posix(ref.pid, pidfd_readable=False, probe=view)
+            if last.status == "terminal":
+                last.elapsed_seconds = time.monotonic() - started
+                return last
+            return PosixLifeObservation(
+                "unknown",
+                "pidfd",
+                f"deadline: {last.status}: {last.reason}",
+                leader_state=last.leader_state,
+                task_ids=last.task_ids,
+                exe_result=last.exe_result,
+                elapsed_seconds=time.monotonic() - started,
+                pidfd_readable=last.pidfd_readable,
+            )
+        readable, err = poll(ref.pidfd, min(remaining, 0.05))
+        if err:
+            return PosixLifeObservation(
+                "unknown",
+                "pidfd",
+                f"pidfd_poll: {err}",
+                elapsed_seconds=time.monotonic() - started,
+                pidfd_readable=None,
+            )
+        last = observe_owned_posix(ref.pid, pidfd_readable=readable, probe=view)
+        last.elapsed_seconds = time.monotonic() - started
+        if last.status == "terminal":
+            return last
+        if last.reason.startswith("permission:"):
+            return last
+        if readable:
+            pause = min(0.05, max(0.0, deadline - time.monotonic()))
+            if pause > 0:
+                time.sleep(pause)
+
+
+def _linux_fate_record(
+    obs: PosixLifeObservation,
+    *,
+    initial_pid: int,
+    initial_starttime: str,
+    cleaned_up: bool,
+    final_status: str,
+    post_interrupt_status: str | None,
+    runtime_launches_count: int | None,
+    sentinel_survived: bool | None,
+    error: str | None = None,
+) -> dict[str, Any]:
+    payload = obs.as_report()
+    payload.update(
+        {
+            "platform": "linux",
+            "status": final_status,
+            "initial_pid": initial_pid,
+            "initial_starttime": initial_starttime,
+            "post_interrupt_status": post_interrupt_status,
+            "wait_result": obs.status,
+            "wait_reason": obs.reason,
+            "runtime_launches_count": runtime_launches_count,
+            "sentinel_survived_full_recovery": sentinel_survived,
+            "cleaned_up": cleaned_up,
+        }
+    )
+    if error is not None:
+        payload["error"] = error
+    return payload
+
+
+def _default_pidfd_sender(pidfd: int, sig: int) -> None:
+    send = getattr(signal, "pidfd_send_signal", None)
+    if send is None:
+        raise CheckFailure("pidfd_send_signal is unavailable; not falling back to kill(pid)")
+    send(pidfd, sig)
+
+
+def signal_retained_process(
+    ref: LinuxProcessRef,
+    sig: int,
+    probe: ProcProbe | None = None,
+    sender: Callable[[int, int], None] | None = None,
+) -> None:
+    """Signal only through the retained pidfd after the starttime still matches."""
+    if ref.pidfd < 0:
+        raise CheckFailure("pidfd is closed; not signaling")
+    view = probe if probe is not None else RealProcProbe()
+    try:
+        current = view.starttime(ref.pid)
+    except PermissionError as err:
+        raise CheckFailure(f"cannot confirm identity before signal: {err}") from err
+    if current is None:
+        raise CheckFailure("proc entry missing before signal; not signaling by PID")
+    if current != ref.starttime:
+        raise CheckFailure(
+            f"starttime mismatch for PID {ref.pid}; refusing to signal ({current} != {ref.starttime})"
+        )
+    try:
+        (sender if sender is not None else _default_pidfd_sender)(ref.pidfd, sig)
+    except OSError as err:
+        raise CheckFailure(f"pidfd_send_signal failed: {err}") from err
 
 
 # ---------------------------------------------------------------------------
@@ -919,20 +1308,24 @@ def _factory_helper(args: argparse.Namespace) -> int:
     from gamefactory.core.policies.policy_engine import PolicyEngine, PolicyRule
     from gamefactory.workflows.engine import WorkflowEngine
 
+    register_handlers: Callable[..., Any]
+    create_workflow: Callable[..., Any]
     if args.rendered_capture:
         from gamefactory.workflows.godot_capture import (
-            create_godot_capture_workflow as create_workflow,
+            create_godot_capture_workflow,
+            register_godot_capture_handlers,
         )
-        from gamefactory.workflows.godot_capture import (
-            register_godot_capture_handlers as register_handlers,
-        )
+
+        register_handlers = register_godot_capture_handlers
+        create_workflow = create_godot_capture_workflow
     else:
         from gamefactory.workflows.godot_verification import (
-            create_godot_verification_workflow as create_workflow,
+            create_godot_verification_workflow,
+            register_godot_handlers,
         )
-        from gamefactory.workflows.godot_verification import (
-            register_godot_handlers as register_handlers,
-        )
+
+        register_handlers = register_godot_handlers
+        create_workflow = create_godot_verification_workflow
 
     db = Database(project / ".gamefactory" / "state" / "factory.db")
     migrations = MigrationRunner(db)
@@ -1088,7 +1481,9 @@ def _main(args: argparse.Namespace) -> int:
     godot_handle: Any = None
     godot_pid: int | None = None
     godot_identity: dict[str, Any] = {}
+    linux_ref: LinuxProcessRef | None = None
     release_file: Path | None = None
+    last_fate: dict[str, Any] | None = None
 
     # Watchdog state for independent cleanup
     watchdog_state: dict[str, Any] = {
@@ -1098,6 +1493,7 @@ def _main(args: argparse.Namespace) -> int:
         "godot_handle": None,
         "godot_pid": None,
         "godot_identity": None,
+        "linux_ref": None,
         "release_file": None,
     }
 
@@ -1116,6 +1512,15 @@ def _main(args: argparse.Namespace) -> int:
                 pass
             _win32_close_handle(h)
             watchdog_state["godot_handle"] = None
+        elif sys.platform.startswith("linux"):
+            ref = watchdog_state.get("linux_ref")
+            if isinstance(ref, LinuxProcessRef):
+                try:
+                    signal_retained_process(ref, signal.SIGKILL)
+                except CheckFailure:
+                    pass
+                ref.close()
+                watchdog_state["linux_ref"] = None
         elif sys.platform != "win32":
             g_pid = watchdog_state.get("godot_pid")
             g_ident = watchdog_state.get("godot_identity")
@@ -1296,11 +1701,16 @@ def _main(args: argparse.Namespace) -> int:
         godot_identity, godot_handle = _get_process_identity(godot_pid, godot)
         watchdog_state["godot_handle"] = godot_handle
         watchdog_state["godot_identity"] = godot_identity
+        if sys.platform.startswith("linux"):
+            linux_ref = open_owned_linux_process(godot_pid, godot, str(godot_identity["starttime"]))
+            watchdog_state["linux_ref"] = linux_ref
 
         report["checks"]["godot_identity"] = {
             **godot_identity,
             "handshake": handshake_data,
             "verified_live_before_factory_kill": True,
+            "observation_method": "pidfd" if linux_ref is not None else godot_identity["platform"],
+            "pidfd_acquired_before_factory_kill": linux_ref is not None,
         }
 
         # 7. Confirm NO terminal receipt exists before killing Factory
@@ -1397,33 +1807,37 @@ def _main(args: argparse.Namespace) -> int:
                     "status": "alive",
                     "observed_terminated": False,
                 }
-        else:
-            stat_file = Path(f"/proc/{godot_pid}/stat")
-            if not stat_file.is_file():
+        elif sys.platform.startswith("linux") and linux_ref is not None:
+            readable, poll_err = poll_linux_pidfd(linux_ref.pidfd, 0)
+            if poll_err:
                 child_fate_post_kill = {
-                    "platform": "posix",
-                    "status": "terminated",
-                    "observed_terminated": True,
+                    "platform": "linux",
+                    "status": "unknown",
+                    "observed_terminated": False,
+                    "method": "pidfd",
+                    "reason": f"pidfd_poll: {poll_err}",
                 }
             else:
-                stat_text = stat_file.read_text(encoding="utf-8")
-                paren_idx = stat_text.rfind(")")
-                fields = stat_text[paren_idx + 1 :].split() if paren_idx != -1 else []
-                proc_state = fields[0] if fields else "unknown"
-                if proc_state == "Z":
-                    child_fate_post_kill = {
-                        "platform": "posix",
-                        "status": "zombie",
-                        "proc_state": proc_state,
-                        "observed_terminated": True,
-                    }
-                else:
-                    child_fate_post_kill = {
-                        "platform": "posix",
-                        "status": "alive",
-                        "proc_state": proc_state,
-                        "observed_terminated": False,
-                    }
+                post_obs = observe_owned_posix(
+                    godot_pid, pidfd_readable=readable, probe=RealProcProbe()
+                )
+                child_fate_post_kill = {
+                    "platform": "linux",
+                    "status": "terminated" if post_obs.status == "terminal" else post_obs.status,
+                    "observed_terminated": post_obs.status == "terminal",
+                    "method": "pidfd",
+                    "reason": post_obs.reason,
+                    "leader_state": post_obs.leader_state,
+                    "exe_result": post_obs.exe_result,
+                    "task_ids": post_obs.task_ids,
+                }
+        else:
+            child_fate_post_kill = {
+                "platform": sys.platform,
+                "status": "unknown",
+                "observed_terminated": False,
+                "reason": "no retained Linux pidfd",
+            }
 
         report["checks"]["child_fate_post_kill"] = child_fate_post_kill
 
@@ -1710,6 +2124,7 @@ def _main(args: argparse.Namespace) -> int:
         child_final_status = "terminated"
 
         if sys.platform == "win32" and godot_handle:
+            win_wait_started = time.monotonic()
             wait_res = kernel32.WaitForSingleObject(godot_handle, 5000)
             if wait_res != WAIT_OBJECT_0:
                 if not kernel32.TerminateProcess(godot_handle, 1):
@@ -1725,47 +2140,89 @@ def _main(args: argparse.Namespace) -> int:
             report["checks"]["child_fate_final"] = {
                 "platform": "win32",
                 "status": child_final_status,
+                "method": "win32_process_handle",
+                "initial_pid": godot_pid,
+                "initial_creation_filetime": godot_identity.get("creation_filetime"),
                 "exit_code": int(exit_code_var.value),
+                "elapsed_seconds": round(time.monotonic() - win_wait_started, 3),
+                "runtime_launches_count": report["checks"]
+                .get("launch_evidence", {})
+                .get("runtime_launches_count"),
+                "sentinel_survived_full_recovery": True,
                 "cleaned_up": True,
             }
-        elif sys.platform != "win32" and godot_pid:
-            deadline_posix = time.monotonic() + 5.0
-            still_alive = True
-            while time.monotonic() < deadline_posix:
-                is_valid, reason = _revalidate_posix_child(
-                    godot_pid, godot, godot_identity.get("starttime", "")
-                )
-                if not is_valid:
-                    _require_terminal_posix_reason(reason)
-                    still_alive = False
-                    break
-                time.sleep(0.05)
-            if still_alive:
-                is_valid, reason = _revalidate_posix_child(
-                    godot_pid, godot, godot_identity.get("starttime", "")
-                )
-                if not is_valid:
-                    raise CheckFailure(f"Child identity mismatch before SIGKILL on POSIX: {reason}")
+        elif sys.platform.startswith("linux") and linux_ref is not None and godot_pid is not None:
+            raw_launches = report["checks"].get("launch_evidence", {}).get("runtime_launches_count")
+            launches = raw_launches if isinstance(raw_launches, int) else None
+            raw_sentinel = report["checks"].get("sentinel", {}).get("survived_full_recovery")
+            sentinel_ok = raw_sentinel if isinstance(raw_sentinel, bool) else None
+            raw_post = report["checks"].get("child_fate_post_kill", {}).get("status")
+            post_status = raw_post if isinstance(raw_post, str) else None
+            starttime = str(godot_identity.get("starttime", ""))
+            obs = wait_for_owned_thread_group(linux_ref, time.monotonic() + 5.0)
+            if obs.status == "alive":
                 try:
-                    os.kill(godot_pid, signal.SIGKILL)
-                    child_final_status = "terminated_by_sigkill"
-                except ProcessLookupError:
-                    pass
-                for _ in range(40):
-                    valid, reason = _revalidate_posix_child(
-                        godot_pid, godot, godot_identity.get("starttime", "")
+                    signal_retained_process(linux_ref, signal.SIGKILL)
+                except CheckFailure as err:
+                    last_fate = _linux_fate_record(
+                        obs,
+                        initial_pid=godot_pid,
+                        initial_starttime=starttime,
+                        cleaned_up=False,
+                        final_status="unknown",
+                        post_interrupt_status=post_status,
+                        runtime_launches_count=launches,
+                        sentinel_survived=sentinel_ok,
+                        error=str(err),
                     )
-                    if not valid:
-                        _require_terminal_posix_reason(reason)
-                        break
-                    time.sleep(0.05)
-                else:
-                    raise CheckFailure("Owned POSIX child exit was not observed after SIGKILL")
-            report["checks"]["child_fate_final"] = {
-                "platform": "posix",
-                "status": child_final_status,
-                "cleaned_up": True,
+                    report["checks"]["child_fate_final"] = last_fate
+                    raise CheckFailure(
+                        f"Owned Linux child was still alive and could not be signaled: {err}"
+                    ) from err
+                child_final_status = "terminated_by_sigkill"
+                obs = wait_for_owned_thread_group(linux_ref, time.monotonic() + 2.0)
+            if obs.status != "terminal":
+                last_fate = _linux_fate_record(
+                    obs,
+                    initial_pid=godot_pid,
+                    initial_starttime=starttime,
+                    cleaned_up=False,
+                    final_status="unknown",
+                    post_interrupt_status=post_status,
+                    runtime_launches_count=launches,
+                    sentinel_survived=sentinel_ok,
+                    error=f"{obs.status}: {obs.reason}",
+                )
+                report["checks"]["child_fate_final"] = last_fate
+                raise CheckFailure(
+                    f"Owned Linux child termination was not confirmed: {obs.status}: {obs.reason}"
+                )
+            last_fate = _linux_fate_record(
+                obs,
+                initial_pid=godot_pid,
+                initial_starttime=starttime,
+                cleaned_up=True,
+                final_status=child_final_status,
+                post_interrupt_status=post_status,
+                runtime_launches_count=launches,
+                sentinel_survived=sentinel_ok,
+            )
+            report["checks"]["child_fate_final"] = last_fate
+            linux_ref.close()
+            linux_ref = None
+            watchdog_state["linux_ref"] = None
+        elif sys.platform != "win32" and godot_pid:
+            last_fate = {
+                "platform": sys.platform,
+                "status": "unknown",
+                "cleaned_up": False,
+                "method": None,
+                "reason": (
+                    "no Linux pidfd was acquired; refusing to treat /proc uncertainty as termination"
+                ),
             }
+            report["checks"]["child_fate_final"] = last_fate
+            raise CheckFailure(str(last_fate["reason"]))
 
         report["status"] = "PASSED"
         report["completed_at"] = _now()
@@ -1782,6 +2239,20 @@ def _main(args: argparse.Namespace) -> int:
         report["error"] = f"{type(exc).__name__}: {exc}"
         report["traceback"] = traceback.format_exc()
         report["completed_at"] = _now()
+        if "child_fate_final" not in report["checks"]:
+            if last_fate is not None:
+                recorded = dict(last_fate)
+                recorded["cleaned_up"] = False
+                recorded["error"] = report["error"]
+                if recorded.get("status") in {"terminated", "terminated_by_sigkill"}:
+                    recorded["status"] = "unknown"
+            else:
+                recorded = {
+                    "status": "unknown",
+                    "cleaned_up": False,
+                    "reason": report["error"],
+                }
+            report["checks"]["child_fate_final"] = recorded
     finally:
         watchdog_state["completed"] = True
         _emergency_cleanup()
