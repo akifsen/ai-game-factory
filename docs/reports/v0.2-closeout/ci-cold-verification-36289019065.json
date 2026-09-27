@@ -1,0 +1,72 @@
+{
+  "source_sha": "93ded412242b2bebf0d90ab90225b5826b852489",
+  "run_id": 36289019065,
+  "manifest_sha256": "9a994ab474412ab3afccf10af74086a9030d1dde8e6fa7c78773ab60b41afdff",
+  "scope": "New CI files byte integrity plus existing selected Windows graph semantics; no Linux live-child success claimed. Copied stdlib verifier runs outside checkout under -I; no original Temp, Godot, package, or network reads.",
+  "commands": [
+    {
+      "label": "cold-positive",
+      "argv": [
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.venv\\Scripts\\python.exe",
+        "-I",
+        "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gf-final-ci-cold-vog1rami\\bundle\\verify_closeout_evidence.py",
+        "verify",
+        "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gf-final-ci-cold-vog1rami\\bundle"
+      ],
+      "cwd": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gf-final-ci-cold-vog1rami",
+      "started_at": "2026-09-27T02:45:30.694523+00:00",
+      "finished_at": "2026-09-27T02:45:31.634690+00:00",
+      "exit_code": 0,
+      "stdout": "PASS: evidence bundle is complete, hash-valid, and internally consistent\n",
+      "stderr": ""
+    },
+    {
+      "label": "missing-new-ci-acceptance-rejected",
+      "argv": [
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.venv\\Scripts\\python.exe",
+        "-I",
+        "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gf-final-ci-cold-vog1rami\\bundle\\verify_closeout_evidence.py",
+        "verify",
+        "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gf-final-ci-cold-vog1rami\\bundle"
+      ],
+      "cwd": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gf-final-ci-cold-vog1rami",
+      "started_at": "2026-09-27T02:45:31.637703+00:00",
+      "finished_at": "2026-09-27T02:45:31.892764+00:00",
+      "exit_code": 1,
+      "stdout": "",
+      "stderr": "FAIL: missing or linked required file: remote-ci/36289019065/artifacts/godot-real-evidence/reports/acceptance.json\n"
+    },
+    {
+      "label": "new-ci-log-tamper-rejected",
+      "argv": [
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.venv\\Scripts\\python.exe",
+        "-I",
+        "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gf-final-ci-cold-vog1rami\\bundle\\verify_closeout_evidence.py",
+        "verify",
+        "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gf-final-ci-cold-vog1rami\\bundle"
+      ],
+      "cwd": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gf-final-ci-cold-vog1rami",
+      "started_at": "2026-09-27T02:45:31.896272+00:00",
+      "finished_at": "2026-09-27T02:45:32.272575+00:00",
+      "exit_code": 1,
+      "stdout": "",
+      "stderr": "FAIL: size/hash mismatch: remote-ci/36289019065/job-108535325678.txt\n"
+    },
+    {
+      "label": "restored-positive",
+      "argv": [
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.venv\\Scripts\\python.exe",
+        "-I",
+        "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gf-final-ci-cold-vog1rami\\bundle\\verify_closeout_evidence.py",
+        "verify",
+        "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gf-final-ci-cold-vog1rami\\bundle"
+      ],
+      "cwd": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gf-final-ci-cold-vog1rami",
+      "started_at": "2026-09-27T02:45:32.274588+00:00",
+      "finished_at": "2026-09-27T02:45:32.560055+00:00",
+      "exit_code": 0,
+      "stdout": "PASS: evidence bundle is complete, hash-valid, and internally consistent\n",
+      "stderr": ""
+    }
+  ]
+}

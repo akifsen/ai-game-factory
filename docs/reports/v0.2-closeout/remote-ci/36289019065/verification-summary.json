@@ -1,0 +1,182 @@
+{
+  "retrieved_at": "2026-09-27T02:43:17.181282+00:00",
+  "run_id": 36289019065,
+  "source_sha": "93ded412242b2bebf0d90ab90225b5826b852489",
+  "initial_dirty_state": "clean",
+  "remote_main_sha": "93ded412242b2bebf0d90ab90225b5826b852489",
+  "ci_source_status": "clean",
+  "relevant_blob_matches": [
+    {
+      "path": ".github/workflows/ci.yml",
+      "sha256": "40ba2394cb0ab123110bdd5424518ca3b5438ddb034586bd6a7051c47eb376ab",
+      "head_git_blob_matches_ci": true
+    },
+    {
+      "path": "scripts/verify_closeout_evidence.py",
+      "sha256": "f9a72907495c65981fcf1689c26787d45e4eb33b582a4ec89fe4e4d70b40212d",
+      "head_git_blob_matches_ci": true
+    },
+    {
+      "path": "scripts/verify_godot_live_crash.py",
+      "sha256": "913f39d6bd021f93f3f92edba4db41f51cb9a5f99457017b855913669c3aa956",
+      "head_git_blob_matches_ci": true
+    },
+    {
+      "path": "scripts/verify_godot_recovery.py",
+      "sha256": "e6500c08c4bd145500dcac5f6a7e8e19d9a423b7222e92b991f3c76fd30f5193",
+      "head_git_blob_matches_ci": true
+    },
+    {
+      "path": "tests/integration/test_process_runner.py",
+      "sha256": "671bda5c75b5f8268a851784b6845fa1014c81c864a4f5008fab6ab6d8cf990d",
+      "head_git_blob_matches_ci": true
+    },
+    {
+      "path": "tests/integration/test_verify_godot_live_crash.py",
+      "sha256": "1d7e41b7c5faea88975176848a4fb2ba2e81f7c1f88566ae0c7ad935d1048e00",
+      "head_git_blob_matches_ci": true
+    },
+    {
+      "path": "tests/unit/test_closeout_evidence.py",
+      "sha256": "0c4e9b70320457f4b32b286dd2ff16fbdb2127a2a088de3015567d06710f339c",
+      "head_git_blob_matches_ci": true
+    },
+    {
+      "path": "tests/unit/test_godot_staging.py",
+      "sha256": "fe952025bfb5b5206b4a7c7a30cec0b7b8debc084546f42f9aeda237d729b2fc",
+      "head_git_blob_matches_ci": true
+    }
+  ],
+  "jobs": [
+    {
+      "job_id": 108535325678,
+      "name": "godot-real",
+      "conclusion": "failure",
+      "source_sha": "93ded412242b2bebf0d90ab90225b5826b852489",
+      "log": "job-108535325678.txt",
+      "evidence_lines": [
+        "2026-09-27T02:38:43.1894179Z Successfully set up CPython (3.12.14)"
+      ]
+    },
+    {
+      "job_id": 108535325786,
+      "name": "test (windows-latest, 3.12)",
+      "conclusion": "success",
+      "source_sha": "93ded412242b2bebf0d90ab90225b5826b852489",
+      "log": "job-108535325786.txt",
+      "evidence_lines": [
+        "2026-09-27T02:36:59.8523301Z Successfully set up CPython (3.12.10)",
+        "2026-09-27T02:38:36.0486833Z tests/integration/test_process_runner.py::TestProcessRunner::test_cleanup_error_message_redacts_request_secret PASSED [ 34%]",
+        "2026-09-27T02:39:03.4706412Z tests/unit/test_godot_staging.py::test_manifest_rejects_linked_source_directory PASSED [ 79%]",
+        "2026-09-27T02:39:03.7133471Z tests/unit/test_godot_staging.py::test_stager_rejects_root_directory_link PASSED [ 79%]",
+        "2026-09-27T02:39:03.9525928Z tests/unit/test_godot_staging.py::test_attempt_parent_link_is_rejected_before_writing_outside_scratch PASSED [ 80%]",
+        "2026-09-27T02:39:04.0828801Z SKIPPED [1] tests\\integration\\test_godot_real.py:18: Set GAMEFACTORY_TEST_GODOT to run real-engine acceptance",
+        "2026-09-27T02:39:04.0829808Z SKIPPED [1] tests\\integration\\test_process_runner.py:290: POSIX process-group cleanup",
+        "2026-09-27T02:39:04.0830919Z SKIPPED [1] tests\\integration\\test_verify_godot_live_crash.py:158: Opt-in real Godot test requires GAMEFACTORY_TEST_REAL_GODOT or GAMEFACTORY_TEST_GODOT env var",
+        "2026-09-27T02:39:04.0831946Z ================== 263 passed, 3 skipped in 80.41s (0:01:20) =================="
+      ]
+    },
+    {
+      "job_id": 108535325836,
+      "name": "test (ubuntu-latest, 3.11)",
+      "conclusion": "success",
+      "source_sha": "93ded412242b2bebf0d90ab90225b5826b852489",
+      "log": "job-108535325836.txt",
+      "evidence_lines": [
+        "2026-09-27T02:36:53.7911638Z Successfully set up CPython (3.11.16)",
+        "2026-09-27T02:37:22.1217957Z tests/integration/test_process_runner.py::TestProcessRunner::test_cleanup_error_message_redacts_request_secret PASSED [ 34%]",
+        "2026-09-27T02:37:25.8850877Z tests/unit/test_godot_staging.py::test_manifest_rejects_linked_source_directory PASSED [ 79%]",
+        "2026-09-27T02:37:25.8869954Z tests/unit/test_godot_staging.py::test_stager_rejects_root_directory_link PASSED [ 79%]",
+        "2026-09-27T02:37:25.8897951Z tests/unit/test_godot_staging.py::test_attempt_parent_link_is_rejected_before_writing_outside_scratch PASSED [ 80%]",
+        "2026-09-27T02:37:25.9873689Z SKIPPED [1] tests/integration/test_godot_real.py:18: Set GAMEFACTORY_TEST_GODOT to run real-engine acceptance",
+        "2026-09-27T02:37:25.9875114Z SKIPPED [1] tests/integration/test_process_runner.py:368: Windows Job Objects are only available on Windows",
+        "2026-09-27T02:37:25.9876374Z SKIPPED [1] tests/integration/test_process_runner.py:494: Windows Job Objects only",
+        "2026-09-27T02:37:25.9878026Z SKIPPED [1] tests/integration/test_verify_godot_live_crash.py:158: Opt-in real Godot test requires GAMEFACTORY_TEST_REAL_GODOT or GAMEFACTORY_TEST_GODOT env var",
+        "2026-09-27T02:37:25.9879535Z SKIPPED [1] tests/unit/test_config.py:126: Windows junction validation",
+        "2026-09-27T02:37:25.9880747Z SKIPPED [1] tests/unit/test_config.py:146: Windows junction validation",
+        "2026-09-27T02:37:25.9881668Z ======================= 260 passed, 6 skipped in 21.82s ========================"
+      ]
+    },
+    {
+      "job_id": 108535325862,
+      "name": "test (windows-latest, 3.11)",
+      "conclusion": "success",
+      "source_sha": "93ded412242b2bebf0d90ab90225b5826b852489",
+      "log": "job-108535325862.txt",
+      "evidence_lines": [
+        "2026-09-27T02:37:01.3604611Z Successfully set up CPython (3.11.9)",
+        "2026-09-27T02:38:11.3833026Z tests/integration/test_process_runner.py::TestProcessRunner::test_cleanup_error_message_redacts_request_secret PASSED [ 34%]",
+        "2026-09-27T02:38:29.5924537Z tests/unit/test_godot_staging.py::test_manifest_rejects_linked_source_directory PASSED [ 79%]",
+        "2026-09-27T02:38:29.9018620Z tests/unit/test_godot_staging.py::test_stager_rejects_root_directory_link PASSED [ 79%]",
+        "2026-09-27T02:38:30.2026556Z tests/unit/test_godot_staging.py::test_attempt_parent_link_is_rejected_before_writing_outside_scratch PASSED [ 80%]",
+        "2026-09-27T02:38:30.3895855Z SKIPPED [1] tests\\integration\\test_godot_real.py:18: Set GAMEFACTORY_TEST_GODOT to run real-engine acceptance",
+        "2026-09-27T02:38:30.3897298Z SKIPPED [1] tests\\integration\\test_process_runner.py:290: POSIX process-group cleanup",
+        "2026-09-27T02:38:30.3898671Z SKIPPED [1] tests\\integration\\test_verify_godot_live_crash.py:158: Opt-in real Godot test requires GAMEFACTORY_TEST_REAL_GODOT or GAMEFACTORY_TEST_GODOT env var",
+        "2026-09-27T02:38:30.3900153Z ================== 263 passed, 3 skipped in 60.11s (0:01:00) =================="
+      ]
+    },
+    {
+      "job_id": 108535325869,
+      "name": "test (ubuntu-latest, 3.12)",
+      "conclusion": "success",
+      "source_sha": "93ded412242b2bebf0d90ab90225b5826b852489",
+      "log": "job-108535325869.txt",
+      "evidence_lines": [
+        "2026-09-27T02:36:55.1131960Z Successfully set up CPython (3.12.14)",
+        "2026-09-27T02:37:23.5388685Z tests/integration/test_process_runner.py::TestProcessRunner::test_cleanup_error_message_redacts_request_secret PASSED [ 34%]",
+        "2026-09-27T02:37:27.7309704Z tests/unit/test_godot_staging.py::test_manifest_rejects_linked_source_directory PASSED [ 79%]",
+        "2026-09-27T02:37:27.7342277Z tests/unit/test_godot_staging.py::test_stager_rejects_root_directory_link PASSED [ 79%]",
+        "2026-09-27T02:37:27.7352757Z tests/unit/test_godot_staging.py::test_attempt_parent_link_is_rejected_before_writing_outside_scratch PASSED [ 80%]",
+        "2026-09-27T02:37:27.8285668Z SKIPPED [1] tests/integration/test_godot_real.py:18: Set GAMEFACTORY_TEST_GODOT to run real-engine acceptance",
+        "2026-09-27T02:37:27.8286961Z SKIPPED [1] tests/integration/test_process_runner.py:368: Windows Job Objects are only available on Windows",
+        "2026-09-27T02:37:27.8287937Z SKIPPED [1] tests/integration/test_process_runner.py:494: Windows Job Objects only",
+        "2026-09-27T02:37:27.8289345Z SKIPPED [1] tests/integration/test_verify_godot_live_crash.py:158: Opt-in real Godot test requires GAMEFACTORY_TEST_REAL_GODOT or GAMEFACTORY_TEST_GODOT env var",
+        "2026-09-27T02:37:27.8292001Z SKIPPED [1] tests/unit/test_config.py:126: Windows junction validation",
+        "2026-09-27T02:37:27.8292504Z SKIPPED [1] tests/unit/test_config.py:146: Windows junction validation",
+        "2026-09-27T02:37:27.8292993Z ======================= 260 passed, 6 skipped in 22.06s ========================"
+      ]
+    }
+  ],
+  "artifacts": [
+    {
+      "id": 10922050240,
+      "name": "godot-real-evidence",
+      "archive": "artifact-10922050240.zip",
+      "sha256": "aff4438705b804c8c92e5a4e1d0b84dfc4edc94f1eb407eca98141551f72c735",
+      "api_digest_matches": true
+    },
+    {
+      "id": 10921132346,
+      "name": "linux-filesystem-python-3.11",
+      "archive": "artifact-10921132346.zip",
+      "sha256": "a83c4e969feee647647b1c82725250bd51fc774c31329338f07faf41da30ca9f",
+      "api_digest_matches": true
+    },
+    {
+      "id": 10921012629,
+      "name": "linux-filesystem-python-3.12",
+      "archive": "artifact-10921012629.zip",
+      "sha256": "2a06cf99f3233d1054feff63ae32b06bcb6de42e73f72d916c3d9136dec1b77e",
+      "api_digest_matches": true
+    }
+  ],
+  "acceptance": {
+    "status": "PASSED",
+    "commands": 43,
+    "python": "3.12.14",
+    "godot": "4.7.2.stable.official.ed1daf0bf"
+  },
+  "recovery": {
+    "status": "FAILED",
+    "classification": "test/helper interpreter invocation",
+    "cause": "Path.resolve dereferences venv Python symlink; helper launches base interpreter without gamefactory"
+  },
+  "live_child": {
+    "status": "NOT RUN",
+    "reason": "preceding recovery failed with set -e/pipefail"
+  },
+  "wheel_sha256": "8946102f9443ec6a87b3b7e24496d3b11137c31a0eac6db6b39559b993306472",
+  "filesystem": "ext4; checkout and runner temp on /dev/sda1",
+  "closure": "PARTIAL",
+  "deselected": 0
+}

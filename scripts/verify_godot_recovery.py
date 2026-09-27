@@ -383,11 +383,27 @@ def _runtime_snapshots(project: Path, artifacts: list[dict[str, Any]]) -> dict[s
     )
 
 
+def _resolve_python(path: Path | str) -> Path:
+    """Preserve invocation path of supplied Python interpreter while validating existence.
+
+    Resolves user home ('~') and normalizes to an absolute path, but does NOT dereference
+    symlinks so that virtual environment interpreter contexts (which locate pyvenv.cfg
+    relative to argv[0]) are preserved.
+    """
+    p = Path(path) if isinstance(path, str) else path
+    expanded = p.expanduser()
+    expanded.resolve(strict=True)
+    python = Path(os.path.abspath(str(expanded)))
+    if not python.is_file():
+        raise FileNotFoundError(f"Python interpreter not found or not a regular file: {python}")
+    return python
+
+
 def _main(args: argparse.Namespace) -> int:
-    cli, python, fixture, godot = (
-        p.expanduser().resolve(strict=True)
-        for p in (args.cli, args.python, args.fixture, args.godot)
+    cli, fixture, godot = (
+        p.expanduser().resolve(strict=True) for p in (args.cli, args.fixture, args.godot)
     )
+    python = _resolve_python(args.python)
     output = args.output.expanduser().resolve()
     workspace = (
         (args.workspace or output.parent / (output.stem + "-evidence")).expanduser().resolve()

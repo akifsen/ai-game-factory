@@ -1,0 +1,27 @@
+{
+  "checked_at": "2026-09-27T02:52:54.821676+00:00",
+  "head": "93ded412242b2bebf0d90ab90225b5826b852489",
+  "changed_tracked": [
+    "docs/reports/v0.2-closeout-report.md",
+    "docs/reports/v0.2-closeout/README.md",
+    "docs/work-plan-v0.2-closeout.md",
+    "scripts/verify_godot_live_crash.py",
+    "scripts/verify_godot_recovery.py"
+  ],
+  "local_tested_hashes_still_match": true,
+  "product_workflow_and_old_evidence_unchanged": true,
+  "new_evidence_visibility": [
+    {
+      "directory": "docs\\reports\\v0.2-closeout\\remote-ci\\36289019065",
+      "files": 27,
+      "all_visible_to_git": true
+    },
+    {
+      "directory": "docs\\reports\\v0.2-closeout\\evidence-package-ci-36289019065",
+      "files": 36,
+      "all_visible_to_git": true
+    }
+  ],
+  "closure": "PARTIAL",
+  "blocker": "User-authorized commit/push of two helper scripts and new interpreter test, followed by new-SHA CI recovery/live-child and matrix verification; no commit/push performed"
+}

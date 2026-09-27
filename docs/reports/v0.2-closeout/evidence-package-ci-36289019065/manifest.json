@@ -1,0 +1,225 @@
+{
+  "acceptance": "records/acceptance.json",
+  "files": [
+    {
+      "path": "metadata/source-identity.json",
+      "role": "source_identity",
+      "sha256": "b690009639d8152f9f6a765ba997cdedcee84e7b59f49469cb624a623684a3fa",
+      "size": 14741
+    },
+    {
+      "path": "records/acceptance.json",
+      "role": "acceptance",
+      "sha256": "31b66e60f11ac7dd766aee4a160dbb710a0e2226520c0490bc7b552e235f5b45",
+      "size": 1145501
+    },
+    {
+      "path": "records/recovery.json",
+      "role": "recovery",
+      "sha256": "b48fdcd70bb33f186694d5b11adfff1de162809397099ad008a5570f7540c483",
+      "size": 504590
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-0f9e853f/ART-0494f04c/runtime-observation.json",
+      "role": "observation",
+      "sha256": "52d6465046e0d5cd13e2785703d6c6f41dd1cb0e3ccc4f88347401bb10554608",
+      "size": 524
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-0f9e853f/ART-6c9c04a9/validation-report.json",
+      "role": "validation",
+      "sha256": "def28ed09b272e1ef1b3faf9040231cb27b27082dbf171eb9930436c57a4e3fe",
+      "size": 1550
+    },
+    {
+      "path": "records/selected-inspect.json",
+      "role": "inspect",
+      "sha256": "66e2ae25018a8fbaf7873b22b744ed34831a159f4afb814ae05da3534c79df62",
+      "size": 38829
+    },
+    {
+      "path": "remote-ci/36289019065/.gitignore",
+      "role": "other",
+      "sha256": "15c4437080db4ec4be5ef2b2dde82e82749b1bb6379ee7f82d0fa7c87feba804",
+      "size": 8
+    },
+    {
+      "path": "remote-ci/36289019065/artifact-10921012629.zip",
+      "role": "other",
+      "sha256": "2a06cf99f3233d1054feff63ae32b06bcb6de42e73f72d916c3d9136dec1b77e",
+      "size": 505
+    },
+    {
+      "path": "remote-ci/36289019065/artifact-10921132346.zip",
+      "role": "other",
+      "sha256": "a83c4e969feee647647b1c82725250bd51fc774c31329338f07faf41da30ca9f",
+      "size": 502
+    },
+    {
+      "path": "remote-ci/36289019065/artifact-10922050240.zip",
+      "role": "other",
+      "sha256": "aff4438705b804c8c92e5a4e1d0b84dfc4edc94f1eb407eca98141551f72c735",
+      "size": 134091
+    },
+    {
+      "path": "remote-ci/36289019065/artifacts/godot-real-evidence/commit.txt",
+      "role": "other",
+      "sha256": "f6e8c98d42e42634e7b9bb124c4d9435db7ce88deaf750560d708ec1ddc52a08",
+      "size": 41
+    },
+    {
+      "path": "remote-ci/36289019065/artifacts/godot-real-evidence/environment.txt",
+      "role": "other",
+      "sha256": "73a333e7b2b3cb846619070af347c6cbf74f757240b962791ba01a815a581f72",
+      "size": 1295
+    },
+    {
+      "path": "remote-ci/36289019065/artifacts/godot-real-evidence/logs/acceptance.log",
+      "role": "other",
+      "sha256": "e75afbee3fd4acee949df63b4769d89732bcf5b0b4501a2de8b6ebbba1cd5d1f",
+      "size": 264
+    },
+    {
+      "path": "remote-ci/36289019065/artifacts/godot-real-evidence/logs/recovery.log",
+      "role": "other",
+      "sha256": "90f81d3bbd3140320d65784d7bc553eb70d6023b647382599b264c8645a6709f",
+      "size": 2047
+    },
+    {
+      "path": "remote-ci/36289019065/artifacts/godot-real-evidence/reports/acceptance.json",
+      "role": "other",
+      "sha256": "06016bcdb79b95aa8db69eacfe16d5fc763de71017e0729b795c1331358b5c6a",
+      "size": 1110642
+    },
+    {
+      "path": "remote-ci/36289019065/artifacts/godot-real-evidence/reports/recovery.json",
+      "role": "other",
+      "sha256": "0d4e91d838545f453bc59199a30871d9465edef1e6f794c8e16ccc7863b5f3a4",
+      "size": 21326
+    },
+    {
+      "path": "remote-ci/36289019065/artifacts/godot-real-evidence/source-manifest-digest.txt",
+      "role": "other",
+      "sha256": "06c2d6ccb7d8de9baa2c4b543dd24d5aaa4b14840d624e59d8676849d116c042",
+      "size": 162
+    },
+    {
+      "path": "remote-ci/36289019065/artifacts/godot-real-evidence/source-manifest.sha256",
+      "role": "other",
+      "sha256": "02bdefcc208be5c1d532c849080c270d64e033189131a6d0b6ebc27b0ecae5f0",
+      "size": 95658
+    },
+    {
+      "path": "remote-ci/36289019065/artifacts/godot-real-evidence/source-status.txt",
+      "role": "other",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    {
+      "path": "remote-ci/36289019065/artifacts/godot-real-evidence/wheel.sha256",
+      "role": "other",
+      "sha256": "1e1d988d5a93a63f65473ed652d606d85500b05e4e01af237eab3ca4a85afcad",
+      "size": 136
+    },
+    {
+      "path": "remote-ci/36289019065/artifacts/linux-filesystem-python-3.11/linux-filesystem-context.txt",
+      "role": "other",
+      "sha256": "6a6ebabc012c2c22136382e6b68c4f954ef1ff5eb3f02c6023ca51ed41f63d15",
+      "size": 651
+    },
+    {
+      "path": "remote-ci/36289019065/artifacts/linux-filesystem-python-3.12/linux-filesystem-context.txt",
+      "role": "other",
+      "sha256": "57ca8b0894490a3ba5ee1346aaf9009b0c7bba7aa35cef90fa6df171845c2c1a",
+      "size": 671
+    },
+    {
+      "path": "remote-ci/36289019065/artifacts.json",
+      "role": "other",
+      "sha256": "a6f732f06b52976383df5b96a3f73accb558a75c36039bbc293945ab0c52c358",
+      "size": 2125
+    },
+    {
+      "path": "remote-ci/36289019065/job-108535325678.txt",
+      "role": "other",
+      "sha256": "779d241c585163664d538fa533bde6640cd0bd12bb823916ba5a4761de1a06a0",
+      "size": 68533
+    },
+    {
+      "path": "remote-ci/36289019065/job-108535325786.txt",
+      "role": "other",
+      "sha256": "3cbff9fd119cdc03531ccf8bee87773323dee244e8d8e945146bc55575ab2e29",
+      "size": 63578
+    },
+    {
+      "path": "remote-ci/36289019065/job-108535325836.txt",
+      "role": "other",
+      "sha256": "a79a9564c983f37c0d62207430dc1b343c60cdddfb63bae1c18aefb32b465345",
+      "size": 70071
+    },
+    {
+      "path": "remote-ci/36289019065/job-108535325862.txt",
+      "role": "other",
+      "sha256": "86aad3c3a9db5f2a98ee39a1a7030a378c3dca093a37eaa02583aeacbff0b9db",
+      "size": 63764
+    },
+    {
+      "path": "remote-ci/36289019065/job-108535325869.txt",
+      "role": "other",
+      "sha256": "ab7609d105d140527a0c80ed6cb1a633897aadd7bbc4831ad3f97e94243d520b",
+      "size": 70266
+    },
+    {
+      "path": "remote-ci/36289019065/jobs.json",
+      "role": "other",
+      "sha256": "0e78e2cf2c3a829761d662307cfcd9c17a8e6ca1ee1a3a6efca4132f4a0de013",
+      "size": 16177
+    },
+    {
+      "path": "remote-ci/36289019065/remote-ref.json",
+      "role": "other",
+      "sha256": "e2a15063e4a2edff0cc6c44855be930ef5130561bcd57f4cbf5542398f49a9c8",
+      "size": 344
+    },
+    {
+      "path": "remote-ci/36289019065/retrieval.json",
+      "role": "other",
+      "sha256": "70ab7007162117c0dbde0c78024055a9aa1b585d68d93c0a582dba789cc2d2d2",
+      "size": 6165
+    },
+    {
+      "path": "remote-ci/36289019065/run.json",
+      "role": "other",
+      "sha256": "933d7907022d345b06fd983773909ed96ce5ff354d1796262f208c16c2f87f3a",
+      "size": 12603
+    },
+    {
+      "path": "remote-ci/36289019065/verification-summary.json",
+      "role": "other",
+      "sha256": "910137a64152cf06324ceee3c72f4598f7782c1bd4a44319a9055816a1ad379d",
+      "size": 10532
+    },
+    {
+      "path": "final-ci-report.md",
+      "role": "other",
+      "sha256": "3336376dd9d45ae66293a9d3f5fca93f348d98e299263551347638ee832c4a75",
+      "size": 6653
+    },
+    {
+      "path": "verify_closeout_evidence.py",
+      "role": "verifier",
+      "sha256": "f9a72907495c65981fcf1689c26787d45e4eb33b582a4ec89fe4e4d70b40212d",
+      "size": 16068
+    }
+  ],
+  "recovery": "records/recovery.json",
+  "relationships": {
+    "execution_id": "EXEC-93637804",
+    "execution_task_id": "WF-GODOT-0f9e853f-EXECUTE",
+    "scenario_id": "fixture-smoke",
+    "validation_task_id": "WF-GODOT-0f9e853f-VALIDATE",
+    "workflow_id": "WF-GODOT-0f9e853f"
+  },
+  "schema_version": 1,
+  "source_identity": "metadata/source-identity.json"
+}

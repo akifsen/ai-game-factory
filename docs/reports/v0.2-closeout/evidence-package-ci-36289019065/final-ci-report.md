@@ -103,29 +103,3 @@ Yeni revizyonun Windows/Linux matrix kanıtı da onunla eşleşmelidir.
 korunur. Önceki raporun teslim anındaki kopyası
 [evidence-package/closeout-report.md](v0.2-closeout/evidence-package/closeout-report.md)
 içindedir. Tarihsel V0.1/V0.2 raporları ve eski başarısız koşular değiştirilmedi.
-
-## Yerel dar düzeltme ve bağımsız lider doğrulaması
-
-Remote'da henüz bulunmayan ilgili değişiklikler:
-
-- `scripts/verify_godot_recovery.py`
-- `scripts/verify_godot_live_crash.py`
-- `tests/integration/test_verify_godot_python_resolution.py` (yeni)
-
-İki helper, verilen Python yolunu symlink dereference etmeden mutlak yola çevirir;
-hedefin varlığı/dosya niteliği denetlenir. Godot kimlik ve cleanup kontrolleri,
-ürün ve workflow değişmedi. Lider incelemesinde testin POSIX venv oluştururken
-`symlinks=True` kullanması ve bunu assert etmesi sağlandı (`EnvBuilder` varsayılanı
-False). Beklenmeyen symlink hataları skip edilmez; yalnız Windows WinError 1314
-izin eksikliği gerekçeli skip olabilir.
-
-Son yerel Windows/Python 3.12.14 hedefli regresyonu **56 passed, 6 skipped,
-1 deselected**: yeni interpreter testleri, canlı-child yardımcıları, staging ve
-process runner testleri. Beş skip WinError 1314, biri POSIX platform-N/A;
-real Godot testi marker ile ayrıldı. Ruff lint/format ve `git diff --check` geçti.
-İlk varsayılan Temp koşusu ortam erişim hatası verdi; ayrı workspace basetemp ile
-tekrar geçti. Bu sonuç Linux runtime veya yeni remote CI başarısı sayılmaz.
-
-Tam argv/cwd/zaman/exit kayıtları, test çıktıları ve üç değişen dosyanın son SHA256
-kimliği [final-ci-local-validation.json](v0.2-closeout/final-ci-local-validation.json)
-içindedir. Commit/push yapılmadı. **Verification Closure: PARTIAL** kalır.

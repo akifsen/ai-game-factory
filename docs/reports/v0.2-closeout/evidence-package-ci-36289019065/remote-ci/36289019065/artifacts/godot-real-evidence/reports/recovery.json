@@ -1,0 +1,304 @@
+{
+  "schema_version": 1,
+  "status": "FAILED",
+  "started_at": "2026-09-27T02:40:01.458682+00:00",
+  "cli": "/home/runner/work/_temp/gamefactory-venv/bin/gamefactory",
+  "python": "/opt/hostedtoolcache/Python/3.12.14/x64/bin/python3.12",
+  "fixture": "/home/runner/work/ai-game-factory/ai-game-factory/examples/godot-verification",
+  "godot": "/home/runner/work/_temp/godot/Godot_v4.7.2-stable_linux.x86_64",
+  "workspace": "/home/runner/work/_temp/gamefactory-workspaces/recovery/godot-recovery-20260927T024001Z-7cfec9f2",
+  "commands": [
+    {
+      "argv": [
+        "/home/runner/work/_temp/gamefactory-venv/bin/gamefactory",
+        "--json",
+        "--project",
+        "/home/runner/work/_temp/gamefactory-workspaces/recovery/godot-recovery-20260927T024001Z-7cfec9f2/Godot doctor 空間",
+        "--godot-path",
+        "/home/runner/work/_temp/godot/Godot_v4.7.2-stable_linux.x86_64",
+        "init"
+      ],
+      "python": "/opt/hostedtoolcache/Python/3.12.14/x64/bin/python3.12",
+      "cwd": "/home/runner/work/_temp/gamefactory-workspaces/recovery/godot-recovery-20260927T024001Z-7cfec9f2/Godot doctor 空間",
+      "exit_code": 0,
+      "stdout": "{\"project_root\":\"/home/runner/work/_temp/gamefactory-workspaces/recovery/godot-recovery-20260927T024001Z-7cfec9f2/Godot doctor 空間\",\"project_id\":\"factory-godot-verification-fixture\",\"project_name\":\"Factory Godot Verification Fixture\",\"already_initialized\":false,\"godot_project\":true,\"main_scene\":\"res://Main.tscn\",\"scripts\":1,\"scenes\":1,\"test_files\":0,\"exports\":false,\"git\":false,\"discovery_file\":\"/home/runner/work/_temp/gamefactory-workspaces/recovery/godot-recovery-20260927T024001Z-7cfec9f2/Godot doctor 空間/.gamefactory/discovery.json\"}\n",
+      "stderr": "",
+      "timed_out": false,
+      "json": {
+        "project_root": "/home/runner/work/_temp/gamefactory-workspaces/recovery/godot-recovery-20260927T024001Z-7cfec9f2/Godot doctor 空間",
+        "project_id": "factory-godot-verification-fixture",
+        "project_name": "Factory Godot Verification Fixture",
+        "already_initialized": false,
+        "godot_project": true,
+        "main_scene": "res://Main.tscn",
+        "scripts": 1,
+        "scenes": 1,
+        "test_files": 0,
+        "exports": false,
+        "git": false,
+        "discovery_file": "/home/runner/work/_temp/gamefactory-workspaces/recovery/godot-recovery-20260927T024001Z-7cfec9f2/Godot doctor 空間/.gamefactory/discovery.json"
+      }
+    },
+    {
+      "argv": [
+        "/home/runner/work/_temp/gamefactory-venv/bin/gamefactory",
+        "--json",
+        "--project",
+        "/home/runner/work/_temp/gamefactory-workspaces/recovery/godot-recovery-20260927T024001Z-7cfec9f2/Godot doctor 空間",
+        "--godot-path",
+        "/home/runner/work/_temp/godot/Godot_v4.7.2-stable_linux.x86_64",
+        "doctor"
+      ],
+      "python": "/opt/hostedtoolcache/Python/3.12.14/x64/bin/python3.12",
+      "cwd": "/home/runner/work/_temp/gamefactory-workspaces/recovery/godot-recovery-20260927T024001Z-7cfec9f2/Godot doctor 空間",
+      "exit_code": 0,
+      "stdout": "{\"project_root\":\"/home/runner/work/_temp/gamefactory-workspaces/recovery/godot-recovery-20260927T024001Z-7cfec9f2/Godot doctor 空間\",\"configuration\":{\"status\":\"OK\",\"project_root\":\"/home/runner/work/_temp/gamefactory-workspaces/recovery/godot-recovery-20260927T024001Z-7cfec9f2/Godot doctor 空間\",\"project_id\":\"factory-godot-verification-fixture\"},\"storage\":{\"status\":\"OK\",\"message\":\"SQLite create, migrate, and reopen succeeded\"},\"capabilities\":{\"engine.godot.detect\":{\"name\":\"engine.godot.detect\",\"description\":\"Detect and inspect Godot executable\",\"status\":\"AVAILABLE\",\"provider\":\"godot\",\"requires_approval\":false,\"details\":{\"version\":\"4.7.2.stable.official.ed1daf0bf\",\"executable_path\":\"/home/runner/work/_temp/godot/Godot_v4.7.2-stable_linux.x86_64\",\"details\":{\"raw_version\":\"4.7.2.stable.official.ed1daf0bf\"}}},\"engine.godot.headless_verification\":{\"name\":\"engine.godot.headless_verification\",\"description\":\"Godot headless verification pipeline; an approved workflow probes the installed CLI before execution\",\"status\":\"NOT_VERIFIED\",\"provider\":\"godot\",\"requires_approval\":false,\"details\":{\"executable_path\":\"/home/runner/work/_temp/godot/Godot_v4.7.2-stable_linux.x86_64\",\"engine_version\":\"4.7.2.stable.official.ed1daf0bf\",\"runtime_cli_probed\":false,\"requires_approval_when_configured\":true}},\"dcc.blender.detect\":{\"name\":\"dcc.blender.detect\",\"description\":\"Detect and inspect Blender executable\",\"status\":\"UNAVAILABLE\",\"provider\":\"blender\",\"requires_approval\":false,\"details\":{\"version\":null,\"executable_path\":null,\"details\":{\"reason\":\"Blender executable was not found on PATH or configured locations.\"}}},\"asset.3d.meshy\":{\"name\":\"asset.3d.meshy\",\"description\":\"Meshy provider boundary (generation not implemented in V0.1)\",\"status\":\"UNAVAILABLE\",\"provider\":\"meshy\",\"requires_approval\":true,\"details\":{\"is_configured\":false,\"cost_class\":\"PAID\",\"milestone\":\"V0.1 boundary only\",\"implemented\":false}},\"workflow.dag.execute\":{\"name\":\"workflow.dag.execute\",\"description\":\"Sequential DAG workflow orchestration with state machine\",\"status\":\"AVAILABLE\",\"provider\":\"core\",\"requires_approval\":false,\"details\":{}},\"security.policy.enforce\":{\"name\":\"security.policy.enforce\",\"description\":\"Centralized cost and operation policy enforcement\",\"status\":\"AVAILABLE\",\"provider\":\"core\",\"requires_approval\":false,\"details\":{}},\"artifacts.hash.verify\":{\"name\":\"artifacts.hash.verify\",\"description\":\"Cryptographic SHA-256 artifact verification and evidence collection\",\"status\":\"AVAILABLE\",\"provider\":\"core\",\"requires_approval\":false,\"details\":{}}}}\n",
+      "stderr": "",
+      "timed_out": false,
+      "json": {
+        "project_root": "/home/runner/work/_temp/gamefactory-workspaces/recovery/godot-recovery-20260927T024001Z-7cfec9f2/Godot doctor 空間",
+        "configuration": {
+          "status": "OK",
+          "project_root": "/home/runner/work/_temp/gamefactory-workspaces/recovery/godot-recovery-20260927T024001Z-7cfec9f2/Godot doctor 空間",
+          "project_id": "factory-godot-verification-fixture"
+        },
+        "storage": {
+          "status": "OK",
+          "message": "SQLite create, migrate, and reopen succeeded"
+        },
+        "capabilities": {
+          "engine.godot.detect": {
+            "name": "engine.godot.detect",
+            "description": "Detect and inspect Godot executable",
+            "status": "AVAILABLE",
+            "provider": "godot",
+            "requires_approval": false,
+            "details": {
+              "version": "4.7.2.stable.official.ed1daf0bf",
+              "executable_path": "/home/runner/work/_temp/godot/Godot_v4.7.2-stable_linux.x86_64",
+              "details": {
+                "raw_version": "4.7.2.stable.official.ed1daf0bf"
+              }
+            }
+          },
+          "engine.godot.headless_verification": {
+            "name": "engine.godot.headless_verification",
+            "description": "Godot headless verification pipeline; an approved workflow probes the installed CLI before execution",
+            "status": "NOT_VERIFIED",
+            "provider": "godot",
+            "requires_approval": false,
+            "details": {
+              "executable_path": "/home/runner/work/_temp/godot/Godot_v4.7.2-stable_linux.x86_64",
+              "engine_version": "4.7.2.stable.official.ed1daf0bf",
+              "runtime_cli_probed": false,
+              "requires_approval_when_configured": true
+            }
+          },
+          "dcc.blender.detect": {
+            "name": "dcc.blender.detect",
+            "description": "Detect and inspect Blender executable",
+            "status": "UNAVAILABLE",
+            "provider": "blender",
+            "requires_approval": false,
+            "details": {
+              "version": null,
+              "executable_path": null,
+              "details": {
+                "reason": "Blender executable was not found on PATH or configured locations."
+              }
+            }
+          },
+          "asset.3d.meshy": {
+            "name": "asset.3d.meshy",
+            "description": "Meshy provider boundary (generation not implemented in V0.1)",
+            "status": "UNAVAILABLE",
+            "provider": "meshy",
+            "requires_approval": true,
+            "details": {
+              "is_configured": false,
+              "cost_class": "PAID",
+              "milestone": "V0.1 boundary only",
+              "implemented": false
+            }
+          },
+          "workflow.dag.execute": {
+            "name": "workflow.dag.execute",
+            "description": "Sequential DAG workflow orchestration with state machine",
+            "status": "AVAILABLE",
+            "provider": "core",
+            "requires_approval": false,
+            "details": {}
+          },
+          "security.policy.enforce": {
+            "name": "security.policy.enforce",
+            "description": "Centralized cost and operation policy enforcement",
+            "status": "AVAILABLE",
+            "provider": "core",
+            "requires_approval": false,
+            "details": {}
+          },
+          "artifacts.hash.verify": {
+            "name": "artifacts.hash.verify",
+            "description": "Cryptographic SHA-256 artifact verification and evidence collection",
+            "status": "AVAILABLE",
+            "provider": "core",
+            "requires_approval": false,
+            "details": {}
+          }
+        }
+      }
+    },
+    {
+      "argv": [
+        "/home/runner/work/_temp/gamefactory-venv/bin/gamefactory",
+        "--json",
+        "--project",
+        "/home/runner/work/_temp/gamefactory-workspaces/recovery/godot-recovery-20260927T024001Z-7cfec9f2/Godot recuperación uncertain Δ/juego 空間",
+        "--godot-path",
+        "/home/runner/work/_temp/godot/Godot_v4.7.2-stable_linux.x86_64",
+        "init"
+      ],
+      "python": "/opt/hostedtoolcache/Python/3.12.14/x64/bin/python3.12",
+      "cwd": "/home/runner/work/_temp/gamefactory-workspaces/recovery/godot-recovery-20260927T024001Z-7cfec9f2/Godot recuperación uncertain Δ/juego 空間",
+      "exit_code": 0,
+      "stdout": "{\"project_root\":\"/home/runner/work/_temp/gamefactory-workspaces/recovery/godot-recovery-20260927T024001Z-7cfec9f2/Godot recuperación uncertain Δ/juego 空間\",\"project_id\":\"factory-godot-verification-fixture\",\"project_name\":\"Factory Godot Verification Fixture\",\"already_initialized\":false,\"godot_project\":true,\"main_scene\":\"res://Main.tscn\",\"scripts\":1,\"scenes\":1,\"test_files\":0,\"exports\":false,\"git\":false,\"discovery_file\":\"/home/runner/work/_temp/gamefactory-workspaces/recovery/godot-recovery-20260927T024001Z-7cfec9f2/Godot recuperación uncertain Δ/juego 空間/.gamefactory/discovery.json\"}\n",
+      "stderr": "",
+      "timed_out": false,
+      "json": {
+        "project_root": "/home/runner/work/_temp/gamefactory-workspaces/recovery/godot-recovery-20260927T024001Z-7cfec9f2/Godot recuperación uncertain Δ/juego 空間",
+        "project_id": "factory-godot-verification-fixture",
+        "project_name": "Factory Godot Verification Fixture",
+        "already_initialized": false,
+        "godot_project": true,
+        "main_scene": "res://Main.tscn",
+        "scripts": 1,
+        "scenes": 1,
+        "test_files": 0,
+        "exports": false,
+        "git": false,
+        "discovery_file": "/home/runner/work/_temp/gamefactory-workspaces/recovery/godot-recovery-20260927T024001Z-7cfec9f2/Godot recuperación uncertain Δ/juego 空間/.gamefactory/discovery.json"
+      }
+    },
+    {
+      "argv": [
+        "/opt/hostedtoolcache/Python/3.12.14/x64/bin/python3.12",
+        "/home/runner/work/ai-game-factory/ai-game-factory/scripts/verify_godot_recovery.py",
+        "--fault-helper",
+        "--fault-mode",
+        "after-runtime-return",
+        "--project",
+        "/home/runner/work/_temp/gamefactory-workspaces/recovery/godot-recovery-20260927T024001Z-7cfec9f2/Godot recuperación uncertain Δ/juego 空間",
+        "--godot",
+        "/home/runner/work/_temp/godot/Godot_v4.7.2-stable_linux.x86_64",
+        "--scenario",
+        "/home/runner/work/_temp/gamefactory-workspaces/recovery/godot-recovery-20260927T024001Z-7cfec9f2/Godot recuperación uncertain Δ/juego 空間/scenario.json",
+        "--workflow-file",
+        "/home/runner/work/_temp/gamefactory-workspaces/recovery/godot-recovery-20260927T024001Z-7cfec9f2/uncertain-workflow.json",
+        "--marker",
+        "/home/runner/work/_temp/gamefactory-workspaces/recovery/godot-recovery-20260927T024001Z-7cfec9f2/uncertain-fault.json"
+      ],
+      "cwd": "/home/runner/work/_temp/gamefactory-workspaces/recovery/godot-recovery-20260927T024001Z-7cfec9f2/Godot recuperación uncertain Δ/juego 空間",
+      "exit_code": 1,
+      "stdout": "",
+      "stderr": "Traceback (most recent call last):\n  File \"/home/runner/work/ai-game-factory/ai-game-factory/scripts/verify_godot_recovery.py\", line 672, in <module>\n    raise SystemExit(main())\n                     ^^^^^^\n  File \"/home/runner/work/ai-game-factory/ai-game-factory/scripts/verify_godot_recovery.py\", line 665, in main\n    return _helper(args)\n           ^^^^^^^^^^^^^\n  File \"/home/runner/work/ai-game-factory/ai-game-factory/scripts/verify_godot_recovery.py\", line 96, in _helper\n    from gamefactory.adapters.persistence.database import Database\nModuleNotFoundError: No module named 'gamefactory'\n",
+      "timed_out": false
+    }
+  ],
+  "checks": {
+    "doctor": {
+      "project_root": "/home/runner/work/_temp/gamefactory-workspaces/recovery/godot-recovery-20260927T024001Z-7cfec9f2/Godot doctor 空間",
+      "configuration": {
+        "status": "OK",
+        "project_root": "/home/runner/work/_temp/gamefactory-workspaces/recovery/godot-recovery-20260927T024001Z-7cfec9f2/Godot doctor 空間",
+        "project_id": "factory-godot-verification-fixture"
+      },
+      "storage": {
+        "status": "OK",
+        "message": "SQLite create, migrate, and reopen succeeded"
+      },
+      "capabilities": {
+        "engine.godot.detect": {
+          "name": "engine.godot.detect",
+          "description": "Detect and inspect Godot executable",
+          "status": "AVAILABLE",
+          "provider": "godot",
+          "requires_approval": false,
+          "details": {
+            "version": "4.7.2.stable.official.ed1daf0bf",
+            "executable_path": "/home/runner/work/_temp/godot/Godot_v4.7.2-stable_linux.x86_64",
+            "details": {
+              "raw_version": "4.7.2.stable.official.ed1daf0bf"
+            }
+          }
+        },
+        "engine.godot.headless_verification": {
+          "name": "engine.godot.headless_verification",
+          "description": "Godot headless verification pipeline; an approved workflow probes the installed CLI before execution",
+          "status": "NOT_VERIFIED",
+          "provider": "godot",
+          "requires_approval": false,
+          "details": {
+            "executable_path": "/home/runner/work/_temp/godot/Godot_v4.7.2-stable_linux.x86_64",
+            "engine_version": "4.7.2.stable.official.ed1daf0bf",
+            "runtime_cli_probed": false,
+            "requires_approval_when_configured": true
+          }
+        },
+        "dcc.blender.detect": {
+          "name": "dcc.blender.detect",
+          "description": "Detect and inspect Blender executable",
+          "status": "UNAVAILABLE",
+          "provider": "blender",
+          "requires_approval": false,
+          "details": {
+            "version": null,
+            "executable_path": null,
+            "details": {
+              "reason": "Blender executable was not found on PATH or configured locations."
+            }
+          }
+        },
+        "asset.3d.meshy": {
+          "name": "asset.3d.meshy",
+          "description": "Meshy provider boundary (generation not implemented in V0.1)",
+          "status": "UNAVAILABLE",
+          "provider": "meshy",
+          "requires_approval": true,
+          "details": {
+            "is_configured": false,
+            "cost_class": "PAID",
+            "milestone": "V0.1 boundary only",
+            "implemented": false
+          }
+        },
+        "workflow.dag.execute": {
+          "name": "workflow.dag.execute",
+          "description": "Sequential DAG workflow orchestration with state machine",
+          "status": "AVAILABLE",
+          "provider": "core",
+          "requires_approval": false,
+          "details": {}
+        },
+        "security.policy.enforce": {
+          "name": "security.policy.enforce",
+          "description": "Centralized cost and operation policy enforcement",
+          "status": "AVAILABLE",
+          "provider": "core",
+          "requires_approval": false,
+          "details": {}
+        },
+        "artifacts.hash.verify": {
+          "name": "artifacts.hash.verify",
+          "description": "Cryptographic SHA-256 artifact verification and evidence collection",
+          "status": "AVAILABLE",
+          "provider": "core",
+          "requires_approval": false,
+          "details": {}
+        }
+      }
+    }
+  },
+  "projects": [],
+  "error": "CheckFailure: Fault helper exit 1, expected 91: {'argv': ['/opt/hostedtoolcache/Python/3.12.14/x64/bin/python3.12', '/home/runner/work/ai-game-factory/ai-game-factory/scripts/verify_godot_recovery.py', '--fault-helper', '--fault-mode', 'after-runtime-return', '--project', '/home/runner/work/_temp/gamefactory-workspaces/recovery/godot-recovery-20260927T024001Z-7cfec9f2/Godot recuperación uncertain Δ/juego 空間', '--godot', '/home/runner/work/_temp/godot/Godot_v4.7.2-stable_linux.x86_64', '--scenario', '/home/runner/work/_temp/gamefactory-workspaces/recovery/godot-recovery-20260927T024001Z-7cfec9f2/Godot recuperación uncertain Δ/juego 空間/scenario.json', '--workflow-file', '/home/runner/work/_temp/gamefactory-workspaces/recovery/godot-recovery-20260927T024001Z-7cfec9f2/uncertain-workflow.json', '--marker', '/home/runner/work/_temp/gamefactory-workspaces/recovery/godot-recovery-20260927T024001Z-7cfec9f2/uncertain-fault.json'], 'cwd': '/home/runner/work/_temp/gamefactory-workspaces/recovery/godot-recovery-20260927T024001Z-7cfec9f2/Godot recuperación uncertain Δ/juego 空間', 'exit_code': 1, 'stdout': '', 'stderr': 'Traceback (most recent call last):\\n  File \"/home/runner/work/ai-game-factory/ai-game-factory/scripts/verify_godot_recovery.py\", line 672, in <module>\\n    raise SystemExit(main())\\n                     ^^^^^^\\n  File \"/home/runner/work/ai-game-factory/ai-game-factory/scripts/verify_godot_recovery.py\", line 665, in main\\n    return _helper(args)\\n           ^^^^^^^^^^^^^\\n  File \"/home/runner/work/ai-game-factory/ai-game-factory/scripts/verify_godot_recovery.py\", line 96, in _helper\\n    from gamefactory.adapters.persistence.database import Database\\nModuleNotFoundError: No module named \\'gamefactory\\'\\n', 'timed_out': False}",
+  "traceback": "Traceback (most recent call last):\n  File \"/home/runner/work/ai-game-factory/ai-game-factory/scripts/verify_godot_recovery.py\", line 451, in _main\n    _run_helper(\n  File \"/home/runner/work/ai-game-factory/ai-game-factory/scripts/verify_godot_recovery.py\", line 270, in _run_helper\n    raise CheckFailure(\nCheckFailure: Fault helper exit 1, expected 91: {'argv': ['/opt/hostedtoolcache/Python/3.12.14/x64/bin/python3.12', '/home/runner/work/ai-game-factory/ai-game-factory/scripts/verify_godot_recovery.py', '--fault-helper', '--fault-mode', 'after-runtime-return', '--project', '/home/runner/work/_temp/gamefactory-workspaces/recovery/godot-recovery-20260927T024001Z-7cfec9f2/Godot recuperación uncertain Δ/juego 空間', '--godot', '/home/runner/work/_temp/godot/Godot_v4.7.2-stable_linux.x86_64', '--scenario', '/home/runner/work/_temp/gamefactory-workspaces/recovery/godot-recovery-20260927T024001Z-7cfec9f2/Godot recuperación uncertain Δ/juego 空間/scenario.json', '--workflow-file', '/home/runner/work/_temp/gamefactory-workspaces/recovery/godot-recovery-20260927T024001Z-7cfec9f2/uncertain-workflow.json', '--marker', '/home/runner/work/_temp/gamefactory-workspaces/recovery/godot-recovery-20260927T024001Z-7cfec9f2/uncertain-fault.json'], 'cwd': '/home/runner/work/_temp/gamefactory-workspaces/recovery/godot-recovery-20260927T024001Z-7cfec9f2/Godot recuperación uncertain Δ/juego 空間', 'exit_code': 1, 'stdout': '', 'stderr': 'Traceback (most recent call last):\\n  File \"/home/runner/work/ai-game-factory/ai-game-factory/scripts/verify_godot_recovery.py\", line 672, in <module>\\n    raise SystemExit(main())\\n                     ^^^^^^\\n  File \"/home/runner/work/ai-game-factory/ai-game-factory/scripts/verify_godot_recovery.py\", line 665, in main\\n    return _helper(args)\\n           ^^^^^^^^^^^^^\\n  File \"/home/runner/work/ai-game-factory/ai-game-factory/scripts/verify_godot_recovery.py\", line 96, in _helper\\n    from gamefactory.adapters.persistence.database import Database\\nModuleNotFoundError: No module named \\'gamefactory\\'\\n', 'timed_out': False}\n"
+}

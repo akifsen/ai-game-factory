@@ -1,0 +1,77 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.14, pytest-9.1.1, pluggy-1.6.0 -- C:\Users\lenovo\devel\ai-game-factory\.venv\Scripts\python.exe
+rootdir: C:\Users\lenovo\devel\ai-game-factory
+configfile: pyproject.toml
+collecting ... collected 63 items / 1 deselected / 62 selected
+
+tests/integration/test_verify_godot_python_resolution.py::test_valid_interpreter_path_resolved_to_absolute[recovery] PASSED [  1%]
+tests/integration/test_verify_godot_python_resolution.py::test_valid_interpreter_path_resolved_to_absolute[live_crash] PASSED [  3%]
+tests/integration/test_verify_godot_python_resolution.py::test_relative_interpreter_path_resolved_to_absolute[recovery] PASSED [  4%]
+tests/integration/test_verify_godot_python_resolution.py::test_relative_interpreter_path_resolved_to_absolute[live_crash] PASSED [  6%]
+tests/integration/test_verify_godot_python_resolution.py::test_nonexistent_python_path_rejected[recovery] PASSED [  8%]
+tests/integration/test_verify_godot_python_resolution.py::test_nonexistent_python_path_rejected[live_crash] PASSED [  9%]
+tests/integration/test_verify_godot_python_resolution.py::test_directory_python_path_rejected[recovery] PASSED [ 11%]
+tests/integration/test_verify_godot_python_resolution.py::test_directory_python_path_rejected[live_crash] PASSED [ 12%]
+tests/integration/test_verify_godot_python_resolution.py::test_symlink_interpreter_path_preserved_filesystem[recovery] SKIPPED [ 14%]
+tests/integration/test_verify_godot_python_resolution.py::test_symlink_interpreter_path_preserved_filesystem[live_crash] SKIPPED [ 16%]
+tests/integration/test_verify_godot_python_resolution.py::test_broken_symlink_rejected[recovery] SKIPPED [ 17%]
+tests/integration/test_verify_godot_python_resolution.py::test_broken_symlink_rejected[live_crash] SKIPPED [ 19%]
+tests/integration/test_verify_godot_python_resolution.py::test_symlink_preservation_synthetic_mock[recovery] PASSED [ 20%]
+tests/integration/test_verify_godot_python_resolution.py::test_symlink_preservation_synthetic_mock[live_crash] PASSED [ 22%]
+tests/integration/test_verify_godot_python_resolution.py::test_real_venv_regression_without_downloads[recovery] PASSED [ 24%]
+tests/integration/test_verify_godot_python_resolution.py::test_real_venv_regression_without_downloads[live_crash] PASSED [ 25%]
+tests/integration/test_verify_godot_python_resolution.py::test_cli_rejects_missing_python_executable PASSED [ 27%]
+tests/integration/test_verify_godot_live_crash.py::test_process_identity_query_current PASSED [ 29%]
+tests/integration/test_verify_godot_live_crash.py::test_process_identity_rejection_wrong_executable PASSED [ 30%]
+tests/integration/test_verify_godot_live_crash.py::test_sentinel_lifecycle PASSED [ 32%]
+tests/integration/test_verify_godot_live_crash.py::test_controlled_fixture_preparation PASSED [ 33%]
+tests/integration/test_verify_godot_live_crash.py::test_wrapper_intercepts_subprocess_launch PASSED [ 35%]
+tests/integration/test_verify_godot_live_crash.py::test_unknown_child_state_is_not_successful_cleanup[os_error: denied] PASSED [ 37%]
+tests/integration/test_verify_godot_live_crash.py::test_unknown_child_state_is_not_successful_cleanup[malformed_stat] PASSED [ 38%]
+tests/integration/test_verify_godot_live_crash.py::test_unknown_child_state_is_not_successful_cleanup[starttime_mismatch: reused] PASSED [ 40%]
+tests/integration/test_verify_godot_live_crash.py::test_unknown_child_state_is_not_successful_cleanup[exe_mismatch: other] PASSED [ 41%]
+tests/unit/test_godot_staging.py::test_manifest_excludes_scenario_state_caches_and_secrets PASSED [ 43%]
+tests/unit/test_godot_staging.py::test_manifest_enforces_file_and_total_byte_bounds PASSED [ 45%]
+tests/unit/test_godot_staging.py::test_create_stage_is_attempt_scoped_and_preserves_original_project PASSED [ 46%]
+tests/unit/test_godot_staging.py::test_source_change_after_preflight_fingerprint_is_rejected PASSED [ 48%]
+tests/unit/test_godot_staging.py::test_source_change_between_manifest_and_copy_is_rejected PASSED [ 50%]
+tests/unit/test_godot_staging.py::test_manifest_rejects_symlinked_file_when_supported SKIPPED [ 51%]
+tests/unit/test_godot_staging.py::test_manifest_rejects_linked_source_directory PASSED [ 53%]
+tests/unit/test_godot_staging.py::test_stager_rejects_root_directory_link PASSED [ 54%]
+tests/unit/test_godot_staging.py::test_attempt_parent_link_is_rejected_before_writing_outside_scratch PASSED [ 56%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_run_simple_command_stdout PASSED [ 58%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_run_command_stderr PASSED [ 59%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_minimal_env_filters_secrets PASSED [ 61%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_timeout_enforcement PASSED [ 62%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_secret_redaction_in_output PASSED [ 64%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_nonexistent_executable_raises_error PASSED [ 66%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_request_override_secret_is_redacted_from_output_and_errors PASSED [ 67%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_sensitive_argument_flag_secret_is_redacted PASSED [ 69%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_short_override_secret_and_malformed_unicode_are_safe PASSED [ 70%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_output_is_bounded PASSED [ 72%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_timeout_kills_descendant_process PASSED [ 74%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_run_success_with_metadata PASSED [ 75%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_run_nonzero_exit_code PASSED [ 77%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_timeout_attaches_serializable_metadata PASSED [ 79%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_redaction_expansion_stays_within_output_limit PASSED [ 80%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_posix_parent_exit_kills_descendant_ignoring_sigterm SKIPPED [ 82%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_incomplete_pipe_read_fails_with_evidence PASSED [ 83%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_cleanup_error_message_redacts_request_secret PASSED [ 85%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_windows_job_close_failure_is_reported PASSED [ 87%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_timeout_redacts_secrets_in_details PASSED [ 88%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_stdout_truncation_flag_and_multibyte_safety PASSED [ 90%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_stderr_truncation_flag PASSED [ 91%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_error_redacts_credentials_in_details PASSED [ 93%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_command_result_backward_compatibility PASSED [ 95%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_job_attach_failure_fails_closed PASSED [ 96%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_parent_exit_descendant_bounded_and_cleaned PASSED [ 98%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_cleanup_failure_retains_metadata PASSED [100%]
+
+=========================== short test summary info ===========================
+SKIPPED [1] tests\integration\test_verify_godot_python_resolution.py:93: Windows symlink privilege unavailable: [WinError 1314] Gereken ayrýcalýk istemci tarafýndan saðlanmýyor: 'C:\\Users\\lenovo\\devel\\ai-game-factory\\.venv\\Scripts\\python.exe' -> 'C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\final-ci-lead-tests-2\\test_symlink_interpreter_path_0\\python_symlink.exe'
+SKIPPED [1] tests\integration\test_verify_godot_python_resolution.py:93: Windows symlink privilege unavailable: [WinError 1314] Gereken ayrýcalýk istemci tarafýndan saðlanmýyor: 'C:\\Users\\lenovo\\devel\\ai-game-factory\\.venv\\Scripts\\python.exe' -> 'C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\final-ci-lead-tests-2\\test_symlink_interpreter_path_1\\python_symlink.exe'
+SKIPPED [1] tests\integration\test_verify_godot_python_resolution.py:113: Windows symlink privilege unavailable: [WinError 1314] Gereken ayrýcalýk istemci tarafýndan saðlanmýyor: 'C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\final-ci-lead-tests-2\\test_broken_symlink_rejected_r0\\does_not_exist_target' -> 'C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\final-ci-lead-tests-2\\test_broken_symlink_rejected_r0\\broken_symlink'
+SKIPPED [1] tests\integration\test_verify_godot_python_resolution.py:113: Windows symlink privilege unavailable: [WinError 1314] Gereken ayrýcalýk istemci tarafýndan saðlanmýyor: 'C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\final-ci-lead-tests-2\\test_broken_symlink_rejected_l0\\does_not_exist_target' -> 'C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\final-ci-lead-tests-2\\test_broken_symlink_rejected_l0\\broken_symlink'
+SKIPPED [1] tests\unit\test_godot_staging.py:198: Symlink creation unavailable on this host: [WinError 1314] Gereken ayrýcalýk istemci tarafýndan saðlanmýyor: 'C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\final-ci-lead-tests-2\\test_manifest_rejects_symlinke0\\outside.txt' -> 'C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\final-ci-lead-tests-2\\test_manifest_rejects_symlinke0\\game\\linked.txt'
+SKIPPED [1] tests\integration\test_process_runner.py:290: POSIX process-group cleanup
+================ 56 passed, 6 skipped, 1 deselected in 13.41s =================

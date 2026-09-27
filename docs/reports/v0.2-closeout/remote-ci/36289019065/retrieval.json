@@ -1,0 +1,227 @@
+[
+  {
+    "argv": [
+      "gh",
+      "api",
+      "repos/akifsen/ai-game-factory/git/ref/heads/main"
+    ],
+    "started_at": "2026-09-27T02:38:31.856081+00:00",
+    "finished_at": "2026-09-27T02:38:32.466036+00:00",
+    "exit_code": 0,
+    "stdout_file": "remote-ref.json",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "gh",
+      "api",
+      "repos/akifsen/ai-game-factory/actions/runs/36289019065"
+    ],
+    "started_at": "2026-09-27T02:38:32.466036+00:00",
+    "finished_at": "2026-09-27T02:38:33.051023+00:00",
+    "exit_code": 0,
+    "stdout_file": "run.json",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "gh",
+      "api",
+      "repos/akifsen/ai-game-factory/actions/runs/36289019065/jobs"
+    ],
+    "started_at": "2026-09-27T02:38:33.051023+00:00",
+    "finished_at": "2026-09-27T02:38:33.771550+00:00",
+    "exit_code": 0,
+    "stdout_file": "jobs.json",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "gh",
+      "api",
+      "repos/akifsen/ai-game-factory/actions/runs/36289019065/artifacts"
+    ],
+    "started_at": "2026-09-27T02:38:33.771550+00:00",
+    "finished_at": "2026-09-27T02:38:34.302334+00:00",
+    "exit_code": 0,
+    "stdout_file": "artifacts.json",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "gh",
+      "api",
+      "repos/akifsen/ai-game-factory/actions/runs/36289019065/jobs"
+    ],
+    "started_at": "2026-09-27T02:39:57.924851+00:00",
+    "finished_at": "2026-09-27T02:39:58.685698+00:00",
+    "exit_code": 0,
+    "stdout_file": "jobs.json",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "gh",
+      "api",
+      "repos/akifsen/ai-game-factory/actions/jobs/108535325786/logs",
+      "--allow-escape-sequences"
+    ],
+    "started_at": "2026-09-27T02:39:58.685698+00:00",
+    "finished_at": "2026-09-27T02:40:00.373301+00:00",
+    "exit_code": 0,
+    "stdout_file": "job-108535325786.txt",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "gh",
+      "api",
+      "repos/akifsen/ai-game-factory/actions/jobs/108535325836/logs",
+      "--allow-escape-sequences"
+    ],
+    "started_at": "2026-09-27T02:40:00.375303+00:00",
+    "finished_at": "2026-09-27T02:40:02.054350+00:00",
+    "exit_code": 0,
+    "stdout_file": "job-108535325836.txt",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "gh",
+      "api",
+      "repos/akifsen/ai-game-factory/actions/jobs/108535325862/logs",
+      "--allow-escape-sequences"
+    ],
+    "started_at": "2026-09-27T02:40:02.054350+00:00",
+    "finished_at": "2026-09-27T02:40:03.366821+00:00",
+    "exit_code": 0,
+    "stdout_file": "job-108535325862.txt",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "gh",
+      "api",
+      "repos/akifsen/ai-game-factory/actions/jobs/108535325869/logs",
+      "--allow-escape-sequences"
+    ],
+    "started_at": "2026-09-27T02:40:03.368825+00:00",
+    "finished_at": "2026-09-27T02:40:04.801489+00:00",
+    "exit_code": 0,
+    "stdout_file": "job-108535325869.txt",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "gh",
+      "api",
+      "repos/akifsen/ai-game-factory/actions/runs/36289019065/artifacts"
+    ],
+    "started_at": "2026-09-27T02:40:04.802488+00:00",
+    "finished_at": "2026-09-27T02:40:05.472663+00:00",
+    "exit_code": 0,
+    "stdout_file": "artifacts.json",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "gh",
+      "api",
+      "repos/akifsen/ai-game-factory/actions/artifacts/10922050240/zip",
+      "--allow-escape-sequences"
+    ],
+    "started_at": "2026-09-27T02:40:05.475168+00:00",
+    "finished_at": "2026-09-27T02:40:07.274850+00:00",
+    "exit_code": 0,
+    "stdout_file": "artifact-10922050240.zip",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "gh",
+      "api",
+      "repos/akifsen/ai-game-factory/actions/artifacts/10921132346/zip",
+      "--allow-escape-sequences"
+    ],
+    "started_at": "2026-09-27T02:40:07.310785+00:00",
+    "finished_at": "2026-09-27T02:40:08.624380+00:00",
+    "exit_code": 0,
+    "stdout_file": "artifact-10921132346.zip",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "gh",
+      "api",
+      "repos/akifsen/ai-game-factory/actions/artifacts/10921012629/zip",
+      "--allow-escape-sequences"
+    ],
+    "started_at": "2026-09-27T02:40:08.627885+00:00",
+    "finished_at": "2026-09-27T02:40:10.085561+00:00",
+    "exit_code": 0,
+    "stdout_file": "artifact-10921012629.zip",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "gh",
+      "api",
+      "repos/akifsen/ai-game-factory/actions/runs/36289019065"
+    ],
+    "started_at": "2026-09-27T02:40:52.344508+00:00",
+    "finished_at": "2026-09-27T02:40:52.954082+00:00",
+    "exit_code": 0,
+    "stdout_file": "run.json",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "gh",
+      "api",
+      "repos/akifsen/ai-game-factory/actions/runs/36289019065/jobs"
+    ],
+    "started_at": "2026-09-27T02:40:52.956082+00:00",
+    "finished_at": "2026-09-27T02:40:53.645308+00:00",
+    "exit_code": 0,
+    "stdout_file": "jobs.json",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "gh",
+      "api",
+      "repos/akifsen/ai-game-factory/actions/runs/36289019065/artifacts"
+    ],
+    "started_at": "2026-09-27T02:40:53.645308+00:00",
+    "finished_at": "2026-09-27T02:40:54.172193+00:00",
+    "exit_code": 0,
+    "stdout_file": "artifacts.json",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "gh",
+      "api",
+      "repos/akifsen/ai-game-factory/actions/jobs/108535325678/logs",
+      "--allow-escape-sequences"
+    ],
+    "started_at": "2026-09-27T02:40:54.172749+00:00",
+    "finished_at": "2026-09-27T02:40:55.556057+00:00",
+    "exit_code": 0,
+    "stdout_file": "job-108535325678.txt",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "gh",
+      "api",
+      "repos/akifsen/ai-game-factory/actions/artifacts/10922050240/zip",
+      "--allow-escape-sequences"
+    ],
+    "started_at": "2026-09-27T02:41:53.820596+00:00",
+    "finished_at": "2026-09-27T02:41:56.470502+00:00",
+    "exit_code": 0,
+    "stdout_file": "artifact-10922050240.zip",
+    "sha256": "aff4438705b804c8c92e5a4e1d0b84dfc4edc94f1eb407eca98141551f72c735"
+  }
+]

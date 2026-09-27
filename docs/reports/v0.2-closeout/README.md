@@ -1,6 +1,35 @@
 # V0.2 closeout kanıt indeksi
 
-Bu dizin yeni closeout koşularını içerir. Üst dizindeki V0.1/V0.2 raporları tarihsel
+## Güncel final CI incelemesi — 2026-09-27
+
+**Verification Closure: PARTIAL.** SHA `93ded412242b2bebf0d90ab90225b5826b852489`,
+run `36289019065`: Ubuntu 3.11/3.12 **260 passed, 6 skipped**; Windows 3.11/3.12
+**263 passed, 3 skipped**. Önceki dört Linux hatası geçti. Linux Godot kabulü
+43 komut, temiz wheel/CLI ve ext4 mount kanıtı geçti. Recovery helper venv Python
+symlink çözümü nedeniyle başarısız; Linux canlı-child **NOT RUN**.
+
+| Yeni kalıcı kanıt | Kapsam |
+|---|---|
+| [remote-ci/36289019065/verification-summary.json](remote-ci/36289019065/verification-summary.json) | SHA/ref/CI kaynak eşleşmesi, job kimlikleri, test/skip satırları, artifact digest kontrolleri |
+| [remote-ci/36289019065/](remote-ci/36289019065/) | Beş tam job logu (`.txt`), run/jobs/ref metadata, üç özgün ZIP ve çıkarılmış environment/mount/kabul/recovery dosyaları |
+| [ci-catalog-36289019065.json](ci-catalog-36289019065.json) | Mevcut verifier için açık dosya listesi; yeni kanıt sistemi değildir |
+| [evidence-package-ci-36289019065/](evidence-package-ci-36289019065/) | Bağımsız taşınabilir kompakt ek paket; yeni CI dosyaları hash kontrolü ve eski seçili Windows graph'ı semantik kontrolü |
+| [ci-cold-verification-36289019065.json](ci-cold-verification-36289019065.json) | Checkout dışı `python -I`: PASS, yeni kabul eksikliği FAIL, yeni log tahrifi FAIL, geri yükleme PASS |
+
+Paket içindeki `final-ci-report.md` CI incelemesi anının kopyasıdır; sonradan yazılan
+yerel düzeltme/test notları ana raporda ayrıca belirtilir. Eski kaynak kimliği yalnız
+eski Windows graph bağlamıdır; yeni CI SHA'sı kendi `remote-ci/36289019065/` metadata'sındadır.
+Linux canlı-child kanıtı yoktur. Linux ham log/artifact setinin tümü yeniden
+üretilmiş veya kopyalanmış sayılmaz. Gömülü JSON ve CI logları Temp'ten bağımsızdır.
+
+```text
+python -I evidence-package-ci-36289019065/verify_closeout_evidence.py verify evidence-package-ci-36289019065
+```
+
+## Önceki kapanış teslimi (tarihsel)
+
+Aşağıdaki “remote henüz çalışmadı” açıklamaları önceki teslim anını anlatır;
+güncel sonuç yukarıdadır. Bu dizin yeni closeout koşularını içerir. Üst dizindeki V0.1/V0.2 raporları tarihsel
 olarak korunmuştur; yeni sonuçlar eski koşulara aitmiş gibi sunulmaz.
 
 | Kanıt | Kapsam |
@@ -49,3 +78,12 @@ Uzak CI raporu seçili JSON kanıtıdır; eski workflow `.gamefactory` gizli dos
 artifact olarak yüklemediğinden Linux ham artifact setinin tamamı burada bulunmaz.
 Yeni yerel workflow tanımı temiz wheel/hash, filesystem bağlamı ve canlı kesintiyi
 hazırlar; bu tanımın varlığı başarılı remote koşu sayılmaz.
+
+
+## Son yerel helper düzeltmesi
+
+[final-ci-local-validation.json](final-ci-local-validation.json) ve
+`final-ci-local-*.txt`: bağımsız lider testi **56 passed, 6 skipped, 1 deselected**;
+lint/format/diff kontrolü geçti. Üç helper/test dosyasının hashleri kayıtlıdır.
+Bu düzeltmeler yalnız yereldir, run 36289019065 bunları içermez. POSIX symlink venv
+regresyonu yeni Linux CI'da zorunludur; yalnız Windows WinError 1314 gerekçeli skip.

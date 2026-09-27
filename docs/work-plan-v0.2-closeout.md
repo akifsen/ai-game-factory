@@ -95,3 +95,24 @@ Eksik ortam/izin N/A veya minor olarak gizlenmez. Gerçek ücretli API çağrıs
 | 12 Kapanış ölçütleri | 12; PARTIAL, Linux ve doğru son revizyon CI açığı saklanmadı |
 | 13 Final rapor | 12; istenen bütün başlıklarla v0.2-closeout-report.md |
 | 14 Çalışma sırası | Günlük; baseline → hedefli araç → gerçek koşu → review → final kanıt |
+
+
+## 2026-09-27 final CI incelemesi — güncel karar
+
+**Verification Closure: PARTIAL.** Önceki günlük tarihsel olarak korunur.
+HEAD/remote/CI SHA `93ded412242b2bebf0d90ab90225b5826b852489`, run `36289019065`.
+Adım 4/5: iki Ubuntu normal suite 260/6, iki Windows suite 263/3 geçti;
+önceki dört Linux helper regresyonu iki sürümde geçti. Linux Godot 43 komut,
+temiz wheel/kaynak dışı CLI ve ext4 mount kanıtı tamamlandı.
+Adım 6/7: Linux recovery venv Python symlink çözümü nedeniyle FAILED;
+canlı-child NOT RUN. N/A değildir. Dar yerel düzeltmenin remote doğrulaması açık.
+Adım 8/9: yeni run ayrı kimlikle, özgün arşiv digest kontrolü ve mevcut
+soğuk doğrulayıcıyla korunur. Adım 11/12: yerel düzeltme CI başarısı sayılmaz;
+commit/push kullanıcı akışına bırakılır. Rerun/release/V0.3 yapılmadı.
+Güncel ayrıntı: [final CI raporu](reports/v0.2-closeout-report.md).
+
+- Son yerel dar düzeltme: iki helper Python venv çağrı yolunu koruyor; yeni
+  interpreter regresyon dosyası eklendi. Lider POSIX venv testini gerçek symlink
+  zorunluluğuyla düzeltti. Bağımsız hedefli test 56/6/1; lint/format/diff geçti.
+  Kanıt: `reports/v0.2-closeout/final-ci-local-validation.json`.
+  Üç kod/test dosyası remote'a taşınmadı; yeni Linux recovery/canlı-child CI açık.

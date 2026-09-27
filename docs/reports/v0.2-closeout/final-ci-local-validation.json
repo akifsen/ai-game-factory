@@ -1,0 +1,101 @@
+{
+  "base_sha": "93ded412242b2bebf0d90ab90225b5826b852489",
+  "tested_state": "local dirty helper fix; NOT remote CI",
+  "platform": "win32",
+  "python": "3.12.14 (main, Aug 25 2026, 14:01:42) [MSC v.1944 64 bit (AMD64)]",
+  "commands": [
+    {
+      "label": "targeted-regression",
+      "argv": [
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.venv\\Scripts\\python.exe",
+        "-m",
+        "pytest",
+        "tests/integration/test_verify_godot_python_resolution.py",
+        "tests/integration/test_verify_godot_live_crash.py",
+        "tests/unit/test_godot_staging.py",
+        "tests/integration/test_process_runner.py",
+        "-m",
+        "not real_godot",
+        "-ra",
+        "-p",
+        "no:cacheprovider",
+        "--basetemp",
+        ".verification/final-ci-lead-tests-2"
+      ],
+      "cwd": "C:\\Users\\lenovo\\devel\\ai-game-factory",
+      "started_at": "2026-09-27T02:51:31.682388+00:00",
+      "finished_at": "2026-09-27T02:51:46.690207+00:00",
+      "exit_code": 0,
+      "output": "final-ci-local-targeted-regression.txt"
+    },
+    {
+      "label": "ruff-check",
+      "argv": [
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.venv\\Scripts\\python.exe",
+        "-m",
+        "ruff",
+        "check",
+        "scripts/verify_godot_recovery.py",
+        "scripts/verify_godot_live_crash.py",
+        "tests/integration/test_verify_godot_python_resolution.py"
+      ],
+      "cwd": "C:\\Users\\lenovo\\devel\\ai-game-factory",
+      "started_at": "2026-09-27T02:51:46.690207+00:00",
+      "finished_at": "2026-09-27T02:51:46.910024+00:00",
+      "exit_code": 0,
+      "output": "final-ci-local-ruff-check.txt"
+    },
+    {
+      "label": "ruff-format",
+      "argv": [
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.venv\\Scripts\\python.exe",
+        "-m",
+        "ruff",
+        "format",
+        "--check",
+        "scripts/verify_godot_recovery.py",
+        "scripts/verify_godot_live_crash.py",
+        "tests/integration/test_verify_godot_python_resolution.py"
+      ],
+      "cwd": "C:\\Users\\lenovo\\devel\\ai-game-factory",
+      "started_at": "2026-09-27T02:51:46.910024+00:00",
+      "finished_at": "2026-09-27T02:51:47.221160+00:00",
+      "exit_code": 0,
+      "output": "final-ci-local-ruff-format.txt"
+    },
+    {
+      "label": "diff-check",
+      "argv": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "cwd": "C:\\Users\\lenovo\\devel\\ai-game-factory",
+      "started_at": "2026-09-27T02:51:47.221160+00:00",
+      "finished_at": "2026-09-27T02:51:47.376037+00:00",
+      "exit_code": 0,
+      "output": "final-ci-local-diff-check.txt"
+    }
+  ],
+  "files": [
+    {
+      "path": "scripts/verify_godot_recovery.py",
+      "sha256": "9efb7b7268f9c1f2a95f2670107c315ff172c367cdb1d299156a8da982e18841"
+    },
+    {
+      "path": "scripts/verify_godot_live_crash.py",
+      "sha256": "067a9b356f0e04ae88dd09b9f1b479a70862a7028013d7c15c62d74f733ecf96"
+    },
+    {
+      "path": "tests/integration/test_verify_godot_python_resolution.py",
+      "sha256": "f3e22372912d9ed65094d8fdeca5f7a2a92278a606d26b5cc9d9303784df4f98"
+    }
+  ],
+  "review_correction": "EnvBuilder defaults to symlinks=False: explicitly enable symlinks on POSIX and assert it; symlink creation errors may skip only Windows WinError 1314, otherwise raise.",
+  "earlier_environment_failure": "Initial lead pytest used default Temp/pytest-of-lenovo and hit WinError 5 during fixture setup (11 passed/15 errors/1 deselected); isolated workspace basetemp resolved it without code changes.",
+  "remote_pending": [
+    "scripts/verify_godot_recovery.py",
+    "scripts/verify_godot_live_crash.py",
+    "tests/integration/test_verify_godot_python_resolution.py"
+  ]
+}
