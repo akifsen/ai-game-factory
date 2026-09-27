@@ -62,6 +62,14 @@ def _make_directory_link(link: Path, target: Path) -> None:
         pytest.skip(f"Directory symlink creation unavailable on this host: {exc}")
 
 
+def _remove_directory_link(link: Path) -> None:
+    # POSIX symlinks are unlinked; Windows junctions are removed as directory entries.
+    if link.is_symlink():
+        link.unlink()
+    else:
+        os.rmdir(link)
+
+
 def test_manifest_excludes_scenario_state_caches_and_secrets(tmp_path: Path) -> None:
     project, scenario = _make_project(tmp_path / "game")
     (project / ".env").write_text("A=1", encoding="utf-8")
@@ -203,7 +211,7 @@ def test_manifest_rejects_linked_source_directory(tmp_path: Path) -> None:
         with pytest.raises(ValidationError, match="link or junction"):
             _stager(project).source_manifest()
     finally:
-        os.rmdir(link)
+        _remove_directory_link(link)
 
 
 def test_stager_rejects_root_directory_link(tmp_path: Path) -> None:
@@ -214,7 +222,7 @@ def test_stager_rejects_root_directory_link(tmp_path: Path) -> None:
         with pytest.raises(ValidationError, match="root cannot be a symlink or junction"):
             GodotStager(alias, alias / ".gamefactory" / "scratch")
     finally:
-        os.rmdir(alias)
+        _remove_directory_link(alias)
 
 
 def test_attempt_parent_link_is_rejected_before_writing_outside_scratch(tmp_path: Path) -> None:
@@ -232,4 +240,4 @@ def test_attempt_parent_link_is_rejected_before_writing_outside_scratch(tmp_path
             stager.create_stage("WF-GODOT-1", "EXEC-1", scenario, fingerprint, b"harness")
         assert not (outside / "EXEC-1").exists()
     finally:
-        os.rmdir(workflow_link)
+        _remove_directory_link(workflow_link)

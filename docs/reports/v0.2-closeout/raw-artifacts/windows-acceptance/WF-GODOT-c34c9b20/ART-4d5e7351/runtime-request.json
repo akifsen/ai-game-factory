@@ -1,0 +1,1 @@
+{"actions":[{"action":"apply_damage","amount":20,"tick":30},{"action":"defeat_enemy","tick":60},{"action":"apply_damage","amount":40,"tick":90}],"execution_id":"EXEC-6975f70f","max_tick":90,"scenario_id":"fixture-smoke","scenario_sha256":"831c75b5537606b349c630f578079a72b09e258fd5af52cca8c52a16b5a51246","scene":"res://Main.tscn","schema_version":"0.2.0","snapshots":[0,30,60,90]}

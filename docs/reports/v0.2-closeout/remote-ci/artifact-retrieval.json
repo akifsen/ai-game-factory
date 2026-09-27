@@ -1,0 +1,13 @@
+{
+  "artifact_id": 10921500736,
+  "archive_sha256": "001b295e22b6863e0a481ed3f1171112a596b1b3053602e61f816f7174ea3141",
+  "entries": 30,
+  "selected": [
+    {
+      "path": "real-godot-20260927T020728Z-2097.json",
+      "size": 1127887,
+      "sha256": "dfe4cb3ea8cd830fd91854955f9c5769a72b6ebae5736b322179e07100aa81da"
+    }
+  ],
+  "scope": "Only top-level real Godot acceptance JSON extracted; archive traversal and symlinks rejected."
+}

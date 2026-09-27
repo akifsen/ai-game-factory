@@ -1,0 +1,9 @@
+{
+  "parsed": true,
+  "matrix_preserved": true,
+  "pin_preserved": true,
+  "workflow_sha256": "40ba2394cb0ab123110bdd5424518ca3b5438ddb034586bd6a7051c47eb376ab",
+  "diff_check_exit": 0,
+  "remote_executed": false,
+  "limitation": "Static YAML/shell inspection only; actionlint unavailable, new workflow requires remote run"
+}

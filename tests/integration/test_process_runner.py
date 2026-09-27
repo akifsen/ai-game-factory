@@ -336,13 +336,22 @@ class TestProcessRunner:
         self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
     ) -> None:
         secret = "cleanup-secret-987"
-        original_close = self.runner._close_windows_job
+        if sys.platform == "win32":
+            original_cleanup = self.runner._close_windows_job
 
-        def failing_close(job: int | None) -> None:
-            original_close(job)
-            raise OSError(f"cleanup failed for {secret}")
+            def failing_cleanup(job: int | None) -> None:
+                original_cleanup(job)
+                raise OSError(f"cleanup failed for {secret}")
 
-        monkeypatch.setattr(self.runner, "_close_windows_job", failing_close)
+            monkeypatch.setattr(self.runner, "_close_windows_job", failing_cleanup)
+        else:
+            original_cleanup = self.runner._kill_tree
+
+            def failing_cleanup(proc: Any) -> None:
+                original_cleanup(proc)
+                raise OSError(f"cleanup failed for {secret}")
+
+            monkeypatch.setattr(self.runner, "_kill_tree", failing_cleanup)
         request = CommandRequest(
             args=[sys.executable, "-c", "print('done')"],
             cwd=tmp_path,

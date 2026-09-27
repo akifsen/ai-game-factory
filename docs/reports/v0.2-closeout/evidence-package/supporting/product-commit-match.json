@@ -1,0 +1,330 @@
+{
+  "commit": "8ad413b385a2338752e1902068da892994acc4e2",
+  "all_equal": true,
+  "files": [
+    {
+      "path": "src/gamefactory/__init__.py",
+      "working_blob": "76803b5a0ae8c5d01f0120ff8abfd72c76415bbe",
+      "commit_blob": "76803b5a0ae8c5d01f0120ff8abfd72c76415bbe",
+      "equal": true
+    },
+    {
+      "path": "src/gamefactory/__main__.py",
+      "working_blob": "288d2c63b78b195a59e93170bcfcfe29920e3b26",
+      "commit_blob": "288d2c63b78b195a59e93170bcfcfe29920e3b26",
+      "equal": true
+    },
+    {
+      "path": "src/gamefactory/capabilities/registry.py",
+      "working_blob": "01a566ee98d9e2eaeb08f300391c9aa0c87dc2e9",
+      "commit_blob": "01a566ee98d9e2eaeb08f300391c9aa0c87dc2e9",
+      "equal": true
+    },
+    {
+      "path": "src/gamefactory/capabilities/__init__.py",
+      "working_blob": "b27b36e87fb50089b4273ae72483e2709e5d77d8",
+      "commit_blob": "b27b36e87fb50089b4273ae72483e2709e5d77d8",
+      "equal": true
+    },
+    {
+      "path": "src/gamefactory/cli/exit_codes.py",
+      "working_blob": "c28d583163dcc8802235a3de68307427ea978b58",
+      "commit_blob": "c28d583163dcc8802235a3de68307427ea978b58",
+      "equal": true
+    },
+    {
+      "path": "src/gamefactory/cli/main.py",
+      "working_blob": "21be8092ed2ee98a2ba490f0f3fcce5b21ef9c4d",
+      "commit_blob": "21be8092ed2ee98a2ba490f0f3fcce5b21ef9c4d",
+      "equal": true
+    },
+    {
+      "path": "src/gamefactory/config/loader.py",
+      "working_blob": "1460301268324497ffc15552e1cf7381bae4954d",
+      "commit_blob": "1460301268324497ffc15552e1cf7381bae4954d",
+      "equal": true
+    },
+    {
+      "path": "src/gamefactory/config/schema.py",
+      "working_blob": "ac3870e515901d048cbdfde2657ae6ec1f8aba89",
+      "commit_blob": "ac3870e515901d048cbdfde2657ae6ec1f8aba89",
+      "equal": true
+    },
+    {
+      "path": "src/gamefactory/config/__init__.py",
+      "working_blob": "16b8631622b718affd873123d1a0058608b91b91",
+      "commit_blob": "16b8631622b718affd873123d1a0058608b91b91",
+      "equal": true
+    },
+    {
+      "path": "src/gamefactory/schemas/godot-observation-0.2.0.schema.json",
+      "working_blob": "7c3d5728437d0074f01ec03387c8d5a8cc5077bc",
+      "commit_blob": "7c3d5728437d0074f01ec03387c8d5a8cc5077bc",
+      "equal": true
+    },
+    {
+      "path": "src/gamefactory/schemas/godot-scenario-0.2.0.schema.json",
+      "working_blob": "eec89c75a98f6426823868f56682aeef6f39d6ad",
+      "commit_blob": "eec89c75a98f6426823868f56682aeef6f39d6ad",
+      "equal": true
+    },
+    {
+      "path": "src/gamefactory/schemas/project-config-0.1.0.schema.json",
+      "working_blob": "6698478a904e369ae03675476d9a640a625f9555",
+      "commit_blob": "6698478a904e369ae03675476d9a640a625f9555",
+      "equal": true
+    },
+    {
+      "path": "src/gamefactory/workflows/builtin_tasks.py",
+      "working_blob": "a38ca6a743ca0d8b7fac1420ce1ab7472d1a2cb3",
+      "commit_blob": "a38ca6a743ca0d8b7fac1420ce1ab7472d1a2cb3",
+      "equal": true
+    },
+    {
+      "path": "src/gamefactory/workflows/definitions.py",
+      "working_blob": "b326e6c6106227015d94bcbe7e590260d8e1bb31",
+      "commit_blob": "b326e6c6106227015d94bcbe7e590260d8e1bb31",
+      "equal": true
+    },
+    {
+      "path": "src/gamefactory/workflows/engine.py",
+      "working_blob": "4d902d7ea62e3da6798171ec2499cc2a555e7f47",
+      "commit_blob": "4d902d7ea62e3da6798171ec2499cc2a555e7f47",
+      "equal": true
+    },
+    {
+      "path": "src/gamefactory/workflows/godot_verification.py",
+      "working_blob": "ba11e1e1dc8f38577764248fc09f1472cdafe63c",
+      "commit_blob": "ba11e1e1dc8f38577764248fc09f1472cdafe63c",
+      "equal": true
+    },
+    {
+      "path": "src/gamefactory/workflows/handlers.py",
+      "working_blob": "2d5fd6c7e755d099a93501961031c97537614e76",
+      "commit_blob": "2d5fd6c7e755d099a93501961031c97537614e76",
+      "equal": true
+    },
+    {
+      "path": "src/gamefactory/workflows/ports.py",
+      "working_blob": "e5afd474293abf7a371de4bd02993bdd03f51856",
+      "commit_blob": "e5afd474293abf7a371de4bd02993bdd03f51856",
+      "equal": true
+    },
+    {
+      "path": "src/gamefactory/workflows/__init__.py",
+      "working_blob": "baa6d5407e3e8b1059149e86c3b9bb5216c97734",
+      "commit_blob": "baa6d5407e3e8b1059149e86c3b9bb5216c97734",
+      "equal": true
+    },
+    {
+      "path": "src/gamefactory/adapters/dcc/base.py",
+      "working_blob": "54edd37ff75be9241eb7bb3837b928b9cdfa9a39",
+      "commit_blob": "54edd37ff75be9241eb7bb3837b928b9cdfa9a39",
+      "equal": true
+    },
+    {
+      "path": "src/gamefactory/adapters/dcc/blender.py",
+      "working_blob": "b0be73a6545ee50bfb13c52ae9c78668a2eec9c4",
+      "commit_blob": "b0be73a6545ee50bfb13c52ae9c78668a2eec9c4",
+      "equal": true
+    },
+    {
+      "path": "src/gamefactory/adapters/dcc/__init__.py",
+      "working_blob": "be2782e33a8fe40bfb54a72cad8b761d4f756f54",
+      "commit_blob": "be2782e33a8fe40bfb54a72cad8b761d4f756f54",
+      "equal": true
+    },
+    {
+      "path": "src/gamefactory/adapters/engines/base.py",
+      "working_blob": "902525f83fe05dfdff9d99cc66d54825071b43b3",
+      "commit_blob": "902525f83fe05dfdff9d99cc66d54825071b43b3",
+      "equal": true
+    },
+    {
+      "path": "src/gamefactory/adapters/engines/godot.py",
+      "working_blob": "2cf623e3e67ff7392f9af78588e76f4a0619a0aa",
+      "commit_blob": "2cf623e3e67ff7392f9af78588e76f4a0619a0aa",
+      "equal": true
+    },
+    {
+      "path": "src/gamefactory/adapters/engines/godot_contracts.py",
+      "working_blob": "6d9054d141a68e2e1069d9983a805ef17a450aa9",
+      "commit_blob": "6d9054d141a68e2e1069d9983a805ef17a450aa9",
+      "equal": true
+    },
+    {
+      "path": "src/gamefactory/adapters/engines/godot_execution.py",
+      "working_blob": "d374b2955c16e43f12f709637b14e71b32dfe5c8",
+      "commit_blob": "d374b2955c16e43f12f709637b14e71b32dfe5c8",
+      "equal": true
+    },
+    {
+      "path": "src/gamefactory/adapters/engines/godot_staging.py",
+      "working_blob": "0919b20dec73731521f4087687455694bc743fe7",
+      "commit_blob": "0919b20dec73731521f4087687455694bc743fe7",
+      "equal": true
+    },
+    {
+      "path": "src/gamefactory/adapters/engines/__init__.py",
+      "working_blob": "ab1fb53cd7488cdf0a977318b2177453732f3486",
+      "commit_blob": "ab1fb53cd7488cdf0a977318b2177453732f3486",
+      "equal": true
+    },
+    {
+      "path": "src/gamefactory/adapters/external/base.py",
+      "working_blob": "413b2cd2fdd803a99f801a3cae62a95ec2ed2c2b",
+      "commit_blob": "413b2cd2fdd803a99f801a3cae62a95ec2ed2c2b",
+      "equal": true
+    },
+    {
+      "path": "src/gamefactory/adapters/external/meshy.py",
+      "working_blob": "7cbcd4b472d765e6884ef70559ce3e605e311147",
+      "commit_blob": "7cbcd4b472d765e6884ef70559ce3e605e311147",
+      "equal": true
+    },
+    {
+      "path": "src/gamefactory/adapters/external/__init__.py",
+      "working_blob": "42742c9c292a8c069071e797fa36cc67b500c653",
+      "commit_blob": "42742c9c292a8c069071e797fa36cc67b500c653",
+      "equal": true
+    },
+    {
+      "path": "src/gamefactory/adapters/fakes/fake_provider.py",
+      "working_blob": "1d3ce181e018f1a6826e131362bfb91c2cefae5f",
+      "commit_blob": "1d3ce181e018f1a6826e131362bfb91c2cefae5f",
+      "equal": true
+    },
+    {
+      "path": "src/gamefactory/adapters/fakes/__init__.py",
+      "working_blob": "f4b777da2e8db7e28ad7b4706e10cc2b292b576e",
+      "commit_blob": "f4b777da2e8db7e28ad7b4706e10cc2b292b576e",
+      "equal": true
+    },
+    {
+      "path": "src/gamefactory/adapters/persistence/database.py",
+      "working_blob": "ef4e2f48c26daa2eaffffe61837399b43ad20614",
+      "commit_blob": "ef4e2f48c26daa2eaffffe61837399b43ad20614",
+      "equal": true
+    },
+    {
+      "path": "src/gamefactory/adapters/persistence/migrations.py",
+      "working_blob": "fb3a50ac47edfa2feaef7908700222b7dd19025c",
+      "commit_blob": "fb3a50ac47edfa2feaef7908700222b7dd19025c",
+      "equal": true
+    },
+    {
+      "path": "src/gamefactory/adapters/persistence/repositories.py",
+      "working_blob": "7a20f97cd4c5ee2141f78bd546b4479eb2eaa404",
+      "commit_blob": "7a20f97cd4c5ee2141f78bd546b4479eb2eaa404",
+      "equal": true
+    },
+    {
+      "path": "src/gamefactory/adapters/persistence/__init__.py",
+      "working_blob": "032e6b50b6aae32660e5b708e0f22aad5c09124f",
+      "commit_blob": "032e6b50b6aae32660e5b708e0f22aad5c09124f",
+      "equal": true
+    },
+    {
+      "path": "src/gamefactory/core/approvals/approval_service.py",
+      "working_blob": "1f4c14c596db3a2e078eadcc54a374e2c8b92496",
+      "commit_blob": "1f4c14c596db3a2e078eadcc54a374e2c8b92496",
+      "equal": true
+    },
+    {
+      "path": "src/gamefactory/core/approvals/__init__.py",
+      "working_blob": "3a1ea95bf2bf02dcc1831cf15d81c8fb56d46004",
+      "commit_blob": "3a1ea95bf2bf02dcc1831cf15d81c8fb56d46004",
+      "equal": true
+    },
+    {
+      "path": "src/gamefactory/core/artifacts/artifact_manager.py",
+      "working_blob": "b1a463427dac3873d06ed5d66f97b9544060a0c1",
+      "commit_blob": "b1a463427dac3873d06ed5d66f97b9544060a0c1",
+      "equal": true
+    },
+    {
+      "path": "src/gamefactory/core/artifacts/__init__.py",
+      "working_blob": "178fa01bd1d390cbe33293a791cbc14f98577f5a",
+      "commit_blob": "178fa01bd1d390cbe33293a791cbc14f98577f5a",
+      "equal": true
+    },
+    {
+      "path": "src/gamefactory/core/domain/dag.py",
+      "working_blob": "c64e05379b94d6ea423d2cd17c31c64eba4d4689",
+      "commit_blob": "c64e05379b94d6ea423d2cd17c31c64eba4d4689",
+      "equal": true
+    },
+    {
+      "path": "src/gamefactory/core/domain/errors.py",
+      "working_blob": "4729ad448f1d7dba18d5fa9e39ef068b0094ecf8",
+      "commit_blob": "4729ad448f1d7dba18d5fa9e39ef068b0094ecf8",
+      "equal": true
+    },
+    {
+      "path": "src/gamefactory/core/domain/models.py",
+      "working_blob": "376b5eb4e01b798d435e3153ddce7308fcbad160",
+      "commit_blob": "376b5eb4e01b798d435e3153ddce7308fcbad160",
+      "equal": true
+    },
+    {
+      "path": "src/gamefactory/core/domain/state_machine.py",
+      "working_blob": "8877292299ee840de3c6fcebba1d8dd627d5c003",
+      "commit_blob": "8877292299ee840de3c6fcebba1d8dd627d5c003",
+      "equal": true
+    },
+    {
+      "path": "src/gamefactory/core/domain/__init__.py",
+      "working_blob": "e01c8427e3f72cff6996d0690b52bedf9b585f80",
+      "commit_blob": "e01c8427e3f72cff6996d0690b52bedf9b585f80",
+      "equal": true
+    },
+    {
+      "path": "src/gamefactory/core/execution/locks.py",
+      "working_blob": "0b34cd7e7c9646b44c9393695ff13dede0652618",
+      "commit_blob": "0b34cd7e7c9646b44c9393695ff13dede0652618",
+      "equal": true
+    },
+    {
+      "path": "src/gamefactory/core/execution/path_guard.py",
+      "working_blob": "ec152c91779da29bd8560871f1bcefccb4998156",
+      "commit_blob": "ec152c91779da29bd8560871f1bcefccb4998156",
+      "equal": true
+    },
+    {
+      "path": "src/gamefactory/core/execution/process_runner.py",
+      "working_blob": "4558cb23baa61e692b48d8d4954f3922d3bd6496",
+      "commit_blob": "4558cb23baa61e692b48d8d4954f3922d3bd6496",
+      "equal": true
+    },
+    {
+      "path": "src/gamefactory/core/execution/redaction.py",
+      "working_blob": "65ca38099690dff7cf5835c927aa774287820098",
+      "commit_blob": "65ca38099690dff7cf5835c927aa774287820098",
+      "equal": true
+    },
+    {
+      "path": "src/gamefactory/core/execution/__init__.py",
+      "working_blob": "0b36f7c748f04a10b82d3c481de801e9f91c7d95",
+      "commit_blob": "0b36f7c748f04a10b82d3c481de801e9f91c7d95",
+      "equal": true
+    },
+    {
+      "path": "src/gamefactory/core/policies/policy_engine.py",
+      "working_blob": "4f2f702f85616d97c3646c771e28b4c4626af514",
+      "commit_blob": "4f2f702f85616d97c3646c771e28b4c4626af514",
+      "equal": true
+    },
+    {
+      "path": "src/gamefactory/core/policies/__init__.py",
+      "working_blob": "0c38de671c3fe1c357c4d6b4f72463dc974aae8c",
+      "commit_blob": "0c38de671c3fe1c357c4d6b4f72463dc974aae8c",
+      "equal": true
+    },
+    {
+      "path": "src/gamefactory/resources/godot/harness.gd",
+      "working_blob": "c39f3ebfb727b530e959e27449de4c524521adac",
+      "commit_blob": "c39f3ebfb727b530e959e27449de4c524521adac",
+      "equal": true
+    }
+  ]
+}

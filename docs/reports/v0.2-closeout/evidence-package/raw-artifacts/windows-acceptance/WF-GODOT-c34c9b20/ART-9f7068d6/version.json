@@ -1,0 +1,23 @@
+{
+  "attempt_number": 1,
+  "executable_path": "C:\\Users\\lenovo\\devel\\godot\\Godot_v4.7.2-stable_win64.exe\\Godot_v4.7.2-stable_win64_console.exe",
+  "executable_sha256": "c8f0a6bc45a19b33541501e57f6f7cd972ab18453743266339d495cbbe846643",
+  "execution_id": "EXEC-6975f70f",
+  "harness_sha256": "429e7e7961dc65a07741f59d1bc40f883a03754673de27ff2d88a5c0bb5949c1",
+  "harness_version": "0.2.0",
+  "phase": "version",
+  "process": {
+    "argv": [
+      "C:\\Users\\lenovo\\devel\\godot\\Godot_v4.7.2-stable_win64.exe\\Godot_v4.7.2-stable_win64_console.exe",
+      "--version"
+    ],
+    "cwd": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gf-closeout-user-1_oo24l7\\acceptance\\godot-acceptance-20260927T020930Z-4c553f1f\\script parse failure Ω\\.gamefactory\\scratch\\WF-GODOT-c34c9b20\\EXEC-6975f70f\\project",
+    "phase": "version",
+    "started_intent_at": "2026-09-27T02:10:16.435800+00:00",
+    "timeout_seconds": 10.0
+  },
+  "scenario_fingerprint": "831c75b5537606b349c630f578079a72b09e258fd5af52cca8c52a16b5a51246",
+  "source_manifest_sha256": "9633c7f6a27d5911e6ebaa82e6f37e9414b6557cb0e8e608b2a1c03b5dd183e8",
+  "task_id": "WF-GODOT-c34c9b20-EXECUTE",
+  "workflow_id": "WF-GODOT-c34c9b20"
+}

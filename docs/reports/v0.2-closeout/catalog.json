@@ -1,0 +1,1524 @@
+{
+  "source_identity": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\final-source.json",
+  "acceptance": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\windows-acceptance.json",
+  "recovery": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\windows-recovery.json",
+  "relationships": {
+    "workflow_id": "WF-GODOT-0f9e853f",
+    "execution_id": "EXEC-93637804",
+    "scenario_id": "fixture-smoke",
+    "execution_task_id": "WF-GODOT-0f9e853f-EXECUTE",
+    "validation_task_id": "WF-GODOT-0f9e853f-VALIDATE"
+  },
+  "files": [
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-4d2ef789\\ART-cfb71fcb\\source-manifest.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4d2ef789/ART-cfb71fcb/source-manifest.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-4d2ef789\\ART-fe936cdc\\scenario-snapshot.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4d2ef789/ART-fe936cdc/scenario-snapshot.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-4d2ef789\\ART-33abc6e4\\version.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4d2ef789/ART-33abc6e4/version.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-4d2ef789\\ART-a3e41e21\\version-terminal.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4d2ef789/ART-a3e41e21/version-terminal.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-4d2ef789\\ART-c3f62782\\help.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4d2ef789/ART-c3f62782/help.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-4d2ef789\\ART-2d87a530\\help-terminal.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4d2ef789/ART-2d87a530/help-terminal.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-4d2ef789\\ART-ce57c271\\import.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4d2ef789/ART-ce57c271/import.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-4d2ef789\\ART-5ddef4a3\\import-terminal.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4d2ef789/ART-5ddef4a3/import-terminal.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-4d2ef789\\ART-9740b245\\runtime.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4d2ef789/ART-9740b245/runtime.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-4d2ef789\\ART-6666e3ae\\runtime-terminal.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4d2ef789/ART-6666e3ae/runtime-terminal.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-4d2ef789\\ART-2eba177a\\help-process.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4d2ef789/ART-2eba177a/help-process.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-4d2ef789\\ART-4e085c09\\help-stderr.log",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4d2ef789/ART-4e085c09/help-stderr.log",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-4d2ef789\\ART-15e778ce\\help-stdout.log",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4d2ef789/ART-15e778ce/help-stdout.log",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-4d2ef789\\ART-8fd0b24d\\import-process.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4d2ef789/ART-8fd0b24d/import-process.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-4d2ef789\\ART-85bcdf70\\import-stderr.log",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4d2ef789/ART-85bcdf70/import-stderr.log",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-4d2ef789\\ART-ecf5046d\\import-stdout.log",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4d2ef789/ART-ecf5046d/import-stdout.log",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-4d2ef789\\ART-0f10308a\\runtime-observation.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4d2ef789/ART-0f10308a/runtime-observation.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-4d2ef789\\ART-29897374\\runtime-process.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4d2ef789/ART-29897374/runtime-process.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-4d2ef789\\ART-4f46e28d\\runtime-request.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4d2ef789/ART-4f46e28d/runtime-request.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-4d2ef789\\ART-0b966811\\runtime-stderr.log",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4d2ef789/ART-0b966811/runtime-stderr.log",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-4d2ef789\\ART-4d5525bf\\runtime-stdout.log",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4d2ef789/ART-4d5525bf/runtime-stdout.log",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-4d2ef789\\ART-e3433e25\\version-process.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4d2ef789/ART-e3433e25/version-process.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-4d2ef789\\ART-bf4efe09\\version-stderr.log",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4d2ef789/ART-bf4efe09/version-stderr.log",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-4d2ef789\\ART-17032d36\\version-stdout.log",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4d2ef789/ART-17032d36/version-stdout.log",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-4d2ef789\\ART-d6eee17a\\execution-summary.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4d2ef789/ART-d6eee17a/execution-summary.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-4d2ef789\\ART-3a12b90e\\validation-report.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4d2ef789/ART-3a12b90e/validation-report.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-ba06b0c7\\ART-2d57146a\\source-manifest.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ba06b0c7/ART-2d57146a/source-manifest.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-ba06b0c7\\ART-a73a0f25\\scenario-snapshot.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ba06b0c7/ART-a73a0f25/scenario-snapshot.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-ba06b0c7\\ART-723b1091\\version.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ba06b0c7/ART-723b1091/version.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-ba06b0c7\\ART-00f858ae\\version-terminal.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ba06b0c7/ART-00f858ae/version-terminal.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-ba06b0c7\\ART-f2f7ccb2\\help.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ba06b0c7/ART-f2f7ccb2/help.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-ba06b0c7\\ART-e057cd57\\help-terminal.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ba06b0c7/ART-e057cd57/help-terminal.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-ba06b0c7\\ART-6e1958f2\\import.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ba06b0c7/ART-6e1958f2/import.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-ba06b0c7\\ART-7fea2f2e\\import-terminal.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ba06b0c7/ART-7fea2f2e/import-terminal.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-ba06b0c7\\ART-08ce8c84\\runtime.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ba06b0c7/ART-08ce8c84/runtime.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-ba06b0c7\\ART-c67137f2\\runtime-terminal.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ba06b0c7/ART-c67137f2/runtime-terminal.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-ba06b0c7\\ART-0ffbcb2a\\help-process.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ba06b0c7/ART-0ffbcb2a/help-process.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-ba06b0c7\\ART-5f0612f0\\help-stderr.log",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ba06b0c7/ART-5f0612f0/help-stderr.log",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-ba06b0c7\\ART-8778167a\\help-stdout.log",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ba06b0c7/ART-8778167a/help-stdout.log",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-ba06b0c7\\ART-585ccdd7\\import-process.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ba06b0c7/ART-585ccdd7/import-process.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-ba06b0c7\\ART-154c0c3d\\import-stderr.log",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ba06b0c7/ART-154c0c3d/import-stderr.log",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-ba06b0c7\\ART-76311b80\\import-stdout.log",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ba06b0c7/ART-76311b80/import-stdout.log",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-ba06b0c7\\ART-d646dcef\\runtime-process.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ba06b0c7/ART-d646dcef/runtime-process.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-ba06b0c7\\ART-a29ac5ad\\runtime-request.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ba06b0c7/ART-a29ac5ad/runtime-request.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-ba06b0c7\\ART-1057a83d\\runtime-stderr.log",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ba06b0c7/ART-1057a83d/runtime-stderr.log",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-ba06b0c7\\ART-106e3cff\\runtime-stdout.log",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ba06b0c7/ART-106e3cff/runtime-stdout.log",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-ba06b0c7\\ART-28491c32\\version-process.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ba06b0c7/ART-28491c32/version-process.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-ba06b0c7\\ART-1ced2aab\\version-stderr.log",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ba06b0c7/ART-1ced2aab/version-stderr.log",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-ba06b0c7\\ART-5c8629a1\\version-stdout.log",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ba06b0c7/ART-5c8629a1/version-stdout.log",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-0f9e853f\\ART-3df9bcb6\\source-manifest.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-0f9e853f/ART-3df9bcb6/source-manifest.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-0f9e853f\\ART-71faa803\\scenario-snapshot.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-0f9e853f/ART-71faa803/scenario-snapshot.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-0f9e853f\\ART-f35f5fed\\version.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-0f9e853f/ART-f35f5fed/version.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-0f9e853f\\ART-5523c6e8\\version-terminal.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-0f9e853f/ART-5523c6e8/version-terminal.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-0f9e853f\\ART-9ce96053\\help.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-0f9e853f/ART-9ce96053/help.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-0f9e853f\\ART-4c10ae3a\\help-terminal.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-0f9e853f/ART-4c10ae3a/help-terminal.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-0f9e853f\\ART-4a41d7fa\\import.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-0f9e853f/ART-4a41d7fa/import.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-0f9e853f\\ART-c8d560cc\\import-terminal.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-0f9e853f/ART-c8d560cc/import-terminal.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-0f9e853f\\ART-974d4fd3\\runtime.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-0f9e853f/ART-974d4fd3/runtime.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-0f9e853f\\ART-01f1003a\\runtime-terminal.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-0f9e853f/ART-01f1003a/runtime-terminal.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-0f9e853f\\ART-8c598de1\\help-process.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-0f9e853f/ART-8c598de1/help-process.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-0f9e853f\\ART-ab0b438a\\help-stderr.log",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-0f9e853f/ART-ab0b438a/help-stderr.log",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-0f9e853f\\ART-32fd5d3f\\help-stdout.log",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-0f9e853f/ART-32fd5d3f/help-stdout.log",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-0f9e853f\\ART-3223d7ed\\import-process.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-0f9e853f/ART-3223d7ed/import-process.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-0f9e853f\\ART-8a5ba9e5\\import-stderr.log",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-0f9e853f/ART-8a5ba9e5/import-stderr.log",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-0f9e853f\\ART-e5b4bd27\\import-stdout.log",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-0f9e853f/ART-e5b4bd27/import-stdout.log",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-0f9e853f\\ART-0494f04c\\runtime-observation.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-0f9e853f/ART-0494f04c/runtime-observation.json",
+      "role": "observation"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-0f9e853f\\ART-5dc5e7b8\\runtime-process.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-0f9e853f/ART-5dc5e7b8/runtime-process.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-0f9e853f\\ART-845ac9a5\\runtime-request.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-0f9e853f/ART-845ac9a5/runtime-request.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-0f9e853f\\ART-2f98cc03\\runtime-stderr.log",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-0f9e853f/ART-2f98cc03/runtime-stderr.log",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-0f9e853f\\ART-f11c5520\\runtime-stdout.log",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-0f9e853f/ART-f11c5520/runtime-stdout.log",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-0f9e853f\\ART-0c78e156\\version-process.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-0f9e853f/ART-0c78e156/version-process.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-0f9e853f\\ART-91d1787f\\version-stderr.log",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-0f9e853f/ART-91d1787f/version-stderr.log",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-0f9e853f\\ART-961ab776\\version-stdout.log",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-0f9e853f/ART-961ab776/version-stdout.log",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-0f9e853f\\ART-7f2b7cc4\\execution-summary.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-0f9e853f/ART-7f2b7cc4/execution-summary.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-0f9e853f\\ART-6c9c04a9\\validation-report.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-0f9e853f/ART-6c9c04a9/validation-report.json",
+      "role": "validation"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-578cfb6c\\ART-d0ede549\\source-manifest.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-578cfb6c/ART-d0ede549/source-manifest.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-578cfb6c\\ART-3319ccf1\\scenario-snapshot.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-578cfb6c/ART-3319ccf1/scenario-snapshot.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-578cfb6c\\ART-f9e1452f\\version.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-578cfb6c/ART-f9e1452f/version.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-578cfb6c\\ART-e33aec62\\version-terminal.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-578cfb6c/ART-e33aec62/version-terminal.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-578cfb6c\\ART-c69fa9e3\\help.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-578cfb6c/ART-c69fa9e3/help.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-578cfb6c\\ART-8a517dbe\\help-terminal.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-578cfb6c/ART-8a517dbe/help-terminal.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-578cfb6c\\ART-1aa76c03\\import.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-578cfb6c/ART-1aa76c03/import.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-578cfb6c\\ART-8a6b010b\\import-terminal.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-578cfb6c/ART-8a6b010b/import-terminal.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-578cfb6c\\ART-acbefc4e\\runtime.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-578cfb6c/ART-acbefc4e/runtime.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-578cfb6c\\ART-a91f5a8e\\runtime-terminal.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-578cfb6c/ART-a91f5a8e/runtime-terminal.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-578cfb6c\\ART-b942bbe1\\help-process.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-578cfb6c/ART-b942bbe1/help-process.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-578cfb6c\\ART-2bd5c2e9\\help-stderr.log",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-578cfb6c/ART-2bd5c2e9/help-stderr.log",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-578cfb6c\\ART-126add56\\help-stdout.log",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-578cfb6c/ART-126add56/help-stdout.log",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-578cfb6c\\ART-7de4a71e\\import-process.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-578cfb6c/ART-7de4a71e/import-process.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-578cfb6c\\ART-ea6ed5e5\\import-stderr.log",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-578cfb6c/ART-ea6ed5e5/import-stderr.log",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-578cfb6c\\ART-613f8dac\\import-stdout.log",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-578cfb6c/ART-613f8dac/import-stdout.log",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-578cfb6c\\ART-4de789c4\\runtime-observation.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-578cfb6c/ART-4de789c4/runtime-observation.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-578cfb6c\\ART-2522465a\\runtime-process.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-578cfb6c/ART-2522465a/runtime-process.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-578cfb6c\\ART-d248a492\\runtime-request.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-578cfb6c/ART-d248a492/runtime-request.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-578cfb6c\\ART-7349e86a\\runtime-stderr.log",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-578cfb6c/ART-7349e86a/runtime-stderr.log",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-578cfb6c\\ART-1f8f80ae\\runtime-stdout.log",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-578cfb6c/ART-1f8f80ae/runtime-stdout.log",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-578cfb6c\\ART-ba8daff8\\version-process.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-578cfb6c/ART-ba8daff8/version-process.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-578cfb6c\\ART-762abc53\\version-stderr.log",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-578cfb6c/ART-762abc53/version-stderr.log",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-578cfb6c\\ART-d9626c40\\version-stdout.log",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-578cfb6c/ART-d9626c40/version-stdout.log",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-578cfb6c\\ART-edb64d05\\execution-summary.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-578cfb6c/ART-edb64d05/execution-summary.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-578cfb6c\\ART-2e15af63\\validation-report.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-578cfb6c/ART-2e15af63/validation-report.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-ce84e822\\ART-5f88fbe7\\source-manifest.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ce84e822/ART-5f88fbe7/source-manifest.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-ce84e822\\ART-4cceae05\\scenario-snapshot.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ce84e822/ART-4cceae05/scenario-snapshot.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-ce84e822\\ART-3cf5d915\\version.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ce84e822/ART-3cf5d915/version.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-ce84e822\\ART-bddf58ca\\version-terminal.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ce84e822/ART-bddf58ca/version-terminal.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-ce84e822\\ART-3c8575f3\\help.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ce84e822/ART-3c8575f3/help.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-ce84e822\\ART-0dc20d5a\\help-terminal.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ce84e822/ART-0dc20d5a/help-terminal.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-ce84e822\\ART-4db2b799\\import.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ce84e822/ART-4db2b799/import.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-ce84e822\\ART-169ddd9a\\import-terminal.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ce84e822/ART-169ddd9a/import-terminal.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-ce84e822\\ART-9f44d273\\runtime.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ce84e822/ART-9f44d273/runtime.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-ce84e822\\ART-4b1f3c9c\\runtime-terminal.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ce84e822/ART-4b1f3c9c/runtime-terminal.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-ce84e822\\ART-4366c74a\\help-process.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ce84e822/ART-4366c74a/help-process.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-ce84e822\\ART-b008b494\\help-stderr.log",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ce84e822/ART-b008b494/help-stderr.log",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-ce84e822\\ART-75cd7643\\help-stdout.log",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ce84e822/ART-75cd7643/help-stdout.log",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-ce84e822\\ART-075c0411\\import-process.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ce84e822/ART-075c0411/import-process.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-ce84e822\\ART-2d5e2310\\import-stderr.log",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ce84e822/ART-2d5e2310/import-stderr.log",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-ce84e822\\ART-410cc27b\\import-stdout.log",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ce84e822/ART-410cc27b/import-stdout.log",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-ce84e822\\ART-d9eb05cb\\runtime-observation.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ce84e822/ART-d9eb05cb/runtime-observation.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-ce84e822\\ART-d8ec9b3c\\runtime-process.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ce84e822/ART-d8ec9b3c/runtime-process.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-ce84e822\\ART-eea0d8ae\\runtime-request.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ce84e822/ART-eea0d8ae/runtime-request.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-ce84e822\\ART-8c79affb\\runtime-stderr.log",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ce84e822/ART-8c79affb/runtime-stderr.log",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-ce84e822\\ART-9aaf43bc\\runtime-stdout.log",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ce84e822/ART-9aaf43bc/runtime-stdout.log",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-ce84e822\\ART-16ef59b3\\version-process.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ce84e822/ART-16ef59b3/version-process.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-ce84e822\\ART-61a24b19\\version-stderr.log",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ce84e822/ART-61a24b19/version-stderr.log",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-ce84e822\\ART-ee9168af\\version-stdout.log",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ce84e822/ART-ee9168af/version-stdout.log",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-ce84e822\\ART-c186af18\\execution-summary.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ce84e822/ART-c186af18/execution-summary.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-ce84e822\\ART-1647f57f\\validation-report.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ce84e822/ART-1647f57f/validation-report.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-20ebaf82\\ART-ff0bda02\\source-manifest.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-20ebaf82/ART-ff0bda02/source-manifest.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-20ebaf82\\ART-fbc37ce3\\scenario-snapshot.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-20ebaf82/ART-fbc37ce3/scenario-snapshot.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-20ebaf82\\ART-0eba6e53\\version.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-20ebaf82/ART-0eba6e53/version.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-20ebaf82\\ART-6470f29f\\version-terminal.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-20ebaf82/ART-6470f29f/version-terminal.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-20ebaf82\\ART-cea6b196\\help.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-20ebaf82/ART-cea6b196/help.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-20ebaf82\\ART-7546f096\\help-terminal.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-20ebaf82/ART-7546f096/help-terminal.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-20ebaf82\\ART-99416ac5\\import.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-20ebaf82/ART-99416ac5/import.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-20ebaf82\\ART-0bf879e2\\import-terminal.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-20ebaf82/ART-0bf879e2/import-terminal.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-20ebaf82\\ART-ab28d12e\\runtime.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-20ebaf82/ART-ab28d12e/runtime.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-20ebaf82\\ART-f6cee10f\\runtime-terminal.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-20ebaf82/ART-f6cee10f/runtime-terminal.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-20ebaf82\\ART-bbe7c343\\help-process.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-20ebaf82/ART-bbe7c343/help-process.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-20ebaf82\\ART-3e4504ee\\help-stderr.log",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-20ebaf82/ART-3e4504ee/help-stderr.log",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-20ebaf82\\ART-e89a82df\\help-stdout.log",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-20ebaf82/ART-e89a82df/help-stdout.log",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-20ebaf82\\ART-ed58600a\\import-process.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-20ebaf82/ART-ed58600a/import-process.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-20ebaf82\\ART-e70a7fa6\\import-stderr.log",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-20ebaf82/ART-e70a7fa6/import-stderr.log",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-20ebaf82\\ART-8436c7fb\\import-stdout.log",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-20ebaf82/ART-8436c7fb/import-stdout.log",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-20ebaf82\\ART-7e89002b\\runtime-observation.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-20ebaf82/ART-7e89002b/runtime-observation.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-20ebaf82\\ART-3add7615\\runtime-process.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-20ebaf82/ART-3add7615/runtime-process.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-20ebaf82\\ART-de3979ae\\runtime-request.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-20ebaf82/ART-de3979ae/runtime-request.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-20ebaf82\\ART-3d148773\\runtime-stderr.log",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-20ebaf82/ART-3d148773/runtime-stderr.log",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-20ebaf82\\ART-0ebcbd64\\runtime-stdout.log",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-20ebaf82/ART-0ebcbd64/runtime-stdout.log",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-20ebaf82\\ART-b78ee480\\version-process.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-20ebaf82/ART-b78ee480/version-process.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-20ebaf82\\ART-846023a8\\version-stderr.log",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-20ebaf82/ART-846023a8/version-stderr.log",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-20ebaf82\\ART-9e4ebdaa\\version-stdout.log",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-20ebaf82/ART-9e4ebdaa/version-stdout.log",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-20ebaf82\\ART-631f9026\\execution-summary.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-20ebaf82/ART-631f9026/execution-summary.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-20ebaf82\\ART-78223d26\\validation-report.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-20ebaf82/ART-78223d26/validation-report.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-c34c9b20\\ART-dd16cf10\\source-manifest.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-c34c9b20/ART-dd16cf10/source-manifest.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-c34c9b20\\ART-a3675caf\\scenario-snapshot.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-c34c9b20/ART-a3675caf/scenario-snapshot.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-c34c9b20\\ART-9f7068d6\\version.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-c34c9b20/ART-9f7068d6/version.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-c34c9b20\\ART-d9f2d969\\version-terminal.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-c34c9b20/ART-d9f2d969/version-terminal.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-c34c9b20\\ART-86ebc5ab\\help.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-c34c9b20/ART-86ebc5ab/help.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-c34c9b20\\ART-017f63c8\\help-terminal.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-c34c9b20/ART-017f63c8/help-terminal.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-c34c9b20\\ART-b6fd19fb\\import.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-c34c9b20/ART-b6fd19fb/import.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-c34c9b20\\ART-ac795a52\\import-terminal.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-c34c9b20/ART-ac795a52/import-terminal.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-c34c9b20\\ART-f7163b0b\\help-process.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-c34c9b20/ART-f7163b0b/help-process.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-c34c9b20\\ART-12209e70\\help-stderr.log",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-c34c9b20/ART-12209e70/help-stderr.log",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-c34c9b20\\ART-f58b06fb\\help-stdout.log",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-c34c9b20/ART-f58b06fb/help-stdout.log",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-c34c9b20\\ART-1b49f33e\\import-process.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-c34c9b20/ART-1b49f33e/import-process.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-c34c9b20\\ART-58007db3\\import-stderr.log",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-c34c9b20/ART-58007db3/import-stderr.log",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-c34c9b20\\ART-f92c2984\\import-stdout.log",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-c34c9b20/ART-f92c2984/import-stdout.log",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-c34c9b20\\ART-4d5e7351\\runtime-request.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-c34c9b20/ART-4d5e7351/runtime-request.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-c34c9b20\\ART-7bc0fbd3\\version-process.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-c34c9b20/ART-7bc0fbd3/version-process.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-c34c9b20\\ART-165137e9\\version-stderr.log",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-c34c9b20/ART-165137e9/version-stderr.log",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-c34c9b20\\ART-c8f3366f\\version-stdout.log",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-c34c9b20/ART-c8f3366f/version-stdout.log",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-4500bae0\\ART-b52247e8\\source-manifest.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4500bae0/ART-b52247e8/source-manifest.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-4500bae0\\ART-fdb28d2b\\scenario-snapshot.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4500bae0/ART-fdb28d2b/scenario-snapshot.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-4500bae0\\ART-086aa6ab\\version.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4500bae0/ART-086aa6ab/version.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-4500bae0\\ART-33145c9b\\version-terminal.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4500bae0/ART-33145c9b/version-terminal.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-4500bae0\\ART-a8bded78\\help.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4500bae0/ART-a8bded78/help.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-4500bae0\\ART-1d846f8c\\help-terminal.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4500bae0/ART-1d846f8c/help-terminal.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-4500bae0\\ART-9f5e3632\\import.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4500bae0/ART-9f5e3632/import.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-4500bae0\\ART-633788bd\\import-terminal.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4500bae0/ART-633788bd/import-terminal.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-4500bae0\\ART-7b316dfc\\runtime.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4500bae0/ART-7b316dfc/runtime.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-4500bae0\\ART-47b855e4\\runtime-terminal.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4500bae0/ART-47b855e4/runtime-terminal.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-4500bae0\\ART-be465422\\help-process.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4500bae0/ART-be465422/help-process.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-4500bae0\\ART-2ad2f5ea\\help-stderr.log",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4500bae0/ART-2ad2f5ea/help-stderr.log",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-4500bae0\\ART-99936f92\\help-stdout.log",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4500bae0/ART-99936f92/help-stdout.log",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-4500bae0\\ART-4a09194c\\import-process.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4500bae0/ART-4a09194c/import-process.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-4500bae0\\ART-1d003550\\import-stderr.log",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4500bae0/ART-1d003550/import-stderr.log",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-4500bae0\\ART-34097050\\import-stdout.log",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4500bae0/ART-34097050/import-stdout.log",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-4500bae0\\ART-7d94a6d2\\runtime-observation.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4500bae0/ART-7d94a6d2/runtime-observation.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-4500bae0\\ART-88ac20f4\\runtime-process.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4500bae0/ART-88ac20f4/runtime-process.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-4500bae0\\ART-4ba6a9f0\\runtime-request.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4500bae0/ART-4ba6a9f0/runtime-request.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-4500bae0\\ART-a0b6411d\\runtime-stderr.log",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4500bae0/ART-a0b6411d/runtime-stderr.log",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-4500bae0\\ART-7d9c49bd\\runtime-stdout.log",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4500bae0/ART-7d9c49bd/runtime-stdout.log",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-4500bae0\\ART-067030fe\\version-process.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4500bae0/ART-067030fe/version-process.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-4500bae0\\ART-30f0eda0\\version-stderr.log",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4500bae0/ART-30f0eda0/version-stderr.log",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-4500bae0\\ART-080a8feb\\version-stdout.log",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4500bae0/ART-080a8feb/version-stdout.log",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-4500bae0\\ART-598be327\\execution-summary.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4500bae0/ART-598be327/execution-summary.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-acceptance\\WF-GODOT-4500bae0\\ART-627e2017\\validation-report.json",
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4500bae0/ART-627e2017/validation-report.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-recovery\\WF-GODOT-a2db051c\\ART-aa7a46b5\\source-manifest.json",
+      "path": "raw-artifacts/windows-recovery/WF-GODOT-a2db051c/ART-aa7a46b5/source-manifest.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-recovery\\WF-GODOT-a2db051c\\ART-9fd8a64f\\scenario-snapshot.json",
+      "path": "raw-artifacts/windows-recovery/WF-GODOT-a2db051c/ART-9fd8a64f/scenario-snapshot.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-recovery\\WF-GODOT-a2db051c\\ART-e5815b56\\version.json",
+      "path": "raw-artifacts/windows-recovery/WF-GODOT-a2db051c/ART-e5815b56/version.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-recovery\\WF-GODOT-a2db051c\\ART-caea6389\\version-terminal.json",
+      "path": "raw-artifacts/windows-recovery/WF-GODOT-a2db051c/ART-caea6389/version-terminal.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-recovery\\WF-GODOT-a2db051c\\ART-cafc3624\\help.json",
+      "path": "raw-artifacts/windows-recovery/WF-GODOT-a2db051c/ART-cafc3624/help.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-recovery\\WF-GODOT-a2db051c\\ART-c723c0ca\\help-terminal.json",
+      "path": "raw-artifacts/windows-recovery/WF-GODOT-a2db051c/ART-c723c0ca/help-terminal.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-recovery\\WF-GODOT-a2db051c\\ART-c8076840\\import.json",
+      "path": "raw-artifacts/windows-recovery/WF-GODOT-a2db051c/ART-c8076840/import.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-recovery\\WF-GODOT-a2db051c\\ART-736c5ec4\\import-terminal.json",
+      "path": "raw-artifacts/windows-recovery/WF-GODOT-a2db051c/ART-736c5ec4/import-terminal.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-recovery\\WF-GODOT-a2db051c\\ART-502c7bb7\\runtime.json",
+      "path": "raw-artifacts/windows-recovery/WF-GODOT-a2db051c/ART-502c7bb7/runtime.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-recovery\\WF-GODOT-a2db051c\\ART-373a224e\\runtime-terminal.json",
+      "path": "raw-artifacts/windows-recovery/WF-GODOT-a2db051c/ART-373a224e/runtime-terminal.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-recovery\\WF-GODOT-a2db051c\\ART-ee88c7e0\\source-manifest.json",
+      "path": "raw-artifacts/windows-recovery/WF-GODOT-a2db051c/ART-ee88c7e0/source-manifest.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-recovery\\WF-GODOT-a2db051c\\ART-fa58faa1\\scenario-snapshot.json",
+      "path": "raw-artifacts/windows-recovery/WF-GODOT-a2db051c/ART-fa58faa1/scenario-snapshot.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-recovery\\WF-GODOT-a2db051c\\ART-1f015ed3\\version.json",
+      "path": "raw-artifacts/windows-recovery/WF-GODOT-a2db051c/ART-1f015ed3/version.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-recovery\\WF-GODOT-a2db051c\\ART-0f166bb9\\version-terminal.json",
+      "path": "raw-artifacts/windows-recovery/WF-GODOT-a2db051c/ART-0f166bb9/version-terminal.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-recovery\\WF-GODOT-a2db051c\\ART-2e7877c5\\help.json",
+      "path": "raw-artifacts/windows-recovery/WF-GODOT-a2db051c/ART-2e7877c5/help.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-recovery\\WF-GODOT-a2db051c\\ART-a048bdd2\\help-terminal.json",
+      "path": "raw-artifacts/windows-recovery/WF-GODOT-a2db051c/ART-a048bdd2/help-terminal.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-recovery\\WF-GODOT-a2db051c\\ART-a4d674bf\\import.json",
+      "path": "raw-artifacts/windows-recovery/WF-GODOT-a2db051c/ART-a4d674bf/import.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-recovery\\WF-GODOT-a2db051c\\ART-f9d7e18b\\import-terminal.json",
+      "path": "raw-artifacts/windows-recovery/WF-GODOT-a2db051c/ART-f9d7e18b/import-terminal.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-recovery\\WF-GODOT-a2db051c\\ART-50d4ed62\\runtime.json",
+      "path": "raw-artifacts/windows-recovery/WF-GODOT-a2db051c/ART-50d4ed62/runtime.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-recovery\\WF-GODOT-a2db051c\\ART-5801a519\\runtime-terminal.json",
+      "path": "raw-artifacts/windows-recovery/WF-GODOT-a2db051c/ART-5801a519/runtime-terminal.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-recovery\\WF-GODOT-a2db051c\\ART-587b444a\\help-process.json",
+      "path": "raw-artifacts/windows-recovery/WF-GODOT-a2db051c/ART-587b444a/help-process.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-recovery\\WF-GODOT-a2db051c\\ART-443fecb8\\help-stderr.log",
+      "path": "raw-artifacts/windows-recovery/WF-GODOT-a2db051c/ART-443fecb8/help-stderr.log",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-recovery\\WF-GODOT-a2db051c\\ART-ec05fcb4\\help-stdout.log",
+      "path": "raw-artifacts/windows-recovery/WF-GODOT-a2db051c/ART-ec05fcb4/help-stdout.log",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-recovery\\WF-GODOT-a2db051c\\ART-ec586b76\\import-process.json",
+      "path": "raw-artifacts/windows-recovery/WF-GODOT-a2db051c/ART-ec586b76/import-process.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-recovery\\WF-GODOT-a2db051c\\ART-9fd23020\\import-stderr.log",
+      "path": "raw-artifacts/windows-recovery/WF-GODOT-a2db051c/ART-9fd23020/import-stderr.log",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-recovery\\WF-GODOT-a2db051c\\ART-8708d009\\import-stdout.log",
+      "path": "raw-artifacts/windows-recovery/WF-GODOT-a2db051c/ART-8708d009/import-stdout.log",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-recovery\\WF-GODOT-a2db051c\\ART-d395af4f\\runtime-observation.json",
+      "path": "raw-artifacts/windows-recovery/WF-GODOT-a2db051c/ART-d395af4f/runtime-observation.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-recovery\\WF-GODOT-a2db051c\\ART-c1f55985\\runtime-process.json",
+      "path": "raw-artifacts/windows-recovery/WF-GODOT-a2db051c/ART-c1f55985/runtime-process.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-recovery\\WF-GODOT-a2db051c\\ART-4909ced4\\runtime-request.json",
+      "path": "raw-artifacts/windows-recovery/WF-GODOT-a2db051c/ART-4909ced4/runtime-request.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-recovery\\WF-GODOT-a2db051c\\ART-7a6f7c4a\\runtime-stderr.log",
+      "path": "raw-artifacts/windows-recovery/WF-GODOT-a2db051c/ART-7a6f7c4a/runtime-stderr.log",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-recovery\\WF-GODOT-a2db051c\\ART-f1309ff6\\runtime-stdout.log",
+      "path": "raw-artifacts/windows-recovery/WF-GODOT-a2db051c/ART-f1309ff6/runtime-stdout.log",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-recovery\\WF-GODOT-a2db051c\\ART-42ed3333\\version-process.json",
+      "path": "raw-artifacts/windows-recovery/WF-GODOT-a2db051c/ART-42ed3333/version-process.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-recovery\\WF-GODOT-a2db051c\\ART-1d9bd0e3\\version-stderr.log",
+      "path": "raw-artifacts/windows-recovery/WF-GODOT-a2db051c/ART-1d9bd0e3/version-stderr.log",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-recovery\\WF-GODOT-a2db051c\\ART-ebdc99cd\\version-stdout.log",
+      "path": "raw-artifacts/windows-recovery/WF-GODOT-a2db051c/ART-ebdc99cd/version-stdout.log",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-recovery\\WF-GODOT-a2db051c\\ART-3e76cf33\\execution-summary.json",
+      "path": "raw-artifacts/windows-recovery/WF-GODOT-a2db051c/ART-3e76cf33/execution-summary.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-recovery\\WF-GODOT-a2db051c\\ART-303c5aab\\validation-report.json",
+      "path": "raw-artifacts/windows-recovery/WF-GODOT-a2db051c/ART-303c5aab/validation-report.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-recovery\\WF-GODOT-6f1b04b0\\ART-7df1e327\\source-manifest.json",
+      "path": "raw-artifacts/windows-recovery/WF-GODOT-6f1b04b0/ART-7df1e327/source-manifest.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-recovery\\WF-GODOT-6f1b04b0\\ART-02201148\\scenario-snapshot.json",
+      "path": "raw-artifacts/windows-recovery/WF-GODOT-6f1b04b0/ART-02201148/scenario-snapshot.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-recovery\\WF-GODOT-6f1b04b0\\ART-b8495790\\version.json",
+      "path": "raw-artifacts/windows-recovery/WF-GODOT-6f1b04b0/ART-b8495790/version.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-recovery\\WF-GODOT-6f1b04b0\\ART-0d49ebd7\\version-terminal.json",
+      "path": "raw-artifacts/windows-recovery/WF-GODOT-6f1b04b0/ART-0d49ebd7/version-terminal.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-recovery\\WF-GODOT-6f1b04b0\\ART-a709957b\\help.json",
+      "path": "raw-artifacts/windows-recovery/WF-GODOT-6f1b04b0/ART-a709957b/help.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-recovery\\WF-GODOT-6f1b04b0\\ART-918ef3f4\\help-terminal.json",
+      "path": "raw-artifacts/windows-recovery/WF-GODOT-6f1b04b0/ART-918ef3f4/help-terminal.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-recovery\\WF-GODOT-6f1b04b0\\ART-fc8324c1\\import.json",
+      "path": "raw-artifacts/windows-recovery/WF-GODOT-6f1b04b0/ART-fc8324c1/import.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-recovery\\WF-GODOT-6f1b04b0\\ART-d03a164e\\import-terminal.json",
+      "path": "raw-artifacts/windows-recovery/WF-GODOT-6f1b04b0/ART-d03a164e/import-terminal.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-recovery\\WF-GODOT-6f1b04b0\\ART-f8c2f03a\\runtime.json",
+      "path": "raw-artifacts/windows-recovery/WF-GODOT-6f1b04b0/ART-f8c2f03a/runtime.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-live-crash\\WF-GODOT-2cd66cd7\\ART-15b9927d\\source-manifest.json",
+      "path": "raw-artifacts/windows-live-crash/WF-GODOT-2cd66cd7/ART-15b9927d/source-manifest.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-live-crash\\WF-GODOT-2cd66cd7\\ART-0ddfc0e9\\scenario-snapshot.json",
+      "path": "raw-artifacts/windows-live-crash/WF-GODOT-2cd66cd7/ART-0ddfc0e9/scenario-snapshot.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-live-crash\\WF-GODOT-2cd66cd7\\ART-870ba9b4\\version.json",
+      "path": "raw-artifacts/windows-live-crash/WF-GODOT-2cd66cd7/ART-870ba9b4/version.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-live-crash\\WF-GODOT-2cd66cd7\\ART-391b1f20\\version-terminal.json",
+      "path": "raw-artifacts/windows-live-crash/WF-GODOT-2cd66cd7/ART-391b1f20/version-terminal.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-live-crash\\WF-GODOT-2cd66cd7\\ART-d08093f9\\help.json",
+      "path": "raw-artifacts/windows-live-crash/WF-GODOT-2cd66cd7/ART-d08093f9/help.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-live-crash\\WF-GODOT-2cd66cd7\\ART-114e7a82\\help-terminal.json",
+      "path": "raw-artifacts/windows-live-crash/WF-GODOT-2cd66cd7/ART-114e7a82/help-terminal.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-live-crash\\WF-GODOT-2cd66cd7\\ART-9fc0fb73\\import.json",
+      "path": "raw-artifacts/windows-live-crash/WF-GODOT-2cd66cd7/ART-9fc0fb73/import.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-live-crash\\WF-GODOT-2cd66cd7\\ART-c1803485\\import-terminal.json",
+      "path": "raw-artifacts/windows-live-crash/WF-GODOT-2cd66cd7/ART-c1803485/import-terminal.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\raw-artifacts\\windows-live-crash\\WF-GODOT-2cd66cd7\\ART-471c38e3\\runtime.json",
+      "path": "raw-artifacts/windows-live-crash/WF-GODOT-2cd66cd7/ART-471c38e3/runtime.json",
+      "role": "other"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\selected-inspect.json",
+      "path": "records/selected-inspect.json",
+      "role": "inspect"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\artifact-export-map.json",
+      "path": "supporting/artifact-export-map.json",
+      "role": "supporting"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\baseline-source.json",
+      "path": "supporting/baseline-source.json",
+      "role": "supporting"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\baseline-tests.xml",
+      "path": "supporting/baseline-tests.xml",
+      "role": "supporting"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\baseline.json",
+      "path": "supporting/baseline.json",
+      "role": "supporting"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\cold-review.json",
+      "path": "supporting/cold-review.json",
+      "role": "supporting"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\commit-transition.json",
+      "path": "supporting/commit-transition.json",
+      "role": "supporting"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\final-product-identity.json",
+      "path": "supporting/final-product-identity.json",
+      "role": "supporting"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\final-quality.json",
+      "path": "supporting/final-quality.json",
+      "role": "supporting"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\final-source.json",
+      "path": "supporting/final-source.json",
+      "role": "supporting"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\final-test-exclusions.json",
+      "path": "supporting/final-test-exclusions.json",
+      "role": "supporting"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\final-tests.xml",
+      "path": "supporting/final-tests.xml",
+      "role": "supporting"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\historical-evidence-assessment.json",
+      "path": "supporting/historical-evidence-assessment.json",
+      "role": "supporting"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\historical-hashes.json",
+      "path": "supporting/historical-hashes.json",
+      "role": "supporting"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\historical-preservation.json",
+      "path": "supporting/historical-preservation.json",
+      "role": "supporting"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\installation.json",
+      "path": "supporting/installation.json",
+      "role": "supporting"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\lead-live-validation.json",
+      "path": "supporting/lead-live-validation.json",
+      "role": "supporting"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\live-export-map.json",
+      "path": "supporting/live-export-map.json",
+      "role": "supporting"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\platform-access.json",
+      "path": "supporting/platform-access.json",
+      "role": "supporting"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\product-commit-match.json",
+      "path": "supporting/product-commit-match.json",
+      "role": "supporting"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\README.md",
+      "path": "supporting/README.md",
+      "role": "supporting"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\symlink-probe.json",
+      "path": "supporting/symlink-probe.json",
+      "role": "supporting"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\test-exclusions.json",
+      "path": "supporting/test-exclusions.json",
+      "role": "supporting"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\v01-command-comparison.json",
+      "path": "supporting/v01-command-comparison.json",
+      "role": "supporting"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\v01-comparison.md",
+      "path": "supporting/v01-comparison.md",
+      "role": "supporting"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\windows-acceptance-sandbox-failed.json",
+      "path": "supporting/windows-acceptance-sandbox-failed.json",
+      "role": "supporting"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\windows-commands.json",
+      "path": "supporting/windows-commands.json",
+      "role": "supporting"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\windows-live-command-before-final-review.json",
+      "path": "supporting/windows-live-command-before-final-review.json",
+      "role": "supporting"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\windows-live-command.json",
+      "path": "supporting/windows-live-command.json",
+      "role": "supporting"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\windows-live-crash-before-final-review.json",
+      "path": "supporting/windows-live-crash-before-final-review.json",
+      "role": "supporting"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\windows-live-crash.json",
+      "path": "supporting/windows-live-crash.json",
+      "role": "supporting"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\windows-runtime-commands.json",
+      "path": "supporting/windows-runtime-commands.json",
+      "role": "supporting"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\windows-v01.json",
+      "path": "supporting/windows-v01.json",
+      "role": "supporting"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\workflow-review.json",
+      "path": "supporting/workflow-review.json",
+      "role": "supporting"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\remote-ci\\artifact-retrieval.json",
+      "path": "remote-ci/artifact-retrieval.json",
+      "role": "supporting"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\remote-ci\\artifacts.json",
+      "path": "remote-ci/artifacts.json",
+      "role": "supporting"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\remote-ci\\jobs.json",
+      "path": "remote-ci/jobs.json",
+      "role": "supporting"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\remote-ci\\real-godot-20260927T020728Z-2097.json",
+      "path": "remote-ci/real-godot-20260927T020728Z-2097.json",
+      "role": "supporting"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\remote-ci\\retrieval.json",
+      "path": "remote-ci/retrieval.json",
+      "role": "supporting"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\remote-ci\\run.json",
+      "path": "remote-ci/run.json",
+      "role": "supporting"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\remote-ci\\run.log",
+      "path": "remote-ci/run.log",
+      "role": "supporting"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\remote-ci\\test-summary.json",
+      "path": "remote-ci/test-summary.json",
+      "role": "supporting"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\live-process-evidence\\fixture-ready.json",
+      "path": "live-process-evidence/fixture-ready.json",
+      "role": "supporting"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\live-process-evidence\\fixture-runtime-journal.jsonl",
+      "path": "live-process-evidence/fixture-runtime-journal.jsonl",
+      "role": "supporting"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\live-process-evidence\\helper-ready.json",
+      "path": "live-process-evidence/helper-ready.json",
+      "role": "supporting"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\live-process-evidence\\launch-observations.jsonl",
+      "path": "live-process-evidence/launch-observations.jsonl",
+      "role": "supporting"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\live-process-evidence\\workflow-info.json",
+      "path": "live-process-evidence/workflow-info.json",
+      "role": "supporting"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout-report.md",
+      "path": "closeout-report.md",
+      "role": "documentation"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\work-plan-v0.2-closeout.md",
+      "path": "work-plan.md",
+      "role": "documentation"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\requirements\\v0.2-verification-closeout.md",
+      "path": "requirements.md",
+      "role": "documentation"
+    },
+    {
+      "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\closeout\\package-README.md",
+      "path": "README.md",
+      "role": "documentation"
+    }
+  ]
+}

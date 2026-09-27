@@ -1,0 +1,85 @@
+{
+  "scope": "Actual selected positive workflow semantic graph plus all 242 exported raw artifact hashes; no source/Temp/Godot/network reads by copied stdlib verifier",
+  "commands": [
+    {
+      "label": "cold-positive",
+      "argv": [
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verify-venv\\Scripts\\python.exe",
+        "-I",
+        "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gf-cold-5lbu53_y\\bundle\\verify_closeout_evidence.py",
+        "verify",
+        "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gf-cold-5lbu53_y\\bundle"
+      ],
+      "cwd": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gf-cold-5lbu53_y",
+      "started_at": "2026-09-27T02:19:03.504990+00:00",
+      "finished_at": "2026-09-27T02:19:04.452201+00:00",
+      "exit_code": 0,
+      "stdout": "PASS: evidence bundle is complete, hash-valid, and internally consistent\n",
+      "stderr": ""
+    },
+    {
+      "label": "required-observation-removed",
+      "argv": [
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verify-venv\\Scripts\\python.exe",
+        "-I",
+        "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gf-cold-5lbu53_y\\bundle\\verify_closeout_evidence.py",
+        "verify",
+        "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gf-cold-5lbu53_y\\bundle"
+      ],
+      "cwd": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gf-cold-5lbu53_y",
+      "started_at": "2026-09-27T02:19:04.453210+00:00",
+      "finished_at": "2026-09-27T02:19:04.601257+00:00",
+      "exit_code": 1,
+      "stdout": "",
+      "stderr": "FAIL: missing or linked required file: raw-artifacts/windows-acceptance/WF-GODOT-0f9e853f/ART-0494f04c/runtime-observation.json\n"
+    },
+    {
+      "label": "log-tampered",
+      "argv": [
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verify-venv\\Scripts\\python.exe",
+        "-I",
+        "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gf-cold-5lbu53_y\\bundle\\verify_closeout_evidence.py",
+        "verify",
+        "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gf-cold-5lbu53_y\\bundle"
+      ],
+      "cwd": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gf-cold-5lbu53_y",
+      "started_at": "2026-09-27T02:19:04.602323+00:00",
+      "finished_at": "2026-09-27T02:19:04.732065+00:00",
+      "exit_code": 1,
+      "stdout": "",
+      "stderr": "FAIL: size/hash mismatch: raw-artifacts/windows-acceptance/WF-GODOT-4d2ef789/ART-15e778ce/help-stdout.log\n"
+    },
+    {
+      "label": "other-execution-with-recomputed-manifest-hash",
+      "argv": [
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verify-venv\\Scripts\\python.exe",
+        "-I",
+        "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gf-cold-5lbu53_y\\bundle\\verify_closeout_evidence.py",
+        "verify",
+        "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gf-cold-5lbu53_y\\bundle"
+      ],
+      "cwd": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gf-cold-5lbu53_y",
+      "started_at": "2026-09-27T02:19:04.734594+00:00",
+      "finished_at": "2026-09-27T02:19:05.042932+00:00",
+      "exit_code": 1,
+      "stdout": "",
+      "stderr": "FAIL: observation execution/scenario identity mismatch\n"
+    },
+    {
+      "label": "restored-positive",
+      "argv": [
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verify-venv\\Scripts\\python.exe",
+        "-I",
+        "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gf-cold-5lbu53_y\\bundle\\verify_closeout_evidence.py",
+        "verify",
+        "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gf-cold-5lbu53_y\\bundle"
+      ],
+      "cwd": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gf-cold-5lbu53_y",
+      "started_at": "2026-09-27T02:19:05.042932+00:00",
+      "finished_at": "2026-09-27T02:19:05.311170+00:00",
+      "exit_code": 0,
+      "stdout": "PASS: evidence bundle is complete, hash-valid, and internally consistent\n",
+      "stderr": ""
+    }
+  ]
+}

@@ -17,27 +17,59 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
+      - name: Record Linux filesystem context
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          set -euo pipefail
+          {
+            printf 'platform='; uname -a
+            printf '\ncheckout_mount:\n'; findmnt -T "$GITHUB_WORKSPACE" -o TARGET,SOURCE,FSTYPE,OPTIONS
+            printf '\ntemp_mount:\n'; findmnt -T "${TMPDIR:-/tmp}" -o TARGET,SOURCE,FSTYPE,OPTIONS
+            printf '\nfilesystem_capacity:\n'; df -T "$GITHUB_WORKSPACE" "${TMPDIR:-/tmp}"
+          } | tee "$RUNNER_TEMP/linux-filesystem-context.txt"
+      - name: Archive Linux filesystem context
+        if: always() && runner.os == 'Linux'
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-filesystem-python-${{ matrix.python-version }}
+          path: ${{ runner.temp }}/linux-filesystem-context.txt
+          if-no-files-found: warn
       - run: python -m pip install --upgrade pip
       - run: python -m pip install -e ".[dev]"
-      - run: python -m pytest -p no:cacheprovider
+      - run: python -m pytest -ra -p no:cacheprovider
       - run: ruff check src tests
       - run: ruff format --check src tests
       - run: mypy src/gamefactory
 
   godot-real:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     # Official Godot release metadata, pinned and reviewed with this source:
     # https://raw.githubusercontent.com/godotengine/godot-builds/main/releases/godot-4.7.2-stable.json
     env:
       GODOT_VERSION: 4.7.2-stable
+      GODOT_EXPECTED_VERSION: 4.7.2.stable.official.ed1daf0bf
       GODOT_ARCHIVE_SHA512: 9aa00f7a605200940bce3027a567b782f49bd8e940dd06ae9e987bd65aee1b1467edd56ed84fcdcbdd44354bf613bdbb4e5d2913e925850368e150c59ed54c65
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Install package and test dependencies
-        run: python -m pip install ".[dev]"
+      - name: Build wheel and install it into a clean virtual environment
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip build
+          mkdir -p "$RUNNER_TEMP/wheelhouse"
+          python -m build --wheel --outdir "$RUNNER_TEMP/wheelhouse"
+          python -m venv "$RUNNER_TEMP/gamefactory-venv"
+          venv_python="$RUNNER_TEMP/gamefactory-venv/bin/python"
+          wheel="$(find "$RUNNER_TEMP/wheelhouse" -maxdepth 1 -name 'gamefactory-*.whl' -print -quit)"
+          test -n "$wheel"
+          sha256sum "$wheel" > "$RUNNER_TEMP/gamefactory-wheel.sha256"
+          "$venv_python" -m pip install --upgrade pip
+          "$venv_python" -m pip install "${wheel}[dev]"
       - name: Download and verify pinned official Godot
         shell: bash
         run: |
@@ -48,12 +80,86 @@ jobs:
           unzip "$RUNNER_TEMP/$archive" -d "$RUNNER_TEMP/godot"
           chmod +x "$RUNNER_TEMP/godot/Godot_v${GODOT_VERSION}_linux.x86_64"
           echo "GAMEFACTORY_TEST_GODOT=$RUNNER_TEMP/godot/Godot_v${GODOT_VERSION}_linux.x86_64" >> "$GITHUB_ENV"
-      - name: Verify real engine behavior
-        run: python -m pytest -p no:cacheprovider -m real_godot
-      - name: Archive real-engine acceptance evidence
+      - name: Record source, platform, executable, and filesystem evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          evidence="$GITHUB_WORKSPACE/.verification/ci-godot"
+          mkdir -p "$evidence/reports" "$evidence/logs" "$RUNNER_TEMP/gamefactory-workspaces"
+          cp "$RUNNER_TEMP/gamefactory-wheel.sha256" "$evidence/wheel.sha256"
+          git rev-parse HEAD > "$evidence/commit.txt"
+          git status --porcelain=v1 > "$evidence/source-status.txt"
+          git ls-files -z | sort -z | xargs -0 sha256sum > "$evidence/source-manifest.sha256"
+          sha256sum "$GITHUB_WORKSPACE/.verification/ci-godot/source-manifest.sha256" > "$evidence/source-manifest-digest.txt"
+          {
+            printf 'python='; "$RUNNER_TEMP/gamefactory-venv/bin/python" --version
+            printf 'platform='; uname -a
+            godot_version="$("$GAMEFACTORY_TEST_GODOT" --version)"
+            printf 'godot_version=%s\n' "$godot_version"
+            test "$godot_version" = "$GODOT_EXPECTED_VERSION"
+            printf 'godot_executable_sha256='; sha256sum "$GAMEFACTORY_TEST_GODOT"
+            printf '\ninstalled_package_from_runner_temp:\n'
+            cd "$RUNNER_TEMP"
+            "$RUNNER_TEMP/gamefactory-venv/bin/python" -m pip check
+            "$RUNNER_TEMP/gamefactory-venv/bin/python" -m pip show gamefactory
+            "$RUNNER_TEMP/gamefactory-venv/bin/python" -c 'import gamefactory; print("module_path=" + gamefactory.__file__)'
+            printf '\ncheckout_mount:\n'; findmnt -T "$GITHUB_WORKSPACE" -o TARGET,SOURCE,FSTYPE,OPTIONS
+            printf '\nrunner_temp_mount:\n'; findmnt -T "$RUNNER_TEMP" -o TARGET,SOURCE,FSTYPE,OPTIONS
+            printf '\nrunner_temp_filesystem:\n'; df -T "$RUNNER_TEMP"
+          } | tee "$evidence/environment.txt"
+      - name: Run pinned real-Godot acceptance
+        shell: bash
+        working-directory: ${{ runner.temp }}
+        run: |
+          set -euo pipefail
+          root="$GITHUB_WORKSPACE"
+          evidence="$root/.verification/ci-godot"
+          python="$RUNNER_TEMP/gamefactory-venv/bin/python"
+          cli="$RUNNER_TEMP/gamefactory-venv/bin/gamefactory"
+          "$python" "$root/scripts/verify_godot_acceptance.py" \
+            --cli "$cli" \
+            --fixture "$root/examples/godot-verification" \
+            --godot "$GAMEFACTORY_TEST_GODOT" \
+            --output "$evidence/reports/acceptance.json" \
+            --workspace "$RUNNER_TEMP/gamefactory-workspaces/acceptance" \
+            2>&1 | tee "$evidence/logs/acceptance.log"
+      - name: Run recovery and live-crash verification
+        shell: bash
+        working-directory: ${{ runner.temp }}
+        run: |
+          set -euo pipefail
+          root="$GITHUB_WORKSPACE"
+          evidence="$root/.verification/ci-godot"
+          python="$RUNNER_TEMP/gamefactory-venv/bin/python"
+          cli="$RUNNER_TEMP/gamefactory-venv/bin/gamefactory"
+          "$python" "$root/scripts/verify_godot_recovery.py" \
+            --cli "$cli" \
+            --python "$python" \
+            --fixture "$root/examples/godot-verification" \
+            --godot "$GAMEFACTORY_TEST_GODOT" \
+            --output "$evidence/reports/recovery.json" \
+            --workspace "$RUNNER_TEMP/gamefactory-workspaces/recovery" \
+            2>&1 | tee "$evidence/logs/recovery.log"
+          "$python" "$root/scripts/verify_godot_live_crash.py" \
+            --cli "$cli" \
+            --python "$python" \
+            --fixture "$root/examples/godot-verification" \
+            --godot "$GAMEFACTORY_TEST_GODOT" \
+            --output "$evidence/reports/live-crash.json" \
+            --workspace "$RUNNER_TEMP/gamefactory-workspaces/live-crash" \
+            2>&1 | tee "$evidence/logs/live-crash.log"
+      - name: Archive selected real-engine closeout evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: godot-real-evidence
-          path: .verification/ci-godot/
+          path: |
+            .verification/ci-godot/reports/*.json
+            .verification/ci-godot/logs/*.log
+            .verification/ci-godot/commit.txt
+            .verification/ci-godot/source-status.txt
+            .verification/ci-godot/source-manifest.sha256
+            .verification/ci-godot/source-manifest-digest.txt
+            .verification/ci-godot/environment.txt
+            .verification/ci-godot/wheel.sha256
           if-no-files-found: warn

@@ -1,0 +1,30 @@
+{
+  "argv": [
+    "C:\\Users\\lenovo\\devel\\godot\\Godot_v4.7.2-stable_win64.exe\\Godot_v4.7.2-stable_win64_console.exe",
+    "--version"
+  ],
+  "attempt_number": 1,
+  "cleanup_completed": true,
+  "completed_at": "2026-09-27T02:09:41.478145+00:00",
+  "cwd": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gf-closeout-user-1_oo24l7\\acceptance\\godot-acceptance-20260927T020930Z-4c553f1f\\fixture game Ω\\.gamefactory\\scratch\\WF-GODOT-578cfb6c\\EXEC-49eab927\\project",
+  "duration_seconds": 0.074,
+  "executable_sha256": "c8f0a6bc45a19b33541501e57f6f7cd972ab18453743266339d495cbbe846643",
+  "execution_id": "EXEC-49eab927",
+  "exit_code": 0,
+  "harness_sha256": "429e7e7961dc65a07741f59d1bc40f883a03754673de27ff2d88a5c0bb5949c1",
+  "harness_version": "0.2.0",
+  "phase": "version",
+  "pid": 50356,
+  "scenario_fingerprint": "831c75b5537606b349c630f578079a72b09e258fd5af52cca8c52a16b5a51246",
+  "source_manifest_sha256": "c73c19852555c56896726e5b773ad0b1fdb73654d91739e704ba8493b274343e",
+  "started_at": "2026-09-27T02:09:41.399078+00:00",
+  "started_intent_at": "2026-09-27T02:09:41.355572+00:00",
+  "stderr_truncated": false,
+  "stdout_truncated": false,
+  "task_id": "WF-GODOT-578cfb6c-EXECUTE",
+  "terminated": false,
+  "termination_status": "completed",
+  "timed_out": false,
+  "timeout_seconds": 10.0,
+  "workflow_id": "WF-GODOT-578cfb6c"
+}

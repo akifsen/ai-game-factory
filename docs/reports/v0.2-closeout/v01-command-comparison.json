@@ -1,0 +1,281 @@
+{
+  "previous_sha256": "888c40fc11304254b1480f90b4c32a218fc775e9dd828cbe61ddfafd353aeae0",
+  "current_sha256": "63890a47272dcdc46dd5ff5d85143fe52106393b14d5c654866088007d89db92",
+  "rows": [
+    {
+      "previous_step": 1,
+      "previous": "--version",
+      "current_step": 1,
+      "current": "--version"
+    },
+    {
+      "previous_step": 2,
+      "previous": "--help",
+      "current_step": 2,
+      "current": "--help"
+    },
+    {
+      "previous_step": 3,
+      "previous": "doctor",
+      "current_step": 3,
+      "current": "doctor"
+    },
+    {
+      "previous_step": 4,
+      "previous": "init",
+      "current_step": 4,
+      "current": "init"
+    },
+    {
+      "previous_step": 5,
+      "previous": "init",
+      "current_step": 5,
+      "current": "init"
+    },
+    {
+      "previous_step": 6,
+      "previous": "status",
+      "current_step": 6,
+      "current": "status"
+    },
+    {
+      "previous_step": 7,
+      "previous": "approvals",
+      "current_step": 7,
+      "current": "approvals"
+    },
+    {
+      "previous_step": 8,
+      "previous": "run demo",
+      "current_step": 8,
+      "current": "run demo"
+    },
+    {
+      "previous_step": 9,
+      "previous": "inspect",
+      "current_step": 9,
+      "current": "inspect"
+    },
+    {
+      "previous_step": 10,
+      "previous": "approvals",
+      "current_step": 10,
+      "current": "approvals"
+    },
+    {
+      "previous_step": 11,
+      "previous": "approve",
+      "current_step": 11,
+      "current": "approve"
+    },
+    {
+      "previous_step": 12,
+      "previous": "resume",
+      "current_step": 12,
+      "current": "resume"
+    },
+    {
+      "previous_step": 13,
+      "previous": "inspect",
+      "current_step": 13,
+      "current": "inspect"
+    },
+    {
+      "previous_step": 14,
+      "previous": "resume",
+      "current_step": 14,
+      "current": "resume"
+    },
+    {
+      "previous_step": 15,
+      "previous": "inspect",
+      "current_step": 15,
+      "current": "inspect"
+    },
+    {
+      "previous_step": 16,
+      "previous": "artifacts",
+      "current_step": 16,
+      "current": "artifacts"
+    },
+    {
+      "previous_step": 17,
+      "previous": "run failure",
+      "current_step": 17,
+      "current": "run failure"
+    },
+    {
+      "previous_step": 18,
+      "previous": "inspect",
+      "current_step": 18,
+      "current": "inspect"
+    },
+    {
+      "previous_step": 19,
+      "previous": "retry",
+      "current_step": 19,
+      "current": "retry"
+    },
+    {
+      "previous_step": 20,
+      "previous": "inspect",
+      "current_step": 20,
+      "current": "inspect"
+    },
+    {
+      "previous_step": 21,
+      "previous": "run paid-safety",
+      "current_step": 21,
+      "current": "run paid-safety"
+    },
+    {
+      "previous_step": 22,
+      "previous": "inspect",
+      "current_step": 22,
+      "current": "inspect"
+    },
+    {
+      "previous_step": 23,
+      "previous": "approvals",
+      "current_step": 23,
+      "current": "approvals"
+    },
+    {
+      "previous_step": 24,
+      "previous": "approve",
+      "current_step": 24,
+      "current": "approve"
+    },
+    {
+      "previous_step": 25,
+      "previous": "resume",
+      "current_step": 25,
+      "current": "resume"
+    },
+    {
+      "previous_step": 26,
+      "previous": "inspect",
+      "current_step": 26,
+      "current": "inspect"
+    },
+    {
+      "previous_step": 27,
+      "previous": "resume",
+      "current_step": 27,
+      "current": "resume"
+    },
+    {
+      "previous_step": 28,
+      "previous": "inspect",
+      "current_step": 28,
+      "current": "inspect"
+    },
+    {
+      "previous_step": 29,
+      "previous": "run paid-safety",
+      "current_step": 29,
+      "current": "run paid-safety"
+    },
+    {
+      "previous_step": 30,
+      "previous": "approvals",
+      "current_step": 30,
+      "current": "approvals"
+    },
+    {
+      "previous_step": 31,
+      "previous": "reject",
+      "current_step": 31,
+      "current": "reject"
+    },
+    {
+      "previous_step": 32,
+      "previous": "resume",
+      "current_step": 32,
+      "current": "resume"
+    },
+    {
+      "previous_step": 33,
+      "previous": "inspect",
+      "current_step": 33,
+      "current": "inspect"
+    },
+    {
+      "previous_step": 34,
+      "previous": "status",
+      "current_step": 34,
+      "current": "status"
+    },
+    {
+      "previous_step": 35,
+      "previous": "init",
+      "current_step": 35,
+      "current": "init"
+    },
+    {
+      "previous_step": 36,
+      "previous": "run paid-safety",
+      "current_step": 36,
+      "current": "run paid-safety"
+    },
+    {
+      "previous_step": 37,
+      "previous": "inspect",
+      "current_step": 37,
+      "current": "inspect"
+    },
+    {
+      "previous_step": 38,
+      "previous": "run demo",
+      "current_step": 38,
+      "current": "run demo"
+    },
+    {
+      "previous_step": 39,
+      "previous": "inspect",
+      "current_step": 39,
+      "current": "inspect"
+    },
+    {
+      "previous_step": 40,
+      "previous": "godot import",
+      "current_step": null,
+      "current": null
+    },
+    {
+      "previous_step": 41,
+      "previous": "godot standalone",
+      "current_step": null,
+      "current": null
+    }
+  ],
+  "previous_checks": {
+    "init_preserves_original_game_files": true,
+    "demo_restart_approval_completion": "WF-DEMO-d8585eed",
+    "failure_dependency_block_retry_history": "WF-FAIL-df34edbb",
+    "fake_paid_invocations": [
+      0,
+      1,
+      1
+    ],
+    "paid_workflow": "WF-PAID-56a6d41f",
+    "rejected_approval_never_invokes_provider": "WF-PAID-66545248",
+    "configured_budget_blocks_dispatch": "WF-PAID-50ab6f6a",
+    "configured_repository_write_requires_approval": "WF-DEMO-2132349c",
+    "godot_without_factory_runtime": true
+  },
+  "current_checks": {
+    "init_preserves_original_game_files": true,
+    "demo_restart_approval_completion": "WF-DEMO-05680b42",
+    "failure_dependency_block_retry_history": "WF-FAIL-94809a01",
+    "fake_paid_invocations": [
+      0,
+      1,
+      1
+    ],
+    "paid_workflow": "WF-PAID-f24ca016",
+    "rejected_approval_never_invokes_provider": "WF-PAID-9ba3be51",
+    "configured_budget_blocks_dispatch": "WF-PAID-823f2ec0",
+    "configured_repository_write_requires_approval": "WF-DEMO-1705097a"
+  }
+}

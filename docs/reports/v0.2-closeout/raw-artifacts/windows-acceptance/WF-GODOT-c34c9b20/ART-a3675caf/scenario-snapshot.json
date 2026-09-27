@@ -1,0 +1,74 @@
+{
+  "actions": [
+    {
+      "action": "apply_damage",
+      "amount": 20,
+      "tick": 30
+    },
+    {
+      "action": "defeat_enemy",
+      "tick": 60
+    },
+    {
+      "action": "apply_damage",
+      "amount": 40,
+      "tick": 90
+    }
+  ],
+  "assertions": [
+    {
+      "expected": 100,
+      "field": "player_hp",
+      "id": "initial-player-hp",
+      "operator": "equals",
+      "tick": 0
+    },
+    {
+      "expected": 80,
+      "field": "player_hp",
+      "id": "post-damage-player-hp",
+      "operator": "equals",
+      "tick": 30
+    },
+    {
+      "expected": 100,
+      "field": "score",
+      "id": "post-enemy-score",
+      "operator": "equals",
+      "tick": 60
+    },
+    {
+      "expected": 40,
+      "field": "player_hp",
+      "id": "final-player-hp",
+      "operator": "equals",
+      "tick": 90
+    },
+    {
+      "expected": 2,
+      "field": "enemies_remaining",
+      "id": "final-enemies",
+      "operator": "equals",
+      "tick": 90
+    },
+    {
+      "expected": 100,
+      "field": "score",
+      "id": "final-score",
+      "operator": "equals",
+      "tick": 90
+    }
+  ],
+  "import_timeout_seconds": 30.0,
+  "max_tick": 90,
+  "scenario_id": "fixture-smoke",
+  "scene": "res://Main.tscn",
+  "schema_version": "0.2.0",
+  "snapshots": [
+    0,
+    30,
+    60,
+    90
+  ],
+  "timeout_seconds": 30.0
+}

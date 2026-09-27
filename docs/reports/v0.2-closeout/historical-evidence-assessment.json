@@ -1,0 +1,14 @@
+[
+  {
+    "report": "v0.2-acceptance.json",
+    "workspace_exists": true,
+    "sha256": "8011f1b40fdcc555d455a3691330c2e76d7ea4770d1ac7d7f42de5101a872f48",
+    "conclusion": "Embedded semantic JSON remains; full raw log/artifact bytes are path referenced. New closeout runs exported separately, not reconstruction of historical run."
+  },
+  {
+    "report": "v0.2-recovery-acceptance.json",
+    "workspace_exists": true,
+    "sha256": "5425fdb08318bc87da85d09b7c2bd1449a4f47ac544d0b1279ea40b73d5ee09c",
+    "conclusion": "Embedded semantic JSON remains; full raw log/artifact bytes are path referenced. New closeout runs exported separately, not reconstruction of historical run."
+  }
+]

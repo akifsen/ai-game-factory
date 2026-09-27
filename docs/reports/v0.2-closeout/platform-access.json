@@ -1,0 +1,78 @@
+{
+  "platform": "Windows-11-10.0.26200-SP0",
+  "commands": [
+    {
+      "argv": [
+        "wsl",
+        "--list",
+        "--verbose"
+      ],
+      "cwd": "C:\\Users\\lenovo\\devel\\ai-game-factory",
+      "started_at": "2026-09-27T02:11:36.715114+00:00",
+      "finished_at": "2026-09-27T02:11:36.773716+00:00",
+      "exit_code": 0,
+      "stdout": "  NAME              STATE           VERSION\r\n* docker-desktop    Stopped         2\r\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "docker",
+        "info",
+        "--format",
+        "{{json .ServerVersion}}"
+      ],
+      "cwd": "C:\\Users\\lenovo\\devel\\ai-game-factory",
+      "started_at": "2026-09-27T02:11:36.783213+00:00",
+      "finished_at": "2026-09-27T02:11:37.271341+00:00",
+      "exit_code": 1,
+      "stdout": "\"\"\n",
+      "stderr": "failed to connect to the docker API at npipe:////./pipe/dockerDesktopLinuxEngine; check if the path is correct and if the daemon is running: open //./pipe/dockerDesktopLinuxEngine: Sistem belirtilen dosyay\u0131 bulam\u0131yor.\n"
+    },
+    {
+      "argv": [
+        "gh",
+        "api",
+        "repos/akifsen/ai-game-factory/actions/runs",
+        "--jq",
+        ".workflow_runs[:5] | map({id,head_sha,head_branch,status,conclusion,html_url})"
+      ],
+      "cwd": "C:\\Users\\lenovo\\devel\\ai-game-factory",
+      "started_at": "2026-09-27T02:11:37.271341+00:00",
+      "finished_at": "2026-09-27T02:11:37.942098+00:00",
+      "exit_code": 0,
+      "stdout": "[{\"conclusion\":\"failure\",\"head_branch\":\"main\",\"head_sha\":\"8ad413b385a2338752e1902068da892994acc4e2\",\"html_url\":\"https://github.com/akifsen/ai-game-factory/actions/runs/36287573467\",\"id\":36287573467,\"status\":\"completed\"},{\"conclusion\":\"success\",\"head_branch\":\"main\",\"head_sha\":\"169a8571d8e9f36d6ffac0cafce2d6a575f98473\",\"html_url\":\"https://github.com/akifsen/ai-game-factory/actions/runs/36281528101\",\"id\":36281528101,\"status\":\"completed\"}]\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "gh",
+        "api",
+        "repos/akifsen/ai-game-factory/branches",
+        "--jq",
+        "map({name,sha:.commit.sha})"
+      ],
+      "cwd": "C:\\Users\\lenovo\\devel\\ai-game-factory",
+      "started_at": "2026-09-27T02:11:37.942098+00:00",
+      "finished_at": "2026-09-27T02:11:38.494702+00:00",
+      "exit_code": 0,
+      "stdout": "[{\"name\":\"main\",\"sha\":\"8ad413b385a2338752e1902068da892994acc4e2\"}]\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "gh",
+        "api",
+        "repos/akifsen/ai-game-factory/actions/runs/36281528101/jobs",
+        "--jq",
+        ".jobs | map({id,name,conclusion,runner_name,labels})"
+      ],
+      "cwd": "C:\\Users\\lenovo\\devel\\ai-game-factory",
+      "started_at": "2026-09-27T02:11:38.494702+00:00",
+      "finished_at": "2026-09-27T02:11:39.231577+00:00",
+      "exit_code": 0,
+      "stdout": "[{\"conclusion\":\"success\",\"id\":108514137291,\"labels\":[\"ubuntu-latest\"],\"name\":\"test (ubuntu-latest, 3.11)\",\"runner_name\":\"GitHub Actions 1000003433\"},{\"conclusion\":\"success\",\"id\":108514137383,\"labels\":[\"ubuntu-latest\"],\"name\":\"test (ubuntu-latest, 3.12)\",\"runner_name\":\"GitHub Actions 1000003434\"},{\"conclusion\":\"success\",\"id\":108514137461,\"labels\":[\"windows-latest\"],\"name\":\"test (windows-latest, 3.11)\",\"runner_name\":\"GitHub Actions 1000003435\"},{\"conclusion\":\"success\",\"id\":108514137482,\"labels\":[\"windows-latest\"],\"name\":\"test (windows-latest, 3.12)\",\"runner_name\":\"GitHub Actions 1000003436\"}]\n",
+      "stderr": ""
+    }
+  ],
+  "conclusion": "No reachable Linux daemon; remote main is historical HEAD, dirty V0.2 absent. No CI rerun: wrong revision. No push."
+}

@@ -1,0 +1,60 @@
+{
+  "findings": [
+    {
+      "actual": 100,
+      "assertion_id": "initial-player-hp",
+      "expected": 100,
+      "explanation": "Observed player_hp=100; equals 100 is satisfied",
+      "field": "player_hp",
+      "status": "PASS",
+      "tick": 0
+    },
+    {
+      "actual": 79,
+      "assertion_id": "post-damage-player-hp",
+      "expected": 80,
+      "explanation": "Observed player_hp=79; equals 80 is not satisfied",
+      "field": "player_hp",
+      "status": "FAIL",
+      "tick": 30
+    },
+    {
+      "actual": 100,
+      "assertion_id": "post-enemy-score",
+      "expected": 100,
+      "explanation": "Observed score=100; equals 100 is satisfied",
+      "field": "score",
+      "status": "PASS",
+      "tick": 60
+    },
+    {
+      "actual": 38,
+      "assertion_id": "final-player-hp",
+      "expected": 40,
+      "explanation": "Observed player_hp=38; equals 40 is not satisfied",
+      "field": "player_hp",
+      "status": "FAIL",
+      "tick": 90
+    },
+    {
+      "actual": 2,
+      "assertion_id": "final-enemies",
+      "expected": 2,
+      "explanation": "Observed enemies_remaining=2; equals 2 is satisfied",
+      "field": "enemies_remaining",
+      "status": "PASS",
+      "tick": 90
+    },
+    {
+      "actual": 100,
+      "assertion_id": "final-score",
+      "expected": 100,
+      "explanation": "Observed score=100; equals 100 is satisfied",
+      "field": "score",
+      "status": "PASS",
+      "tick": 90
+    }
+  ],
+  "schema_version": "0.2.0",
+  "status": "FAIL"
+}

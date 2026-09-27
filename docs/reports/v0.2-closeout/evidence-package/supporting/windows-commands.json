@@ -1,0 +1,141 @@
+[
+  {
+    "argv": [
+      "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verify-venv\\Scripts\\python.exe",
+      "-m",
+      "pip",
+      "wheel",
+      ".",
+      "--no-deps",
+      "--no-build-isolation",
+      "--no-cache-dir",
+      "--no-index",
+      "-w",
+      "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\closeout\\wheels"
+    ],
+    "cwd": "C:\\Users\\lenovo\\devel\\ai-game-factory",
+    "started_at": "2026-09-27T02:08:09.266783+00:00",
+    "finished_at": "2026-09-27T02:08:12.568181+00:00",
+    "exit_code": 0,
+    "stdout": "Processing c:\\users\\lenovo\\devel\\ai-game-factory\n  Preparing metadata (pyproject.toml): started\n  Preparing metadata (pyproject.toml): finished with status 'done'\nBuilding wheels for collected packages: gamefactory\n  Building wheel for gamefactory (pyproject.toml): started\n  Building wheel for gamefactory (pyproject.toml): finished with status 'done'\n  Created wheel for gamefactory: filename=gamefactory-0.2.0-py3-none-any.whl size=102536 sha256=5a88523723a531efe6bc09a8ffa84939b960ae6815c28dbdaa06e86496d09fe7\n  Stored in directory: C:\\Users\\lenovo\\AppData\\Local\\Temp\\pip-ephem-wheel-cache-w2q0afzr\\wheels\\3d\\88\\a3\\286e2f374a5f23b0b7168d23237dc19e0a25f5cb260d22e468\nSuccessfully built gamefactory\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verify-venv\\Scripts\\python.exe",
+      "-m",
+      "venv",
+      "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\closeout\\installed"
+    ],
+    "cwd": "C:\\Users\\lenovo\\devel\\ai-game-factory",
+    "started_at": "2026-09-27T02:08:12.568831+00:00",
+    "finished_at": "2026-09-27T02:08:24.768706+00:00",
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\closeout\\installed\\Scripts\\python.exe",
+      "-m",
+      "pip",
+      "install",
+      "--no-index",
+      "--find-links",
+      "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\wheels",
+      "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\closeout\\wheels\\gamefactory-0.2.0-py3-none-any.whl"
+    ],
+    "cwd": "C:\\Users\\lenovo\\devel\\ai-game-factory",
+    "started_at": "2026-09-27T02:08:24.768706+00:00",
+    "finished_at": "2026-09-27T02:08:31.479594+00:00",
+    "exit_code": 0,
+    "stdout": "Looking in links: c:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\wheels\nProcessing c:\\users\\lenovo\\devel\\ai-game-factory\\.verification\\closeout\\wheels\\gamefactory-0.2.0-py3-none-any.whl\nProcessing c:\\users\\lenovo\\devel\\ai-game-factory\\.verification\\wheels\\pydantic-2.13.5-py3-none-any.whl (from gamefactory==0.2.0)\nProcessing c:\\users\\lenovo\\devel\\ai-game-factory\\.verification\\wheels\\pyyaml-6.0.3-cp312-cp312-win_amd64.whl (from gamefactory==0.2.0)\nProcessing c:\\users\\lenovo\\devel\\ai-game-factory\\.verification\\wheels\\annotated_types-0.8.0-py3-none-any.whl (from pydantic>=2.0.0->gamefactory==0.2.0)\nProcessing c:\\users\\lenovo\\devel\\ai-game-factory\\.verification\\wheels\\pydantic_core-2.46.5-cp312-cp312-win_amd64.whl (from pydantic>=2.0.0->gamefactory==0.2.0)\nProcessing c:\\users\\lenovo\\devel\\ai-game-factory\\.verification\\wheels\\typing_extensions-4.16.0-py3-none-any.whl (from pydantic>=2.0.0->gamefactory==0.2.0)\nProcessing c:\\users\\lenovo\\devel\\ai-game-factory\\.verification\\wheels\\typing_inspection-0.4.4-py3-none-any.whl (from pydantic>=2.0.0->gamefactory==0.2.0)\nInstalling collected packages: typing-extensions, pyyaml, annotated-types, typing-inspection, pydantic-core, pydantic, gamefactory\nSuccessfully installed annotated-types-0.8.0 gamefactory-0.2.0 pydantic-2.13.5 pydantic-core-2.46.5 pyyaml-6.0.3 typing-extensions-4.16.0 typing-inspection-0.4.4\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\closeout\\installed\\Scripts\\python.exe",
+      "-m",
+      "pip",
+      "check"
+    ],
+    "cwd": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gf-closeout-wsb0_jui",
+    "started_at": "2026-09-27T02:08:31.481229+00:00",
+    "finished_at": "2026-09-27T02:08:32.268510+00:00",
+    "exit_code": 0,
+    "stdout": "No broken requirements found.\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\closeout\\installed\\Scripts\\python.exe",
+      "-I",
+      "-c",
+      "import gamefactory;print(gamefactory.__file__)"
+    ],
+    "cwd": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gf-closeout-wsb0_jui",
+    "started_at": "2026-09-27T02:08:32.268510+00:00",
+    "finished_at": "2026-09-27T02:08:32.344835+00:00",
+    "exit_code": 0,
+    "stdout": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\closeout\\installed\\Lib\\site-packages\\gamefactory\\__init__.py\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\closeout\\installed\\Scripts\\gamefactory.exe",
+      "--version"
+    ],
+    "cwd": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gf-closeout-wsb0_jui",
+    "started_at": "2026-09-27T02:08:32.344835+00:00",
+    "finished_at": "2026-09-27T02:08:33.225310+00:00",
+    "exit_code": 0,
+    "stdout": "gamefactory 0.2.0\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\closeout\\installed\\Scripts\\gamefactory.exe",
+      "--help"
+    ],
+    "cwd": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gf-closeout-wsb0_jui",
+    "started_at": "2026-09-27T02:08:33.225818+00:00",
+    "finished_at": "2026-09-27T02:08:33.734996+00:00",
+    "exit_code": 0,
+    "stdout": "usage: gamefactory [-h] [--version] [-p PROJECT] [--godot-path GODOT_PATH]\n                   [--blender-path BLENDER_PATH] [--json]\n                   {doctor,init,status,approvals,artifacts,run,resume,retry,approve,reject,inspect}\n                   ...\n\nLocal-first game development workflow orchestration\n\npositional arguments:\n  {doctor,init,status,approvals,artifacts,run,resume,retry,approve,reject,inspect}\n    run                 run a built-in demonstrator workflow\n\noptions:\n  -h, --help            show this help message and exit\n  --version             show program's version number and exit\n  -p PROJECT, --project PROJECT\n                        project directory (defaults to current directory)\n  --godot-path GODOT_PATH\n                        explicit Godot executable path\n  --blender-path BLENDER_PATH\n                        explicit Blender executable path\n  --json                emit machine-readable JSON\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "C:\\Users\\lenovo\\devel\\godot\\Godot_v4.7.2-stable_win64.exe\\Godot_v4.7.2-stable_win64_console.exe",
+      "--version"
+    ],
+    "cwd": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gf-closeout-wsb0_jui",
+    "started_at": "2026-09-27T02:08:33.736006+00:00",
+    "finished_at": "2026-09-27T02:08:34.256814+00:00",
+    "exit_code": 0,
+    "stdout": "4.7.2.stable.official.ed1daf0bf\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\closeout\\installed\\Scripts\\python.exe",
+      "C:\\Users\\lenovo\\devel\\ai-game-factory\\scripts\\verify_godot_acceptance.py",
+      "--cli",
+      "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\closeout\\installed\\Scripts\\gamefactory.exe",
+      "--fixture",
+      "C:\\Users\\lenovo\\devel\\ai-game-factory\\examples\\godot-verification",
+      "--godot",
+      "C:\\Users\\lenovo\\devel\\godot\\Godot_v4.7.2-stable_win64.exe\\Godot_v4.7.2-stable_win64_console.exe",
+      "--output",
+      "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\windows-acceptance.json",
+      "--workspace",
+      "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gf-closeout-wsb0_jui\\acceptance"
+    ],
+    "cwd": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gf-closeout-wsb0_jui",
+    "started_at": "2026-09-27T02:08:34.275469+00:00",
+    "finished_at": "2026-09-27T02:08:43.189313+00:00",
+    "exit_code": 1,
+    "stdout": "{\"status\": \"FAILED\", \"commands\": 7, \"report\": \"C:\\\\Users\\\\lenovo\\\\devel\\\\ai-game-factory\\\\docs\\\\reports\\\\v0.2-closeout\\\\windows-acceptance.json\", \"workspace\": \"C:\\\\Users\\\\lenovo\\\\AppData\\\\Local\\\\Temp\\\\gf-closeout-wsb0_jui\\\\acceptance\\\\godot-acceptance-20260927T020834Z-9830fe86\"}\n",
+    "stderr": ""
+  }
+]

@@ -1,0 +1,24 @@
+{
+  "execution_id": "EXEC-ebacdba7",
+  "files": [
+    {
+      "relative_path": "Main.tscn",
+      "sha256": "3dadaf4ca52f7e9ed19c21f47ff281f22e1ccbd1855c03e00cc517f71baf38a8",
+      "size": 161
+    },
+    {
+      "relative_path": "main.gd",
+      "sha256": "ad8f71c167a1cf0c38dc612bf99cf9dedca94d0c718d935425c24f5f158fb344",
+      "size": 633
+    },
+    {
+      "relative_path": "project.godot",
+      "sha256": "598a8552f3747c23baff8134218faf3d9f0013a397219f3a023b2e8984a7f30e",
+      "size": 287
+    }
+  ],
+  "schema_version": "0.2.0",
+  "source_manifest_sha256": "641d9c97e0ec0b87df5259a88bdd30a2af4700481060f26c9e0a779c025cd845",
+  "task_id": "WF-GODOT-20ebaf82-EXECUTE",
+  "workflow_id": "WF-GODOT-20ebaf82"
+}

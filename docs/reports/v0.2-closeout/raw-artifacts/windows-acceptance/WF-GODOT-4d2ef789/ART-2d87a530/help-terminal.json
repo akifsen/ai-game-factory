@@ -1,0 +1,21 @@
+{
+  "attempt_number": 1,
+  "executable_path": "C:\\Users\\lenovo\\devel\\godot\\Godot_v4.7.2-stable_win64.exe\\Godot_v4.7.2-stable_win64_console.exe",
+  "executable_sha256": "c8f0a6bc45a19b33541501e57f6f7cd972ab18453743266339d495cbbe846643",
+  "execution_id": "EXEC-2c7810c1",
+  "harness_sha256": "429e7e7961dc65a07741f59d1bc40f883a03754673de27ff2d88a5c0bb5949c1",
+  "harness_version": "0.2.0",
+  "phase": "help-terminal",
+  "process": {
+    "cleanup_completed": true,
+    "completed_at": "2026-09-27T02:10:33.642405+00:00",
+    "exit_code": 0,
+    "phase": "help",
+    "pid": 41752,
+    "timed_out": false
+  },
+  "scenario_fingerprint": "831c75b5537606b349c630f578079a72b09e258fd5af52cca8c52a16b5a51246",
+  "source_manifest_sha256": "c73c19852555c56896726e5b773ad0b1fdb73654d91739e704ba8493b274343e",
+  "task_id": "WF-GODOT-4d2ef789-EXECUTE",
+  "workflow_id": "WF-GODOT-4d2ef789"
+}

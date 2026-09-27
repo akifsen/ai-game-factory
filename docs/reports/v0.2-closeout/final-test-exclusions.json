@@ -1,0 +1,37 @@
+[
+  {
+    "id": "tests.integration.test_locks.TestExecutionLock::test_symlink_lock_leaf_cannot_write_outside_lock_directory",
+    "reason": "Symlink creation is unavailable on this host",
+    "category": "privilege-unavailable"
+  },
+  {
+    "id": "tests.integration.test_process_runner.TestProcessRunner::test_posix_parent_exit_kills_descendant_ignoring_sigterm",
+    "reason": "POSIX process-group cleanup",
+    "category": "platform-inapplicable"
+  },
+  {
+    "id": "tests.unit.test_godot_staging::test_manifest_rejects_symlinked_file_when_supported",
+    "reason": "Symlink creation unavailable on this host: [WinError 1314] Gereken ayr\u0131cal\u0131k istemci taraf\u0131ndan sa\u011flanm\u0131yor: 'C:\\\\Users\\\\lenovo\\\\devel\\\\ai-game-factory\\\\.verification\\\\closeout-final\\\\test_manifest_rejects_symlinke0\\\\outside.txt' -> 'C:\\\\Users\\\\lenovo\\\\devel\\\\ai-game-factory\\\\.verification\\\\closeout-final\\\\test_manifest_rejects_symlinke0\\\\game\\\\linked.txt'",
+    "category": "privilege-unavailable"
+  },
+  {
+    "id": "tests.unit.test_path_guard.TestPathGuard::test_symlink_escape_rejected_if_pointing_outside",
+    "reason": "Symlink creation not supported or permitted in this test environment",
+    "category": "privilege-unavailable"
+  },
+  {
+    "id": "tests.unit.test_path_guard.TestPathGuard::test_symlink_parent_escape_rejected_for_missing_leaf",
+    "reason": "Symlink creation not supported or permitted in this test environment",
+    "category": "privilege-unavailable"
+  },
+  {
+    "id": "tests/integration/test_godot_real.py::test_real_godot_acceptance",
+    "category": "intentional-marker-selection",
+    "reason": "Real scripts separately run with clean installed wheel; not silently skipped runtime"
+  },
+  {
+    "id": "tests/integration/test_verify_godot_live_crash.py::test_real_godot_live_crash",
+    "category": "intentional-marker-selection",
+    "reason": "Real scripts separately run with clean installed wheel; not silently skipped runtime"
+  }
+]

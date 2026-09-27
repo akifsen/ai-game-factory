@@ -1,0 +1,58 @@
+[
+  {
+    "argv": [
+      "gh",
+      "api",
+      "repos/akifsen/ai-game-factory/actions/runs/36287573467"
+    ],
+    "cwd": "C:\\Users\\lenovo\\devel\\ai-game-factory",
+    "started_at": "2026-09-27T02:14:31.138253+00:00",
+    "finished_at": "2026-09-27T02:14:31.739542+00:00",
+    "exit_code": 0,
+    "stdout_file": "run.json",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "gh",
+      "api",
+      "repos/akifsen/ai-game-factory/actions/runs/36287573467/jobs"
+    ],
+    "cwd": "C:\\Users\\lenovo\\devel\\ai-game-factory",
+    "started_at": "2026-09-27T02:14:31.739542+00:00",
+    "finished_at": "2026-09-27T02:14:32.520294+00:00",
+    "exit_code": 0,
+    "stdout_file": "jobs.json",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "gh",
+      "api",
+      "repos/akifsen/ai-game-factory/actions/runs/36287573467/artifacts"
+    ],
+    "cwd": "C:\\Users\\lenovo\\devel\\ai-game-factory",
+    "started_at": "2026-09-27T02:14:32.520294+00:00",
+    "finished_at": "2026-09-27T02:14:33.089586+00:00",
+    "exit_code": 0,
+    "stdout_file": "artifacts.json",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "gh",
+      "run",
+      "view",
+      "36287573467",
+      "--repo",
+      "akifsen/ai-game-factory",
+      "--log"
+    ],
+    "cwd": "C:\\Users\\lenovo\\devel\\ai-game-factory",
+    "started_at": "2026-09-27T02:14:33.089586+00:00",
+    "finished_at": "2026-09-27T02:14:34.487758+00:00",
+    "exit_code": 0,
+    "stdout_file": "run.log",
+    "stderr": ""
+  }
+]

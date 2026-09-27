@@ -1,0 +1,28 @@
+{
+  "argv": [
+    "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\closeout\\installed\\Scripts\\python.exe",
+    "C:\\Users\\lenovo\\devel\\ai-game-factory\\scripts\\verify_godot_live_crash.py",
+    "--cli",
+    "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\closeout\\installed\\Scripts\\gamefactory.exe",
+    "--python",
+    "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\closeout\\installed\\Scripts\\python.exe",
+    "--fixture",
+    "C:\\Users\\lenovo\\devel\\ai-game-factory\\examples\\godot-verification",
+    "--godot",
+    "C:\\Users\\lenovo\\devel\\godot\\Godot_v4.7.2-stable_win64.exe\\Godot_v4.7.2-stable_win64_console.exe",
+    "--output",
+    "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\windows-live-crash.json",
+    "--workspace",
+    "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gf-live-closeout-5cfq53qc",
+    "--timeout",
+    "100"
+  ],
+  "cwd": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gf-live-closeout-5cfq53qc",
+  "started_at": "2026-09-27T02:25:44.905099+00:00",
+  "finished_at": "2026-09-27T02:25:53.126683+00:00",
+  "exit_code": 0,
+  "stdout": "{\"status\": \"PASSED\", \"report\": \"C:\\\\Users\\\\lenovo\\\\devel\\\\ai-game-factory\\\\docs\\\\reports\\\\v0.2-closeout\\\\windows-live-crash.json\", \"workspace\": \"C:\\\\Users\\\\lenovo\\\\AppData\\\\Local\\\\Temp\\\\gf-live-closeout-5cfq53qc\\\\godot-live-crash-20260927T022545Z-7ce4517f\", \"godot_pid\": 41764, \"child_fate_post_kill\": \"terminated\", \"child_fate_final\": \"terminated\", \"sentinel_survived\": true, \"no_duplicate_launches\": true, \"error\": null}\n",
+  "stderr": "",
+  "script_sha256": "ba320283ff9d69ec738e31b7080455c511b66dde2b667d0f2a9334aa901e6ae0",
+  "wheel_sha256": "5a88523723a531efe6bc09a8ffa84939b960ae6815c28dbdaa06e86496d09fe7"
+}

@@ -1,0 +1,10 @@
+{
+  "workflow_id": "WF-GODOT-2cd66cd7",
+  "task_ids": [
+    "WF-GODOT-2cd66cd7-EXECUTE",
+    "WF-GODOT-2cd66cd7-VALIDATE",
+    "WF-GODOT-2cd66cd7-EVIDENCE"
+  ],
+  "execute_task_id": "WF-GODOT-2cd66cd7-EXECUTE",
+  "helper_pid": 4740
+}

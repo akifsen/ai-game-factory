@@ -1,0 +1,68 @@
+[
+  {
+    "argv": [
+      "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\closeout\\installed\\Scripts\\python.exe",
+      "C:\\Users\\lenovo\\devel\\ai-game-factory\\scripts\\verify_godot_acceptance.py",
+      "--cli",
+      "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\closeout\\installed\\Scripts\\gamefactory.exe",
+      "--fixture",
+      "C:\\Users\\lenovo\\devel\\ai-game-factory\\examples\\godot-verification",
+      "--godot",
+      "C:\\Users\\lenovo\\devel\\godot\\Godot_v4.7.2-stable_win64.exe\\Godot_v4.7.2-stable_win64_console.exe",
+      "--output",
+      "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\windows-acceptance.json",
+      "--workspace",
+      "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gf-closeout-user-1_oo24l7\\acceptance"
+    ],
+    "cwd": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gf-closeout-user-1_oo24l7",
+    "started_at": "2026-09-27T02:09:30.407907+00:00",
+    "finished_at": "2026-09-27T02:10:55.387105+00:00",
+    "exit_code": 0,
+    "stdout": "{\"status\": \"PASSED\", \"commands\": 43, \"report\": \"C:\\\\Users\\\\lenovo\\\\devel\\\\ai-game-factory\\\\docs\\\\reports\\\\v0.2-closeout\\\\windows-acceptance.json\", \"workspace\": \"C:\\\\Users\\\\lenovo\\\\AppData\\\\Local\\\\Temp\\\\gf-closeout-user-1_oo24l7\\\\acceptance\\\\godot-acceptance-20260927T020930Z-4c553f1f\"}\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\closeout\\installed\\Scripts\\python.exe",
+      "C:\\Users\\lenovo\\devel\\ai-game-factory\\scripts\\verify_godot_recovery.py",
+      "--cli",
+      "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\closeout\\installed\\Scripts\\gamefactory.exe",
+      "--python",
+      "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\closeout\\installed\\Scripts\\python.exe",
+      "--fixture",
+      "C:\\Users\\lenovo\\devel\\ai-game-factory\\examples\\godot-verification",
+      "--godot",
+      "C:\\Users\\lenovo\\devel\\godot\\Godot_v4.7.2-stable_win64.exe\\Godot_v4.7.2-stable_win64_console.exe",
+      "--output",
+      "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\windows-recovery.json",
+      "--workspace",
+      "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gf-closeout-user-1_oo24l7\\recovery"
+    ],
+    "cwd": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gf-closeout-user-1_oo24l7",
+    "started_at": "2026-09-27T02:10:55.388988+00:00",
+    "finished_at": "2026-09-27T02:11:21.707856+00:00",
+    "exit_code": 0,
+    "stdout": "{\"status\": \"PASSED\", \"report\": \"C:\\\\Users\\\\lenovo\\\\devel\\\\ai-game-factory\\\\docs\\\\reports\\\\v0.2-closeout\\\\windows-recovery.json\", \"workspace\": \"C:\\\\Users\\\\lenovo\\\\AppData\\\\Local\\\\Temp\\\\gf-closeout-user-1_oo24l7\\\\recovery\\\\godot-recovery-20260927T021055Z-f9d16456\", \"error\": null}\n",
+    "stderr": ""
+  },
+  {
+    "argv": [
+      "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\closeout\\installed\\Scripts\\python.exe",
+      "C:\\Users\\lenovo\\devel\\ai-game-factory\\scripts\\verify_acceptance.py",
+      "--cli",
+      "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\closeout\\installed\\Scripts\\gamefactory.exe",
+      "--fixture",
+      "C:\\Users\\lenovo\\devel\\ai-game-factory\\examples\\minimal-godot",
+      "--godot",
+      "C:\\Users\\lenovo\\devel\\godot\\Godot_v4.7.2-stable_win64.exe\\Godot_v4.7.2-stable_win64_console.exe",
+      "--output",
+      "C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.2-closeout\\windows-v01.json"
+    ],
+    "cwd": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gf-closeout-user-1_oo24l7",
+    "started_at": "2026-09-27T02:11:21.708488+00:00",
+    "finished_at": "2026-09-27T02:11:42.504928+00:00",
+    "exit_code": 0,
+    "stdout": "{\"status\": \"PASSED\", \"commands\": 41, \"report\": \"C:\\\\Users\\\\lenovo\\\\devel\\\\ai-game-factory\\\\docs\\\\reports\\\\v0.2-closeout\\\\windows-v01.json\"}\n",
+    "stderr": ""
+  }
+]

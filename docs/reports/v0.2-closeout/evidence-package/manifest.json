@@ -1,0 +1,1851 @@
+{
+  "acceptance": "records/acceptance.json",
+  "files": [
+    {
+      "path": "metadata/source-identity.json",
+      "role": "source_identity",
+      "sha256": "b690009639d8152f9f6a765ba997cdedcee84e7b59f49469cb624a623684a3fa",
+      "size": 14741
+    },
+    {
+      "path": "records/acceptance.json",
+      "role": "acceptance",
+      "sha256": "31b66e60f11ac7dd766aee4a160dbb710a0e2226520c0490bc7b552e235f5b45",
+      "size": 1145501
+    },
+    {
+      "path": "records/recovery.json",
+      "role": "recovery",
+      "sha256": "b48fdcd70bb33f186694d5b11adfff1de162809397099ad008a5570f7540c483",
+      "size": 504590
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4d2ef789/ART-cfb71fcb/source-manifest.json",
+      "role": "other",
+      "sha256": "bebb92c5e8210a42aaeb5d7046c367271d4c6040e146ac31c57536ae1dbb026f",
+      "size": 737
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4d2ef789/ART-fe936cdc/scenario-snapshot.json",
+      "role": "other",
+      "sha256": "53f5cf62c152269cb73a13e6d7fb26e86b4d0fd5ddd30e40e7faaa04ac12aa32",
+      "size": 1404
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4d2ef789/ART-33abc6e4/version.json",
+      "role": "other",
+      "sha256": "ae5e85fb081ce5f121f360d4109923a7a8f98f8dd7ea13e9a8d97917ea982606",
+      "size": 1227
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4d2ef789/ART-a3e41e21/version-terminal.json",
+      "role": "other",
+      "sha256": "46139c65681bc01fcb1eb9bab60bf927d3f2d9d7bb02c0af1d632b23f3a85959",
+      "size": 908
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4d2ef789/ART-c3f62782/help.json",
+      "role": "other",
+      "sha256": "94e4c5f73777cbdd7344a36d4ff0a32bb4e32f5d681388fa31e9ccedcbf7f815",
+      "size": 1218
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4d2ef789/ART-2d87a530/help-terminal.json",
+      "role": "other",
+      "sha256": "bd3f70b419f6def6801cc39a0d4d6950b7c037812426fd6247bb115de782407a",
+      "size": 902
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4d2ef789/ART-ce57c271/import.json",
+      "role": "other",
+      "sha256": "23afcba188f508e28109c52849cb0d2c8f994e480938505bb47be5f685ff6ffc",
+      "size": 1493
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4d2ef789/ART-5ddef4a3/import-terminal.json",
+      "role": "other",
+      "sha256": "70e26c3bb1eacbf1ad1aada4026b5053fac66cedbd64642c3a9b5792ff908ada",
+      "size": 906
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4d2ef789/ART-9740b245/runtime.json",
+      "role": "other",
+      "sha256": "9c7620381f02034ea7f55acc799bc7107268eff83872d243c1d17700bb7abe61",
+      "size": 2291
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4d2ef789/ART-6666e3ae/runtime-terminal.json",
+      "role": "other",
+      "sha256": "92169268fe7fcd580ac944d2142cde7666e38dff9eff5d32e7873a06db1189c6",
+      "size": 907
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4d2ef789/ART-2eba177a/help-process.json",
+      "role": "other",
+      "sha256": "d4fb4f4dab6d0852f1368c3b42fbeae36a5c4de162b5945ef7c77e3700568086",
+      "size": 1383
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4d2ef789/ART-4e085c09/help-stderr.log",
+      "role": "other",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4d2ef789/ART-15e778ce/help-stdout.log",
+      "role": "other",
+      "sha256": "e4160ad4187fba1cbc092d2412a03535e83464eb9d8c446075cc29f4cad5b1d3",
+      "size": 15663
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4d2ef789/ART-8fd0b24d/import-process.json",
+      "role": "other",
+      "sha256": "eef3ac5b626ba2b06805b5f3636a583b91fb236ba104744bc9eb4bd874f1ad64",
+      "size": 1650
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4d2ef789/ART-85bcdf70/import-stderr.log",
+      "role": "other",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4d2ef789/ART-ecf5046d/import-stdout.log",
+      "role": "other",
+      "sha256": "21fcb9c0b9f0607f38457386670bd71c0303fd972e623bb024dfeaaf58a56b59",
+      "size": 1436
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4d2ef789/ART-0f10308a/runtime-observation.json",
+      "role": "other",
+      "sha256": "bf8eb383cef24c52b977d74f1f6784bbf4e4a143d3157e637d80ef0233a64787",
+      "size": 524
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4d2ef789/ART-29897374/runtime-process.json",
+      "role": "other",
+      "sha256": "45fdd14b020ddae63dbd001168ea56ade261dbb70a51f8ed4f7272c6a03df0c8",
+      "size": 2434
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4d2ef789/ART-4f46e28d/runtime-request.json",
+      "role": "other",
+      "sha256": "4b7aef7ab2a9108ee1449ba7c742aa5130aab71f42034f41810be5382903d555",
+      "size": 381
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4d2ef789/ART-0b966811/runtime-stderr.log",
+      "role": "other",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4d2ef789/ART-4d5525bf/runtime-stdout.log",
+      "role": "other",
+      "sha256": "85040aeb00d8286aed45096a50fb1007783ed6433ad0e11e9a76547c77eb5df9",
+      "size": 77
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4d2ef789/ART-e3433e25/version-process.json",
+      "role": "other",
+      "sha256": "c847d2033bd2cd5a5a91b863999d27fffa156fa8a40228b00af40dd77d5ddcb1",
+      "size": 1388
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4d2ef789/ART-bf4efe09/version-stderr.log",
+      "role": "other",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4d2ef789/ART-17032d36/version-stdout.log",
+      "role": "other",
+      "sha256": "c070177873f0f0acfbd7940156bb455d896c7b3694a65fa71d6d8c0ed65fb3fb",
+      "size": 34
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4d2ef789/ART-d6eee17a/execution-summary.json",
+      "role": "other",
+      "sha256": "5eb9bbedcf9434d3cdad3c91bdbfd28cc6494aa6ee701e6e9bc35f451e5c62db",
+      "size": 615
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4d2ef789/ART-3a12b90e/validation-report.json",
+      "role": "other",
+      "sha256": "def28ed09b272e1ef1b3faf9040231cb27b27082dbf171eb9930436c57a4e3fe",
+      "size": 1550
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ba06b0c7/ART-2d57146a/source-manifest.json",
+      "role": "other",
+      "sha256": "adc5c0689d9cbc2b3b5c5259a26116527d309770d63f99059e2ffa04f54cfbf5",
+      "size": 737
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ba06b0c7/ART-a73a0f25/scenario-snapshot.json",
+      "role": "other",
+      "sha256": "d171ade687195e138ddafd394458f482134128f32717545d53ff218e7de943ce",
+      "size": 1403
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ba06b0c7/ART-723b1091/version.json",
+      "role": "other",
+      "sha256": "4fb89898fa08e5f0f155122f933de468a72d8caf4189907643ae92e5a0877e7d",
+      "size": 1214
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ba06b0c7/ART-00f858ae/version-terminal.json",
+      "role": "other",
+      "sha256": "ab329f65490ea2d38aff7377a1bc1d635cd106f46c38a4e147e0a4a430b425cc",
+      "size": 907
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ba06b0c7/ART-f2f7ccb2/help.json",
+      "role": "other",
+      "sha256": "053a72316c6270eed777cc1e9f7b3f9555eef27369865a032ef09c2323723748",
+      "size": 1205
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ba06b0c7/ART-e057cd57/help-terminal.json",
+      "role": "other",
+      "sha256": "3ae0d1212850acfe60513fe9c863c2564c9f9866f7008b94abbd7beece7f36f9",
+      "size": 902
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ba06b0c7/ART-6e1958f2/import.json",
+      "role": "other",
+      "sha256": "1707091c03aeaab6fc7fc85bd735cb1e9a47e51017b1e5815c825c69108c7238",
+      "size": 1467
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ba06b0c7/ART-7fea2f2e/import-terminal.json",
+      "role": "other",
+      "sha256": "347b9d9e07e3c4e2d48d320304df673fa9288bd58534cdef0cd1cb9242cd8964",
+      "size": 906
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ba06b0c7/ART-08ce8c84/runtime.json",
+      "role": "other",
+      "sha256": "1431fa00353b47b21b662afdc9afa3d55937e17ff33e9bd690ecbb17623c00d1",
+      "size": 2225
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ba06b0c7/ART-c67137f2/runtime-terminal.json",
+      "role": "other",
+      "sha256": "e38b3cbadb9819ea199cc73d7680a1075370d99762796bbdd418c39acc76c371",
+      "size": 907
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ba06b0c7/ART-0ffbcb2a/help-process.json",
+      "role": "other",
+      "sha256": "713cc70683cd216dffd6638a22d5b8cb5b7b52bf53a41f1004e0757c6f6763a0",
+      "size": 1370
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ba06b0c7/ART-5f0612f0/help-stderr.log",
+      "role": "other",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ba06b0c7/ART-8778167a/help-stdout.log",
+      "role": "other",
+      "sha256": "a0312b699fc3404bb43aa3a2fd65cd61afc49b5a5beeb2c7d6ed4071aa9b6204",
+      "size": 15534
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ba06b0c7/ART-585ccdd7/import-process.json",
+      "role": "other",
+      "sha256": "0c0c874c447f0bbcf3e73e7205b24e7b7b6d3313d8a3bd815c19b72a0c9be345",
+      "size": 1624
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ba06b0c7/ART-154c0c3d/import-stderr.log",
+      "role": "other",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ba06b0c7/ART-76311b80/import-stdout.log",
+      "role": "other",
+      "sha256": "6d51f349f7d3af814525539a8b79618093e16c693c070bfface3b99bea10f11e",
+      "size": 1415
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ba06b0c7/ART-d646dcef/runtime-process.json",
+      "role": "other",
+      "sha256": "cd03268e4c5c8c681f8c413948aa3e5aac4844600ade7c19f09993af40e7b496",
+      "size": 5822
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ba06b0c7/ART-a29ac5ad/runtime-request.json",
+      "role": "other",
+      "sha256": "ef035d9e078956f7b5cc7e480bf802f7f47a19a961f7f66a007b64fb5ef720dd",
+      "size": 381
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ba06b0c7/ART-1057a83d/runtime-stderr.log",
+      "role": "other",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ba06b0c7/ART-106e3cff/runtime-stdout.log",
+      "role": "other",
+      "sha256": "83cf0b082206af2aa236c83064fbcfa76be1e00a4aa3558574b2f65965d9481c",
+      "size": 75
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ba06b0c7/ART-28491c32/version-process.json",
+      "role": "other",
+      "sha256": "d9f1ebdd8a00dd60fbe2062ce09c698df005235cc587c6018394af18b0df80fb",
+      "size": 1375
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ba06b0c7/ART-1ced2aab/version-stderr.log",
+      "role": "other",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ba06b0c7/ART-5c8629a1/version-stdout.log",
+      "role": "other",
+      "sha256": "bf8803022b574250bb04dea65053a46b7c58570725316c1f7fe2aa6735706498",
+      "size": 33
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-0f9e853f/ART-3df9bcb6/source-manifest.json",
+      "role": "other",
+      "sha256": "0d188d07b3cf66b4c5089d054104b06f25817c541c1f62268e89374be23cbf38",
+      "size": 737
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-0f9e853f/ART-71faa803/scenario-snapshot.json",
+      "role": "other",
+      "sha256": "53f5cf62c152269cb73a13e6d7fb26e86b4d0fd5ddd30e40e7faaa04ac12aa32",
+      "size": 1404
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-0f9e853f/ART-f35f5fed/version.json",
+      "role": "other",
+      "sha256": "8c6deb72a57a6e3a5521c269b095121d423dcd5f0c3c86851113b57c2770c903",
+      "size": 1212
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-0f9e853f/ART-5523c6e8/version-terminal.json",
+      "role": "other",
+      "sha256": "9db81b96d439bf27f978eebbac7defca9d3e72cca8097a9c13ceeeca176394cc",
+      "size": 908
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-0f9e853f/ART-9ce96053/help.json",
+      "role": "other",
+      "sha256": "d8bb2b049700a840c85d365da47fc753f89cdd0b966e824303a99480c3e8e99c",
+      "size": 1203
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-0f9e853f/ART-4c10ae3a/help-terminal.json",
+      "role": "other",
+      "sha256": "45b24751a04ee42269b0eafbbda4152e75bfea75a430427fe8322185d0af2b33",
+      "size": 902
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-0f9e853f/ART-4a41d7fa/import.json",
+      "role": "other",
+      "sha256": "f71987ad5d973d095fb2224935b10d272b71b666a0efcca3ca68fe08c2deb1eb",
+      "size": 1463
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-0f9e853f/ART-c8d560cc/import-terminal.json",
+      "role": "other",
+      "sha256": "69f9d35869d7dd7997ec16bcee0becdaa4803b404665269e3de4dc092a5529d3",
+      "size": 906
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-0f9e853f/ART-974d4fd3/runtime.json",
+      "role": "other",
+      "sha256": "a5c1df718764fd31c734c5e44fbc86f94b35791987dda9ed5771c8ec7dc3d208",
+      "size": 2216
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-0f9e853f/ART-01f1003a/runtime-terminal.json",
+      "role": "other",
+      "sha256": "711795d251b61fa087df59a76e9c794d1d3e0974ca14946da936cd5a14baa56a",
+      "size": 907
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-0f9e853f/ART-8c598de1/help-process.json",
+      "role": "other",
+      "sha256": "0d1191fd02e965ac58cb02a1fa72ea2bc35b9c18df2a8716e5b248a43845687a",
+      "size": 1368
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-0f9e853f/ART-ab0b438a/help-stderr.log",
+      "role": "other",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-0f9e853f/ART-32fd5d3f/help-stdout.log",
+      "role": "other",
+      "sha256": "e4160ad4187fba1cbc092d2412a03535e83464eb9d8c446075cc29f4cad5b1d3",
+      "size": 15663
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-0f9e853f/ART-3223d7ed/import-process.json",
+      "role": "other",
+      "sha256": "f13ce03b76656c402a0027c1790d74768c2bb9c8495e6b42cf63e8bb3af2e7a8",
+      "size": 1620
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-0f9e853f/ART-8a5ba9e5/import-stderr.log",
+      "role": "other",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-0f9e853f/ART-e5b4bd27/import-stdout.log",
+      "role": "other",
+      "sha256": "21fcb9c0b9f0607f38457386670bd71c0303fd972e623bb024dfeaaf58a56b59",
+      "size": 1436
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-0f9e853f/ART-0494f04c/runtime-observation.json",
+      "role": "observation",
+      "sha256": "52d6465046e0d5cd13e2785703d6c6f41dd1cb0e3ccc4f88347401bb10554608",
+      "size": 524
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-0f9e853f/ART-5dc5e7b8/runtime-process.json",
+      "role": "other",
+      "sha256": "ed86daa3de978707bdae71d316342b6bbeb56f0754a4945b954eb51971acba6a",
+      "size": 2357
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-0f9e853f/ART-845ac9a5/runtime-request.json",
+      "role": "other",
+      "sha256": "744011f8b95b36d9744b85c87c88944fee41515c17fb29e0f5e180efa744455f",
+      "size": 381
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-0f9e853f/ART-2f98cc03/runtime-stderr.log",
+      "role": "other",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-0f9e853f/ART-f11c5520/runtime-stdout.log",
+      "role": "other",
+      "sha256": "85040aeb00d8286aed45096a50fb1007783ed6433ad0e11e9a76547c77eb5df9",
+      "size": 77
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-0f9e853f/ART-0c78e156/version-process.json",
+      "role": "other",
+      "sha256": "0c33d5d51735360f55007e61bae388c743893cf38e14cf726583d9c7add68b10",
+      "size": 1374
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-0f9e853f/ART-91d1787f/version-stderr.log",
+      "role": "other",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-0f9e853f/ART-961ab776/version-stdout.log",
+      "role": "other",
+      "sha256": "c070177873f0f0acfbd7940156bb455d896c7b3694a65fa71d6d8c0ed65fb3fb",
+      "size": 34
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-0f9e853f/ART-7f2b7cc4/execution-summary.json",
+      "role": "other",
+      "sha256": "833e0afedfffe9bd96a862211743e47c2df016c4944281432a1ce13975f78db0",
+      "size": 615
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-0f9e853f/ART-6c9c04a9/validation-report.json",
+      "role": "validation",
+      "sha256": "def28ed09b272e1ef1b3faf9040231cb27b27082dbf171eb9930436c57a4e3fe",
+      "size": 1550
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-578cfb6c/ART-d0ede549/source-manifest.json",
+      "role": "other",
+      "sha256": "022d20a979d15f0759763018f96973b1f08da888cb6df51cca7f0d1ed09dbcdd",
+      "size": 737
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-578cfb6c/ART-3319ccf1/scenario-snapshot.json",
+      "role": "other",
+      "sha256": "53f5cf62c152269cb73a13e6d7fb26e86b4d0fd5ddd30e40e7faaa04ac12aa32",
+      "size": 1404
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-578cfb6c/ART-f9e1452f/version.json",
+      "role": "other",
+      "sha256": "8d712e57b98cf9ac405516f659e6b30b516b1102a5c83813eb273158523e6b02",
+      "size": 1212
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-578cfb6c/ART-e33aec62/version-terminal.json",
+      "role": "other",
+      "sha256": "ba2b42be4f47947c2ef597a55d7d619eaf358e774bb0b275f3a1158d64902e58",
+      "size": 908
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-578cfb6c/ART-c69fa9e3/help.json",
+      "role": "other",
+      "sha256": "a755c031c0874117030eabde56fe946a67b2f6a1b6e5ebc1ca33619275be73b8",
+      "size": 1203
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-578cfb6c/ART-8a517dbe/help-terminal.json",
+      "role": "other",
+      "sha256": "a7ff02cd0c7ddba19f3a83a736c7f3cf2b011f535492b0a5ec309a91924d6456",
+      "size": 902
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-578cfb6c/ART-1aa76c03/import.json",
+      "role": "other",
+      "sha256": "a41238685f96f2370cea94ddc35dcf00dae2618272a8979683c816a35ee6e1d1",
+      "size": 1463
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-578cfb6c/ART-8a6b010b/import-terminal.json",
+      "role": "other",
+      "sha256": "14210a65582174e362ac87f067b372baac2d040824b612cb80bb52c257c10b0b",
+      "size": 906
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-578cfb6c/ART-acbefc4e/runtime.json",
+      "role": "other",
+      "sha256": "a222778a2cba3139a54cec050b1163953794339b70ab65dff8c076b0b42f9789",
+      "size": 2216
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-578cfb6c/ART-a91f5a8e/runtime-terminal.json",
+      "role": "other",
+      "sha256": "ce5ca609140c73f31a566b9f79bd6b8320b9702feed1dcc2edab9f7b23ddc143",
+      "size": 908
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-578cfb6c/ART-b942bbe1/help-process.json",
+      "role": "other",
+      "sha256": "c006277f67fd6f23b9b4ea8a7042edaa1499bb874ed2cffbc56a40392687fde6",
+      "size": 1368
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-578cfb6c/ART-2bd5c2e9/help-stderr.log",
+      "role": "other",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-578cfb6c/ART-126add56/help-stdout.log",
+      "role": "other",
+      "sha256": "e4160ad4187fba1cbc092d2412a03535e83464eb9d8c446075cc29f4cad5b1d3",
+      "size": 15663
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-578cfb6c/ART-7de4a71e/import-process.json",
+      "role": "other",
+      "sha256": "48c633ddc9ecc9583a53d8d22e664e1ec0dcae7920312409d8f85b20b61a546f",
+      "size": 1620
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-578cfb6c/ART-ea6ed5e5/import-stderr.log",
+      "role": "other",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-578cfb6c/ART-613f8dac/import-stdout.log",
+      "role": "other",
+      "sha256": "21fcb9c0b9f0607f38457386670bd71c0303fd972e623bb024dfeaaf58a56b59",
+      "size": 1436
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-578cfb6c/ART-4de789c4/runtime-observation.json",
+      "role": "other",
+      "sha256": "4cf51cec0c5cf5d0ca57b2edb209dd5925ddcbd0559d53b47ebfefeaebdbb815",
+      "size": 524
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-578cfb6c/ART-2522465a/runtime-process.json",
+      "role": "other",
+      "sha256": "0eaacedee269276a200d5d6e2f271308dddea7e678aab0d87537f82d5affffb3",
+      "size": 2360
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-578cfb6c/ART-d248a492/runtime-request.json",
+      "role": "other",
+      "sha256": "824f60e7db3a3cdc7d70dfde896fe58c11238c8322097bf3c2e37002445e60b8",
+      "size": 381
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-578cfb6c/ART-7349e86a/runtime-stderr.log",
+      "role": "other",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-578cfb6c/ART-1f8f80ae/runtime-stdout.log",
+      "role": "other",
+      "sha256": "85040aeb00d8286aed45096a50fb1007783ed6433ad0e11e9a76547c77eb5df9",
+      "size": 77
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-578cfb6c/ART-ba8daff8/version-process.json",
+      "role": "other",
+      "sha256": "4c36ba63a042110e3ba15bcbaa18143f1150ae9c4635362270911704993720de",
+      "size": 1374
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-578cfb6c/ART-762abc53/version-stderr.log",
+      "role": "other",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-578cfb6c/ART-d9626c40/version-stdout.log",
+      "role": "other",
+      "sha256": "c070177873f0f0acfbd7940156bb455d896c7b3694a65fa71d6d8c0ed65fb3fb",
+      "size": 34
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-578cfb6c/ART-edb64d05/execution-summary.json",
+      "role": "other",
+      "sha256": "5ab256097c1dab14a0d3177eb3b64fc6b6405353a191c2dd26bb335bf3d88c56",
+      "size": 615
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-578cfb6c/ART-2e15af63/validation-report.json",
+      "role": "other",
+      "sha256": "def28ed09b272e1ef1b3faf9040231cb27b27082dbf171eb9930436c57a4e3fe",
+      "size": 1550
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ce84e822/ART-5f88fbe7/source-manifest.json",
+      "role": "other",
+      "sha256": "733c961c32bcd3b1f5eee4cb7dff0bdf83956b176e8c534e942f2934d0db55fa",
+      "size": 737
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ce84e822/ART-4cceae05/scenario-snapshot.json",
+      "role": "other",
+      "sha256": "53f5cf62c152269cb73a13e6d7fb26e86b4d0fd5ddd30e40e7faaa04ac12aa32",
+      "size": 1404
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ce84e822/ART-3cf5d915/version.json",
+      "role": "other",
+      "sha256": "7737666c75a54ee9f98efdf3a0edb534191889ece44a770d80ab7ac57db61f30",
+      "size": 1212
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ce84e822/ART-bddf58ca/version-terminal.json",
+      "role": "other",
+      "sha256": "dd1961267c7aaceacb88cf95c0bb339a58679b58f3f356d638a1014e109eb405",
+      "size": 908
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ce84e822/ART-3c8575f3/help.json",
+      "role": "other",
+      "sha256": "1b6c5abf75a17214a034d6c7d1cf320b556a80d5b4f5e7ca0013aee5aba02fe9",
+      "size": 1203
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ce84e822/ART-0dc20d5a/help-terminal.json",
+      "role": "other",
+      "sha256": "a742ef6c908618a589d5dd092a7b3ca8fc69975048aa7f790268a0b68b84ac8f",
+      "size": 902
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ce84e822/ART-4db2b799/import.json",
+      "role": "other",
+      "sha256": "fcccb71b463f2e167d946785efc02d834714a5b838c7df5d92302e5a5dccaac7",
+      "size": 1463
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ce84e822/ART-169ddd9a/import-terminal.json",
+      "role": "other",
+      "sha256": "9d82b4bb49eae39fcd4b9f8df99b9d558a2f6e166fb278949c3aa95031914eb1",
+      "size": 906
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ce84e822/ART-9f44d273/runtime.json",
+      "role": "other",
+      "sha256": "44f92eb8fcfa49dabcba54e5c6ff716d06bc9facc9045190c664a5321ee38b3d",
+      "size": 2216
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ce84e822/ART-4b1f3c9c/runtime-terminal.json",
+      "role": "other",
+      "sha256": "72b21604ada1b9d2a01d2a16c90cba99a10b8f9847499ff8c733fefbcf2e4da8",
+      "size": 908
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ce84e822/ART-4366c74a/help-process.json",
+      "role": "other",
+      "sha256": "055a8b526b93cb0512b8c289e1447d2cc47b6fe72f18935cff40b81edd01d54a",
+      "size": 1368
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ce84e822/ART-b008b494/help-stderr.log",
+      "role": "other",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ce84e822/ART-75cd7643/help-stdout.log",
+      "role": "other",
+      "sha256": "e4160ad4187fba1cbc092d2412a03535e83464eb9d8c446075cc29f4cad5b1d3",
+      "size": 15663
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ce84e822/ART-075c0411/import-process.json",
+      "role": "other",
+      "sha256": "ce60c5ecbcdc8c8e69d868c64396da6d21b3f427da8214f19b4fe3048f3bc6b3",
+      "size": 1620
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ce84e822/ART-2d5e2310/import-stderr.log",
+      "role": "other",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ce84e822/ART-410cc27b/import-stdout.log",
+      "role": "other",
+      "sha256": "21fcb9c0b9f0607f38457386670bd71c0303fd972e623bb024dfeaaf58a56b59",
+      "size": 1436
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ce84e822/ART-d9eb05cb/runtime-observation.json",
+      "role": "other",
+      "sha256": "c3ac3d394248b00afc6a25d44a08cf5e8241a8c1bc86639bab137e6f3dd6f503",
+      "size": 524
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ce84e822/ART-d8ec9b3c/runtime-process.json",
+      "role": "other",
+      "sha256": "deaecd46077f43dbdd29ed39f6a5dd9a181480da73473b82296117c862f1d37d",
+      "size": 2359
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ce84e822/ART-eea0d8ae/runtime-request.json",
+      "role": "other",
+      "sha256": "185c15ec02c9061ce3a5f4574b09380f3339eba97ea0648d6b8e95cab542b00c",
+      "size": 381
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ce84e822/ART-8c79affb/runtime-stderr.log",
+      "role": "other",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ce84e822/ART-9aaf43bc/runtime-stdout.log",
+      "role": "other",
+      "sha256": "85040aeb00d8286aed45096a50fb1007783ed6433ad0e11e9a76547c77eb5df9",
+      "size": 77
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ce84e822/ART-16ef59b3/version-process.json",
+      "role": "other",
+      "sha256": "96d1a7aa570fd4c51356f704ab56302e8ebeaf8582b0d826ce93e4624c1bd8a9",
+      "size": 1374
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ce84e822/ART-61a24b19/version-stderr.log",
+      "role": "other",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ce84e822/ART-ee9168af/version-stdout.log",
+      "role": "other",
+      "sha256": "c070177873f0f0acfbd7940156bb455d896c7b3694a65fa71d6d8c0ed65fb3fb",
+      "size": 34
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ce84e822/ART-c186af18/execution-summary.json",
+      "role": "other",
+      "sha256": "adeecb730642788f4341aa75433d1cf68f2c1951673f804f9a759aa7968aae41",
+      "size": 615
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-ce84e822/ART-1647f57f/validation-report.json",
+      "role": "other",
+      "sha256": "def28ed09b272e1ef1b3faf9040231cb27b27082dbf171eb9930436c57a4e3fe",
+      "size": 1550
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-20ebaf82/ART-ff0bda02/source-manifest.json",
+      "role": "other",
+      "sha256": "716b01963fb60fcf1b84a8cdb3f6bc226550217243ad911b483e8c995bd6ec36",
+      "size": 737
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-20ebaf82/ART-fbc37ce3/scenario-snapshot.json",
+      "role": "other",
+      "sha256": "53f5cf62c152269cb73a13e6d7fb26e86b4d0fd5ddd30e40e7faaa04ac12aa32",
+      "size": 1404
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-20ebaf82/ART-0eba6e53/version.json",
+      "role": "other",
+      "sha256": "b68b710c85b4387241946265d80248473611942d7c3d36262467c18374f4444a",
+      "size": 1214
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-20ebaf82/ART-6470f29f/version-terminal.json",
+      "role": "other",
+      "sha256": "da15cef3930643fa5a2f9f2a541ca770fbae1dd264fde1ecd0714bde04d3c06b",
+      "size": 908
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-20ebaf82/ART-cea6b196/help.json",
+      "role": "other",
+      "sha256": "dee76761cf4c18a710605b677346a80645820b8a6a05d9bfa9e10c9b6835f16a",
+      "size": 1205
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-20ebaf82/ART-7546f096/help-terminal.json",
+      "role": "other",
+      "sha256": "3f64aea64064ddffd906ce602803c8cbf138085b5577bb7756e21c95536a8bc9",
+      "size": 902
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-20ebaf82/ART-99416ac5/import.json",
+      "role": "other",
+      "sha256": "4e119145ac88842a32b437aefa5ce7470fe3657ef9ad1feeda7a93e83e3a404c",
+      "size": 1467
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-20ebaf82/ART-0bf879e2/import-terminal.json",
+      "role": "other",
+      "sha256": "69831b54b2292b049b464530b101ba9a08e37002b1c862f7ba0009b847de1ee4",
+      "size": 906
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-20ebaf82/ART-ab28d12e/runtime.json",
+      "role": "other",
+      "sha256": "57604803d8c383d058fa97cf7e33b6a94edea1f0ac5b4e02a3e738c9be9d26c9",
+      "size": 2226
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-20ebaf82/ART-f6cee10f/runtime-terminal.json",
+      "role": "other",
+      "sha256": "60df5f3684d57f1737de457531346305cdd371f503323df3820b50e252379a45",
+      "size": 907
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-20ebaf82/ART-bbe7c343/help-process.json",
+      "role": "other",
+      "sha256": "62d61559d3dbf3a890eaa9c85e4bd1fd30dcebae7be15ee72c88607a2df9ea3a",
+      "size": 1370
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-20ebaf82/ART-3e4504ee/help-stderr.log",
+      "role": "other",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-20ebaf82/ART-e89a82df/help-stdout.log",
+      "role": "other",
+      "sha256": "e4160ad4187fba1cbc092d2412a03535e83464eb9d8c446075cc29f4cad5b1d3",
+      "size": 15663
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-20ebaf82/ART-ed58600a/import-process.json",
+      "role": "other",
+      "sha256": "426d2bc32d5e6faca9ff11a79f3d95bab10b231ca8511d1634f17ba13eabbbd7",
+      "size": 1623
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-20ebaf82/ART-e70a7fa6/import-stderr.log",
+      "role": "other",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-20ebaf82/ART-8436c7fb/import-stdout.log",
+      "role": "other",
+      "sha256": "21fcb9c0b9f0607f38457386670bd71c0303fd972e623bb024dfeaaf58a56b59",
+      "size": 1436
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-20ebaf82/ART-7e89002b/runtime-observation.json",
+      "role": "other",
+      "sha256": "f81958814466d03d0eda2b436b70e2e90b94b6d616930d4202c57e4db34efcc0",
+      "size": 524
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-20ebaf82/ART-3add7615/runtime-process.json",
+      "role": "other",
+      "sha256": "869b53f4358ef0ba8390b2ca5d477c028dca047cbcc786c51e694a96e8e8aa2a",
+      "size": 2369
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-20ebaf82/ART-de3979ae/runtime-request.json",
+      "role": "other",
+      "sha256": "9cd14bd85b5723ec9c6b008b7dea39b30c19ca2de7e8f572bcf5feebe7394b85",
+      "size": 381
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-20ebaf82/ART-3d148773/runtime-stderr.log",
+      "role": "other",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-20ebaf82/ART-0ebcbd64/runtime-stdout.log",
+      "role": "other",
+      "sha256": "85040aeb00d8286aed45096a50fb1007783ed6433ad0e11e9a76547c77eb5df9",
+      "size": 77
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-20ebaf82/ART-b78ee480/version-process.json",
+      "role": "other",
+      "sha256": "7f8ffa7b05afe8986f250e639acda3ff55f985f43b7418aa514ae1dc8f068aa2",
+      "size": 1376
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-20ebaf82/ART-846023a8/version-stderr.log",
+      "role": "other",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-20ebaf82/ART-9e4ebdaa/version-stdout.log",
+      "role": "other",
+      "sha256": "c070177873f0f0acfbd7940156bb455d896c7b3694a65fa71d6d8c0ed65fb3fb",
+      "size": 34
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-20ebaf82/ART-631f9026/execution-summary.json",
+      "role": "other",
+      "sha256": "3ba46503c34f0845480973a9a129200e0b7f183b2427e0283d6adc2263b5c925",
+      "size": 615
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-20ebaf82/ART-78223d26/validation-report.json",
+      "role": "other",
+      "sha256": "6c9cebc5ed59d6135e10a49a4b54ac32effa77b5cdfb95344bb1dbd04d36a073",
+      "size": 1558
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-c34c9b20/ART-dd16cf10/source-manifest.json",
+      "role": "other",
+      "sha256": "b5153e80cc5da77c1725842b8a80d7408a42b5a60984c61ba119332658b9e5b5",
+      "size": 736
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-c34c9b20/ART-a3675caf/scenario-snapshot.json",
+      "role": "other",
+      "sha256": "53f5cf62c152269cb73a13e6d7fb26e86b4d0fd5ddd30e40e7faaa04ac12aa32",
+      "size": 1404
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-c34c9b20/ART-9f7068d6/version.json",
+      "role": "other",
+      "sha256": "18ee6430137234f75b28ef58c6fd694b574de10aa1fa9f1c28157b74c1a6117f",
+      "size": 1220
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-c34c9b20/ART-d9f2d969/version-terminal.json",
+      "role": "other",
+      "sha256": "e4e51f5b5df01620c68ee65c0b576a6f9a026c2b23858983cd7a2ef2cab21531",
+      "size": 908
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-c34c9b20/ART-86ebc5ab/help.json",
+      "role": "other",
+      "sha256": "2b8501d1e2441b8eb4e5c0aed9c78b6bbb169ceecb056a93a38d07b6225b0eb3",
+      "size": 1211
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-c34c9b20/ART-017f63c8/help-terminal.json",
+      "role": "other",
+      "sha256": "7754216036e407c4aaa48787994fdc95315d669cdceb9fe437dd6fc5c5e720ac",
+      "size": 902
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-c34c9b20/ART-b6fd19fb/import.json",
+      "role": "other",
+      "sha256": "fe55045ee948c63b6f04418e517e9acbec4bae4a1d61b8d2dd254dd49b858ccf",
+      "size": 1479
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-c34c9b20/ART-ac795a52/import-terminal.json",
+      "role": "other",
+      "sha256": "51281ddd20bc95ee8d333b226771d9bfe3066923777daf7e06839c18fd49b749",
+      "size": 906
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-c34c9b20/ART-f7163b0b/help-process.json",
+      "role": "other",
+      "sha256": "4aab3d58825ebad1eb8cf6489547bab2434399cc755da74bf62428c326f96d30",
+      "size": 1376
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-c34c9b20/ART-12209e70/help-stderr.log",
+      "role": "other",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-c34c9b20/ART-f58b06fb/help-stdout.log",
+      "role": "other",
+      "sha256": "a0312b699fc3404bb43aa3a2fd65cd61afc49b5a5beeb2c7d6ed4071aa9b6204",
+      "size": 15534
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-c34c9b20/ART-1b49f33e/import-process.json",
+      "role": "other",
+      "sha256": "d876059af2afbfee640d34f8466aca7460ed0a3a66977c2781553dd0103450a3",
+      "size": 1636
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-c34c9b20/ART-58007db3/import-stderr.log",
+      "role": "other",
+      "sha256": "3de1885b223e2cfb5be9e962114e0bfa79e8f90ec1fb16096edc2749d6c4f3ca",
+      "size": 279
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-c34c9b20/ART-f92c2984/import-stdout.log",
+      "role": "other",
+      "sha256": "6d51f349f7d3af814525539a8b79618093e16c693c070bfface3b99bea10f11e",
+      "size": 1415
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-c34c9b20/ART-4d5e7351/runtime-request.json",
+      "role": "other",
+      "sha256": "f9a99f374a097e64b0ff84398c84bdfa8b719da438fcca289f9edd0715426e74",
+      "size": 381
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-c34c9b20/ART-7bc0fbd3/version-process.json",
+      "role": "other",
+      "sha256": "2974e7498500777c1c50b7b42d5b935e2f88dee9083f9d458c420b2cf85ce9ba",
+      "size": 1382
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-c34c9b20/ART-165137e9/version-stderr.log",
+      "role": "other",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-c34c9b20/ART-c8f3366f/version-stdout.log",
+      "role": "other",
+      "sha256": "bf8803022b574250bb04dea65053a46b7c58570725316c1f7fe2aa6735706498",
+      "size": 33
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4500bae0/ART-b52247e8/source-manifest.json",
+      "role": "other",
+      "sha256": "26c0e49cb311ff4d5a391c804b5ec2923ab77d4dc5ee59292dce09ea0a248a9f",
+      "size": 737
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4500bae0/ART-fdb28d2b/scenario-snapshot.json",
+      "role": "other",
+      "sha256": "6d069220adb257c097258d1d581ff81449da24b043bbefc05434d97b824301ec",
+      "size": 1404
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4500bae0/ART-086aa6ab/version.json",
+      "role": "other",
+      "sha256": "fdb6c05a2c83e1a17db1f5048b4042cc812e30013532eba236cfaa7f64804027",
+      "size": 1217
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4500bae0/ART-33145c9b/version-terminal.json",
+      "role": "other",
+      "sha256": "9b50118ea0114f30a20733e892e5c5a2fbee26462f19ef032b339af019066606",
+      "size": 907
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4500bae0/ART-a8bded78/help.json",
+      "role": "other",
+      "sha256": "2a4c3e01d59e14c3c97c0c5fcfd4c4b740fc9ceebb8a240ef27d036e4a507be8",
+      "size": 1208
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4500bae0/ART-1d846f8c/help-terminal.json",
+      "role": "other",
+      "sha256": "a014e32653a690f5fa83b5561c65a34b57b98c1fbfa5ef761f6799fb3a308b6e",
+      "size": 902
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4500bae0/ART-9f5e3632/import.json",
+      "role": "other",
+      "sha256": "5915ab5b187263573ea941c03cfb819f362de36c0476ec712e6be7b5eb714e43",
+      "size": 1473
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4500bae0/ART-633788bd/import-terminal.json",
+      "role": "other",
+      "sha256": "8590c4804e56dfdcfe6c7953803147201d610cd1e3331e1e1415de35725cf657",
+      "size": 906
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4500bae0/ART-7b316dfc/runtime.json",
+      "role": "other",
+      "sha256": "0a762f3b19ca0840fdfba015ae52feee420438b9dd9ab55f49cf17a6d8f4f03d",
+      "size": 2241
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4500bae0/ART-47b855e4/runtime-terminal.json",
+      "role": "other",
+      "sha256": "c56927e1dc05fdaad6b01d21600a751fbde6acc5b56a8b891ee45f336a60b9ca",
+      "size": 908
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4500bae0/ART-be465422/help-process.json",
+      "role": "other",
+      "sha256": "46f47ef3fe30ae2e3c7cbe2e7dde63251a6c0a767df561c800b7002f51345a40",
+      "size": 1373
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4500bae0/ART-2ad2f5ea/help-stderr.log",
+      "role": "other",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4500bae0/ART-99936f92/help-stdout.log",
+      "role": "other",
+      "sha256": "e4160ad4187fba1cbc092d2412a03535e83464eb9d8c446075cc29f4cad5b1d3",
+      "size": 15663
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4500bae0/ART-4a09194c/import-process.json",
+      "role": "other",
+      "sha256": "e6fc3dd09cca3a0204b39ef1070e8f7b7fc4a8548073ad8f5042cb99712267ce",
+      "size": 1630
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4500bae0/ART-1d003550/import-stderr.log",
+      "role": "other",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4500bae0/ART-34097050/import-stdout.log",
+      "role": "other",
+      "sha256": "21fcb9c0b9f0607f38457386670bd71c0303fd972e623bb024dfeaaf58a56b59",
+      "size": 1436
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4500bae0/ART-7d94a6d2/runtime-observation.json",
+      "role": "other",
+      "sha256": "47ba70b3a4158a3cead3e47df3f96a6562cc431f68a7f18bf8b9b7d7598da0d5",
+      "size": 524
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4500bae0/ART-88ac20f4/runtime-process.json",
+      "role": "other",
+      "sha256": "ea523a35350bed6e7fd9074239820553ecba5a72643e0ad305c62253d06a8ffa",
+      "size": 2385
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4500bae0/ART-4ba6a9f0/runtime-request.json",
+      "role": "other",
+      "sha256": "84050b8d5b8bdb471195fd50b20a6eb61545effeccd5bd0c9e64ce8f06059fce",
+      "size": 381
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4500bae0/ART-a0b6411d/runtime-stderr.log",
+      "role": "other",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4500bae0/ART-7d9c49bd/runtime-stdout.log",
+      "role": "other",
+      "sha256": "85040aeb00d8286aed45096a50fb1007783ed6433ad0e11e9a76547c77eb5df9",
+      "size": 77
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4500bae0/ART-067030fe/version-process.json",
+      "role": "other",
+      "sha256": "b2dc42efe9220096cf7296f4b8f6715fad5f343030740d0232846a7b4ea3db07",
+      "size": 1378
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4500bae0/ART-30f0eda0/version-stderr.log",
+      "role": "other",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4500bae0/ART-080a8feb/version-stdout.log",
+      "role": "other",
+      "sha256": "c070177873f0f0acfbd7940156bb455d896c7b3694a65fa71d6d8c0ed65fb3fb",
+      "size": 34
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4500bae0/ART-598be327/execution-summary.json",
+      "role": "other",
+      "sha256": "b376a26d936b484a75af1deae24803606c2ac696a3482046a52faaadd3e035ee",
+      "size": 615
+    },
+    {
+      "path": "raw-artifacts/windows-acceptance/WF-GODOT-4500bae0/ART-627e2017/validation-report.json",
+      "role": "other",
+      "sha256": "2165cafc17321bf1c70e1c1f10543b0c1d0d7ad59dac2bae49132d0f3eacba12",
+      "size": 1554
+    },
+    {
+      "path": "raw-artifacts/windows-recovery/WF-GODOT-a2db051c/ART-aa7a46b5/source-manifest.json",
+      "role": "other",
+      "sha256": "1538c4740b33853622e9a23b058bb72068a23fee64d162c8f3fc6bff184b747c",
+      "size": 737
+    },
+    {
+      "path": "raw-artifacts/windows-recovery/WF-GODOT-a2db051c/ART-9fd8a64f/scenario-snapshot.json",
+      "role": "other",
+      "sha256": "53f5cf62c152269cb73a13e6d7fb26e86b4d0fd5ddd30e40e7faaa04ac12aa32",
+      "size": 1404
+    },
+    {
+      "path": "raw-artifacts/windows-recovery/WF-GODOT-a2db051c/ART-e5815b56/version.json",
+      "role": "other",
+      "sha256": "40fbba6593ee4fb9d8d6899aedb1403e00c5c4f5cc81342fa6b39154a8b33f09",
+      "size": 1238
+    },
+    {
+      "path": "raw-artifacts/windows-recovery/WF-GODOT-a2db051c/ART-caea6389/version-terminal.json",
+      "role": "other",
+      "sha256": "a98e7803273ae710a7f867bd3e00c1d19808e802dc359835dde75d6844fb5431",
+      "size": 908
+    },
+    {
+      "path": "raw-artifacts/windows-recovery/WF-GODOT-a2db051c/ART-cafc3624/help.json",
+      "role": "other",
+      "sha256": "2f3a854103024b3e4ede77cda9d4feb6d835a363ac94ca59b00ab79bfa12132f",
+      "size": 1229
+    },
+    {
+      "path": "raw-artifacts/windows-recovery/WF-GODOT-a2db051c/ART-c723c0ca/help-terminal.json",
+      "role": "other",
+      "sha256": "ca568a8b4fd2a2286f957d1bbd52e605f9054c91384b9bb3ca84d72f8a48c601",
+      "size": 902
+    },
+    {
+      "path": "raw-artifacts/windows-recovery/WF-GODOT-a2db051c/ART-c8076840/import.json",
+      "role": "other",
+      "sha256": "b9968bbeee238586a419d3809ad94484793ddc9ad1827dc848d71f902c47742b",
+      "size": 1515
+    },
+    {
+      "path": "raw-artifacts/windows-recovery/WF-GODOT-a2db051c/ART-736c5ec4/import-terminal.json",
+      "role": "other",
+      "sha256": "11eecae053bcf40451f415738ae8666316232d0115f1b9ea6bb8d05f07371778",
+      "size": 906
+    },
+    {
+      "path": "raw-artifacts/windows-recovery/WF-GODOT-a2db051c/ART-502c7bb7/runtime.json",
+      "role": "other",
+      "sha256": "a096de6ba37718934921228169f8deef004eb3e98436822c629b721d34228e64",
+      "size": 2346
+    },
+    {
+      "path": "raw-artifacts/windows-recovery/WF-GODOT-a2db051c/ART-373a224e/runtime-terminal.json",
+      "role": "other",
+      "sha256": "21ddd9c9d01abb41d7dcccecfe23ae10658738939cd2064864e17b193f231472",
+      "size": 908
+    },
+    {
+      "path": "raw-artifacts/windows-recovery/WF-GODOT-a2db051c/ART-ee88c7e0/source-manifest.json",
+      "role": "other",
+      "sha256": "9afe6c14f42e0259e5e7e8161a19a54391cb23a100dbb68476787e6cf0abf9e9",
+      "size": 737
+    },
+    {
+      "path": "raw-artifacts/windows-recovery/WF-GODOT-a2db051c/ART-fa58faa1/scenario-snapshot.json",
+      "role": "other",
+      "sha256": "53f5cf62c152269cb73a13e6d7fb26e86b4d0fd5ddd30e40e7faaa04ac12aa32",
+      "size": 1404
+    },
+    {
+      "path": "raw-artifacts/windows-recovery/WF-GODOT-a2db051c/ART-1f015ed3/version.json",
+      "role": "other",
+      "sha256": "1b9d303c3dd92741872a15da8f94acf07e87edfbd16669059f5c4fab066a83d5",
+      "size": 1238
+    },
+    {
+      "path": "raw-artifacts/windows-recovery/WF-GODOT-a2db051c/ART-0f166bb9/version-terminal.json",
+      "role": "other",
+      "sha256": "89e09db5051ea8362b5343ceca0c1bc6dd6b3af4abbe0ea6ad3af453a1f744c7",
+      "size": 908
+    },
+    {
+      "path": "raw-artifacts/windows-recovery/WF-GODOT-a2db051c/ART-2e7877c5/help.json",
+      "role": "other",
+      "sha256": "ac16095493514c56c1876d3c1138859df99f0f3095437fe297fc4a9bce668256",
+      "size": 1229
+    },
+    {
+      "path": "raw-artifacts/windows-recovery/WF-GODOT-a2db051c/ART-a048bdd2/help-terminal.json",
+      "role": "other",
+      "sha256": "3fe9e5f7ff8404d7cd3ceacfb9bf8fdb7bca66f16912beb5ad545357c2929715",
+      "size": 902
+    },
+    {
+      "path": "raw-artifacts/windows-recovery/WF-GODOT-a2db051c/ART-a4d674bf/import.json",
+      "role": "other",
+      "sha256": "8d8496c32541083af6c413d9011ea6a82442ad1c88a75d9ded7955995841a6ae",
+      "size": 1515
+    },
+    {
+      "path": "raw-artifacts/windows-recovery/WF-GODOT-a2db051c/ART-f9d7e18b/import-terminal.json",
+      "role": "other",
+      "sha256": "c8e0c91dff8191e7ee301c501a01bb63b2ddd4136d53fa90135d65101b2647b8",
+      "size": 906
+    },
+    {
+      "path": "raw-artifacts/windows-recovery/WF-GODOT-a2db051c/ART-50d4ed62/runtime.json",
+      "role": "other",
+      "sha256": "3e2c02c916a83e4d93d054f4e791f80de47475a1efbe6a2b523fd604de400a34",
+      "size": 2346
+    },
+    {
+      "path": "raw-artifacts/windows-recovery/WF-GODOT-a2db051c/ART-5801a519/runtime-terminal.json",
+      "role": "other",
+      "sha256": "e799f02a768ddac54513015e2e9ae69c956e11ebe50828e006c53caf86ea81e5",
+      "size": 908
+    },
+    {
+      "path": "raw-artifacts/windows-recovery/WF-GODOT-a2db051c/ART-587b444a/help-process.json",
+      "role": "other",
+      "sha256": "73cc3d88fbf8d07a5cee6ba17104c65936c331a8cbbb55ca1894b9e713273ef0",
+      "size": 1394
+    },
+    {
+      "path": "raw-artifacts/windows-recovery/WF-GODOT-a2db051c/ART-443fecb8/help-stderr.log",
+      "role": "other",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    {
+      "path": "raw-artifacts/windows-recovery/WF-GODOT-a2db051c/ART-ec05fcb4/help-stdout.log",
+      "role": "other",
+      "sha256": "e4160ad4187fba1cbc092d2412a03535e83464eb9d8c446075cc29f4cad5b1d3",
+      "size": 15663
+    },
+    {
+      "path": "raw-artifacts/windows-recovery/WF-GODOT-a2db051c/ART-ec586b76/import-process.json",
+      "role": "other",
+      "sha256": "e5641c5b13b87cf28c6fa519c09b774bc8a63422951d7a1d8866a87f3be61d41",
+      "size": 1672
+    },
+    {
+      "path": "raw-artifacts/windows-recovery/WF-GODOT-a2db051c/ART-9fd23020/import-stderr.log",
+      "role": "other",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    {
+      "path": "raw-artifacts/windows-recovery/WF-GODOT-a2db051c/ART-8708d009/import-stdout.log",
+      "role": "other",
+      "sha256": "21fcb9c0b9f0607f38457386670bd71c0303fd972e623bb024dfeaaf58a56b59",
+      "size": 1436
+    },
+    {
+      "path": "raw-artifacts/windows-recovery/WF-GODOT-a2db051c/ART-d395af4f/runtime-observation.json",
+      "role": "other",
+      "sha256": "f14cdfc8c183a283c722e3410fd94dd3be61a9330b701021655d4c4751f566e9",
+      "size": 524
+    },
+    {
+      "path": "raw-artifacts/windows-recovery/WF-GODOT-a2db051c/ART-c1f55985/runtime-process.json",
+      "role": "other",
+      "sha256": "0b73c0c677aa478e85190b3e16a5e4e9b846466cd4d24ef7c9fbdac418c12ae6",
+      "size": 2490
+    },
+    {
+      "path": "raw-artifacts/windows-recovery/WF-GODOT-a2db051c/ART-4909ced4/runtime-request.json",
+      "role": "other",
+      "sha256": "97325310703b76848a4ee16afe302683e73c0dd8639f3bdc5f77fb4e383f61c3",
+      "size": 381
+    },
+    {
+      "path": "raw-artifacts/windows-recovery/WF-GODOT-a2db051c/ART-7a6f7c4a/runtime-stderr.log",
+      "role": "other",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    {
+      "path": "raw-artifacts/windows-recovery/WF-GODOT-a2db051c/ART-f1309ff6/runtime-stdout.log",
+      "role": "other",
+      "sha256": "85040aeb00d8286aed45096a50fb1007783ed6433ad0e11e9a76547c77eb5df9",
+      "size": 77
+    },
+    {
+      "path": "raw-artifacts/windows-recovery/WF-GODOT-a2db051c/ART-42ed3333/version-process.json",
+      "role": "other",
+      "sha256": "573867baa6851017745b040a06584547d08f19be870598b4f6d2af189fcabdc9",
+      "size": 1400
+    },
+    {
+      "path": "raw-artifacts/windows-recovery/WF-GODOT-a2db051c/ART-1d9bd0e3/version-stderr.log",
+      "role": "other",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "size": 0
+    },
+    {
+      "path": "raw-artifacts/windows-recovery/WF-GODOT-a2db051c/ART-ebdc99cd/version-stdout.log",
+      "role": "other",
+      "sha256": "c070177873f0f0acfbd7940156bb455d896c7b3694a65fa71d6d8c0ed65fb3fb",
+      "size": 34
+    },
+    {
+      "path": "raw-artifacts/windows-recovery/WF-GODOT-a2db051c/ART-3e76cf33/execution-summary.json",
+      "role": "other",
+      "sha256": "d6fbd319b58da38b7d2e7c8542eaa7cdad4b78efb9d9aaca0d655703d0da9e68",
+      "size": 615
+    },
+    {
+      "path": "raw-artifacts/windows-recovery/WF-GODOT-a2db051c/ART-303c5aab/validation-report.json",
+      "role": "other",
+      "sha256": "def28ed09b272e1ef1b3faf9040231cb27b27082dbf171eb9930436c57a4e3fe",
+      "size": 1550
+    },
+    {
+      "path": "raw-artifacts/windows-recovery/WF-GODOT-6f1b04b0/ART-7df1e327/source-manifest.json",
+      "role": "other",
+      "sha256": "1ba8d6fabf67ea6524a7c9627ac8553db08943c72350badd231bbab6e37a756e",
+      "size": 737
+    },
+    {
+      "path": "raw-artifacts/windows-recovery/WF-GODOT-6f1b04b0/ART-02201148/scenario-snapshot.json",
+      "role": "other",
+      "sha256": "53f5cf62c152269cb73a13e6d7fb26e86b4d0fd5ddd30e40e7faaa04ac12aa32",
+      "size": 1404
+    },
+    {
+      "path": "raw-artifacts/windows-recovery/WF-GODOT-6f1b04b0/ART-b8495790/version.json",
+      "role": "other",
+      "sha256": "9a85c8a47716dc01bfc9a68765b8fa83bfd300086fe5035f29ea71e2d2cd96b2",
+      "size": 1239
+    },
+    {
+      "path": "raw-artifacts/windows-recovery/WF-GODOT-6f1b04b0/ART-0d49ebd7/version-terminal.json",
+      "role": "other",
+      "sha256": "72bb59afb33cc139fa633dd4a2e92d34e4cbfde48ee601c6b3e3bf0a74e1955c",
+      "size": 908
+    },
+    {
+      "path": "raw-artifacts/windows-recovery/WF-GODOT-6f1b04b0/ART-a709957b/help.json",
+      "role": "other",
+      "sha256": "ffdea4cf2a43b8ba05a49331eef35b2953fd3c0578e1d97065b715e900a0e25f",
+      "size": 1230
+    },
+    {
+      "path": "raw-artifacts/windows-recovery/WF-GODOT-6f1b04b0/ART-918ef3f4/help-terminal.json",
+      "role": "other",
+      "sha256": "35866e340616a7e5c6594c0ae036e78d66ed315c15017e3243905ed7614d06ed",
+      "size": 902
+    },
+    {
+      "path": "raw-artifacts/windows-recovery/WF-GODOT-6f1b04b0/ART-fc8324c1/import.json",
+      "role": "other",
+      "sha256": "8879d71584dc730c30189d28be2086a60ebd66f006dc860daf81feb232552777",
+      "size": 1517
+    },
+    {
+      "path": "raw-artifacts/windows-recovery/WF-GODOT-6f1b04b0/ART-d03a164e/import-terminal.json",
+      "role": "other",
+      "sha256": "adde8f236d6df396f78cfcb8d3ad3fd668afad2866b228492800f4a6484fdb6d",
+      "size": 906
+    },
+    {
+      "path": "raw-artifacts/windows-recovery/WF-GODOT-6f1b04b0/ART-f8c2f03a/runtime.json",
+      "role": "other",
+      "sha256": "40399cf51dcf3a698589c098637e5cd94cfb0f35cecc8c1fe944b7f54923c05a",
+      "size": 2351
+    },
+    {
+      "path": "raw-artifacts/windows-live-crash/WF-GODOT-2cd66cd7/ART-15b9927d/source-manifest.json",
+      "role": "other",
+      "sha256": "8e3f0e9c68b55caa12a6ef19558db38d47387ee85a08f19bd2e60db7750c975a",
+      "size": 906
+    },
+    {
+      "path": "raw-artifacts/windows-live-crash/WF-GODOT-2cd66cd7/ART-0ddfc0e9/scenario-snapshot.json",
+      "role": "other",
+      "sha256": "53f5cf62c152269cb73a13e6d7fb26e86b4d0fd5ddd30e40e7faaa04ac12aa32",
+      "size": 1404
+    },
+    {
+      "path": "raw-artifacts/windows-live-crash/WF-GODOT-2cd66cd7/ART-870ba9b4/version.json",
+      "role": "other",
+      "sha256": "ebaf1e5ad5786594ee0ea9a3d9fa0c36370f4d15ded4513344c91a40e5df228d",
+      "size": 1208
+    },
+    {
+      "path": "raw-artifacts/windows-live-crash/WF-GODOT-2cd66cd7/ART-391b1f20/version-terminal.json",
+      "role": "other",
+      "sha256": "255813d620c420240c6612cf06737c063a161d3e5185af98acfb41c8b18aafcc",
+      "size": 907
+    },
+    {
+      "path": "raw-artifacts/windows-live-crash/WF-GODOT-2cd66cd7/ART-d08093f9/help.json",
+      "role": "other",
+      "sha256": "3a91bf9229f4f9eb22bf681eee661c64d8da923990525b025be4b2df8f57c462",
+      "size": 1199
+    },
+    {
+      "path": "raw-artifacts/windows-live-crash/WF-GODOT-2cd66cd7/ART-114e7a82/help-terminal.json",
+      "role": "other",
+      "sha256": "abf61830e399e2d9f733da6e242ead83ad8cb442c566127891efd5d65cadba6f",
+      "size": 902
+    },
+    {
+      "path": "raw-artifacts/windows-live-crash/WF-GODOT-2cd66cd7/ART-9fc0fb73/import.json",
+      "role": "other",
+      "sha256": "a4a3d6790f32e5facaee271903a8b5e4cb72bd8e227c5bad3dc4cb5e0c851936",
+      "size": 1455
+    },
+    {
+      "path": "raw-artifacts/windows-live-crash/WF-GODOT-2cd66cd7/ART-c1803485/import-terminal.json",
+      "role": "other",
+      "sha256": "191373d5e0f6d68df440e9a5eb312f09612eb25ca4474adef8a629fe9df6bbfc",
+      "size": 906
+    },
+    {
+      "path": "raw-artifacts/windows-live-crash/WF-GODOT-2cd66cd7/ART-471c38e3/runtime.json",
+      "role": "other",
+      "sha256": "da53df2cdfde3632ddee35f51d70e5866ad8022346089449242f203555dc6c9f",
+      "size": 2196
+    },
+    {
+      "path": "records/selected-inspect.json",
+      "role": "inspect",
+      "sha256": "66e2ae25018a8fbaf7873b22b744ed34831a159f4afb814ae05da3534c79df62",
+      "size": 38829
+    },
+    {
+      "path": "supporting/artifact-export-map.json",
+      "role": "supporting",
+      "sha256": "a309ad186e51c08fb38feb361eb138da44e466785ef100ea5aa57e239ab6a2f9",
+      "size": 256472
+    },
+    {
+      "path": "supporting/baseline-source.json",
+      "role": "supporting",
+      "sha256": "83b69fece157f3b574a4dea2b5a0774a29fb471cea3ac3942ab0e22afa02bcbc",
+      "size": 14533
+    },
+    {
+      "path": "supporting/baseline-tests.xml",
+      "role": "supporting",
+      "sha256": "674d4338ba79d0cd68f777e7cc998f487dd1e89d29f8aa91523a0fab26ae63a9",
+      "size": 36067
+    },
+    {
+      "path": "supporting/baseline.json",
+      "role": "supporting",
+      "sha256": "7133d2e688116a8b37e5cc2fea007054513f957b540c5096fb6196ba4d900476",
+      "size": 32184
+    },
+    {
+      "path": "supporting/cold-review.json",
+      "role": "supporting",
+      "sha256": "bdda967fdc65bc9a643f6ee68094a290d8b1e0c744966aea715be91ce526e712",
+      "size": 3863
+    },
+    {
+      "path": "supporting/commit-transition.json",
+      "role": "supporting",
+      "sha256": "1d862cc9d53a7122b182e96dceae337c7ebc4bbb281efea63559d718ef8a0739",
+      "size": 15365
+    },
+    {
+      "path": "supporting/final-product-identity.json",
+      "role": "supporting",
+      "sha256": "59fe40e56db49b17a7b2b6c723cd944a61f78160f7cbbfba35d97f9a0954a6b9",
+      "size": 353
+    },
+    {
+      "path": "supporting/final-quality.json",
+      "role": "supporting",
+      "sha256": "ee543462f67eab142b7b43438b1ae849cb4890f0d9b539604771397500e776fe",
+      "size": 34429
+    },
+    {
+      "path": "supporting/final-source.json",
+      "role": "supporting",
+      "sha256": "b690009639d8152f9f6a765ba997cdedcee84e7b59f49469cb624a623684a3fa",
+      "size": 14741
+    },
+    {
+      "path": "supporting/final-test-exclusions.json",
+      "role": "supporting",
+      "sha256": "340c5aa69a02fe651cfe7fd962f36f7229de9b2f2a2a97b7f6765a18eeca9c8e",
+      "size": 2037
+    },
+    {
+      "path": "supporting/final-tests.xml",
+      "role": "supporting",
+      "sha256": "ff9eb69aa06fdf5c6a3a6eb630690f1890335668cfb65ea737a50083c5757414",
+      "size": 38838
+    },
+    {
+      "path": "supporting/historical-evidence-assessment.json",
+      "role": "supporting",
+      "sha256": "df10659b8d27cb270eaa568e400cd67cb98879e2bd47289b151e19ec9036ea85",
+      "size": 698
+    },
+    {
+      "path": "supporting/historical-hashes.json",
+      "role": "supporting",
+      "sha256": "46ba6b8ade9bdeac691eec5aaea5331a4350375ec86f0a41a98d167b22d59deb",
+      "size": 2276
+    },
+    {
+      "path": "supporting/historical-preservation.json",
+      "role": "supporting",
+      "sha256": "a9990e46b771fa4b756154cb4cd4c8e73125b4b67d53241925b1797ab80ccc6d",
+      "size": 78
+    },
+    {
+      "path": "supporting/installation.json",
+      "role": "supporting",
+      "sha256": "dfb93eb6144a7bce469e32b35a33ee359b9528174006d599c446b3d3fe443374",
+      "size": 3777
+    },
+    {
+      "path": "supporting/lead-live-validation.json",
+      "role": "supporting",
+      "sha256": "9c3ce0aab8fc87a758b62e7dd63399ccda29b6853dc3bab7a978c0dc5bf997f8",
+      "size": 676
+    },
+    {
+      "path": "supporting/live-export-map.json",
+      "role": "supporting",
+      "sha256": "213f43b052e20665ead78b8816ec027cf474b4aeca407b629f5050873aac2067",
+      "size": 860
+    },
+    {
+      "path": "supporting/platform-access.json",
+      "role": "supporting",
+      "sha256": "fd64fbb07ff1a35df1329e2eb7af04edb9663f4632de7f264a4662132d841ba2",
+      "size": 3823
+    },
+    {
+      "path": "supporting/product-commit-match.json",
+      "role": "supporting",
+      "sha256": "2de0a62909b0fc8e696df6a8505903c53be7f42811780c6c01cd969469909504",
+      "size": 12514
+    },
+    {
+      "path": "supporting/README.md",
+      "role": "supporting",
+      "sha256": "ece32fac4988e47e25586d4a70fa4098d12dc64c975f6c1f473d2dc5a8f51eaa",
+      "size": 4092
+    },
+    {
+      "path": "supporting/symlink-probe.json",
+      "role": "supporting",
+      "sha256": "3ae91bc1450e801ff48f727c37420c0d0e9a3c869474cdeb9ff88882c182b5e4",
+      "size": 276
+    },
+    {
+      "path": "supporting/test-exclusions.json",
+      "role": "supporting",
+      "sha256": "8a83c037ea17f7a6bf977757898fc3575599008ec4e4164d3a0aa5e8dd077728",
+      "size": 1773
+    },
+    {
+      "path": "supporting/v01-command-comparison.json",
+      "role": "supporting",
+      "sha256": "0387de092b5112da3832d154beee8642471de73837b0e9bed1b3440bb539aa02",
+      "size": 6567
+    },
+    {
+      "path": "supporting/v01-comparison.md",
+      "role": "supporting",
+      "sha256": "6fbfc214cadaf6730d420ad0acc3f6f9a337f6b1ee19ac3fda20cd11ff1080e3",
+      "size": 2081
+    },
+    {
+      "path": "supporting/windows-acceptance-sandbox-failed.json",
+      "role": "supporting",
+      "sha256": "8ec354f13c64cfa5fc5b2f822b910a6e1b6c1d4d641b835b69d4196a5ddf3743",
+      "size": 129405
+    },
+    {
+      "path": "supporting/windows-commands.json",
+      "role": "supporting",
+      "sha256": "8931441db869fe19b782ec293fac929d348ca240bf84e3126a142985394d0ba9",
+      "size": 8567
+    },
+    {
+      "path": "supporting/windows-live-command-before-final-review.json",
+      "role": "supporting",
+      "sha256": "1372751a0a29341bbb4ebaa49a23942b0fc1f0f62f722dd086df4e585ee98960",
+      "size": 1833
+    },
+    {
+      "path": "supporting/windows-live-command.json",
+      "role": "supporting",
+      "sha256": "4fe725265ed0d1049929e5d46d6696d9dc3bbc85caf49959364515f48e079a21",
+      "size": 1832
+    },
+    {
+      "path": "supporting/windows-live-crash-before-final-review.json",
+      "role": "supporting",
+      "sha256": "41c8d77501555dd7d49f29fb74e8e4da901c2902bd887ca7ece249884098aaf7",
+      "size": 182701
+    },
+    {
+      "path": "supporting/windows-live-crash.json",
+      "role": "supporting",
+      "sha256": "24f929cd28fcbbee6a9c9c290e1fbe6510e6272351608fa5eecaa00279b597f7",
+      "size": 182547
+    },
+    {
+      "path": "supporting/windows-runtime-commands.json",
+      "role": "supporting",
+      "sha256": "dd4e1188b5c4346ef2d2ab04361ec660f046e0be9ff5da90c9fbbcdf01160eaf",
+      "size": 4065
+    },
+    {
+      "path": "supporting/windows-v01.json",
+      "role": "supporting",
+      "sha256": "0710d38aa8ce0cda45c625cd5b3b049257b0ccccf62f5d6b46fe1b58202b1931",
+      "size": 120262
+    },
+    {
+      "path": "supporting/workflow-review.json",
+      "role": "supporting",
+      "sha256": "c5e81a62347fb4d58cb36037f7b1a50e1d94c307db1e7aba5bc94b43442f4140",
+      "size": 333
+    },
+    {
+      "path": "remote-ci/artifact-retrieval.json",
+      "role": "supporting",
+      "sha256": "7475988bf026821510de396376ee1585784f0d314430feb777c2296496b67ad5",
+      "size": 451
+    },
+    {
+      "path": "remote-ci/artifacts.json",
+      "role": "supporting",
+      "sha256": "f9679c8448428ee95f8e3a4952c7b1c4fbc125dfcbdd8dcc9c83d64e6bd66545",
+      "size": 725
+    },
+    {
+      "path": "remote-ci/jobs.json",
+      "role": "supporting",
+      "sha256": "b5f676ba69b6c90ada5c380101f71c4940366af35ba8e2f1eb2e8da1c7cc62e1",
+      "size": 14357
+    },
+    {
+      "path": "remote-ci/real-godot-20260927T020728Z-2097.json",
+      "role": "supporting",
+      "sha256": "dfe4cb3ea8cd830fd91854955f9c5769a72b6ebae5736b322179e07100aa81da",
+      "size": 1127887
+    },
+    {
+      "path": "remote-ci/retrieval.json",
+      "role": "supporting",
+      "sha256": "5ad6d5dfbcc101d9a1d2d91ec1a6beb2381509af0adf8fa0886abe09f60ffb16",
+      "size": 1519
+    },
+    {
+      "path": "remote-ci/run.json",
+      "role": "supporting",
+      "sha256": "ed4934b76f81023648f9b077148e2d2d3f55cfa822a6e97674ba219d1070b823",
+      "size": 12653
+    },
+    {
+      "path": "remote-ci/run.log",
+      "role": "supporting",
+      "sha256": "f162d59d8355e9d00083349ed563220c8e89fb03920a4ce8d1a0202095b2fde8",
+      "size": 433942
+    },
+    {
+      "path": "remote-ci/test-summary.json",
+      "role": "supporting",
+      "sha256": "5918db4494244d3696c526074facadf274d8eeddc1268aa87c966edd92c8f63b",
+      "size": 9149
+    },
+    {
+      "path": "live-process-evidence/fixture-ready.json",
+      "role": "supporting",
+      "sha256": "b6ef769027e5cfc9fa7718fa23ea57840034d1df9e9cd2a302dfce62c58abe9e",
+      "size": 87
+    },
+    {
+      "path": "live-process-evidence/fixture-runtime-journal.jsonl",
+      "role": "supporting",
+      "sha256": "f92b80b6f1451ae1055f162beeadf9a1a6badd14156662a30302a585462212d2",
+      "size": 88
+    },
+    {
+      "path": "live-process-evidence/helper-ready.json",
+      "role": "supporting",
+      "sha256": "c6a3754e812a455e2ea0642378c4e811f465250eccaa0807900f27a7d0052680",
+      "size": 215
+    },
+    {
+      "path": "live-process-evidence/launch-observations.jsonl",
+      "role": "supporting",
+      "sha256": "d51ad43e817886c8d389219b37a424d475d7b34c03b79b25d7a4a8f28544c62b",
+      "size": 10341
+    },
+    {
+      "path": "live-process-evidence/workflow-info.json",
+      "role": "supporting",
+      "sha256": "89174ec13b76fd1fc636a54d5a4d359bde0331d76602e6627c2806c8a2c39e38",
+      "size": 234
+    },
+    {
+      "path": "closeout-report.md",
+      "role": "documentation",
+      "sha256": "c7b3176e27816e2466d3f908ca523e033f7f4d49f5d6b1a3eb4fcf1e975f2428",
+      "size": 13749
+    },
+    {
+      "path": "work-plan.md",
+      "role": "documentation",
+      "sha256": "789c7c4543444468bceb39db05b12e9b6fd2f4b0b116d6892f666aa3cc6edc1e",
+      "size": 8930
+    },
+    {
+      "path": "requirements.md",
+      "role": "documentation",
+      "sha256": "a9500ea4ba41810cb6b15cb78ae621bc136688af272e6a02692d594b8720773c",
+      "size": 19882
+    },
+    {
+      "path": "README.md",
+      "role": "documentation",
+      "sha256": "38fe9e110dc3b8d42384384781e8695bb4de182d77ac4f61f234c7bf054a367d",
+      "size": 1556
+    },
+    {
+      "path": "verify_closeout_evidence.py",
+      "role": "verifier",
+      "sha256": "f9a72907495c65981fcf1689c26787d45e4eb33b582a4ec89fe4e4d70b40212d",
+      "size": 16068
+    }
+  ],
+  "recovery": "records/recovery.json",
+  "relationships": {
+    "execution_id": "EXEC-93637804",
+    "execution_task_id": "WF-GODOT-0f9e853f-EXECUTE",
+    "scenario_id": "fixture-smoke",
+    "validation_task_id": "WF-GODOT-0f9e853f-VALIDATE",
+    "workflow_id": "WF-GODOT-0f9e853f"
+  },
+  "schema_version": 1,
+  "source_identity": "metadata/source-identity.json"
+}

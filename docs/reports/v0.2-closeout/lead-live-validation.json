@@ -1,0 +1,14 @@
+{
+  "report_sha256": "24f929cd28fcbbee6a9c9c290e1fbe6510e6272351608fa5eecaa00279b597f7",
+  "launch_journal_sha256": "d51ad43e817886c8d389219b37a424d475d7b34c03b79b25d7a4a8f28544c62b",
+  "recovery_wrapper_pids": [
+    36168,
+    11808,
+    16684
+  ],
+  "actual_subprocess_launches_from_resume_retry": 0,
+  "same_execution_id": "EXEC-05fc86d9",
+  "workflow": "WF-GODOT-2cd66cd7",
+  "status": "PASSED",
+  "checks": "Real launch journal independently inspected; all three resume/retry entry processes had ZERO subprocess launches, stronger than runtime-only counting. One UNCERTAIN attempt, BLOCKED workflow, no passed gate, sentinel survived, child exit observed."
+}

@@ -1,0 +1,6 @@
+{
+  "product_files": 54,
+  "baseline_equals_final": true,
+  "wheel_sha256": "5a88523723a531efe6bc09a8ffa84939b960ae6815c28dbdaa06e86496d09fe7",
+  "explanation": "Only verification scripts, tests, workflow and docs changed. Real acceptance/V0.1/recovery use identical product bytes and same wheel; live crash rerun after last verifier correction."
+}

@@ -1,0 +1,27 @@
+[
+  {
+    "path": "live-process-evidence/fixture-ready.json",
+    "size": 87,
+    "sha256": "b6ef769027e5cfc9fa7718fa23ea57840034d1df9e9cd2a302dfce62c58abe9e"
+  },
+  {
+    "path": "live-process-evidence/fixture-runtime-journal.jsonl",
+    "size": 88,
+    "sha256": "f92b80b6f1451ae1055f162beeadf9a1a6badd14156662a30302a585462212d2"
+  },
+  {
+    "path": "live-process-evidence/helper-ready.json",
+    "size": 215,
+    "sha256": "c6a3754e812a455e2ea0642378c4e811f465250eccaa0807900f27a7d0052680"
+  },
+  {
+    "path": "live-process-evidence/launch-observations.jsonl",
+    "size": 10341,
+    "sha256": "d51ad43e817886c8d389219b37a424d475d7b34c03b79b25d7a4a8f28544c62b"
+  },
+  {
+    "path": "live-process-evidence/workflow-info.json",
+    "size": 234,
+    "sha256": "89174ec13b76fd1fc636a54d5a4d359bde0331d76602e6627c2806c8a2c39e38"
+  }
+]

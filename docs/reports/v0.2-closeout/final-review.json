@@ -1,0 +1,19 @@
+{
+  "completed_at": "2026-09-27T02:33:10.105567+00:00",
+  "engineering_decision": "APPROVED WITH COMMENTS",
+  "verification_closure": "PARTIAL",
+  "final_source_files_checked": 102,
+  "source_mismatches": [],
+  "historical_files_checked": 24,
+  "historical_changes": [],
+  "product_sources_unchanged": true,
+  "package_files": 306,
+  "package_bytes": 4872976,
+  "package_manifest_sha256": "70220e888a0fcaea513c574f00ce3622f938da7cc59fd6bb72de686ac07f129a",
+  "remaining": [
+    "Current local test/script/workflow revision remote CI run",
+    "Linux live-child crash and final normal suite after test fixes",
+    "Linux clean wheel identity and filesystem mount evidence"
+  ],
+  "git_diff_check_exit": 0
+}

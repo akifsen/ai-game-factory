@@ -1,0 +1,7 @@
+{
+  "platform": "Windows-11-10.0.26200-SP0",
+  "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gf-symlink-probe-upq8dtlr",
+  "supported": false,
+  "error": "OSError(22, 'Gereken ayr\u0131cal\u0131k istemci taraf\u0131ndan sa\u011flanm\u0131yor')",
+  "winerror": 1314
+}
