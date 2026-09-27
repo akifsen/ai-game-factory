@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "meshy": {
+      "type": "stdio",
+      "command": "C:\\Program Files\\nodejs\\node.exe",
+      "args": [
+        "C:\\Users\\lenovo\\devel\\tide-bastion\\tools\\start-meshy.cjs"
+      ],
+      "env": {
+        "MESHY_API_KEY": "${env:MESHY_API_KEY}"
+      }
+    }
+  }
+}

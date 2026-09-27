@@ -1,0 +1,13 @@
+{
+  "sha256": "70bdbcc28f91162899776f8bc22205a96f05e17718dd3e5c62db40baaf287636",
+  "source_type": "imported",
+  "created_at": "2026-09-27T17:57:35.004711+00:00",
+  "prompt": "Stylized sci-fi energy cell, small upright collectible, dark housing and a bright cyan core. Operator drawing for pickup_energy_cell_01. Not a Stable Diffusion or Meshy image.",
+  "model": {
+    "id": "pillow-operator-concept-v0.5"
+  },
+  "generation": {
+    "provider": "local_operator_drawing",
+    "paid": false
+  }
+}

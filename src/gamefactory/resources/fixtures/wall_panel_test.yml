@@ -1,0 +1,31 @@
+schema_version: "0.5.0"
+asset_id: wall_panel_test
+category: modular
+profile: modular_piece
+profile_version: 1
+intent: "TEST FIXTURE. Modular wall panel used to exercise snap dimensions and origin. Not a production Meshy asset."
+dimensions:
+  width_m: 1.0
+  depth_m: 0.25
+  height_m: 2.0
+orientation:
+  up: "+Y"
+  front: "-Z"
+origin_policy: bottom_center
+geometry_budget:
+  max_triangles_lod0: 12000
+  max_triangles_lod1: 4000
+  lod_ratio: 0.5
+material_budget:
+  max_materials: 2
+texture_budget:
+  max_dimension: 2048
+collider_policy: box
+lod_policy: lod0_only
+style_constraints:
+  family: stylized_scifi
+  silhouette: planar
+  readability: high
+  detail_density: low
+target_engine: godot
+target_import_path: assets/generated/modular/wall_panel_test/

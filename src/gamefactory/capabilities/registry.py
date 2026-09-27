@@ -174,15 +174,15 @@ class CapabilityRegistry:
         )
 
         for name, description in {
-            "asset.specification.validate": "Strict V0.4 static_prop specification validation",
+            "asset.specification.validate": "Strict asset specification validation bound to a built-in profile",
             "asset.glb.validate": "Decoded GLB geometry, texture, LOD and collider validation",
             "asset.concept.ingest": "Bounded PNG ingestion with hash-bound local provenance",
-            "asset.workflow.execute": "Static-prop DAG with concept, paid and final human gates",
+            "asset.workflow.execute": "Profile-driven asset DAG with concept, paid and final human gates",
         }.items():
             entries[name] = CapabilityEntry(name, description, CapabilityStatus.AVAILABLE, "core")
         entries["asset.blender.process"] = CapabilityEntry(
             "asset.blender.process",
-            "Deterministic static-prop processing; real execution remains workflow evidence",
+            "Deterministic profile-contract processing; real execution remains workflow evidence",
             CapabilityStatus.NOT_VERIFIED if blender_res.available else blender_status,
             "blender",
             details={"executable_path": blender_res.executable_path, "processing_probed": False},

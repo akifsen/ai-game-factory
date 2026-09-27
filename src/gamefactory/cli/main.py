@@ -156,7 +156,7 @@ def build_parser() -> argparse.ArgumentParser:
     inspect.add_argument("workflow_id")
 
     asset_create = commands.add_parser(
-        "asset-create", help="create a gated static-prop production workflow"
+        "asset-create", help="create a gated profile-driven asset production workflow"
     )
     _add_common(asset_create, nested=True)
     asset_create.add_argument("--spec", required=True, help="strict asset-spec-0.4.0 YAML or JSON")
@@ -172,7 +172,36 @@ def build_parser() -> argparse.ArgumentParser:
         type=float,
         help="maximum budget reservation when provider cost is UNKNOWN; not a cost estimate",
     )
+
+    asset = commands.add_parser("asset", help="profile-aware asset commands")
+    asset_commands = asset.add_subparsers(dest="asset_command", required=True)
+    asset_profiles = asset_commands.add_parser("profiles", help="list built-in asset profiles")
+    _add_common(asset_profiles, nested=True)
+    asset_create_alias = asset_commands.add_parser(
+        "create", help="create a gated profile-driven asset production workflow"
+    )
+    _add_asset_create_arguments(asset_create_alias)
+    asset_inspect = asset_commands.add_parser("inspect", help="show one asset revision")
+    _add_common(asset_inspect, nested=True)
+    asset_inspect.add_argument("asset_id")
     return parser
+
+
+def _add_asset_create_arguments(parser: argparse.ArgumentParser) -> None:
+    _add_common(parser, nested=True)
+    parser.add_argument("--spec", required=True, help="strict asset specification YAML or JSON")
+    parser.add_argument("--concept", required=True, help="concept PNG")
+    parser.add_argument("--provenance", required=True, help="hashed concept provenance JSON")
+    parser.add_argument("--provider", choices=("fake", "meshy"), default="fake")
+    parser.add_argument(
+        "--concept-source-type", choices=("imported", "local_generation"), default="imported"
+    )
+    parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument(
+        "--budget-reservation",
+        type=float,
+        help="maximum budget reservation when provider cost is UNKNOWN; not a cost estimate",
+    )
 
 
 def _resolve_root(project: str | None) -> Path:
@@ -294,12 +323,15 @@ def _doctor(
         storage = {"status": "OK", "message": "SQLite create, migrate, and reopen succeeded"}
     except Exception as exc:
         storage = {"status": "ERROR", "message": f"Local storage check failed: {exc}"}
+    from gamefactory.core.domain.asset_profiles import builtin_registry
+
     entries = {key: entry.to_dict() for key, entry in capabilities.items()}
     payload = {
         "project_root": str(root),
         "configuration": config_status,
         "storage": storage,
         "capabilities": entries,
+        "asset_profiles": builtin_registry().availability(),
     }
     bad_explicit = any(
         entry["status"] == "MISCONFIGURED"
@@ -581,13 +613,19 @@ def _create_asset_workflow(
         {
             "asset_id": specification.asset_id,
             "revision": tasks[0].parameters["revision_number"],
+            "profile": specification.bound_profile().profile_id,
+            "profile_version": specification.bound_profile().qualified,
             "provider": args.provider,
             "operation": "image-to-3d" if args.provider == "meshy" else "fake-image-to-3d",
             "estimated_cost": "UNKNOWN" if estimate is None else estimate,
             "budget_reservation": reservation,
         }
     )
-    message = f"Asset workflow {workflow.id} is {result.status.value}; asset={specification.asset_id} revision=r{tasks[0].parameters['revision_number']:03d}"
+    message = (
+        f"Asset workflow {workflow.id} is {result.status.value}; "
+        f"asset={specification.asset_id} revision=r{tasks[0].parameters['revision_number']:03d} "
+        f"profile={specification.bound_profile().qualified}"
+    )
     if result.pending_approval_id:
         approval = ApprovalRepository(db).get(result.pending_approval_id)
         message += f"; {approval.approval_type if approval else 'approval'} ID={result.pending_approval_id}"
@@ -643,6 +681,9 @@ def _asset_approval_checkpoint(root: Path, db: Database, approval_id: str) -> di
     return {
         "asset_id": params.get("asset_id"),
         "revision": params.get("revision_number"),
+        "profile_id": params.get("profile_id"),
+        "profile_version": params.get("profile_version"),
+        "profile_qualified": params.get("profile_qualified"),
         "approval_type": approval.approval_type,
         "approval_id": approval.id,
         "concept_path": concept.relative_path if concept else None,
@@ -833,11 +874,95 @@ def _init(root: Path, args: argparse.Namespace) -> dict[str, Any]:
     }
 
 
+def _doctor_text(payload: dict[str, Any]) -> str:
+    lines = ["Asset Profiles"]
+    for row in payload.get("asset_profiles", []):
+        if row["status"] == "AVAILABLE":
+            lines.append(f"✓ {row['qualified']}")
+        else:
+            lines.append(f"{row['profile_id']:<18} UNSUPPORTED")
+    lines.append("")
+    lines.append("Tools")
+    capabilities = payload.get("capabilities", {})
+
+    def present(name: str) -> bool:
+        status = str(capabilities.get(name, {}).get("status", "UNAVAILABLE"))
+        return status in {"AVAILABLE", "NOT_VERIFIED"}
+
+    lines.append(f"{'✓' if present('dcc.blender.detect') else '○'} Blender")
+    lines.append(f"{'✓' if present('engine.godot.detect') else '○'} Godot")
+    meshy = capabilities.get("asset.3d.meshy", {})
+    meshy_status = str(meshy.get("status", "UNAVAILABLE"))
+    if meshy_status == "AVAILABLE":
+        lines.append("○ Meshy — configured / paid approval required")
+    elif meshy_status == "MISCONFIGURED":
+        lines.append("○ Meshy — not configured / paid approval required")
+    else:
+        lines.append("○ Meshy — unavailable / paid approval required")
+    return "\n".join(lines)
+
+
+def _profile_catalog_text(rows: list[dict[str, str]]) -> str:
+    lines = ["Asset Profiles", ""]
+    for row in rows:
+        if row["status"] == "AVAILABLE":
+            lines.append(f"{row['profile_id']:<18} AVAILABLE")
+        else:
+            lines.append(f"{row['profile_id']:<18} UNSUPPORTED")
+    return "\n".join(lines)
+
+
+def _asset_inspect(db: Database, asset_id: str) -> dict[str, Any]:
+    revision = AssetRevisionRepository(db).get_latest(asset_id)
+    if revision is None:
+        raise ConfigurationError(f"No stored revision for asset {asset_id}")
+    workflow = WorkflowRepository(db).get(revision.workflow_id)
+    if workflow is None:
+        raise ConfigurationError(f"Workflow for asset {asset_id} is missing")
+    tasks = TaskRepository(db).list_by_workflow(revision.workflow_id)
+    prepare = next((task for task in tasks if task.task_type == "asset_prepare"), None)
+    if prepare is None:
+        raise ConfigurationError(f"Asset {asset_id} has no specification task")
+    specification = parse_asset_specification(prepare.parameters["specification"])
+    profile = specification.bound_profile()
+    current = next(
+        (task for task in tasks if task.status.value not in {"COMPLETED", "SKIPPED"}),
+        None,
+    )
+    return {
+        "asset_id": asset_id,
+        "revision": revision.revision_id,
+        "profile": profile.profile_id,
+        "profile_version": profile.qualified,
+        "workflow": workflow.id,
+        "workflow_status": workflow.status.value,
+        "current_gate": current.task_type if current is not None else workflow.status.value,
+    }
+
+
+def _asset_inspect_text(payload: dict[str, Any]) -> str:
+    return "\n".join(
+        [
+            f"Asset: {payload['asset_id']}",
+            f"Revision: {payload['revision']}",
+            f"Profile: {payload['profile']}",
+            f"Profile Version: {payload['profile_version']}",
+            f"Workflow: {payload['workflow']}",
+            f"Current Gate: {payload['current_gate']}",
+        ]
+    )
+
+
 def _dispatch(args: argparse.Namespace) -> tuple[Any, int, str | None]:
     root = _resolve_root(args.project)
     if args.command == "doctor":
         payload, code = _doctor(root, args.godot_path, args.blender_path)
-        return payload, code, None
+        return payload, code, _doctor_text(payload)
+    if args.command == "asset" and args.asset_command == "profiles":
+        from gamefactory.core.domain.asset_profiles import builtin_registry
+
+        rows = builtin_registry().availability()
+        return {"asset_profiles": rows}, EXIT_SUCCESS, _profile_catalog_text(rows)
     if args.command == "init":
         payload = _init(root, args)
         return (
@@ -858,11 +983,17 @@ def _dispatch(args: argparse.Namespace) -> tuple[Any, int, str | None]:
         "inspect",
         "report",
         "asset-create",
+        "asset",
     }:
         # Explicit path overrides are passed through detection; no failed explicit path falls back.
         db = _db(root)
-        if args.command == "asset-create":
+        if args.command == "asset-create" or (
+            args.command == "asset" and args.asset_command == "create"
+        ):
             return _create_asset_workflow(root, db, args)
+        if args.command == "asset" and args.asset_command == "inspect":
+            payload = _asset_inspect(db, args.asset_id)
+            return payload, EXIT_SUCCESS, _asset_inspect_text(payload)
         if args.command == "status":
             return _status(root, args.godot_path, args.blender_path), EXIT_SUCCESS, None
         if args.command == "run":
@@ -899,6 +1030,7 @@ def _dispatch(args: argparse.Namespace) -> tuple[Any, int, str | None]:
                     message += (
                         f"; {checkpoint['approval_type']} approval {checkpoint['approval_id']}"
                         f"; asset={checkpoint['asset_id']} revision=r{int(checkpoint['revision']):03d}"
+                        f" profile={checkpoint.get('profile_qualified') or 'unbound'}"
                         f"; concept={checkpoint['concept_path']} sha256={checkpoint['concept_sha256']}"
                         f"; provider={checkpoint['provider']} status={checkpoint['provider_status']}"
                         f"; operation={checkpoint['operation']} estimate={checkpoint['estimate']}"

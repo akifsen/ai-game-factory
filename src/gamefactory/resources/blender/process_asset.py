@@ -27,6 +27,7 @@ def _args() -> argparse.Namespace:
         "--origin-policy", choices=("bottom_center", "center"), default="bottom_center"
     )
     parser.add_argument("--lod-policy", choices=("lod0_lod1", "lod0_only"), default="lod0_lod1")
+    parser.add_argument("--contract", default="")
     return parser.parse_args(values)
 
 
@@ -62,8 +63,18 @@ def main() -> None:
     _assert_new_distinct_targets(source, output, report_path)
     if not 0.05 <= args.lod1_ratio <= 0.95:
         raise ValueError("lod1-ratio must be between 0.05 and 0.95")
-    if args.lod_policy != "lod0_lod1":
-        raise ValueError("V0.4 static_prop requires LOD0 and LOD1")
+    contract: dict = {}
+    if args.contract:
+        contract = json.loads(Path(args.contract).read_text(encoding="utf-8"))
+        if not isinstance(contract, dict):
+            raise ValueError("processing contract must be a JSON object")
+    lod1_required = bool(contract.get("lod1_required", args.lod_policy == "lod0_lod1"))
+    if args.lod_policy == "lod0_only" and lod1_required:
+        raise ValueError("processing contract requires LOD1")
+    if args.lod_policy not in {"lod0_lod1", "lod0_only"}:
+        raise ValueError("unsupported lod policy")
+    if contract and contract.get("collider_policy", "box") != "box":
+        raise ValueError("this processor implements only a box collider")
     raw_hash = hashlib.sha256(source.read_bytes()).hexdigest()
     import bpy  # type: ignore[import-not-found]
     from mathutils import Vector  # type: ignore[import-not-found]
@@ -76,7 +87,7 @@ def main() -> None:
     if not visual:
         raise RuntimeError("input contains no mesh")
     if any(obj.parent for obj in visual):
-        raise RuntimeError("nested mesh transforms are unsupported by this static_prop processor")
+        raise RuntimeError("nested mesh transforms are unsupported by this processor")
     if any(obj.type not in {"MESH", "EMPTY"} for obj in bpy.context.scene.objects):
         raise RuntimeError("rigged or non-static scene objects are unsupported")
 
@@ -127,17 +138,20 @@ def main() -> None:
     bpy.ops.object.transform_apply(location=True, rotation=False, scale=False)
     lod0_triangles = sum(max(1, len(poly.vertices) - 2) for poly in lod0.data.polygons)
 
-    lod1 = lod0.copy()
-    lod1.data = lod0.data.copy()
-    lod1.name = f"SM_{args.asset_id}_LOD1"
-    lod1.data.name = f"SM_{args.asset_id}_LOD1_Mesh"
-    bpy.context.scene.collection.objects.link(lod1)
-    decimate = lod1.modifiers.new("LOD1_Decimate", "DECIMATE")
-    decimate.ratio = args.lod1_ratio
-    bpy.context.view_layer.objects.active = lod1
-    lod1.select_set(True)
-    bpy.ops.object.modifier_apply(modifier=decimate.name)
-    lod1_triangles = sum(max(1, len(poly.vertices) - 2) for poly in lod1.data.polygons)
+    lod1 = None
+    lod1_triangles = None
+    if lod1_required:
+        lod1 = lod0.copy()
+        lod1.data = lod0.data.copy()
+        lod1.name = f"SM_{args.asset_id}_LOD1"
+        lod1.data.name = f"SM_{args.asset_id}_LOD1_Mesh"
+        bpy.context.scene.collection.objects.link(lod1)
+        decimate = lod1.modifiers.new("LOD1_Decimate", "DECIMATE")
+        decimate.ratio = args.lod1_ratio
+        bpy.context.view_layer.objects.active = lod1
+        lod1.select_set(True)
+        bpy.ops.object.modifier_apply(modifier=decimate.name)
+        lod1_triangles = sum(max(1, len(poly.vertices) - 2) for poly in lod1.data.polygons)
 
     low, high = bounds([lod0])
     bpy.ops.mesh.primitive_cube_add(
@@ -148,8 +162,9 @@ def main() -> None:
     collider.dimensions = high - low
     bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
     collider_triangles = sum(max(1, len(poly.vertices) - 2) for poly in collider.data.polygons)
+    selected_objects = [lod0, collider] if lod1 is None else [lod0, lod1, collider]
     for obj in bpy.context.scene.objects:
-        obj.select_set(obj in (lod0, lod1, collider))
+        obj.select_set(obj in selected_objects)
     bpy.context.view_layer.objects.active = lod0
     _assert_new_distinct_targets(source, output, report_path)
     output.parent.mkdir(parents=True, exist_ok=True)
@@ -165,6 +180,9 @@ def main() -> None:
     payload = {
         "status": "SUCCESS",
         "asset_id": args.asset_id,
+        "profile_id": contract.get("profile_id"),
+        "profile_version": contract.get("profile_version"),
+        "processing_contract": contract or None,
         "blender_version": bpy.app.version_string,
         "input_raw_glb_sha256": raw_hash,
         "processing_script_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
@@ -183,7 +201,7 @@ def main() -> None:
             "bounds_min": list(low),
             "bounds_max": list(high),
             "lod1_ratio": args.lod1_ratio,
-            "nodes": [lod0.name, lod1.name, collider.name],
+            "nodes": [item.name for item in selected_objects],
         },
         "duration_seconds": time.monotonic() - started,
         "exit_code": 0,

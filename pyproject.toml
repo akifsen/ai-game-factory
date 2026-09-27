@@ -50,6 +50,8 @@ gamefactory = [
     "resources/blender/*.py",
     "resources/specs/*.yml",
     "resources/specs/*.json",
+    "resources/profiles/*.yml",
+    "resources/fixtures/*.yml",
     "resources/scripts/*.py",
 ]
 

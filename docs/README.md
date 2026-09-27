@@ -89,3 +89,11 @@ V0.1 reports above remain historical records; V0.2 evidence uses separate files.
 Phase A uygulama doğrulaması, gerçek Meshy üretimi ve nihai insan görsel onayı
 ayrı kabul aşamalarıdır. Fake provider kanıtları gerçek üretim veya insan onayı
 yerine geçmez.
+
+## V0.5 — Profile-driven asset factory
+
+- [Work plan](work-plan-v0.5.md)
+- [Asset profiles](architecture/asset-profiles.md)
+- [Generalized production pipeline](pipelines/generalized-asset-production.md)
+- [ADR 0008: profile versus specification](adr/0008-asset-profile-versus-specification.md)
+- [V0.5 completion report](reports/v0.5-completion-report.md)

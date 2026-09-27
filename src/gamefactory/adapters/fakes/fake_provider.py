@@ -99,7 +99,7 @@ class FakeAssetGenerationProvider(AssetGenerationProvider):
         request_fingerprint = request.operation_hash or generate_id("FP")
         task_id = str(params.get("task_id", ""))
         workflow_id = str(params.get("workflow_id", ""))
-        asset_id = str(params.get("asset_id", "prop_energy_crate_01"))
+        asset_id = str(params.get("asset_id", "asset_under_test"))
         revision_number = int(params.get("revision_number", 1))
         approval_id = str(params.get("approval_id", "app-001"))
         concept_hash = str(params.get("concept_hash", "concept-hash-placeholder"))

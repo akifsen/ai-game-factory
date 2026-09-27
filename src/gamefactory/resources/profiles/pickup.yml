@@ -1,0 +1,44 @@
+schema_version: asset-profile-0.5.0
+profile_id: pickup
+version: 1
+categories:
+  - pickup
+review_views:
+  - front
+  - three_quarter
+  - top
+framing:
+  min_screen_fraction: 0.5
+  max_screen_fraction: 0.75
+  target_screen_fraction: 0.62
+  margin_fraction: 0.04
+  fov_degrees: 38
+dimension_rules:
+  min_m: 0.05
+  max_m: 1.5
+processing:
+  lod0_required: true
+  lod1_required: false
+  allowed_lod_policies:
+    - lod0_only
+    - lod0_lod1
+  allowed_collider_policies:
+    - box
+  allowed_origin_policies:
+    - center
+    - bottom_center
+  default_origin_policy: center
+  dimension_tolerance_m: 0.01
+  snap_grid_m: null
+  rig_forbidden: true
+  animation_forbidden: true
+  max_materials: 2
+  max_texture_dimension: 2048
+  max_triangles_lod0: 20000
+godot:
+  body_kind: area
+  require_ray_hit: false
+  require_area: true
+runtime:
+  bounds_tolerance_ratio: 0.15
+  bounds_tolerance_floor_m: 0.05

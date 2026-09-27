@@ -232,12 +232,18 @@ def _migration_0005_asset_operations_and_intent(conn: sqlite3.Connection) -> Non
     )
 
 
+def _migration_0006_asset_revision_profile(conn: sqlite3.Connection) -> None:
+    conn.execute("ALTER TABLE asset_revisions ADD COLUMN profile_id TEXT")
+    conn.execute("ALTER TABLE asset_revisions ADD COLUMN profile_version INTEGER")
+
+
 MIGRATIONS: list[tuple[int, str, Callable[[sqlite3.Connection], None]]] = [
     (1, "0001_initial_schema", _migration_0001_initial),
     (2, "0002_provider_invocations", _migration_0002_provider_invocations),
     (3, "0003_execution_cost_metadata", _migration_0003_execution_cost_metadata),
     (4, "0004_execution_retry_classification", _migration_0004_execution_retry_classification),
     (5, "0005_asset_operations_and_intent", _migration_0005_asset_operations_and_intent),
+    (6, "0006_asset_revision_profile", _migration_0006_asset_revision_profile),
 ]
 
 

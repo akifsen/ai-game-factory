@@ -101,7 +101,7 @@ class OrientationConfig(BaseModel):
         if self.up != "+Y" or self.front != "-Z":
             raise ValueError(
                 f"Unsupported orientation: up={self.up}, front={self.front}. "
-                "Only up='+Y' and front='-Z' are supported for static_prop profile."
+                "Only up='+Y' and front='-Z' are supported."
             )
         return self
 
@@ -193,14 +193,21 @@ class StyleConstraintsConfig(BaseModel):
 
 
 class AssetSpecification(BaseModel):
-    """Strict, versioned specification for a production 3D asset (V0.4)."""
+    """Strict specification for one asset revision.
+
+    schema 0.4.0 is the historical static_prop document. Its fingerprint omits
+    profile_version; readers bind those documents to static_prop@1.
+    schema 0.5.0 records profile_version explicitly. Profile behavior lives on
+    the profile registry, not in this value object.
+    """
 
     model_config = ConfigDict(extra="forbid")
 
-    schema_version: Literal["0.4.0"] = "0.4.0"
+    schema_version: Literal["0.4.0", "0.5.0"] = "0.4.0"
     asset_id: str = Field(..., min_length=2, max_length=80)
-    category: Literal["prop"] = "prop"
-    profile: Literal["static_prop"] = "static_prop"
+    category: Literal["prop", "pickup", "modular"] = "prop"
+    profile: Literal["static_prop", "pickup", "modular_piece"] = "static_prop"
+    profile_version: int | None = None
     intent: str = Field(..., min_length=1, max_length=500)
     dimensions: DimensionsConfig
     orientation: OrientationConfig = Field(default_factory=OrientationConfig)
@@ -209,7 +216,7 @@ class AssetSpecification(BaseModel):
     material_budget: MaterialBudgetConfig = Field(default_factory=MaterialBudgetConfig)
     texture_budget: TextureBudgetConfig = Field(default_factory=TextureBudgetConfig)
     collider_policy: Literal["box"] = "box"
-    lod_policy: Literal["lod0_lod1"] = "lod0_lod1"
+    lod_policy: Literal["lod0_lod1", "lod0_only"] = "lod0_lod1"
     style_constraints: StyleConstraintsConfig = Field(default_factory=StyleConstraintsConfig)
     target_engine: Literal["godot"] = "godot"
     target_import_path: str = Field(default="")
@@ -259,11 +266,58 @@ class AssetSpecification(BaseModel):
             raise ValueError(f"target_import_path contains path traversal: '{value}'")
         return cleaned
 
+    @field_validator("profile_version", mode="before")
+    @classmethod
+    def reject_bool_profile_version(cls, value: Any) -> Any:
+        if value is None:
+            return value
+        return _reject_bool_and_string(value, "profile_version", "integer")
+
+    @model_validator(mode="after")
+    def bind_profile_contract(self) -> AssetSpecification:
+        from gamefactory.core.domain.asset_profiles import builtin_registry
+
+        if self.schema_version == "0.4.0":
+            if self.profile != "static_prop" or self.category != "prop":
+                raise ValueError(
+                    "asset-spec-0.4.0 only accepts category prop and profile static_prop"
+                )
+            if self.profile_version is not None:
+                raise ValueError("asset-spec-0.4.0 does not carry profile_version")
+            if self.collider_policy != "box" or self.lod_policy != "lod0_lod1":
+                raise ValueError("asset-spec-0.4.0 only accepts a box collider and lod0_lod1")
+            version = 1
+        else:
+            if self.profile_version is None:
+                raise ValueError("asset-spec-0.5.0 requires profile_version")
+            version = self.profile_version
+        try:
+            profile = builtin_registry().get(self.profile, version)
+        except SpecInvalidError as exc:
+            raise ValueError(str(exc)) from exc
+        profile.check_specification(self)
+        return self
+
     @model_validator(mode="after")
     def default_import_path_if_unset(self) -> AssetSpecification:
         if not self.target_import_path:
-            self.target_import_path = f"assets/generated/props/{self.asset_id}/"
+            folder = "props" if self.category == "prop" else self.category
+            self.target_import_path = f"assets/generated/{folder}/{self.asset_id}/"
         return self
+
+    def bound_profile(self) -> Any:
+        """Return the immutable profile this specification is bound to."""
+        from gamefactory.core.domain.asset_profiles import builtin_registry
+
+        version = 1 if self.schema_version == "0.4.0" else int(self.profile_version or 0)
+        return builtin_registry().get(self.profile, version)
+
+    def model_dump(self, *args: Any, **kwargs: Any) -> dict[str, Any]:
+        """Keep 0.4.0 fingerprints identical by omitting the unbound version field."""
+        payload = super().model_dump(*args, **kwargs)
+        if payload.get("schema_version") == "0.4.0":
+            payload.pop("profile_version", None)
+        return payload
 
 
 def parse_asset_specification(content: str | dict[str, Any] | Path) -> AssetSpecification:
@@ -322,6 +376,8 @@ class AssetRevision:
     revision_number: int
     workflow_id: str
     spec_hash: str
+    profile_id: str | None = None
+    profile_version: int | None = None
     concept_hash: str | None = None
     raw_glb_hash: str | None = None
     processed_glb_hash: str | None = None

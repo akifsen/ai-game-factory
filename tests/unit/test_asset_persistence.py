@@ -125,6 +125,32 @@ def test_asset_revision_immutability_and_artifacts(tmp_path: Path) -> None:
         repo.save(saved)  # equal values are idempotent
 
 
+def test_bound_profile_cannot_change_on_an_existing_revision(tmp_path: Path) -> None:
+    db = Database(tmp_path / "factory.db")
+    MigrationRunner(db).apply_all()
+    wf_id, _ = _setup_parents(db, tmp_path)
+    repo = AssetRevisionRepository(db)
+    revision = repo.allocate_revision(
+        asset_id="energy_pickup_test",
+        workflow_id=wf_id,
+        spec_hash="spec_hash",
+        profile_id="pickup",
+        profile_version=1,
+    )
+    fetched = repo.get("energy_pickup_test", 1)
+    assert fetched is not None
+    assert fetched.profile_id == "pickup"
+    assert fetched.profile_version == 1
+    fetched.profile_id = "modular_piece"
+    with pytest.raises(ValueError, match="profile_id"):
+        repo.save(fetched)
+    fetched.profile_id = "pickup"
+    fetched.profile_version = 2
+    with pytest.raises(ValueError, match="profile_version"):
+        repo.save(fetched)
+    assert revision.revision_id == "r001"
+
+
 def test_asset_revision_runtime_evidence_is_append_only(tmp_path: Path) -> None:
     db = Database(tmp_path / "factory.db")
     MigrationRunner(db).apply_all()

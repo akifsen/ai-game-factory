@@ -398,3 +398,103 @@ def test_png_decoder_rejects_large_inflate_after_small_ihdr() -> None:
     decoder = runpy.run_path(str(SCRIPT))["_png_dimensions"]
     with pytest.raises(ValueError, match="decoded image"):
         decoder(raw)
+
+
+def _side_correction(processed_sha: str, execution_id: str = "EXEC-SIDE", attempt: int = 2) -> dict:
+    return {
+        "workflow_id": "WF-1",
+        "revision": 1,
+        "asset_id": "prop_energy_crate_01",
+        "execution_id": execution_id,
+        "attempt_number": attempt,
+        "processed_glb_sha256": processed_sha,
+        "status": "PASS",
+        "mesh_visible": True,
+        "physics_ray_hit": True,
+        "errors": [],
+        "side_framing": {
+            "inside_viewport": True,
+            "margin_ok": True,
+            "height_ratio": 0.65,
+            "horizontally_centered": True,
+            "reference_between_camera_and_asset": False,
+            "view_axis": "+X",
+        },
+    }
+
+
+def _bind_side_correction(root: Path, manifest: dict, record: dict) -> None:
+    side = next(item for item in manifest["files"] if item.get("angle") == "side")
+    side["execution_id"] = record["execution_id"]
+    side["attempt_number"] = record["attempt_number"]
+    raw = json.dumps(record).encode()
+    (root / "evidence").mkdir(exist_ok=True)
+    (root / "evidence" / "side-correction.json").write_bytes(raw)
+    manifest["files"].append(
+        {
+            "path": "evidence/side-correction.json",
+            "role": "side_correction",
+            "sha256": digest(raw),
+            "size": len(raw),
+        }
+    )
+    html_item = next(item for item in manifest["files"] if item["role"] == "review_html")
+    html = (root / html_item["path"]).read_text(encoding="utf-8")
+    html = html.replace(
+        "</body>",
+        '<a href="evidence/side-correction.json">side_correction</a></body>',
+    )
+    html_raw = html.encode()
+    (root / html_item["path"]).write_bytes(html_raw)
+    html_item["sha256"] = digest(html_raw)
+    html_item["size"] = len(html_raw)
+    write_json(root / "manifest.json", manifest)
+
+
+def test_substituted_side_attempt_without_correction_fails(tmp_path: Path) -> None:
+    root = tmp_path / "bundle"
+    manifest = make_bundle(root)
+    side = next(item for item in manifest["files"] if item.get("angle") == "side")
+    side["execution_id"] = "EXEC-SIDE"
+    side["attempt_number"] = 2
+    write_json(root / "manifest.json", manifest)
+    assert "corrected side" in verify(root).stdout
+
+
+def test_corrected_side_record_binds_attempt_and_framing(tmp_path: Path) -> None:
+    root = tmp_path / "bundle"
+    manifest = make_bundle(root)
+    side = next(item for item in manifest["files"] if item.get("angle") == "side")
+    _bind_side_correction(root, manifest, _side_correction(side["processed_glb_sha256"]))
+    result = verify(root)
+    assert result.returncode == 0, result.stdout + result.stderr
+
+
+def test_corrected_side_rejects_bad_framing_and_wrong_attempt(tmp_path: Path) -> None:
+    root = tmp_path / "bundle"
+    manifest = make_bundle(root)
+    side = next(item for item in manifest["files"] if item.get("angle") == "side")
+    record = _side_correction(side["processed_glb_sha256"])
+    record["side_framing"]["height_ratio"] = 0.2
+    _bind_side_correction(root, manifest, record)
+    assert "corrected side" in verify(root).stdout
+
+    record["side_framing"]["height_ratio"] = 0.65
+    record["attempt_number"] = 9
+    raw = json.dumps(record).encode()
+    path = root / "evidence" / "side-correction.json"
+    path.write_bytes(raw)
+    item = next(entry for entry in manifest["files"] if entry["role"] == "side_correction")
+    item["sha256"] = digest(raw)
+    item["size"] = len(raw)
+    write_json(root / "manifest.json", manifest)
+    assert verify(root).returncode == 1
+
+
+def test_modified_side_png_fails_even_when_correction_record_matches(tmp_path: Path) -> None:
+    root = tmp_path / "bundle"
+    manifest = make_bundle(root)
+    side = next(item for item in manifest["files"] if item.get("angle") == "side")
+    _bind_side_correction(root, manifest, _side_correction(side["processed_glb_sha256"]))
+    (root / side["path"]).write_bytes(png() + b"\x00")
+    assert "SHA-256" in verify(root).stdout

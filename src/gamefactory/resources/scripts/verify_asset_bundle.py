@@ -38,6 +38,7 @@ _SINGLE_ROLES = {
     "final_approval",
 }
 _ANGLES = {"front", "three_quarter", "side"}
+_OPTIONAL_ROLES = {"side_correction"}
 _EXCLUDED = {"manifest.json", "verify_asset_bundle.py"}
 _LINKED_ROLES = _SINGLE_ROLES - {"review_html"}
 _MAX_FILE_BYTES = 100_000_000
@@ -295,7 +296,33 @@ def verify_bundle(bundle: Path) -> dict[str, Any]:
     if _linked(root / "manifest.json"):
         raise ValueError("bundle manifest is a symlink or junction")
     manifest = _object(root / "manifest.json")
-    if manifest.get("schema_version") != "asset-evidence-0.4.0":
+    schema = manifest.get("schema_version")
+    if schema == "asset-evidence-0.4.0":
+        required_angles = set(_ANGLES)
+        extra_single_roles: set[str] = set()
+    elif schema == "asset-evidence-0.5.0":
+        views = manifest.get("review_views")
+        allowed_views = {
+            "front",
+            "rear",
+            "left",
+            "right",
+            "side",
+            "three_quarter",
+            "three_quarter_front",
+            "three_quarter_rear",
+            "top",
+        }
+        if (
+            not isinstance(views, list)
+            or not views
+            or len(views) != len(set(views))
+            or any(view not in allowed_views for view in views)
+        ):
+            raise ValueError("0.5.0 bundle review_views are missing or unsupported")
+        required_angles = set(views)
+        extra_single_roles = {"production_receipt"}
+    else:
         raise ValueError("unsupported evidence manifest schema")
     workflow_id, revision = manifest.get("workflow_id"), manifest.get("revision")
     if (
@@ -316,7 +343,8 @@ def verify_bundle(bundle: Path) -> dict[str, Any]:
             raise ValueError("file entry must be an object")
         rel = _path(item.get("path"))
         role = item.get("role")
-        if rel in _EXCLUDED or rel in listed or role not in _SINGLE_ROLES | {"runtime_capture"}:
+        allowed_roles = _SINGLE_ROLES | extra_single_roles | {"runtime_capture"} | _OPTIONAL_ROLES
+        if rel in _EXCLUDED or rel in listed or role not in allowed_roles:
             raise ValueError(f"duplicate, excluded, or unknown bundle entry: {rel}")
         digest, size = item.get("sha256"), item.get("size")
         if (
@@ -345,12 +373,15 @@ def verify_bundle(bundle: Path) -> dict[str, Any]:
             raise ValueError(f"bundle size or SHA-256 mismatch: {rel}")
         listed.add(rel)
         roles.setdefault(role, []).append(item)
-    for role in _SINGLE_ROLES:
+    for role in _SINGLE_ROLES | extra_single_roles:
         if len(roles.get(role, [])) != 1:
             raise ValueError(f"bundle requires exactly one {role} entry")
     captures = roles.get("runtime_capture", [])
-    if len(captures) != 3 or {item.get("angle") for item in captures} != _ANGLES:
-        raise ValueError("bundle requires front, three_quarter, and side captures")
+    if (
+        len(captures) != len(required_angles)
+        or {item.get("angle") for item in captures} != required_angles
+    ):
+        raise ValueError("bundle captures do not match the required review views")
 
     # Every physical file belongs to the manifest, except the manifest and this optional verifier.
     on_disk: set[str] = set()
@@ -371,7 +402,7 @@ def verify_bundle(bundle: Path) -> dict[str, Any]:
     parser.feed((root / "index.html").read_text(encoding="utf-8"))
     if not parser.paths <= listed:
         raise ValueError("review HTML references an unmanifested file")
-    for role in _LINKED_ROLES | {"runtime_capture"}:
+    for role in _LINKED_ROLES | {"runtime_capture"} | (set(roles) & _OPTIONAL_ROLES):
         if not any(item["path"] in parser.paths for item in roles[role]):
             raise ValueError(f"review HTML does not link to {role}")
 
@@ -492,13 +523,32 @@ def verify_bundle(bundle: Path) -> dict[str, Any]:
         or bound["processed_glb_sha256"] != one("processed_glb")["sha256"]
     ):
         raise ValueError("runtime observation identity or processed GLB hash mismatch")
+    if schema == "asset-evidence-0.4.0":
+        runtime_ok = (
+            observation.get("physics_body_present") is True
+            and observation.get("physics_ray_hit") is True
+        )
+    else:
+        requirements = manifest.get("runtime_requirements")
+        if not isinstance(requirements, dict):
+            raise ValueError("0.5.0 bundle is missing runtime_requirements")
+        if manifest.get("profile_id") != specification.get("profile"):
+            raise ValueError("bundle profile does not match the specification")
+        runtime_ok = True
+        if requirements.get("require_physics_body") is True:
+            runtime_ok = runtime_ok and observation.get("physics_body_present") is True
+        if requirements.get("require_ray_hit") is True:
+            runtime_ok = runtime_ok and observation.get("physics_ray_hit") is True
+        if requirements.get("require_area") is True:
+            runtime_ok = runtime_ok and observation.get("area_present") is True
+        if requirements.get("require_collision", True) is True:
+            runtime_ok = runtime_ok and observation.get("collision_shape_present") is True
     if (
         observation.get("status") != "PASS"
         or observation.get("mesh_visible") is not True
         or observation.get("collision_shape_present") is not True
-        or observation.get("physics_body_present") is not True
-        or observation.get("physics_ray_hit") is not True
         or observation.get("errors") != []
+        or not runtime_ok
     ):
         raise ValueError("runtime observation does not confirm mesh and live collider")
     bounds = observation.get("mesh_bounds")
@@ -529,11 +579,53 @@ def verify_bundle(bundle: Path) -> dict[str, Any]:
             or abs(measured - expected) > max(0.15, expected * 0.2)
         ):
             raise ValueError("runtime mesh bounds do not match specification")
+    identity_keys = ("workflow_id", "revision", "asset_id", "processed_glb_sha256")
+    attempt_keys = ("execution_id", "attempt_number")
+    corrections = roles.get("side_correction", [])
+    if len(corrections) > 1:
+        raise ValueError("bundle has more than one side correction record")
+    correction = _object(root / corrections[0]["path"]) if corrections else None
     for capture in captures:
-        if any(capture.get(key) != value for key, value in bound.items()):
+        if any(capture.get(key) != bound[key] for key in identity_keys):
             raise ValueError(
-                f"runtime capture belongs to wrong revision or attempt: {capture['path']}"
+                f"runtime capture belongs to wrong revision or processed GLB: {capture['path']}"
             )
+        same_attempt = all(capture.get(key) == bound[key] for key in attempt_keys)
+        if capture.get("angle") != "side" or same_attempt:
+            if not same_attempt:
+                raise ValueError(
+                    f"runtime capture belongs to wrong revision or attempt: {capture['path']}"
+                )
+        else:
+            framing = correction.get("side_framing") if isinstance(correction, dict) else None
+            height = framing.get("height_ratio") if isinstance(framing, dict) else None
+            if (
+                not isinstance(correction, dict)
+                or correction.get("workflow_id") != bound["workflow_id"]
+                or correction.get("revision") != bound["revision"]
+                or correction.get("asset_id") != bound["asset_id"]
+                or correction.get("processed_glb_sha256") != bound["processed_glb_sha256"]
+                or correction.get("execution_id") != capture.get("execution_id")
+                or correction.get("attempt_number") != capture.get("attempt_number")
+                or correction.get("status") != "PASS"
+                or correction.get("errors") != []
+                or correction.get("mesh_visible") is not True
+                or correction.get("physics_ray_hit") is not True
+                or not isinstance(framing, dict)
+                or framing.get("inside_viewport") is not True
+                or framing.get("margin_ok") is not True
+                or framing.get("horizontally_centered") is not True
+                or framing.get("reference_between_camera_and_asset") is not False
+                or framing.get("view_axis") != "+X"
+                or isinstance(height, bool)
+                or not isinstance(height, (int, float))
+                or not math.isfinite(height)
+                or height < 0.55
+                or height > 0.75
+            ):
+                raise ValueError(
+                    f"corrected side capture binding or framing is invalid: {capture['path']}"
+                )
         _png_dimensions((root / capture["path"]).read_bytes())
 
     # The final receipt must explicitly bind the current artifact digests.

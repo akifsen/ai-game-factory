@@ -1,0 +1,31 @@
+schema_version: "0.5.0"
+asset_id: pickup_energy_cell_01
+category: pickup
+profile: pickup
+profile_version: 1
+intent: "Stylized sci-fi energy cell, a small collectible with a clear glowing core and a readable upright silhouette."
+dimensions:
+  width_m: 0.22
+  depth_m: 0.22
+  height_m: 0.48
+orientation:
+  up: "+Y"
+  front: "-Z"
+origin_policy: center
+geometry_budget:
+  max_triangles_lod0: 8000
+  max_triangles_lod1: 3000
+  lod_ratio: 0.4
+material_budget:
+  max_materials: 2
+texture_budget:
+  max_dimension: 2048
+collider_policy: box
+lod_policy: lod0_only
+style_constraints:
+  family: stylized_scifi
+  silhouette: upright_capsule
+  readability: high
+  detail_density: low
+target_engine: godot
+target_import_path: assets/generated/pickup/pickup_energy_cell_01/

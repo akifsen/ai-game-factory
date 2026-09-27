@@ -1,0 +1,43 @@
+schema_version: asset-profile-0.5.0
+profile_id: modular_piece
+version: 1
+categories:
+  - modular
+review_views:
+  - front
+  - side
+  - three_quarter
+framing:
+  min_screen_fraction: 0.5
+  max_screen_fraction: 0.75
+  target_screen_fraction: 0.62
+  margin_fraction: 0.04
+  fov_degrees: 38
+dimension_rules:
+  min_m: 0.1
+  max_m: 8.0
+processing:
+  lod0_required: true
+  lod1_required: false
+  allowed_lod_policies:
+    - lod0_only
+    - lod0_lod1
+  allowed_collider_policies:
+    - box
+  allowed_origin_policies:
+    - bottom_center
+  default_origin_policy: bottom_center
+  dimension_tolerance_m: 0.002
+  snap_grid_m: 0.25
+  rig_forbidden: true
+  animation_forbidden: true
+  max_materials: 4
+  max_texture_dimension: 2048
+  max_triangles_lod0: 30000
+godot:
+  body_kind: static_body
+  require_ray_hit: true
+  require_area: false
+runtime:
+  bounds_tolerance_ratio: 0.02
+  bounds_tolerance_floor_m: 0.02

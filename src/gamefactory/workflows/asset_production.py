@@ -22,14 +22,17 @@ from gamefactory.adapters.assets.glb_validator import preflight_glb
 from gamefactory.adapters.dcc.blender_processor import BlenderAssetProcessor
 from gamefactory.adapters.engines.godot_execution import _ENGINE_ERROR_PATTERNS
 from gamefactory.adapters.engines.godot_staging import sha256_file
+from gamefactory.adapters.persistence.database import Database
 from gamefactory.adapters.persistence.repositories import (
     ApprovalRepository,
     ArtifactRepository,
     AssetRevisionRepository,
     EvidenceRepository,
     ExecutionRepository,
+    ProviderInvocationRepository,
     ProviderOperationIntentRepository,
     QualityGateRepository,
+    TaskRepository,
     WorkflowRepository,
 )
 from gamefactory.core.artifacts.artifact_manager import ArtifactManager
@@ -51,10 +54,12 @@ from gamefactory.core.domain.errors import (
 from gamefactory.core.domain.models import (
     CostClass,
     Execution,
+    ExecutionStatus,
     Task,
     Workflow,
     WorkflowStatus,
     generate_id,
+    utc_now_iso,
 )
 from gamefactory.core.execution.path_guard import PathGuard, assert_managed_directory
 from gamefactory.core.execution.process_runner import CommandRequest, ProcessRunner
@@ -123,6 +128,7 @@ def create_asset_production_workflow(
     wf_id = workflow_id or generate_id("WF-ASSET")
     spec_hash = spec_fingerprint(specification)
     concept_hash = sha256_file(concept)
+    profile = specification.bound_profile()
     if revision_repository is None:
         raise ValidationError("Asset workflow requires the durable AssetRevisionRepository")
     # The revision table references workflows. Persist the workflow identity before
@@ -135,7 +141,12 @@ def create_asset_production_workflow(
     )
     WorkflowRepository(revision_repository.db).save(base_workflow)
     revision = revision_repository.allocate_revision(
-        specification.asset_id, wf_id, spec_hash, concept_hash=concept_hash
+        specification.asset_id,
+        wf_id,
+        spec_hash,
+        concept_hash=concept_hash,
+        profile_id=profile.profile_id,
+        profile_version=profile.version,
     )
     revision_number = revision.revision_number
     asset_dir = f".gamefactory/assets/{specification.asset_id}/r{revision_number:03d}"
@@ -160,6 +171,10 @@ def create_asset_production_workflow(
         "budget_reservation": budget_reservation,
         "cost_unit": provider_cost_unit,
         "asset_dir": asset_dir,
+        "profile_id": profile.profile_id,
+        "profile_version": profile.version,
+        "profile_qualified": profile.qualified,
+        "profile_schema": profile.schema_version,
     }
     prep, concept_review, generate, process, validate, runtime, final, finish = (
         f"{wf_id}-{suffix}"
@@ -287,6 +302,11 @@ class AssetProductionHandlers:
         spec = parse_asset_specification(task.parameters["specification"])
         if spec_fingerprint(spec) != task.parameters["specification_hash"]:
             raise ValidationError("Asset specification fingerprint changed")
+        bound = spec.bound_profile()
+        if task.parameters.get("profile_id") not in (None, bound.profile_id) or (
+            task.parameters.get("profile_version") not in (None, bound.version)
+        ):
+            raise ValidationError("Asset revision profile binding does not match the specification")
         path_guard = PathGuard(self.root)
         image_source = path_guard.resolve_safe_path(task.parameters["concept_source"])
         provenance_source = path_guard.resolve_safe_path(
@@ -337,6 +357,9 @@ class AssetProductionHandlers:
             "specification_hash": task.parameters["specification_hash"],
             "artifacts": expected,
             "style_constraints": task.parameters["specification"]["style_constraints"],
+            "profile_id": bound_profile_id(task),
+            "profile_version": bound_profile_version(task),
+            "profile_qualified": bound_profile_qualified(task),
         }
 
     def paid_review_context(self, workflow: Workflow, task: Task) -> dict[str, Any]:
@@ -363,6 +386,9 @@ class AssetProductionHandlers:
             else "UNKNOWN",
             "budget_reservation": task.parameters["budget_reservation"],
             "cost_unit": task.parameters["cost_unit"],
+            "profile_id": bound_profile_id(task),
+            "profile_version": bound_profile_version(task),
+            "profile_qualified": bound_profile_qualified(task),
         }
 
     def _artifact_hashes(self, workflow_id: str) -> dict[str, str]:
@@ -451,7 +477,7 @@ class AssetProductionHandlers:
             raise RawArtifactInvalidError("Refusing to overwrite a raw GLB from an earlier attempt")
         concept_path = self.root / concept.relative_path
         request = GenerationRequest(
-            prompt=f"Image-to-3D static prop: {params['asset_id']}",
+            prompt=f"Image-to-3D {bound_profile_qualified(task)}: {params['asset_id']}",
             target_format="glb",
             parameters={
                 **params,
@@ -553,7 +579,7 @@ class AssetProductionHandlers:
             download_dir = self._path(
                 task, f"download-attempt-{execution.attempt_number}/.keep"
             ).parent
-            download_dir.mkdir(parents=True, exist_ok=False)
+            download_dir.mkdir(parents=True, exist_ok=True)
             output, _ = self.provider.cli_runner.download_glb(response.external_op_id, download_dir)
         if output is None or not output.is_file() or output.stat().st_size <= 0:
             raise RawArtifactInvalidError(
@@ -722,16 +748,18 @@ class AssetProductionHandlers:
         observation = json.loads(
             (self.root / observation_artifact.relative_path).read_text(encoding="utf-8")
         )
-        runtime_capture_hashes = sorted(
-            artifact.content_hash
-            for artifact in artifact_list
-            if artifact.artifact_type == "asset-runtime-capture"
-            and observation.get("execution_id") in artifact.relative_path
+        selected_captures = select_review_captures(
+            [
+                artifact
+                for artifact in artifact_list
+                if artifact.artifact_type == "asset-runtime-capture"
+            ],
+            str(observation.get("execution_id", "")),
+            parse_asset_specification(task.parameters["specification"])
+            .bound_profile()
+            .review_views,
         )
-        if len(runtime_capture_hashes) != 3:
-            raise ArtifactError(
-                "Final review requires three captures from the bound runtime attempt"
-            )
+        runtime_capture_hashes = sorted(artifact.content_hash for artifact in selected_captures)
         return {
             "workflow_id": workflow.id,
             "revision": task.parameters["revision_number"],
@@ -739,6 +767,9 @@ class AssetProductionHandlers:
             "artifacts": {key: roles[key] for key in required},
             "runtime_capture_hashes": runtime_capture_hashes,
             "all_artifacts_verified": bool(hashes),
+            "profile_id": bound_profile_id(task),
+            "profile_version": bound_profile_version(task),
+            "profile_qualified": bound_profile_qualified(task),
         }
 
     def final_review(
@@ -835,6 +866,121 @@ def register_asset_production_handlers(
     )
 
 
+def bound_profile_id(task: Task) -> str:
+    spec = parse_asset_specification(task.parameters["specification"])
+    return str(spec.bound_profile().profile_id)
+
+
+def bound_profile_version(task: Task) -> int:
+    spec = parse_asset_specification(task.parameters["specification"])
+    return int(spec.bound_profile().version)
+
+
+def bound_profile_qualified(task: Task) -> str:
+    spec = parse_asset_specification(task.parameters["specification"])
+    return str(spec.bound_profile().qualified)
+
+
+REVIEW_CAPTURE_ANGLES = ("front", "three_quarter", "side")
+SIDE_HEIGHT_MIN = 0.55
+SIDE_HEIGHT_MAX = 0.75
+
+
+def capture_belongs_to_execution(relative_path: str, execution_id: str) -> bool:
+    """True when a capture path is bound to this execution attempt."""
+    if not execution_id:
+        return False
+    normalized = relative_path.replace("\\", "/")
+    filename = normalized.rsplit("/", 1)[-1]
+    if filename.startswith(f"{execution_id}-") or filename.startswith(f"{execution_id}."):
+        return True
+    return f"-{execution_id}/" in normalized or f"/{execution_id}/" in normalized
+
+
+def select_review_captures(
+    captures: list[Any],
+    execution_id: str,
+    angles: tuple[str, ...] | None = None,
+) -> list[Any]:
+    """Select one capture per required view from the bound runtime attempt.
+
+    A later side-only recapture replaces the review side view when side is required.
+    The earlier side file remains registered and is not selected.
+    """
+    required = angles or REVIEW_CAPTURE_ANGLES
+    by_angle: dict[str, list[Any]] = {angle: [] for angle in required}
+    for artifact in captures:
+        angle = Path(artifact.relative_path).stem
+        if angle.startswith(f"{execution_id}-"):
+            angle = angle[len(execution_id) + 1 :]
+        if angle in by_angle:
+            by_angle[angle].append(artifact)
+    selected: list[Any] = []
+    for angle in required:
+        owned = [
+            artifact
+            for artifact in by_angle[angle]
+            if capture_belongs_to_execution(artifact.relative_path, execution_id)
+        ]
+        if angle == "side":
+            corrections = [
+                artifact
+                for artifact in by_angle[angle]
+                if not capture_belongs_to_execution(artifact.relative_path, execution_id)
+            ]
+            if corrections:
+                selected.append(
+                    max(corrections, key=lambda artifact: (artifact.created_at, artifact.id))
+                )
+                continue
+        if len(owned) != 1:
+            raise ArtifactError(
+                f"Final review requires one {angle} capture from the bound runtime attempt"
+            )
+        selected.append(owned[0])
+    return selected
+
+
+def validate_view_framing(
+    framing: Any,
+    *,
+    view: str,
+    minimum: float,
+    maximum: float,
+) -> None:
+    """Reject a capture whose projected bounds miss the profile framing contract."""
+    if not isinstance(framing, dict):
+        raise RuntimeValidationFailedError(f"{view} capture has no framing measurement")
+    height = framing.get("height_ratio")
+    if (
+        isinstance(height, bool)
+        or not isinstance(height, (int, float))
+        or not math.isfinite(float(height))
+        or float(height) < minimum
+        or float(height) > maximum
+    ):
+        raise RuntimeValidationFailedError(
+            f"{view} capture height fraction is outside {minimum}-{maximum}"
+        )
+    if framing.get("inside_viewport") is not True or framing.get("margin_ok") is not True:
+        raise RuntimeValidationFailedError(
+            f"{view} capture bounds are outside the viewport safety margin"
+        )
+    if framing.get("horizontally_centered") is not True:
+        raise RuntimeValidationFailedError(f"{view} capture is not horizontally centered")
+    if framing.get("reference_between_camera_and_asset") is not False:
+        raise RuntimeValidationFailedError(
+            f"{view} capture reference object occludes the production asset"
+        )
+    if view == "side" and framing.get("view_axis") != "+X":
+        raise RuntimeValidationFailedError("side capture is not a principal-side view")
+
+
+def validate_side_framing(framing: Any) -> None:
+    """Reject a side capture outside the static_prop viewport contract."""
+    validate_view_framing(framing, view="side", minimum=SIDE_HEIGHT_MIN, maximum=SIDE_HEIGHT_MAX)
+
+
 def run_asset_in_godot(
     root: Path,
     artifacts: ArtifactRepository,
@@ -844,8 +990,16 @@ def run_asset_in_godot(
     execution: Execution,
     godot_path: str | None,
     runner: ProcessRunner | None,
+    *,
+    angles: tuple[str, ...] | None = None,
+    observation_artifact_type: str = "asset-runtime-observation",
 ) -> list[str]:
     """Stage a validated GLB, invoke the real Godot renderer, then independently inspect outputs."""
+    from gamefactory.core.domain.asset_profiles import render_scene_contract
+    from gamefactory.core.domain.camera_framing import PLACED_VIEWS
+
+    if observation_artifact_type not in {"asset-runtime-observation", "asset-side-correction"}:
+        raise ValidationError("Unsupported runtime observation artifact type")
     if not godot_path:
         raise EngineImportFailedError("Godot executable is required for asset runtime verification")
     processed = next(
@@ -873,6 +1027,14 @@ def run_asset_in_godot(
             "Godot stage is blocked because the independent asset validator did not pass"
         )
     spec = parse_asset_specification(task.parameters["specification"])
+    profile = spec.bound_profile()
+    capture_angles = angles or profile.review_views
+    if (
+        not capture_angles
+        or len(capture_angles) != len(set(capture_angles))
+        or any(angle not in PLACED_VIEWS for angle in capture_angles)
+    ):
+        raise ValidationError("Asset capture angles are not an implemented review view set")
     scratch = assert_managed_directory(root, ".gamefactory/scratch")
     relative_stage = f".gamefactory/scratch/asset-{workflow.id}-{execution.id}"
     stage = PathGuard(root).resolve_safe_path(relative_stage)
@@ -902,7 +1064,13 @@ def run_asset_in_godot(
         "processed_glb_sha256": processed.content_hash,
         "output_dir": str(capture_dir),
         "observation_path": str(observation_path),
+        "angles": list(capture_angles),
+        "profile": profile.capture_request_profile(),
     }
+    (stage / "asset_wrapper.tscn").write_text(
+        render_scene_contract(profile.scene_contract()),
+        encoding="utf-8",
+    )
     request_path = stage / "request.json"
     request_path.write_text(json.dumps(request, sort_keys=True), encoding="utf-8")
     proc = runner or ProcessRunner(sanitize_output=True)
@@ -986,21 +1154,30 @@ def run_asset_in_godot(
         raise RuntimeValidationFailedError(
             "Godot runtime observation is bound to a different workflow, revision, or GLB"
         )
+    requirements = profile.runtime_requirements()
     if (
         observation.get("status") != "PASS"
         or not observation.get("mesh_visible")
-        or not observation.get("physics_body_present")
         or not observation.get("collision_shape_present")
-        or not observation.get("physics_ray_hit")
         or observation.get("errors") != []
+        or (
+            requirements["require_physics_body"]
+            and observation.get("physics_body_present") is not True
+        )
+        or (requirements["require_area"] and observation.get("area_present") is not True)
+        or (requirements["require_ray_hit"] and observation.get("physics_ray_hit") is not True)
     ):
         raise RuntimeValidationFailedError(
-            "Independent Godot observation failed mesh/collider/error checks"
+            "Independent Godot observation failed mesh, collision, or error checks"
         )
     bounds = observation.get("mesh_bounds", {}).get("size", [])
     expected = spec.dimensions.model_dump()
     if len(bounds) != 3 or any(
-        abs(float(actual) - float(target)) > max(0.15, float(target) * 0.2)
+        abs(float(actual) - float(target))
+        > max(
+            float(requirements["bounds_tolerance_floor_m"]),
+            float(target) * float(requirements["bounds_tolerance_ratio"]),
+        )
         for actual, target in zip(
             bounds,
             (expected["width_m"], expected["height_m"], expected["depth_m"]),
@@ -1010,14 +1187,28 @@ def run_asset_in_godot(
         raise RuntimeValidationFailedError(
             "Godot transformed mesh bounds differ materially from the specification"
         )
+    view_framing = observation.get("view_framing")
+    if not isinstance(view_framing, dict):
+        view_framing = {}
+    framing_policy = profile.framing
+    for angle in capture_angles:
+        measured = view_framing.get(angle)
+        if angle == "side" and measured is None:
+            measured = observation.get("side_framing")
+        validate_view_framing(
+            measured,
+            view=angle,
+            minimum=framing_policy.min_screen_fraction,
+            maximum=framing_policy.max_screen_fraction,
+        )
     output_ids: list[str] = []
     observation_relative = observation_path.relative_to(root).as_posix()
     obs_art = artifact_manager.register_file_artifact(
-        workflow.id, task.id, "asset-runtime-observation", task.task_type, observation_relative
+        workflow.id, task.id, observation_artifact_type, task.task_type, observation_relative
     )
     artifacts.save(obs_art)
     output_ids.append(obs_art.id)
-    for angle in ("front", "three_quarter", "side"):
+    for angle in capture_angles:
         image = capture_dir / f"{angle}.png"
         from gamefactory.adapters.engines.godot_image import decode_png
 
@@ -1029,3 +1220,150 @@ def run_asset_in_godot(
         artifacts.save(artifact)
         output_ids.append(artifact.id)
     return output_ids
+
+
+def recapture_side_evidence(
+    root: Path,
+    db: Database,
+    workflow_id: str,
+    *,
+    godot_path: str,
+    expected_asset_id: str,
+    expected_revision_number: int,
+    expected_processed_sha256: str,
+    expected_external_task_id: str,
+    expected_paid_invocations: int,
+    expected_approval_id: str,
+) -> dict[str, Any]:
+    """Render a new side view of the current processed GLB without a new provider call."""
+    project = Path(root).resolve(strict=True)
+    workflow = WorkflowRepository(db).get(workflow_id)
+    if workflow is None:
+        raise ValidationError(f"Workflow not found: {workflow_id}")
+    tasks = TaskRepository(db).list_by_workflow(workflow_id)
+    godot_task = next((task for task in tasks if task.task_type == "asset_godot"), None)
+    review_task = next((task for task in tasks if task.task_type == "asset_final_review"), None)
+    if godot_task is None or review_task is None:
+        raise ValidationError("Asset workflow is missing Godot or final-review tasks")
+    if str(godot_task.parameters.get("asset_id")) != expected_asset_id:
+        raise ValidationError("Refusing side recapture: asset id does not match")
+    if int(godot_task.parameters.get("revision_number", -1)) != expected_revision_number:
+        raise ValidationError("Refusing side recapture: revision does not match")
+    artifacts = ArtifactRepository(db)
+    artifact_manager = ArtifactManager(project)
+    processed = next(
+        (
+            artifact
+            for artifact in artifacts.list_by_workflow(workflow_id)
+            if artifact.artifact_type == "asset-processed-glb"
+        ),
+        None,
+    )
+    if processed is None or processed.content_hash != expected_processed_sha256:
+        raise ValidationError("Refusing side recapture: processed GLB hash does not match")
+    artifact_manager.verify_artifact_integrity(processed)
+    intents = ProviderOperationIntentRepository(db).list_by_workflow(workflow_id)
+    external_ids = [intent.external_task_id for intent in intents if intent.external_task_id]
+    paid_count = ProviderInvocationRepository(db).count(workflow_id) + len(external_ids)
+    if paid_count != expected_paid_invocations or external_ids != [expected_external_task_id]:
+        raise ValidationError("Refusing side recapture: paid provider identity does not match")
+    approval = ApprovalRepository(db).get(expected_approval_id)
+    if (
+        approval is None
+        or approval.workflow_id != workflow_id
+        or approval.task_id != review_task.id
+        or approval.approval_type != "final_visual_review"
+        or approval.status.value != "PENDING"
+    ):
+        raise ValidationError(
+            "Refusing side recapture: final review is not the expected pending approval"
+        )
+    preserved = [
+        artifact
+        for artifact in artifacts.list_by_workflow(workflow_id)
+        if artifact.artifact_type == "asset-runtime-capture"
+    ]
+    preserved_hashes = {artifact.id: artifact.content_hash for artifact in preserved}
+    executions = ExecutionRepository(db)
+    attempt_number = (
+        max((item.attempt_number for item in executions.list_by_task(godot_task.id)), default=0) + 1
+    )
+    execution = Execution(
+        id=generate_id("EXEC"),
+        task_id=godot_task.id,
+        attempt_number=attempt_number,
+        status=ExecutionStatus.RUNNING,
+        cost=0.0,
+        estimated_cost=0.0,
+        provider=None,
+    )
+    executions.save(execution)
+    try:
+        output_ids = run_asset_in_godot(
+            project,
+            artifacts,
+            artifact_manager,
+            workflow,
+            godot_task,
+            execution,
+            godot_path,
+            None,
+            angles=("side",),
+            observation_artifact_type="asset-side-correction",
+        )
+    except Exception:
+        execution.status = ExecutionStatus.FAILED
+        execution.completed_at = utc_now_iso()
+        execution.retryable = False
+        executions.save(execution)
+        raise
+    for artifact_id, content_hash in preserved_hashes.items():
+        current = artifacts.get(artifact_id)
+        if current is None or current.content_hash != content_hash:
+            execution.status = ExecutionStatus.FAILED
+            execution.completed_at = utc_now_iso()
+            execution.retryable = False
+            executions.save(execution)
+            raise ValidationError("Side recapture changed a previously registered capture")
+        artifact_manager.verify_artifact_integrity(current)
+    execution.status = ExecutionStatus.COMPLETED
+    execution.completed_at = utc_now_iso()
+    execution.exit_code = 0
+    execution.cost = 0.0
+    execution.stdout = (
+        "Corrected side capture rendered from the existing processed GLB\n"
+        "provider generation submitted = false\n"
+    )
+    executions.save(execution)
+    registered = [artifacts.get(artifact_id) for artifact_id in output_ids]
+    side = next(
+        artifact
+        for artifact in registered
+        if artifact is not None and artifact.artifact_type == "asset-runtime-capture"
+    )
+    correction = next(
+        artifact
+        for artifact in registered
+        if artifact is not None and artifact.artifact_type == "asset-side-correction"
+    )
+    paid_after = ProviderInvocationRepository(db).count(workflow_id) + len(
+        [
+            intent.external_task_id
+            for intent in ProviderOperationIntentRepository(db).list_by_workflow(workflow_id)
+            if intent.external_task_id
+        ]
+    )
+    if paid_after != expected_paid_invocations:
+        raise ValidationError("Side recapture changed the paid invocation count")
+    return {
+        "execution_id": execution.id,
+        "attempt_number": execution.attempt_number,
+        "task_id": godot_task.id,
+        "side_artifact_id": side.id,
+        "side_relative_path": side.relative_path,
+        "side_sha256": side.content_hash,
+        "correction_artifact_id": correction.id,
+        "correction_relative_path": correction.relative_path,
+        "processed_glb_sha256": processed.content_hash,
+        "paid_invocations": paid_after,
+    }

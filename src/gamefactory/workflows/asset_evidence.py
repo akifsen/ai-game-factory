@@ -74,10 +74,15 @@ def export_asset_evidence_bundle(
     runtime_runs = ExecutionRepository(db).list_by_task(runtime_task.id)
     if not runtime_runs:
         raise ArtifactError("Runtime execution record is missing")
-    runtime_execution = max(runtime_runs, key=lambda e: e.attempt_number)
     observation = json.loads(
         (project / selected["runtime_observation"].relative_path).read_text(encoding="utf-8")
     )
+    runtime_execution = next(
+        (item for item in runtime_runs if item.id == observation.get("execution_id")),
+        None,
+    )
+    if runtime_execution is None:
+        raise ArtifactError("Runtime observation execution record is missing")
     binding = {
         "workflow_id": workflow_id,
         "revision": revision_number,
@@ -86,18 +91,26 @@ def export_asset_evidence_bundle(
         "attempt_number": runtime_execution.attempt_number,
         "processed_glb_sha256": selected["processed_glb"].content_hash,
     }
-    captures = sorted(
-        (
-            a
-            for a in types.get("asset-runtime-capture", [])
-            if runtime_execution.id in a.relative_path
-        ),
-        key=lambda a: a.relative_path,
+    from gamefactory.core.domain.asset_contracts import parse_asset_specification
+    from gamefactory.workflows.asset_production import (
+        capture_belongs_to_execution,
+        select_review_captures,
     )
-    if len(captures) != 3:
-        raise ArtifactError("Exactly three captures from the bound runtime attempt are required")
+
+    specification = parse_asset_specification(prepare.parameters["specification"])
+    profile = specification.bound_profile()
+    review_views = profile.review_views
+    captures = select_review_captures(
+        types.get("asset-runtime-capture", []), runtime_execution.id, review_views
+    )
     if any(observation.get(key) != value for key, value in binding.items()):
         raise ValidationError("Runtime observation does not bind this revision and processed GLB")
+    side_records = {
+        artifact.relative_path: json.loads(
+            (project / artifact.relative_path).read_text(encoding="utf-8")
+        )
+        for artifact in types.get("asset-side-correction", [])
+    }
 
     approvals = ApprovalRepository(db).list_by_workflow(workflow_id)
     from gamefactory.adapters.fakes.fake_provider import FakeAssetGenerationProvider
@@ -206,14 +219,68 @@ def export_asset_evidence_bundle(
         )
     for artifact in captures:
         angle = Path(artifact.relative_path).stem
-        if angle not in {"front", "three_quarter", "side"}:
+        execution_prefix = f"{runtime_execution.id}-"
+        if angle.startswith(execution_prefix):
+            angle = angle[len(execution_prefix) :]
+        if angle not in review_views:
             raise ValidationError("Unexpected runtime capture angle")
+        capture_binding = binding
+        if not capture_belongs_to_execution(artifact.relative_path, runtime_execution.id):
+            record = next(
+                (
+                    payload
+                    for path, payload in side_records.items()
+                    if capture_belongs_to_execution(path, str(payload.get("execution_id", "")))
+                    and capture_belongs_to_execution(
+                        artifact.relative_path, str(payload.get("execution_id", ""))
+                    )
+                ),
+                None,
+            )
+            if not isinstance(record, dict):
+                raise ValidationError("Corrected side capture has no side-correction record")
+            side_execution = next(
+                (item for item in runtime_runs if item.id == record.get("execution_id")),
+                None,
+            )
+            if (
+                side_execution is None
+                or side_execution.status.value != "COMPLETED"
+                or side_execution.attempt_number != record.get("attempt_number")
+            ):
+                raise ValidationError("Corrected side capture execution does not match its record")
+            capture_binding = {
+                "workflow_id": workflow_id,
+                "revision": revision_number,
+                "asset_id": asset_id,
+                "execution_id": record.get("execution_id"),
+                "attempt_number": record.get("attempt_number"),
+                "processed_glb_sha256": record.get("processed_glb_sha256"),
+            }
         add(
             "runtime_capture",
             project / artifact.relative_path,
             f"captures/{angle}.png",
-            {**binding, "angle": angle},
+            {**capture_binding, "angle": angle},
         )
+    if any(
+        not capture_belongs_to_execution(artifact.relative_path, runtime_execution.id)
+        for artifact in captures
+    ):
+        record_path = next(
+            (
+                path
+                for path, payload in side_records.items()
+                if capture_belongs_to_execution(
+                    captures[-1].relative_path, str(payload.get("execution_id", ""))
+                )
+                and path.endswith("observation.json")
+            ),
+            None,
+        )
+        if record_path is None:
+            raise ValidationError("Corrected side capture has no side-correction record")
+        add("side_correction", project / record_path, "evidence/side-correction.json")
     for role, (approval, inputs) in receipt_data.items():
         receipt = {
             "approval_id": approval.id,
@@ -335,6 +402,40 @@ def export_asset_evidence_bundle(
             for role, (approval, _) in receipt_data.items()
         ],
     )
+    receipt = {
+        "schema_version": "production-receipt-0.5.0",
+        "asset_id": asset_id,
+        "revision": revision_number,
+        "profile_id": profile.profile_id,
+        "profile_version": profile.version,
+        "profile_qualified": profile.qualified,
+        "profile_schema": profile.schema_version,
+        "spec_hash": prepare.parameters["specification_hash"],
+        "concept_hash": concept_entry["sha256"],
+        "provider_request_fingerprint": intent.request_fingerprint,
+        "provider_task_id": intent.external_task_id,
+        "cost": provider["actual_cost"],
+        "raw_artifact_hash": selected["raw_glb"].content_hash,
+        "processed_artifact_hash": selected["processed_glb"].content_hash,
+        "validation_hash": selected["validation"].content_hash,
+        "runtime_hash": selected["runtime_observation"].content_hash,
+        "render_hashes": {
+            entry["angle"]: entry["sha256"]
+            for entry in entries
+            if entry["role"] == "runtime_capture"
+        },
+        "approval_ids": {role: approval.id for role, (approval, _inputs) in receipt_data.items()},
+        "completed_at": workflow.updated_at,
+    }
+    receipt_bytes = _write_json(output / "evidence/production-receipt.json", receipt)
+    entries.append(
+        {
+            "role": "production_receipt",
+            "path": "evidence/production-receipt.json",
+            "size": len(receipt_bytes),
+            "sha256": hashlib.sha256(receipt_bytes).hexdigest(),
+        }
+    )
     add_table("Artifact digests", [(entry["role"], entry["sha256"]) for entry in entries])
     lines.append("<ul>")
     for entry in entries:
@@ -343,14 +444,13 @@ def export_asset_evidence_bundle(
         )
         href = html.escape(entry["path"], quote=True)
         lines.append(f'<li><a href="{href}">{html.escape(label)}</a></li>')
-    lines.append(
-        "<table><thead><tr><th>Concept</th><th>Front</th><th>Three-quarter</th><th>Side</th></tr></thead><tbody><tr>"
-    )
+    header = "".join(f"<th>{html.escape(angle)}</th>" for angle in ("concept", *review_views))
+    lines.append(f"<table><thead><tr>{header}</tr></thead><tbody><tr>")
     lines.append(f'<td><img src="{concept_href}" alt="Approved concept" width="320"></td>')
     capture_by_angle = {
         entry["angle"]: entry for entry in entries if entry["role"] == "runtime_capture"
     }
-    for angle in ("front", "three_quarter", "side"):
+    for angle in review_views:
         entry = capture_by_angle[angle]
         lines.append(
             f'<td><img src="{html.escape(entry["path"], quote=True)}" alt="{angle} view" width="320" height="180"></td>'
@@ -368,8 +468,13 @@ def export_asset_evidence_bundle(
         }
     )
     manifest = {
-        "schema_version": "asset-evidence-0.4.0",
+        "schema_version": "asset-evidence-0.5.0",
         **binding,
+        "profile_id": profile.profile_id,
+        "profile_version": profile.version,
+        "profile_qualified": profile.qualified,
+        "review_views": list(review_views),
+        "runtime_requirements": profile.runtime_requirements(),
         "specification_fingerprint": prepare.parameters["specification_hash"],
         "final_review": {"decision": final.status.value, "fingerprint": final.operation_hash},
         "files": entries,

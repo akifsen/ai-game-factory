@@ -259,16 +259,16 @@ def _inspect(
     dict[int, list[list[float]]],
 ]:
     if document.get("animations"):
-        raise _InvalidGLB("animations are forbidden for static_prop")
+        raise _InvalidGLB("animations are forbidden by the asset profile")
     if document.get("skins"):
-        raise _InvalidGLB("skins/rigging are forbidden for static_prop")
+        raise _InvalidGLB("skins/rigging are forbidden by the asset profile")
     if document.get("extensionsRequired") or document.get("extensionsUsed"):
-        raise _InvalidGLB("glTF extensions are unsupported in static_prop profile")
+        raise _InvalidGLB("glTF extensions are unsupported by the asset profile")
 
     def reject_extensions(value: Any) -> None:
         if isinstance(value, dict):
             if value.get("extensions"):
-                raise _InvalidGLB("glTF extensions are unsupported in static_prop profile")
+                raise _InvalidGLB("glTF extensions are unsupported by the asset profile")
             for child in value.values():
                 reject_extensions(child)
         elif isinstance(value, list):
@@ -459,7 +459,9 @@ def preflight_glb(path: Path, *, max_file_size_bytes: int = _MAX_FILE_BYTES) -> 
 def validate_glb(
     path: Path, spec: AssetSpecification, *, max_file_size_bytes: int = _MAX_FILE_BYTES
 ) -> AssetValidationResult:
-    """Validate a processed static_prop GLB using decoded geometry and safe parsing."""
+    """Validate a processed GLB against the specification's bound profile."""
+    profile = spec.bound_profile()
+    contract = profile.processing_contract(spec)
     artifact = str(path)
     findings: list[ValidationFinding] = []
 
@@ -488,6 +490,7 @@ def validate_glb(
         add("glb.hash", True, "SHA-256 recorded", digest, "Artifact hash computed")
         names = [info.name for info in infos]
         unique_names = len(names) == len(set(names))
+        expected_names = profile.expected_mesh_names(spec)
         expected_lod0 = f"SM_{spec.asset_id}_LOD0"
         expected_lod1 = f"SM_{spec.asset_id}_LOD1"
         expected_collider = f"COL_{spec.asset_id}"
@@ -500,8 +503,8 @@ def validate_glb(
         )
         add(
             "nodes.profile",
-            set(names) == {expected_lod0, expected_lod1, expected_collider},
-            f"exactly {expected_lod0}, {expected_lod1}, {expected_collider}",
+            set(names) == expected_names,
+            f"exactly {sorted(expected_names)}",
             str(names),
             "Unexpected or missing mesh nodes are rejected",
         )
@@ -523,12 +526,15 @@ def validate_glb(
             "present" if lod0 else "missing",
             "LOD0 node must reference nonempty triangles",
         )
+        lod1_required = bool(contract["lod1_required"])
         add(
             "lod1.present",
-            lod1 is not None and lod1.triangle_count > 0,
-            "LOD1 mesh geometry when required",
+            (lod1 is not None and lod1.triangle_count > 0) or not lod1_required,
+            "LOD1 mesh geometry" if lod1_required else "LOD1 optional",
             "present" if lod1 else "missing",
-            "LOD1 node must reference nonempty triangles",
+            "LOD1 is required by the profile contract"
+            if lod1_required
+            else "LOD1 is optional for this profile",
         )
         visual_points = list(lod0.points) if lod0 else []
         visual_mins = (
@@ -597,7 +603,7 @@ def validate_glb(
         maxs = [max(p[i] for p in visual_points) for i in range(3)]
         actual = [maxs[i] - mins[i] for i in range(3)]
         target = [spec.dimensions.width_m, spec.dimensions.height_m, spec.dimensions.depth_m]
-        tolerance = 0.01
+        tolerance = float(contract["dimension_tolerance_m"])
         bounds_ok = all(abs(a - t) <= tolerance for a, t in zip(actual, target, strict=True))
         add(
             "scale.bounds",
@@ -620,16 +626,33 @@ def validate_glb(
             f"min={mins}, max={maxs}",
             "Origin evaluated from transformed geometry",
         )
+        snap_grid = contract.get("snap_grid_m")
+        if snap_grid:
+            snap_ok = all(
+                abs((value / float(snap_grid)) - round(value / float(snap_grid))) * float(snap_grid)
+                <= tolerance
+                for value in actual
+            )
+            add(
+                "dimensions.snap",
+                snap_ok and origin_ok,
+                f"module axes are multiples of {snap_grid} m and the origin is on the snap pivot",
+                str(actual),
+                "Modular dimensions and origin must land on the profile snap grid",
+            )
         lod1_points = lod1.points if lod1 else ()
-        lod_bounds_match = bool(lod0 and lod1_points) and all(
-            abs(min(p[i] for p in lod1_points) - mins[i]) <= tolerance
-            and abs(max(p[i] for p in lod1_points) - maxs[i]) <= tolerance
-            for i in range(3)
-        )
+        if not lod1_required and not lod1_points:
+            lod_bounds_match = True
+        else:
+            lod_bounds_match = bool(lod0 and lod1_points) and all(
+                abs(min(point[index] for point in lod1_points) - mins[index]) <= tolerance
+                and abs(max(point[index] for point in lod1_points) - maxs[index]) <= tolerance
+                for index in range(3)
+            )
         add(
             "lod1.bounds",
             lod_bounds_match,
-            "LOD1 bounds match LOD0 ± 0.01m",
+            f"LOD1 bounds match LOD0 ± {tolerance}m",
             str(lod1 and lod1.points[:1]),
             "LOD1 geometry must preserve the visual envelope",
         )
@@ -664,7 +687,7 @@ def validate_glb(
         add(
             "glb.parse",
             False,
-            "supported safe static_prop GLB subset",
+            "supported safe profile GLB subset",
             str(exc),
             "GLB could not be safely validated",
         )

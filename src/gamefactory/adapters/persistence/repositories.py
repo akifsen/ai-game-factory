@@ -687,6 +687,37 @@ class ApprovalRepository:
                 ),
             )
 
+    def rebind_pending_inputs(
+        self,
+        approval_id: str,
+        operation_hash: str,
+        artifact_ids: list[str],
+        event: AuditEvent,
+    ) -> bool:
+        """Point a still-pending approval at corrected inputs without deciding it."""
+        if len(operation_hash) != 64 or any(
+            char not in "0123456789abcdef" for char in operation_hash
+        ):
+            raise ValidationError("operation hash must be a sha256 digest")
+        with self.db.transaction() as conn:
+            changed = conn.execute(
+                """
+                UPDATE approvals
+                SET operation_hash = ?, artifact_ids_json = ?
+                WHERE id = ? AND status = ?
+                """,
+                (
+                    operation_hash,
+                    json.dumps(artifact_ids),
+                    approval_id,
+                    ApprovalStatus.PENDING.value,
+                ),
+            ).rowcount
+            if changed != 1:
+                return False
+            _insert_audit_event(conn, event)
+            return True
+
     def decide_if_pending(self, approval: ApprovalRequest, event: AuditEvent) -> bool:
         """Compare-and-set approval decision and audit event atomically."""
         with self.db.transaction() as conn:
@@ -1047,6 +1078,8 @@ class AssetRevisionRepository:
         processed_glb_hash: str | None = None,
         validation_report_hash: str | None = None,
         runtime_evidence_hashes: list[str] | None = None,
+        profile_id: str | None = None,
+        profile_version: int | None = None,
     ) -> AssetRevision:
         """Atomically allocate the next monotonic revision for an asset."""
         now = utc_now_iso()
@@ -1065,8 +1098,8 @@ class AssetRevisionRepository:
                     asset_id, revision_number, workflow_id, spec_hash,
                     concept_hash, raw_glb_hash, processed_glb_hash,
                     validation_report_hash, runtime_evidence_hashes_json,
-                    created_at, updated_at
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+                    created_at, updated_at, profile_id, profile_version
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
                 """,
                 (
                     asset_id,
@@ -1080,6 +1113,8 @@ class AssetRevisionRepository:
                     json.dumps(runtime_hashes),
                     now,
                     now,
+                    profile_id,
+                    profile_version,
                 ),
             )
 
@@ -1088,6 +1123,8 @@ class AssetRevisionRepository:
                 revision_number=next_rev,
                 workflow_id=workflow_id,
                 spec_hash=spec_hash,
+                profile_id=profile_id,
+                profile_version=profile_version,
                 concept_hash=concept_hash,
                 raw_glb_hash=raw_glb_hash,
                 processed_glb_hash=processed_glb_hash,
@@ -1102,7 +1139,7 @@ class AssetRevisionRepository:
         with self.db.transaction() as conn:
             conn.execute("BEGIN IMMEDIATE")
             existing = conn.execute(
-                "SELECT spec_hash, workflow_id, concept_hash, raw_glb_hash, processed_glb_hash, validation_report_hash, runtime_evidence_hashes_json FROM asset_revisions WHERE asset_id = ? AND revision_number = ?;",
+                "SELECT spec_hash, workflow_id, concept_hash, raw_glb_hash, processed_glb_hash, validation_report_hash, runtime_evidence_hashes_json, profile_id, profile_version FROM asset_revisions WHERE asset_id = ? AND revision_number = ?;",
                 (revision.asset_id, revision.revision_number),
             ).fetchone()
 
@@ -1113,8 +1150,8 @@ class AssetRevisionRepository:
                         asset_id, revision_number, workflow_id, spec_hash,
                         concept_hash, raw_glb_hash, processed_glb_hash,
                         validation_report_hash, runtime_evidence_hashes_json,
-                        created_at, updated_at
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+                        created_at, updated_at, profile_id, profile_version
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
                     """,
                     (
                         revision.asset_id,
@@ -1128,6 +1165,8 @@ class AssetRevisionRepository:
                         json.dumps(revision.runtime_evidence_hashes),
                         revision.created_at,
                         revision.updated_at,
+                        revision.profile_id,
+                        revision.profile_version,
                     ),
                 )
             else:
@@ -1138,6 +1177,21 @@ class AssetRevisionRepository:
                 if existing["workflow_id"] != revision.workflow_id:
                     raise ValueError(
                         f"Cannot overwrite workflow_id for revision {revision.revision_number} of '{revision.asset_id}'"
+                    )
+                if existing["profile_id"] is not None and revision.profile_id not in (
+                    None,
+                    existing["profile_id"],
+                ):
+                    raise ValueError(
+                        f"Cannot overwrite immutable profile_id for revision {revision.revision_number} of '{revision.asset_id}'"
+                    )
+                if existing["profile_version"] is not None and revision.profile_version not in (
+                    None,
+                    existing["profile_version"],
+                ):
+                    raise ValueError(
+                        "Cannot overwrite immutable profile_version for revision "
+                        f"{revision.revision_number} of '{revision.asset_id}'"
                     )
                 immutable_artifacts = (
                     "concept_hash",
@@ -1247,6 +1301,8 @@ class AssetRevisionRepository:
             runtime_evidence_hashes=json.loads(row["runtime_evidence_hashes_json"]),
             created_at=row["created_at"],
             updated_at=row["updated_at"],
+            profile_id=row["profile_id"] if "profile_id" in row.keys() else None,
+            profile_version=row["profile_version"] if "profile_version" in row.keys() else None,
         )
 
 

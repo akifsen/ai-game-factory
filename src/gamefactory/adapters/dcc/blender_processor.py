@@ -94,14 +94,16 @@ class BlenderAssetProcessor:
         if raw_glb.suffix.casefold() != ".glb":
             raise ValueError("raw input must use the .glb extension")
 
+        profile = spec.bound_profile()
+        contract = profile.processing_contract(spec)
         if spec.orientation.up != "+Y" or spec.orientation.front != "-Z":
-            raise ValueError("Blender static_prop processing supports only +Y up and -Z front")
-        if spec.collider_policy != "box":
+            raise ValueError("Blender processing supports only +Y up and -Z front")
+        if contract["collider_policy"] != "box":
             raise ValueError(
-                f"Unsupported collider_policy for Blender static_prop: {spec.collider_policy}"
+                f"Unsupported collider_policy for {profile.qualified}: {contract['collider_policy']}"
             )
-        if spec.lod_policy != "lod0_lod1":
-            raise ValueError("Blender static_prop processing requires the lod0_lod1 policy")
+        if spec.lod_policy not in profile.document.processing.allowed_lod_policies:
+            raise ValueError(f"lod_policy {spec.lod_policy} is not allowed by {profile.qualified}")
         ratio = spec.geometry_budget.lod_ratio if lod1_ratio is None else lod1_ratio
         if not 0.05 <= ratio <= 0.95:
             raise ValueError("lod1_ratio must be between 0.05 and 0.95")
@@ -145,6 +147,12 @@ class BlenderAssetProcessor:
         script_hash = hashlib.sha256(script_bytes).hexdigest()
 
         resolved_report.parent.mkdir(parents=True, exist_ok=True)
+        contract_path = resolved_report.with_suffix(".contract.json")
+        if contract_path.exists() or contract_path.is_symlink():
+            raise ValueError(f"refusing to overwrite existing processing contract: {contract_path}")
+        contract_path.write_text(
+            json.dumps(contract, sort_keys=True, indent=2) + "\n", encoding="utf-8"
+        )
 
         cmd = [
             self.blender_exe,
@@ -173,6 +181,8 @@ class BlenderAssetProcessor:
             spec.origin_policy,
             "--lod-policy",
             spec.lod_policy,
+            "--contract",
+            str(contract_path),
         ]
 
         req = CommandRequest(
