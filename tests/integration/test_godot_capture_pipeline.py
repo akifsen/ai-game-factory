@@ -6,7 +6,9 @@ These tests do not claim a real viewport was rendered.
 from __future__ import annotations
 
 import json
+import os
 import shutil
+import subprocess
 import sys
 from pathlib import Path
 
@@ -38,6 +40,13 @@ from gamefactory.workflows.godot_capture import (
 from tests.integration.test_godot_pipeline import FIXTURE, FakeGodotRunner
 
 PROJECT = Path(__file__).parents[2]
+
+
+@pytest.fixture(autouse=True)
+def fake_capture_satisfies_linux_display_gate(monkeypatch: pytest.MonkeyPatch) -> None:
+    """The fake runner never opens a window. Linux still requires a DISPLAY value."""
+    if sys.platform.startswith("linux") and not os.environ.get("DISPLAY"):
+        monkeypatch.setenv("DISPLAY", ":99")
 
 
 def _project(
@@ -227,6 +236,83 @@ def test_tampered_png_cannot_be_approved_or_completed(tmp_path: Path) -> None:
         _approve(engine, db, blocked.pending_approval_id or "")
     approval = ApprovalRepository(db).get(blocked.pending_approval_id or "")
     assert approval is not None and approval.status.value == "PENDING"
+
+
+def test_approved_capture_rejects_changed_png_on_a_new_cli_resume(tmp_path: Path) -> None:
+    """Technical PASS, test-actor approval, then a changed PNG must not complete.
+
+    The actor is pipeline-test. This is not a human visual review.
+    """
+    root, db, project_id, exe, scenario = _project(tmp_path)
+    runner = FakeGodotRunner()
+    engine = _engine(root, db, project_id, exe, scenario, runner)
+    workflow_id = engine.wf_repo.list_by_project(project_id)[-1].id
+    blocked = engine.run_workflow(workflow_id)
+    assert blocked.status == WorkflowStatus.BLOCKED
+    approval_id = blocked.pending_approval_id or ""
+    calls_before = len(runner.calls)
+    png = next(
+        item
+        for item in ArtifactRepository(db).list_by_workflow(workflow_id)
+        if item.artifact_type == "godot-capture-png" and item.relative_path.endswith("cp-090.png")
+    )
+    png_count = sum(
+        1
+        for item in ArtifactRepository(db).list_by_workflow(workflow_id)
+        if item.artifact_type == "godot-capture-png"
+    )
+    execute_task = next(
+        task
+        for task in TaskRepository(db).list_by_workflow(workflow_id)
+        if task.task_type == "godot_capture_execute"
+    )
+    del db
+
+    def cli(*arguments: str) -> subprocess.CompletedProcess[str]:
+        return subprocess.run(
+            [sys.executable, "-m", "gamefactory", *arguments, "--project", str(root), "--json"],
+            cwd=root,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+
+    approved = cli(
+        "approve",
+        approval_id,
+        "--actor",
+        "pipeline-test",
+        "--comment",
+        "test actor, not a human visual review",
+    )
+    assert approved.returncode == 0, approved.stderr
+    target = root / png.relative_path
+    target.write_bytes(target.read_bytes() + b"tamper")
+    resumed = cli("resume", workflow_id)
+    assert resumed.returncode != 0, resumed.stdout
+    payload = json.loads(resumed.stdout)
+    assert payload["status"] == "BLOCKED"
+    assert "hash mismatch" in (payload.get("error_message") or "")
+    inspected = cli("inspect", workflow_id)
+    assert inspected.returncode == 0, inspected.stderr
+    graph = json.loads(inspected.stdout)
+    assert graph["workflow"]["status"] == "BLOCKED"
+    approvals = graph["approvals"]
+    assert any(
+        item["id"] == approval_id
+        and item["status"] == "APPROVED"
+        and item["actor"] == "pipeline-test"
+        for item in approvals
+    )
+    assert not any(item["status"] == "PENDING" for item in approvals)
+    execute_runs = [item for item in graph["executions"] if item["task_id"] == execute_task.id]
+    assert len(execute_runs) == 1 and execute_runs[0]["status"] == "COMPLETED"
+    assert graph["workflow"]["status"] != "COMPLETED"
+    assert (
+        sum(1 for item in graph["artifacts"] if item["artifact_type"] == "godot-capture-png")
+        == png_count
+    )
+    assert len(runner.calls) == calls_before
 
 
 def test_linux_capture_allowlists_display_and_refuses_headless_fallback(

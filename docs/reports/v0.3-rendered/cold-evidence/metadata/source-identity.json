@@ -1,0 +1,16 @@
+{
+  "head": "2c33ea8952c647b96520a699105cdfb7f222c43f",
+  "committed_for_v03": false,
+  "human_review": "PENDING",
+  "dirty_paths": [
+    "docs/reports/v0.3-completion-report.md",
+    "scripts/verify_closeout_evidence.py",
+    "scripts/verify_godot_live_crash.py",
+    "tests/integration/test_godot_capture_pipeline.py",
+    "tests/unit/test_closeout_evidence.py",
+    "docs/reports/v0.3-rendered/cold-evidence/",
+    "docs/reports/v0.3-rendered/cold-verify-results.json",
+    "docs/reports/v0.3-rendered/linux-ci/",
+    "docs/reports/v0.3-rendered/rendered-interrupt.json"
+  ]
+}

@@ -1,0 +1,230 @@
+{
+  "execution_id": "EXEC-f0ad7969",
+  "images": [
+    {
+      "bytes": 13876,
+      "height": 1280,
+      "id": "cp-000",
+      "mode": "RGBA",
+      "sha256": "34fb3847f811baf1e7a8348a29aa3dd7cbfab82e04bff1c90f9954da03baccad",
+      "src": "images/cp-000.png",
+      "state": {
+        "enemies_remaining": 3,
+        "player_hp": 100,
+        "score": 0
+      },
+      "tick": 0,
+      "width": 720
+    },
+    {
+      "bytes": 14471,
+      "height": 1280,
+      "id": "cp-030",
+      "mode": "RGBA",
+      "sha256": "7865ed132c2e3a71f6159a66e863f14eb09eaa20150c27570d5de7abd1d178a7",
+      "src": "images/cp-030.png",
+      "state": {
+        "enemies_remaining": 3,
+        "player_hp": 80,
+        "score": 0
+      },
+      "tick": 30,
+      "width": 720
+    },
+    {
+      "bytes": 14577,
+      "height": 1280,
+      "id": "cp-060",
+      "mode": "RGBA",
+      "sha256": "7f046020d838ae668cf4d8934f33caed602a6bb4a79aaaaaf0515234cacf88b3",
+      "src": "images/cp-060.png",
+      "state": {
+        "enemies_remaining": 2,
+        "player_hp": 80,
+        "score": 100
+      },
+      "tick": 60,
+      "width": 720
+    },
+    {
+      "bytes": 14168,
+      "height": 1280,
+      "id": "cp-090",
+      "mode": "RGBA",
+      "sha256": "bf0436013cf9fbb2aaceb09ed53a6769376bd1e2a2e6eb895796286e8d361877",
+      "src": "images/cp-090.png",
+      "state": {
+        "enemies_remaining": 2,
+        "player_hp": 40,
+        "score": 100
+      },
+      "tick": 90,
+      "width": 720
+    }
+  ],
+  "region_checks": [
+    {
+      "detail": "hp=100 pixel=(51, 191, 71, 255)",
+      "id": "cp-000:health-fill",
+      "status": "PASS"
+    },
+    {
+      "detail": "hp=100 pixel=(51, 191, 71, 255) expected=(51, 191, 71)",
+      "id": "cp-000:health-tail",
+      "status": "PASS"
+    },
+    {
+      "detail": "enemies=3 pixel=(217, 56, 46, 255) expected=(217, 56, 46)",
+      "id": "cp-000:enemy-1",
+      "status": "PASS"
+    },
+    {
+      "detail": "enemies=3 pixel=(217, 56, 46, 255) expected=(217, 56, 46)",
+      "id": "cp-000:enemy-2",
+      "status": "PASS"
+    },
+    {
+      "detail": "enemies=3 pixel=(217, 56, 46, 255) expected=(217, 56, 46)",
+      "id": "cp-000:enemy-3",
+      "status": "PASS"
+    },
+    {
+      "detail": "hp=80 pixel=(51, 191, 71, 255)",
+      "id": "cp-030:health-fill",
+      "status": "PASS"
+    },
+    {
+      "detail": "hp=80 pixel=(51, 51, 56, 255) expected=(51, 51, 56)",
+      "id": "cp-030:health-tail",
+      "status": "PASS"
+    },
+    {
+      "detail": "enemies=3 pixel=(217, 56, 46, 255) expected=(217, 56, 46)",
+      "id": "cp-030:enemy-1",
+      "status": "PASS"
+    },
+    {
+      "detail": "enemies=3 pixel=(217, 56, 46, 255) expected=(217, 56, 46)",
+      "id": "cp-030:enemy-2",
+      "status": "PASS"
+    },
+    {
+      "detail": "enemies=3 pixel=(217, 56, 46, 255) expected=(217, 56, 46)",
+      "id": "cp-030:enemy-3",
+      "status": "PASS"
+    },
+    {
+      "detail": "hp=80 pixel=(51, 191, 71, 255)",
+      "id": "cp-060:health-fill",
+      "status": "PASS"
+    },
+    {
+      "detail": "hp=80 pixel=(51, 51, 56, 255) expected=(51, 51, 56)",
+      "id": "cp-060:health-tail",
+      "status": "PASS"
+    },
+    {
+      "detail": "enemies=2 pixel=(217, 56, 46, 255) expected=(217, 56, 46)",
+      "id": "cp-060:enemy-1",
+      "status": "PASS"
+    },
+    {
+      "detail": "enemies=2 pixel=(217, 56, 46, 255) expected=(217, 56, 46)",
+      "id": "cp-060:enemy-2",
+      "status": "PASS"
+    },
+    {
+      "detail": "enemies=2 pixel=(31, 36, 46, 255) expected=(31, 36, 46)",
+      "id": "cp-060:enemy-3",
+      "status": "PASS"
+    },
+    {
+      "detail": "hp=40 pixel=(51, 191, 71, 255)",
+      "id": "cp-090:health-fill",
+      "status": "PASS"
+    },
+    {
+      "detail": "hp=40 pixel=(51, 51, 56, 255) expected=(51, 51, 56)",
+      "id": "cp-090:health-tail",
+      "status": "PASS"
+    },
+    {
+      "detail": "enemies=2 pixel=(217, 56, 46, 255) expected=(217, 56, 46)",
+      "id": "cp-090:enemy-1",
+      "status": "PASS"
+    },
+    {
+      "detail": "enemies=2 pixel=(217, 56, 46, 255) expected=(217, 56, 46)",
+      "id": "cp-090:enemy-2",
+      "status": "PASS"
+    },
+    {
+      "detail": "enemies=2 pixel=(31, 36, 46, 255) expected=(31, 36, 46)",
+      "id": "cp-090:enemy-3",
+      "status": "PASS"
+    }
+  ],
+  "scenario_fingerprint": "ac1b85748de2b6d3a5255407b180dd4cc39b6fbf6ec6e1780824c6244ccb1b1f",
+  "schema_version": "0.3.0",
+  "state": {
+    "findings": [
+      {
+        "actual": 100,
+        "assertion_id": "initial-player-hp",
+        "expected": 100,
+        "explanation": "Observed player_hp=100; equals 100 is satisfied",
+        "field": "player_hp",
+        "status": "PASS",
+        "tick": 0
+      },
+      {
+        "actual": 80,
+        "assertion_id": "post-damage-player-hp",
+        "expected": 80,
+        "explanation": "Observed player_hp=80; equals 80 is satisfied",
+        "field": "player_hp",
+        "status": "PASS",
+        "tick": 30
+      },
+      {
+        "actual": 100,
+        "assertion_id": "post-enemy-score",
+        "expected": 100,
+        "explanation": "Observed score=100; equals 100 is satisfied",
+        "field": "score",
+        "status": "PASS",
+        "tick": 60
+      },
+      {
+        "actual": 40,
+        "assertion_id": "final-player-hp",
+        "expected": 40,
+        "explanation": "Observed player_hp=40; equals 40 is satisfied",
+        "field": "player_hp",
+        "status": "PASS",
+        "tick": 90
+      },
+      {
+        "actual": 2,
+        "assertion_id": "final-enemies",
+        "expected": 2,
+        "explanation": "Observed enemies_remaining=2; equals 2 is satisfied",
+        "field": "enemies_remaining",
+        "status": "PASS",
+        "tick": 90
+      },
+      {
+        "actual": 100,
+        "assertion_id": "final-score",
+        "expected": 100,
+        "explanation": "Observed score=100; equals 100 is satisfied",
+        "field": "score",
+        "status": "PASS",
+        "tick": 90
+      }
+    ],
+    "schema_version": "0.2.0",
+    "status": "PASS"
+  },
+  "status": "PASS"
+}

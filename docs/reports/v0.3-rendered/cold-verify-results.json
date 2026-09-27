@@ -1,0 +1,36 @@
+{
+  "kind": "cold-evidence-verification",
+  "human_review": "PENDING",
+  "browser_file_url": {
+    "tool": "cursor-ide-browser browser_navigate",
+    "url": "file:///C:/Users/lenovo/devel/ai-game-factory/docs/reports/v0.3-rendered/landscape/index.html",
+    "result": "Security restriction: file:// URLs are not allowed",
+    "counts_as_browser_image_load": false
+  },
+  "positive": {
+    "command": "python -I verify_closeout_evidence.py verify C:\\Users\\lenovo\\devel\\gf-v03-cold-evidence",
+    "cwd": "C:\\Users\\lenovo\\devel\\gf-v03-cold-cwd",
+    "exit_code": 0,
+    "message": "PASS: evidence bundle is complete, hash-valid, and internally consistent"
+  },
+  "negatives": [
+    {
+      "case": "missing-png",
+      "change": "deleted images/landscape/cp-090.png",
+      "exit_code": 1,
+      "message": "FAIL: missing or linked required file: images/landscape/cp-090.png"
+    },
+    {
+      "case": "modified-file",
+      "change": "appended bytes to records/validation.json without updating the manifest",
+      "exit_code": 1,
+      "message": "FAIL: size/hash mismatch: records/validation.json"
+    },
+    {
+      "case": "wrong-execution",
+      "change": "relationships.execution_id set to EXEC-OTHER",
+      "exit_code": 1,
+      "message": "FAIL: observation execution/scenario identity mismatch"
+    }
+  ]
+}

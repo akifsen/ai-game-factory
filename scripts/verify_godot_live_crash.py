@@ -551,6 +551,102 @@ def _prepare_controlled_fixture(
     (dest_project / "main.gd").write_text(_CONTROLLED_MAIN_GD, encoding="utf-8", newline="\n")
 
 
+_HANDSHAKE_FUNCTION = """
+
+func _perform_handshake() -> void:
+	if not FileAccess.file_exists("res://handshake_config.json"):
+		return
+	var cfg_file := FileAccess.open("res://handshake_config.json", FileAccess.READ)
+	if cfg_file == null:
+		return
+	var text := cfg_file.get_as_text()
+	cfg_file.close()
+	var cfg: Variant = JSON.parse_string(text)
+	if typeof(cfg) != TYPE_DICTIONARY:
+		return
+	var journal_file: String = cfg.get("journal_file", "")
+	var ready_file: String = cfg.get("ready_file", "")
+	var release_file: String = cfg.get("release_file", "")
+	var token: String = str(cfg.get("token", ""))
+	var max_wait_ms: int = int(cfg.get("max_wait_ms", 25000))
+	if not journal_file.is_empty():
+		var j_file: FileAccess
+		if FileAccess.file_exists(journal_file):
+			j_file = FileAccess.open(journal_file, FileAccess.READ_WRITE)
+			if j_file != null:
+				j_file.seek_end()
+		else:
+			j_file = FileAccess.open(journal_file, FileAccess.WRITE)
+		if j_file != null:
+			j_file.store_line(JSON.stringify({
+				"pid": OS.get_process_id(),
+				"token": token,
+				"status": "LIVE",
+				"time_msec": Time.get_ticks_msec(),
+			}))
+			j_file.flush()
+			j_file.close()
+	if not ready_file.is_empty() and not FileAccess.file_exists(ready_file):
+		var out := FileAccess.open(ready_file, FileAccess.WRITE)
+		if out != null:
+			out.store_string(JSON.stringify({
+				"pid": OS.get_process_id(),
+				"token": token,
+				"status": "LIVE",
+				"time_msec": Time.get_ticks_msec(),
+			}))
+			out.flush()
+			out.close()
+	if not release_file.is_empty():
+		var deadline := Time.get_ticks_msec() + max_wait_ms
+		while Time.get_ticks_msec() < deadline:
+			if FileAccess.file_exists(release_file):
+				break
+			OS.delay_msec(20)
+"""
+
+
+def _prepare_rendered_capture_fixture(
+    source_fixture: Path,
+    dest_project: Path,
+    ready_file: Path,
+    release_file: Path,
+    journal_file: Path | None = None,
+    token: str = "",
+    max_wait_ms: int = 25000,
+) -> None:
+    """Copy the visual fixture and pause inside the first snapshot, before any PNG write."""
+    import shutil
+
+    dest_project.mkdir(parents=True, exist_ok=True)
+    ignored = shutil.ignore_patterns(".godot", ".gamefactory", ".git", "__pycache__")
+    shutil.copytree(source_fixture, dest_project, dirs_exist_ok=True, ignore=ignored)
+    if journal_file is None:
+        journal_file = ready_file.with_name("fixture-runtime-journal.jsonl")
+    if not token:
+        token = uuid.uuid4().hex
+    _write_json(
+        dest_project / "handshake_config.json",
+        {
+            "journal_file": journal_file.as_posix(),
+            "ready_file": ready_file.as_posix(),
+            "release_file": release_file.as_posix(),
+            "token": token,
+            "max_wait_ms": max_wait_ms,
+        },
+    )
+    scene = dest_project / "visual_main.gd"
+    original = scene.read_text(encoding="utf-8")
+    needle = "func verification_snapshot() -> Dictionary:\n"
+    if needle not in original:
+        raise CheckFailure("visual scene has no verification_snapshot to bind the handshake")
+    scene.write_text(
+        original.replace(needle, needle + "\t_perform_handshake()\n", 1) + _HANDSHAKE_FUNCTION,
+        encoding="utf-8",
+        newline="\n",
+    )
+
+
 # ---------------------------------------------------------------------------
 # CLI Command Execution via Test-only Entry Wrapper
 # ---------------------------------------------------------------------------
@@ -822,10 +918,21 @@ def _factory_helper(args: argparse.Namespace) -> int:
     from gamefactory.core.execution.process_runner import ProcessRunner
     from gamefactory.core.policies.policy_engine import PolicyEngine, PolicyRule
     from gamefactory.workflows.engine import WorkflowEngine
-    from gamefactory.workflows.godot_verification import (
-        create_godot_verification_workflow,
-        register_godot_handlers,
-    )
+
+    if args.rendered_capture:
+        from gamefactory.workflows.godot_capture import (
+            create_godot_capture_workflow as create_workflow,
+        )
+        from gamefactory.workflows.godot_capture import (
+            register_godot_capture_handlers as register_handlers,
+        )
+    else:
+        from gamefactory.workflows.godot_verification import (
+            create_godot_verification_workflow as create_workflow,
+        )
+        from gamefactory.workflows.godot_verification import (
+            register_godot_handlers as register_handlers,
+        )
 
     db = Database(project / ".gamefactory" / "state" / "factory.db")
     migrations = MigrationRunner(db)
@@ -848,7 +955,7 @@ def _factory_helper(args: argparse.Namespace) -> int:
 
     runner = ProcessRunner(sanitize_output=True)
     engine = WorkflowEngine(project, db, policy_engine=policy, process_runner=runner)
-    register_godot_handlers(
+    register_handlers(
         engine.handler_registry,
         project,
         engine.artifact_mgr,
@@ -859,7 +966,7 @@ def _factory_helper(args: argparse.Namespace) -> int:
         runner,
     )
 
-    workflow, tasks = create_godot_verification_workflow(
+    workflow, tasks = create_workflow(
         cfg.project.id,
         project,
         args.godot,
@@ -965,6 +1072,7 @@ def _main(args: argparse.Namespace) -> int:
             "fixture": str(fixture),
             "workspace": str(run_root),
             "timeout_seconds": args.timeout,
+            "mode": "rendered_capture" if args.rendered_capture else "headless_verification",
         },
         "source_identity": {
             "source_checkout": str(checkout),
@@ -1069,7 +1177,12 @@ def _main(args: argparse.Namespace) -> int:
         watchdog_state["release_file"] = release_file
 
         finite_bound_ms = min(int(args.timeout * 1000), 25000)
-        _prepare_controlled_fixture(
+        prepare = (
+            _prepare_rendered_capture_fixture
+            if args.rendered_capture
+            else _prepare_controlled_fixture
+        )
+        prepare(
             fixture,
             project,
             ready_file,
@@ -1095,7 +1208,7 @@ def _main(args: argparse.Namespace) -> int:
             deadline=overall_deadline,
         )
 
-        scenario = project / "scenario.json"
+        scenario = project / ("visual-scenario.json" if args.rendered_capture else "scenario.json")
         workflow_file = run_root / "workflow-info.json"
 
         # 4. Launch Factory process (the helper) in background
@@ -1114,6 +1227,8 @@ def _main(args: argparse.Namespace) -> int:
             "--marker",
             str(marker),
         ]
+        if args.rendered_capture:
+            helper_argv.append("--rendered-capture")
         factory_start_time = _now()
         factory_proc = subprocess.Popen(
             helper_argv,
@@ -1135,7 +1250,8 @@ def _main(args: argparse.Namespace) -> int:
         }
 
         # 5. Wait boundedly for Godot live handshake (polling journal and ready file)
-        supervisor_deadline = min(overall_deadline, time.monotonic() + 45.0)
+        handshake_wait = 90.0 if args.rendered_capture else 45.0
+        supervisor_deadline = min(overall_deadline, time.monotonic() + handshake_wait)
         handshake_data: dict[str, Any] = {}
         while time.monotonic() < supervisor_deadline:
             if journal_file.is_file():
@@ -1217,7 +1333,34 @@ def _main(args: argparse.Namespace) -> int:
             finally:
                 conn.close()
 
+        if args.rendered_capture and scratch.is_dir():
+            early_images = [
+                str(path.relative_to(project))
+                for path in scratch.rglob("*")
+                if path.is_file() and path.suffix.lower() in {".png", ".partial"}
+            ]
+            if early_images:
+                raise CheckFailure(
+                    f"Capture image already existed before the Factory kill: {early_images}"
+                )
+            if db_path.is_file():
+                import sqlite3
+
+                image_conn = sqlite3.connect(f"file:{db_path.as_posix()}?mode=ro", uri=True)
+                try:
+                    image_rows = image_conn.execute(
+                        "SELECT artifact_type, relative_path FROM artifacts "
+                        "WHERE artifact_type IN ('godot-capture-png', 'godot-review-html', "
+                        "'godot-capture-validation')"
+                    ).fetchall()
+                finally:
+                    image_conn.close()
+                if image_rows:
+                    raise CheckFailure(
+                        f"Capture success artifacts already recorded before the Factory kill: {image_rows}"
+                    )
         report["checks"]["pre_kill_terminal_receipt_absent"] = True
+        report["checks"]["pre_kill_capture_incomplete"] = bool(args.rendered_capture)
 
         # 8. Force-kill the separate Factory process using retained process handle
         factory_killed_at = _now()
@@ -1489,6 +1632,25 @@ def _main(args: argparse.Namespace) -> int:
             raise CheckFailure(
                 f"Expected exactly 1 runtime process launch before crash, found {len(runtime_launches)}: {runtime_launches}"
             )
+        if args.rendered_capture:
+            runtime_argv = [str(item) for item in runtime_launches[0].get("argv", [])]
+            required = ("--windowed", "--rendering-method", "gl_compatibility", "--script")
+            missing = [item for item in required if item not in runtime_argv]
+            if missing or "--headless" in runtime_argv:
+                raise CheckFailure(
+                    f"Interrupted runtime was not a windowed capture: {runtime_argv}"
+                )
+            png_artifacts = [
+                item
+                for item in post_artifacts
+                if isinstance(item, dict)
+                and item.get("artifact_type")
+                in {"godot-capture-png", "godot-review-html", "godot-capture-validation"}
+            ]
+            if png_artifacts:
+                raise CheckFailure(
+                    f"Interrupted capture published image, review, or validation artifacts: {png_artifacts}"
+                )
 
         # Check append-only fixture runtime journal
         journal_entries: list[dict[str, Any]] = []
@@ -1672,6 +1834,11 @@ def main() -> int:
     parser.add_argument("--launch-log", type=Path, help=argparse.SUPPRESS)
     parser.add_argument("--cli-exe", type=Path, help=argparse.SUPPRESS)
     parser.add_argument("--wrapper-probe", action="store_true", help=argparse.SUPPRESS)
+    parser.add_argument(
+        "--rendered-capture",
+        action="store_true",
+        help="Interrupt a live windowed capture instead of the headless verifier",
+    )
 
     args, unknown = parser.parse_known_args()
 

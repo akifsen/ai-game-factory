@@ -1,0 +1,5 @@
+renderer_request=gl_compatibility opengl3 x11
+software_rendering=LIBGL_ALWAYS_SOFTWARE=1
+note=software llvmpipe is not a hardware GPU or mobile result
+4.7.2.stable.official.ed1daf0bf
+8d106cbe6144c2dc7e881d61d2429c1a8a76e6b22ef48bd5e48dcf934953f71e  /home/runner/work/_temp/godot/Godot_v4.7.2-stable_linux.x86_64

@@ -1,0 +1,44 @@
+{
+  "execution_id": "EXEC-98f31271",
+  "files": [
+    {
+      "relative_path": "Main.tscn",
+      "sha256": "3dadaf4ca52f7e9ed19c21f47ff281f22e1ccbd1855c03e00cc517f71baf38a8",
+      "size": 161
+    },
+    {
+      "relative_path": "VisualMain.tscn",
+      "sha256": "7209330a62a0e9105c60a65bf5951315e32b9632c75a0979128d2e58fa020335",
+      "size": 278
+    },
+    {
+      "relative_path": "main.gd",
+      "sha256": "f729ffbe9c8981c3a08fd424a83eb7bc9f060ef6492e71f33c51cbe897c89b55",
+      "size": 605
+    },
+    {
+      "relative_path": "project.godot",
+      "sha256": "598a8552f3747c23baff8134218faf3d9f0013a397219f3a023b2e8984a7f30e",
+      "size": 287
+    },
+    {
+      "relative_path": "scenario.json",
+      "sha256": "4519e3c0cd2a84bf58325d271fb6ddadb002d6cee32c6c8990b345c5523d73d4",
+      "size": 1026
+    },
+    {
+      "relative_path": "visual-scenario-portrait.json",
+      "sha256": "607867ff59de532699d9b012f833af30499d312ba3932ee175519576197a70ab",
+      "size": 1285
+    },
+    {
+      "relative_path": "visual_main.gd",
+      "sha256": "d8e0fb9f896e674c51eb18338449d89f08e675fb6ab9f1c7e7d413a372a5a1c7",
+      "size": 4141
+    }
+  ],
+  "schema_version": "0.3.0",
+  "source_manifest_sha256": "ce934c6f4b2e33fa64192525f0fffb9b4c3d92d374c111c5022bfe77830b7b53",
+  "task_id": "WF-CAPTURE-09ce2ff8-EXECUTE",
+  "workflow_id": "WF-CAPTURE-09ce2ff8"
+}

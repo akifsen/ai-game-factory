@@ -229,3 +229,122 @@ def test_mixed_execution_fails_relationship_even_with_updated_hash(tmp_path):
 def test_unsafe_bundle_paths_rejected(path):
     with pytest.raises(EvidenceError):
         _safe_path(path)
+
+
+def _capture_bundle(root):
+    root = _bundle(root)
+    png = root / "images" / "cp-000.png"
+    png.parent.mkdir(parents=True, exist_ok=True)
+    png.write_bytes(b"\x89PNG\r\n\x1a\nfake")
+    png_hash = hashlib.sha256(png.read_bytes()).hexdigest()
+    validation = {
+        "status": "PASS",
+        "execution_id": "EXEC-1",
+        "images": [{"id": "cp-000", "sha256": png_hash}],
+    }
+    observation = {"execution_id": "EXEC-1", "scenario_id": "SCEN-1", "completion": "COMPLETED"}
+    val_path = root / "records" / "validation.json"
+    obs_path = root / "records" / "observation.json"
+    val_path.write_text(json.dumps(validation), encoding="utf-8")
+    obs_path.write_text(json.dumps(observation), encoding="utf-8")
+    val_hash = hashlib.sha256(val_path.read_bytes()).hexdigest()
+    obs_hash = hashlib.sha256(obs_path.read_bytes()).hexdigest()
+    inspection = {
+        "workflow": {"id": "WF-1"},
+        "tasks": [
+            {
+                "id": "EXEC-TASK",
+                "workflow_id": "WF-1",
+                "task_type": "godot_capture_execute",
+                "depends_on": [],
+            },
+            {
+                "id": "VALIDATE-TASK",
+                "workflow_id": "WF-1",
+                "task_type": "godot_capture_validate",
+                "depends_on": ["EXEC-TASK"],
+            },
+        ],
+        "executions": [{"id": "EXEC-1", "task_id": "EXEC-TASK"}],
+        "artifacts": [
+            {
+                "workflow_id": "WF-1",
+                "task_id": "EXEC-TASK",
+                "artifact_type": "godot-runtime-observation",
+                "content_hash": obs_hash,
+            },
+            {
+                "workflow_id": "WF-1",
+                "task_id": "VALIDATE-TASK",
+                "artifact_type": "godot-capture-validation",
+                "content_hash": val_hash,
+            },
+        ],
+    }
+    (root / "records" / "inspect.json").write_text(json.dumps(inspection), encoding="utf-8")
+    acceptance = {
+        "status": "PASSED",
+        "started_at": "2026-01-01T00:00:00Z",
+        "checks": {
+            "artifact_documents": {
+                "WF-1": [
+                    {
+                        "artifact": {
+                            "workflow_id": "WF-1",
+                            "task_id": "EXEC-TASK",
+                            "artifact_type": "godot-runtime-observation",
+                            "content_hash": obs_hash,
+                        }
+                    },
+                    {
+                        "artifact": {
+                            "workflow_id": "WF-1",
+                            "task_id": "VALIDATE-TASK",
+                            "artifact_type": "godot-capture-validation",
+                            "content_hash": val_hash,
+                        }
+                    },
+                ]
+            }
+        },
+        "commands": [{"json": inspection}],
+    }
+    (root / "records" / "acceptance.json").write_text(json.dumps(acceptance), encoding="utf-8")
+    manifest = json.loads((root / "manifest.json").read_text(encoding="utf-8"))
+    for row in manifest["files"]:
+        path = root / row["path"]
+        data = path.read_bytes()
+        row["size"] = len(data)
+        row["sha256"] = hashlib.sha256(data).hexdigest()
+    image_row = {
+        "path": "images/cp-000.png",
+        "role": "image",
+        "size": png.stat().st_size,
+        "sha256": png_hash,
+    }
+    manifest["files"].append(image_row)
+    (root / "manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
+    return root
+
+
+def test_capture_bundle_binds_images_and_rejects_broken_evidence(tmp_path):
+    root = _capture_bundle(tmp_path / "capture")
+    verify(root)
+
+    missing = _capture_bundle(tmp_path / "missing-png")
+    (missing / "images" / "cp-000.png").unlink()
+    with pytest.raises(EvidenceError, match="missing"):
+        verify(missing)
+
+    modified = _capture_bundle(tmp_path / "modified")
+    image = modified / "images" / "cp-000.png"
+    image.write_bytes(image.read_bytes() + b"x")
+    with pytest.raises(EvidenceError, match="hash"):
+        verify(modified)
+
+    wrong = _capture_bundle(tmp_path / "wrong-execution")
+    manifest = json.loads((wrong / "manifest.json").read_text(encoding="utf-8"))
+    manifest["relationships"]["execution_id"] = "EXEC-OTHER"
+    (wrong / "manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
+    with pytest.raises(EvidenceError, match="identity mismatch"):
+        verify(wrong)
