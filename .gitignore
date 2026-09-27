@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.venv/
+.verify-venv/
+.verification/
+build/
+dist/
+*.egg-info/
+
+# Godot generated editor/import data and local runtime files
+.godot/
+*.log
+*.tmp
+.gamefactory/state/
+.gamefactory/locks/
+.gamefactory/artifacts/
+
+# Blender backups
+*.blend1
+*.blend2

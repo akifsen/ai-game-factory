@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "started_at": "2026-09-26T23:23:20.829719+00:00",
+  "platform": "win32",
+  "commands": [
+    {
+      "argv": [
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verify-venv\\Scripts\\gamefactory.exe",
+        "--version"
+      ],
+      "exit_code": 1,
+      "stdout": "",
+      "stderr": "Traceback (most recent call last):\n  File \"<frozen runpy>\", line 198, in _run_module_as_main\n  File \"<frozen runpy>\", line 88, in _run_code\n  File \"C:\\Users\\lenovo\\devel\\ai-game-factory\\.verify-venv\\Scripts\\gamefactory.exe\\__main__.py\", line 4, in <module>\n  File \"C:\\Users\\lenovo\\devel\\ai-game-factory\\src\\gamefactory\\cli\\main.py\", line 75\n    commands = parser.add_subparsers(dest=\"command\")\nIndentationError: unexpected indent"
+    }
+  ],
+  "checks": {},
+  "status": "FAILED",
+  "failure": "AssertionError: {'argv': ['C:\\\\Users\\\\lenovo\\\\devel\\\\ai-game-factory\\\\.verify-venv\\\\Scripts\\\\gamefactory.exe', '--version'], 'exit_code': 1, 'stdout': '', 'stderr': 'Traceback (most recent call last):\\n  File \"<frozen runpy>\", line 198, in _run_module_as_main\\n  File \"<frozen runpy>\", line 88, in _run_code\\n  File \"C:\\\\Users\\\\lenovo\\\\devel\\\\ai-game-factory\\\\.verify-venv\\\\Scripts\\\\gamefactory.exe\\\\__main__.py\", line 4, in <module>\\n  File \"C:\\\\Users\\\\lenovo\\\\devel\\\\ai-game-factory\\\\src\\\\gamefactory\\\\cli\\\\main.py\", line 75\\n    commands = parser.add_subparsers(dest=\"command\")\\nIndentationError: unexpected indent'}",
+  "traceback": "Traceback (most recent call last):\n  File \"C:\\Users\\lenovo\\devel\\ai-game-factory\\scripts\\verify_acceptance.py\", line 65, in main\n    execute([cli, \"--version\"], structured=False)\n  File \"C:\\Users\\lenovo\\devel\\ai-game-factory\\scripts\\verify_acceptance.py\", line 60, in execute\n    assert proc.returncode == expected, record\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: {'argv': ['C:\\\\Users\\\\lenovo\\\\devel\\\\ai-game-factory\\\\.verify-venv\\\\Scripts\\\\gamefactory.exe', '--version'], 'exit_code': 1, 'stdout': '', 'stderr': 'Traceback (most recent call last):\\n  File \"<frozen runpy>\", line 198, in _run_module_as_main\\n  File \"<frozen runpy>\", line 88, in _run_code\\n  File \"C:\\\\Users\\\\lenovo\\\\devel\\\\ai-game-factory\\\\.verify-venv\\\\Scripts\\\\gamefactory.exe\\\\__main__.py\", line 4, in <module>\\n  File \"C:\\\\Users\\\\lenovo\\\\devel\\\\ai-game-factory\\\\src\\\\gamefactory\\\\cli\\\\main.py\", line 75\\n    commands = parser.add_subparsers(dest=\"command\")\\nIndentationError: unexpected indent'}\n",
+  "finished_at": "2026-09-26T23:23:20.920098+00:00"
+}

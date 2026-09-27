@@ -1,0 +1,701 @@
+{
+  "schema_version": 1,
+  "started_at": "2026-09-26T23:58:57.198334+00:00",
+  "platform": "win32",
+  "commands": [
+    {
+      "argv": [
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\installed-delivery-env\\Scripts\\gamefactory.exe",
+        "--version"
+      ],
+      "exit_code": 0,
+      "stdout": "gamefactory 0.1.0",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\installed-delivery-env\\Scripts\\gamefactory.exe",
+        "--help"
+      ],
+      "exit_code": 0,
+      "stdout": "usage: gamefactory [-h] [--version] [-p PROJECT] [--godot-path GODOT_PATH]\n                   [--blender-path BLENDER_PATH] [--json]\n                   {doctor,init,status,approvals,artifacts,run,resume,retry,approve,reject,inspect}\n                   ...\n\nLocal-first game development workflow orchestration\n\npositional arguments:\n  {doctor,init,status,approvals,artifacts,run,resume,retry,approve,reject,inspect}\n    run                 run a built-in demonstrator workflow\n\noptions:\n  -h, --help            show this help message and exit\n  --version             show program's version number and exit\n  -p PROJECT, --project PROJECT\n                        project directory (defaults to current directory)\n  --godot-path GODOT_PATH\n                        explicit Godot executable path\n  --blender-path BLENDER_PATH\n                        explicit Blender executable path\n  --json                emit machine-readable JSON",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\installed-delivery-env\\Scripts\\gamefactory.exe",
+        "--json",
+        "--project",
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\acceptance game 2mmp7qxl\\fixture game",
+        "--godot-path",
+        "C:\\Users\\lenovo\\devel\\godot\\Godot_v4.7.2-stable_win64.exe\\Godot_v4.7.2-stable_win64_console.exe",
+        "--blender-path",
+        "C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe",
+        "doctor"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"project_root\":\"C:\\\\Users\\\\lenovo\\\\devel\\\\ai-game-factory\\\\.verification\\\\acceptance game 2mmp7qxl\\\\fixture game\",\"configuration\":{\"status\":\"NOT_INITIALIZED\",\"project_root\":\"C:\\\\Users\\\\lenovo\\\\devel\\\\ai-game-factory\\\\.verification\\\\acceptance game 2mmp7qxl\\\\fixture game\",\"message\":\"Run 'gamefactory init' inside an existing game project.\",\"user_config\":\"DEFAULTS\"},\"storage\":{\"status\":\"OK\",\"message\":\"SQLite create, migrate, and reopen succeeded\"},\"capabilities\":{\"engine.godot.detect\":{\"name\":\"engine.godot.detect\",\"description\":\"Detect and inspect Godot executable\",\"status\":\"AVAILABLE\",\"provider\":\"godot\",\"requires_approval\":false,\"details\":{\"version\":\"4.7.2.stable.official.ed1daf0bf\",\"executable_path\":\"C:\\\\Users\\\\lenovo\\\\devel\\\\godot\\\\Godot_v4.7.2-stable_win64.exe\\\\Godot_v4.7.2-stable_win64_console.exe\",\"details\":{\"raw_version\":\"4.7.2.stable.official.ed1daf0bf\"}}},\"dcc.blender.detect\":{\"name\":\"dcc.blender.detect\",\"description\":\"Detect and inspect Blender executable\",\"status\":\"AVAILABLE\",\"provider\":\"blender\",\"requires_approval\":false,\"details\":{\"version\":\"Blender 5.2.1 LTS\",\"executable_path\":\"C:\\\\Program Files\\\\Blender Foundation\\\\Blender 5.2\\\\blender.exe\",\"details\":{\"raw_version\":\"Blender 5.2.1 LTS\"}}},\"asset.3d.meshy\":{\"name\":\"asset.3d.meshy\",\"description\":\"Meshy provider boundary (generation not implemented in V0.1)\",\"status\":\"UNAVAILABLE\",\"provider\":\"meshy\",\"requires_approval\":true,\"details\":{\"is_configured\":true,\"cost_class\":\"PAID\",\"milestone\":\"V0.1 boundary only\",\"implemented\":false}},\"workflow.dag.execute\":{\"name\":\"workflow.dag.execute\",\"description\":\"Sequential DAG workflow orchestration with state machine\",\"status\":\"AVAILABLE\",\"provider\":\"core\",\"requires_approval\":false,\"details\":{}},\"security.policy.enforce\":{\"name\":\"security.policy.enforce\",\"description\":\"Centralized cost and operation policy enforcement\",\"status\":\"AVAILABLE\",\"provider\":\"core\",\"requires_approval\":false,\"details\":{}},\"artifacts.hash.verify\":{\"name\":\"artifacts.hash.verify\",\"description\":\"Cryptographic SHA-256 artifact verification and evidence collection\",\"status\":\"AVAILABLE\",\"provider\":\"core\",\"requires_approval\":false,\"details\":{}}}}",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\installed-delivery-env\\Scripts\\gamefactory.exe",
+        "--json",
+        "--project",
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\acceptance game 2mmp7qxl\\fixture game",
+        "--godot-path",
+        "C:\\Users\\lenovo\\devel\\godot\\Godot_v4.7.2-stable_win64.exe\\Godot_v4.7.2-stable_win64_console.exe",
+        "--blender-path",
+        "C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe",
+        "init"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"project_root\":\"C:\\\\Users\\\\lenovo\\\\devel\\\\ai-game-factory\\\\.verification\\\\acceptance game 2mmp7qxl\\\\fixture game\",\"project_id\":\"factory-minimal-fixture\",\"project_name\":\"Factory Minimal Fixture\",\"already_initialized\":false,\"godot_project\":true,\"main_scene\":\"res://Main.tscn\",\"scripts\":1,\"scenes\":1,\"test_files\":0,\"exports\":false,\"git\":false,\"discovery_file\":\"C:\\\\Users\\\\lenovo\\\\devel\\\\ai-game-factory\\\\.verification\\\\acceptance game 2mmp7qxl\\\\fixture game\\\\.gamefactory\\\\discovery.json\"}",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\installed-delivery-env\\Scripts\\gamefactory.exe",
+        "--json",
+        "--project",
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\acceptance game 2mmp7qxl\\fixture game",
+        "--godot-path",
+        "C:\\Users\\lenovo\\devel\\godot\\Godot_v4.7.2-stable_win64.exe\\Godot_v4.7.2-stable_win64_console.exe",
+        "--blender-path",
+        "C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe",
+        "init"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"project_root\":\"C:\\\\Users\\\\lenovo\\\\devel\\\\ai-game-factory\\\\.verification\\\\acceptance game 2mmp7qxl\\\\fixture game\",\"project_id\":\"factory-minimal-fixture\",\"project_name\":\"Factory Minimal Fixture\",\"already_initialized\":true,\"godot_project\":true,\"main_scene\":\"res://Main.tscn\",\"scripts\":1,\"scenes\":1,\"test_files\":0,\"exports\":false,\"git\":false,\"discovery_file\":\"C:\\\\Users\\\\lenovo\\\\devel\\\\ai-game-factory\\\\.verification\\\\acceptance game 2mmp7qxl\\\\fixture game\\\\.gamefactory\\\\discovery.json\"}",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\installed-delivery-env\\Scripts\\gamefactory.exe",
+        "--json",
+        "--project",
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\acceptance game 2mmp7qxl\\fixture game",
+        "--godot-path",
+        "C:\\Users\\lenovo\\devel\\godot\\Godot_v4.7.2-stable_win64.exe\\Godot_v4.7.2-stable_win64_console.exe",
+        "--blender-path",
+        "C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe",
+        "status"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"project\":{\"id\":\"factory-minimal-fixture\",\"name\":\"Factory Minimal Fixture\",\"root\":\"C:\\\\Users\\\\lenovo\\\\devel\\\\ai-game-factory\\\\.verification\\\\acceptance game 2mmp7qxl\\\\fixture game\",\"engine\":\"godot\",\"targets\":[\"desktop\"],\"godot_project\":true,\"main_scene\":\"res://Main.tscn\"},\"capabilities\":{\"engine.godot.detect\":{\"name\":\"engine.godot.detect\",\"description\":\"Detect and inspect Godot executable\",\"status\":\"AVAILABLE\",\"provider\":\"godot\",\"requires_approval\":false,\"details\":{\"version\":\"4.7.2.stable.official.ed1daf0bf\",\"executable_path\":\"C:\\\\Users\\\\lenovo\\\\devel\\\\godot\\\\Godot_v4.7.2-stable_win64.exe\\\\Godot_v4.7.2-stable_win64_console.exe\",\"details\":{\"raw_version\":\"4.7.2.stable.official.ed1daf0bf\"}}},\"dcc.blender.detect\":{\"name\":\"dcc.blender.detect\",\"description\":\"Detect and inspect Blender executable\",\"status\":\"AVAILABLE\",\"provider\":\"blender\",\"requires_approval\":false,\"details\":{\"version\":\"Blender 5.2.1 LTS\",\"executable_path\":\"C:\\\\Program Files\\\\Blender Foundation\\\\Blender 5.2\\\\blender.exe\",\"details\":{\"raw_version\":\"Blender 5.2.1 LTS\"}}},\"asset.3d.meshy\":{\"name\":\"asset.3d.meshy\",\"description\":\"Meshy provider boundary (generation not implemented in V0.1)\",\"status\":\"UNAVAILABLE\",\"provider\":\"meshy\",\"requires_approval\":true,\"details\":{\"is_configured\":true,\"cost_class\":\"PAID\",\"milestone\":\"V0.1 boundary only\",\"implemented\":false}},\"workflow.dag.execute\":{\"name\":\"workflow.dag.execute\",\"description\":\"Sequential DAG workflow orchestration with state machine\",\"status\":\"AVAILABLE\",\"provider\":\"core\",\"requires_approval\":false,\"details\":{}},\"security.policy.enforce\":{\"name\":\"security.policy.enforce\",\"description\":\"Centralized cost and operation policy enforcement\",\"status\":\"AVAILABLE\",\"provider\":\"core\",\"requires_approval\":false,\"details\":{}},\"artifacts.hash.verify\":{\"name\":\"artifacts.hash.verify\",\"description\":\"Cryptographic SHA-256 artifact verification and evidence collection\",\"status\":\"AVAILABLE\",\"provider\":\"core\",\"requires_approval\":false,\"details\":{}}},\"workflows\":[],\"pending_approvals\":[],\"recent_executions\":[]}",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\installed-delivery-env\\Scripts\\gamefactory.exe",
+        "--json",
+        "--project",
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\acceptance game 2mmp7qxl\\fixture game",
+        "--godot-path",
+        "C:\\Users\\lenovo\\devel\\godot\\Godot_v4.7.2-stable_win64.exe\\Godot_v4.7.2-stable_win64_console.exe",
+        "--blender-path",
+        "C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe",
+        "approvals"
+      ],
+      "exit_code": 0,
+      "stdout": "[]",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\installed-delivery-env\\Scripts\\gamefactory.exe",
+        "--json",
+        "--project",
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\acceptance game 2mmp7qxl\\fixture game",
+        "--godot-path",
+        "C:\\Users\\lenovo\\devel\\godot\\Godot_v4.7.2-stable_win64.exe\\Godot_v4.7.2-stable_win64_console.exe",
+        "--blender-path",
+        "C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe",
+        "run",
+        "demo"
+      ],
+      "exit_code": 3,
+      "stdout": "{\"workflow_id\":\"WF-DEMO-d8585eed\",\"status\":\"BLOCKED\",\"pending_approval_id\":\"APP-82383e3e\",\"completed_tasks\":[],\"failed_tasks\":[],\"blocked_tasks\":[\"WF-DEMO-d8585eed-T4\"],\"error_message\":null}",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\installed-delivery-env\\Scripts\\gamefactory.exe",
+        "--json",
+        "--project",
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\acceptance game 2mmp7qxl\\fixture game",
+        "--godot-path",
+        "C:\\Users\\lenovo\\devel\\godot\\Godot_v4.7.2-stable_win64.exe\\Godot_v4.7.2-stable_win64_console.exe",
+        "--blender-path",
+        "C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe",
+        "inspect",
+        "WF-DEMO-d8585eed"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"workflow\":{\"id\":\"WF-DEMO-d8585eed\",\"project_id\":\"factory-minimal-fixture\",\"name\":\"Demo End-to-End Workflow\",\"status\":\"BLOCKED\",\"created_at\":\"2026-09-26T23:59:00.373896+00:00\",\"updated_at\":\"2026-09-26T23:59:00.624083+00:00\"},\"tasks\":[{\"id\":\"WF-DEMO-d8585eed-T1\",\"workflow_id\":\"WF-DEMO-d8585eed\",\"name\":\"Inspect Project Structure\",\"task_type\":\"inspect_project\",\"cost_class\":\"LOCAL\",\"depends_on\":[],\"status\":\"COMPLETED\",\"parameters\":{},\"max_retries\":1,\"timeout_seconds\":60.0,\"created_at\":\"2026-09-26T23:59:00.373896+00:00\",\"updated_at\":\"2026-09-26T23:59:00.474184+00:00\"},{\"id\":\"WF-DEMO-d8585eed-T2\",\"workflow_id\":\"WF-DEMO-d8585eed\",\"name\":\"Generate Asset Concept\",\"task_type\":\"generate_concept\",\"cost_class\":\"LOCAL\",\"depends_on\":[\"WF-DEMO-d8585eed-T1\"],\"status\":\"COMPLETED\",\"parameters\":{\"concept_name\":\"Heavy Mech Enemy\",\"poly_budget\":15000},\"max_retries\":1,\"timeout_seconds\":60.0,\"created_at\":\"2026-09-26T23:59:00.373896+00:00\",\"updated_at\":\"2026-09-26T23:59:00.532168+00:00\"},{\"id\":\"WF-DEMO-d8585eed-T3\",\"workflow_id\":\"WF-DEMO-d8585eed\",\"name\":\"Validate Concept Artifact\",\"task_type\":\"validate_artifact\",\"cost_class\":\"LOCAL\",\"depends_on\":[\"WF-DEMO-d8585eed-T2\"],\"status\":\"COMPLETED\",\"parameters\":{},\"max_retries\":1,\"timeout_seconds\":60.0,\"created_at\":\"2026-09-26T23:59:00.373896+00:00\",\"updated_at\":\"2026-09-26T23:59:00.582272+00:00\"},{\"id\":\"WF-DEMO-d8585eed-T4\",\"workflow_id\":\"WF-DEMO-d8585eed\",\"name\":\"Paid 3D Asset Generation\",\"task_type\":\"paid_generation\",\"cost_class\":\"PAID\",\"depends_on\":[\"WF-DEMO-d8585eed-T3\"],\"status\":\"BLOCKED\",\"parameters\":{\"prompt\":\"Heavy Mech Enemy 3D Model\",\"format\":\"glb\",\"cost\":5.0,\"cost_unit\":\"fake_credits\"},\"max_retries\":1,\"timeout_seconds\":60.0,\"created_at\":\"2026-09-26T23:59:00.373896+00:00\",\"updated_at\":\"2026-09-26T23:59:00.616401+00:00\"},{\"id\":\"WF-DEMO-d8585eed-T5\",\"workflow_id\":\"WF-DEMO-d8585eed\",\"name\":\"Controlled Subprocess Execution\",\"task_type\":\"controlled_command\",\"cost_class\":\"LOCAL\",\"depends_on\":[\"WF-DEMO-d8585eed-T4\"],\"status\":\"PENDING\",\"parameters\":{},\"max_retries\":1,\"timeout_seconds\":60.0,\"created_at\":\"2026-09-26T23:59:00.373896+00:00\",\"updated_at\":\"2026-09-26T23:59:00.373896+00:00\"},{\"id\":\"WF-DEMO-d8585eed-T6\",\"workflow_id\":\"WF-DEMO-d8585eed\",\"name\":\"Record Evidence & Quality Gate\",\"task_type\":\"record_evidence\",\"cost_class\":\"LOCAL\",\"depends_on\":[\"WF-DEMO-d8585eed-T5\"],\"status\":\"PENDING\",\"parameters\":{},\"max_retries\":1,\"timeout_seconds\":60.0,\"created_at\":\"2026-09-26T23:59:00.373896+00:00\",\"updated_at\":\"2026-09-26T23:59:00.373896+00:00\"}],\"executions\":[{\"id\":\"EXEC-f37b65d1\",\"task_id\":\"WF-DEMO-d8585eed-T1\",\"attempt_number\":1,\"status\":\"COMPLETED\",\"started_at\":\"2026-09-26T23:59:00.412469+00:00\",\"completed_at\":\"2026-09-26T23:59:00.467848+00:00\",\"external_op_id\":null,\"pid\":null,\"host\":null,\"error_message\":null,\"exit_code\":null,\"stdout\":\"Inspected project structure successfully\",\"stderr\":null,\"cost\":0.0,\"estimated_cost\":0.0,\"cost_unit\":\"provider_units\",\"provider\":null,\"retryable\":false},{\"id\":\"EXEC-6973f652\",\"task_id\":\"WF-DEMO-d8585eed-T2\",\"attempt_number\":1,\"status\":\"COMPLETED\",\"started_at\":\"2026-09-26T23:59:00.497799+00:00\",\"completed_at\":\"2026-09-26T23:59:00.530159+00:00\",\"external_op_id\":null,\"pid\":null,\"host\":null,\"error_message\":null,\"exit_code\":null,\"stdout\":\"Generated concept specification for Heavy Mech Enemy\",\"stderr\":null,\"cost\":0.0,\"estimated_cost\":0.0,\"cost_unit\":\"provider_units\",\"provider\":null,\"retryable\":false},{\"id\":\"EXEC-1120f8e8\",\"task_id\":\"WF-DEMO-d8585eed-T3\",\"attempt_number\":1,\"status\":\"COMPLETED\",\"started_at\":\"2026-09-26T23:59:00.556959+00:00\",\"completed_at\":\"2026-09-26T23:59:00.582272+00:00\",\"external_op_id\":null,\"pid\":null,\"host\":null,\"error_message\":null,\"exit_code\":null,\"stdout\":\"Found 1 concept specification artifact(s) for engine validation\",\"stderr\":null,\"cost\":0.0,\"estimated_cost\":0.0,\"cost_unit\":\"provider_units\",\"provider\":null,\"retryable\":false}],\"artifacts\":[{\"id\":\"ART-66358cea\",\"workflow_id\":\"WF-DEMO-d8585eed\",\"task_id\":\"WF-DEMO-d8585eed-T1\",\"artifact_type\":\"inspection_report\",\"producer\":\"DemoProjectInspector\",\"relative_path\":\".gamefactory/artifacts/WF-DEMO-d8585eed/WF-DEMO-d8585eed-T1/attempt-1/inspection.md\",\"content_hash\":\"1538e57dea7dd6eff129d95a9765c18a59033042092a05321d9ee4e63dceca41\",\"file_size\":164,\"validation_state\":\"VALID\",\"created_at\":\"2026-09-26T23:59:00.440079+00:00\"},{\"id\":\"ART-4c3ab380\",\"workflow_id\":\"WF-DEMO-d8585eed\",\"task_id\":\"WF-DEMO-d8585eed-T2\",\"artifact_type\":\"concept_spec\",\"producer\":\"DemoConceptSpecGenerator\",\"relative_path\":\".gamefactory/artifacts/WF-DEMO-d8585eed/WF-DEMO-d8585eed-T2/attempt-1/concept.md\",\"content_hash\":\"f2804df3df95c8a5e15fc8b6cd8dce75956161947e7e25a8ccf808f4a80ec359\",\"file_size\":67,\"validation_state\":\"VALID\",\"created_at\":\"2026-09-26T23:59:00.507410+00:00\"}],\"evidence\":[{\"id\":\"EVI-14ccc16d\",\"task_id\":\"WF-DEMO-d8585eed-T1\",\"execution_id\":\"EXEC-f37b65d1\",\"evidence_type\":\"execution:inspect_project\",\"summary\":\"Task output artifact registered\",\"raw_data\":{\"schema_version\":1,\"gate_id\":\"GATE-64139f55\",\"artifacts\":[{\"artifact_id\":\"ART-66358cea\",\"status\":\"VERIFIED\",\"content_hash\":\"1538e57dea7dd6eff129d95a9765c18a59033042092a05321d9ee4e63dceca41\",\"file_size\":164}]},\"created_at\":\"2026-09-26T23:59:00.464614+00:00\"},{\"id\":\"EVI-ebf3bf90\",\"task_id\":\"WF-DEMO-d8585eed-T2\",\"execution_id\":\"EXEC-6973f652\",\"evidence_type\":\"execution:generate_concept\",\"summary\":\"Task output artifact registered\",\"raw_data\":{\"schema_version\":1,\"gate_id\":\"GATE-86b2ed3b\",\"artifacts\":[{\"artifact_id\":\"ART-4c3ab380\",\"status\":\"VERIFIED\",\"content_hash\":\"f2804df3df95c8a5e15fc8b6cd8dce75956161947e7e25a8ccf808f4a80ec359\",\"file_size\":67}]},\"created_at\":\"2026-09-26T23:59:00.523196+00:00\"},{\"id\":\"EVI-0dd00d28\",\"task_id\":\"WF-DEMO-d8585eed-T3\",\"execution_id\":\"EXEC-1120f8e8\",\"evidence_type\":\"execution:validate_artifact\",\"summary\":\"Concept specification artifacts selected for validation\",\"raw_data\":{\"schema_version\":1,\"gate_id\":\"GATE-619a6869\",\"artifacts\":[{\"artifact_id\":\"ART-4c3ab380\",\"status\":\"VERIFIED\",\"content_hash\":\"f2804df3df95c8a5e15fc8b6cd8dce75956161947e7e25a8ccf808f4a80ec359\",\"file_size\":67}]},\"created_at\":\"2026-09-26T23:59:00.574139+00:00\"}],\"gates\":[{\"id\":\"GATE-64139f55\",\"task_id\":\"WF-DEMO-d8585eed-T1\",\"gate_type\":\"result:inspect_project\",\"status\":\"PASSED\",\"evaluated_at\":\"2026-09-26T23:59:00.453604+00:00\",\"reason\":\"Execution output passed its registered deterministic result validator\"},{\"id\":\"GATE-86b2ed3b\",\"task_id\":\"WF-DEMO-d8585eed-T2\",\"gate_type\":\"result:generate_concept\",\"status\":\"PASSED\",\"evaluated_at\":\"2026-09-26T23:59:00.511860+00:00\",\"reason\":\"Execution output passed its registered deterministic result validator\"},{\"id\":\"GATE-619a6869\",\"task_id\":\"WF-DEMO-d8585eed-T3\",\"gate_type\":\"result:validate_artifact\",\"status\":\"PASSED\",\"evaluated_at\":\"2026-09-26T23:59:00.566110+00:00\",\"reason\":\"Execution output passed its registered deterministic result validator\"}],\"approvals\":[{\"id\":\"APP-82383e3e\",\"workflow_id\":\"WF-DEMO-d8585eed\",\"task_id\":\"WF-DEMO-d8585eed-T4\",\"approval_type\":\"paid_generation\",\"status\":\"PENDING\",\"reason\":\"Paid external operation requires human approval per cost safety policy\",\"cost_class\":\"PAID\",\"operation_hash\":\"75bace5c3d183c2bf722ef4c097796ccbe2371b5d2505262bb81e7ba8f5619ac\",\"actor\":null,\"comment\":null,\"requested_at\":\"2026-09-26T23:59:00.608008+00:00\",\"decided_at\":null,\"artifact_ids\":[\"ART-66358cea\",\"ART-4c3ab380\"]}],\"paid_provider_invocations\":0}",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\installed-delivery-env\\Scripts\\gamefactory.exe",
+        "--json",
+        "--project",
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\acceptance game 2mmp7qxl\\fixture game",
+        "--godot-path",
+        "C:\\Users\\lenovo\\devel\\godot\\Godot_v4.7.2-stable_win64.exe\\Godot_v4.7.2-stable_win64_console.exe",
+        "--blender-path",
+        "C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe",
+        "approvals",
+        "--workflow",
+        "WF-DEMO-d8585eed"
+      ],
+      "exit_code": 0,
+      "stdout": "[{\"id\":\"APP-82383e3e\",\"workflow_id\":\"WF-DEMO-d8585eed\",\"task_id\":\"WF-DEMO-d8585eed-T4\",\"approval_type\":\"paid_generation\",\"status\":\"PENDING\",\"reason\":\"Paid external operation requires human approval per cost safety policy\",\"cost_class\":\"PAID\",\"operation_hash\":\"75bace5c3d183c2bf722ef4c097796ccbe2371b5d2505262bb81e7ba8f5619ac\",\"actor\":null,\"comment\":null,\"requested_at\":\"2026-09-26T23:59:00.608008+00:00\",\"decided_at\":null,\"artifact_ids\":[\"ART-66358cea\",\"ART-4c3ab380\"]}]",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\installed-delivery-env\\Scripts\\gamefactory.exe",
+        "--json",
+        "--project",
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\acceptance game 2mmp7qxl\\fixture game",
+        "--godot-path",
+        "C:\\Users\\lenovo\\devel\\godot\\Godot_v4.7.2-stable_win64.exe\\Godot_v4.7.2-stable_win64_console.exe",
+        "--blender-path",
+        "C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe",
+        "approve",
+        "APP-82383e3e",
+        "--comment",
+        "Explicit acceptance decision: deterministic fake provider only"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"id\":\"APP-82383e3e\",\"workflow_id\":\"WF-DEMO-d8585eed\",\"task_id\":\"WF-DEMO-d8585eed-T4\",\"approval_type\":\"paid_generation\",\"status\":\"APPROVED\",\"reason\":\"Paid external operation requires human approval per cost safety policy\",\"cost_class\":\"PAID\",\"operation_hash\":\"75bace5c3d183c2bf722ef4c097796ccbe2371b5d2505262bb81e7ba8f5619ac\",\"actor\":\"lenovo\",\"comment\":\"Explicit acceptance decision: deterministic fake provider only\",\"requested_at\":\"2026-09-26T23:59:00.608008+00:00\",\"decided_at\":\"2026-09-26T23:59:01.650378+00:00\",\"artifact_ids\":[\"ART-66358cea\",\"ART-4c3ab380\"]}",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\installed-delivery-env\\Scripts\\gamefactory.exe",
+        "--json",
+        "--project",
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\acceptance game 2mmp7qxl\\fixture game",
+        "--godot-path",
+        "C:\\Users\\lenovo\\devel\\godot\\Godot_v4.7.2-stable_win64.exe\\Godot_v4.7.2-stable_win64_console.exe",
+        "--blender-path",
+        "C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe",
+        "resume",
+        "WF-DEMO-d8585eed"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"workflow_id\":\"WF-DEMO-d8585eed\",\"status\":\"COMPLETED\",\"pending_approval_id\":null,\"completed_tasks\":[\"WF-DEMO-d8585eed-T6\",\"WF-DEMO-d8585eed-T2\",\"WF-DEMO-d8585eed-T5\",\"WF-DEMO-d8585eed-T1\",\"WF-DEMO-d8585eed-T3\",\"WF-DEMO-d8585eed-T4\"],\"failed_tasks\":[],\"blocked_tasks\":[],\"error_message\":null}",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\installed-delivery-env\\Scripts\\gamefactory.exe",
+        "--json",
+        "--project",
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\acceptance game 2mmp7qxl\\fixture game",
+        "--godot-path",
+        "C:\\Users\\lenovo\\devel\\godot\\Godot_v4.7.2-stable_win64.exe\\Godot_v4.7.2-stable_win64_console.exe",
+        "--blender-path",
+        "C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe",
+        "inspect",
+        "WF-DEMO-d8585eed"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"workflow\":{\"id\":\"WF-DEMO-d8585eed\",\"project_id\":\"factory-minimal-fixture\",\"name\":\"Demo End-to-End Workflow\",\"status\":\"COMPLETED\",\"created_at\":\"2026-09-26T23:59:00.373896+00:00\",\"updated_at\":\"2026-09-26T23:59:02.229399+00:00\"},\"tasks\":[{\"id\":\"WF-DEMO-d8585eed-T1\",\"workflow_id\":\"WF-DEMO-d8585eed\",\"name\":\"Inspect Project Structure\",\"task_type\":\"inspect_project\",\"cost_class\":\"LOCAL\",\"depends_on\":[],\"status\":\"COMPLETED\",\"parameters\":{},\"max_retries\":1,\"timeout_seconds\":60.0,\"created_at\":\"2026-09-26T23:59:00.373896+00:00\",\"updated_at\":\"2026-09-26T23:59:00.474184+00:00\"},{\"id\":\"WF-DEMO-d8585eed-T2\",\"workflow_id\":\"WF-DEMO-d8585eed\",\"name\":\"Generate Asset Concept\",\"task_type\":\"generate_concept\",\"cost_class\":\"LOCAL\",\"depends_on\":[\"WF-DEMO-d8585eed-T1\"],\"status\":\"COMPLETED\",\"parameters\":{\"concept_name\":\"Heavy Mech Enemy\",\"poly_budget\":15000},\"max_retries\":1,\"timeout_seconds\":60.0,\"created_at\":\"2026-09-26T23:59:00.373896+00:00\",\"updated_at\":\"2026-09-26T23:59:00.532168+00:00\"},{\"id\":\"WF-DEMO-d8585eed-T3\",\"workflow_id\":\"WF-DEMO-d8585eed\",\"name\":\"Validate Concept Artifact\",\"task_type\":\"validate_artifact\",\"cost_class\":\"LOCAL\",\"depends_on\":[\"WF-DEMO-d8585eed-T2\"],\"status\":\"COMPLETED\",\"parameters\":{},\"max_retries\":1,\"timeout_seconds\":60.0,\"created_at\":\"2026-09-26T23:59:00.373896+00:00\",\"updated_at\":\"2026-09-26T23:59:00.582272+00:00\"},{\"id\":\"WF-DEMO-d8585eed-T4\",\"workflow_id\":\"WF-DEMO-d8585eed\",\"name\":\"Paid 3D Asset Generation\",\"task_type\":\"paid_generation\",\"cost_class\":\"PAID\",\"depends_on\":[\"WF-DEMO-d8585eed-T3\"],\"status\":\"COMPLETED\",\"parameters\":{\"prompt\":\"Heavy Mech Enemy 3D Model\",\"format\":\"glb\",\"cost\":5.0,\"cost_unit\":\"fake_credits\"},\"max_retries\":1,\"timeout_seconds\":60.0,\"created_at\":\"2026-09-26T23:59:00.373896+00:00\",\"updated_at\":\"2026-09-26T23:59:02.061965+00:00\"},{\"id\":\"WF-DEMO-d8585eed-T5\",\"workflow_id\":\"WF-DEMO-d8585eed\",\"name\":\"Controlled Subprocess Execution\",\"task_type\":\"controlled_command\",\"cost_class\":\"LOCAL\",\"depends_on\":[\"WF-DEMO-d8585eed-T4\"],\"status\":\"COMPLETED\",\"parameters\":{},\"max_retries\":1,\"timeout_seconds\":60.0,\"created_at\":\"2026-09-26T23:59:00.373896+00:00\",\"updated_at\":\"2026-09-26T23:59:02.163291+00:00\"},{\"id\":\"WF-DEMO-d8585eed-T6\",\"workflow_id\":\"WF-DEMO-d8585eed\",\"name\":\"Record Evidence & Quality Gate\",\"task_type\":\"record_evidence\",\"cost_class\":\"LOCAL\",\"depends_on\":[\"WF-DEMO-d8585eed-T5\"],\"status\":\"COMPLETED\",\"parameters\":{},\"max_retries\":1,\"timeout_seconds\":60.0,\"created_at\":\"2026-09-26T23:59:00.373896+00:00\",\"updated_at\":\"2026-09-26T23:59:02.220397+00:00\"}],\"executions\":[{\"id\":\"EXEC-f37b65d1\",\"task_id\":\"WF-DEMO-d8585eed-T1\",\"attempt_number\":1,\"status\":\"COMPLETED\",\"started_at\":\"2026-09-26T23:59:00.412469+00:00\",\"completed_at\":\"2026-09-26T23:59:00.467848+00:00\",\"external_op_id\":null,\"pid\":null,\"host\":null,\"error_message\":null,\"exit_code\":null,\"stdout\":\"Inspected project structure successfully\",\"stderr\":null,\"cost\":0.0,\"estimated_cost\":0.0,\"cost_unit\":\"provider_units\",\"provider\":null,\"retryable\":false},{\"id\":\"EXEC-6973f652\",\"task_id\":\"WF-DEMO-d8585eed-T2\",\"attempt_number\":1,\"status\":\"COMPLETED\",\"started_at\":\"2026-09-26T23:59:00.497799+00:00\",\"completed_at\":\"2026-09-26T23:59:00.530159+00:00\",\"external_op_id\":null,\"pid\":null,\"host\":null,\"error_message\":null,\"exit_code\":null,\"stdout\":\"Generated concept specification for Heavy Mech Enemy\",\"stderr\":null,\"cost\":0.0,\"estimated_cost\":0.0,\"cost_unit\":\"provider_units\",\"provider\":null,\"retryable\":false},{\"id\":\"EXEC-1120f8e8\",\"task_id\":\"WF-DEMO-d8585eed-T3\",\"attempt_number\":1,\"status\":\"COMPLETED\",\"started_at\":\"2026-09-26T23:59:00.556959+00:00\",\"completed_at\":\"2026-09-26T23:59:00.582272+00:00\",\"external_op_id\":null,\"pid\":null,\"host\":null,\"error_message\":null,\"exit_code\":null,\"stdout\":\"Found 1 concept specification artifact(s) for engine validation\",\"stderr\":null,\"cost\":0.0,\"estimated_cost\":0.0,\"cost_unit\":\"provider_units\",\"provider\":null,\"retryable\":false},{\"id\":\"EXEC-ef897ebb\",\"task_id\":\"WF-DEMO-d8585eed-T4\",\"attempt_number\":1,\"status\":\"COMPLETED\",\"started_at\":\"2026-09-26T23:59:02.018881+00:00\",\"completed_at\":\"2026-09-26T23:59:02.053701+00:00\",\"external_op_id\":\"FAKE-OP-0001\",\"pid\":null,\"host\":null,\"error_message\":null,\"exit_code\":null,\"stdout\":\"Generated asset with operation ID FAKE-OP-0001\",\"stderr\":null,\"cost\":5.0,\"estimated_cost\":5.0,\"cost_unit\":\"fake_credits\",\"provider\":\"fake_asset_gen\",\"retryable\":false},{\"id\":\"EXEC-952b6bff\",\"task_id\":\"WF-DEMO-d8585eed-T5\",\"attempt_number\":1,\"status\":\"COMPLETED\",\"started_at\":\"2026-09-26T23:59:02.086964+00:00\",\"completed_at\":\"2026-09-26T23:59:02.157680+00:00\",\"external_op_id\":null,\"pid\":null,\"host\":null,\"error_message\":null,\"exit_code\":0,\"stdout\":\"Controlled execution completed successfully\\r\\n\",\"stderr\":\"\",\"cost\":0.0,\"estimated_cost\":0.0,\"cost_unit\":\"provider_units\",\"provider\":null,\"retryable\":false},{\"id\":\"EXEC-7972e59c\",\"task_id\":\"WF-DEMO-d8585eed-T6\",\"attempt_number\":1,\"status\":\"COMPLETED\",\"started_at\":\"2026-09-26T23:59:02.189322+00:00\",\"completed_at\":\"2026-09-26T23:59:02.219396+00:00\",\"external_op_id\":null,\"pid\":null,\"host\":null,\"error_message\":null,\"exit_code\":null,\"stdout\":\"Requested independent verification of registered workflow artifacts\",\"stderr\":null,\"cost\":0.0,\"estimated_cost\":0.0,\"cost_unit\":\"provider_units\",\"provider\":null,\"retryable\":false}],\"artifacts\":[{\"id\":\"ART-66358cea\",\"workflow_id\":\"WF-DEMO-d8585eed\",\"task_id\":\"WF-DEMO-d8585eed-T1\",\"artifact_type\":\"inspection_report\",\"producer\":\"DemoProjectInspector\",\"relative_path\":\".gamefactory/artifacts/WF-DEMO-d8585eed/WF-DEMO-d8585eed-T1/attempt-1/inspection.md\",\"content_hash\":\"1538e57dea7dd6eff129d95a9765c18a59033042092a05321d9ee4e63dceca41\",\"file_size\":164,\"validation_state\":\"VALID\",\"created_at\":\"2026-09-26T23:59:00.440079+00:00\"},{\"id\":\"ART-4c3ab380\",\"workflow_id\":\"WF-DEMO-d8585eed\",\"task_id\":\"WF-DEMO-d8585eed-T2\",\"artifact_type\":\"concept_spec\",\"producer\":\"DemoConceptSpecGenerator\",\"relative_path\":\".gamefactory/artifacts/WF-DEMO-d8585eed/WF-DEMO-d8585eed-T2/attempt-1/concept.md\",\"content_hash\":\"f2804df3df95c8a5e15fc8b6cd8dce75956161947e7e25a8ccf808f4a80ec359\",\"file_size\":67,\"validation_state\":\"VALID\",\"created_at\":\"2026-09-26T23:59:00.507410+00:00\"},{\"id\":\"ART-830174c0\",\"workflow_id\":\"WF-DEMO-d8585eed\",\"task_id\":\"WF-DEMO-d8585eed-T4\",\"artifact_type\":\"model_3d\",\"producer\":\"fake_asset_gen\",\"relative_path\":\".gamefactory/artifacts/WF-DEMO-d8585eed/WF-DEMO-d8585eed-T4/attempt-1.glb\",\"content_hash\":\"7823ddfc1d53f8c7b6c47a751e0cc9e609f1fdb4a3804a675016addb5fc1a0fd\",\"file_size\":36,\"validation_state\":\"VALID\",\"created_at\":\"2026-09-26T23:59:02.036923+00:00\"}],\"evidence\":[{\"id\":\"EVI-14ccc16d\",\"task_id\":\"WF-DEMO-d8585eed-T1\",\"execution_id\":\"EXEC-f37b65d1\",\"evidence_type\":\"execution:inspect_project\",\"summary\":\"Task output artifact registered\",\"raw_data\":{\"schema_version\":1,\"gate_id\":\"GATE-64139f55\",\"artifacts\":[{\"artifact_id\":\"ART-66358cea\",\"status\":\"VERIFIED\",\"content_hash\":\"1538e57dea7dd6eff129d95a9765c18a59033042092a05321d9ee4e63dceca41\",\"file_size\":164}]},\"created_at\":\"2026-09-26T23:59:00.464614+00:00\"},{\"id\":\"EVI-ebf3bf90\",\"task_id\":\"WF-DEMO-d8585eed-T2\",\"execution_id\":\"EXEC-6973f652\",\"evidence_type\":\"execution:generate_concept\",\"summary\":\"Task output artifact registered\",\"raw_data\":{\"schema_version\":1,\"gate_id\":\"GATE-86b2ed3b\",\"artifacts\":[{\"artifact_id\":\"ART-4c3ab380\",\"status\":\"VERIFIED\",\"content_hash\":\"f2804df3df95c8a5e15fc8b6cd8dce75956161947e7e25a8ccf808f4a80ec359\",\"file_size\":67}]},\"created_at\":\"2026-09-26T23:59:00.523196+00:00\"},{\"id\":\"EVI-0dd00d28\",\"task_id\":\"WF-DEMO-d8585eed-T3\",\"execution_id\":\"EXEC-1120f8e8\",\"evidence_type\":\"execution:validate_artifact\",\"summary\":\"Concept specification artifacts selected for validation\",\"raw_data\":{\"schema_version\":1,\"gate_id\":\"GATE-619a6869\",\"artifacts\":[{\"artifact_id\":\"ART-4c3ab380\",\"status\":\"VERIFIED\",\"content_hash\":\"f2804df3df95c8a5e15fc8b6cd8dce75956161947e7e25a8ccf808f4a80ec359\",\"file_size\":67}]},\"created_at\":\"2026-09-26T23:59:00.574139+00:00\"},{\"id\":\"EVI-da07f143\",\"task_id\":\"WF-DEMO-d8585eed-T4\",\"execution_id\":\"EXEC-ef897ebb\",\"evidence_type\":\"execution:paid_generation\",\"summary\":\"Task output artifact registered\",\"raw_data\":{\"schema_version\":1,\"gate_id\":\"GATE-1b585cf9\",\"artifacts\":[{\"artifact_id\":\"ART-830174c0\",\"status\":\"VERIFIED\",\"content_hash\":\"7823ddfc1d53f8c7b6c47a751e0cc9e609f1fdb4a3804a675016addb5fc1a0fd\",\"file_size\":36}]},\"created_at\":\"2026-09-26T23:59:02.053701+00:00\"},{\"id\":\"EVI-f504c9ea\",\"task_id\":\"WF-DEMO-d8585eed-T5\",\"execution_id\":\"EXEC-952b6bff\",\"evidence_type\":\"execution:controlled_command\",\"summary\":\"Controlled process exited successfully\",\"raw_data\":{\"schema_version\":1,\"gate_id\":\"GATE-6672d657\",\"artifacts\":[],\"exit_code\":0,\"stdout\":\"Controlled execution completed successfully\\r\\n\"},\"created_at\":\"2026-09-26T23:59:02.153680+00:00\"},{\"id\":\"EVI-b64c6a3a\",\"task_id\":\"WF-DEMO-d8585eed-T6\",\"execution_id\":\"EXEC-7972e59c\",\"evidence_type\":\"validation_report\",\"summary\":\"All workflow artifacts passed SHA-256 verification\",\"raw_data\":{\"gate_id\":\"GATE-91916262\",\"artifacts\":[{\"artifact_id\":\"ART-66358cea\",\"status\":\"VERIFIED\",\"content_hash\":\"1538e57dea7dd6eff129d95a9765c18a59033042092a05321d9ee4e63dceca41\",\"file_size\":164},{\"artifact_id\":\"ART-4c3ab380\",\"status\":\"VERIFIED\",\"content_hash\":\"f2804df3df95c8a5e15fc8b6cd8dce75956161947e7e25a8ccf808f4a80ec359\",\"file_size\":67},{\"artifact_id\":\"ART-830174c0\",\"status\":\"VERIFIED\",\"content_hash\":\"7823ddfc1d53f8c7b6c47a751e0cc9e609f1fdb4a3804a675016addb5fc1a0fd\",\"file_size\":36}]},\"created_at\":\"2026-09-26T23:59:02.206397+00:00\"}],\"gates\":[{\"id\":\"GATE-64139f55\",\"task_id\":\"WF-DEMO-d8585eed-T1\",\"gate_type\":\"result:inspect_project\",\"status\":\"PASSED\",\"evaluated_at\":\"2026-09-26T23:59:00.453604+00:00\",\"reason\":\"Execution output passed its registered deterministic result validator\"},{\"id\":\"GATE-86b2ed3b\",\"task_id\":\"WF-DEMO-d8585eed-T2\",\"gate_type\":\"result:generate_concept\",\"status\":\"PASSED\",\"evaluated_at\":\"2026-09-26T23:59:00.511860+00:00\",\"reason\":\"Execution output passed its registered deterministic result validator\"},{\"id\":\"GATE-619a6869\",\"task_id\":\"WF-DEMO-d8585eed-T3\",\"gate_type\":\"result:validate_artifact\",\"status\":\"PASSED\",\"evaluated_at\":\"2026-09-26T23:59:00.566110+00:00\",\"reason\":\"Execution output passed its registered deterministic result validator\"},{\"id\":\"GATE-1b585cf9\",\"task_id\":\"WF-DEMO-d8585eed-T4\",\"gate_type\":\"result:paid_generation\",\"status\":\"PASSED\",\"evaluated_at\":\"2026-09-26T23:59:02.048469+00:00\",\"reason\":\"Execution output passed its registered deterministic result validator\"},{\"id\":\"GATE-6672d657\",\"task_id\":\"WF-DEMO-d8585eed-T5\",\"gate_type\":\"result:controlled_command\",\"status\":\"PASSED\",\"evaluated_at\":\"2026-09-26T23:59:02.146503+00:00\",\"reason\":\"Execution output passed its registered deterministic result validator\"},{\"id\":\"GATE-91916262\",\"task_id\":\"WF-DEMO-d8585eed-T6\",\"gate_type\":\"workflow_artifact_integrity\",\"status\":\"PASSED\",\"evaluated_at\":\"2026-09-26T23:59:02.199876+00:00\",\"reason\":\"The engine independently verified every registered workflow artifact\"}],\"approvals\":[{\"id\":\"APP-82383e3e\",\"workflow_id\":\"WF-DEMO-d8585eed\",\"task_id\":\"WF-DEMO-d8585eed-T4\",\"approval_type\":\"paid_generation\",\"status\":\"APPROVED\",\"reason\":\"Paid external operation requires human approval per cost safety policy\",\"cost_class\":\"PAID\",\"operation_hash\":\"75bace5c3d183c2bf722ef4c097796ccbe2371b5d2505262bb81e7ba8f5619ac\",\"actor\":\"lenovo\",\"comment\":\"Explicit acceptance decision: deterministic fake provider only\",\"requested_at\":\"2026-09-26T23:59:00.608008+00:00\",\"decided_at\":\"2026-09-26T23:59:01.650378+00:00\",\"artifact_ids\":[\"ART-66358cea\",\"ART-4c3ab380\"]}],\"paid_provider_invocations\":1}",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\installed-delivery-env\\Scripts\\gamefactory.exe",
+        "--json",
+        "--project",
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\acceptance game 2mmp7qxl\\fixture game",
+        "--godot-path",
+        "C:\\Users\\lenovo\\devel\\godot\\Godot_v4.7.2-stable_win64.exe\\Godot_v4.7.2-stable_win64_console.exe",
+        "--blender-path",
+        "C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe",
+        "resume",
+        "WF-DEMO-d8585eed"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"workflow_id\":\"WF-DEMO-d8585eed\",\"status\":\"COMPLETED\",\"pending_approval_id\":null,\"completed_tasks\":[\"WF-DEMO-d8585eed-T1\",\"WF-DEMO-d8585eed-T6\",\"WF-DEMO-d8585eed-T2\",\"WF-DEMO-d8585eed-T5\",\"WF-DEMO-d8585eed-T4\",\"WF-DEMO-d8585eed-T3\"],\"failed_tasks\":[],\"blocked_tasks\":[],\"error_message\":null}",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\installed-delivery-env\\Scripts\\gamefactory.exe",
+        "--json",
+        "--project",
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\acceptance game 2mmp7qxl\\fixture game",
+        "--godot-path",
+        "C:\\Users\\lenovo\\devel\\godot\\Godot_v4.7.2-stable_win64.exe\\Godot_v4.7.2-stable_win64_console.exe",
+        "--blender-path",
+        "C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe",
+        "inspect",
+        "WF-DEMO-d8585eed"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"workflow\":{\"id\":\"WF-DEMO-d8585eed\",\"project_id\":\"factory-minimal-fixture\",\"name\":\"Demo End-to-End Workflow\",\"status\":\"COMPLETED\",\"created_at\":\"2026-09-26T23:59:00.373896+00:00\",\"updated_at\":\"2026-09-26T23:59:02.229399+00:00\"},\"tasks\":[{\"id\":\"WF-DEMO-d8585eed-T1\",\"workflow_id\":\"WF-DEMO-d8585eed\",\"name\":\"Inspect Project Structure\",\"task_type\":\"inspect_project\",\"cost_class\":\"LOCAL\",\"depends_on\":[],\"status\":\"COMPLETED\",\"parameters\":{},\"max_retries\":1,\"timeout_seconds\":60.0,\"created_at\":\"2026-09-26T23:59:00.373896+00:00\",\"updated_at\":\"2026-09-26T23:59:00.474184+00:00\"},{\"id\":\"WF-DEMO-d8585eed-T2\",\"workflow_id\":\"WF-DEMO-d8585eed\",\"name\":\"Generate Asset Concept\",\"task_type\":\"generate_concept\",\"cost_class\":\"LOCAL\",\"depends_on\":[\"WF-DEMO-d8585eed-T1\"],\"status\":\"COMPLETED\",\"parameters\":{\"concept_name\":\"Heavy Mech Enemy\",\"poly_budget\":15000},\"max_retries\":1,\"timeout_seconds\":60.0,\"created_at\":\"2026-09-26T23:59:00.373896+00:00\",\"updated_at\":\"2026-09-26T23:59:00.532168+00:00\"},{\"id\":\"WF-DEMO-d8585eed-T3\",\"workflow_id\":\"WF-DEMO-d8585eed\",\"name\":\"Validate Concept Artifact\",\"task_type\":\"validate_artifact\",\"cost_class\":\"LOCAL\",\"depends_on\":[\"WF-DEMO-d8585eed-T2\"],\"status\":\"COMPLETED\",\"parameters\":{},\"max_retries\":1,\"timeout_seconds\":60.0,\"created_at\":\"2026-09-26T23:59:00.373896+00:00\",\"updated_at\":\"2026-09-26T23:59:00.582272+00:00\"},{\"id\":\"WF-DEMO-d8585eed-T4\",\"workflow_id\":\"WF-DEMO-d8585eed\",\"name\":\"Paid 3D Asset Generation\",\"task_type\":\"paid_generation\",\"cost_class\":\"PAID\",\"depends_on\":[\"WF-DEMO-d8585eed-T3\"],\"status\":\"COMPLETED\",\"parameters\":{\"prompt\":\"Heavy Mech Enemy 3D Model\",\"format\":\"glb\",\"cost\":5.0,\"cost_unit\":\"fake_credits\"},\"max_retries\":1,\"timeout_seconds\":60.0,\"created_at\":\"2026-09-26T23:59:00.373896+00:00\",\"updated_at\":\"2026-09-26T23:59:02.061965+00:00\"},{\"id\":\"WF-DEMO-d8585eed-T5\",\"workflow_id\":\"WF-DEMO-d8585eed\",\"name\":\"Controlled Subprocess Execution\",\"task_type\":\"controlled_command\",\"cost_class\":\"LOCAL\",\"depends_on\":[\"WF-DEMO-d8585eed-T4\"],\"status\":\"COMPLETED\",\"parameters\":{},\"max_retries\":1,\"timeout_seconds\":60.0,\"created_at\":\"2026-09-26T23:59:00.373896+00:00\",\"updated_at\":\"2026-09-26T23:59:02.163291+00:00\"},{\"id\":\"WF-DEMO-d8585eed-T6\",\"workflow_id\":\"WF-DEMO-d8585eed\",\"name\":\"Record Evidence & Quality Gate\",\"task_type\":\"record_evidence\",\"cost_class\":\"LOCAL\",\"depends_on\":[\"WF-DEMO-d8585eed-T5\"],\"status\":\"COMPLETED\",\"parameters\":{},\"max_retries\":1,\"timeout_seconds\":60.0,\"created_at\":\"2026-09-26T23:59:00.373896+00:00\",\"updated_at\":\"2026-09-26T23:59:02.220397+00:00\"}],\"executions\":[{\"id\":\"EXEC-f37b65d1\",\"task_id\":\"WF-DEMO-d8585eed-T1\",\"attempt_number\":1,\"status\":\"COMPLETED\",\"started_at\":\"2026-09-26T23:59:00.412469+00:00\",\"completed_at\":\"2026-09-26T23:59:00.467848+00:00\",\"external_op_id\":null,\"pid\":null,\"host\":null,\"error_message\":null,\"exit_code\":null,\"stdout\":\"Inspected project structure successfully\",\"stderr\":null,\"cost\":0.0,\"estimated_cost\":0.0,\"cost_unit\":\"provider_units\",\"provider\":null,\"retryable\":false},{\"id\":\"EXEC-6973f652\",\"task_id\":\"WF-DEMO-d8585eed-T2\",\"attempt_number\":1,\"status\":\"COMPLETED\",\"started_at\":\"2026-09-26T23:59:00.497799+00:00\",\"completed_at\":\"2026-09-26T23:59:00.530159+00:00\",\"external_op_id\":null,\"pid\":null,\"host\":null,\"error_message\":null,\"exit_code\":null,\"stdout\":\"Generated concept specification for Heavy Mech Enemy\",\"stderr\":null,\"cost\":0.0,\"estimated_cost\":0.0,\"cost_unit\":\"provider_units\",\"provider\":null,\"retryable\":false},{\"id\":\"EXEC-1120f8e8\",\"task_id\":\"WF-DEMO-d8585eed-T3\",\"attempt_number\":1,\"status\":\"COMPLETED\",\"started_at\":\"2026-09-26T23:59:00.556959+00:00\",\"completed_at\":\"2026-09-26T23:59:00.582272+00:00\",\"external_op_id\":null,\"pid\":null,\"host\":null,\"error_message\":null,\"exit_code\":null,\"stdout\":\"Found 1 concept specification artifact(s) for engine validation\",\"stderr\":null,\"cost\":0.0,\"estimated_cost\":0.0,\"cost_unit\":\"provider_units\",\"provider\":null,\"retryable\":false},{\"id\":\"EXEC-ef897ebb\",\"task_id\":\"WF-DEMO-d8585eed-T4\",\"attempt_number\":1,\"status\":\"COMPLETED\",\"started_at\":\"2026-09-26T23:59:02.018881+00:00\",\"completed_at\":\"2026-09-26T23:59:02.053701+00:00\",\"external_op_id\":\"FAKE-OP-0001\",\"pid\":null,\"host\":null,\"error_message\":null,\"exit_code\":null,\"stdout\":\"Generated asset with operation ID FAKE-OP-0001\",\"stderr\":null,\"cost\":5.0,\"estimated_cost\":5.0,\"cost_unit\":\"fake_credits\",\"provider\":\"fake_asset_gen\",\"retryable\":false},{\"id\":\"EXEC-952b6bff\",\"task_id\":\"WF-DEMO-d8585eed-T5\",\"attempt_number\":1,\"status\":\"COMPLETED\",\"started_at\":\"2026-09-26T23:59:02.086964+00:00\",\"completed_at\":\"2026-09-26T23:59:02.157680+00:00\",\"external_op_id\":null,\"pid\":null,\"host\":null,\"error_message\":null,\"exit_code\":0,\"stdout\":\"Controlled execution completed successfully\\r\\n\",\"stderr\":\"\",\"cost\":0.0,\"estimated_cost\":0.0,\"cost_unit\":\"provider_units\",\"provider\":null,\"retryable\":false},{\"id\":\"EXEC-7972e59c\",\"task_id\":\"WF-DEMO-d8585eed-T6\",\"attempt_number\":1,\"status\":\"COMPLETED\",\"started_at\":\"2026-09-26T23:59:02.189322+00:00\",\"completed_at\":\"2026-09-26T23:59:02.219396+00:00\",\"external_op_id\":null,\"pid\":null,\"host\":null,\"error_message\":null,\"exit_code\":null,\"stdout\":\"Requested independent verification of registered workflow artifacts\",\"stderr\":null,\"cost\":0.0,\"estimated_cost\":0.0,\"cost_unit\":\"provider_units\",\"provider\":null,\"retryable\":false}],\"artifacts\":[{\"id\":\"ART-66358cea\",\"workflow_id\":\"WF-DEMO-d8585eed\",\"task_id\":\"WF-DEMO-d8585eed-T1\",\"artifact_type\":\"inspection_report\",\"producer\":\"DemoProjectInspector\",\"relative_path\":\".gamefactory/artifacts/WF-DEMO-d8585eed/WF-DEMO-d8585eed-T1/attempt-1/inspection.md\",\"content_hash\":\"1538e57dea7dd6eff129d95a9765c18a59033042092a05321d9ee4e63dceca41\",\"file_size\":164,\"validation_state\":\"VALID\",\"created_at\":\"2026-09-26T23:59:00.440079+00:00\"},{\"id\":\"ART-4c3ab380\",\"workflow_id\":\"WF-DEMO-d8585eed\",\"task_id\":\"WF-DEMO-d8585eed-T2\",\"artifact_type\":\"concept_spec\",\"producer\":\"DemoConceptSpecGenerator\",\"relative_path\":\".gamefactory/artifacts/WF-DEMO-d8585eed/WF-DEMO-d8585eed-T2/attempt-1/concept.md\",\"content_hash\":\"f2804df3df95c8a5e15fc8b6cd8dce75956161947e7e25a8ccf808f4a80ec359\",\"file_size\":67,\"validation_state\":\"VALID\",\"created_at\":\"2026-09-26T23:59:00.507410+00:00\"},{\"id\":\"ART-830174c0\",\"workflow_id\":\"WF-DEMO-d8585eed\",\"task_id\":\"WF-DEMO-d8585eed-T4\",\"artifact_type\":\"model_3d\",\"producer\":\"fake_asset_gen\",\"relative_path\":\".gamefactory/artifacts/WF-DEMO-d8585eed/WF-DEMO-d8585eed-T4/attempt-1.glb\",\"content_hash\":\"7823ddfc1d53f8c7b6c47a751e0cc9e609f1fdb4a3804a675016addb5fc1a0fd\",\"file_size\":36,\"validation_state\":\"VALID\",\"created_at\":\"2026-09-26T23:59:02.036923+00:00\"}],\"evidence\":[{\"id\":\"EVI-14ccc16d\",\"task_id\":\"WF-DEMO-d8585eed-T1\",\"execution_id\":\"EXEC-f37b65d1\",\"evidence_type\":\"execution:inspect_project\",\"summary\":\"Task output artifact registered\",\"raw_data\":{\"schema_version\":1,\"gate_id\":\"GATE-64139f55\",\"artifacts\":[{\"artifact_id\":\"ART-66358cea\",\"status\":\"VERIFIED\",\"content_hash\":\"1538e57dea7dd6eff129d95a9765c18a59033042092a05321d9ee4e63dceca41\",\"file_size\":164}]},\"created_at\":\"2026-09-26T23:59:00.464614+00:00\"},{\"id\":\"EVI-ebf3bf90\",\"task_id\":\"WF-DEMO-d8585eed-T2\",\"execution_id\":\"EXEC-6973f652\",\"evidence_type\":\"execution:generate_concept\",\"summary\":\"Task output artifact registered\",\"raw_data\":{\"schema_version\":1,\"gate_id\":\"GATE-86b2ed3b\",\"artifacts\":[{\"artifact_id\":\"ART-4c3ab380\",\"status\":\"VERIFIED\",\"content_hash\":\"f2804df3df95c8a5e15fc8b6cd8dce75956161947e7e25a8ccf808f4a80ec359\",\"file_size\":67}]},\"created_at\":\"2026-09-26T23:59:00.523196+00:00\"},{\"id\":\"EVI-0dd00d28\",\"task_id\":\"WF-DEMO-d8585eed-T3\",\"execution_id\":\"EXEC-1120f8e8\",\"evidence_type\":\"execution:validate_artifact\",\"summary\":\"Concept specification artifacts selected for validation\",\"raw_data\":{\"schema_version\":1,\"gate_id\":\"GATE-619a6869\",\"artifacts\":[{\"artifact_id\":\"ART-4c3ab380\",\"status\":\"VERIFIED\",\"content_hash\":\"f2804df3df95c8a5e15fc8b6cd8dce75956161947e7e25a8ccf808f4a80ec359\",\"file_size\":67}]},\"created_at\":\"2026-09-26T23:59:00.574139+00:00\"},{\"id\":\"EVI-da07f143\",\"task_id\":\"WF-DEMO-d8585eed-T4\",\"execution_id\":\"EXEC-ef897ebb\",\"evidence_type\":\"execution:paid_generation\",\"summary\":\"Task output artifact registered\",\"raw_data\":{\"schema_version\":1,\"gate_id\":\"GATE-1b585cf9\",\"artifacts\":[{\"artifact_id\":\"ART-830174c0\",\"status\":\"VERIFIED\",\"content_hash\":\"7823ddfc1d53f8c7b6c47a751e0cc9e609f1fdb4a3804a675016addb5fc1a0fd\",\"file_size\":36}]},\"created_at\":\"2026-09-26T23:59:02.053701+00:00\"},{\"id\":\"EVI-f504c9ea\",\"task_id\":\"WF-DEMO-d8585eed-T5\",\"execution_id\":\"EXEC-952b6bff\",\"evidence_type\":\"execution:controlled_command\",\"summary\":\"Controlled process exited successfully\",\"raw_data\":{\"schema_version\":1,\"gate_id\":\"GATE-6672d657\",\"artifacts\":[],\"exit_code\":0,\"stdout\":\"Controlled execution completed successfully\\r\\n\"},\"created_at\":\"2026-09-26T23:59:02.153680+00:00\"},{\"id\":\"EVI-b64c6a3a\",\"task_id\":\"WF-DEMO-d8585eed-T6\",\"execution_id\":\"EXEC-7972e59c\",\"evidence_type\":\"validation_report\",\"summary\":\"All workflow artifacts passed SHA-256 verification\",\"raw_data\":{\"gate_id\":\"GATE-91916262\",\"artifacts\":[{\"artifact_id\":\"ART-66358cea\",\"status\":\"VERIFIED\",\"content_hash\":\"1538e57dea7dd6eff129d95a9765c18a59033042092a05321d9ee4e63dceca41\",\"file_size\":164},{\"artifact_id\":\"ART-4c3ab380\",\"status\":\"VERIFIED\",\"content_hash\":\"f2804df3df95c8a5e15fc8b6cd8dce75956161947e7e25a8ccf808f4a80ec359\",\"file_size\":67},{\"artifact_id\":\"ART-830174c0\",\"status\":\"VERIFIED\",\"content_hash\":\"7823ddfc1d53f8c7b6c47a751e0cc9e609f1fdb4a3804a675016addb5fc1a0fd\",\"file_size\":36}]},\"created_at\":\"2026-09-26T23:59:02.206397+00:00\"}],\"gates\":[{\"id\":\"GATE-64139f55\",\"task_id\":\"WF-DEMO-d8585eed-T1\",\"gate_type\":\"result:inspect_project\",\"status\":\"PASSED\",\"evaluated_at\":\"2026-09-26T23:59:00.453604+00:00\",\"reason\":\"Execution output passed its registered deterministic result validator\"},{\"id\":\"GATE-86b2ed3b\",\"task_id\":\"WF-DEMO-d8585eed-T2\",\"gate_type\":\"result:generate_concept\",\"status\":\"PASSED\",\"evaluated_at\":\"2026-09-26T23:59:00.511860+00:00\",\"reason\":\"Execution output passed its registered deterministic result validator\"},{\"id\":\"GATE-619a6869\",\"task_id\":\"WF-DEMO-d8585eed-T3\",\"gate_type\":\"result:validate_artifact\",\"status\":\"PASSED\",\"evaluated_at\":\"2026-09-26T23:59:00.566110+00:00\",\"reason\":\"Execution output passed its registered deterministic result validator\"},{\"id\":\"GATE-1b585cf9\",\"task_id\":\"WF-DEMO-d8585eed-T4\",\"gate_type\":\"result:paid_generation\",\"status\":\"PASSED\",\"evaluated_at\":\"2026-09-26T23:59:02.048469+00:00\",\"reason\":\"Execution output passed its registered deterministic result validator\"},{\"id\":\"GATE-6672d657\",\"task_id\":\"WF-DEMO-d8585eed-T5\",\"gate_type\":\"result:controlled_command\",\"status\":\"PASSED\",\"evaluated_at\":\"2026-09-26T23:59:02.146503+00:00\",\"reason\":\"Execution output passed its registered deterministic result validator\"},{\"id\":\"GATE-91916262\",\"task_id\":\"WF-DEMO-d8585eed-T6\",\"gate_type\":\"workflow_artifact_integrity\",\"status\":\"PASSED\",\"evaluated_at\":\"2026-09-26T23:59:02.199876+00:00\",\"reason\":\"The engine independently verified every registered workflow artifact\"}],\"approvals\":[{\"id\":\"APP-82383e3e\",\"workflow_id\":\"WF-DEMO-d8585eed\",\"task_id\":\"WF-DEMO-d8585eed-T4\",\"approval_type\":\"paid_generation\",\"status\":\"APPROVED\",\"reason\":\"Paid external operation requires human approval per cost safety policy\",\"cost_class\":\"PAID\",\"operation_hash\":\"75bace5c3d183c2bf722ef4c097796ccbe2371b5d2505262bb81e7ba8f5619ac\",\"actor\":\"lenovo\",\"comment\":\"Explicit acceptance decision: deterministic fake provider only\",\"requested_at\":\"2026-09-26T23:59:00.608008+00:00\",\"decided_at\":\"2026-09-26T23:59:01.650378+00:00\",\"artifact_ids\":[\"ART-66358cea\",\"ART-4c3ab380\"]}],\"paid_provider_invocations\":1}",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\installed-delivery-env\\Scripts\\gamefactory.exe",
+        "--json",
+        "--project",
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\acceptance game 2mmp7qxl\\fixture game",
+        "--godot-path",
+        "C:\\Users\\lenovo\\devel\\godot\\Godot_v4.7.2-stable_win64.exe\\Godot_v4.7.2-stable_win64_console.exe",
+        "--blender-path",
+        "C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe",
+        "artifacts",
+        "--workflow",
+        "WF-DEMO-d8585eed"
+      ],
+      "exit_code": 0,
+      "stdout": "[{\"id\":\"ART-66358cea\",\"workflow_id\":\"WF-DEMO-d8585eed\",\"task_id\":\"WF-DEMO-d8585eed-T1\",\"artifact_type\":\"inspection_report\",\"producer\":\"DemoProjectInspector\",\"relative_path\":\".gamefactory/artifacts/WF-DEMO-d8585eed/WF-DEMO-d8585eed-T1/attempt-1/inspection.md\",\"content_hash\":\"1538e57dea7dd6eff129d95a9765c18a59033042092a05321d9ee4e63dceca41\",\"file_size\":164,\"validation_state\":\"VALID\",\"created_at\":\"2026-09-26T23:59:00.440079+00:00\"},{\"id\":\"ART-4c3ab380\",\"workflow_id\":\"WF-DEMO-d8585eed\",\"task_id\":\"WF-DEMO-d8585eed-T2\",\"artifact_type\":\"concept_spec\",\"producer\":\"DemoConceptSpecGenerator\",\"relative_path\":\".gamefactory/artifacts/WF-DEMO-d8585eed/WF-DEMO-d8585eed-T2/attempt-1/concept.md\",\"content_hash\":\"f2804df3df95c8a5e15fc8b6cd8dce75956161947e7e25a8ccf808f4a80ec359\",\"file_size\":67,\"validation_state\":\"VALID\",\"created_at\":\"2026-09-26T23:59:00.507410+00:00\"},{\"id\":\"ART-830174c0\",\"workflow_id\":\"WF-DEMO-d8585eed\",\"task_id\":\"WF-DEMO-d8585eed-T4\",\"artifact_type\":\"model_3d\",\"producer\":\"fake_asset_gen\",\"relative_path\":\".gamefactory/artifacts/WF-DEMO-d8585eed/WF-DEMO-d8585eed-T4/attempt-1.glb\",\"content_hash\":\"7823ddfc1d53f8c7b6c47a751e0cc9e609f1fdb4a3804a675016addb5fc1a0fd\",\"file_size\":36,\"validation_state\":\"VALID\",\"created_at\":\"2026-09-26T23:59:02.036923+00:00\"}]",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\installed-delivery-env\\Scripts\\gamefactory.exe",
+        "--json",
+        "--project",
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\acceptance game 2mmp7qxl\\fixture game",
+        "--godot-path",
+        "C:\\Users\\lenovo\\devel\\godot\\Godot_v4.7.2-stable_win64.exe\\Godot_v4.7.2-stable_win64_console.exe",
+        "--blender-path",
+        "C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe",
+        "run",
+        "failure"
+      ],
+      "exit_code": 2,
+      "stdout": "{\"workflow_id\":\"WF-FAIL-df34edbb\",\"status\":\"FAILED\",\"pending_approval_id\":null,\"completed_tasks\":[],\"failed_tasks\":[\"WF-FAIL-df34edbb-T2\"],\"blocked_tasks\":[],\"error_message\":\"Attempt 1 failed: Simulated upstream transient failure\"}",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\installed-delivery-env\\Scripts\\gamefactory.exe",
+        "--json",
+        "--project",
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\acceptance game 2mmp7qxl\\fixture game",
+        "--godot-path",
+        "C:\\Users\\lenovo\\devel\\godot\\Godot_v4.7.2-stable_win64.exe\\Godot_v4.7.2-stable_win64_console.exe",
+        "--blender-path",
+        "C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe",
+        "inspect",
+        "WF-FAIL-df34edbb"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"workflow\":{\"id\":\"WF-FAIL-df34edbb\",\"project_id\":\"factory-minimal-fixture\",\"name\":\"Deterministic Failure Workflow\",\"status\":\"FAILED\",\"created_at\":\"2026-09-26T23:59:04.027371+00:00\",\"updated_at\":\"2026-09-26T23:59:04.177037+00:00\"},\"tasks\":[{\"id\":\"WF-FAIL-df34edbb-T1\",\"workflow_id\":\"WF-FAIL-df34edbb\",\"name\":\"Pre-check Task\",\"task_type\":\"inspect_project\",\"cost_class\":\"LOCAL\",\"depends_on\":[],\"status\":\"COMPLETED\",\"parameters\":{},\"max_retries\":1,\"timeout_seconds\":60.0,\"created_at\":\"2026-09-26T23:59:04.027371+00:00\",\"updated_at\":\"2026-09-26T23:59:04.132355+00:00\"},{\"id\":\"WF-FAIL-df34edbb-T2\",\"workflow_id\":\"WF-FAIL-df34edbb\",\"name\":\"Deterministic Failing Task\",\"task_type\":\"simulated_failure\",\"cost_class\":\"LOCAL\",\"depends_on\":[\"WF-FAIL-df34edbb-T1\"],\"status\":\"FAILED\",\"parameters\":{\"fail_attempts\":1,\"error\":\"Simulated upstream transient failure\"},\"max_retries\":1,\"timeout_seconds\":60.0,\"created_at\":\"2026-09-26T23:59:04.027371+00:00\",\"updated_at\":\"2026-09-26T23:59:04.170817+00:00\"},{\"id\":\"WF-FAIL-df34edbb-T3\",\"workflow_id\":\"WF-FAIL-df34edbb\",\"name\":\"Downstream Dependent Task\",\"task_type\":\"inspect_project\",\"cost_class\":\"LOCAL\",\"depends_on\":[\"WF-FAIL-df34edbb-T2\"],\"status\":\"PENDING\",\"parameters\":{},\"max_retries\":1,\"timeout_seconds\":60.0,\"created_at\":\"2026-09-26T23:59:04.027371+00:00\",\"updated_at\":\"2026-09-26T23:59:04.027371+00:00\"}],\"executions\":[{\"id\":\"EXEC-f70aafa0\",\"task_id\":\"WF-FAIL-df34edbb-T1\",\"attempt_number\":1,\"status\":\"COMPLETED\",\"started_at\":\"2026-09-26T23:59:04.080067+00:00\",\"completed_at\":\"2026-09-26T23:59:04.130367+00:00\",\"external_op_id\":null,\"pid\":null,\"host\":null,\"error_message\":null,\"exit_code\":null,\"stdout\":\"Inspected project structure successfully\",\"stderr\":null,\"cost\":0.0,\"estimated_cost\":0.0,\"cost_unit\":\"provider_units\",\"provider\":null,\"retryable\":false},{\"id\":\"EXEC-9aeef6fd\",\"task_id\":\"WF-FAIL-df34edbb-T2\",\"attempt_number\":1,\"status\":\"FAILED\",\"started_at\":\"2026-09-26T23:59:04.152401+00:00\",\"completed_at\":\"2026-09-26T23:59:04.168017+00:00\",\"external_op_id\":null,\"pid\":null,\"host\":null,\"error_message\":\"Attempt 1 failed: Simulated upstream transient failure\",\"exit_code\":null,\"stdout\":null,\"stderr\":null,\"cost\":0.0,\"estimated_cost\":0.0,\"cost_unit\":\"provider_units\",\"provider\":null,\"retryable\":true}],\"artifacts\":[{\"id\":\"ART-9c7db398\",\"workflow_id\":\"WF-FAIL-df34edbb\",\"task_id\":\"WF-FAIL-df34edbb-T1\",\"artifact_type\":\"inspection_report\",\"producer\":\"DemoProjectInspector\",\"relative_path\":\".gamefactory/artifacts/WF-FAIL-df34edbb/WF-FAIL-df34edbb-T1/attempt-1/inspection.md\",\"content_hash\":\"3a440cd81eba517e521f1ed2616fcf72f09ec9b533810827918a549d5124c67d\",\"file_size\":164,\"validation_state\":\"VALID\",\"created_at\":\"2026-09-26T23:59:04.104097+00:00\"}],\"evidence\":[{\"id\":\"EVI-ae51ba7d\",\"task_id\":\"WF-FAIL-df34edbb-T1\",\"execution_id\":\"EXEC-f70aafa0\",\"evidence_type\":\"execution:inspect_project\",\"summary\":\"Task output artifact registered\",\"raw_data\":{\"schema_version\":1,\"gate_id\":\"GATE-5be6e8ce\",\"artifacts\":[{\"artifact_id\":\"ART-9c7db398\",\"status\":\"VERIFIED\",\"content_hash\":\"3a440cd81eba517e521f1ed2616fcf72f09ec9b533810827918a549d5124c67d\",\"file_size\":164}]},\"created_at\":\"2026-09-26T23:59:04.122747+00:00\"}],\"gates\":[{\"id\":\"GATE-5be6e8ce\",\"task_id\":\"WF-FAIL-df34edbb-T1\",\"gate_type\":\"result:inspect_project\",\"status\":\"PASSED\",\"evaluated_at\":\"2026-09-26T23:59:04.114188+00:00\",\"reason\":\"Execution output passed its registered deterministic result validator\"}],\"approvals\":[],\"paid_provider_invocations\":0}",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\installed-delivery-env\\Scripts\\gamefactory.exe",
+        "--json",
+        "--project",
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\acceptance game 2mmp7qxl\\fixture game",
+        "--godot-path",
+        "C:\\Users\\lenovo\\devel\\godot\\Godot_v4.7.2-stable_win64.exe\\Godot_v4.7.2-stable_win64_console.exe",
+        "--blender-path",
+        "C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe",
+        "retry",
+        "WF-FAIL-df34edbb",
+        "WF-FAIL-df34edbb-T2"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"workflow_id\":\"WF-FAIL-df34edbb\",\"status\":\"COMPLETED\",\"pending_approval_id\":null,\"completed_tasks\":[\"WF-FAIL-df34edbb-T1\",\"WF-FAIL-df34edbb-T2\",\"WF-FAIL-df34edbb-T3\"],\"failed_tasks\":[],\"blocked_tasks\":[],\"error_message\":null}",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\installed-delivery-env\\Scripts\\gamefactory.exe",
+        "--json",
+        "--project",
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\acceptance game 2mmp7qxl\\fixture game",
+        "--godot-path",
+        "C:\\Users\\lenovo\\devel\\godot\\Godot_v4.7.2-stable_win64.exe\\Godot_v4.7.2-stable_win64_console.exe",
+        "--blender-path",
+        "C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe",
+        "inspect",
+        "WF-FAIL-df34edbb"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"workflow\":{\"id\":\"WF-FAIL-df34edbb\",\"project_id\":\"factory-minimal-fixture\",\"name\":\"Deterministic Failure Workflow\",\"status\":\"COMPLETED\",\"created_at\":\"2026-09-26T23:59:04.027371+00:00\",\"updated_at\":\"2026-09-26T23:59:05.054204+00:00\"},\"tasks\":[{\"id\":\"WF-FAIL-df34edbb-T1\",\"workflow_id\":\"WF-FAIL-df34edbb\",\"name\":\"Pre-check Task\",\"task_type\":\"inspect_project\",\"cost_class\":\"LOCAL\",\"depends_on\":[],\"status\":\"COMPLETED\",\"parameters\":{},\"max_retries\":1,\"timeout_seconds\":60.0,\"created_at\":\"2026-09-26T23:59:04.027371+00:00\",\"updated_at\":\"2026-09-26T23:59:04.132355+00:00\"},{\"id\":\"WF-FAIL-df34edbb-T2\",\"workflow_id\":\"WF-FAIL-df34edbb\",\"name\":\"Deterministic Failing Task\",\"task_type\":\"simulated_failure\",\"cost_class\":\"LOCAL\",\"depends_on\":[\"WF-FAIL-df34edbb-T1\"],\"status\":\"COMPLETED\",\"parameters\":{\"fail_attempts\":1,\"error\":\"Simulated upstream transient failure\"},\"max_retries\":1,\"timeout_seconds\":60.0,\"created_at\":\"2026-09-26T23:59:04.027371+00:00\",\"updated_at\":\"2026-09-26T23:59:04.964973+00:00\"},{\"id\":\"WF-FAIL-df34edbb-T3\",\"workflow_id\":\"WF-FAIL-df34edbb\",\"name\":\"Downstream Dependent Task\",\"task_type\":\"inspect_project\",\"cost_class\":\"LOCAL\",\"depends_on\":[\"WF-FAIL-df34edbb-T2\"],\"status\":\"COMPLETED\",\"parameters\":{},\"max_retries\":1,\"timeout_seconds\":60.0,\"created_at\":\"2026-09-26T23:59:04.027371+00:00\",\"updated_at\":\"2026-09-26T23:59:05.043273+00:00\"}],\"executions\":[{\"id\":\"EXEC-f70aafa0\",\"task_id\":\"WF-FAIL-df34edbb-T1\",\"attempt_number\":1,\"status\":\"COMPLETED\",\"started_at\":\"2026-09-26T23:59:04.080067+00:00\",\"completed_at\":\"2026-09-26T23:59:04.130367+00:00\",\"external_op_id\":null,\"pid\":null,\"host\":null,\"error_message\":null,\"exit_code\":null,\"stdout\":\"Inspected project structure successfully\",\"stderr\":null,\"cost\":0.0,\"estimated_cost\":0.0,\"cost_unit\":\"provider_units\",\"provider\":null,\"retryable\":false},{\"id\":\"EXEC-9aeef6fd\",\"task_id\":\"WF-FAIL-df34edbb-T2\",\"attempt_number\":1,\"status\":\"FAILED\",\"started_at\":\"2026-09-26T23:59:04.152401+00:00\",\"completed_at\":\"2026-09-26T23:59:04.168017+00:00\",\"external_op_id\":null,\"pid\":null,\"host\":null,\"error_message\":\"Attempt 1 failed: Simulated upstream transient failure\",\"exit_code\":null,\"stdout\":null,\"stderr\":null,\"cost\":0.0,\"estimated_cost\":0.0,\"cost_unit\":\"provider_units\",\"provider\":null,\"retryable\":true},{\"id\":\"EXEC-5db88e41\",\"task_id\":\"WF-FAIL-df34edbb-T2\",\"attempt_number\":2,\"status\":\"COMPLETED\",\"started_at\":\"2026-09-26T23:59:04.937396+00:00\",\"completed_at\":\"2026-09-26T23:59:04.962393+00:00\",\"external_op_id\":null,\"pid\":null,\"host\":null,\"error_message\":null,\"exit_code\":null,\"stdout\":\"Attempt 2 succeeded after retry\",\"stderr\":null,\"cost\":0.0,\"estimated_cost\":0.0,\"cost_unit\":\"provider_units\",\"provider\":null,\"retryable\":false},{\"id\":\"EXEC-5f7d2a0c\",\"task_id\":\"WF-FAIL-df34edbb-T3\",\"attempt_number\":1,\"status\":\"COMPLETED\",\"started_at\":\"2026-09-26T23:59:04.987416+00:00\",\"completed_at\":\"2026-09-26T23:59:05.041448+00:00\",\"external_op_id\":null,\"pid\":null,\"host\":null,\"error_message\":null,\"exit_code\":null,\"stdout\":\"Inspected project structure successfully\",\"stderr\":null,\"cost\":0.0,\"estimated_cost\":0.0,\"cost_unit\":\"provider_units\",\"provider\":null,\"retryable\":false}],\"artifacts\":[{\"id\":\"ART-9c7db398\",\"workflow_id\":\"WF-FAIL-df34edbb\",\"task_id\":\"WF-FAIL-df34edbb-T1\",\"artifact_type\":\"inspection_report\",\"producer\":\"DemoProjectInspector\",\"relative_path\":\".gamefactory/artifacts/WF-FAIL-df34edbb/WF-FAIL-df34edbb-T1/attempt-1/inspection.md\",\"content_hash\":\"3a440cd81eba517e521f1ed2616fcf72f09ec9b533810827918a549d5124c67d\",\"file_size\":164,\"validation_state\":\"VALID\",\"created_at\":\"2026-09-26T23:59:04.104097+00:00\"},{\"id\":\"ART-bd6940d4\",\"workflow_id\":\"WF-FAIL-df34edbb\",\"task_id\":\"WF-FAIL-df34edbb-T3\",\"artifact_type\":\"inspection_report\",\"producer\":\"DemoProjectInspector\",\"relative_path\":\".gamefactory/artifacts/WF-FAIL-df34edbb/WF-FAIL-df34edbb-T3/attempt-1/inspection.md\",\"content_hash\":\"6678c7541ff050857169698de5974b83e5d7964d6bcc7ae1bba9110054593014\",\"file_size\":164,\"validation_state\":\"VALID\",\"created_at\":\"2026-09-26T23:59:05.016480+00:00\"}],\"evidence\":[{\"id\":\"EVI-ae51ba7d\",\"task_id\":\"WF-FAIL-df34edbb-T1\",\"execution_id\":\"EXEC-f70aafa0\",\"evidence_type\":\"execution:inspect_project\",\"summary\":\"Task output artifact registered\",\"raw_data\":{\"schema_version\":1,\"gate_id\":\"GATE-5be6e8ce\",\"artifacts\":[{\"artifact_id\":\"ART-9c7db398\",\"status\":\"VERIFIED\",\"content_hash\":\"3a440cd81eba517e521f1ed2616fcf72f09ec9b533810827918a549d5124c67d\",\"file_size\":164}]},\"created_at\":\"2026-09-26T23:59:04.122747+00:00\"},{\"id\":\"EVI-c8d882c0\",\"task_id\":\"WF-FAIL-df34edbb-T2\",\"execution_id\":\"EXEC-5db88e41\",\"evidence_type\":\"execution:simulated_failure\",\"summary\":\"Deterministic retry fixture completed\",\"raw_data\":{\"schema_version\":1,\"gate_id\":\"GATE-8daa1fd8\",\"artifacts\":[],\"result\":\"Attempt 2 succeeded after retry\"},\"created_at\":\"2026-09-26T23:59:04.953948+00:00\"},{\"id\":\"EVI-a970337c\",\"task_id\":\"WF-FAIL-df34edbb-T3\",\"execution_id\":\"EXEC-5f7d2a0c\",\"evidence_type\":\"execution:inspect_project\",\"summary\":\"Task output artifact registered\",\"raw_data\":{\"schema_version\":1,\"gate_id\":\"GATE-a5174476\",\"artifacts\":[{\"artifact_id\":\"ART-bd6940d4\",\"status\":\"VERIFIED\",\"content_hash\":\"6678c7541ff050857169698de5974b83e5d7964d6bcc7ae1bba9110054593014\",\"file_size\":164}]},\"created_at\":\"2026-09-26T23:59:05.033871+00:00\"}],\"gates\":[{\"id\":\"GATE-5be6e8ce\",\"task_id\":\"WF-FAIL-df34edbb-T1\",\"gate_type\":\"result:inspect_project\",\"status\":\"PASSED\",\"evaluated_at\":\"2026-09-26T23:59:04.114188+00:00\",\"reason\":\"Execution output passed its registered deterministic result validator\"},{\"id\":\"GATE-8daa1fd8\",\"task_id\":\"WF-FAIL-df34edbb-T2\",\"gate_type\":\"result:simulated_failure\",\"status\":\"PASSED\",\"evaluated_at\":\"2026-09-26T23:59:04.948459+00:00\",\"reason\":\"Execution output passed its registered deterministic result validator\"},{\"id\":\"GATE-a5174476\",\"task_id\":\"WF-FAIL-df34edbb-T3\",\"gate_type\":\"result:inspect_project\",\"status\":\"PASSED\",\"evaluated_at\":\"2026-09-26T23:59:05.027795+00:00\",\"reason\":\"Execution output passed its registered deterministic result validator\"}],\"approvals\":[],\"paid_provider_invocations\":0}",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\installed-delivery-env\\Scripts\\gamefactory.exe",
+        "--json",
+        "--project",
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\acceptance game 2mmp7qxl\\fixture game",
+        "--godot-path",
+        "C:\\Users\\lenovo\\devel\\godot\\Godot_v4.7.2-stable_win64.exe\\Godot_v4.7.2-stable_win64_console.exe",
+        "--blender-path",
+        "C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe",
+        "run",
+        "paid-safety"
+      ],
+      "exit_code": 3,
+      "stdout": "{\"workflow_id\":\"WF-PAID-56a6d41f\",\"status\":\"BLOCKED\",\"pending_approval_id\":\"APP-c7e4e6f4\",\"completed_tasks\":[],\"failed_tasks\":[],\"blocked_tasks\":[\"WF-PAID-56a6d41f-T2\"],\"error_message\":null}",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\installed-delivery-env\\Scripts\\gamefactory.exe",
+        "--json",
+        "--project",
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\acceptance game 2mmp7qxl\\fixture game",
+        "--godot-path",
+        "C:\\Users\\lenovo\\devel\\godot\\Godot_v4.7.2-stable_win64.exe\\Godot_v4.7.2-stable_win64_console.exe",
+        "--blender-path",
+        "C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe",
+        "inspect",
+        "WF-PAID-56a6d41f"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"workflow\":{\"id\":\"WF-PAID-56a6d41f\",\"project_id\":\"factory-minimal-fixture\",\"name\":\"Paid Safety Workflow\",\"status\":\"BLOCKED\",\"created_at\":\"2026-09-26T23:59:05.737644+00:00\",\"updated_at\":\"2026-09-26T23:59:05.904253+00:00\"},\"tasks\":[{\"id\":\"WF-PAID-56a6d41f-T1\",\"workflow_id\":\"WF-PAID-56a6d41f\",\"name\":\"Preparation Task\",\"task_type\":\"inspect_project\",\"cost_class\":\"LOCAL\",\"depends_on\":[],\"status\":\"COMPLETED\",\"parameters\":{},\"max_retries\":1,\"timeout_seconds\":60.0,\"created_at\":\"2026-09-26T23:59:05.737644+00:00\",\"updated_at\":\"2026-09-26T23:59:05.850273+00:00\"},{\"id\":\"WF-PAID-56a6d41f-T2\",\"workflow_id\":\"WF-PAID-56a6d41f\",\"name\":\"Paid Generation Task\",\"task_type\":\"paid_generation\",\"cost_class\":\"PAID\",\"depends_on\":[\"WF-PAID-56a6d41f-T1\"],\"status\":\"BLOCKED\",\"parameters\":{\"prompt\":\"Space Cruiser\",\"cost\":10.0,\"cost_unit\":\"fake_credits\"},\"max_retries\":1,\"timeout_seconds\":60.0,\"created_at\":\"2026-09-26T23:59:05.737644+00:00\",\"updated_at\":\"2026-09-26T23:59:05.896570+00:00\"}],\"executions\":[{\"id\":\"EXEC-84f3457a\",\"task_id\":\"WF-PAID-56a6d41f-T1\",\"attempt_number\":1,\"status\":\"COMPLETED\",\"started_at\":\"2026-09-26T23:59:05.797317+00:00\",\"completed_at\":\"2026-09-26T23:59:05.847872+00:00\",\"external_op_id\":null,\"pid\":null,\"host\":null,\"error_message\":null,\"exit_code\":null,\"stdout\":\"Inspected project structure successfully\",\"stderr\":null,\"cost\":0.0,\"estimated_cost\":0.0,\"cost_unit\":\"provider_units\",\"provider\":null,\"retryable\":false}],\"artifacts\":[{\"id\":\"ART-f1fe835d\",\"workflow_id\":\"WF-PAID-56a6d41f\",\"task_id\":\"WF-PAID-56a6d41f-T1\",\"artifact_type\":\"inspection_report\",\"producer\":\"DemoProjectInspector\",\"relative_path\":\".gamefactory/artifacts/WF-PAID-56a6d41f/WF-PAID-56a6d41f-T1/attempt-1/inspection.md\",\"content_hash\":\"5d9f940e60caa483971b803b8140a1418b084c05d651cc5d33a1ed0596e525cf\",\"file_size\":164,\"validation_state\":\"VALID\",\"created_at\":\"2026-09-26T23:59:05.821316+00:00\"}],\"evidence\":[{\"id\":\"EVI-c24ad299\",\"task_id\":\"WF-PAID-56a6d41f-T1\",\"execution_id\":\"EXEC-84f3457a\",\"evidence_type\":\"execution:inspect_project\",\"summary\":\"Task output artifact registered\",\"raw_data\":{\"schema_version\":1,\"gate_id\":\"GATE-702643d1\",\"artifacts\":[{\"artifact_id\":\"ART-f1fe835d\",\"status\":\"VERIFIED\",\"content_hash\":\"5d9f940e60caa483971b803b8140a1418b084c05d651cc5d33a1ed0596e525cf\",\"file_size\":164}]},\"created_at\":\"2026-09-26T23:59:05.840641+00:00\"}],\"gates\":[{\"id\":\"GATE-702643d1\",\"task_id\":\"WF-PAID-56a6d41f-T1\",\"gate_type\":\"result:inspect_project\",\"status\":\"PASSED\",\"evaluated_at\":\"2026-09-26T23:59:05.833302+00:00\",\"reason\":\"Execution output passed its registered deterministic result validator\"}],\"approvals\":[{\"id\":\"APP-c7e4e6f4\",\"workflow_id\":\"WF-PAID-56a6d41f\",\"task_id\":\"WF-PAID-56a6d41f-T2\",\"approval_type\":\"paid_generation\",\"status\":\"PENDING\",\"reason\":\"Paid external operation requires human approval per cost safety policy\",\"cost_class\":\"PAID\",\"operation_hash\":\"ef818b9299870f2dac35335511fe464f9ed4a78bdb5b1f501c70645e977a0d36\",\"actor\":null,\"comment\":null,\"requested_at\":\"2026-09-26T23:59:05.887946+00:00\",\"decided_at\":null,\"artifact_ids\":[\"ART-f1fe835d\"]}],\"paid_provider_invocations\":0}",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\installed-delivery-env\\Scripts\\gamefactory.exe",
+        "--json",
+        "--project",
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\acceptance game 2mmp7qxl\\fixture game",
+        "--godot-path",
+        "C:\\Users\\lenovo\\devel\\godot\\Godot_v4.7.2-stable_win64.exe\\Godot_v4.7.2-stable_win64_console.exe",
+        "--blender-path",
+        "C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe",
+        "approvals",
+        "--workflow",
+        "WF-PAID-56a6d41f"
+      ],
+      "exit_code": 0,
+      "stdout": "[{\"id\":\"APP-c7e4e6f4\",\"workflow_id\":\"WF-PAID-56a6d41f\",\"task_id\":\"WF-PAID-56a6d41f-T2\",\"approval_type\":\"paid_generation\",\"status\":\"PENDING\",\"reason\":\"Paid external operation requires human approval per cost safety policy\",\"cost_class\":\"PAID\",\"operation_hash\":\"ef818b9299870f2dac35335511fe464f9ed4a78bdb5b1f501c70645e977a0d36\",\"actor\":null,\"comment\":null,\"requested_at\":\"2026-09-26T23:59:05.887946+00:00\",\"decided_at\":null,\"artifact_ids\":[\"ART-f1fe835d\"]}]",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\installed-delivery-env\\Scripts\\gamefactory.exe",
+        "--json",
+        "--project",
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\acceptance game 2mmp7qxl\\fixture game",
+        "--godot-path",
+        "C:\\Users\\lenovo\\devel\\godot\\Godot_v4.7.2-stable_win64.exe\\Godot_v4.7.2-stable_win64_console.exe",
+        "--blender-path",
+        "C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe",
+        "approve",
+        "APP-c7e4e6f4",
+        "--comment",
+        "Explicit acceptance decision: deterministic fake provider only"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"id\":\"APP-c7e4e6f4\",\"workflow_id\":\"WF-PAID-56a6d41f\",\"task_id\":\"WF-PAID-56a6d41f-T2\",\"approval_type\":\"paid_generation\",\"status\":\"APPROVED\",\"reason\":\"Paid external operation requires human approval per cost safety policy\",\"cost_class\":\"PAID\",\"operation_hash\":\"ef818b9299870f2dac35335511fe464f9ed4a78bdb5b1f501c70645e977a0d36\",\"actor\":\"lenovo\",\"comment\":\"Explicit acceptance decision: deterministic fake provider only\",\"requested_at\":\"2026-09-26T23:59:05.887946+00:00\",\"decided_at\":\"2026-09-26T23:59:06.887792+00:00\",\"artifact_ids\":[\"ART-f1fe835d\"]}",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\installed-delivery-env\\Scripts\\gamefactory.exe",
+        "--json",
+        "--project",
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\acceptance game 2mmp7qxl\\fixture game",
+        "--godot-path",
+        "C:\\Users\\lenovo\\devel\\godot\\Godot_v4.7.2-stable_win64.exe\\Godot_v4.7.2-stable_win64_console.exe",
+        "--blender-path",
+        "C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe",
+        "resume",
+        "WF-PAID-56a6d41f"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"workflow_id\":\"WF-PAID-56a6d41f\",\"status\":\"COMPLETED\",\"pending_approval_id\":null,\"completed_tasks\":[\"WF-PAID-56a6d41f-T1\",\"WF-PAID-56a6d41f-T2\"],\"failed_tasks\":[],\"blocked_tasks\":[],\"error_message\":null}",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\installed-delivery-env\\Scripts\\gamefactory.exe",
+        "--json",
+        "--project",
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\acceptance game 2mmp7qxl\\fixture game",
+        "--godot-path",
+        "C:\\Users\\lenovo\\devel\\godot\\Godot_v4.7.2-stable_win64.exe\\Godot_v4.7.2-stable_win64_console.exe",
+        "--blender-path",
+        "C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe",
+        "inspect",
+        "WF-PAID-56a6d41f"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"workflow\":{\"id\":\"WF-PAID-56a6d41f\",\"project_id\":\"factory-minimal-fixture\",\"name\":\"Paid Safety Workflow\",\"status\":\"COMPLETED\",\"created_at\":\"2026-09-26T23:59:05.737644+00:00\",\"updated_at\":\"2026-09-26T23:59:07.343277+00:00\"},\"tasks\":[{\"id\":\"WF-PAID-56a6d41f-T1\",\"workflow_id\":\"WF-PAID-56a6d41f\",\"name\":\"Preparation Task\",\"task_type\":\"inspect_project\",\"cost_class\":\"LOCAL\",\"depends_on\":[],\"status\":\"COMPLETED\",\"parameters\":{},\"max_retries\":1,\"timeout_seconds\":60.0,\"created_at\":\"2026-09-26T23:59:05.737644+00:00\",\"updated_at\":\"2026-09-26T23:59:05.850273+00:00\"},{\"id\":\"WF-PAID-56a6d41f-T2\",\"workflow_id\":\"WF-PAID-56a6d41f\",\"name\":\"Paid Generation Task\",\"task_type\":\"paid_generation\",\"cost_class\":\"PAID\",\"depends_on\":[\"WF-PAID-56a6d41f-T1\"],\"status\":\"COMPLETED\",\"parameters\":{\"prompt\":\"Space Cruiser\",\"cost\":10.0,\"cost_unit\":\"fake_credits\"},\"max_retries\":1,\"timeout_seconds\":60.0,\"created_at\":\"2026-09-26T23:59:05.737644+00:00\",\"updated_at\":\"2026-09-26T23:59:07.333960+00:00\"}],\"executions\":[{\"id\":\"EXEC-84f3457a\",\"task_id\":\"WF-PAID-56a6d41f-T1\",\"attempt_number\":1,\"status\":\"COMPLETED\",\"started_at\":\"2026-09-26T23:59:05.797317+00:00\",\"completed_at\":\"2026-09-26T23:59:05.847872+00:00\",\"external_op_id\":null,\"pid\":null,\"host\":null,\"error_message\":null,\"exit_code\":null,\"stdout\":\"Inspected project structure successfully\",\"stderr\":null,\"cost\":0.0,\"estimated_cost\":0.0,\"cost_unit\":\"provider_units\",\"provider\":null,\"retryable\":false},{\"id\":\"EXEC-83f89bb6\",\"task_id\":\"WF-PAID-56a6d41f-T2\",\"attempt_number\":1,\"status\":\"COMPLETED\",\"started_at\":\"2026-09-26T23:59:07.288676+00:00\",\"completed_at\":\"2026-09-26T23:59:07.331374+00:00\",\"external_op_id\":\"FAKE-OP-0001\",\"pid\":null,\"host\":null,\"error_message\":null,\"exit_code\":null,\"stdout\":\"Generated asset with operation ID FAKE-OP-0001\",\"stderr\":null,\"cost\":5.0,\"estimated_cost\":10.0,\"cost_unit\":\"fake_credits\",\"provider\":\"fake_asset_gen\",\"retryable\":false}],\"artifacts\":[{\"id\":\"ART-f1fe835d\",\"workflow_id\":\"WF-PAID-56a6d41f\",\"task_id\":\"WF-PAID-56a6d41f-T1\",\"artifact_type\":\"inspection_report\",\"producer\":\"DemoProjectInspector\",\"relative_path\":\".gamefactory/artifacts/WF-PAID-56a6d41f/WF-PAID-56a6d41f-T1/attempt-1/inspection.md\",\"content_hash\":\"5d9f940e60caa483971b803b8140a1418b084c05d651cc5d33a1ed0596e525cf\",\"file_size\":164,\"validation_state\":\"VALID\",\"created_at\":\"2026-09-26T23:59:05.821316+00:00\"},{\"id\":\"ART-64d5048b\",\"workflow_id\":\"WF-PAID-56a6d41f\",\"task_id\":\"WF-PAID-56a6d41f-T2\",\"artifact_type\":\"model_3d\",\"producer\":\"fake_asset_gen\",\"relative_path\":\".gamefactory/artifacts/WF-PAID-56a6d41f/WF-PAID-56a6d41f-T2/attempt-1.glb\",\"content_hash\":\"7823ddfc1d53f8c7b6c47a751e0cc9e609f1fdb4a3804a675016addb5fc1a0fd\",\"file_size\":36,\"validation_state\":\"VALID\",\"created_at\":\"2026-09-26T23:59:07.307480+00:00\"}],\"evidence\":[{\"id\":\"EVI-c24ad299\",\"task_id\":\"WF-PAID-56a6d41f-T1\",\"execution_id\":\"EXEC-84f3457a\",\"evidence_type\":\"execution:inspect_project\",\"summary\":\"Task output artifact registered\",\"raw_data\":{\"schema_version\":1,\"gate_id\":\"GATE-702643d1\",\"artifacts\":[{\"artifact_id\":\"ART-f1fe835d\",\"status\":\"VERIFIED\",\"content_hash\":\"5d9f940e60caa483971b803b8140a1418b084c05d651cc5d33a1ed0596e525cf\",\"file_size\":164}]},\"created_at\":\"2026-09-26T23:59:05.840641+00:00\"},{\"id\":\"EVI-7f743d7d\",\"task_id\":\"WF-PAID-56a6d41f-T2\",\"execution_id\":\"EXEC-83f89bb6\",\"evidence_type\":\"execution:paid_generation\",\"summary\":\"Task output artifact registered\",\"raw_data\":{\"schema_version\":1,\"gate_id\":\"GATE-c38443aa\",\"artifacts\":[{\"artifact_id\":\"ART-64d5048b\",\"status\":\"VERIFIED\",\"content_hash\":\"7823ddfc1d53f8c7b6c47a751e0cc9e609f1fdb4a3804a675016addb5fc1a0fd\",\"file_size\":36}]},\"created_at\":\"2026-09-26T23:59:07.323973+00:00\"}],\"gates\":[{\"id\":\"GATE-702643d1\",\"task_id\":\"WF-PAID-56a6d41f-T1\",\"gate_type\":\"result:inspect_project\",\"status\":\"PASSED\",\"evaluated_at\":\"2026-09-26T23:59:05.833302+00:00\",\"reason\":\"Execution output passed its registered deterministic result validator\"},{\"id\":\"GATE-c38443aa\",\"task_id\":\"WF-PAID-56a6d41f-T2\",\"gate_type\":\"result:paid_generation\",\"status\":\"PASSED\",\"evaluated_at\":\"2026-09-26T23:59:07.315386+00:00\",\"reason\":\"Execution output passed its registered deterministic result validator\"}],\"approvals\":[{\"id\":\"APP-c7e4e6f4\",\"workflow_id\":\"WF-PAID-56a6d41f\",\"task_id\":\"WF-PAID-56a6d41f-T2\",\"approval_type\":\"paid_generation\",\"status\":\"APPROVED\",\"reason\":\"Paid external operation requires human approval per cost safety policy\",\"cost_class\":\"PAID\",\"operation_hash\":\"ef818b9299870f2dac35335511fe464f9ed4a78bdb5b1f501c70645e977a0d36\",\"actor\":\"lenovo\",\"comment\":\"Explicit acceptance decision: deterministic fake provider only\",\"requested_at\":\"2026-09-26T23:59:05.887946+00:00\",\"decided_at\":\"2026-09-26T23:59:06.887792+00:00\",\"artifact_ids\":[\"ART-f1fe835d\"]}],\"paid_provider_invocations\":1}",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\installed-delivery-env\\Scripts\\gamefactory.exe",
+        "--json",
+        "--project",
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\acceptance game 2mmp7qxl\\fixture game",
+        "--godot-path",
+        "C:\\Users\\lenovo\\devel\\godot\\Godot_v4.7.2-stable_win64.exe\\Godot_v4.7.2-stable_win64_console.exe",
+        "--blender-path",
+        "C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe",
+        "resume",
+        "WF-PAID-56a6d41f"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"workflow_id\":\"WF-PAID-56a6d41f\",\"status\":\"COMPLETED\",\"pending_approval_id\":null,\"completed_tasks\":[\"WF-PAID-56a6d41f-T1\",\"WF-PAID-56a6d41f-T2\"],\"failed_tasks\":[],\"blocked_tasks\":[],\"error_message\":null}",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\installed-delivery-env\\Scripts\\gamefactory.exe",
+        "--json",
+        "--project",
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\acceptance game 2mmp7qxl\\fixture game",
+        "--godot-path",
+        "C:\\Users\\lenovo\\devel\\godot\\Godot_v4.7.2-stable_win64.exe\\Godot_v4.7.2-stable_win64_console.exe",
+        "--blender-path",
+        "C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe",
+        "inspect",
+        "WF-PAID-56a6d41f"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"workflow\":{\"id\":\"WF-PAID-56a6d41f\",\"project_id\":\"factory-minimal-fixture\",\"name\":\"Paid Safety Workflow\",\"status\":\"COMPLETED\",\"created_at\":\"2026-09-26T23:59:05.737644+00:00\",\"updated_at\":\"2026-09-26T23:59:07.343277+00:00\"},\"tasks\":[{\"id\":\"WF-PAID-56a6d41f-T1\",\"workflow_id\":\"WF-PAID-56a6d41f\",\"name\":\"Preparation Task\",\"task_type\":\"inspect_project\",\"cost_class\":\"LOCAL\",\"depends_on\":[],\"status\":\"COMPLETED\",\"parameters\":{},\"max_retries\":1,\"timeout_seconds\":60.0,\"created_at\":\"2026-09-26T23:59:05.737644+00:00\",\"updated_at\":\"2026-09-26T23:59:05.850273+00:00\"},{\"id\":\"WF-PAID-56a6d41f-T2\",\"workflow_id\":\"WF-PAID-56a6d41f\",\"name\":\"Paid Generation Task\",\"task_type\":\"paid_generation\",\"cost_class\":\"PAID\",\"depends_on\":[\"WF-PAID-56a6d41f-T1\"],\"status\":\"COMPLETED\",\"parameters\":{\"prompt\":\"Space Cruiser\",\"cost\":10.0,\"cost_unit\":\"fake_credits\"},\"max_retries\":1,\"timeout_seconds\":60.0,\"created_at\":\"2026-09-26T23:59:05.737644+00:00\",\"updated_at\":\"2026-09-26T23:59:07.333960+00:00\"}],\"executions\":[{\"id\":\"EXEC-84f3457a\",\"task_id\":\"WF-PAID-56a6d41f-T1\",\"attempt_number\":1,\"status\":\"COMPLETED\",\"started_at\":\"2026-09-26T23:59:05.797317+00:00\",\"completed_at\":\"2026-09-26T23:59:05.847872+00:00\",\"external_op_id\":null,\"pid\":null,\"host\":null,\"error_message\":null,\"exit_code\":null,\"stdout\":\"Inspected project structure successfully\",\"stderr\":null,\"cost\":0.0,\"estimated_cost\":0.0,\"cost_unit\":\"provider_units\",\"provider\":null,\"retryable\":false},{\"id\":\"EXEC-83f89bb6\",\"task_id\":\"WF-PAID-56a6d41f-T2\",\"attempt_number\":1,\"status\":\"COMPLETED\",\"started_at\":\"2026-09-26T23:59:07.288676+00:00\",\"completed_at\":\"2026-09-26T23:59:07.331374+00:00\",\"external_op_id\":\"FAKE-OP-0001\",\"pid\":null,\"host\":null,\"error_message\":null,\"exit_code\":null,\"stdout\":\"Generated asset with operation ID FAKE-OP-0001\",\"stderr\":null,\"cost\":5.0,\"estimated_cost\":10.0,\"cost_unit\":\"fake_credits\",\"provider\":\"fake_asset_gen\",\"retryable\":false}],\"artifacts\":[{\"id\":\"ART-f1fe835d\",\"workflow_id\":\"WF-PAID-56a6d41f\",\"task_id\":\"WF-PAID-56a6d41f-T1\",\"artifact_type\":\"inspection_report\",\"producer\":\"DemoProjectInspector\",\"relative_path\":\".gamefactory/artifacts/WF-PAID-56a6d41f/WF-PAID-56a6d41f-T1/attempt-1/inspection.md\",\"content_hash\":\"5d9f940e60caa483971b803b8140a1418b084c05d651cc5d33a1ed0596e525cf\",\"file_size\":164,\"validation_state\":\"VALID\",\"created_at\":\"2026-09-26T23:59:05.821316+00:00\"},{\"id\":\"ART-64d5048b\",\"workflow_id\":\"WF-PAID-56a6d41f\",\"task_id\":\"WF-PAID-56a6d41f-T2\",\"artifact_type\":\"model_3d\",\"producer\":\"fake_asset_gen\",\"relative_path\":\".gamefactory/artifacts/WF-PAID-56a6d41f/WF-PAID-56a6d41f-T2/attempt-1.glb\",\"content_hash\":\"7823ddfc1d53f8c7b6c47a751e0cc9e609f1fdb4a3804a675016addb5fc1a0fd\",\"file_size\":36,\"validation_state\":\"VALID\",\"created_at\":\"2026-09-26T23:59:07.307480+00:00\"}],\"evidence\":[{\"id\":\"EVI-c24ad299\",\"task_id\":\"WF-PAID-56a6d41f-T1\",\"execution_id\":\"EXEC-84f3457a\",\"evidence_type\":\"execution:inspect_project\",\"summary\":\"Task output artifact registered\",\"raw_data\":{\"schema_version\":1,\"gate_id\":\"GATE-702643d1\",\"artifacts\":[{\"artifact_id\":\"ART-f1fe835d\",\"status\":\"VERIFIED\",\"content_hash\":\"5d9f940e60caa483971b803b8140a1418b084c05d651cc5d33a1ed0596e525cf\",\"file_size\":164}]},\"created_at\":\"2026-09-26T23:59:05.840641+00:00\"},{\"id\":\"EVI-7f743d7d\",\"task_id\":\"WF-PAID-56a6d41f-T2\",\"execution_id\":\"EXEC-83f89bb6\",\"evidence_type\":\"execution:paid_generation\",\"summary\":\"Task output artifact registered\",\"raw_data\":{\"schema_version\":1,\"gate_id\":\"GATE-c38443aa\",\"artifacts\":[{\"artifact_id\":\"ART-64d5048b\",\"status\":\"VERIFIED\",\"content_hash\":\"7823ddfc1d53f8c7b6c47a751e0cc9e609f1fdb4a3804a675016addb5fc1a0fd\",\"file_size\":36}]},\"created_at\":\"2026-09-26T23:59:07.323973+00:00\"}],\"gates\":[{\"id\":\"GATE-702643d1\",\"task_id\":\"WF-PAID-56a6d41f-T1\",\"gate_type\":\"result:inspect_project\",\"status\":\"PASSED\",\"evaluated_at\":\"2026-09-26T23:59:05.833302+00:00\",\"reason\":\"Execution output passed its registered deterministic result validator\"},{\"id\":\"GATE-c38443aa\",\"task_id\":\"WF-PAID-56a6d41f-T2\",\"gate_type\":\"result:paid_generation\",\"status\":\"PASSED\",\"evaluated_at\":\"2026-09-26T23:59:07.315386+00:00\",\"reason\":\"Execution output passed its registered deterministic result validator\"}],\"approvals\":[{\"id\":\"APP-c7e4e6f4\",\"workflow_id\":\"WF-PAID-56a6d41f\",\"task_id\":\"WF-PAID-56a6d41f-T2\",\"approval_type\":\"paid_generation\",\"status\":\"APPROVED\",\"reason\":\"Paid external operation requires human approval per cost safety policy\",\"cost_class\":\"PAID\",\"operation_hash\":\"ef818b9299870f2dac35335511fe464f9ed4a78bdb5b1f501c70645e977a0d36\",\"actor\":\"lenovo\",\"comment\":\"Explicit acceptance decision: deterministic fake provider only\",\"requested_at\":\"2026-09-26T23:59:05.887946+00:00\",\"decided_at\":\"2026-09-26T23:59:06.887792+00:00\",\"artifact_ids\":[\"ART-f1fe835d\"]}],\"paid_provider_invocations\":1}",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\installed-delivery-env\\Scripts\\gamefactory.exe",
+        "--json",
+        "--project",
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\acceptance game 2mmp7qxl\\fixture game",
+        "--godot-path",
+        "C:\\Users\\lenovo\\devel\\godot\\Godot_v4.7.2-stable_win64.exe\\Godot_v4.7.2-stable_win64_console.exe",
+        "--blender-path",
+        "C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe",
+        "run",
+        "paid-safety"
+      ],
+      "exit_code": 3,
+      "stdout": "{\"workflow_id\":\"WF-PAID-66545248\",\"status\":\"BLOCKED\",\"pending_approval_id\":\"APP-cd5e731b\",\"completed_tasks\":[],\"failed_tasks\":[],\"blocked_tasks\":[\"WF-PAID-66545248-T2\"],\"error_message\":null}",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\installed-delivery-env\\Scripts\\gamefactory.exe",
+        "--json",
+        "--project",
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\acceptance game 2mmp7qxl\\fixture game",
+        "--godot-path",
+        "C:\\Users\\lenovo\\devel\\godot\\Godot_v4.7.2-stable_win64.exe\\Godot_v4.7.2-stable_win64_console.exe",
+        "--blender-path",
+        "C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe",
+        "approvals",
+        "--workflow",
+        "WF-PAID-66545248"
+      ],
+      "exit_code": 0,
+      "stdout": "[{\"id\":\"APP-cd5e731b\",\"workflow_id\":\"WF-PAID-66545248\",\"task_id\":\"WF-PAID-66545248-T2\",\"approval_type\":\"paid_generation\",\"status\":\"PENDING\",\"reason\":\"Paid external operation requires human approval per cost safety policy\",\"cost_class\":\"PAID\",\"operation_hash\":\"b347f014adcc16df566040c42edcf9bcfbeeb7dc2daf43bdd3bdbcf3abbc89d6\",\"actor\":null,\"comment\":null,\"requested_at\":\"2026-09-26T23:59:08.858863+00:00\",\"decided_at\":null,\"artifact_ids\":[\"ART-b3aaf0a1\"]}]",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\installed-delivery-env\\Scripts\\gamefactory.exe",
+        "--json",
+        "--project",
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\acceptance game 2mmp7qxl\\fixture game",
+        "--godot-path",
+        "C:\\Users\\lenovo\\devel\\godot\\Godot_v4.7.2-stable_win64.exe\\Godot_v4.7.2-stable_win64_console.exe",
+        "--blender-path",
+        "C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe",
+        "reject",
+        "APP-cd5e731b",
+        "--comment",
+        "Explicit fake-provider rejection test"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"id\":\"APP-cd5e731b\",\"workflow_id\":\"WF-PAID-66545248\",\"task_id\":\"WF-PAID-66545248-T2\",\"approval_type\":\"paid_generation\",\"status\":\"REJECTED\",\"reason\":\"Paid external operation requires human approval per cost safety policy\",\"cost_class\":\"PAID\",\"operation_hash\":\"b347f014adcc16df566040c42edcf9bcfbeeb7dc2daf43bdd3bdbcf3abbc89d6\",\"actor\":\"lenovo\",\"comment\":\"Explicit fake-provider rejection test\",\"requested_at\":\"2026-09-26T23:59:08.858863+00:00\",\"decided_at\":\"2026-09-26T23:59:09.546412+00:00\",\"artifact_ids\":[\"ART-b3aaf0a1\"]}",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\installed-delivery-env\\Scripts\\gamefactory.exe",
+        "--json",
+        "--project",
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\acceptance game 2mmp7qxl\\fixture game",
+        "--godot-path",
+        "C:\\Users\\lenovo\\devel\\godot\\Godot_v4.7.2-stable_win64.exe\\Godot_v4.7.2-stable_win64_console.exe",
+        "--blender-path",
+        "C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe",
+        "resume",
+        "WF-PAID-66545248"
+      ],
+      "exit_code": 2,
+      "stdout": "{\"workflow_id\":\"WF-PAID-66545248\",\"status\":\"FAILED\",\"pending_approval_id\":null,\"completed_tasks\":[],\"failed_tasks\":[\"WF-PAID-66545248-T2\"],\"blocked_tasks\":[],\"error_message\":\"Task 'WF-PAID-66545248-T2' rejected by human operator: Explicit fake-provider rejection test\"}",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\installed-delivery-env\\Scripts\\gamefactory.exe",
+        "--json",
+        "--project",
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\acceptance game 2mmp7qxl\\fixture game",
+        "--godot-path",
+        "C:\\Users\\lenovo\\devel\\godot\\Godot_v4.7.2-stable_win64.exe\\Godot_v4.7.2-stable_win64_console.exe",
+        "--blender-path",
+        "C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe",
+        "inspect",
+        "WF-PAID-66545248"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"workflow\":{\"id\":\"WF-PAID-66545248\",\"project_id\":\"factory-minimal-fixture\",\"name\":\"Paid Safety Workflow\",\"status\":\"FAILED\",\"created_at\":\"2026-09-26T23:59:08.708207+00:00\",\"updated_at\":\"2026-09-26T23:59:09.970567+00:00\"},\"tasks\":[{\"id\":\"WF-PAID-66545248-T1\",\"workflow_id\":\"WF-PAID-66545248\",\"name\":\"Preparation Task\",\"task_type\":\"inspect_project\",\"cost_class\":\"LOCAL\",\"depends_on\":[],\"status\":\"COMPLETED\",\"parameters\":{},\"max_retries\":1,\"timeout_seconds\":60.0,\"created_at\":\"2026-09-26T23:59:08.708207+00:00\",\"updated_at\":\"2026-09-26T23:59:08.816861+00:00\"},{\"id\":\"WF-PAID-66545248-T2\",\"workflow_id\":\"WF-PAID-66545248\",\"name\":\"Paid Generation Task\",\"task_type\":\"paid_generation\",\"cost_class\":\"PAID\",\"depends_on\":[\"WF-PAID-66545248-T1\"],\"status\":\"FAILED\",\"parameters\":{\"prompt\":\"Space Cruiser\",\"cost\":10.0,\"cost_unit\":\"fake_credits\"},\"max_retries\":1,\"timeout_seconds\":60.0,\"created_at\":\"2026-09-26T23:59:08.708207+00:00\",\"updated_at\":\"2026-09-26T23:59:09.961158+00:00\"}],\"executions\":[{\"id\":\"EXEC-83160b0b\",\"task_id\":\"WF-PAID-66545248-T1\",\"attempt_number\":1,\"status\":\"COMPLETED\",\"started_at\":\"2026-09-26T23:59:08.765740+00:00\",\"completed_at\":\"2026-09-26T23:59:08.814860+00:00\",\"external_op_id\":null,\"pid\":null,\"host\":null,\"error_message\":null,\"exit_code\":null,\"stdout\":\"Inspected project structure successfully\",\"stderr\":null,\"cost\":0.0,\"estimated_cost\":0.0,\"cost_unit\":\"provider_units\",\"provider\":null,\"retryable\":false}],\"artifacts\":[{\"id\":\"ART-b3aaf0a1\",\"workflow_id\":\"WF-PAID-66545248\",\"task_id\":\"WF-PAID-66545248-T1\",\"artifact_type\":\"inspection_report\",\"producer\":\"DemoProjectInspector\",\"relative_path\":\".gamefactory/artifacts/WF-PAID-66545248/WF-PAID-66545248-T1/attempt-1/inspection.md\",\"content_hash\":\"5ac691cc608de4aa40d14e860e7f1a7d731fb4b0767cbf63e0096301211b79cd\",\"file_size\":164,\"validation_state\":\"VALID\",\"created_at\":\"2026-09-26T23:59:08.787358+00:00\"}],\"evidence\":[{\"id\":\"EVI-6c3cf8eb\",\"task_id\":\"WF-PAID-66545248-T1\",\"execution_id\":\"EXEC-83160b0b\",\"evidence_type\":\"execution:inspect_project\",\"summary\":\"Task output artifact registered\",\"raw_data\":{\"schema_version\":1,\"gate_id\":\"GATE-8adb53da\",\"artifacts\":[{\"artifact_id\":\"ART-b3aaf0a1\",\"status\":\"VERIFIED\",\"content_hash\":\"5ac691cc608de4aa40d14e860e7f1a7d731fb4b0767cbf63e0096301211b79cd\",\"file_size\":164}]},\"created_at\":\"2026-09-26T23:59:08.807861+00:00\"}],\"gates\":[{\"id\":\"GATE-8adb53da\",\"task_id\":\"WF-PAID-66545248-T1\",\"gate_type\":\"result:inspect_project\",\"status\":\"PASSED\",\"evaluated_at\":\"2026-09-26T23:59:08.801284+00:00\",\"reason\":\"Execution output passed its registered deterministic result validator\"}],\"approvals\":[{\"id\":\"APP-cd5e731b\",\"workflow_id\":\"WF-PAID-66545248\",\"task_id\":\"WF-PAID-66545248-T2\",\"approval_type\":\"paid_generation\",\"status\":\"REJECTED\",\"reason\":\"Paid external operation requires human approval per cost safety policy\",\"cost_class\":\"PAID\",\"operation_hash\":\"b347f014adcc16df566040c42edcf9bcfbeeb7dc2daf43bdd3bdbcf3abbc89d6\",\"actor\":\"lenovo\",\"comment\":\"Explicit fake-provider rejection test\",\"requested_at\":\"2026-09-26T23:59:08.858863+00:00\",\"decided_at\":\"2026-09-26T23:59:09.546412+00:00\",\"artifact_ids\":[\"ART-b3aaf0a1\"]}],\"paid_provider_invocations\":0}",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\installed-delivery-env\\Scripts\\gamefactory.exe",
+        "--json",
+        "--project",
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\acceptance game 2mmp7qxl\\fixture game",
+        "--godot-path",
+        "C:\\Users\\lenovo\\devel\\godot\\Godot_v4.7.2-stable_win64.exe\\Godot_v4.7.2-stable_win64_console.exe",
+        "--blender-path",
+        "C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe",
+        "status"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"project\":{\"id\":\"factory-minimal-fixture\",\"name\":\"Factory Minimal Fixture\",\"root\":\"C:\\\\Users\\\\lenovo\\\\devel\\\\ai-game-factory\\\\.verification\\\\acceptance game 2mmp7qxl\\\\fixture game\",\"engine\":\"godot\",\"targets\":[\"desktop\"],\"godot_project\":true,\"main_scene\":\"res://Main.tscn\"},\"capabilities\":{\"engine.godot.detect\":{\"name\":\"engine.godot.detect\",\"description\":\"Detect and inspect Godot executable\",\"status\":\"AVAILABLE\",\"provider\":\"godot\",\"requires_approval\":false,\"details\":{\"version\":\"4.7.2.stable.official.ed1daf0bf\",\"executable_path\":\"C:\\\\Users\\\\lenovo\\\\devel\\\\godot\\\\Godot_v4.7.2-stable_win64.exe\\\\Godot_v4.7.2-stable_win64_console.exe\",\"details\":{\"raw_version\":\"4.7.2.stable.official.ed1daf0bf\"}}},\"dcc.blender.detect\":{\"name\":\"dcc.blender.detect\",\"description\":\"Detect and inspect Blender executable\",\"status\":\"AVAILABLE\",\"provider\":\"blender\",\"requires_approval\":false,\"details\":{\"version\":\"Blender 5.2.1 LTS\",\"executable_path\":\"C:\\\\Program Files\\\\Blender Foundation\\\\Blender 5.2\\\\blender.exe\",\"details\":{\"raw_version\":\"Blender 5.2.1 LTS\"}}},\"asset.3d.meshy\":{\"name\":\"asset.3d.meshy\",\"description\":\"Meshy provider boundary (generation not implemented in V0.1)\",\"status\":\"UNAVAILABLE\",\"provider\":\"meshy\",\"requires_approval\":true,\"details\":{\"is_configured\":true,\"cost_class\":\"PAID\",\"milestone\":\"V0.1 boundary only\",\"implemented\":false}},\"workflow.dag.execute\":{\"name\":\"workflow.dag.execute\",\"description\":\"Sequential DAG workflow orchestration with state machine\",\"status\":\"AVAILABLE\",\"provider\":\"core\",\"requires_approval\":false,\"details\":{}},\"security.policy.enforce\":{\"name\":\"security.policy.enforce\",\"description\":\"Centralized cost and operation policy enforcement\",\"status\":\"AVAILABLE\",\"provider\":\"core\",\"requires_approval\":false,\"details\":{}},\"artifacts.hash.verify\":{\"name\":\"artifacts.hash.verify\",\"description\":\"Cryptographic SHA-256 artifact verification and evidence collection\",\"status\":\"AVAILABLE\",\"provider\":\"core\",\"requires_approval\":false,\"details\":{}}},\"workflows\":[{\"id\":\"WF-PAID-66545248\",\"project_id\":\"factory-minimal-fixture\",\"name\":\"Paid Safety Workflow\",\"status\":\"FAILED\",\"created_at\":\"2026-09-26T23:59:08.708207+00:00\",\"updated_at\":\"2026-09-26T23:59:09.970567+00:00\"},{\"id\":\"WF-PAID-56a6d41f\",\"project_id\":\"factory-minimal-fixture\",\"name\":\"Paid Safety Workflow\",\"status\":\"COMPLETED\",\"created_at\":\"2026-09-26T23:59:05.737644+00:00\",\"updated_at\":\"2026-09-26T23:59:07.343277+00:00\"},{\"id\":\"WF-FAIL-df34edbb\",\"project_id\":\"factory-minimal-fixture\",\"name\":\"Deterministic Failure Workflow\",\"status\":\"COMPLETED\",\"created_at\":\"2026-09-26T23:59:04.027371+00:00\",\"updated_at\":\"2026-09-26T23:59:05.054204+00:00\"},{\"id\":\"WF-DEMO-d8585eed\",\"project_id\":\"factory-minimal-fixture\",\"name\":\"Demo End-to-End Workflow\",\"status\":\"COMPLETED\",\"created_at\":\"2026-09-26T23:59:00.373896+00:00\",\"updated_at\":\"2026-09-26T23:59:02.229399+00:00\"}],\"pending_approvals\":[],\"recent_executions\":[{\"id\":\"EXEC-83160b0b\",\"task_id\":\"WF-PAID-66545248-T1\",\"attempt_number\":1,\"status\":\"COMPLETED\",\"started_at\":\"2026-09-26T23:59:08.765740+00:00\",\"completed_at\":\"2026-09-26T23:59:08.814860+00:00\",\"external_op_id\":null,\"pid\":null,\"host\":null,\"error_message\":null,\"exit_code\":null,\"stdout\":\"Inspected project structure successfully\",\"stderr\":null,\"cost\":0.0,\"estimated_cost\":0.0,\"cost_unit\":\"provider_units\",\"provider\":null,\"retryable\":false},{\"id\":\"EXEC-84f3457a\",\"task_id\":\"WF-PAID-56a6d41f-T1\",\"attempt_number\":1,\"status\":\"COMPLETED\",\"started_at\":\"2026-09-26T23:59:05.797317+00:00\",\"completed_at\":\"2026-09-26T23:59:05.847872+00:00\",\"external_op_id\":null,\"pid\":null,\"host\":null,\"error_message\":null,\"exit_code\":null,\"stdout\":\"Inspected project structure successfully\",\"stderr\":null,\"cost\":0.0,\"estimated_cost\":0.0,\"cost_unit\":\"provider_units\",\"provider\":null,\"retryable\":false},{\"id\":\"EXEC-83f89bb6\",\"task_id\":\"WF-PAID-56a6d41f-T2\",\"attempt_number\":1,\"status\":\"COMPLETED\",\"started_at\":\"2026-09-26T23:59:07.288676+00:00\",\"completed_at\":\"2026-09-26T23:59:07.331374+00:00\",\"external_op_id\":\"FAKE-OP-0001\",\"pid\":null,\"host\":null,\"error_message\":null,\"exit_code\":null,\"stdout\":\"Generated asset with operation ID FAKE-OP-0001\",\"stderr\":null,\"cost\":5.0,\"estimated_cost\":10.0,\"cost_unit\":\"fake_credits\",\"provider\":\"fake_asset_gen\",\"retryable\":false},{\"id\":\"EXEC-f70aafa0\",\"task_id\":\"WF-FAIL-df34edbb-T1\",\"attempt_number\":1,\"status\":\"COMPLETED\",\"started_at\":\"2026-09-26T23:59:04.080067+00:00\",\"completed_at\":\"2026-09-26T23:59:04.130367+00:00\",\"external_op_id\":null,\"pid\":null,\"host\":null,\"error_message\":null,\"exit_code\":null,\"stdout\":\"Inspected project structure successfully\",\"stderr\":null,\"cost\":0.0,\"estimated_cost\":0.0,\"cost_unit\":\"provider_units\",\"provider\":null,\"retryable\":false},{\"id\":\"EXEC-9aeef6fd\",\"task_id\":\"WF-FAIL-df34edbb-T2\",\"attempt_number\":1,\"status\":\"FAILED\",\"started_at\":\"2026-09-26T23:59:04.152401+00:00\",\"completed_at\":\"2026-09-26T23:59:04.168017+00:00\",\"external_op_id\":null,\"pid\":null,\"host\":null,\"error_message\":\"Attempt 1 failed: Simulated upstream transient failure\",\"exit_code\":null,\"stdout\":null,\"stderr\":null,\"cost\":0.0,\"estimated_cost\":0.0,\"cost_unit\":\"provider_units\",\"provider\":null,\"retryable\":true},{\"id\":\"EXEC-5db88e41\",\"task_id\":\"WF-FAIL-df34edbb-T2\",\"attempt_number\":2,\"status\":\"COMPLETED\",\"started_at\":\"2026-09-26T23:59:04.937396+00:00\",\"completed_at\":\"2026-09-26T23:59:04.962393+00:00\",\"external_op_id\":null,\"pid\":null,\"host\":null,\"error_message\":null,\"exit_code\":null,\"stdout\":\"Attempt 2 succeeded after retry\",\"stderr\":null,\"cost\":0.0,\"estimated_cost\":0.0,\"cost_unit\":\"provider_units\",\"provider\":null,\"retryable\":false},{\"id\":\"EXEC-5f7d2a0c\",\"task_id\":\"WF-FAIL-df34edbb-T3\",\"attempt_number\":1,\"status\":\"COMPLETED\",\"started_at\":\"2026-09-26T23:59:04.987416+00:00\",\"completed_at\":\"2026-09-26T23:59:05.041448+00:00\",\"external_op_id\":null,\"pid\":null,\"host\":null,\"error_message\":null,\"exit_code\":null,\"stdout\":\"Inspected project structure successfully\",\"stderr\":null,\"cost\":0.0,\"estimated_cost\":0.0,\"cost_unit\":\"provider_units\",\"provider\":null,\"retryable\":false},{\"id\":\"EXEC-f37b65d1\",\"task_id\":\"WF-DEMO-d8585eed-T1\",\"attempt_number\":1,\"status\":\"COMPLETED\",\"started_at\":\"2026-09-26T23:59:00.412469+00:00\",\"completed_at\":\"2026-09-26T23:59:00.467848+00:00\",\"external_op_id\":null,\"pid\":null,\"host\":null,\"error_message\":null,\"exit_code\":null,\"stdout\":\"Inspected project structure successfully\",\"stderr\":null,\"cost\":0.0,\"estimated_cost\":0.0,\"cost_unit\":\"provider_units\",\"provider\":null,\"retryable\":false},{\"id\":\"EXEC-6973f652\",\"task_id\":\"WF-DEMO-d8585eed-T2\",\"attempt_number\":1,\"status\":\"COMPLETED\",\"started_at\":\"2026-09-26T23:59:00.497799+00:00\",\"completed_at\":\"2026-09-26T23:59:00.530159+00:00\",\"external_op_id\":null,\"pid\":null,\"host\":null,\"error_message\":null,\"exit_code\":null,\"stdout\":\"Generated concept specification for Heavy Mech Enemy\",\"stderr\":null,\"cost\":0.0,\"estimated_cost\":0.0,\"cost_unit\":\"provider_units\",\"provider\":null,\"retryable\":false},{\"id\":\"EXEC-1120f8e8\",\"task_id\":\"WF-DEMO-d8585eed-T3\",\"attempt_number\":1,\"status\":\"COMPLETED\",\"started_at\":\"2026-09-26T23:59:00.556959+00:00\",\"completed_at\":\"2026-09-26T23:59:00.582272+00:00\",\"external_op_id\":null,\"pid\":null,\"host\":null,\"error_message\":null,\"exit_code\":null,\"stdout\":\"Found 1 concept specification artifact(s) for engine validation\",\"stderr\":null,\"cost\":0.0,\"estimated_cost\":0.0,\"cost_unit\":\"provider_units\",\"provider\":null,\"retryable\":false},{\"id\":\"EXEC-ef897ebb\",\"task_id\":\"WF-DEMO-d8585eed-T4\",\"attempt_number\":1,\"status\":\"COMPLETED\",\"started_at\":\"2026-09-26T23:59:02.018881+00:00\",\"completed_at\":\"2026-09-26T23:59:02.053701+00:00\",\"external_op_id\":\"FAKE-OP-0001\",\"pid\":null,\"host\":null,\"error_message\":null,\"exit_code\":null,\"stdout\":\"Generated asset with operation ID FAKE-OP-0001\",\"stderr\":null,\"cost\":5.0,\"estimated_cost\":5.0,\"cost_unit\":\"fake_credits\",\"provider\":\"fake_asset_gen\",\"retryable\":false},{\"id\":\"EXEC-952b6bff\",\"task_id\":\"WF-DEMO-d8585eed-T5\",\"attempt_number\":1,\"status\":\"COMPLETED\",\"started_at\":\"2026-09-26T23:59:02.086964+00:00\",\"completed_at\":\"2026-09-26T23:59:02.157680+00:00\",\"external_op_id\":null,\"pid\":null,\"host\":null,\"error_message\":null,\"exit_code\":0,\"stdout\":\"Controlled execution completed successfully\\r\\n\",\"stderr\":\"\",\"cost\":0.0,\"estimated_cost\":0.0,\"cost_unit\":\"provider_units\",\"provider\":null,\"retryable\":false},{\"id\":\"EXEC-7972e59c\",\"task_id\":\"WF-DEMO-d8585eed-T6\",\"attempt_number\":1,\"status\":\"COMPLETED\",\"started_at\":\"2026-09-26T23:59:02.189322+00:00\",\"completed_at\":\"2026-09-26T23:59:02.219396+00:00\",\"external_op_id\":null,\"pid\":null,\"host\":null,\"error_message\":null,\"exit_code\":null,\"stdout\":\"Requested independent verification of registered workflow artifacts\",\"stderr\":null,\"cost\":0.0,\"estimated_cost\":0.0,\"cost_unit\":\"provider_units\",\"provider\":null,\"retryable\":false}]}",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\installed-delivery-env\\Scripts\\gamefactory.exe",
+        "--json",
+        "--project",
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\acceptance game 2mmp7qxl\\policy game",
+        "--godot-path",
+        "C:\\Users\\lenovo\\devel\\godot\\Godot_v4.7.2-stable_win64.exe\\Godot_v4.7.2-stable_win64_console.exe",
+        "--blender-path",
+        "C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe",
+        "init"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"project_root\":\"C:\\\\Users\\\\lenovo\\\\devel\\\\ai-game-factory\\\\.verification\\\\acceptance game 2mmp7qxl\\\\policy game\",\"project_id\":\"factory-minimal-fixture\",\"project_name\":\"Factory Minimal Fixture\",\"already_initialized\":false,\"godot_project\":true,\"main_scene\":\"res://Main.tscn\",\"scripts\":1,\"scenes\":1,\"test_files\":0,\"exports\":false,\"git\":false,\"discovery_file\":\"C:\\\\Users\\\\lenovo\\\\devel\\\\ai-game-factory\\\\.verification\\\\acceptance game 2mmp7qxl\\\\policy game\\\\.gamefactory\\\\discovery.json\"}",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\installed-delivery-env\\Scripts\\gamefactory.exe",
+        "--json",
+        "--project",
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\acceptance game 2mmp7qxl\\policy game",
+        "--godot-path",
+        "C:\\Users\\lenovo\\devel\\godot\\Godot_v4.7.2-stable_win64.exe\\Godot_v4.7.2-stable_win64_console.exe",
+        "--blender-path",
+        "C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe",
+        "run",
+        "paid-safety"
+      ],
+      "exit_code": 3,
+      "stdout": "{\"workflow_id\":\"WF-PAID-50ab6f6a\",\"status\":\"BLOCKED\",\"pending_approval_id\":null,\"completed_tasks\":[],\"failed_tasks\":[],\"blocked_tasks\":[\"WF-PAID-50ab6f6a-T2\"],\"error_message\":\"Operation would exceed total project budget: current spent 0.00 + 10.00 > 1.00 cost units\"}",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\installed-delivery-env\\Scripts\\gamefactory.exe",
+        "--json",
+        "--project",
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\acceptance game 2mmp7qxl\\policy game",
+        "--godot-path",
+        "C:\\Users\\lenovo\\devel\\godot\\Godot_v4.7.2-stable_win64.exe\\Godot_v4.7.2-stable_win64_console.exe",
+        "--blender-path",
+        "C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe",
+        "inspect",
+        "WF-PAID-50ab6f6a"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"workflow\":{\"id\":\"WF-PAID-50ab6f6a\",\"project_id\":\"factory-minimal-fixture\",\"name\":\"Paid Safety Workflow\",\"status\":\"BLOCKED\",\"created_at\":\"2026-09-26T23:59:11.584336+00:00\",\"updated_at\":\"2026-09-26T23:59:11.710378+00:00\"},\"tasks\":[{\"id\":\"WF-PAID-50ab6f6a-T1\",\"workflow_id\":\"WF-PAID-50ab6f6a\",\"name\":\"Preparation Task\",\"task_type\":\"inspect_project\",\"cost_class\":\"LOCAL\",\"depends_on\":[],\"status\":\"COMPLETED\",\"parameters\":{},\"max_retries\":1,\"timeout_seconds\":60.0,\"created_at\":\"2026-09-26T23:59:11.584336+00:00\",\"updated_at\":\"2026-09-26T23:59:11.681588+00:00\"},{\"id\":\"WF-PAID-50ab6f6a-T2\",\"workflow_id\":\"WF-PAID-50ab6f6a\",\"name\":\"Paid Generation Task\",\"task_type\":\"paid_generation\",\"cost_class\":\"PAID\",\"depends_on\":[\"WF-PAID-50ab6f6a-T1\"],\"status\":\"BLOCKED\",\"parameters\":{\"prompt\":\"Space Cruiser\",\"cost\":10.0,\"cost_unit\":\"fake_credits\"},\"max_retries\":1,\"timeout_seconds\":60.0,\"created_at\":\"2026-09-26T23:59:11.584336+00:00\",\"updated_at\":\"2026-09-26T23:59:11.700804+00:00\"}],\"executions\":[{\"id\":\"EXEC-5c0e545f\",\"task_id\":\"WF-PAID-50ab6f6a-T1\",\"attempt_number\":1,\"status\":\"COMPLETED\",\"started_at\":\"2026-09-26T23:59:11.627342+00:00\",\"completed_at\":\"2026-09-26T23:59:11.679583+00:00\",\"external_op_id\":null,\"pid\":null,\"host\":null,\"error_message\":null,\"exit_code\":null,\"stdout\":\"Inspected project structure successfully\",\"stderr\":null,\"cost\":0.0,\"estimated_cost\":0.0,\"cost_unit\":\"provider_units\",\"provider\":null,\"retryable\":false}],\"artifacts\":[{\"id\":\"ART-a4204302\",\"workflow_id\":\"WF-PAID-50ab6f6a\",\"task_id\":\"WF-PAID-50ab6f6a-T1\",\"artifact_type\":\"inspection_report\",\"producer\":\"DemoProjectInspector\",\"relative_path\":\".gamefactory/artifacts/WF-PAID-50ab6f6a/WF-PAID-50ab6f6a-T1/attempt-1/inspection.md\",\"content_hash\":\"ffb48cef011c00e5ccff537d279f0289efbfea255d9f1ce289ab6ddd74e93757\",\"file_size\":163,\"validation_state\":\"VALID\",\"created_at\":\"2026-09-26T23:59:11.653590+00:00\"}],\"evidence\":[{\"id\":\"EVI-c38d6203\",\"task_id\":\"WF-PAID-50ab6f6a-T1\",\"execution_id\":\"EXEC-5c0e545f\",\"evidence_type\":\"execution:inspect_project\",\"summary\":\"Task output artifact registered\",\"raw_data\":{\"schema_version\":1,\"gate_id\":\"GATE-25d8659d\",\"artifacts\":[{\"artifact_id\":\"ART-a4204302\",\"status\":\"VERIFIED\",\"content_hash\":\"ffb48cef011c00e5ccff537d279f0289efbfea255d9f1ce289ab6ddd74e93757\",\"file_size\":163}]},\"created_at\":\"2026-09-26T23:59:11.671323+00:00\"}],\"gates\":[{\"id\":\"GATE-25d8659d\",\"task_id\":\"WF-PAID-50ab6f6a-T1\",\"gate_type\":\"result:inspect_project\",\"status\":\"PASSED\",\"evaluated_at\":\"2026-09-26T23:59:11.666324+00:00\",\"reason\":\"Execution output passed its registered deterministic result validator\"}],\"approvals\":[],\"paid_provider_invocations\":0}",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\installed-delivery-env\\Scripts\\gamefactory.exe",
+        "--json",
+        "--project",
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\acceptance game 2mmp7qxl\\policy game",
+        "--godot-path",
+        "C:\\Users\\lenovo\\devel\\godot\\Godot_v4.7.2-stable_win64.exe\\Godot_v4.7.2-stable_win64_console.exe",
+        "--blender-path",
+        "C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe",
+        "run",
+        "demo"
+      ],
+      "exit_code": 3,
+      "stdout": "{\"workflow_id\":\"WF-DEMO-2132349c\",\"status\":\"BLOCKED\",\"pending_approval_id\":\"APP-b0b9f2f5\",\"completed_tasks\":[],\"failed_tasks\":[],\"blocked_tasks\":[\"WF-DEMO-2132349c-T2\"],\"error_message\":null}",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\installed-delivery-env\\Scripts\\gamefactory.exe",
+        "--json",
+        "--project",
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\acceptance game 2mmp7qxl\\policy game",
+        "--godot-path",
+        "C:\\Users\\lenovo\\devel\\godot\\Godot_v4.7.2-stable_win64.exe\\Godot_v4.7.2-stable_win64_console.exe",
+        "--blender-path",
+        "C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe",
+        "inspect",
+        "WF-DEMO-2132349c"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"workflow\":{\"id\":\"WF-DEMO-2132349c\",\"project_id\":\"factory-minimal-fixture\",\"name\":\"Demo End-to-End Workflow\",\"status\":\"BLOCKED\",\"created_at\":\"2026-09-26T23:59:12.384189+00:00\",\"updated_at\":\"2026-09-26T23:59:12.542541+00:00\"},\"tasks\":[{\"id\":\"WF-DEMO-2132349c-T1\",\"workflow_id\":\"WF-DEMO-2132349c\",\"name\":\"Inspect Project Structure\",\"task_type\":\"inspect_project\",\"cost_class\":\"LOCAL\",\"depends_on\":[],\"status\":\"COMPLETED\",\"parameters\":{},\"max_retries\":1,\"timeout_seconds\":60.0,\"created_at\":\"2026-09-26T23:59:12.384189+00:00\",\"updated_at\":\"2026-09-26T23:59:12.492476+00:00\"},{\"id\":\"WF-DEMO-2132349c-T2\",\"workflow_id\":\"WF-DEMO-2132349c\",\"name\":\"Generate Asset Concept\",\"task_type\":\"generate_concept\",\"cost_class\":\"LOCAL\",\"depends_on\":[\"WF-DEMO-2132349c-T1\"],\"status\":\"BLOCKED\",\"parameters\":{\"concept_name\":\"Heavy Mech Enemy\",\"poly_budget\":15000},\"max_retries\":1,\"timeout_seconds\":60.0,\"created_at\":\"2026-09-26T23:59:12.384189+00:00\",\"updated_at\":\"2026-09-26T23:59:12.534331+00:00\"},{\"id\":\"WF-DEMO-2132349c-T3\",\"workflow_id\":\"WF-DEMO-2132349c\",\"name\":\"Validate Concept Artifact\",\"task_type\":\"validate_artifact\",\"cost_class\":\"LOCAL\",\"depends_on\":[\"WF-DEMO-2132349c-T2\"],\"status\":\"PENDING\",\"parameters\":{},\"max_retries\":1,\"timeout_seconds\":60.0,\"created_at\":\"2026-09-26T23:59:12.384189+00:00\",\"updated_at\":\"2026-09-26T23:59:12.384189+00:00\"},{\"id\":\"WF-DEMO-2132349c-T4\",\"workflow_id\":\"WF-DEMO-2132349c\",\"name\":\"Paid 3D Asset Generation\",\"task_type\":\"paid_generation\",\"cost_class\":\"PAID\",\"depends_on\":[\"WF-DEMO-2132349c-T3\"],\"status\":\"PENDING\",\"parameters\":{\"prompt\":\"Heavy Mech Enemy 3D Model\",\"format\":\"glb\",\"cost\":5.0,\"cost_unit\":\"fake_credits\"},\"max_retries\":1,\"timeout_seconds\":60.0,\"created_at\":\"2026-09-26T23:59:12.384189+00:00\",\"updated_at\":\"2026-09-26T23:59:12.384189+00:00\"},{\"id\":\"WF-DEMO-2132349c-T5\",\"workflow_id\":\"WF-DEMO-2132349c\",\"name\":\"Controlled Subprocess Execution\",\"task_type\":\"controlled_command\",\"cost_class\":\"LOCAL\",\"depends_on\":[\"WF-DEMO-2132349c-T4\"],\"status\":\"PENDING\",\"parameters\":{},\"max_retries\":1,\"timeout_seconds\":60.0,\"created_at\":\"2026-09-26T23:59:12.384189+00:00\",\"updated_at\":\"2026-09-26T23:59:12.384189+00:00\"},{\"id\":\"WF-DEMO-2132349c-T6\",\"workflow_id\":\"WF-DEMO-2132349c\",\"name\":\"Record Evidence & Quality Gate\",\"task_type\":\"record_evidence\",\"cost_class\":\"LOCAL\",\"depends_on\":[\"WF-DEMO-2132349c-T5\"],\"status\":\"PENDING\",\"parameters\":{},\"max_retries\":1,\"timeout_seconds\":60.0,\"created_at\":\"2026-09-26T23:59:12.384189+00:00\",\"updated_at\":\"2026-09-26T23:59:12.384189+00:00\"}],\"executions\":[{\"id\":\"EXEC-5a2199bc\",\"task_id\":\"WF-DEMO-2132349c-T1\",\"attempt_number\":1,\"status\":\"COMPLETED\",\"started_at\":\"2026-09-26T23:59:12.437266+00:00\",\"completed_at\":\"2026-09-26T23:59:12.490808+00:00\",\"external_op_id\":null,\"pid\":null,\"host\":null,\"error_message\":null,\"exit_code\":null,\"stdout\":\"Inspected project structure successfully\",\"stderr\":null,\"cost\":0.0,\"estimated_cost\":0.0,\"cost_unit\":\"provider_units\",\"provider\":null,\"retryable\":false}],\"artifacts\":[{\"id\":\"ART-3b07d056\",\"workflow_id\":\"WF-DEMO-2132349c\",\"task_id\":\"WF-DEMO-2132349c-T1\",\"artifact_type\":\"inspection_report\",\"producer\":\"DemoProjectInspector\",\"relative_path\":\".gamefactory/artifacts/WF-DEMO-2132349c/WF-DEMO-2132349c-T1/attempt-1/inspection.md\",\"content_hash\":\"ec6545d2913d215a06a8b6de043d5f36276d160bef3e5ea95def61e8acbcff2f\",\"file_size\":163,\"validation_state\":\"VALID\",\"created_at\":\"2026-09-26T23:59:12.460350+00:00\"}],\"evidence\":[{\"id\":\"EVI-74225a74\",\"task_id\":\"WF-DEMO-2132349c-T1\",\"execution_id\":\"EXEC-5a2199bc\",\"evidence_type\":\"execution:inspect_project\",\"summary\":\"Task output artifact registered\",\"raw_data\":{\"schema_version\":1,\"gate_id\":\"GATE-d921c823\",\"artifacts\":[{\"artifact_id\":\"ART-3b07d056\",\"status\":\"VERIFIED\",\"content_hash\":\"ec6545d2913d215a06a8b6de043d5f36276d160bef3e5ea95def61e8acbcff2f\",\"file_size\":163}]},\"created_at\":\"2026-09-26T23:59:12.482965+00:00\"}],\"gates\":[{\"id\":\"GATE-d921c823\",\"task_id\":\"WF-DEMO-2132349c-T1\",\"gate_type\":\"result:inspect_project\",\"status\":\"PASSED\",\"evaluated_at\":\"2026-09-26T23:59:12.475315+00:00\",\"reason\":\"Execution output passed its registered deterministic result validator\"}],\"approvals\":[{\"id\":\"APP-b0b9f2f5\",\"workflow_id\":\"WF-DEMO-2132349c\",\"task_id\":\"WF-DEMO-2132349c-T2\",\"approval_type\":\"repository_write\",\"status\":\"PENDING\",\"reason\":\"Repository modification requires approval\",\"cost_class\":\"LOCAL\",\"operation_hash\":\"619c3c6fe41d0294199a16052a75203055a61df243b134e909a160361f92872e\",\"actor\":null,\"comment\":null,\"requested_at\":\"2026-09-26T23:59:12.526045+00:00\",\"decided_at\":null,\"artifact_ids\":[\"ART-3b07d056\"]}],\"paid_provider_invocations\":0}",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\lenovo\\devel\\godot\\Godot_v4.7.2-stable_win64.exe\\Godot_v4.7.2-stable_win64_console.exe",
+        "--headless",
+        "--path",
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\acceptance game 2mmp7qxl\\standalone game",
+        "--editor",
+        "--import"
+      ],
+      "exit_code": 0,
+      "stdout": "Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org\n\n[   0% ] \u001b[90m\u001b[1mfirst_scan_filesystem\u001b[22m | Started Projenin ilk başlatılması (5 steps)\u001b[39m\u001b[0m\n[   0% ] \u001b[90m\u001b[1mfirst_scan_filesystem\u001b[22m | Dosya yapısı taranıyor...\u001b[39m\u001b[0m\n[  16% ] \u001b[90m\u001b[1mfirst_scan_filesystem\u001b[22m | Genel sınıf isimleri yükleniyor...\u001b[39m\u001b[0m\n[  33% ] \u001b[90m\u001b[1mfirst_scan_filesystem\u001b[22m | GDExtension'lar doğrulanıyor...\u001b[39m\u001b[0m\n[  50% ] \u001b[90m\u001b[1mfirst_scan_filesystem\u001b[22m | Otomatik yükleme betikleri oluşturuluyor...\u001b[39m\u001b[0m\n[  66% ] \u001b[90m\u001b[1mfirst_scan_filesystem\u001b[22m | Eklentiler başlatılıyor...\u001b[39m\u001b[0m\n[  83% ] \u001b[90m\u001b[1mfirst_scan_filesystem\u001b[22m | Dosya taraması başlatılıyor...\u001b[39m\u001b[0m\n\u001b[92m[ DONE ]\u001b[39m \u001b[1mfirst_scan_filesystem\u001b[22m\n\u001b[0m\n[   0% ] \u001b[90m\u001b[1mloading_editor_layout\u001b[22m | Started Düzenleyici yükleniyor (5 steps)\u001b[39m\u001b[0m\n[   0% ] \u001b[90m\u001b[1mloading_editor_layout\u001b[22m | Düzenleyici yerleşim düzeni yükleniyor...\u001b[39m\u001b[0m\n[  16% ] \u001b[90m\u001b[1mloading_editor_layout\u001b[22m | Yuvalar yükleniyor...\u001b[39m\u001b[0m\n\u001b[92m[ DONE ]\u001b[39m \u001b[1mloading_editor_layout\u001b[22m\n\u001b[0m",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\lenovo\\devel\\godot\\Godot_v4.7.2-stable_win64.exe\\Godot_v4.7.2-stable_win64_console.exe",
+        "--headless",
+        "--path",
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\acceptance game 2mmp7qxl\\standalone game",
+        "--quit-after",
+        "2"
+      ],
+      "exit_code": 0,
+      "stdout": "Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org\n\nMinimal Godot fixture is running",
+      "stderr": ""
+    }
+  ],
+  "checks": {
+    "init_preserves_original_game_files": true,
+    "demo_restart_approval_completion": "WF-DEMO-d8585eed",
+    "failure_dependency_block_retry_history": "WF-FAIL-df34edbb",
+    "fake_paid_invocations": [
+      0,
+      1,
+      1
+    ],
+    "paid_workflow": "WF-PAID-56a6d41f",
+    "rejected_approval_never_invokes_provider": "WF-PAID-66545248",
+    "configured_budget_blocks_dispatch": "WF-PAID-50ab6f6a",
+    "configured_repository_write_requires_approval": "WF-DEMO-2132349c",
+    "godot_without_factory_runtime": true
+  },
+  "status": "PASSED",
+  "finished_at": "2026-09-26T23:59:15.934131+00:00"
+}

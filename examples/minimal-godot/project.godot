@@ -1,0 +1,11 @@
+; Minimal game fixture. No Factory runtime dependency.
+config_version=5
+
+[application]
+config/name="Factory Minimal Fixture"
+run/main_scene="res://Main.tscn"
+config/features=PackedStringArray("4.3", "GL Compatibility")
+
+[rendering]
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"

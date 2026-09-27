@@ -1,0 +1,145 @@
+{
+  "schema_version": 1,
+  "started_at": "2026-09-26T23:15:32.298556+00:00",
+  "platform": "win32",
+  "commands": [
+    {
+      "argv": [
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verify-venv\\Scripts\\gamefactory.exe",
+        "--version"
+      ],
+      "exit_code": 0,
+      "stdout": "gamefactory 0.1.0",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verify-venv\\Scripts\\gamefactory.exe",
+        "--help"
+      ],
+      "exit_code": 0,
+      "stdout": "usage: gamefactory [-h] [--version] [-p PROJECT] [--godot-path GODOT_PATH]\n                   [--blender-path BLENDER_PATH] [--json]\n                   {doctor,init,status,approvals,artifacts,run,resume,retry,approve,reject,inspect}\n                   ...\n\nLocal-first game development workflow orchestration\n\npositional arguments:\n  {doctor,init,status,approvals,artifacts,run,resume,retry,approve,reject,inspect}\n    run                 run a built-in demonstrator workflow\n\noptions:\n  -h, --help            show this help message and exit\n  --version             show program's version number and exit\n  -p PROJECT, --project PROJECT\n                        project directory (defaults to current directory)\n  --godot-path GODOT_PATH\n                        explicit Godot executable path\n  --blender-path BLENDER_PATH\n                        explicit Blender executable path\n  --json                emit machine-readable JSON",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verify-venv\\Scripts\\gamefactory.exe",
+        "--json",
+        "--project",
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\acceptance game g6h6hz8q\\fixture game",
+        "--godot-path",
+        "C:\\Users\\lenovo\\devel\\godot\\Godot_v4.7.2-stable_win64.exe\\Godot_v4.7.2-stable_win64_console.exe",
+        "--blender-path",
+        "C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe",
+        "doctor"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"project_root\":\"C:\\\\Users\\\\lenovo\\\\devel\\\\ai-game-factory\\\\.verification\\\\acceptance game g6h6hz8q\\\\fixture game\",\"configuration\":{\"status\":\"NOT_INITIALIZED\",\"project_root\":\"C:\\\\Users\\\\lenovo\\\\devel\\\\ai-game-factory\\\\.verification\\\\acceptance game g6h6hz8q\\\\fixture game\",\"message\":\"Run 'gamefactory init' inside an existing game project.\"},\"storage\":{\"status\":\"OK\",\"message\":\"SQLite create, migrate, and reopen succeeded\"},\"capabilities\":{\"engine.godot.detect\":{\"name\":\"engine.godot.detect\",\"description\":\"Detect and inspect Godot executable\",\"status\":\"AVAILABLE\",\"provider\":\"godot\",\"requires_approval\":false,\"details\":{\"version\":\"4.7.2.stable.official.ed1daf0bf\",\"executable_path\":\"C:\\\\Users\\\\lenovo\\\\devel\\\\godot\\\\Godot_v4.7.2-stable_win64.exe\\\\Godot_v4.7.2-stable_win64_console.exe\",\"details\":{\"raw_version\":\"4.7.2.stable.official.ed1daf0bf\"}}},\"dcc.blender.detect\":{\"name\":\"dcc.blender.detect\",\"description\":\"Detect and inspect Blender executable\",\"status\":\"AVAILABLE\",\"provider\":\"blender\",\"requires_approval\":false,\"details\":{\"version\":\"Blender 5.2.1 LTS\",\"executable_path\":\"C:\\\\Program Files\\\\Blender Foundation\\\\Blender 5.2\\\\blender.exe\",\"details\":{\"raw_version\":\"Blender 5.2.1 LTS\"}}},\"asset.3d.meshy\":{\"name\":\"asset.3d.meshy\",\"description\":\"Meshy provider boundary (generation not implemented in V0.1)\",\"status\":\"UNAVAILABLE\",\"provider\":\"meshy\",\"requires_approval\":true,\"details\":{\"is_configured\":true,\"cost_class\":\"PAID\",\"milestone\":\"V0.1 boundary only\",\"implemented\":false}},\"workflow.dag.execute\":{\"name\":\"workflow.dag.execute\",\"description\":\"Sequential DAG workflow orchestration with state machine\",\"status\":\"AVAILABLE\",\"provider\":\"core\",\"requires_approval\":false,\"details\":{}},\"security.policy.enforce\":{\"name\":\"security.policy.enforce\",\"description\":\"Centralized cost and operation policy enforcement\",\"status\":\"AVAILABLE\",\"provider\":\"core\",\"requires_approval\":false,\"details\":{}},\"artifacts.hash.verify\":{\"name\":\"artifacts.hash.verify\",\"description\":\"Cryptographic SHA-256 artifact verification and evidence collection\",\"status\":\"AVAILABLE\",\"provider\":\"core\",\"requires_approval\":false,\"details\":{}}}}",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verify-venv\\Scripts\\gamefactory.exe",
+        "--json",
+        "--project",
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\acceptance game g6h6hz8q\\fixture game",
+        "--godot-path",
+        "C:\\Users\\lenovo\\devel\\godot\\Godot_v4.7.2-stable_win64.exe\\Godot_v4.7.2-stable_win64_console.exe",
+        "--blender-path",
+        "C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe",
+        "init"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"project_root\":\"C:\\\\Users\\\\lenovo\\\\devel\\\\ai-game-factory\\\\.verification\\\\acceptance game g6h6hz8q\\\\fixture game\",\"project_id\":\"fixture-game\",\"project_name\":\"fixture game\",\"already_initialized\":false,\"godot_project\":true,\"main_scene\":\"res://Main.tscn\",\"scripts\":0,\"scenes\":1,\"exports\":false,\"git\":false}",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verify-venv\\Scripts\\gamefactory.exe",
+        "--json",
+        "--project",
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\acceptance game g6h6hz8q\\fixture game",
+        "--godot-path",
+        "C:\\Users\\lenovo\\devel\\godot\\Godot_v4.7.2-stable_win64.exe\\Godot_v4.7.2-stable_win64_console.exe",
+        "--blender-path",
+        "C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe",
+        "init"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"project_root\":\"C:\\\\Users\\\\lenovo\\\\devel\\\\ai-game-factory\\\\.verification\\\\acceptance game g6h6hz8q\\\\fixture game\",\"project_id\":\"fixture-game\",\"project_name\":\"fixture game\",\"already_initialized\":true,\"godot_project\":true,\"main_scene\":\"res://Main.tscn\",\"scripts\":0,\"scenes\":1,\"exports\":false,\"git\":false}",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verify-venv\\Scripts\\gamefactory.exe",
+        "--json",
+        "--project",
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\acceptance game g6h6hz8q\\fixture game",
+        "--godot-path",
+        "C:\\Users\\lenovo\\devel\\godot\\Godot_v4.7.2-stable_win64.exe\\Godot_v4.7.2-stable_win64_console.exe",
+        "--blender-path",
+        "C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe",
+        "status"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"project\":{\"id\":\"fixture-game\",\"name\":\"fixture game\",\"root\":\"C:\\\\Users\\\\lenovo\\\\devel\\\\ai-game-factory\\\\.verification\\\\acceptance game g6h6hz8q\\\\fixture game\",\"engine\":\"godot\",\"targets\":[\"desktop\"],\"godot_project\":true,\"main_scene\":\"res://Main.tscn\"},\"capabilities\":{\"engine.godot.detect\":{\"name\":\"engine.godot.detect\",\"description\":\"Detect and inspect Godot executable\",\"status\":\"AVAILABLE\",\"provider\":\"godot\",\"requires_approval\":false,\"details\":{\"version\":\"4.7.2.stable.official.ed1daf0bf\",\"executable_path\":\"C:\\\\Users\\\\lenovo\\\\devel\\\\godot\\\\Godot_v4.7.2-stable_win64.exe\\\\Godot_v4.7.2-stable_win64_console.exe\",\"details\":{\"raw_version\":\"4.7.2.stable.official.ed1daf0bf\"}}},\"dcc.blender.detect\":{\"name\":\"dcc.blender.detect\",\"description\":\"Detect and inspect Blender executable\",\"status\":\"AVAILABLE\",\"provider\":\"blender\",\"requires_approval\":false,\"details\":{\"version\":\"Blender 5.2.1 LTS\",\"executable_path\":\"C:\\\\Program Files\\\\Blender Foundation\\\\Blender 5.2\\\\blender.exe\",\"details\":{\"raw_version\":\"Blender 5.2.1 LTS\"}}},\"asset.3d.meshy\":{\"name\":\"asset.3d.meshy\",\"description\":\"Meshy provider boundary (generation not implemented in V0.1)\",\"status\":\"UNAVAILABLE\",\"provider\":\"meshy\",\"requires_approval\":true,\"details\":{\"is_configured\":true,\"cost_class\":\"PAID\",\"milestone\":\"V0.1 boundary only\",\"implemented\":false}},\"workflow.dag.execute\":{\"name\":\"workflow.dag.execute\",\"description\":\"Sequential DAG workflow orchestration with state machine\",\"status\":\"AVAILABLE\",\"provider\":\"core\",\"requires_approval\":false,\"details\":{}},\"security.policy.enforce\":{\"name\":\"security.policy.enforce\",\"description\":\"Centralized cost and operation policy enforcement\",\"status\":\"AVAILABLE\",\"provider\":\"core\",\"requires_approval\":false,\"details\":{}},\"artifacts.hash.verify\":{\"name\":\"artifacts.hash.verify\",\"description\":\"Cryptographic SHA-256 artifact verification and evidence collection\",\"status\":\"AVAILABLE\",\"provider\":\"core\",\"requires_approval\":false,\"details\":{}}},\"workflows\":[],\"pending_approvals\":[],\"recent_executions\":[]}",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verify-venv\\Scripts\\gamefactory.exe",
+        "--json",
+        "--project",
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\acceptance game g6h6hz8q\\fixture game",
+        "--godot-path",
+        "C:\\Users\\lenovo\\devel\\godot\\Godot_v4.7.2-stable_win64.exe\\Godot_v4.7.2-stable_win64_console.exe",
+        "--blender-path",
+        "C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe",
+        "approvals"
+      ],
+      "exit_code": 0,
+      "stdout": "[]",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verify-venv\\Scripts\\gamefactory.exe",
+        "--json",
+        "--project",
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\acceptance game g6h6hz8q\\fixture game",
+        "--godot-path",
+        "C:\\Users\\lenovo\\devel\\godot\\Godot_v4.7.2-stable_win64.exe\\Godot_v4.7.2-stable_win64_console.exe",
+        "--blender-path",
+        "C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe",
+        "run",
+        "demo"
+      ],
+      "exit_code": 3,
+      "stdout": "{\"workflow_id\":\"WF-DEMO-a9316db2\",\"status\":\"BLOCKED\",\"pending_approval_id\":\"APP-5ae7ec73\",\"completed_tasks\":[],\"failed_tasks\":[],\"blocked_tasks\":[\"WF-DEMO-a9316db2-T4\"],\"error_message\":null}",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verify-venv\\Scripts\\gamefactory.exe",
+        "--json",
+        "--project",
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\acceptance game g6h6hz8q\\fixture game",
+        "--godot-path",
+        "C:\\Users\\lenovo\\devel\\godot\\Godot_v4.7.2-stable_win64.exe\\Godot_v4.7.2-stable_win64_console.exe",
+        "--blender-path",
+        "C:\\Program Files\\Blender Foundation\\Blender 5.2\\blender.exe",
+        "inspect",
+        "WF-DEMO-a9316db2"
+      ],
+      "exit_code": 0,
+      "stdout": "{\"workflow\":{\"id\":\"WF-DEMO-a9316db2\",\"project_id\":\"fixture-game\",\"name\":\"Demo End-to-End Workflow\",\"status\":\"BLOCKED\",\"created_at\":\"2026-09-26T23:15:36.500983+00:00\",\"updated_at\":\"2026-09-26T23:15:36.688303+00:00\"},\"tasks\":[{\"id\":\"WF-DEMO-a9316db2-T1\",\"workflow_id\":\"WF-DEMO-a9316db2\",\"name\":\"Inspect Project Structure\",\"task_type\":\"inspect_project\",\"cost_class\":\"LOCAL\",\"depends_on\":[],\"status\":\"COMPLETED\",\"parameters\":{},\"max_retries\":1,\"timeout_seconds\":60.0,\"created_at\":\"2026-09-26T23:15:36.500983+00:00\",\"updated_at\":\"2026-09-26T23:15:36.573924+00:00\"},{\"id\":\"WF-DEMO-a9316db2-T2\",\"workflow_id\":\"WF-DEMO-a9316db2\",\"name\":\"Generate Asset Concept\",\"task_type\":\"generate_concept\",\"cost_class\":\"LOCAL\",\"depends_on\":[\"WF-DEMO-a9316db2-T1\"],\"status\":\"COMPLETED\",\"parameters\":{\"concept_name\":\"Heavy Mech Enemy\",\"poly_budget\":15000},\"max_retries\":1,\"timeout_seconds\":60.0,\"created_at\":\"2026-09-26T23:15:36.500983+00:00\",\"updated_at\":\"2026-09-26T23:15:36.611650+00:00\"},{\"id\":\"WF-DEMO-a9316db2-T3\",\"workflow_id\":\"WF-DEMO-a9316db2\",\"name\":\"Validate Concept Artifact\",\"task_type\":\"validate_artifact\",\"cost_class\":\"LOCAL\",\"depends_on\":[\"WF-DEMO-a9316db2-T2\"],\"status\":\"COMPLETED\",\"parameters\":{},\"max_retries\":1,\"timeout_seconds\":60.0,\"created_at\":\"2026-09-26T23:15:36.500983+00:00\",\"updated_at\":\"2026-09-26T23:15:36.650319+00:00\"},{\"id\":\"WF-DEMO-a9316db2-T4\",\"workflow_id\":\"WF-DEMO-a9316db2\",\"name\":\"Paid 3D Asset Generation\",\"task_type\":\"paid_generation\",\"cost_class\":\"PAID\",\"depends_on\":[\"WF-DEMO-a9316db2-T3\"],\"status\":\"BLOCKED\",\"parameters\":{\"prompt\":\"Heavy Mech Enemy 3D Model\",\"format\":\"glb\",\"cost\":5.0},\"max_retries\":1,\"timeout_seconds\":60.0,\"created_at\":\"2026-09-26T23:15:36.500983+00:00\",\"updated_at\":\"2026-09-26T23:15:36.678195+00:00\"},{\"id\":\"WF-DEMO-a9316db2-T5\",\"workflow_id\":\"WF-DEMO-a9316db2\",\"name\":\"Controlled Subprocess Execution\",\"task_type\":\"controlled_command\",\"cost_class\":\"LOCAL\",\"depends_on\":[\"WF-DEMO-a9316db2-T4\"],\"status\":\"PENDING\",\"parameters\":{},\"max_retries\":1,\"timeout_seconds\":60.0,\"created_at\":\"2026-09-26T23:15:36.500983+00:00\",\"updated_at\":\"2026-09-26T23:15:36.500983+00:00\"},{\"id\":\"WF-DEMO-a9316db2-T6\",\"workflow_id\":\"WF-DEMO-a9316db2\",\"name\":\"Record Evidence & Quality Gate\",\"task_type\":\"record_evidence\",\"cost_class\":\"LOCAL\",\"depends_on\":[\"WF-DEMO-a9316db2-T5\"],\"status\":\"PENDING\",\"parameters\":{},\"max_retries\":1,\"timeout_seconds\":60.0,\"created_at\":\"2026-09-26T23:15:36.500983+00:00\",\"updated_at\":\"2026-09-26T23:15:36.500983+00:00\"}],\"executions\":[{\"id\":\"EXEC-1cbad8e1\",\"task_id\":\"WF-DEMO-a9316db2-T1\",\"attempt_number\":1,\"status\":\"COMPLETED\",\"started_at\":\"2026-09-26T23:15:36.540450+00:00\",\"completed_at\":\"2026-09-26T23:15:36.572925+00:00\",\"external_op_id\":null,\"pid\":null,\"host\":null,\"error_message\":null,\"exit_code\":null,\"stdout\":\"Inspected project structure successfully\",\"stderr\":null,\"cost\":0.0},{\"id\":\"EXEC-72e37f69\",\"task_id\":\"WF-DEMO-a9316db2-T2\",\"attempt_number\":1,\"status\":\"COMPLETED\",\"started_at\":\"2026-09-26T23:15:36.597719+00:00\",\"completed_at\":\"2026-09-26T23:15:36.611650+00:00\",\"external_op_id\":null,\"pid\":null,\"host\":null,\"error_message\":null,\"exit_code\":null,\"stdout\":\"Generated concept for Heavy Mech Enemy\",\"stderr\":null,\"cost\":0.0},{\"id\":\"EXEC-4e8f2ddf\",\"task_id\":\"WF-DEMO-a9316db2-T3\",\"attempt_number\":1,\"status\":\"COMPLETED\",\"started_at\":\"2026-09-26T23:15:36.636737+00:00\",\"completed_at\":\"2026-09-26T23:15:36.649066+00:00\",\"external_op_id\":null,\"pid\":null,\"host\":null,\"error_message\":null,\"exit_code\":null,\"stdout\":\"Verified 1 artifacts successfully\",\"stderr\":null,\"cost\":0.0}],\"artifacts\":[{\"id\":\"ART-4b6d13f6\",\"workflow_id\":\"WF-DEMO-a9316db2\",\"task_id\":\"WF-DEMO-a9316db2-T1\",\"artifact_type\":\"inspection_report\",\"producer\":\"Inspector\",\"relative_path\":\".gamefactory/artifacts/WF-DEMO-a9316db2/WF-DEMO-a9316db2-T1/attempt-1/inspection.md\",\"content_hash\":\"fbfa363c520af78464ba4221fcc109c8100890644e86a37b285ea65f4ea83960\",\"file_size\":164,\"validation_state\":\"VALID\",\"created_at\":\"2026-09-26T23:15:36.561404+00:00\"},{\"id\":\"ART-4a0f0b3e\",\"workflow_id\":\"WF-DEMO-a9316db2\",\"task_id\":\"WF-DEMO-a9316db2-T2\",\"artifact_type\":\"concept_spec\",\"producer\":\"ConceptArtist\",\"relative_path\":\".gamefactory/artifacts/WF-DEMO-a9316db2/WF-DEMO-a9316db2-T2/attempt-1/concept.md\",\"content_hash\":\"f2804df3df95c8a5e15fc8b6cd8dce75956161947e7e25a8ccf808f4a80ec359\",\"file_size\":67,\"validation_state\":\"VALID\",\"created_at\":\"2026-09-26T23:15:36.606313+00:00\"}],\"evidence\":[],\"gates\":[],\"approvals\":[{\"id\":\"APP-5ae7ec73\",\"workflow_id\":\"WF-DEMO-a9316db2\",\"task_id\":\"WF-DEMO-a9316db2-T4\",\"approval_type\":\"paid_generation\",\"status\":\"PENDING\",\"reason\":\"Paid external operation requires human approval per cost safety policy\",\"cost_class\":\"PAID\",\"operation_hash\":\"ab3f5b09526484e2839f0da7b4afc6bf9912c13b286ce3635aa414d9166129b5\",\"actor\":null,\"comment\":null,\"requested_at\":\"2026-09-26T23:15:36.670091+00:00\",\"decided_at\":null,\"artifact_ids\":[]}],\"paid_provider_invocations\":0}",
+      "stderr": ""
+    }
+  ],
+  "checks": {
+    "init_preserves_original_game_files": true
+  },
+  "status": "FAILED",
+  "failure": "",
+  "finished_at": "2026-09-26T23:15:37.196426+00:00"
+}

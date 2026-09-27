@@ -1,0 +1,202 @@
+{
+  "timestamp": "2026-09-26T23:58:13.973962+00:00",
+  "commands": [
+    {
+      "argv": [
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verify-venv\\Scripts\\python.exe",
+        "-m",
+        "venv",
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\installed-delivery-env"
+      ],
+      "cwd": "C:\\Users\\lenovo\\devel\\ai-game-factory",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verify-venv\\Scripts\\python.exe",
+        "-m",
+        "pip",
+        "wheel",
+        ".",
+        "--no-deps",
+        "--no-build-isolation",
+        "--no-cache-dir",
+        "--wheel-dir",
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\wheels"
+      ],
+      "cwd": "C:\\Users\\lenovo\\devel\\ai-game-factory",
+      "exit_code": 0,
+      "stdout": "Processing c:\\users\\lenovo\\devel\\ai-game-factory\n  Preparing metadata (pyproject.toml): started\n  Preparing metadata (pyproject.toml): finished with status 'done'\nBuilding wheels for collected packages: gamefactory\n  Building wheel for gamefactory (pyproject.toml): started\n  Building wheel for gamefactory (pyproject.toml): finished with status 'done'\n  Created wheel for gamefactory: filename=gamefactory-0.1.0-py3-none-any.whl size=74952 sha256=197d6fd1e23a7981b20d5887a6595de1a8503270f379af332a1d018f9ad8d74d\n  Stored in directory: C:\\Users\\lenovo\\AppData\\Local\\Temp\\pip-ephem-wheel-cache-w8g60cg3\\wheels\\3d\\88\\a3\\286e2f374a5f23b0b7168d23237dc19e0a25f5cb260d22e468\nSuccessfully built gamefactory\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\installed-delivery-env\\Scripts\\python.exe",
+        "-m",
+        "pip",
+        "install",
+        "--no-index",
+        "--find-links",
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\wheels",
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\wheels\\gamefactory-0.1.0-py3-none-any.whl"
+      ],
+      "cwd": "C:\\Users\\lenovo\\devel\\ai-game-factory",
+      "exit_code": 0,
+      "stdout": "Looking in links: c:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\wheels\nProcessing c:\\users\\lenovo\\devel\\ai-game-factory\\.verification\\wheels\\gamefactory-0.1.0-py3-none-any.whl\nProcessing c:\\users\\lenovo\\devel\\ai-game-factory\\.verification\\wheels\\pydantic-2.13.5-py3-none-any.whl (from gamefactory==0.1.0)\nProcessing c:\\users\\lenovo\\devel\\ai-game-factory\\.verification\\wheels\\pyyaml-6.0.3-cp312-cp312-win_amd64.whl (from gamefactory==0.1.0)\nProcessing c:\\users\\lenovo\\devel\\ai-game-factory\\.verification\\wheels\\annotated_types-0.8.0-py3-none-any.whl (from pydantic>=2.0.0->gamefactory==0.1.0)\nProcessing c:\\users\\lenovo\\devel\\ai-game-factory\\.verification\\wheels\\pydantic_core-2.46.5-cp312-cp312-win_amd64.whl (from pydantic>=2.0.0->gamefactory==0.1.0)\nProcessing c:\\users\\lenovo\\devel\\ai-game-factory\\.verification\\wheels\\typing_extensions-4.16.0-py3-none-any.whl (from pydantic>=2.0.0->gamefactory==0.1.0)\nProcessing c:\\users\\lenovo\\devel\\ai-game-factory\\.verification\\wheels\\typing_inspection-0.4.4-py3-none-any.whl (from pydantic>=2.0.0->gamefactory==0.1.0)\nInstalling collected packages: typing-extensions, pyyaml, annotated-types, typing-inspection, pydantic-core, pydantic, gamefactory\nSuccessfully installed annotated-types-0.8.0 gamefactory-0.1.0 pydantic-2.13.5 pydantic-core-2.46.5 pyyaml-6.0.3 typing-extensions-4.16.0 typing-inspection-0.4.4\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\installed-delivery-env\\Scripts\\python.exe",
+        "-m",
+        "pip",
+        "check"
+      ],
+      "cwd": "C:\\Users\\lenovo\\devel\\ai-game-factory",
+      "exit_code": 0,
+      "stdout": "No broken requirements found.\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\installed-delivery-env\\Scripts\\gamefactory.exe",
+        "--version"
+      ],
+      "cwd": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\installation-cwd",
+      "exit_code": 0,
+      "stdout": "gamefactory 0.1.0\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\installed-delivery-env\\Scripts\\gamefactory.exe",
+        "--help"
+      ],
+      "cwd": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\installation-cwd",
+      "exit_code": 0,
+      "stdout": "usage: gamefactory [-h] [--version] [-p PROJECT] [--godot-path GODOT_PATH]\n                   [--blender-path BLENDER_PATH] [--json]\n                   {doctor,init,status,approvals,artifacts,run,resume,retry,approve,reject,inspect}\n                   ...\n\nLocal-first game development workflow orchestration\n\npositional arguments:\n  {doctor,init,status,approvals,artifacts,run,resume,retry,approve,reject,inspect}\n    run                 run a built-in demonstrator workflow\n\noptions:\n  -h, --help            show this help message and exit\n  --version             show program's version number and exit\n  -p PROJECT, --project PROJECT\n                        project directory (defaults to current directory)\n  --godot-path GODOT_PATH\n                        explicit Godot executable path\n  --blender-path BLENDER_PATH\n                        explicit Blender executable path\n  --json                emit machine-readable JSON\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\installed-delivery-env\\Scripts\\python.exe",
+        "-c",
+        "import gamefactory,importlib.resources,json; print(json.dumps({\"path\":gamefactory.__file__,\"schema\":importlib.resources.files(\"gamefactory\").joinpath(\"schemas/project-config-0.1.0.schema.json\").is_file()}))"
+      ],
+      "cwd": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\installation-cwd",
+      "exit_code": 0,
+      "stdout": "{\"path\": \"C:\\\\Users\\\\lenovo\\\\devel\\\\ai-game-factory\\\\.verification\\\\installed-delivery-env\\\\Lib\\\\site-packages\\\\gamefactory\\\\__init__.py\", \"schema\": true}\n",
+      "stderr": ""
+    }
+  ],
+  "status": "PASSED",
+  "wheel_sha256": "197d6fd1e23a7981b20d5887a6595de1a8503270f379af332a1d018f9ad8d74d",
+  "wheel_files": [
+    "gamefactory/__init__.py",
+    "gamefactory/__main__.py",
+    "gamefactory/adapters/dcc/__init__.py",
+    "gamefactory/adapters/dcc/base.py",
+    "gamefactory/adapters/dcc/blender.py",
+    "gamefactory/adapters/engines/__init__.py",
+    "gamefactory/adapters/engines/base.py",
+    "gamefactory/adapters/engines/godot.py",
+    "gamefactory/adapters/external/__init__.py",
+    "gamefactory/adapters/external/base.py",
+    "gamefactory/adapters/external/meshy.py",
+    "gamefactory/adapters/fakes/__init__.py",
+    "gamefactory/adapters/fakes/fake_provider.py",
+    "gamefactory/adapters/persistence/__init__.py",
+    "gamefactory/adapters/persistence/database.py",
+    "gamefactory/adapters/persistence/migrations.py",
+    "gamefactory/adapters/persistence/repositories.py",
+    "gamefactory/capabilities/__init__.py",
+    "gamefactory/capabilities/registry.py",
+    "gamefactory/cli/exit_codes.py",
+    "gamefactory/cli/main.py",
+    "gamefactory/config/__init__.py",
+    "gamefactory/config/loader.py",
+    "gamefactory/config/schema.py",
+    "gamefactory/core/approvals/__init__.py",
+    "gamefactory/core/approvals/approval_service.py",
+    "gamefactory/core/artifacts/__init__.py",
+    "gamefactory/core/artifacts/artifact_manager.py",
+    "gamefactory/core/domain/__init__.py",
+    "gamefactory/core/domain/dag.py",
+    "gamefactory/core/domain/errors.py",
+    "gamefactory/core/domain/models.py",
+    "gamefactory/core/domain/state_machine.py",
+    "gamefactory/core/execution/__init__.py",
+    "gamefactory/core/execution/locks.py",
+    "gamefactory/core/execution/path_guard.py",
+    "gamefactory/core/execution/process_runner.py",
+    "gamefactory/core/execution/redaction.py",
+    "gamefactory/core/policies/__init__.py",
+    "gamefactory/core/policies/policy_engine.py",
+    "gamefactory/schemas/project-config-0.1.0.schema.json",
+    "gamefactory/workflows/__init__.py",
+    "gamefactory/workflows/builtin_tasks.py",
+    "gamefactory/workflows/definitions.py",
+    "gamefactory/workflows/engine.py",
+    "gamefactory/workflows/handlers.py",
+    "gamefactory/workflows/ports.py",
+    "gamefactory-0.1.0.dist-info/METADATA",
+    "gamefactory-0.1.0.dist-info/WHEEL",
+    "gamefactory-0.1.0.dist-info/entry_points.txt",
+    "gamefactory-0.1.0.dist-info/top_level.txt",
+    "gamefactory-0.1.0.dist-info/RECORD"
+  ],
+  "isolated_import": {
+    "path": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\installed-delivery-env\\Lib\\site-packages\\gamefactory\\__init__.py",
+    "schema": true
+  },
+  "source_sha256": {
+    "src/gamefactory/__init__.py": "7d409d117cf50b26f14877df92302a2a3d6341385ee7d5b047eccc949af3a100",
+    "src/gamefactory/__main__.py": "095dc136991f9d62a180db336a602d439d38a30a97f30d57c3312b839768da7b",
+    "src/gamefactory/adapters/dcc/__init__.py": "bc8b0895065c5749c604b773c54470387d52aed90b12aeb10ea06bb2ecdded2d",
+    "src/gamefactory/adapters/dcc/base.py": "fecac0145ff0bfed70edaaff67726c6688c7d92801abe1beb269f64bbd63c09a",
+    "src/gamefactory/adapters/dcc/blender.py": "ce45f851a143f00f70172dc4f2a14b165001dc4a66c5b4343e618d628973b62d",
+    "src/gamefactory/adapters/engines/__init__.py": "2b9391b727ad42cd7f572b778fb3bbf89132d6cb7fdfd79f123e84f1e0891e03",
+    "src/gamefactory/adapters/engines/base.py": "1fb3fc85e9b8eb0fa00dae4d6d98983dad12a948758665e407fb8d448b80ce58",
+    "src/gamefactory/adapters/engines/godot.py": "4ce0bb077043fc63256043a2389d730c4bf741d225ee60524110ca3da2d7c513",
+    "src/gamefactory/adapters/external/__init__.py": "0382c034bd40536e01766c65b946db09de32873ff399670970896bddf1807f7e",
+    "src/gamefactory/adapters/external/base.py": "5ca4b5d873a448e3ca6527ef57897552563ffd0550c43d168e40c82961708738",
+    "src/gamefactory/adapters/external/meshy.py": "bac526d4e81064e8a085f02bee06bf074287439c21ded17e9ffb6743297e4bf4",
+    "src/gamefactory/adapters/fakes/__init__.py": "b238ad743943fcf2164503d2291579dd02a0e8340b7ff09eec52b9bbb4bd4692",
+    "src/gamefactory/adapters/fakes/fake_provider.py": "0995dfb00c321a34bd1cc5901e0f46da9bb809fea4435176d6a042b339ba734f",
+    "src/gamefactory/adapters/persistence/__init__.py": "76dbc9e741b0a67becb3347ea3fc6a791ecd1b855a6a0a33f74aa2d91d299f13",
+    "src/gamefactory/adapters/persistence/database.py": "18081198681ab41b0ddd474643870288da40b6600ee0500493345c1c73591d5c",
+    "src/gamefactory/adapters/persistence/migrations.py": "30d6129b3831499edc0fa1b2f88aa277fbb08c255cef1b56a67d21743626c357",
+    "src/gamefactory/adapters/persistence/repositories.py": "a3e4aa2ab757d4bd05d54aec96b346c96c9a5f68947b887f3486abfa1e3b8bb1",
+    "src/gamefactory/capabilities/__init__.py": "44964770ecc72f986b7313fed3469b753ec8510d8f817c9f4280e086cf0b7fcc",
+    "src/gamefactory/capabilities/registry.py": "9ad783038bf861504a7d24b5b3f08970b1781dbbb442c0a49c23d1fe1da819f1",
+    "src/gamefactory/cli/exit_codes.py": "20430987a26d6600cb29ebc5c727794d0bcce3aee7d1cbb2a0e776857ac37f33",
+    "src/gamefactory/cli/main.py": "763d2129fea2d176071e9920dd45d38c554aae69b427e9379d98d6fb7a354fc0",
+    "src/gamefactory/config/__init__.py": "82806849ff4f278c54f27f458883d5cdb5af98a431f8801be6ed34a4b4b8350d",
+    "src/gamefactory/config/loader.py": "0fe4a998985453291e2fa2744e55b455867a2c6d88673bd80c5eb4110a3e1094",
+    "src/gamefactory/config/schema.py": "20d843f4a768260fb11b5acf382c0f02a51fcf758f1154b6ffb1d40db13333b9",
+    "src/gamefactory/core/approvals/__init__.py": "498b4d875ee3b65369ee134969c4e24fe3006c5ce6b5e39bb046082a9f000182",
+    "src/gamefactory/core/approvals/approval_service.py": "0abdeda8ba7e482636d42072ac4f7c65683e44407fb0d530b77b0e8eba21a586",
+    "src/gamefactory/core/artifacts/__init__.py": "8919e5db7d2d5689c52d384b41ceb8bbdcf197435ebf32744c2fbf675dc45b83",
+    "src/gamefactory/core/artifacts/artifact_manager.py": "e258056105828d6c7fec6d974f292e2f88e6415638c160a7de7fc56063028921",
+    "src/gamefactory/core/domain/__init__.py": "383c583c029caab6df7a86a8f674040441f15912ef4247e03160ab6df637aa92",
+    "src/gamefactory/core/domain/dag.py": "fe1a80ae169260bdf02629e367e156203ae18a863116b28756934c34c7e1a400",
+    "src/gamefactory/core/domain/errors.py": "7c9a7fa07866ed729a9c12b370b1eabab9e6ef9028e88413763ee2b1bae23d18",
+    "src/gamefactory/core/domain/models.py": "9a2912b97beecacd49e00311a03bc9156f57dd49a378edb8a438c77c5c58617b",
+    "src/gamefactory/core/domain/state_machine.py": "a21aa6dcf1dc94da03f5ed2f6023532a65814000b670eee6315da5ef2c464cd9",
+    "src/gamefactory/core/execution/__init__.py": "1041092bf92ae8fc1963db1ff241ea10c5e12f3ffcc285bd126fc12755a2aad1",
+    "src/gamefactory/core/execution/locks.py": "e89bac87763148adf0241c1f2292dbe07b82aace1811b4a59798104820ccdf1f",
+    "src/gamefactory/core/execution/path_guard.py": "2432bb961af05a2725b36e1bebb7589ccce6849011161af37641cf512352f6fd",
+    "src/gamefactory/core/execution/process_runner.py": "5324ff4d14d973d6ab7b7e92ace0f49f980c7cf969df036138d6103a31c0243f",
+    "src/gamefactory/core/execution/redaction.py": "b09df83c5d87f3a8d33aadea2b58c2248e104963133b7ab6e4335925bcc02e5c",
+    "src/gamefactory/core/policies/__init__.py": "8b93c3a3f851d9ff1a18cdd6ba060883da5f003bd6d27431063a95834d5788f6",
+    "src/gamefactory/core/policies/policy_engine.py": "a6447a22e175cb7420b6338f56c151c2e46e8d32dd549e08dcd29b9af3990c12",
+    "src/gamefactory/workflows/__init__.py": "d0da48c2f2b4927d9fe0a9334bb8e14b239f667c11024502ba8c55631eadc164",
+    "src/gamefactory/workflows/builtin_tasks.py": "207c3b5846cfb2d675862bdcee46526e0db1a2cd770ed5c64fc6afda1160664b",
+    "src/gamefactory/workflows/definitions.py": "ebc2de358b0e22e826ee679dae3d3fa2679266b6bdb7787d278d6c758499f3aa",
+    "src/gamefactory/workflows/engine.py": "67e6f8b27a85b4cfac24723c642fcd915734426637a7d5161bb4ef934b0971ec",
+    "src/gamefactory/workflows/handlers.py": "ebf204053fb40877c1adcc9b73c4d61c403081398dd8921d1fd5799475c8a928",
+    "src/gamefactory/workflows/ports.py": "7038d3a2b7c9ef5903bc02d573b3da2b927884e30f59c211bb4b49ddecebccf6"
+  }
+}

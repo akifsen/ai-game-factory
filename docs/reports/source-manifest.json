@@ -1,0 +1,427 @@
+{
+  "initial_repository": "empty directory; no Git history",
+  "files": [
+    {
+      "path": ".github/workflows/ci.yml",
+      "sha256": "66ff70a1122c10aa4ed2c5caacfde5660c839e60cd94e8e347a237c1dfd0ffb8"
+    },
+    {
+      "path": ".gitignore",
+      "sha256": "7076a76d2e1c4558a53ab9d9e4b9904aa812472ea31e2eac93181fe89c726902"
+    },
+    {
+      "path": "docs/adr/0001-core-language-and-runtime.md",
+      "sha256": "f740134e3f25c49722d9443ba1a0c4d0dcf313e04d0b68286552cc61aba6bd79"
+    },
+    {
+      "path": "docs/adr/0002-persistence-strategy.md",
+      "sha256": "6d97a6af2256210ef4ada4d5c6ae3dfa4cf7619763656c0230d9bbc17021ef9e"
+    },
+    {
+      "path": "docs/adr/0003-workflow-execution-model.md",
+      "sha256": "14762c152d77e77b0ed5cd95c56cd4f8de48891c463b6c18a4e89f9523bb21b4"
+    },
+    {
+      "path": "docs/adr/0004-adapter-and-provider-architecture.md",
+      "sha256": "89f15fa3872b9402c856470b14407f50e3c7169150e73f51d59ff52b81a59c34"
+    },
+    {
+      "path": "docs/architecture/overview.md",
+      "sha256": "3fc6c74f7734728ac164698e010e991381a653e20d1215f746b4d4e5d8aa96b6"
+    },
+    {
+      "path": "docs/development/README.md",
+      "sha256": "41f423fb019adb67f91f03869ac88c3f432240457ffe1ac08cb8a8f4a1dc411b"
+    },
+    {
+      "path": "docs/development-environment.md",
+      "sha256": "99280ca2ff829d7b3064303860176adb9d2f23446f317b716137eac5096af2bd"
+    },
+    {
+      "path": "docs/integrations/status.md",
+      "sha256": "4d78125dc3c42e85f7feb6b47d69fa5e3637aa7076404864f6e228dcf7b29aa9"
+    },
+    {
+      "path": "docs/README.md",
+      "sha256": "58c9e5ae6e99465d86664f2ba8b142c75f1266ebfafc9a42172ee289e6f7cb47"
+    },
+    {
+      "path": "docs/reports/acceptance-fourth.json",
+      "sha256": "2b81d2b99b66b1d0e09fd796031f9c12e88fdb14e6374069a18735e1103a38b1"
+    },
+    {
+      "path": "docs/reports/acceptance-initial.json",
+      "sha256": "da1a7b2ccf15480aa43226b068a5aac56800374abf445586b97aa0e21c74cd61"
+    },
+    {
+      "path": "docs/reports/acceptance-second.json",
+      "sha256": "199d8615f14334cf40a03904f5ea447dc88824616573151e4aaebc5f0942431b"
+    },
+    {
+      "path": "docs/reports/acceptance-third.json",
+      "sha256": "7c3ea8058cbea28e31d1ca5f7d25b6392af81c74bcfd114da517938c93471d0c"
+    },
+    {
+      "path": "docs/reports/acceptance.json",
+      "sha256": "888c40fc11304254b1480f90b4c32a218fc775e9dd828cbe61ddfafd353aeae0"
+    },
+    {
+      "path": "docs/reports/installation.json",
+      "sha256": "1e0e78ebf67c3059a939548802fcc4c9e9c7a24932ee98a0d66dd692b51ad306"
+    },
+    {
+      "path": "docs/reports/quality.json",
+      "sha256": "e1fe098adcf52fe221edba09330a58c79cbeeaa0eef95fd193371dfb62450a2f"
+    },
+    {
+      "path": "docs/reports/review-notes.md",
+      "sha256": "71587d8a24b9a426dc44795bef62e07147be7a249739ab804ca0448ed00b30a2"
+    },
+    {
+      "path": "docs/reports/revision-01.md",
+      "sha256": "5be493798c774957231cdce40d8894ffc847a65529f4c6073fe7ca51285b2829"
+    },
+    {
+      "path": "docs/reports/revision-02.md",
+      "sha256": "adedc6e16a766fcb7f495e7fb2c784b72bcd679194a3b99514e74fe29165d538"
+    },
+    {
+      "path": "docs/reports/revision-03.md",
+      "sha256": "48cb5fb5450054099219e5c7f5334cde2159e49ef81058bdcb28b29d41702595"
+    },
+    {
+      "path": "docs/reports/tests.xml",
+      "sha256": "6fac54dc801ce07ef5cfe2dfb671ca5e5afc5edbfee70691bbfc7a00a1e0f710"
+    },
+    {
+      "path": "docs/reports/v0.1-completion-report.md",
+      "sha256": "d4bb17ab34783f4ba783f9f3ad57f331dce9f4eaa2df0bcc3c3807c7d79730ef"
+    },
+    {
+      "path": "docs/requirements/01-master.md",
+      "sha256": "4ce7d54b0184858ad0b941b5216ae699aedef7ee16f450e2be678bce094f78ee"
+    },
+    {
+      "path": "docs/requirements/02-extensions.md",
+      "sha256": "e8203bb801a7b7b41e1d087ca940cd35c83fad802a94a0d993bf28fed58db8a5"
+    },
+    {
+      "path": "docs/requirements/03-acceptance.md",
+      "sha256": "d66ff30732f20f615f640d0f48be613c0e6ee2d5f6c5cb5aacb6f3d1b6c29bd1"
+    },
+    {
+      "path": "docs/requirements/04-verification.md",
+      "sha256": "d53397d71038d9c01c0b61762364d56ab69ea98cb14a7959e49b2747f6fc2dda"
+    },
+    {
+      "path": "docs/requirements/acceptance-checklist.md",
+      "sha256": "097b539d4b0e1b327e1c5fd3c135e51117ade6cbdcfce9e3852478d997526863"
+    },
+    {
+      "path": "docs/requirements/future-boundaries.md",
+      "sha256": "7eb82b6520d73a6aeea273c6ca537a338605293c11da91f5b351142b2390af43"
+    },
+    {
+      "path": "docs/requirements/traceability.md",
+      "sha256": "e07b5fb703ebc1c07191c1eca2c1936718f235076c07bdf77f18c8746539e99d"
+    },
+    {
+      "path": "docs/work-plan.md",
+      "sha256": "63035b57cb76e2f70e8979c438221c41c3bd4b3c962fbb8231e1700082f45ff8"
+    },
+    {
+      "path": "examples/minimal-godot/main.gd",
+      "sha256": "820537051c4ccac0da41de731d271b9e7c1dde2a503e9086658668919723e81e"
+    },
+    {
+      "path": "examples/minimal-godot/Main.tscn",
+      "sha256": "073085956cb847979f9ddd2afd0e38a09d08072b8b99b8c2a4c10225ca59e145"
+    },
+    {
+      "path": "examples/minimal-godot/project.godot",
+      "sha256": "5801ac24dee88785d6326464ec6a992e8ded797e90ad496cf4932fec3e74949a"
+    },
+    {
+      "path": "pyproject.toml",
+      "sha256": "009621472408db8e7990b48fe61bb27922fa6c49f5d3d0f22ab9b0125c2b12ff"
+    },
+    {
+      "path": "README.md",
+      "sha256": "346f47134c32372320be52ae49deb4ee04a808c7268a89fcb0dca8489ec22c35"
+    },
+    {
+      "path": "schemas/project-config-0.1.0.schema.json",
+      "sha256": "64bed6afdab7854967fcf83ffbc882726909192ace356e86b5fc1da8f36844b2"
+    },
+    {
+      "path": "scripts/verify_acceptance.py",
+      "sha256": "a38a5c351571af9063923e4fa53eeae8ee7d909f2195e15627f90601a1954f10"
+    },
+    {
+      "path": "src/gamefactory/__init__.py",
+      "sha256": "7d409d117cf50b26f14877df92302a2a3d6341385ee7d5b047eccc949af3a100"
+    },
+    {
+      "path": "src/gamefactory/__main__.py",
+      "sha256": "095dc136991f9d62a180db336a602d439d38a30a97f30d57c3312b839768da7b"
+    },
+    {
+      "path": "src/gamefactory/adapters/dcc/__init__.py",
+      "sha256": "bc8b0895065c5749c604b773c54470387d52aed90b12aeb10ea06bb2ecdded2d"
+    },
+    {
+      "path": "src/gamefactory/adapters/dcc/base.py",
+      "sha256": "fecac0145ff0bfed70edaaff67726c6688c7d92801abe1beb269f64bbd63c09a"
+    },
+    {
+      "path": "src/gamefactory/adapters/dcc/blender.py",
+      "sha256": "ce45f851a143f00f70172dc4f2a14b165001dc4a66c5b4343e618d628973b62d"
+    },
+    {
+      "path": "src/gamefactory/adapters/engines/__init__.py",
+      "sha256": "2b9391b727ad42cd7f572b778fb3bbf89132d6cb7fdfd79f123e84f1e0891e03"
+    },
+    {
+      "path": "src/gamefactory/adapters/engines/base.py",
+      "sha256": "1fb3fc85e9b8eb0fa00dae4d6d98983dad12a948758665e407fb8d448b80ce58"
+    },
+    {
+      "path": "src/gamefactory/adapters/engines/godot.py",
+      "sha256": "4ce0bb077043fc63256043a2389d730c4bf741d225ee60524110ca3da2d7c513"
+    },
+    {
+      "path": "src/gamefactory/adapters/external/__init__.py",
+      "sha256": "0382c034bd40536e01766c65b946db09de32873ff399670970896bddf1807f7e"
+    },
+    {
+      "path": "src/gamefactory/adapters/external/base.py",
+      "sha256": "5ca4b5d873a448e3ca6527ef57897552563ffd0550c43d168e40c82961708738"
+    },
+    {
+      "path": "src/gamefactory/adapters/external/meshy.py",
+      "sha256": "bac526d4e81064e8a085f02bee06bf074287439c21ded17e9ffb6743297e4bf4"
+    },
+    {
+      "path": "src/gamefactory/adapters/fakes/__init__.py",
+      "sha256": "b238ad743943fcf2164503d2291579dd02a0e8340b7ff09eec52b9bbb4bd4692"
+    },
+    {
+      "path": "src/gamefactory/adapters/fakes/fake_provider.py",
+      "sha256": "0995dfb00c321a34bd1cc5901e0f46da9bb809fea4435176d6a042b339ba734f"
+    },
+    {
+      "path": "src/gamefactory/adapters/persistence/__init__.py",
+      "sha256": "76dbc9e741b0a67becb3347ea3fc6a791ecd1b855a6a0a33f74aa2d91d299f13"
+    },
+    {
+      "path": "src/gamefactory/adapters/persistence/database.py",
+      "sha256": "18081198681ab41b0ddd474643870288da40b6600ee0500493345c1c73591d5c"
+    },
+    {
+      "path": "src/gamefactory/adapters/persistence/migrations.py",
+      "sha256": "30d6129b3831499edc0fa1b2f88aa277fbb08c255cef1b56a67d21743626c357"
+    },
+    {
+      "path": "src/gamefactory/adapters/persistence/repositories.py",
+      "sha256": "a3e4aa2ab757d4bd05d54aec96b346c96c9a5f68947b887f3486abfa1e3b8bb1"
+    },
+    {
+      "path": "src/gamefactory/capabilities/__init__.py",
+      "sha256": "44964770ecc72f986b7313fed3469b753ec8510d8f817c9f4280e086cf0b7fcc"
+    },
+    {
+      "path": "src/gamefactory/capabilities/registry.py",
+      "sha256": "9ad783038bf861504a7d24b5b3f08970b1781dbbb442c0a49c23d1fe1da819f1"
+    },
+    {
+      "path": "src/gamefactory/cli/exit_codes.py",
+      "sha256": "20430987a26d6600cb29ebc5c727794d0bcce3aee7d1cbb2a0e776857ac37f33"
+    },
+    {
+      "path": "src/gamefactory/cli/main.py",
+      "sha256": "763d2129fea2d176071e9920dd45d38c554aae69b427e9379d98d6fb7a354fc0"
+    },
+    {
+      "path": "src/gamefactory/config/__init__.py",
+      "sha256": "82806849ff4f278c54f27f458883d5cdb5af98a431f8801be6ed34a4b4b8350d"
+    },
+    {
+      "path": "src/gamefactory/config/loader.py",
+      "sha256": "0fe4a998985453291e2fa2744e55b455867a2c6d88673bd80c5eb4110a3e1094"
+    },
+    {
+      "path": "src/gamefactory/config/schema.py",
+      "sha256": "20d843f4a768260fb11b5acf382c0f02a51fcf758f1154b6ffb1d40db13333b9"
+    },
+    {
+      "path": "src/gamefactory/core/approvals/__init__.py",
+      "sha256": "498b4d875ee3b65369ee134969c4e24fe3006c5ce6b5e39bb046082a9f000182"
+    },
+    {
+      "path": "src/gamefactory/core/approvals/approval_service.py",
+      "sha256": "0abdeda8ba7e482636d42072ac4f7c65683e44407fb0d530b77b0e8eba21a586"
+    },
+    {
+      "path": "src/gamefactory/core/artifacts/__init__.py",
+      "sha256": "8919e5db7d2d5689c52d384b41ceb8bbdcf197435ebf32744c2fbf675dc45b83"
+    },
+    {
+      "path": "src/gamefactory/core/artifacts/artifact_manager.py",
+      "sha256": "e258056105828d6c7fec6d974f292e2f88e6415638c160a7de7fc56063028921"
+    },
+    {
+      "path": "src/gamefactory/core/domain/__init__.py",
+      "sha256": "383c583c029caab6df7a86a8f674040441f15912ef4247e03160ab6df637aa92"
+    },
+    {
+      "path": "src/gamefactory/core/domain/dag.py",
+      "sha256": "fe1a80ae169260bdf02629e367e156203ae18a863116b28756934c34c7e1a400"
+    },
+    {
+      "path": "src/gamefactory/core/domain/errors.py",
+      "sha256": "7c9a7fa07866ed729a9c12b370b1eabab9e6ef9028e88413763ee2b1bae23d18"
+    },
+    {
+      "path": "src/gamefactory/core/domain/models.py",
+      "sha256": "9a2912b97beecacd49e00311a03bc9156f57dd49a378edb8a438c77c5c58617b"
+    },
+    {
+      "path": "src/gamefactory/core/domain/state_machine.py",
+      "sha256": "a21aa6dcf1dc94da03f5ed2f6023532a65814000b670eee6315da5ef2c464cd9"
+    },
+    {
+      "path": "src/gamefactory/core/execution/__init__.py",
+      "sha256": "1041092bf92ae8fc1963db1ff241ea10c5e12f3ffcc285bd126fc12755a2aad1"
+    },
+    {
+      "path": "src/gamefactory/core/execution/locks.py",
+      "sha256": "e89bac87763148adf0241c1f2292dbe07b82aace1811b4a59798104820ccdf1f"
+    },
+    {
+      "path": "src/gamefactory/core/execution/path_guard.py",
+      "sha256": "2432bb961af05a2725b36e1bebb7589ccce6849011161af37641cf512352f6fd"
+    },
+    {
+      "path": "src/gamefactory/core/execution/process_runner.py",
+      "sha256": "5324ff4d14d973d6ab7b7e92ace0f49f980c7cf969df036138d6103a31c0243f"
+    },
+    {
+      "path": "src/gamefactory/core/execution/redaction.py",
+      "sha256": "b09df83c5d87f3a8d33aadea2b58c2248e104963133b7ab6e4335925bcc02e5c"
+    },
+    {
+      "path": "src/gamefactory/core/policies/__init__.py",
+      "sha256": "8b93c3a3f851d9ff1a18cdd6ba060883da5f003bd6d27431063a95834d5788f6"
+    },
+    {
+      "path": "src/gamefactory/core/policies/policy_engine.py",
+      "sha256": "a6447a22e175cb7420b6338f56c151c2e46e8d32dd549e08dcd29b9af3990c12"
+    },
+    {
+      "path": "src/gamefactory/schemas/project-config-0.1.0.schema.json",
+      "sha256": "64bed6afdab7854967fcf83ffbc882726909192ace356e86b5fc1da8f36844b2"
+    },
+    {
+      "path": "src/gamefactory/workflows/__init__.py",
+      "sha256": "d0da48c2f2b4927d9fe0a9334bb8e14b239f667c11024502ba8c55631eadc164"
+    },
+    {
+      "path": "src/gamefactory/workflows/builtin_tasks.py",
+      "sha256": "207c3b5846cfb2d675862bdcee46526e0db1a2cd770ed5c64fc6afda1160664b"
+    },
+    {
+      "path": "src/gamefactory/workflows/definitions.py",
+      "sha256": "ebc2de358b0e22e826ee679dae3d3fa2679266b6bdb7787d278d6c758499f3aa"
+    },
+    {
+      "path": "src/gamefactory/workflows/engine.py",
+      "sha256": "67e6f8b27a85b4cfac24723c642fcd915734426637a7d5161bb4ef934b0971ec"
+    },
+    {
+      "path": "src/gamefactory/workflows/handlers.py",
+      "sha256": "ebf204053fb40877c1adcc9b73c4d61c403081398dd8921d1fd5799475c8a928"
+    },
+    {
+      "path": "src/gamefactory/workflows/ports.py",
+      "sha256": "7038d3a2b7c9ef5903bc02d573b3da2b927884e30f59c211bb4b49ddecebccf6"
+    },
+    {
+      "path": "tests/integration/test_capabilities.py",
+      "sha256": "ed69d45dfc0603bc4cd6aa54a2768f05f3d49a59e74704cb431ace47534a4723"
+    },
+    {
+      "path": "tests/integration/test_cli.py",
+      "sha256": "3b0a9d72cc3af38d5d41de6df2ac84e97ad48816a70a9c8f58ff2f291c7b290f"
+    },
+    {
+      "path": "tests/integration/test_crash_recovery.py",
+      "sha256": "f03ac752809e0407dc3c87851e517abafc9a1a409654b68d099fc97fae75cef4"
+    },
+    {
+      "path": "tests/integration/test_godot_blender_detection.py",
+      "sha256": "e38a7b8eb8754ce6f5c60a486d0426a5a4582a947180c9c759caeeab435a5dc3"
+    },
+    {
+      "path": "tests/integration/test_locks.py",
+      "sha256": "9e236293a13082b8402aea2cfae51df8237c21acea235f975b45d338113730bc"
+    },
+    {
+      "path": "tests/integration/test_paid_safety.py",
+      "sha256": "9758ba58097348f9672fb737e2510bd499ac958e4ad836c46f801db3a3c2f318"
+    },
+    {
+      "path": "tests/integration/test_persistence.py",
+      "sha256": "72f7d881b6d4be6d153f7577c19df2531bd58fb0478b30271a634ab549998c0c"
+    },
+    {
+      "path": "tests/integration/test_persistence_redaction.py",
+      "sha256": "e8c023f56167ed82bcc060c00a93b80533a655bef6c833a58840c1bf3d25e618"
+    },
+    {
+      "path": "tests/integration/test_process_runner.py",
+      "sha256": "19f4a3afd32724c4c3f8b586f70898bbeebb0ea7384ff2a737dd632ed317e50b"
+    },
+    {
+      "path": "tests/integration/test_workflow_engine.py",
+      "sha256": "290e246d07d150f281a5c857ad260eb7369d69d9a541550a0a0f09248246a198"
+    },
+    {
+      "path": "tests/integration/test_workflow_regressions.py",
+      "sha256": "67919365dfdf45161cfb27fe96dbe922e5a37d1208f03fc10010994298d35129"
+    },
+    {
+      "path": "tests/unit/test_approvals.py",
+      "sha256": "065ec7ec03d779526317c12dc3fdb85246be6b85a2abb625c2a445c848c2d73f"
+    },
+    {
+      "path": "tests/unit/test_artifacts.py",
+      "sha256": "147564e6421ce20e89aa379b7a897a7518b169a0ccba2fd28c28d63e5ea66f28"
+    },
+    {
+      "path": "tests/unit/test_config.py",
+      "sha256": "ae2c420d1278fc48825ef79604606b5bff7678124c0a0e2f8e9683cfcc6ebd1d"
+    },
+    {
+      "path": "tests/unit/test_dag.py",
+      "sha256": "c94ae844fa420ed2d847479fabd92968b0674adc200e0a11d4ae8b5aa4feb496"
+    },
+    {
+      "path": "tests/unit/test_path_guard.py",
+      "sha256": "76d849b5d0572b0ea239991b693860a868f027fbb7b4550cb84ba0f27551641f"
+    },
+    {
+      "path": "tests/unit/test_policy.py",
+      "sha256": "7c68fddb747eb94e86513ccea134285a3e8ab71a4f5de5b0c3969854c17dd58f"
+    },
+    {
+      "path": "tests/unit/test_redaction.py",
+      "sha256": "0192ff324216c51779d06a762fd6abadaccc0fe331ffa490fa3d86ed086a98f1"
+    },
+    {
+      "path": "tests/unit/test_state_machine.py",
+      "sha256": "d97da2a188899c81660e2b022dce17d9b776053be6847466069b39a520edd8b1"
+    }
+  ],
+  "broken_local_markdown_links": [],
+  "known_environment_credential_hits": []
+}
