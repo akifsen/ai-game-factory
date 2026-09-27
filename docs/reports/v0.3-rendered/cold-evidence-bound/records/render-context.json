@@ -1,0 +1,25 @@
+{
+  "engine_api": {
+    "adapter_name": "NVIDIA GeForce RTX 4060 Laptop GPU",
+    "adapter_vendor": "NVIDIA",
+    "display_server": "Windows",
+    "os_name": "Windows",
+    "rendering_driver": "opengl3",
+    "rendering_method": "gl_compatibility",
+    "source": "engine_api",
+    "viewport_height": 720,
+    "viewport_width": 1280
+  },
+  "engine_source": "engine_api",
+  "process_log": "OpenGL API 3.3.0 NVIDIA 616.56 - Compatibility - Using Device: NVIDIA - NVIDIA GeForce RTX 4060 Laptop GPU\r",
+  "process_log_source": "process_log",
+  "requested": {
+    "audio_driver": "Dummy",
+    "display_driver": "windows",
+    "rendering_driver": "opengl3",
+    "rendering_method": "gl_compatibility",
+    "resolution": "1280x720",
+    "software_rendering_requested": "",
+    "window_mode": "windowed"
+  }
+}

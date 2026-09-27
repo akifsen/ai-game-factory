@@ -1,0 +1,147 @@
+{
+  "acceptance": "records/acceptance.json",
+  "files": [
+    {
+      "path": "metadata/source-identity.json",
+      "role": "source_identity",
+      "sha256": "b6258de8d59fea38c9b3e7cdc90a4d59a78ed78a3cee6cd9d5701137ebc9abed",
+      "size": 529
+    },
+    {
+      "path": "records/acceptance.json",
+      "role": "acceptance",
+      "sha256": "79d66e8ce6995358c9164ef9938877945309b0cbf376afa9200e73c8bd8046c7",
+      "size": 47553
+    },
+    {
+      "path": "records/recovery.json",
+      "role": "recovery",
+      "sha256": "fb4b197975cd218378749628b06fc1e98dd164d47301b952b097fea8ea679e1f",
+      "size": 198583
+    },
+    {
+      "path": "review/landscape/images/cp-000.png",
+      "role": "image",
+      "sha256": "fb35be73c5fb051d23e6d0c3cf381d4ea6b30d61745e46e03103a76dc64d8404",
+      "size": 12771
+    },
+    {
+      "path": "review/landscape/images/cp-030.png",
+      "role": "image",
+      "sha256": "1bf0eb4c7e537a548ff0017a7c2f8aa35cd2a9bb470bb5e14550556b88cd2e7a",
+      "size": 13367
+    },
+    {
+      "path": "review/landscape/images/cp-060.png",
+      "role": "image",
+      "sha256": "b74f022bb8534c14c09dc6f292456d9fd5c5544eab952bf8b2029b22fcf54793",
+      "size": 13463
+    },
+    {
+      "path": "review/landscape/images/cp-090.png",
+      "role": "image",
+      "sha256": "dbb9633af40222ec1681fa4b467e3345599815e3f52fa5ff6cf1cbbefe429f63",
+      "size": 13070
+    },
+    {
+      "path": "records/observation.json",
+      "role": "observation",
+      "sha256": "bb16cad4e45b28b55383270e00c5f60ceea1d67f0298ccdc63262876e81d7e51",
+      "size": 1423
+    },
+    {
+      "path": "records/validation.json",
+      "role": "validation",
+      "sha256": "99ffaa6966cdde58b01a44e7931c89821777cff3bbf7d2be935ed739eafce8b5",
+      "size": 6270
+    },
+    {
+      "path": "review/landscape/index.html",
+      "role": "other",
+      "sha256": "ad9b24dca5e856927b7a38ceb4aa53e600b1c8fd1aed807d1b2d7e60ffd2c6c5",
+      "size": 5121
+    },
+    {
+      "path": "review/portrait/index.html",
+      "role": "other",
+      "sha256": "a3aad6c002a51d3184532150602d761d18f3bf7faa1bae69efeada72f6534b4a",
+      "size": 5180
+    },
+    {
+      "path": "records/render-context.json",
+      "role": "other",
+      "sha256": "c196c57cc2bf38e4cadac674cc6664250fd6a708f16ef703d37aac6d5209e1b1",
+      "size": 824
+    },
+    {
+      "path": "records/source-manifest.json",
+      "role": "other",
+      "sha256": "ceffd67f84a445da390f60a75dc0ff4f6d03d212cef7571391f8db896372d0cd",
+      "size": 1403
+    },
+    {
+      "path": "records/portrait-validation.json",
+      "role": "other",
+      "sha256": "fe77d21b7d4b6487474b3f014d8b7a72368a8035300f06b3149c47d57ed4bdb1",
+      "size": 6270
+    },
+    {
+      "path": "records/capture-acceptance.json",
+      "role": "other",
+      "sha256": "c4173c642ce6097addad77583c7519ede92a77a82d62f36c301cacecb4576a33",
+      "size": 1387
+    },
+    {
+      "path": "records/rendered-interrupt-copy.json",
+      "role": "other",
+      "sha256": "fb4b197975cd218378749628b06fc1e98dd164d47301b952b097fea8ea679e1f",
+      "size": 198583
+    },
+    {
+      "path": "review/portrait/images/cp-000.png",
+      "role": "image",
+      "sha256": "34fb3847f811baf1e7a8348a29aa3dd7cbfab82e04bff1c90f9954da03baccad",
+      "size": 13876
+    },
+    {
+      "path": "review/portrait/images/cp-030.png",
+      "role": "image",
+      "sha256": "7865ed132c2e3a71f6159a66e863f14eb09eaa20150c27570d5de7abd1d178a7",
+      "size": 14471
+    },
+    {
+      "path": "review/portrait/images/cp-060.png",
+      "role": "image",
+      "sha256": "7f046020d838ae668cf4d8934f33caed602a6bb4a79aaaaaf0515234cacf88b3",
+      "size": 14577
+    },
+    {
+      "path": "review/portrait/images/cp-090.png",
+      "role": "image",
+      "sha256": "bf0436013cf9fbb2aaceb09ed53a6769376bd1e2a2e6eb895796286e8d361877",
+      "size": 14168
+    },
+    {
+      "path": "records/inspect.json",
+      "role": "inspect",
+      "sha256": "ddd36924670c498003565c8e9dbe239dd8f649bf25a1b6a05a5803035a62530e",
+      "size": 39698
+    },
+    {
+      "path": "verify_closeout_evidence.py",
+      "role": "verifier",
+      "sha256": "8d3e2dd82bd66bf65e785fc863d1fe07448b500d845cbf2de1699bf8f5199960",
+      "size": 23539
+    }
+  ],
+  "recovery": "records/recovery.json",
+  "relationships": {
+    "execution_id": "EXEC-98f31271",
+    "execution_task_id": "WF-CAPTURE-09ce2ff8-EXECUTE",
+    "scenario_id": "visual-fixture",
+    "validation_task_id": "WF-CAPTURE-09ce2ff8-VALIDATE",
+    "workflow_id": "WF-CAPTURE-09ce2ff8"
+  },
+  "schema_version": 1,
+  "source_identity": "metadata/source-identity.json"
+}

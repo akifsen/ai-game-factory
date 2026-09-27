@@ -1,0 +1,49 @@
+{
+  "kind": "bound-review-cold-verification",
+  "human_review": "PENDING",
+  "package": "docs/reports/v0.3-rendered/cold-evidence-bound",
+  "verified_outside": "C:\\Users\\lenovo\\devel\\gf-v03-cold-bound",
+  "cwd": "C:\\Users\\lenovo\\devel\\gf-v03-cold-cwd",
+  "browser_file_url": {
+    "tool": "cursor-ide-browser browser_navigate",
+    "url": "file:///C:/Users/lenovo/devel/ai-game-factory/docs/reports/v0.3-rendered/cold-evidence-bound/review/landscape/index.html",
+    "result": "Security restriction: file:// URLs are not allowed",
+    "counts_as_browser_image_load": false
+  },
+  "positive": {
+    "exit_code": 0,
+    "message": "PASS: evidence bundle is complete, hash-valid, and internally consistent"
+  },
+  "negatives": [
+    {
+      "case": "displayed-png-missing",
+      "path": "review/landscape/images/cp-090.png",
+      "exit_code": 1,
+      "message": "FAIL: missing or linked required file: review/landscape/images/cp-090.png"
+    },
+    {
+      "case": "displayed-png-modified",
+      "path": "review/landscape/images/cp-090.png",
+      "exit_code": 1,
+      "message": "FAIL: size/hash mismatch: review/landscape/images/cp-090.png"
+    },
+    {
+      "case": "checkpoint-images-swapped",
+      "note": "cp-000 and cp-090 bytes exchanged and the manifest hashes refreshed",
+      "exit_code": 1,
+      "message": "FAIL: rendered image is not bound to the capture validation report"
+    },
+    {
+      "case": "html-points-at-another-valid-capture",
+      "note": "cp-090 figure src changed to images/cp-000.png; HTML manifest hash refreshed",
+      "exit_code": 1,
+      "message": "FAIL: review HTML points at a different capture than the figure caption"
+    }
+  ],
+  "previous_unbound_layout": {
+    "package": "docs/reports/v0.3-rendered/cold-evidence",
+    "left_unmodified": true,
+    "exit_code": 1,
+    "message": "FAIL: review HTML displays a file outside the manifest: review/landscape/images/cp-000.png"
+  }
+}

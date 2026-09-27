@@ -1,0 +1,15 @@
+{
+  "head": "b9f3b4da2000602ff742a9ed7c6852beb72421cc",
+  "committed_for_v03": false,
+  "human_review": "PENDING",
+  "dirty_paths": [
+    ".github/workflows/ci.yml",
+    "docs/reports/v0.3-completion-report.md",
+    "scripts/verify_closeout_evidence.py",
+    "scripts/verify_godot_capture.py",
+    "tests/integration/test_godot_capture_pipeline.py",
+    "tests/unit/test_closeout_evidence.py",
+    "docs/reports/v0.3-rendered/bound-verify-results.json",
+    "docs/reports/v0.3-rendered/cold-evidence-bound/"
+  ]
+}

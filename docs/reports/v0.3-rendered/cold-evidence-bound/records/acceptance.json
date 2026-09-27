@@ -1,0 +1,1034 @@
+{
+  "status": "PASSED",
+  "started_at": "2026-09-27T04:17:43.083618+00:00",
+  "kind": "windows-rendered-capture-technical-acceptance",
+  "human_review": "PENDING",
+  "note": "PASSED means this technical capture inspect is internally consistent. It is not a human visual approval.",
+  "checks": {
+    "artifact_documents": {
+      "WF-CAPTURE-09ce2ff8": [
+        {
+          "artifact": {
+            "id": "ART-e83cb90b",
+            "workflow_id": "WF-CAPTURE-09ce2ff8",
+            "task_id": "WF-CAPTURE-09ce2ff8-EXECUTE",
+            "artifact_type": "godot-runtime-observation",
+            "producer": "GodotCaptureHandler",
+            "relative_path": ".gamefactory/artifacts/godot/WF-CAPTURE-09ce2ff8/WF-CAPTURE-09ce2ff8-EXECUTE/EXEC-98f31271/runtime-observation.json",
+            "content_hash": "bb16cad4e45b28b55383270e00c5f60ceea1d67f0298ccdc63262876e81d7e51",
+            "file_size": 1423,
+            "validation_state": "VALID",
+            "created_at": "2026-09-27T04:17:54.535142+00:00"
+          }
+        },
+        {
+          "artifact": {
+            "id": "ART-183e3308",
+            "workflow_id": "WF-CAPTURE-09ce2ff8",
+            "task_id": "WF-CAPTURE-09ce2ff8-VALIDATE",
+            "artifact_type": "godot-capture-validation",
+            "producer": "GodotCaptureHandler",
+            "relative_path": ".gamefactory/artifacts/godot/WF-CAPTURE-09ce2ff8/WF-CAPTURE-09ce2ff8-VALIDATE/EXEC-928ced6b/validation-report.json",
+            "content_hash": "99ffaa6966cdde58b01a44e7931c89821777cff3bbf7d2be935ed739eafce8b5",
+            "file_size": 6270,
+            "validation_state": "VALID",
+            "created_at": "2026-09-27T04:17:55.286647+00:00"
+          }
+        }
+      ]
+    }
+  },
+  "commands": [
+    {
+      "command": "gamefactory --project .verification/v03-capture/landscape inspect WF-CAPTURE-09ce2ff8 --json",
+      "json": {
+        "approvals": [
+          {
+            "actor": null,
+            "approval_type": "visual_review",
+            "artifact_ids": [
+              "ART-b77ab611",
+              "ART-ac4f560f",
+              "ART-ccc75e51",
+              "ART-08b1876d",
+              "ART-4ad09a38",
+              "ART-6103b9e4",
+              "ART-933e9866",
+              "ART-2effd85a",
+              "ART-8250bf58",
+              "ART-98def853",
+              "ART-8e835957",
+              "ART-ea53c8a3",
+              "ART-5e1a3bca",
+              "ART-493e4ed3",
+              "ART-c73e1d56",
+              "ART-7281a662",
+              "ART-e83cb90b",
+              "ART-29d07b8a",
+              "ART-c05ecc49",
+              "ART-5b7abce3",
+              "ART-e74b2c09",
+              "ART-83c769da",
+              "ART-9c74997e",
+              "ART-9cf15e67",
+              "ART-af764831",
+              "ART-f30f690f",
+              "ART-964b43af",
+              "ART-4b745b87",
+              "ART-45aa042a",
+              "ART-183e3308",
+              "ART-ab82bb9d",
+              "ART-3c4c261b",
+              "ART-147c5c90",
+              "ART-77139820",
+              "ART-1713d92d"
+            ],
+            "comment": null,
+            "cost_class": "LOCAL",
+            "decided_at": null,
+            "id": "APP-ab0d79da",
+            "operation_hash": "10f7f9bfa2c7ce9c0ac2fe8acce1e0361c64725ad912a46599dee3aaad7501c4",
+            "reason": "Rendered captures require a separate human visual review",
+            "requested_at": "2026-09-27T04:17:55.608606+00:00",
+            "status": "PENDING",
+            "task_id": "WF-CAPTURE-09ce2ff8-REVIEW",
+            "workflow_id": "WF-CAPTURE-09ce2ff8"
+          }
+        ],
+        "artifacts": [
+          {
+            "artifact_type": "godot-source-manifest",
+            "content_hash": "ceffd67f84a445da390f60a75dc0ff4f6d03d212cef7571391f8db896372d0cd",
+            "created_at": "2026-09-27T04:17:44.813391+00:00",
+            "file_size": 1403,
+            "id": "ART-b77ab611",
+            "producer": "GodotCaptureHandler",
+            "relative_path": ".gamefactory/artifacts/godot/WF-CAPTURE-09ce2ff8/WF-CAPTURE-09ce2ff8-EXECUTE/EXEC-98f31271/source-manifest.json",
+            "task_id": "WF-CAPTURE-09ce2ff8-EXECUTE",
+            "validation_state": "VALID",
+            "workflow_id": "WF-CAPTURE-09ce2ff8"
+          },
+          {
+            "artifact_type": "godot-scenario-snapshot",
+            "content_hash": "00d53b5a4d33d1c5b31011ca6356b2b43b206bc191cb238fe1d102269fa66fa7",
+            "created_at": "2026-09-27T04:17:44.825717+00:00",
+            "file_size": 1189,
+            "id": "ART-ac4f560f",
+            "producer": "GodotCaptureHandler",
+            "relative_path": ".gamefactory/artifacts/godot/WF-CAPTURE-09ce2ff8/WF-CAPTURE-09ce2ff8-EXECUTE/EXEC-98f31271/scenario-snapshot.json",
+            "task_id": "WF-CAPTURE-09ce2ff8-EXECUTE",
+            "validation_state": "VALID",
+            "workflow_id": "WF-CAPTURE-09ce2ff8"
+          },
+          {
+            "artifact_type": "godot-process-journal",
+            "content_hash": "a5fe13cc257467f89bf9dbdd966affdc2e6836fb978e57c5ff7f760bf7da2b63",
+            "created_at": "2026-09-27T04:17:44.864191+00:00",
+            "file_size": 1032,
+            "id": "ART-ccc75e51",
+            "producer": "GodotCaptureHandler",
+            "relative_path": ".gamefactory/artifacts/godot/WF-CAPTURE-09ce2ff8/WF-CAPTURE-09ce2ff8-EXECUTE/EXEC-98f31271/version.json",
+            "task_id": "WF-CAPTURE-09ce2ff8-EXECUTE",
+            "validation_state": "VALID",
+            "workflow_id": "WF-CAPTURE-09ce2ff8"
+          },
+          {
+            "artifact_type": "godot-process-journal",
+            "content_hash": "650039149c4fa8c1baa1c101dda0271fa18fee401bd57fb1b41dadfa1fffd075",
+            "created_at": "2026-09-27T04:17:44.957672+00:00",
+            "file_size": 785,
+            "id": "ART-08b1876d",
+            "producer": "GodotCaptureHandler",
+            "relative_path": ".gamefactory/artifacts/godot/WF-CAPTURE-09ce2ff8/WF-CAPTURE-09ce2ff8-EXECUTE/EXEC-98f31271/version-terminal.json",
+            "task_id": "WF-CAPTURE-09ce2ff8-EXECUTE",
+            "validation_state": "VALID",
+            "workflow_id": "WF-CAPTURE-09ce2ff8"
+          },
+          {
+            "artifact_type": "godot-process-journal",
+            "content_hash": "f9a9bd2cf5d79967ce40389cbf326fe54de204fb4de7a0f3e0f0a5cf6fb2e2b8",
+            "created_at": "2026-09-27T04:17:44.987496+00:00",
+            "file_size": 1023,
+            "id": "ART-4ad09a38",
+            "producer": "GodotCaptureHandler",
+            "relative_path": ".gamefactory/artifacts/godot/WF-CAPTURE-09ce2ff8/WF-CAPTURE-09ce2ff8-EXECUTE/EXEC-98f31271/help.json",
+            "task_id": "WF-CAPTURE-09ce2ff8-EXECUTE",
+            "validation_state": "VALID",
+            "workflow_id": "WF-CAPTURE-09ce2ff8"
+          },
+          {
+            "artifact_type": "godot-process-journal",
+            "content_hash": "ca7e924fd08171ab5acb6f6f0584849aa2c4315369cae86061f349a2498e3ceb",
+            "created_at": "2026-09-27T04:17:45.085813+00:00",
+            "file_size": 779,
+            "id": "ART-6103b9e4",
+            "producer": "GodotCaptureHandler",
+            "relative_path": ".gamefactory/artifacts/godot/WF-CAPTURE-09ce2ff8/WF-CAPTURE-09ce2ff8-EXECUTE/EXEC-98f31271/help-terminal.json",
+            "task_id": "WF-CAPTURE-09ce2ff8-EXECUTE",
+            "validation_state": "VALID",
+            "workflow_id": "WF-CAPTURE-09ce2ff8"
+          },
+          {
+            "artifact_type": "godot-process-journal",
+            "content_hash": "006d2146212d2b6256c50c697d4d6fcf07d346b9d79e968b5c951da9461f4262",
+            "created_at": "2026-09-27T04:17:45.131867+00:00",
+            "file_size": 1226,
+            "id": "ART-933e9866",
+            "producer": "GodotCaptureHandler",
+            "relative_path": ".gamefactory/artifacts/godot/WF-CAPTURE-09ce2ff8/WF-CAPTURE-09ce2ff8-EXECUTE/EXEC-98f31271/import.json",
+            "task_id": "WF-CAPTURE-09ce2ff8-EXECUTE",
+            "validation_state": "VALID",
+            "workflow_id": "WF-CAPTURE-09ce2ff8"
+          },
+          {
+            "artifact_type": "godot-process-journal",
+            "content_hash": "fd02b84d2117e0f8d12158f850563e51c9334bc043ad0e352e0da7478c08572a",
+            "created_at": "2026-09-27T04:17:50.615795+00:00",
+            "file_size": 783,
+            "id": "ART-2effd85a",
+            "producer": "GodotCaptureHandler",
+            "relative_path": ".gamefactory/artifacts/godot/WF-CAPTURE-09ce2ff8/WF-CAPTURE-09ce2ff8-EXECUTE/EXEC-98f31271/import-terminal.json",
+            "task_id": "WF-CAPTURE-09ce2ff8-EXECUTE",
+            "validation_state": "VALID",
+            "workflow_id": "WF-CAPTURE-09ce2ff8"
+          },
+          {
+            "artifact_type": "godot-process-journal",
+            "content_hash": "6762bd8f5b1a4c3884e900218200a370bca18a5d1bb58dafeb04cd88428a1dfd",
+            "created_at": "2026-09-27T04:17:50.657183+00:00",
+            "file_size": 2257,
+            "id": "ART-8250bf58",
+            "producer": "GodotCaptureHandler",
+            "relative_path": ".gamefactory/artifacts/godot/WF-CAPTURE-09ce2ff8/WF-CAPTURE-09ce2ff8-EXECUTE/EXEC-98f31271/runtime.json",
+            "task_id": "WF-CAPTURE-09ce2ff8-EXECUTE",
+            "validation_state": "VALID",
+            "workflow_id": "WF-CAPTURE-09ce2ff8"
+          },
+          {
+            "artifact_type": "godot-process-journal",
+            "content_hash": "63ee5e356535f79eb890b2eecdf07a3ab98274dee9d707098539653fb106be7c",
+            "created_at": "2026-09-27T04:17:54.357344+00:00",
+            "file_size": 785,
+            "id": "ART-98def853",
+            "producer": "GodotCaptureHandler",
+            "relative_path": ".gamefactory/artifacts/godot/WF-CAPTURE-09ce2ff8/WF-CAPTURE-09ce2ff8-EXECUTE/EXEC-98f31271/runtime-terminal.json",
+            "task_id": "WF-CAPTURE-09ce2ff8-EXECUTE",
+            "validation_state": "VALID",
+            "workflow_id": "WF-CAPTURE-09ce2ff8"
+          },
+          {
+            "artifact_type": "godot-help-process",
+            "content_hash": "a17618c824abf46f70c3322aae24381077d6f9371f0acb0f4a2be839c2f780ac",
+            "created_at": "2026-09-27T04:17:54.391984+00:00",
+            "file_size": 942,
+            "id": "ART-8e835957",
+            "producer": "GodotCaptureHandler",
+            "relative_path": ".gamefactory/artifacts/godot/WF-CAPTURE-09ce2ff8/WF-CAPTURE-09ce2ff8-EXECUTE/EXEC-98f31271/help-process.json",
+            "task_id": "WF-CAPTURE-09ce2ff8-EXECUTE",
+            "validation_state": "VALID",
+            "workflow_id": "WF-CAPTURE-09ce2ff8"
+          },
+          {
+            "artifact_type": "godot-help-stderr",
+            "content_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "created_at": "2026-09-27T04:17:54.405186+00:00",
+            "file_size": 0,
+            "id": "ART-ea53c8a3",
+            "producer": "GodotCaptureHandler",
+            "relative_path": ".gamefactory/artifacts/godot/WF-CAPTURE-09ce2ff8/WF-CAPTURE-09ce2ff8-EXECUTE/EXEC-98f31271/help-stderr.log",
+            "task_id": "WF-CAPTURE-09ce2ff8-EXECUTE",
+            "validation_state": "VALID",
+            "workflow_id": "WF-CAPTURE-09ce2ff8"
+          },
+          {
+            "artifact_type": "godot-help-stdout",
+            "content_hash": "e4160ad4187fba1cbc092d2412a03535e83464eb9d8c446075cc29f4cad5b1d3",
+            "created_at": "2026-09-27T04:17:54.439841+00:00",
+            "file_size": 15663,
+            "id": "ART-5e1a3bca",
+            "producer": "GodotCaptureHandler",
+            "relative_path": ".gamefactory/artifacts/godot/WF-CAPTURE-09ce2ff8/WF-CAPTURE-09ce2ff8-EXECUTE/EXEC-98f31271/help-stdout.log",
+            "task_id": "WF-CAPTURE-09ce2ff8-EXECUTE",
+            "validation_state": "VALID",
+            "workflow_id": "WF-CAPTURE-09ce2ff8"
+          },
+          {
+            "artifact_type": "godot-import-process",
+            "content_hash": "37a27621257dc2465106607e8fce892c92a3d1ee2b860b921411fa60e9dc9b70",
+            "created_at": "2026-09-27T04:17:54.463300+00:00",
+            "file_size": 1136,
+            "id": "ART-493e4ed3",
+            "producer": "GodotCaptureHandler",
+            "relative_path": ".gamefactory/artifacts/godot/WF-CAPTURE-09ce2ff8/WF-CAPTURE-09ce2ff8-EXECUTE/EXEC-98f31271/import-process.json",
+            "task_id": "WF-CAPTURE-09ce2ff8-EXECUTE",
+            "validation_state": "VALID",
+            "workflow_id": "WF-CAPTURE-09ce2ff8"
+          },
+          {
+            "artifact_type": "godot-import-stderr",
+            "content_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "created_at": "2026-09-27T04:17:54.478424+00:00",
+            "file_size": 0,
+            "id": "ART-c73e1d56",
+            "producer": "GodotCaptureHandler",
+            "relative_path": ".gamefactory/artifacts/godot/WF-CAPTURE-09ce2ff8/WF-CAPTURE-09ce2ff8-EXECUTE/EXEC-98f31271/import-stderr.log",
+            "task_id": "WF-CAPTURE-09ce2ff8-EXECUTE",
+            "validation_state": "VALID",
+            "workflow_id": "WF-CAPTURE-09ce2ff8"
+          },
+          {
+            "artifact_type": "godot-import-stdout",
+            "content_hash": "eab278ddc67d7d9b013960425d8e07849c2d1ea3e733c6280bdb97057498ba8a",
+            "created_at": "2026-09-27T04:17:54.505526+00:00",
+            "file_size": 1496,
+            "id": "ART-7281a662",
+            "producer": "GodotCaptureHandler",
+            "relative_path": ".gamefactory/artifacts/godot/WF-CAPTURE-09ce2ff8/WF-CAPTURE-09ce2ff8-EXECUTE/EXEC-98f31271/import-stdout.log",
+            "task_id": "WF-CAPTURE-09ce2ff8-EXECUTE",
+            "validation_state": "VALID",
+            "workflow_id": "WF-CAPTURE-09ce2ff8"
+          },
+          {
+            "artifact_type": "godot-runtime-observation",
+            "content_hash": "bb16cad4e45b28b55383270e00c5f60ceea1d67f0298ccdc63262876e81d7e51",
+            "created_at": "2026-09-27T04:17:54.535142+00:00",
+            "file_size": 1423,
+            "id": "ART-e83cb90b",
+            "producer": "GodotCaptureHandler",
+            "relative_path": ".gamefactory/artifacts/godot/WF-CAPTURE-09ce2ff8/WF-CAPTURE-09ce2ff8-EXECUTE/EXEC-98f31271/runtime-observation.json",
+            "task_id": "WF-CAPTURE-09ce2ff8-EXECUTE",
+            "validation_state": "VALID",
+            "workflow_id": "WF-CAPTURE-09ce2ff8"
+          },
+          {
+            "artifact_type": "godot-runtime-process",
+            "content_hash": "6a37c60bfada630f2aad12c846ffa699205296ae2c5bdec2abea3e7628f3b8ba",
+            "created_at": "2026-09-27T04:17:54.557078+00:00",
+            "file_size": 2127,
+            "id": "ART-29d07b8a",
+            "producer": "GodotCaptureHandler",
+            "relative_path": ".gamefactory/artifacts/godot/WF-CAPTURE-09ce2ff8/WF-CAPTURE-09ce2ff8-EXECUTE/EXEC-98f31271/runtime-process.json",
+            "task_id": "WF-CAPTURE-09ce2ff8-EXECUTE",
+            "validation_state": "VALID",
+            "workflow_id": "WF-CAPTURE-09ce2ff8"
+          },
+          {
+            "artifact_type": "godot-runtime-request",
+            "content_hash": "e8f9c8b026036e37c203729bf445da3f10eb974d2cfc2ae6d4651cf9479398c5",
+            "created_at": "2026-09-27T04:17:54.572839+00:00",
+            "file_size": 758,
+            "id": "ART-c05ecc49",
+            "producer": "GodotCaptureHandler",
+            "relative_path": ".gamefactory/artifacts/godot/WF-CAPTURE-09ce2ff8/WF-CAPTURE-09ce2ff8-EXECUTE/EXEC-98f31271/runtime-request.json",
+            "task_id": "WF-CAPTURE-09ce2ff8-EXECUTE",
+            "validation_state": "VALID",
+            "workflow_id": "WF-CAPTURE-09ce2ff8"
+          },
+          {
+            "artifact_type": "godot-runtime-stderr",
+            "content_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "created_at": "2026-09-27T04:17:54.585840+00:00",
+            "file_size": 0,
+            "id": "ART-5b7abce3",
+            "producer": "GodotCaptureHandler",
+            "relative_path": ".gamefactory/artifacts/godot/WF-CAPTURE-09ce2ff8/WF-CAPTURE-09ce2ff8-EXECUTE/EXEC-98f31271/runtime-stderr.log",
+            "task_id": "WF-CAPTURE-09ce2ff8-EXECUTE",
+            "validation_state": "VALID",
+            "workflow_id": "WF-CAPTURE-09ce2ff8"
+          },
+          {
+            "artifact_type": "godot-runtime-stdout",
+            "content_hash": "b96c46e912cd186eaa4ea76416ea71b1ec45bcc9952fe5c86cccafb4b2d31d16",
+            "created_at": "2026-09-27T04:17:54.612360+00:00",
+            "file_size": 186,
+            "id": "ART-e74b2c09",
+            "producer": "GodotCaptureHandler",
+            "relative_path": ".gamefactory/artifacts/godot/WF-CAPTURE-09ce2ff8/WF-CAPTURE-09ce2ff8-EXECUTE/EXEC-98f31271/runtime-stdout.log",
+            "task_id": "WF-CAPTURE-09ce2ff8-EXECUTE",
+            "validation_state": "VALID",
+            "workflow_id": "WF-CAPTURE-09ce2ff8"
+          },
+          {
+            "artifact_type": "godot-version-process",
+            "content_hash": "b18fd93aefc497a1c8c733a8fa6b1d7ef54ec616537e9f07e0b6866dd31dd7cf",
+            "created_at": "2026-09-27T04:17:54.643278+00:00",
+            "file_size": 948,
+            "id": "ART-83c769da",
+            "producer": "GodotCaptureHandler",
+            "relative_path": ".gamefactory/artifacts/godot/WF-CAPTURE-09ce2ff8/WF-CAPTURE-09ce2ff8-EXECUTE/EXEC-98f31271/version-process.json",
+            "task_id": "WF-CAPTURE-09ce2ff8-EXECUTE",
+            "validation_state": "VALID",
+            "workflow_id": "WF-CAPTURE-09ce2ff8"
+          },
+          {
+            "artifact_type": "godot-version-stderr",
+            "content_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "created_at": "2026-09-27T04:17:54.656738+00:00",
+            "file_size": 0,
+            "id": "ART-9c74997e",
+            "producer": "GodotCaptureHandler",
+            "relative_path": ".gamefactory/artifacts/godot/WF-CAPTURE-09ce2ff8/WF-CAPTURE-09ce2ff8-EXECUTE/EXEC-98f31271/version-stderr.log",
+            "task_id": "WF-CAPTURE-09ce2ff8-EXECUTE",
+            "validation_state": "VALID",
+            "workflow_id": "WF-CAPTURE-09ce2ff8"
+          },
+          {
+            "artifact_type": "godot-version-stdout",
+            "content_hash": "c070177873f0f0acfbd7940156bb455d896c7b3694a65fa71d6d8c0ed65fb3fb",
+            "created_at": "2026-09-27T04:17:54.680416+00:00",
+            "file_size": 34,
+            "id": "ART-9cf15e67",
+            "producer": "GodotCaptureHandler",
+            "relative_path": ".gamefactory/artifacts/godot/WF-CAPTURE-09ce2ff8/WF-CAPTURE-09ce2ff8-EXECUTE/EXEC-98f31271/version-stdout.log",
+            "task_id": "WF-CAPTURE-09ce2ff8-EXECUTE",
+            "validation_state": "VALID",
+            "workflow_id": "WF-CAPTURE-09ce2ff8"
+          },
+          {
+            "artifact_type": "godot-capture-png",
+            "content_hash": "fb35be73c5fb051d23e6d0c3cf381d4ea6b30d61745e46e03103a76dc64d8404",
+            "created_at": "2026-09-27T04:17:54.707114+00:00",
+            "file_size": 12771,
+            "id": "ART-af764831",
+            "producer": "GodotCaptureHandler",
+            "relative_path": ".gamefactory/artifacts/godot/WF-CAPTURE-09ce2ff8/WF-CAPTURE-09ce2ff8-EXECUTE/EXEC-98f31271/cp-000.png",
+            "task_id": "WF-CAPTURE-09ce2ff8-EXECUTE",
+            "validation_state": "VALID",
+            "workflow_id": "WF-CAPTURE-09ce2ff8"
+          },
+          {
+            "artifact_type": "godot-capture-png",
+            "content_hash": "1bf0eb4c7e537a548ff0017a7c2f8aa35cd2a9bb470bb5e14550556b88cd2e7a",
+            "created_at": "2026-09-27T04:17:54.734784+00:00",
+            "file_size": 13367,
+            "id": "ART-f30f690f",
+            "producer": "GodotCaptureHandler",
+            "relative_path": ".gamefactory/artifacts/godot/WF-CAPTURE-09ce2ff8/WF-CAPTURE-09ce2ff8-EXECUTE/EXEC-98f31271/cp-030.png",
+            "task_id": "WF-CAPTURE-09ce2ff8-EXECUTE",
+            "validation_state": "VALID",
+            "workflow_id": "WF-CAPTURE-09ce2ff8"
+          },
+          {
+            "artifact_type": "godot-capture-png",
+            "content_hash": "b74f022bb8534c14c09dc6f292456d9fd5c5544eab952bf8b2029b22fcf54793",
+            "created_at": "2026-09-27T04:17:54.757939+00:00",
+            "file_size": 13463,
+            "id": "ART-964b43af",
+            "producer": "GodotCaptureHandler",
+            "relative_path": ".gamefactory/artifacts/godot/WF-CAPTURE-09ce2ff8/WF-CAPTURE-09ce2ff8-EXECUTE/EXEC-98f31271/cp-060.png",
+            "task_id": "WF-CAPTURE-09ce2ff8-EXECUTE",
+            "validation_state": "VALID",
+            "workflow_id": "WF-CAPTURE-09ce2ff8"
+          },
+          {
+            "artifact_type": "godot-capture-png",
+            "content_hash": "dbb9633af40222ec1681fa4b467e3345599815e3f52fa5ff6cf1cbbefe429f63",
+            "created_at": "2026-09-27T04:17:54.781593+00:00",
+            "file_size": 13070,
+            "id": "ART-4b745b87",
+            "producer": "GodotCaptureHandler",
+            "relative_path": ".gamefactory/artifacts/godot/WF-CAPTURE-09ce2ff8/WF-CAPTURE-09ce2ff8-EXECUTE/EXEC-98f31271/cp-090.png",
+            "task_id": "WF-CAPTURE-09ce2ff8-EXECUTE",
+            "validation_state": "VALID",
+            "workflow_id": "WF-CAPTURE-09ce2ff8"
+          },
+          {
+            "artifact_type": "godot-render-context",
+            "content_hash": "c196c57cc2bf38e4cadac674cc6664250fd6a708f16ef703d37aac6d5209e1b1",
+            "created_at": "2026-09-27T04:17:54.810778+00:00",
+            "file_size": 824,
+            "id": "ART-45aa042a",
+            "producer": "GodotCaptureHandler",
+            "relative_path": ".gamefactory/artifacts/godot/WF-CAPTURE-09ce2ff8/WF-CAPTURE-09ce2ff8-EXECUTE/EXEC-98f31271/render-context.json",
+            "task_id": "WF-CAPTURE-09ce2ff8-EXECUTE",
+            "validation_state": "VALID",
+            "workflow_id": "WF-CAPTURE-09ce2ff8"
+          },
+          {
+            "artifact_type": "godot-capture-validation",
+            "content_hash": "99ffaa6966cdde58b01a44e7931c89821777cff3bbf7d2be935ed739eafce8b5",
+            "created_at": "2026-09-27T04:17:55.286647+00:00",
+            "file_size": 6270,
+            "id": "ART-183e3308",
+            "producer": "GodotCaptureHandler",
+            "relative_path": ".gamefactory/artifacts/godot/WF-CAPTURE-09ce2ff8/WF-CAPTURE-09ce2ff8-VALIDATE/EXEC-928ced6b/validation-report.json",
+            "task_id": "WF-CAPTURE-09ce2ff8-VALIDATE",
+            "validation_state": "VALID",
+            "workflow_id": "WF-CAPTURE-09ce2ff8"
+          },
+          {
+            "artifact_type": "godot-review-html",
+            "content_hash": "ad9b24dca5e856927b7a38ceb4aa53e600b1c8fd1aed807d1b2d7e60ffd2c6c5",
+            "created_at": "2026-09-27T04:17:55.315494+00:00",
+            "file_size": 5121,
+            "id": "ART-ab82bb9d",
+            "producer": "GodotCaptureHandler",
+            "relative_path": ".gamefactory/artifacts/godot/WF-CAPTURE-09ce2ff8/WF-CAPTURE-09ce2ff8-VALIDATE/EXEC-928ced6b/review/index.html",
+            "task_id": "WF-CAPTURE-09ce2ff8-VALIDATE",
+            "validation_state": "VALID",
+            "workflow_id": "WF-CAPTURE-09ce2ff8"
+          },
+          {
+            "artifact_type": "godot-review-png",
+            "content_hash": "fb35be73c5fb051d23e6d0c3cf381d4ea6b30d61745e46e03103a76dc64d8404",
+            "created_at": "2026-09-27T04:17:55.340360+00:00",
+            "file_size": 12771,
+            "id": "ART-3c4c261b",
+            "producer": "GodotCaptureHandler",
+            "relative_path": ".gamefactory/artifacts/godot/WF-CAPTURE-09ce2ff8/WF-CAPTURE-09ce2ff8-VALIDATE/EXEC-928ced6b/review/images/cp-000.png",
+            "task_id": "WF-CAPTURE-09ce2ff8-VALIDATE",
+            "validation_state": "VALID",
+            "workflow_id": "WF-CAPTURE-09ce2ff8"
+          },
+          {
+            "artifact_type": "godot-review-png",
+            "content_hash": "1bf0eb4c7e537a548ff0017a7c2f8aa35cd2a9bb470bb5e14550556b88cd2e7a",
+            "created_at": "2026-09-27T04:17:55.373609+00:00",
+            "file_size": 13367,
+            "id": "ART-147c5c90",
+            "producer": "GodotCaptureHandler",
+            "relative_path": ".gamefactory/artifacts/godot/WF-CAPTURE-09ce2ff8/WF-CAPTURE-09ce2ff8-VALIDATE/EXEC-928ced6b/review/images/cp-030.png",
+            "task_id": "WF-CAPTURE-09ce2ff8-VALIDATE",
+            "validation_state": "VALID",
+            "workflow_id": "WF-CAPTURE-09ce2ff8"
+          },
+          {
+            "artifact_type": "godot-review-png",
+            "content_hash": "b74f022bb8534c14c09dc6f292456d9fd5c5544eab952bf8b2029b22fcf54793",
+            "created_at": "2026-09-27T04:17:55.398463+00:00",
+            "file_size": 13463,
+            "id": "ART-77139820",
+            "producer": "GodotCaptureHandler",
+            "relative_path": ".gamefactory/artifacts/godot/WF-CAPTURE-09ce2ff8/WF-CAPTURE-09ce2ff8-VALIDATE/EXEC-928ced6b/review/images/cp-060.png",
+            "task_id": "WF-CAPTURE-09ce2ff8-VALIDATE",
+            "validation_state": "VALID",
+            "workflow_id": "WF-CAPTURE-09ce2ff8"
+          },
+          {
+            "artifact_type": "godot-review-png",
+            "content_hash": "dbb9633af40222ec1681fa4b467e3345599815e3f52fa5ff6cf1cbbefe429f63",
+            "created_at": "2026-09-27T04:17:55.417740+00:00",
+            "file_size": 13070,
+            "id": "ART-1713d92d",
+            "producer": "GodotCaptureHandler",
+            "relative_path": ".gamefactory/artifacts/godot/WF-CAPTURE-09ce2ff8/WF-CAPTURE-09ce2ff8-VALIDATE/EXEC-928ced6b/review/images/cp-090.png",
+            "task_id": "WF-CAPTURE-09ce2ff8-VALIDATE",
+            "validation_state": "VALID",
+            "workflow_id": "WF-CAPTURE-09ce2ff8"
+          }
+        ],
+        "evidence": [
+          {
+            "created_at": "2026-09-27T04:17:55.061824+00:00",
+            "evidence_type": "handler:godot_capture_execute",
+            "execution_id": "EXEC-98f31271",
+            "id": "EVI-0922d985",
+            "raw_data": {
+              "artifacts": [
+                {
+                  "artifact_id": "ART-b77ab611",
+                  "content_hash": "ceffd67f84a445da390f60a75dc0ff4f6d03d212cef7571391f8db896372d0cd",
+                  "file_size": 1403,
+                  "status": "VERIFIED"
+                },
+                {
+                  "artifact_id": "ART-ac4f560f",
+                  "content_hash": "00d53b5a4d33d1c5b31011ca6356b2b43b206bc191cb238fe1d102269fa66fa7",
+                  "file_size": 1189,
+                  "status": "VERIFIED"
+                },
+                {
+                  "artifact_id": "ART-ccc75e51",
+                  "content_hash": "a5fe13cc257467f89bf9dbdd966affdc2e6836fb978e57c5ff7f760bf7da2b63",
+                  "file_size": 1032,
+                  "status": "VERIFIED"
+                },
+                {
+                  "artifact_id": "ART-08b1876d",
+                  "content_hash": "650039149c4fa8c1baa1c101dda0271fa18fee401bd57fb1b41dadfa1fffd075",
+                  "file_size": 785,
+                  "status": "VERIFIED"
+                },
+                {
+                  "artifact_id": "ART-4ad09a38",
+                  "content_hash": "f9a9bd2cf5d79967ce40389cbf326fe54de204fb4de7a0f3e0f0a5cf6fb2e2b8",
+                  "file_size": 1023,
+                  "status": "VERIFIED"
+                },
+                {
+                  "artifact_id": "ART-6103b9e4",
+                  "content_hash": "ca7e924fd08171ab5acb6f6f0584849aa2c4315369cae86061f349a2498e3ceb",
+                  "file_size": 779,
+                  "status": "VERIFIED"
+                },
+                {
+                  "artifact_id": "ART-933e9866",
+                  "content_hash": "006d2146212d2b6256c50c697d4d6fcf07d346b9d79e968b5c951da9461f4262",
+                  "file_size": 1226,
+                  "status": "VERIFIED"
+                },
+                {
+                  "artifact_id": "ART-2effd85a",
+                  "content_hash": "fd02b84d2117e0f8d12158f850563e51c9334bc043ad0e352e0da7478c08572a",
+                  "file_size": 783,
+                  "status": "VERIFIED"
+                },
+                {
+                  "artifact_id": "ART-8250bf58",
+                  "content_hash": "6762bd8f5b1a4c3884e900218200a370bca18a5d1bb58dafeb04cd88428a1dfd",
+                  "file_size": 2257,
+                  "status": "VERIFIED"
+                },
+                {
+                  "artifact_id": "ART-98def853",
+                  "content_hash": "63ee5e356535f79eb890b2eecdf07a3ab98274dee9d707098539653fb106be7c",
+                  "file_size": 785,
+                  "status": "VERIFIED"
+                },
+                {
+                  "artifact_id": "ART-8e835957",
+                  "content_hash": "a17618c824abf46f70c3322aae24381077d6f9371f0acb0f4a2be839c2f780ac",
+                  "file_size": 942,
+                  "status": "VERIFIED"
+                },
+                {
+                  "artifact_id": "ART-ea53c8a3",
+                  "content_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                  "file_size": 0,
+                  "status": "VERIFIED"
+                },
+                {
+                  "artifact_id": "ART-5e1a3bca",
+                  "content_hash": "e4160ad4187fba1cbc092d2412a03535e83464eb9d8c446075cc29f4cad5b1d3",
+                  "file_size": 15663,
+                  "status": "VERIFIED"
+                },
+                {
+                  "artifact_id": "ART-493e4ed3",
+                  "content_hash": "37a27621257dc2465106607e8fce892c92a3d1ee2b860b921411fa60e9dc9b70",
+                  "file_size": 1136,
+                  "status": "VERIFIED"
+                },
+                {
+                  "artifact_id": "ART-c73e1d56",
+                  "content_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                  "file_size": 0,
+                  "status": "VERIFIED"
+                },
+                {
+                  "artifact_id": "ART-7281a662",
+                  "content_hash": "eab278ddc67d7d9b013960425d8e07849c2d1ea3e733c6280bdb97057498ba8a",
+                  "file_size": 1496,
+                  "status": "VERIFIED"
+                },
+                {
+                  "artifact_id": "ART-e83cb90b",
+                  "content_hash": "bb16cad4e45b28b55383270e00c5f60ceea1d67f0298ccdc63262876e81d7e51",
+                  "file_size": 1423,
+                  "status": "VERIFIED"
+                },
+                {
+                  "artifact_id": "ART-29d07b8a",
+                  "content_hash": "6a37c60bfada630f2aad12c846ffa699205296ae2c5bdec2abea3e7628f3b8ba",
+                  "file_size": 2127,
+                  "status": "VERIFIED"
+                },
+                {
+                  "artifact_id": "ART-c05ecc49",
+                  "content_hash": "e8f9c8b026036e37c203729bf445da3f10eb974d2cfc2ae6d4651cf9479398c5",
+                  "file_size": 758,
+                  "status": "VERIFIED"
+                },
+                {
+                  "artifact_id": "ART-5b7abce3",
+                  "content_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                  "file_size": 0,
+                  "status": "VERIFIED"
+                },
+                {
+                  "artifact_id": "ART-e74b2c09",
+                  "content_hash": "b96c46e912cd186eaa4ea76416ea71b1ec45bcc9952fe5c86cccafb4b2d31d16",
+                  "file_size": 186,
+                  "status": "VERIFIED"
+                },
+                {
+                  "artifact_id": "ART-83c769da",
+                  "content_hash": "b18fd93aefc497a1c8c733a8fa6b1d7ef54ec616537e9f07e0b6866dd31dd7cf",
+                  "file_size": 948,
+                  "status": "VERIFIED"
+                },
+                {
+                  "artifact_id": "ART-9c74997e",
+                  "content_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                  "file_size": 0,
+                  "status": "VERIFIED"
+                },
+                {
+                  "artifact_id": "ART-9cf15e67",
+                  "content_hash": "c070177873f0f0acfbd7940156bb455d896c7b3694a65fa71d6d8c0ed65fb3fb",
+                  "file_size": 34,
+                  "status": "VERIFIED"
+                },
+                {
+                  "artifact_id": "ART-af764831",
+                  "content_hash": "fb35be73c5fb051d23e6d0c3cf381d4ea6b30d61745e46e03103a76dc64d8404",
+                  "file_size": 12771,
+                  "status": "VERIFIED"
+                },
+                {
+                  "artifact_id": "ART-f30f690f",
+                  "content_hash": "1bf0eb4c7e537a548ff0017a7c2f8aa35cd2a9bb470bb5e14550556b88cd2e7a",
+                  "file_size": 13367,
+                  "status": "VERIFIED"
+                },
+                {
+                  "artifact_id": "ART-964b43af",
+                  "content_hash": "b74f022bb8534c14c09dc6f292456d9fd5c5544eab952bf8b2029b22fcf54793",
+                  "file_size": 13463,
+                  "status": "VERIFIED"
+                },
+                {
+                  "artifact_id": "ART-4b745b87",
+                  "content_hash": "dbb9633af40222ec1681fa4b467e3345599815e3f52fa5ff6cf1cbbefe429f63",
+                  "file_size": 13070,
+                  "status": "VERIFIED"
+                },
+                {
+                  "artifact_id": "ART-45aa042a",
+                  "content_hash": "c196c57cc2bf38e4cadac674cc6664250fd6a708f16ef703d37aac6d5209e1b1",
+                  "file_size": 824,
+                  "status": "VERIFIED"
+                }
+              ],
+              "gate_id": "GATE-2585267a",
+              "schema_version": 1
+            },
+            "summary": "Godot 4.7.2.stable.official.ed1daf0bf rendered 4 captures",
+            "task_id": "WF-CAPTURE-09ce2ff8-EXECUTE"
+          },
+          {
+            "created_at": "2026-09-27T04:17:55.476090+00:00",
+            "evidence_type": "handler:godot_capture_validate",
+            "execution_id": "EXEC-928ced6b",
+            "id": "EVI-14020aa0",
+            "raw_data": {
+              "artifacts": [
+                {
+                  "artifact_id": "ART-183e3308",
+                  "content_hash": "99ffaa6966cdde58b01a44e7931c89821777cff3bbf7d2be935ed739eafce8b5",
+                  "file_size": 6270,
+                  "status": "VERIFIED"
+                },
+                {
+                  "artifact_id": "ART-ab82bb9d",
+                  "content_hash": "ad9b24dca5e856927b7a38ceb4aa53e600b1c8fd1aed807d1b2d7e60ffd2c6c5",
+                  "file_size": 5121,
+                  "status": "VERIFIED"
+                },
+                {
+                  "artifact_id": "ART-3c4c261b",
+                  "content_hash": "fb35be73c5fb051d23e6d0c3cf381d4ea6b30d61745e46e03103a76dc64d8404",
+                  "file_size": 12771,
+                  "status": "VERIFIED"
+                },
+                {
+                  "artifact_id": "ART-147c5c90",
+                  "content_hash": "1bf0eb4c7e537a548ff0017a7c2f8aa35cd2a9bb470bb5e14550556b88cd2e7a",
+                  "file_size": 13367,
+                  "status": "VERIFIED"
+                },
+                {
+                  "artifact_id": "ART-77139820",
+                  "content_hash": "b74f022bb8534c14c09dc6f292456d9fd5c5544eab952bf8b2029b22fcf54793",
+                  "file_size": 13463,
+                  "status": "VERIFIED"
+                },
+                {
+                  "artifact_id": "ART-1713d92d",
+                  "content_hash": "dbb9633af40222ec1681fa4b467e3345599815e3f52fa5ff6cf1cbbefe429f63",
+                  "file_size": 13070,
+                  "status": "VERIFIED"
+                }
+              ],
+              "gate_id": "GATE-304cda77",
+              "schema_version": 1
+            },
+            "summary": "Capture state and images passed independent checks; human review is still required",
+            "task_id": "WF-CAPTURE-09ce2ff8-VALIDATE"
+          }
+        ],
+        "executions": [
+          {
+            "attempt_number": 1,
+            "completed_at": "2026-09-27T04:17:55.085477+00:00",
+            "cost": 0.0,
+            "cost_unit": "provider_units",
+            "error_message": null,
+            "estimated_cost": 0.0,
+            "exit_code": null,
+            "external_op_id": null,
+            "host": null,
+            "id": "EXEC-98f31271",
+            "pid": null,
+            "provider": null,
+            "retryable": false,
+            "started_at": "2026-09-27T04:17:44.770066+00:00",
+            "status": "COMPLETED",
+            "stderr": null,
+            "stdout": "Godot 4.7.2.stable.official.ed1daf0bf rendered 4 captures",
+            "task_id": "WF-CAPTURE-09ce2ff8-EXECUTE"
+          },
+          {
+            "attempt_number": 1,
+            "completed_at": "2026-09-27T04:17:55.489170+00:00",
+            "cost": 0.0,
+            "cost_unit": "provider_units",
+            "error_message": null,
+            "estimated_cost": 0.0,
+            "exit_code": null,
+            "external_op_id": null,
+            "host": null,
+            "id": "EXEC-928ced6b",
+            "pid": null,
+            "provider": null,
+            "retryable": false,
+            "started_at": "2026-09-27T04:17:55.178891+00:00",
+            "status": "COMPLETED",
+            "stderr": null,
+            "stdout": "Capture state and images passed independent checks; human review is still required",
+            "task_id": "WF-CAPTURE-09ce2ff8-VALIDATE"
+          }
+        ],
+        "gates": [
+          {
+            "evaluated_at": "2026-09-27T04:17:55.050895+00:00",
+            "gate_type": "handler:godot_capture_execute",
+            "id": "GATE-2585267a",
+            "reason": "The engine independently verified handler artifact hashes",
+            "status": "PASSED",
+            "task_id": "WF-CAPTURE-09ce2ff8-EXECUTE"
+          },
+          {
+            "evaluated_at": "2026-09-27T04:17:55.460179+00:00",
+            "gate_type": "handler:godot_capture_validate",
+            "id": "GATE-304cda77",
+            "reason": "The engine independently verified handler artifact hashes",
+            "status": "PASSED",
+            "task_id": "WF-CAPTURE-09ce2ff8-VALIDATE"
+          }
+        ],
+        "paid_provider_invocations": 0,
+        "tasks": [
+          {
+            "cost_class": "LOCAL",
+            "created_at": "2026-09-27T04:17:44.697327+00:00",
+            "depends_on": [],
+            "id": "WF-CAPTURE-09ce2ff8-EXECUTE",
+            "max_retries": 1,
+            "name": "Stage, import, and render Godot captures",
+            "parameters": {
+              "executable_path": "C:\\Users\\lenovo\\devel\\godot\\Godot_v4.7.2-stable_win64.exe\\Godot_v4.7.2-stable_win64_console.exe",
+              "executable_sha256": "c8f0a6bc45a19b33541501e57f6f7cd972ab18453743266339d495cbbe846643",
+              "harness_sha256": "0a07d1df38f356e1350a21068434ffd9d6ee3aa65b5d74441290e878cefa782a",
+              "renderer_profile": "gl_compatibility",
+              "review_contract": "0.3.0",
+              "scenario_file": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\v03-capture\\landscape\\visual-scenario.json",
+              "scenario_fingerprint": "51e12a89b34b04ca5c8a5fa187d203a8b7f013bf9f4638fe552a9a43619eb9b7",
+              "scenario_snapshot": {
+                "actions": [
+                  {
+                    "action": "apply_damage",
+                    "amount": 20,
+                    "tick": 30
+                  },
+                  {
+                    "action": "defeat_enemy",
+                    "tick": 60
+                  },
+                  {
+                    "action": "apply_damage",
+                    "amount": 40,
+                    "tick": 90
+                  }
+                ],
+                "assertions": [
+                  {
+                    "expected": 100,
+                    "field": "player_hp",
+                    "id": "initial-player-hp",
+                    "operator": "equals",
+                    "tick": 0
+                  },
+                  {
+                    "expected": 80,
+                    "field": "player_hp",
+                    "id": "post-damage-player-hp",
+                    "operator": "equals",
+                    "tick": 30
+                  },
+                  {
+                    "expected": 100,
+                    "field": "score",
+                    "id": "post-enemy-score",
+                    "operator": "equals",
+                    "tick": 60
+                  },
+                  {
+                    "expected": 40,
+                    "field": "player_hp",
+                    "id": "final-player-hp",
+                    "operator": "equals",
+                    "tick": 90
+                  },
+                  {
+                    "expected": 2,
+                    "field": "enemies_remaining",
+                    "id": "final-enemies",
+                    "operator": "equals",
+                    "tick": 90
+                  },
+                  {
+                    "expected": 100,
+                    "field": "score",
+                    "id": "final-score",
+                    "operator": "equals",
+                    "tick": 90
+                  }
+                ],
+                "captures": [
+                  {
+                    "id": "cp-000",
+                    "tick": 0
+                  },
+                  {
+                    "id": "cp-030",
+                    "tick": 30
+                  },
+                  {
+                    "id": "cp-060",
+                    "tick": 60
+                  },
+                  {
+                    "id": "cp-090",
+                    "tick": 90
+                  }
+                ],
+                "import_timeout_seconds": 30.0,
+                "max_tick": 90,
+                "renderer_profile": "gl_compatibility",
+                "scenario_id": "visual-fixture",
+                "scene": "res://VisualMain.tscn",
+                "schema_version": "0.3.0",
+                "snapshots": [
+                  0,
+                  30,
+                  60,
+                  90
+                ],
+                "timeout_seconds": 60.0,
+                "viewport": {
+                  "height": 720,
+                  "width": 1280
+                }
+              },
+              "scene_sha256": "7209330a62a0e9105c60a65bf5951315e32b9632c75a0979128d2e58fa020335",
+              "source_manifest_hash": "ce934c6f4b2e33fa64192525f0fffb9b4c3d92d374c111c5022bfe77830b7b53",
+              "viewport_height": 720,
+              "viewport_width": 1280
+            },
+            "status": "COMPLETED",
+            "task_type": "godot_capture_execute",
+            "timeout_seconds": 120.0,
+            "updated_at": "2026-09-27T04:17:55.094567+00:00",
+            "workflow_id": "WF-CAPTURE-09ce2ff8"
+          },
+          {
+            "cost_class": "LOCAL",
+            "created_at": "2026-09-27T04:17:44.697327+00:00",
+            "depends_on": [
+              "WF-CAPTURE-09ce2ff8-EXECUTE"
+            ],
+            "id": "WF-CAPTURE-09ce2ff8-VALIDATE",
+            "max_retries": 1,
+            "name": "Validate state and decoded captures",
+            "parameters": {
+              "execute_task_id": "WF-CAPTURE-09ce2ff8-EXECUTE"
+            },
+            "status": "COMPLETED",
+            "task_type": "godot_capture_validate",
+            "timeout_seconds": 60.0,
+            "updated_at": "2026-09-27T04:17:55.493833+00:00",
+            "workflow_id": "WF-CAPTURE-09ce2ff8"
+          },
+          {
+            "cost_class": "LOCAL",
+            "created_at": "2026-09-27T04:17:44.697327+00:00",
+            "depends_on": [
+              "WF-CAPTURE-09ce2ff8-VALIDATE"
+            ],
+            "id": "WF-CAPTURE-09ce2ff8-REVIEW",
+            "max_retries": 1,
+            "name": "Wait for human visual review",
+            "parameters": {
+              "execute_task_id": "WF-CAPTURE-09ce2ff8-EXECUTE",
+              "review_fingerprint": {
+                "captures": [
+                  {
+                    "name": "cp-000.png",
+                    "sha256": "fb35be73c5fb051d23e6d0c3cf381d4ea6b30d61745e46e03103a76dc64d8404"
+                  },
+                  {
+                    "name": "cp-030.png",
+                    "sha256": "1bf0eb4c7e537a548ff0017a7c2f8aa35cd2a9bb470bb5e14550556b88cd2e7a"
+                  },
+                  {
+                    "name": "cp-060.png",
+                    "sha256": "b74f022bb8534c14c09dc6f292456d9fd5c5544eab952bf8b2029b22fcf54793"
+                  },
+                  {
+                    "name": "cp-090.png",
+                    "sha256": "dbb9633af40222ec1681fa4b467e3345599815e3f52fa5ff6cf1cbbefe429f63"
+                  }
+                ],
+                "execute_execution_id": "EXEC-98f31271",
+                "report_sha256": "ad9b24dca5e856927b7a38ceb4aa53e600b1c8fd1aed807d1b2d7e60ffd2c6c5",
+                "review_contract": "0.3.0",
+                "validate_execution_id": "EXEC-928ced6b"
+              },
+              "validate_task_id": "WF-CAPTURE-09ce2ff8-VALIDATE"
+            },
+            "status": "BLOCKED",
+            "task_type": "godot_visual_review",
+            "timeout_seconds": 60.0,
+            "updated_at": "2026-09-27T04:17:55.623608+00:00",
+            "workflow_id": "WF-CAPTURE-09ce2ff8"
+          },
+          {
+            "cost_class": "LOCAL",
+            "created_at": "2026-09-27T04:17:44.697327+00:00",
+            "depends_on": [
+              "WF-CAPTURE-09ce2ff8-REVIEW"
+            ],
+            "id": "WF-CAPTURE-09ce2ff8-EVIDENCE",
+            "max_retries": 1,
+            "name": "Record final quality evidence",
+            "parameters": {},
+            "status": "PENDING",
+            "task_type": "record_evidence",
+            "timeout_seconds": 60.0,
+            "updated_at": "2026-09-27T04:17:44.697327+00:00",
+            "workflow_id": "WF-CAPTURE-09ce2ff8"
+          }
+        ],
+        "workflow": {
+          "created_at": "2026-09-27T04:17:44.697327+00:00",
+          "id": "WF-CAPTURE-09ce2ff8",
+          "name": "Godot rendered capture: visual-fixture",
+          "project_id": "factory-godot-verification-fixture",
+          "status": "BLOCKED",
+          "updated_at": "2026-09-27T04:17:55.635609+00:00"
+        }
+      }
+    }
+  ]
+}

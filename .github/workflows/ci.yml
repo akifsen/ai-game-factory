@@ -215,8 +215,8 @@ jobs:
           mkdir -p "$evidence"
           {
             printf 'renderer_request=gl_compatibility opengl3 x11\n'
-            printf 'software_rendering=LIBGL_ALWAYS_SOFTWARE=%s\n' "$LIBGL_ALWAYS_SOFTWARE"
-            printf 'note=software llvmpipe is not a hardware GPU or mobile result\n'
+            printf 'software_rendering_request=LIBGL_ALWAYS_SOFTWARE=%s\n' "$LIBGL_ALWAYS_SOFTWARE"
+            printf 'note=LIBGL_ALWAYS_SOFTWARE is a process request, not the engine-reported adapter. Read publish/*/render-context.json.\n'
             "$GAMEFACTORY_TEST_GODOT" --version
             sha256sum "$GAMEFACTORY_TEST_GODOT"
             cp "$RUNNER_TEMP/gamefactory-wheel.sha256" "$evidence/wheel.sha256"
@@ -231,6 +231,23 @@ jobs:
             --output "$evidence/acceptance.json" \
             --workspace "$RUNNER_TEMP/capture-workspaces" \
             --publish "$evidence/publish"
+      - name: Interrupt a live rendered capture
+        shell: bash
+        run: |
+          set -euo pipefail
+          evidence="$GITHUB_WORKSPACE/.verification/ci-godot-rendered"
+          python="$RUNNER_TEMP/gamefactory-venv/bin/python"
+          cli="$RUNNER_TEMP/gamefactory-venv/bin/gamefactory"
+          xvfb-run -a --server-args="-screen 0 1600x1200x24" \
+            "$python" "$GITHUB_WORKSPACE/scripts/verify_godot_live_crash.py" \
+            --rendered-capture \
+            --cli "$cli" \
+            --python "$python" \
+            --fixture "$GITHUB_WORKSPACE/examples/godot-verification" \
+            --godot "$GAMEFACTORY_TEST_GODOT" \
+            --output "$evidence/rendered-interrupt.json" \
+            --workspace "$RUNNER_TEMP/rendered-interrupt-workspaces" \
+            --timeout 180
       - name: Archive selected rendered evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -241,5 +258,6 @@ jobs:
             .verification/ci-godot-rendered/environment.txt
             .verification/ci-godot-rendered/commit.txt
             .verification/ci-godot-rendered/wheel.sha256
+            .verification/ci-godot-rendered/rendered-interrupt.json
             .verification/ci-godot-rendered/publish/**/*
           if-no-files-found: warn

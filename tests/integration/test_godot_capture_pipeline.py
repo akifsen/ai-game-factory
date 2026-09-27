@@ -42,11 +42,14 @@ from tests.integration.test_godot_pipeline import FIXTURE, FakeGodotRunner
 PROJECT = Path(__file__).parents[2]
 
 
-@pytest.fixture(autouse=True)
+@pytest.fixture
 def fake_capture_satisfies_linux_display_gate(monkeypatch: pytest.MonkeyPatch) -> None:
-    """The fake runner never opens a window. Linux still requires a DISPLAY value."""
+    """Fake-runner tests only. This does not change product capture or real renders."""
     if sys.platform.startswith("linux") and not os.environ.get("DISPLAY"):
         monkeypatch.setenv("DISPLAY", ":99")
+
+
+_FAKE_DISPLAY = pytest.mark.usefixtures("fake_capture_satisfies_linux_display_gate")
 
 
 def _project(
@@ -124,6 +127,7 @@ def _approve(engine: WorkflowEngine, db: Database, approval_id: str) -> None:
     )
 
 
+@_FAKE_DISPLAY
 def test_fake_capture_blocks_for_visual_review_and_resume_does_not_rerun(tmp_path: Path) -> None:
     root, db, project_id, exe, scenario = _project(tmp_path)
     runner = FakeGodotRunner()
@@ -154,6 +158,7 @@ def test_fake_capture_blocks_for_visual_review_and_resume_does_not_rerun(tmp_pat
     assert len(runner.calls) == calls_before
 
 
+@_FAKE_DISPLAY
 def test_hud_mutation_keeps_state_pass_and_fails_visual_gate(tmp_path: Path) -> None:
     root, db, project_id, exe, scenario = _project(tmp_path)
     runner = FakeGodotRunner("hud-mutation")
@@ -176,6 +181,7 @@ def test_hud_mutation_keeps_state_pass_and_fails_visual_gate(tmp_path: Path) -> 
     assert ApprovalRepository(db).list_by_workflow(workflow_id) == []
 
 
+@_FAKE_DISPLAY
 def test_missing_png_and_dummy_renderer_are_not_passes(tmp_path: Path) -> None:
     for outcome in (
         "no-png",
@@ -193,6 +199,7 @@ def test_missing_png_and_dummy_renderer_are_not_passes(tmp_path: Path) -> None:
         assert ApprovalRepository(db).list_pending(workflow_id) == []
 
 
+@_FAKE_DISPLAY
 def test_reject_does_not_start_another_capture(tmp_path: Path) -> None:
     root, db, project_id, exe, scenario = _project(tmp_path)
     runner = FakeGodotRunner()
@@ -220,6 +227,7 @@ def test_reject_does_not_start_another_capture(tmp_path: Path) -> None:
     assert len(runner.calls) == calls
 
 
+@_FAKE_DISPLAY
 def test_tampered_png_cannot_be_approved_or_completed(tmp_path: Path) -> None:
     root, db, project_id, exe, scenario = _project(tmp_path)
     engine = _engine(root, db, project_id, exe, scenario, FakeGodotRunner())
@@ -238,6 +246,7 @@ def test_tampered_png_cannot_be_approved_or_completed(tmp_path: Path) -> None:
     assert approval is not None and approval.status.value == "PENDING"
 
 
+@_FAKE_DISPLAY
 def test_approved_capture_rejects_changed_png_on_a_new_cli_resume(tmp_path: Path) -> None:
     """Technical PASS, test-actor approval, then a changed PNG must not complete.
 
@@ -316,11 +325,13 @@ def test_approved_capture_rejects_changed_png_on_a_new_cli_resume(tmp_path: Path
 
 
 def test_linux_capture_allowlists_display_and_refuses_headless_fallback(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, request: pytest.FixtureRequest
 ) -> None:
+    assert "fake_capture_satisfies_linux_display_gate" not in request.fixturenames
     root, _db, _project_id, exe, scenario = _project(tmp_path)
     monkeypatch.setattr(sys, "platform", "linux")
     monkeypatch.delenv("DISPLAY", raising=False)
+    assert os.environ.get("DISPLAY") is None
     from gamefactory.adapters.engines.godot_capture_contracts import (
         capture_fingerprint,
         load_capture_scenario,
@@ -367,6 +378,7 @@ def test_linux_capture_allowlists_display_and_refuses_headless_fallback(
     assert "--headless" not in argv
 
 
+@_FAKE_DISPLAY
 def test_portrait_profile_is_a_separate_size(tmp_path: Path) -> None:
     root, db, project_id, exe, scenario = _project(tmp_path, "visual-scenario-portrait.json")
     engine = _engine(root, db, project_id, exe, scenario, FakeGodotRunner())

@@ -348,3 +348,213 @@ def test_capture_bundle_binds_images_and_rejects_broken_evidence(tmp_path):
     (wrong / "manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
     with pytest.raises(EvidenceError, match="identity mismatch"):
         verify(wrong)
+
+
+def _png(label: str) -> bytes:
+    return b"\x89PNG\r\n\x1a\n" + label.encode("ascii")
+
+
+def _refresh_manifest(root: Path) -> None:
+    manifest = json.loads((root / "manifest.json").read_text(encoding="utf-8"))
+    for row in manifest["files"]:
+        data = (root / row["path"]).read_bytes()
+        row["size"] = len(data)
+        row["sha256"] = hashlib.sha256(data).hexdigest()
+    (root / "manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
+
+
+def _write_review(root: Path, images: list[tuple[str, bytes]], execution: str) -> None:
+    page = root / "review" / "landscape" / "index.html"
+    folder = page.parent / "images"
+    folder.mkdir(parents=True, exist_ok=True)
+    figures = []
+    validation_images = []
+    for capture_id, payload in images:
+        (folder / f"{capture_id}.png").write_bytes(payload)
+        digest = hashlib.sha256(payload).hexdigest()
+        figures.append(
+            "<figure>"
+            f'<img class="capture" src="images/{capture_id}.png" alt="{capture_id} tick 0">'
+            f"<figcaption><strong>{capture_id}</strong><br>SHA-256 {digest}</figcaption>"
+            "</figure>"
+        )
+        validation_images.append({"id": capture_id, "sha256": digest})
+    page.write_text("<html><body>" + "".join(figures) + "</body></html>", encoding="utf-8")
+    validation = {
+        "status": "PASS",
+        "execution_id": execution,
+        "images": validation_images,
+    }
+    (root / "records" / "validation.json").write_text(json.dumps(validation), encoding="utf-8")
+
+
+def _install_capture_graph(root: Path, execution: str = "EXEC-1") -> None:
+    """Point the synthetic V0.2 scaffold at one capture validation and its HTML images."""
+    images = [("cp-000", _png("checkpoint-0")), ("cp-090", _png("checkpoint-90"))]
+    _write_review(root, images, execution)
+    validation_bytes = (root / "records" / "validation.json").read_bytes()
+    val_hash = hashlib.sha256(validation_bytes).hexdigest()
+    obs_hash = hashlib.sha256((root / "records" / "observation.json").read_bytes()).hexdigest()
+    inspection = {
+        "workflow": {"id": "WF-1"},
+        "tasks": [
+            {
+                "id": "EXEC-TASK",
+                "workflow_id": "WF-1",
+                "task_type": "godot_capture_execute",
+                "depends_on": [],
+            },
+            {
+                "id": "VALIDATE-TASK",
+                "workflow_id": "WF-1",
+                "task_type": "godot_capture_validate",
+                "depends_on": ["EXEC-TASK"],
+            },
+        ],
+        "executions": [{"id": execution, "task_id": "EXEC-TASK"}],
+        "artifacts": [
+            {
+                "workflow_id": "WF-1",
+                "task_id": "EXEC-TASK",
+                "artifact_type": "godot-runtime-observation",
+                "content_hash": obs_hash,
+            },
+            {
+                "workflow_id": "WF-1",
+                "task_id": "VALIDATE-TASK",
+                "artifact_type": "godot-capture-validation",
+                "content_hash": val_hash,
+            },
+        ],
+    }
+    (root / "records" / "inspect.json").write_text(json.dumps(inspection), encoding="utf-8")
+    acceptance = json.loads((root / "records" / "acceptance.json").read_text(encoding="utf-8"))
+    acceptance["commands"] = [{"json": inspection}]
+    acceptance["checks"]["artifact_documents"]["WF-1"] = [
+        {
+            "artifact": {
+                "workflow_id": "WF-1",
+                "task_id": "EXEC-TASK",
+                "artifact_type": "godot-runtime-observation",
+                "content_hash": obs_hash,
+            }
+        },
+        {
+            "artifact": {
+                "workflow_id": "WF-1",
+                "task_id": "VALIDATE-TASK",
+                "artifact_type": "godot-capture-validation",
+                "content_hash": val_hash,
+            }
+        },
+    ]
+    (root / "records" / "acceptance.json").write_text(json.dumps(acceptance), encoding="utf-8")
+    manifest = json.loads((root / "manifest.json").read_text(encoding="utf-8"))
+    manifest["relationships"]["execution_id"] = execution
+    manifest["files"] = [row for row in manifest["files"] if row["role"] != "image"]
+    for capture_id, _payload in images:
+        manifest["files"].append(
+            {
+                "path": f"review/landscape/images/{capture_id}.png",
+                "role": "image",
+                "size": 0,
+                "sha256": "",
+            }
+        )
+    manifest["files"].append(
+        {"path": "review/landscape/index.html", "role": "other", "size": 0, "sha256": ""}
+    )
+    (root / "manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
+    _refresh_manifest(root)
+
+
+def _bound_review_bundle(root: Path) -> Path:
+    root = _bundle(root)
+    _install_capture_graph(root)
+    return root
+
+
+def _defective_unlisted_review_bundle(root: Path) -> Path:
+    """Canonical images are listed; the HTML still shows a second unlisted copy."""
+    root = _bound_review_bundle(root)
+    listed = root / "images" / "landscape"
+    listed.mkdir(parents=True)
+    shown = root / "review" / "landscape" / "images"
+    for path in shown.glob("*.png"):
+        (listed / path.name).write_bytes(path.read_bytes())
+    manifest = json.loads((root / "manifest.json").read_text(encoding="utf-8"))
+    manifest["files"] = [
+        row
+        for row in manifest["files"]
+        if not str(row["path"]).startswith("review/landscape/images/")
+    ]
+    for path in sorted(listed.glob("*.png")):
+        data = path.read_bytes()
+        manifest["files"].append(
+            {
+                "path": f"images/landscape/{path.name}",
+                "role": "image",
+                "size": len(data),
+                "sha256": hashlib.sha256(data).hexdigest(),
+            }
+        )
+    (root / "manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
+    return root
+
+
+def test_swapped_unlisted_review_png_is_rejected(tmp_path):
+    root = _defective_unlisted_review_bundle(tmp_path / "defect")
+    shown = root / "review" / "landscape" / "images" / "cp-090.png"
+    other = root / "review" / "landscape" / "images" / "cp-000.png"
+    canonical = root / "images" / "landscape" / "cp-090.png"
+    manifest_before = (root / "manifest.json").read_bytes()
+    validation_before = (root / "records" / "validation.json").read_bytes()
+    canonical_before = canonical.read_bytes()
+    shown.write_bytes(other.read_bytes())
+    assert (root / "manifest.json").read_bytes() == manifest_before
+    assert (root / "records" / "validation.json").read_bytes() == validation_before
+    assert canonical.read_bytes() == canonical_before
+    with pytest.raises(EvidenceError, match="outside the manifest"):
+        verify(root)
+
+
+def test_bound_review_html_rejects_displayed_image_tampering(tmp_path):
+    root = _bound_review_bundle(tmp_path / "bound")
+    verify(root)
+
+    missing = _bound_review_bundle(tmp_path / "missing-displayed")
+    (missing / "review" / "landscape" / "images" / "cp-090.png").unlink()
+    with pytest.raises(EvidenceError, match="missing"):
+        verify(missing)
+
+    modified = _bound_review_bundle(tmp_path / "modified-displayed")
+    image = modified / "review" / "landscape" / "images" / "cp-090.png"
+    image.write_bytes(image.read_bytes() + b"x")
+    with pytest.raises(EvidenceError, match="hash"):
+        verify(modified)
+
+    swapped = _bound_review_bundle(tmp_path / "swapped")
+    first = swapped / "review" / "landscape" / "images" / "cp-000.png"
+    second = swapped / "review" / "landscape" / "images" / "cp-090.png"
+    first_bytes, second_bytes = first.read_bytes(), second.read_bytes()
+    first.write_bytes(second_bytes)
+    second.write_bytes(first_bytes)
+    _refresh_manifest(swapped)
+    with pytest.raises(EvidenceError, match="not bound"):
+        verify(swapped)
+
+    redirected = _bound_review_bundle(tmp_path / "redirected")
+    page = redirected / "review" / "landscape" / "index.html"
+    page.write_text(
+        page.read_text(encoding="utf-8").replace(
+            'src="images/cp-090.png" alt="cp-090 tick 0"',
+            'src="images/cp-000.png" alt="cp-090 tick 0"',
+            1,
+        ),
+        encoding="utf-8",
+    )
+    # The HTML file's new bytes are recorded so the failure is the wrong target,
+    # not an untracked edit of the page itself.
+    _refresh_manifest(redirected)
+    with pytest.raises(EvidenceError, match="different capture"):
+        verify(redirected)

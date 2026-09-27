@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Capture review visual-fixture</title>
+<style>
+body { margin: 0; font-family: "Segoe UI", sans-serif; background: #f4f1ea; color: #1d1c19; }
+main { max-width: 1100px; margin: 0 auto; padding: 28px 20px 48px; }
+h1 { font-size: 1.6rem; margin-bottom: 0.2rem; }
+h2 { font-size: 1.05rem; margin-top: 1.6rem; }
+.meta, .status { line-height: 1.45; }
+.pill { display: inline-block; padding: 0.15rem 0.55rem; border-radius: 999px; background: #e7e1d6; margin-right: 0.4rem; }
+.pass { background: #d9ead3; }
+.fail { background: #f4cccc; }
+.pending { background: #fff2cc; }
+figure { margin: 0 0 28px; }
+img.capture { max-width: min(100%, 1280px); height: auto; background: #111; }
+img.portrait { max-width: min(100%, 420px); }
+figcaption { margin-top: 8px; }
+code, pre { font-family: Consolas, monospace; }
+pre { white-space: pre-wrap; background: #fff; padding: 12px; }
+</style>
+</head>
+<body>
+<main>
+<h1>Capture review visual-fixture</h1>
+<p class="meta">factory-godot-verification-fixture · visual-fixture</p>
+<h2>Technical result</h2>
+<p class="status"><span class="pill pass">PASS</span></p>
+<h2>Human review</h2>
+<p class="status"><span class="pill pending">PENDING</span> This page does not record a decision.</p>
+<h2>Environment</h2>
+<p class="meta">{&quot;renderer_profile&quot;: &quot;gl_compatibility&quot;, &quot;scenario_fingerprint&quot;: &quot;51e12a89b34b04ca5c8a5fa187d203a8b7f013bf9f4638fe552a9a43619eb9b7&quot;, &quot;viewport&quot;: [1280, 720]}</p>
+<h2>Captures</h2>
+<figure><img class="capture" src="images/cp-000.png" alt="cp-000 tick 0" width="1280" height="720"><figcaption><strong>cp-000</strong> tick 0<br>HP 100 · enemies 3 · score 0<br>SHA-256 fb35be73c5fb051d23e6d0c3cf381d4ea6b30d61745e46e03103a76dc64d8404</figcaption></figure><figure><img class="capture" src="images/cp-030.png" alt="cp-030 tick 30" width="1280" height="720"><figcaption><strong>cp-030</strong> tick 30<br>HP 80 · enemies 3 · score 0<br>SHA-256 1bf0eb4c7e537a548ff0017a7c2f8aa35cd2a9bb470bb5e14550556b88cd2e7a</figcaption></figure><figure><img class="capture" src="images/cp-060.png" alt="cp-060 tick 60" width="1280" height="720"><figcaption><strong>cp-060</strong> tick 60<br>HP 80 · enemies 2 · score 100<br>SHA-256 b74f022bb8534c14c09dc6f292456d9fd5c5544eab952bf8b2029b22fcf54793</figcaption></figure><figure><img class="capture" src="images/cp-090.png" alt="cp-090 tick 90" width="1280" height="720"><figcaption><strong>cp-090</strong> tick 90<br>HP 40 · enemies 2 · score 100<br>SHA-256 dbb9633af40222ec1681fa4b467e3345599815e3f52fa5ff6cf1cbbefe429f63</figcaption></figure>
+<h2>Checks</h2>
+<ul><li>cp-000:health-fill: PASS — hp=100 pixel=(51, 191, 71, 255)</li><li>cp-000:health-tail: PASS — hp=100 pixel=(51, 191, 71, 255) expected=(51, 191, 71)</li><li>cp-000:enemy-1: PASS — enemies=3 pixel=(217, 56, 46, 255) expected=(217, 56, 46)</li><li>cp-000:enemy-2: PASS — enemies=3 pixel=(217, 56, 46, 255) expected=(217, 56, 46)</li><li>cp-000:enemy-3: PASS — enemies=3 pixel=(217, 56, 46, 255) expected=(217, 56, 46)</li><li>cp-030:health-fill: PASS — hp=80 pixel=(51, 191, 71, 255)</li><li>cp-030:health-tail: PASS — hp=80 pixel=(51, 51, 56, 255) expected=(51, 51, 56)</li><li>cp-030:enemy-1: PASS — enemies=3 pixel=(217, 56, 46, 255) expected=(217, 56, 46)</li><li>cp-030:enemy-2: PASS — enemies=3 pixel=(217, 56, 46, 255) expected=(217, 56, 46)</li><li>cp-030:enemy-3: PASS — enemies=3 pixel=(217, 56, 46, 255) expected=(217, 56, 46)</li><li>cp-060:health-fill: PASS — hp=80 pixel=(51, 191, 71, 255)</li><li>cp-060:health-tail: PASS — hp=80 pixel=(51, 51, 56, 255) expected=(51, 51, 56)</li><li>cp-060:enemy-1: PASS — enemies=2 pixel=(217, 56, 46, 255) expected=(217, 56, 46)</li><li>cp-060:enemy-2: PASS — enemies=2 pixel=(217, 56, 46, 255) expected=(217, 56, 46)</li><li>cp-060:enemy-3: PASS — enemies=2 pixel=(31, 36, 46, 255) expected=(31, 36, 46)</li><li>cp-090:health-fill: PASS — hp=40 pixel=(51, 191, 71, 255)</li><li>cp-090:health-tail: PASS — hp=40 pixel=(51, 51, 56, 255) expected=(51, 51, 56)</li><li>cp-090:enemy-1: PASS — enemies=2 pixel=(217, 56, 46, 255) expected=(217, 56, 46)</li><li>cp-090:enemy-2: PASS — enemies=2 pixel=(217, 56, 46, 255) expected=(217, 56, 46)</li><li>cp-090:enemy-3: PASS — enemies=2 pixel=(31, 36, 46, 255) expected=(31, 36, 46)</li></ul>
+<h2>Commands</h2>
+<pre>gamefactory --project C:\Users\lenovo\devel\ai-game-factory\.verification\v03-capture\landscape approvals --workflow WF-CAPTURE-09ce2ff8
+gamefactory --project C:\Users\lenovo\devel\ai-game-factory\.verification\v03-capture\landscape approve APPROVAL_ID --comment &quot;Reviewed&quot;
+gamefactory --project C:\Users\lenovo\devel\ai-game-factory\.verification\v03-capture\landscape resume WF-CAPTURE-09ce2ff8
+gamefactory --project C:\Users\lenovo\devel\ai-game-factory\.verification\v03-capture\landscape reject APPROVAL_ID --comment &quot;Changes needed&quot;</pre>
+</main>
+</body>
+</html>

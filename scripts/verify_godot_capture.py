@@ -61,6 +61,21 @@ def _copy_review(cli: str, project: Path, workflow_id: str, destination: Path) -
     return destination / "index.html"
 
 
+def _publish_render_context(project: Path, workflow_id: str, destination: Path) -> None:
+    """Copy the engine-reported renderer record next to the published review."""
+    matches = [
+        path
+        for path in (project / ".gamefactory").rglob("render-context.json")
+        if workflow_id in path.parts and "scratch" not in path.parts
+    ]
+    if len(matches) != 1:
+        raise AcceptanceFailure(
+            f"expected one render-context for {workflow_id}, found {len(matches)}"
+        )
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copyfile(matches[0], destination)
+
+
 def _assert_published(
     project: Path, workflow_id: str, review_dir: Path, width: int, height: int
 ) -> None:
@@ -149,6 +164,9 @@ def main() -> int:
             raise AcceptanceFailure(f"unexpected rendered capability status {rendered['status']}")
         first = _capture(cli, landscape, godot, "visual-scenario.json")
         page = _copy_review(cli, landscape, first["workflow_id"], publish / "landscape")
+        _publish_render_context(
+            landscape, first["workflow_id"], publish / "landscape" / "render-context.json"
+        )
         _assert_published(landscape, first["workflow_id"], publish / "landscape", 1280, 720)
         second = _capture(cli, landscape, godot, "visual-scenario.json")
         second_review = next(
@@ -169,6 +187,9 @@ def main() -> int:
         portrait = _capture(cli, portrait_root, godot, "visual-scenario-portrait.json")
         portrait_page = _copy_review(
             cli, portrait_root, portrait["workflow_id"], publish / "portrait"
+        )
+        _publish_render_context(
+            portrait_root, portrait["workflow_id"], publish / "portrait" / "render-context.json"
         )
         _assert_published(portrait_root, portrait["workflow_id"], publish / "portrait", 720, 1280)
         report["checks"]["portrait_pending"] = {
