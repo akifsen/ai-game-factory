@@ -1,0 +1,30 @@
+{
+  "schema_version": "0.3.0",
+  "scenario_id": "visual-fixture",
+  "scene": "res://VisualMain.tscn",
+  "max_tick": 90,
+  "timeout_seconds": 60,
+  "import_timeout_seconds": 30,
+  "viewport": {"width": 1280, "height": 720},
+  "renderer_profile": "gl_compatibility",
+  "captures": [
+    {"id": "cp-000", "tick": 0},
+    {"id": "cp-030", "tick": 30},
+    {"id": "cp-060", "tick": 60},
+    {"id": "cp-090", "tick": 90}
+  ],
+  "actions": [
+    {"tick": 30, "action": "apply_damage", "amount": 20},
+    {"tick": 60, "action": "defeat_enemy"},
+    {"tick": 90, "action": "apply_damage", "amount": 40}
+  ],
+  "snapshots": [0, 30, 60, 90],
+  "assertions": [
+    {"id": "initial-player-hp", "tick": 0, "field": "player_hp", "operator": "equals", "expected": 100},
+    {"id": "post-damage-player-hp", "tick": 30, "field": "player_hp", "operator": "equals", "expected": 80},
+    {"id": "post-enemy-score", "tick": 60, "field": "score", "operator": "equals", "expected": 100},
+    {"id": "final-player-hp", "tick": 90, "field": "player_hp", "operator": "equals", "expected": 40},
+    {"id": "final-enemies", "tick": 90, "field": "enemies_remaining", "operator": "equals", "expected": 2},
+    {"id": "final-score", "tick": 90, "field": "score", "operator": "equals", "expected": 100}
+  ]
+}

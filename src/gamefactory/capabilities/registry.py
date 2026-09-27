@@ -90,6 +90,20 @@ class CapabilityRegistry:
                 "details": godot_res.details,
             },
         )
+        entries["engine.godot.rendered_capture"] = CapabilityEntry(
+            name="engine.godot.rendered_capture",
+            description=(
+                "Rendered viewport capture. Doctor does not open a window; "
+                "only an explicit godot-capture run probes the renderer."
+            ),
+            status=(CapabilityStatus.NOT_VERIFIED if godot_res.available else godot_status),
+            provider="godot",
+            details={
+                "executable_path": godot_res.executable_path,
+                "runtime_renderer_probed": False,
+                "headless_is_not_sufficient": True,
+            },
+        )
         entries["engine.godot.headless_verification"] = CapabilityEntry(
             name="engine.godot.headless_verification",
             description="Godot headless verification pipeline; an approved workflow probes the installed CLI before execution",

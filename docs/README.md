@@ -65,3 +65,11 @@ V0.1 reports above remain historical records; V0.2 evidence uses separate files.
 - [Kapanış kararı ve platform sınırları](reports/v0.2-closeout-report.md)
 - [Kalıcı kanıt kapsamı ve doğrulama](reports/v0.2-closeout/README.md)
 - [V0.1 41 → 39 komut eşlemesi](reports/v0.2-closeout/v01-comparison.md)
+
+## V0.3 — Rendered capture
+
+- [Sprint work plan](work-plan-v0.3.md)
+- [Rendered capture contract](integrations/godot-rendered-capture.md)
+- [ADR 0006: renderer, checkpoints, and human review](adr/0006-rendered-capture-and-visual-review.md)
+- [V0.3 completion report](reports/v0.3-completion-report.md)
+- [Openable Windows review package](reports/v0.3-rendered/README.md)

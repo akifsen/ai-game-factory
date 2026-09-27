@@ -56,6 +56,7 @@ class FakeGodotRunner:
     def __init__(self, outcome: str = "success") -> None:
         self.outcome = outcome
         self.calls: list[list[str]] = []
+        self.requests: list[Any] = []
         self.previous_report: dict[str, Any] | None = None
 
     def run(self, request: Any) -> Any:
@@ -63,6 +64,7 @@ class FakeGodotRunner:
 
         args = [str(item) for item in request.args]
         self.calls.append(args)
+        self.requests.append(request)
         if "--version" in args:
             if self.outcome == "incomplete-cleanup":
                 return CommandResult(
@@ -77,7 +79,8 @@ class FakeGodotRunner:
         if "--help" in args:
             return CommandResult(
                 0,
-                "--headless --path --import --script -- user-provided arguments",
+                "--headless --path --import --script --display-driver --rendering-driver "
+                "--rendering-method --windowed --resolution -- user-provided arguments",
                 "",
                 duration_seconds=0.01,
             )
@@ -88,6 +91,8 @@ class FakeGodotRunner:
             )
         if "--script" not in args:
             return CommandResult(2, "", "unexpected fake Godot argv", duration_seconds=0.01)
+        if "--captures" in args:
+            return self._capture(args)
         if self.outcome == "runtime-failure":
             return CommandResult(2, "", "controlled runtime failure", duration_seconds=0.01)
         request_path = Path(args[args.index("--request") + 1])
@@ -128,6 +133,119 @@ class FakeGodotRunner:
                 stdout_truncated=True,
             )
         return CommandResult(0, "fake runtime finished", "", duration_seconds=0.01)
+
+    def _capture(self, args: list[str]) -> Any:
+        from io import BytesIO
+
+        from PIL import Image, ImageDraw
+
+        from gamefactory.adapters.engines.godot_image import LAYOUTS
+        from gamefactory.core.execution.process_runner import CommandResult
+
+        request = json.loads(Path(args[args.index("--request") + 1]).read_text(encoding="utf-8"))
+        output_path = Path(args[args.index("--output") + 1])
+        capture_dir = Path(args[args.index("--captures") + 1])
+        width = int(request["viewport_width"])
+        height = int(request["viewport_height"])
+        hp, enemies, score = 100, 3, 0
+        action_by_tick: dict[int, list[dict[str, Any]]] = {}
+        for action in request["actions"]:
+            action_by_tick.setdefault(int(action["tick"]), []).append(action)
+        snapshots = []
+        current = 0
+        for tick in request["snapshots"]:
+            tick = int(tick)
+            for next_tick in range(current + 1, tick + 1):
+                for action in action_by_tick.get(next_tick, []):
+                    if action["action"] == "apply_damage":
+                        hp = max(0, hp - int(action["amount"]))
+                    elif enemies:
+                        enemies -= 1
+                        score += 100
+            if tick == 0:
+                hp, enemies, score = 100, 3, 0
+            state = {"player_hp": hp, "enemies_remaining": enemies, "score": score}
+            snapshots.append({"tick": tick, "state": state})
+            current = tick
+        display = "headless" if self.outcome == "dummy-renderer" else "windows"
+        captures = []
+        for index, snapshot in enumerate(snapshots):
+            point = request["captures"][index]
+            state = snapshot["state"]
+            painted = state
+            if self.outcome == "hud-mutation":
+                painted = {**state, "player_hp": 100}
+            if self.outcome == "previous-frame" and index == len(snapshots) - 1:
+                painted = snapshots[0]["state"]
+            image = Image.new(
+                "RGBA",
+                (100, 100) if self.outcome == "wrong-resolution" else (width, height),
+                (31, 36, 46, 255),
+            )
+            if self.outcome != "wrong-resolution":
+                draw = ImageDraw.Draw(image)
+                bar_x, bar_y, bar_w, bar_h = LAYOUTS[(width, height)]["bar"]
+                draw.rectangle(
+                    (bar_x, bar_y, bar_x + bar_w - 1, bar_y + bar_h - 1), fill=(51, 51, 56, 255)
+                )
+                filled = int(bar_w * int(painted["player_hp"]) / 100)
+                if filled > 0:
+                    draw.rectangle(
+                        (bar_x, bar_y, bar_x + filled - 1, bar_y + bar_h - 1),
+                        fill=(51, 191, 71, 255),
+                    )
+                for enemy_index, (ex, ey, ew, eh) in enumerate(LAYOUTS[(width, height)]["enemies"]):
+                    if enemy_index < int(painted["enemies_remaining"]):
+                        draw.rectangle((ex, ey, ex + ew - 1, ey + eh - 1), fill=(217, 56, 46, 255))
+            raw = BytesIO()
+            image.save(raw, format="PNG")
+            payload = raw.getvalue()
+            if self.outcome == "truncated-png":
+                payload = b"\x89PNG\r\n\x1a\n" + b"truncated"
+            if self.outcome != "no-png":
+                (capture_dir / f"{point['id']}.png").write_bytes(payload)
+            captures.append(
+                {
+                    "id": point["id"],
+                    "tick": snapshot["tick"],
+                    "state": state,
+                    "file": f"{point['id']}.png",
+                }
+            )
+        if self.outcome == "duplicate-capture-id" and captures:
+            captures[-1]["id"] = captures[0]["id"]
+        report = {
+            "schema_version": "0.3.0",
+            "harness_version": "0.3.0",
+            "execution_id": "EXEC-STALE"
+            if self.outcome == "stale-execution"
+            else request["execution_id"],
+            "scenario_id": request["scenario_id"],
+            "scenario_sha256": request["scenario_sha256"],
+            "completed_tick": request["max_tick"],
+            "snapshots": snapshots,
+            "captures": captures,
+            "renderer": {
+                "rendering_method": "gl_compatibility",
+                "rendering_driver": "opengl3",
+                "adapter_name": "Fake Adapter",
+                "adapter_vendor": "Test",
+                "display_server": display,
+                "os_name": "Test",
+                "viewport_width": width,
+                "viewport_height": height,
+                "source": "engine_api",
+            },
+            "completion": "COMPLETED",
+            "error": None,
+        }
+        output_path.write_text(json.dumps(report), encoding="utf-8")
+        return CommandResult(
+            0,
+            "OpenGL API 3.3.0 Compatibility - Using Device: Fake Adapter\n",
+            "",
+            duration_seconds=0.01,
+        )
 
     @staticmethod
     def _report(request: dict[str, Any]) -> dict[str, Any]:

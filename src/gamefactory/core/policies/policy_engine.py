@@ -22,6 +22,7 @@ class OperationType(StrEnum):
     LOCAL_READ = "LOCAL_READ"
     REPOSITORY_WRITE = "REPOSITORY_WRITE"
     PROCESS_EXECUTION = "PROCESS_EXECUTION"
+    VISUAL_REVIEW = "VISUAL_REVIEW"
     FREE_EXTERNAL = "FREE_EXTERNAL"
     PAID_OPERATION = "PAID_OPERATION"
     DESTRUCTIVE = "DESTRUCTIVE"
@@ -145,6 +146,20 @@ class PolicyEngine:
                 )
             return PolicyEvaluationResult(
                 allowed=True, requires_approval=False, reason="Repository write permitted"
+            )
+
+        if op_type == OperationType.VISUAL_REVIEW:
+            if has_approval:
+                return PolicyEvaluationResult(
+                    allowed=True,
+                    requires_approval=False,
+                    reason="Visual review decision already matches this evidence",
+                )
+            return PolicyEvaluationResult(
+                allowed=False,
+                requires_approval=True,
+                approval_type="visual_review",
+                reason="Rendered captures require a separate human visual review",
             )
 
         if op_type == OperationType.PROCESS_EXECUTION:

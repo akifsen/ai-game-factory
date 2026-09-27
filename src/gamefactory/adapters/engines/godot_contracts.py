@@ -306,8 +306,15 @@ def validate_observation(
 def evaluate_assertions(scenario: Scenario, observation: Observation) -> dict[str, object]:
     """Evaluate Python-owned assertions exclusively against observed state."""
     snapshots = {snapshot.tick: snapshot.state for snapshot in observation.snapshots}
+    return evaluate_state_assertions(scenario.assertions, snapshots)
+
+
+def evaluate_state_assertions(
+    assertions: tuple[ScenarioAssertion, ...], snapshots: dict[int, ObservedState]
+) -> dict[str, object]:
+    """Evaluate assertion rows against an already bound snapshot map."""
     findings: list[AssertionFinding] = []
-    for assertion in scenario.assertions:
+    for assertion in assertions:
         state = snapshots.get(assertion.tick)
         if state is None:
             raise ValueError(f"required observation at tick {assertion.tick} is missing")

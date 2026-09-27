@@ -55,6 +55,10 @@ from gamefactory.workflows.definitions import (
     create_paid_safety_workflow,
 )
 from gamefactory.workflows.engine import WorkflowEngine
+from gamefactory.workflows.godot_capture import (
+    create_godot_capture_workflow,
+    register_godot_capture_handlers,
+)
 from gamefactory.workflows.godot_verification import (
     create_godot_verification_workflow,
     register_godot_handlers,
@@ -107,10 +111,16 @@ def build_parser() -> argparse.ArgumentParser:
         if name in ("approvals", "artifacts"):
             cmd.add_argument("--workflow")
 
+    report = commands.add_parser("report")
+    _add_common(report, nested=True)
+    report.add_argument("--workflow", required=True)
+
     run = commands.add_parser("run", help="run a built-in demonstrator workflow")
     _add_common(run, nested=True)
-    run.add_argument("kind", choices=("demo", "failure", "paid-safety", "godot-verify"))
-    run.add_argument("--scenario", help="strict Godot verification scenario JSON")
+    run.add_argument(
+        "kind", choices=("demo", "failure", "paid-safety", "godot-verify", "godot-capture")
+    )
+    run.add_argument("--scenario", help="strict Godot scenario JSON")
 
     resume = commands.add_parser("resume")
     _add_common(resume, nested=True)
@@ -324,6 +334,33 @@ def _inspect(db: Database, workflow_id: str) -> dict[str, Any]:
     }
 
 
+def _report(root: Path, db: Database, workflow_id: str) -> tuple[dict[str, Any], int, str]:
+    """Point at the static review snapshot. This command does not approve anything."""
+    pages = [
+        item
+        for item in ArtifactRepository(db).list_by_workflow(workflow_id)
+        if item.artifact_type == "godot-review-html"
+    ]
+    if not pages:
+        raise ConfigurationError(f"No capture review page is recorded for {workflow_id}")
+    page = max(pages, key=lambda item: item.created_at)
+    path = (root / page.relative_path).resolve()
+    path.relative_to(root.resolve())
+    receipts = [
+        item
+        for item in ArtifactRepository(db).list_by_workflow(workflow_id)
+        if item.artifact_type == "godot-review-receipt"
+    ]
+    payload = {
+        "workflow_id": workflow_id,
+        "review_html": str(path),
+        "report_sha256": page.content_hash,
+        "human_review": "RECEIPT_PRESENT" if receipts else "PENDING",
+        "note": "The HTML file is a snapshot and does not itself grant approval.",
+    }
+    return payload, EXIT_SUCCESS, f"Review page: {path}"
+
+
 def _run_workflow(
     root: Path,
     db: Database,
@@ -332,9 +369,9 @@ def _run_workflow(
     godot_path: str | None = None,
 ) -> Any:
     cfg = ConfigLoader.load_config(root)
-    if kind == "godot-verify":
+    if kind in {"godot-verify", "godot-capture"}:
         if not scenario_path:
-            raise ConfigurationError("run godot-verify requires --scenario <scenario.json>")
+            raise ConfigurationError(f"run {kind} requires --scenario <scenario.json>")
         configured = godot_path if godot_path is not None else cfg.engine.executable_path
         if configured is None:
             configured = os.environ.get("GAMEFACTORY_GODOT_PATH")
@@ -351,14 +388,19 @@ def _run_workflow(
         scenario = Path(scenario_path).expanduser()
         if not scenario.is_absolute():
             scenario = root / scenario
-        workflow, tasks = create_godot_verification_workflow(
-            cfg.project.id, root, executable, scenario
+        creator = (
+            create_godot_capture_workflow
+            if kind == "godot-capture"
+            else create_godot_verification_workflow
         )
+        workflow, tasks = creator(cfg.project.id, root, executable, scenario)
         engine = _engine(root, db)
         engine.register_workflow(workflow, tasks)
         return engine.run_workflow(workflow.id)
     if scenario_path:
-        raise ConfigurationError("--scenario is only valid with 'run godot-verify'")
+        raise ConfigurationError(
+            "--scenario is only valid with 'run godot-verify' or 'run godot-capture'"
+        )
     creators = {
         "demo": create_demo_workflow,
         "failure": create_failure_workflow,
@@ -391,6 +433,16 @@ def _engine(root: Path, db: Database, godot_path: str | None = None) -> Workflow
         asset_provider=FakeAssetGenerationProvider(),
     )
     register_godot_handlers(
+        engine.handler_registry,
+        root,
+        engine.artifact_mgr,
+        engine.art_repo,
+        engine.exec_repo,
+        engine.evi_repo,
+        engine.gate_repo,
+        engine.process_runner,
+    )
+    register_godot_capture_handlers(
         engine.handler_registry,
         root,
         engine.artifact_mgr,
@@ -519,6 +571,7 @@ def _dispatch(args: argparse.Namespace) -> tuple[Any, int, str | None]:
         "approve",
         "reject",
         "inspect",
+        "report",
     }:
         # Explicit path overrides are passed through detection; no failed explicit path falls back.
         db = _db(root)
@@ -558,8 +611,20 @@ def _dispatch(args: argparse.Namespace) -> tuple[Any, int, str | None]:
             approval = repo.get(args.approval_id)
             if approval is None:
                 raise ConfigurationError(f"Approval not found: {args.approval_id}")
+            current_inputs = None
+            if args.command == "approve":
+                engine = _engine(root, db)
+                workflow = engine.wf_repo.get(approval.workflow_id)
+                task = engine.task_repo.get(approval.task_id)
+                if workflow is None or task is None:
+                    raise ConfigurationError(
+                        f"Approval '{approval.id}' is not bound to a current workflow task"
+                    )
+                current_inputs = engine.approval_inputs(workflow, task)
             decided = (
-                ApprovalService.approve(approval, args.actor, args.comment)
+                ApprovalService.approve(
+                    approval, args.actor, args.comment, current_inputs=current_inputs
+                )
                 if args.command == "approve"
                 else ApprovalService.reject(approval, args.actor, args.comment)
             )
@@ -602,6 +667,8 @@ def _dispatch(args: argparse.Namespace) -> tuple[Any, int, str | None]:
                 or "No pending approvals."
             )
             return records, EXIT_SUCCESS, human
+        if args.command == "report":
+            return _report(root, db, args.workflow)
         if args.command == "artifacts":
             cfg = ConfigLoader.load_config(root)
             workflows = (

@@ -2,7 +2,7 @@
 
 AI Game Factory is local development tooling for coordinating bounded game-development workflows. It stores workflow state, task attempts, artifacts, evidence, approvals, and policy decisions locally. A managed game remains usable without the Factory installed.
 
-V0.2 adds real Godot headless scene verification with staged projects, bounded import/runtime processes, durable evidence and independent Python assertions. It preserves the V0.1 SQLite workflow, approvals, fake demo providers and CLI. Meshy generation, Blender processing and AI workers remain outside this release.
+V0.3 adds rendered Godot viewport capture: a real Compatibility renderer writes checkpoint PNGs, Python checks those images independently, and a static HTML page waits for a human visual decision. V0.2 headless verification stays available. Meshy generation, Blender processing and AI workers remain outside this release.
 
 ## Install and run
 
@@ -56,7 +56,7 @@ The CLI accepts `--project DIR` / `-p DIR` and explicit `--godot-path` / `--blen
 
 The versioned project contract is `.gamefactory/factory.yml`; the JSON Schema is in `schemas/`. Unknown fields are rejected. User-wide defaults can be set in `%APPDATA%/gamefactory/config.yml` on Windows or `$XDG_CONFIG_HOME/gamefactory/config.yml` (falling back to `~/.config/gamefactory/config.yml`) on Linux/macOS. Precedence is defaults, user config, project config, then explicit command-line executable paths. Do not put credentials in either YAML file; provider secrets belong in environment variables, and no V0.1 command sends them anywhere. Local state is in `.gamefactory/state/factory.db`. State and config paths are checked against project-root escapes before use.
 
-Godot is required only for `godot-verify`; other core workflows remain usable without it. Blender is optional and detection-only. `doctor` reports actual capabilities and versions. Meshy remains unavailable and no real paid-provider operation is implemented.
+Godot is required only for `godot-verify` and `godot-capture`. Other core workflows remain usable without a renderer. `doctor` does not open a window. Blender is optional and detection-only. Meshy remains unavailable and no real paid-provider operation is implemented.
 
 See [architecture overview](docs/architecture/overview.md), [integration status](docs/integrations/status.md), [development workflow](docs/development/README.md), [acceptance requirements](docs/requirements/03-acceptance.md), and [deferred boundaries](docs/requirements/future-boundaries.md).
 
@@ -80,7 +80,7 @@ Supply `--godot-path PATH` if detection cannot locate your executable. Configure
 `policies.require_approval_for_process_execution: true` to require approval before
 launch; use `approvals`, `approve` and `resume` as in the existing workflow. The
 approved source/scenario/executable/harness fingerprint is checked before dispatch.
-The package is 0.2.0; project config schema stays 0.1.0.
+The package is 0.3.0. Project config schema stays 0.1.0. Headless scenarios stay on schema 0.2.0.
 
 Godot runs a separate staged copy and writes observations without receiving the
 assertion expectations. Python validates current-attempt evidence and checks the
@@ -96,3 +96,20 @@ physics determinism, AI gameplay or mobile exports.
 See the [V0.2 plan](docs/work-plan-v0.2.md),
 [Godot contract and recovery guide](docs/integrations/godot-headless-verification.md)
 and [V0.2 completion report](docs/reports/v0.2-completion-report.md).
+
+## V0.3 rendered capture
+
+`godot-capture` stages the project, imports it headless, then runs a windowed Compatibility renderer. It does not use `--headless` for the image. Supported viewports are 1280×720 and 720×1280, as separate workflows. The portrait profile is not a mobile-device test. Capture schema is 0.3.0; existing headless scenarios are not required to take screenshots.
+
+```bash
+gamefactory --project examples/godot-verification init
+gamefactory --project examples/godot-verification run godot-capture --scenario visual-scenario.json
+gamefactory --project examples/godot-verification report --workflow WORKFLOW_ID
+gamefactory --project examples/godot-verification approvals --workflow WORKFLOW_ID
+gamefactory --project examples/godot-verification approve APPROVAL_ID --comment "Reviewed"
+gamefactory --project examples/godot-verification resume WORKFLOW_ID
+```
+
+A technical PASS leaves the workflow blocked for visual review. That approval is not the process-execution approval. Rejecting it does not start another capture. `inspect`, `artifacts`, `retry` and `godot-verify` keep their existing roles.
+
+The published Windows review is `docs/reports/v0.3-rendered/landscape/index.html`. Its human decision is still pending. See [rendered capture](docs/integrations/godot-rendered-capture.md) and the [V0.3 completion report](docs/reports/v0.3-completion-report.md).

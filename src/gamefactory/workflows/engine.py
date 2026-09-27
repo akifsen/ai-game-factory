@@ -498,6 +498,7 @@ class WorkflowEngine:
                     HandlerOperation.LOCAL_READ: OperationType.LOCAL_READ,
                     HandlerOperation.REPOSITORY_WRITE: OperationType.REPOSITORY_WRITE,
                     HandlerOperation.PROCESS_EXECUTION: OperationType.PROCESS_EXECUTION,
+                    HandlerOperation.VISUAL_REVIEW: OperationType.VISUAL_REVIEW,
                 }[profile.operation]
                 if profile is not None
                 else OperationType.LOCAL_READ
@@ -521,6 +522,8 @@ class WorkflowEngine:
             if op_type == OperationType.PAID_OPERATION
             else "process_execution"
             if op_type == OperationType.PROCESS_EXECUTION and handler_profile is not None
+            else "visual_review"
+            if op_type == OperationType.VISUAL_REVIEW
             else active_approval.approval_type
             if active_approval
             else "repository_write"

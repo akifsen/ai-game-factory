@@ -163,3 +163,83 @@ jobs:
             .verification/ci-godot/environment.txt
             .verification/ci-godot/wheel.sha256
           if-no-files-found: warn
+
+  godot-rendered:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      GODOT_VERSION: 4.7.2-stable
+      GODOT_EXPECTED_VERSION: 4.7.2.stable.official.ed1daf0bf
+      GODOT_ARCHIVE_SHA512: 9aa00f7a605200940bce3027a567b782f49bd8e940dd06ae9e987bd65aee1b1467edd56ed84fcdcbdd44354bf613bdbb4e5d2913e925850368e150c59ed54c65
+      LIBGL_ALWAYS_SOFTWARE: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install a local software OpenGL display
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y xvfb libgl1-mesa-dri mesa-utils
+      - name: Build wheel and install it into a clean virtual environment
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip build
+          mkdir -p "$RUNNER_TEMP/wheelhouse"
+          python -m build --wheel --outdir "$RUNNER_TEMP/wheelhouse"
+          python -m venv "$RUNNER_TEMP/gamefactory-venv"
+          venv_python="$RUNNER_TEMP/gamefactory-venv/bin/python"
+          wheel="$(find "$RUNNER_TEMP/wheelhouse" -maxdepth 1 -name 'gamefactory-*.whl' -print -quit)"
+          test -n "$wheel"
+          sha256sum "$wheel" > "$RUNNER_TEMP/gamefactory-wheel.sha256"
+          "$venv_python" -m pip install --upgrade pip
+          "$venv_python" -m pip install "$wheel"
+      - name: Download and verify pinned official Godot
+        shell: bash
+        run: |
+          set -euo pipefail
+          archive="Godot_v${GODOT_VERSION}_linux.x86_64.zip"
+          curl --fail --location --retry 3 "https://github.com/godotengine/godot-builds/releases/download/${GODOT_VERSION}/${archive}" --output "$RUNNER_TEMP/$archive"
+          printf '%s  %s\n' "$GODOT_ARCHIVE_SHA512" "$RUNNER_TEMP/$archive" | sha512sum --check --strict
+          unzip "$RUNNER_TEMP/$archive" -d "$RUNNER_TEMP/godot"
+          chmod +x "$RUNNER_TEMP/godot/Godot_v${GODOT_VERSION}_linux.x86_64"
+          echo "GAMEFACTORY_TEST_GODOT=$RUNNER_TEMP/godot/Godot_v${GODOT_VERSION}_linux.x86_64" >> "$GITHUB_ENV"
+      - name: Capture with Xvfb and llvmpipe
+        shell: bash
+        run: |
+          set -euo pipefail
+          evidence="$GITHUB_WORKSPACE/.verification/ci-godot-rendered"
+          mkdir -p "$evidence"
+          {
+            printf 'renderer_request=gl_compatibility opengl3 x11\n'
+            printf 'software_rendering=LIBGL_ALWAYS_SOFTWARE=%s\n' "$LIBGL_ALWAYS_SOFTWARE"
+            printf 'note=software llvmpipe is not a hardware GPU or mobile result\n'
+            "$GAMEFACTORY_TEST_GODOT" --version
+            sha256sum "$GAMEFACTORY_TEST_GODOT"
+            cp "$RUNNER_TEMP/gamefactory-wheel.sha256" "$evidence/wheel.sha256"
+            git rev-parse HEAD > "$evidence/commit.txt"
+          } | tee "$evidence/environment.txt"
+          xvfb-run -a --server-args="-screen 0 1600x1200x24" \
+            "$RUNNER_TEMP/gamefactory-venv/bin/python" \
+            "$GITHUB_WORKSPACE/scripts/verify_godot_capture.py" \
+            --cli "$RUNNER_TEMP/gamefactory-venv/bin/gamefactory" \
+            --fixture "$GITHUB_WORKSPACE/examples/godot-verification" \
+            --godot "$GAMEFACTORY_TEST_GODOT" \
+            --output "$evidence/acceptance.json" \
+            --workspace "$RUNNER_TEMP/capture-workspaces" \
+            --publish "$evidence/publish"
+      - name: Archive selected rendered evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: godot-rendered-evidence
+          path: |
+            .verification/ci-godot-rendered/acceptance.json
+            .verification/ci-godot-rendered/environment.txt
+            .verification/ci-godot-rendered/commit.txt
+            .verification/ci-godot-rendered/wheel.sha256
+            .verification/ci-godot-rendered/publish/**/*
+          if-no-files-found: warn

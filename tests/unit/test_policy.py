@@ -28,6 +28,14 @@ class TestPolicyEngine:
         assert res.allowed is True
         assert res.requires_approval is False
 
+    def test_visual_review_requires_approval_even_when_process_execution_does_not(self) -> None:
+        result = self.engine.evaluate(OperationType.VISUAL_REVIEW)
+        assert result.allowed is False
+        assert result.requires_approval is True
+        assert result.approval_type == "visual_review"
+        approved = self.engine.evaluate(OperationType.VISUAL_REVIEW, has_approval=True)
+        assert approved.allowed is True
+
     def test_process_execution_allowed_without_approval(self) -> None:
         res = self.engine.evaluate(OperationType.PROCESS_EXECUTION)
         assert res.allowed is True

@@ -6,11 +6,17 @@ import json
 import os
 import re
 import stat
+import sys
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
+from gamefactory.adapters.engines.godot_capture_contracts import (
+    CaptureScenario,
+    capture_fingerprint,
+    make_capture_request,
+)
 from gamefactory.adapters.engines.godot_contracts import (
     Scenario,
     make_runtime_request,
@@ -31,6 +37,54 @@ def _now() -> str:
     return datetime.now(UTC).isoformat()
 
 
+def _binary_read_flags() -> int:
+    """Windows os.open is text mode unless O_BINARY is set, which stops at 0x1A."""
+    return os.O_RDONLY | getattr(os, "O_BINARY", 0) | getattr(os, "O_NOFOLLOW", 0)
+
+
+def _display_driver() -> str:
+    if sys.platform == "win32":
+        return "windows"
+    if sys.platform.startswith("linux"):
+        return "x11"
+    raise ValidationError(f"rendered capture is not supported on {sys.platform}")
+
+
+_RENDER_LOG = re.compile(
+    r"(?im)^.*(?:opengl|vulkan|d3d|compatibility|using device|dummy|headless).*$"
+)
+
+
+def _renderer_log(text: str) -> str:
+    return "\n".join(_RENDER_LOG.findall(text)[:20])[:4000]
+
+
+def _read_bounded_regular_file(path: Path, root: Path, limit: int) -> bytes:
+    if _is_reparse(path):
+        raise ValidationError("capture output cannot be a symlink or reparse point")
+    try:
+        path.resolve(strict=True).relative_to(root.resolve(strict=True))
+    except (OSError, ValueError) as exc:
+        raise ValidationError("capture output escapes its scratch directory") from exc
+    if not path.is_file():
+        raise ToolExecutionError("expected capture output is missing", details={"path": path.name})
+    descriptor = os.open(path, _binary_read_flags())
+    try:
+        if not stat.S_ISREG(os.fstat(descriptor).st_mode):
+            raise ValidationError("capture output must be a regular file")
+        chunks = bytearray()
+        while len(chunks) <= limit:
+            part = os.read(descriptor, min(64 * 1024, limit + 1 - len(chunks)))
+            if not part:
+                break
+            chunks.extend(part)
+        if len(chunks) > limit:
+            raise ValidationError("capture output exceeds its byte limit")
+        return bytes(chunks)
+    finally:
+        os.close(descriptor)
+
+
 def _write_exclusive(path: Path, content: bytes) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("xb") as stream:
@@ -47,6 +101,9 @@ class GodotRun:
     version: str
     source_hash: str
     harness_hash: str
+    images: dict[str, bytes] | None = None
+    requested_renderer: dict[str, str] | None = None
+    process_renderer_log: str = ""
 
 
 class GodotExecutor:
@@ -172,7 +229,7 @@ class GodotExecutor:
                 exit_code=runtime["metadata"].get("exit_code"),
                 details={"godot_phase": "runtime"},
             )
-        descriptor = os.open(observation_path, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0))
+        descriptor = os.open(observation_path, _binary_read_flags())
         try:
             if not stat.S_ISREG(os.fstat(descriptor).st_mode):
                 raise ValidationError("Godot observation must be a regular file")
@@ -207,6 +264,210 @@ class GodotExecutor:
             version=version_string,
             source_hash=source_hash,
             harness_hash=harness_hash,
+        )
+
+    def run_capture(
+        self,
+        executable: Path | str,
+        stage: Path,
+        scratch: Path,
+        scenario: CaptureScenario,
+        execution_id: str,
+        scenario_hash: str,
+        source_hash: str,
+        harness_hash: str,
+        import_timeout: float,
+        runtime_timeout: float,
+        durable_intent: Any | None = None,
+    ) -> GodotRun:
+        """Import headless, then capture from a real Compatibility renderer."""
+        exe = Path(executable).resolve(strict=True)
+        if capture_fingerprint(scenario) != scenario_hash:
+            raise ValidationError(
+                "Godot capture scenario changed after its approval fingerprint was computed"
+            )
+        display = _display_driver()
+        env = self._isolated_environment(scratch)
+        if sys.platform.startswith("linux"):
+            display_value = os.environ.get("DISPLAY")
+            if not display_value:
+                raise ValidationError(
+                    "Linux rendered capture requires DISPLAY; headless fallback is not a capture"
+                )
+            env["DISPLAY"] = display_value
+            authority = os.environ.get("XAUTHORITY")
+            if authority:
+                env["XAUTHORITY"] = authority
+            software = os.environ.get("LIBGL_ALWAYS_SOFTWARE")
+            if software:
+                env["LIBGL_ALWAYS_SOFTWARE"] = software
+        artifacts: dict[str, bytes] = {}
+        version = self._run_phase(
+            "version", [str(exe), "--version"], stage, scratch, 10.0, env, durable_intent
+        )
+        artifacts.update(version["artifacts"])
+        if not version["success"] or not version["stdout"].strip():
+            raise ToolExecutionError(
+                "Godot version probe failed after approval",
+                details=self._failure_details(version, "version"),
+            )
+        help_result = self._run_phase(
+            "help", [str(exe), "--help"], stage, scratch, 10.0, env, durable_intent
+        )
+        artifacts.update(help_result["artifacts"])
+        if not help_result["success"]:
+            raise ToolExecutionError(
+                "Godot CLI capability probe failed after approval",
+                details=self._failure_details(help_result, "help"),
+            )
+        help_text = help_result["stdout"] + "\n" + help_result["stderr"]
+        required_flags = (
+            "--headless",
+            "--path",
+            "--import",
+            "--script",
+            "--display-driver",
+            "--rendering-driver",
+            "--rendering-method",
+            "--windowed",
+            "--resolution",
+        )
+        unsupported = [flag for flag in required_flags if flag not in help_text]
+        if unsupported:
+            raise ValidationError(
+                f"Installed Godot does not advertise required flags: {unsupported}"
+            )
+        version_string = version["stdout"].strip().splitlines()[0]
+        imports = self._run_phase(
+            "import",
+            [str(exe), "--headless", "--path", str(stage), "--import"],
+            stage,
+            scratch,
+            import_timeout,
+            env,
+            durable_intent,
+        )
+        artifacts.update(imports["artifacts"])
+        if not imports["success"]:
+            raise ToolExecutionError(
+                "Godot project import failed",
+                exit_code=imports["metadata"].get("exit_code"),
+                stderr=imports["stderr"],
+                details=self._failure_details(imports, "import"),
+            )
+        capture_dir = scratch / "captures"
+        capture_dir.mkdir(parents=True, exist_ok=False)
+        request = make_capture_request(scenario, execution_id, str(capture_dir.resolve()))
+        artifacts["runtime-request.json"] = json.dumps(
+            request,
+            sort_keys=True,
+            ensure_ascii=False,
+            separators=(",", ":"),
+            allow_nan=False,
+        ).encode("utf-8")
+        request_path = scratch / "runtime-request.json"
+        observation_path = scratch / "runtime-observation.json"
+        _write_exclusive(request_path, artifacts["runtime-request.json"])
+        requested = {
+            "rendering_method": "gl_compatibility",
+            "rendering_driver": "opengl3",
+            "display_driver": display,
+            "audio_driver": "Dummy",
+            "window_mode": "windowed",
+            "resolution": f"{scenario.viewport.width}x{scenario.viewport.height}",
+            "software_rendering_requested": os.environ.get("LIBGL_ALWAYS_SOFTWARE", ""),
+        }
+        runtime_args = [
+            str(exe),
+            "--path",
+            str(stage),
+            "--display-driver",
+            display,
+            "--rendering-driver",
+            "opengl3",
+            "--rendering-method",
+            "gl_compatibility",
+            "--audio-driver",
+            "Dummy",
+            "--windowed",
+            "--resolution",
+            requested["resolution"],
+            "--position",
+            "40,40",
+            "--script",
+            str(stage / ".factory-harness.gd"),
+            "--",
+            "--request",
+            str(request_path),
+            "--output",
+            str(observation_path),
+            "--captures",
+            str(capture_dir.resolve()),
+        ]
+        runtime = self._run_phase(
+            "runtime", runtime_args, stage, scratch, runtime_timeout, env, durable_intent
+        )
+        artifacts.update(runtime["artifacts"])
+        log = _renderer_log(runtime["stdout"] + "\n" + runtime["stderr"])
+        if not runtime["success"]:
+            raise ToolExecutionError(
+                "Godot rendered capture process failed",
+                exit_code=runtime["metadata"].get("exit_code"),
+                stderr=runtime["stderr"],
+                details=self._failure_details(runtime, "runtime"),
+            )
+        raw = _read_bounded_regular_file(observation_path, scratch, 1024 * 1024)
+        artifacts["runtime-observation.json"] = raw
+        try:
+            report = json.loads(
+                raw.decode("utf-8"),
+                object_pairs_hook=self._unique_json_object,
+                parse_constant=lambda value: (_ for _ in ()).throw(
+                    ValueError(f"invalid JSON constant: {value}")
+                ),
+            )
+        except (UnicodeDecodeError, json.JSONDecodeError, ValueError) as exc:
+            raise ValidationError(f"Godot observation is not valid UTF-8 JSON: {exc}") from exc
+        if not isinstance(report, dict):
+            raise ValidationError("Godot observation root must be a JSON object")
+        renderer = report.get("renderer")
+        if not isinstance(renderer, dict) or renderer.get("rendering_method") != "gl_compatibility":
+            raise ToolExecutionError(
+                "Capture did not report a gl_compatibility renderer",
+                details={"renderer": renderer, "process_log": log},
+            )
+        if (
+            renderer.get("rendering_driver") == "dummy"
+            or renderer.get("display_server") == "headless"
+        ):
+            raise ToolExecutionError(
+                "Headless or dummy rendering is not a successful capture",
+                details={"renderer": renderer, "process_log": log},
+            )
+        images: dict[str, bytes] = {}
+        expected = [point.id + ".png" for point in scenario.captures]
+        found = sorted(path.name for path in capture_dir.iterdir() if path.is_file())
+        if found != sorted(expected):
+            raise ToolExecutionError(
+                "Capture process did not publish exactly the requested PNG files",
+                details={"expected": expected, "found": found},
+            )
+        for name in expected:
+            images[name] = _read_bounded_regular_file(
+                capture_dir / name, capture_dir, 4 * 1024 * 1024
+            )
+            if not images[name].startswith(b"\x89PNG\r\n\x1a\n"):
+                raise ToolExecutionError(f"capture file {name} is not a PNG")
+        return GodotRun(
+            observation=report,
+            artifacts=artifacts,
+            executable=str(exe),
+            version=version_string,
+            source_hash=source_hash,
+            harness_hash=harness_hash,
+            images=images,
+            requested_renderer=requested,
+            process_renderer_log=log,
         )
 
     @staticmethod

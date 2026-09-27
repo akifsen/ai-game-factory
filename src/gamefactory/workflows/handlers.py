@@ -37,6 +37,7 @@ class HandlerOperation(StrEnum):
     LOCAL_READ = "LOCAL_READ"
     REPOSITORY_WRITE = "REPOSITORY_WRITE"
     PROCESS_EXECUTION = "PROCESS_EXECUTION"
+    VISUAL_REVIEW = "VISUAL_REVIEW"
 
 
 class HandlerRecovery(StrEnum):
