@@ -1,0 +1,3017 @@
+============================= test session starts ==============================
+platform linux -- Python 3.11.16, pytest-9.1.1, pluggy-1.6.0 -- /usr/local/bin/python
+rootdir: /tmp/descendant-candidate
+configfile: pyproject.toml
+testpaths: tests
+collecting ... collected 315 items
+
+tests/integration/test_capabilities.py::TestCapabilityRegistry::test_discovery_contains_core_capabilities PASSED [  0%]
+tests/integration/test_capabilities.py::TestCapabilityRegistry::test_meshy_capability_classified_with_approval_or_unavailable PASSED [  0%]
+tests/integration/test_cli.py::test_help_version_and_json_usage_error PASSED [  0%]
+tests/integration/test_cli.py::test_cli_paid_workflow_requires_approval_and_resumes_across_processes ERROR [  1%]
+tests/integration/test_cli.py::test_doctor_keeps_invalid_explicit_paths_misconfigured ERROR [  1%]
+tests/integration/test_cli.py::test_database_lock_and_readonly_errors_are_actionable_json ERROR [  1%]
+tests/integration/test_cli.py::test_cli_engine_uses_project_policy_values ERROR [  2%]
+tests/integration/test_crash_recovery.py::TestCrashRecoveryAndFailures::test_deterministic_failure_and_retry_history ERROR [  2%]
+tests/integration/test_crash_recovery.py::TestCrashRecoveryAndFailures::test_crash_during_paid_operation_blocks_for_reconciliation ERROR [  2%]
+tests/integration/test_godot_blender_detection.py::TestGodotAndBlenderDetection::test_real_blender_detection_or_graceful_degradation PASSED [  3%]
+tests/integration/test_godot_blender_detection.py::TestGodotAndBlenderDetection::test_missing_blender_path_degrades_gracefully PASSED [  3%]
+tests/integration/test_godot_blender_detection.py::TestGodotAndBlenderDetection::test_real_godot_detection_or_graceful_degradation PASSED [  3%]
+tests/integration/test_godot_blender_detection.py::TestGodotAndBlenderDetection::test_missing_godot_path_degrades_gracefully PASSED [  4%]
+tests/integration/test_godot_blender_detection.py::TestGodotAndBlenderDetection::test_inspect_godot_project_file ERROR [  4%]
+tests/integration/test_godot_blender_detection.py::TestGodotAndBlenderDetection::test_inspect_empty_directory_not_godot_project ERROR [  4%]
+tests/integration/test_godot_capture_pipeline.py::test_fake_capture_blocks_for_visual_review_and_resume_does_not_rerun ERROR [  5%]
+tests/integration/test_godot_capture_pipeline.py::test_hud_mutation_keeps_state_pass_and_fails_visual_gate ERROR [  5%]
+tests/integration/test_godot_capture_pipeline.py::test_missing_png_and_dummy_renderer_are_not_passes ERROR [  5%]
+tests/integration/test_godot_capture_pipeline.py::test_reject_does_not_start_another_capture ERROR [  6%]
+tests/integration/test_godot_capture_pipeline.py::test_tampered_png_cannot_be_approved_or_completed ERROR [  6%]
+tests/integration/test_godot_capture_pipeline.py::test_approved_capture_rejects_changed_png_on_a_new_cli_resume ERROR [  6%]
+tests/integration/test_godot_capture_pipeline.py::test_linux_capture_allowlists_display_and_refuses_headless_fallback ERROR [  6%]
+tests/integration/test_godot_capture_pipeline.py::test_portrait_profile_is_a_separate_size ERROR [  7%]
+tests/integration/test_godot_pipeline.py::test_fake_godot_pipeline_passes_independent_assertions_and_no_duplicate_resume ERROR [  7%]
+tests/integration/test_godot_pipeline.py::test_staging_excludes_plural_secret_files_and_generic_cache_directories ERROR [  7%]
+tests/integration/test_godot_pipeline.py::test_process_and_stale_report_failures_keep_attempt_artifacts[import-failure-0] ERROR [  8%]
+tests/integration/test_godot_pipeline.py::test_process_and_stale_report_failures_keep_attempt_artifacts[runtime-failure-1] ERROR [  8%]
+tests/integration/test_godot_pipeline.py::test_process_and_stale_report_failures_keep_attempt_artifacts[missing-report-1] ERROR [  8%]
+tests/integration/test_godot_pipeline.py::test_process_and_stale_report_failures_keep_attempt_artifacts[stale-execution-1] ERROR [  9%]
+tests/integration/test_godot_pipeline.py::test_malformed_or_self_asserted_runtime_evidence_never_completes_workflow[completed-missing-snapshot] ERROR [  9%]
+tests/integration/test_godot_pipeline.py::test_malformed_or_self_asserted_runtime_evidence_never_completes_workflow[self-declared-pass] ERROR [  9%]
+tests/integration/test_godot_pipeline.py::test_malformed_or_self_asserted_runtime_evidence_never_completes_workflow[pass-stdout-nonzero] ERROR [ 10%]
+tests/integration/test_godot_pipeline.py::test_malformed_or_self_asserted_runtime_evidence_never_completes_workflow[malformed-report] ERROR [ 10%]
+tests/integration/test_godot_pipeline.py::test_malformed_or_self_asserted_runtime_evidence_never_completes_workflow[truncated-output] ERROR [ 10%]
+tests/integration/test_godot_pipeline.py::test_prior_attempt_report_is_preserved_and_rejected_when_reused_by_retry ERROR [ 11%]
+tests/integration/test_godot_pipeline.py::test_observation_integrity_or_managed_path_escape_blocks_validation[observation-bytes] ERROR [ 11%]
+tests/integration/test_godot_pipeline.py::test_observation_integrity_or_managed_path_escape_blocks_validation[report-path-escape] ERROR [ 11%]
+tests/integration/test_godot_pipeline.py::test_approval_precedes_all_godot_processes_and_changed_inputs_request_new_approval ERROR [ 12%]
+tests/integration/test_godot_pipeline.py::test_recovery_with_unknown_child_intent_blocks_in_fresh_cli_processes ERROR [ 12%]
+tests/integration/test_godot_pipeline.py::test_known_terminal_or_no_intent_recovery_allows_only_explicit_new_attempt[False] ERROR [ 12%]
+tests/integration/test_godot_pipeline.py::test_known_terminal_or_no_intent_recovery_allows_only_explicit_new_attempt[True] ERROR [ 13%]
+tests/integration/test_godot_pipeline.py::test_metered_conservative_handler_never_uses_safe_terminal_retry_path ERROR [ 13%]
+tests/integration/test_godot_pipeline.py::test_terminal_journal_persistence_failure_preserves_unknown_child_state ERROR [ 13%]
+tests/integration/test_godot_real.py::test_real_godot_acceptance SKIPPED [ 13%]
+tests/integration/test_locks.py::TestExecutionLock::test_acquire_and_release ERROR [ 14%]
+tests/integration/test_locks.py::TestExecutionLock::test_hold_context_manager ERROR [ 14%]
+tests/integration/test_locks.py::TestExecutionLock::test_competing_runner_blocked_when_active ERROR [ 14%]
+tests/integration/test_locks.py::TestExecutionLock::test_stale_lock_reclaimed_when_process_is_dead ERROR [ 15%]
+tests/integration/test_locks.py::TestExecutionLock::test_workflow_id_never_becomes_a_path ERROR [ 15%]
+tests/integration/test_locks.py::TestExecutionLock::test_symlink_lock_leaf_cannot_write_outside_lock_directory ERROR [ 15%]
+tests/integration/test_locks.py::TestExecutionLock::test_hardlink_lock_leaf_is_rejected ERROR [ 16%]
+tests/integration/test_locks.py::test_two_processes_cannot_acquire_same_workflow ERROR [ 16%]
+tests/integration/test_paid_safety.py::TestPaidOperationSafety::test_paid_operation_safety_invariants ERROR [ 16%]
+tests/integration/test_persistence.py::TestPersistence::test_migrations_and_version_tracking ERROR [ 17%]
+tests/integration/test_persistence.py::TestPersistence::test_future_schema_version_rejected ERROR [ 17%]
+tests/integration/test_persistence.py::TestPersistence::test_gapped_migration_history_is_rejected ERROR [ 17%]
+tests/integration/test_persistence.py::TestPersistence::test_migration_failure_rolls_back_ddl_and_version_records ERROR [ 18%]
+tests/integration/test_persistence.py::TestPersistence::test_concurrent_fresh_migrations_apply_once ERROR [ 18%]
+tests/integration/test_persistence.py::TestPersistence::test_foreign_key_enforcement ERROR [ 18%]
+tests/integration/test_persistence.py::TestPersistence::test_cascade_delete ERROR [ 19%]
+tests/integration/test_persistence.py::TestPersistence::test_attempt_history_preservation ERROR [ 19%]
+tests/integration/test_persistence.py::TestPersistence::test_reopen_database_preserves_records ERROR [ 19%]
+tests/integration/test_persistence.py::TestPersistence::test_full_entity_persistence_roundtrip ERROR [ 20%]
+tests/integration/test_persistence_redaction.py::test_engine_provider_error_is_redacted_from_db_and_wal ERROR [ 20%]
+tests/integration/test_persistence_redaction.py::test_task_parameters_with_sensitive_inputs_are_rejected[prompt-task] ERROR [ 20%]
+tests/integration/test_persistence_redaction.py::test_task_parameters_with_sensitive_inputs_are_rejected[prompt-workflow] ERROR [ 20%]
+tests/integration/test_persistence_redaction.py::test_task_parameters_with_sensitive_inputs_are_rejected[output_path-task] ERROR [ 21%]
+tests/integration/test_persistence_redaction.py::test_task_parameters_with_sensitive_inputs_are_rejected[output_path-workflow] ERROR [ 21%]
+tests/integration/test_persistence_redaction.py::test_sensitive_task_parameter_keys_are_rejected_without_modifying_metadata ERROR [ 21%]
+tests/integration/test_persistence_redaction.py::test_evidence_approval_and_audit_payloads_are_sanitized ERROR [ 22%]
+tests/integration/test_persistence_redaction.py::test_finalize_task_rejects_invalid_state_transition ERROR [ 22%]
+tests/integration/test_process_metadata.py::TestProcessMetadata::test_command_result_defaults_and_properties PASSED [ 22%]
+tests/integration/test_process_metadata.py::TestProcessMetadata::test_command_result_canonical_construction PASSED [ 23%]
+tests/integration/test_process_metadata.py::TestProcessMetadata::test_multibyte_trim_incomplete_helper PASSED [ 23%]
+tests/integration/test_process_metadata.py::TestProcessMetadata::test_read_bounded_with_multibyte_stream PASSED [ 23%]
+tests/integration/test_process_metadata.py::TestProcessMetadata::test_read_error_does_not_silently_return_untruncated_success PASSED [ 24%]
+tests/integration/test_process_metadata.py::TestProcessMetadata::test_successful_execution_metadata_contract ERROR [ 24%]
+tests/integration/test_process_metadata.py::TestProcessMetadata::test_nonzero_execution_metadata_contract ERROR [ 24%]
+tests/integration/test_process_metadata.py::TestProcessMetadata::test_timeout_metadata_contract_and_serializability ERROR [ 25%]
+tests/integration/test_process_metadata.py::TestProcessMetadata::test_timeout_redaction_metadata_safety ERROR [ 25%]
+tests/integration/test_process_metadata.py::TestProcessMetadata::test_truncation_stdout_and_stderr ERROR [ 25%]
+tests/integration/test_process_metadata.py::TestProcessMetadata::test_tool_execution_error_redaction ERROR [ 26%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_run_simple_command_stdout ERROR [ 26%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_run_command_stderr ERROR [ 26%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_minimal_env_filters_secrets ERROR [ 26%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_timeout_enforcement ERROR [ 27%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_secret_redaction_in_output ERROR [ 27%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_nonexistent_executable_raises_error ERROR [ 27%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_request_override_secret_is_redacted_from_output_and_errors ERROR [ 28%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_sensitive_argument_flag_secret_is_redacted ERROR [ 28%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_short_override_secret_and_malformed_unicode_are_safe ERROR [ 28%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_output_is_bounded ERROR [ 29%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_timeout_kills_descendant_process ERROR [ 29%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_run_success_with_metadata ERROR [ 29%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_run_nonzero_exit_code ERROR [ 30%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_timeout_attaches_serializable_metadata ERROR [ 30%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_redaction_expansion_stays_within_output_limit ERROR [ 30%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_posix_parent_exit_kills_descendant_ignoring_sigterm ERROR [ 31%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_incomplete_pipe_read_fails_with_evidence ERROR [ 31%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_cleanup_error_message_redacts_request_secret ERROR [ 31%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_windows_job_close_failure_is_reported SKIPPED [ 32%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_timeout_redacts_secrets_in_details ERROR [ 32%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_stdout_truncation_flag_and_multibyte_safety ERROR [ 32%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_stderr_truncation_flag ERROR [ 33%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_error_redacts_credentials_in_details ERROR [ 33%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_command_result_backward_compatibility PASSED [ 33%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_job_attach_failure_fails_closed SKIPPED [ 33%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_parent_exit_descendant_bounded_and_cleaned ERROR [ 34%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_cleanup_failure_retains_metadata ERROR [ 34%]
+tests/integration/test_v02_compatibility.py::test_v01_approved_workflow_resumes_with_original_input_hash ERROR [ 34%]
+tests/integration/test_v02_compatibility.py::test_update_parameters_rejects_secrets_without_overwriting_previous_snapshot ERROR [ 35%]
+tests/integration/test_verify_godot_live_crash.py::test_process_identity_query_current PASSED [ 35%]
+tests/integration/test_verify_godot_live_crash.py::test_process_identity_rejection_wrong_executable PASSED [ 35%]
+tests/integration/test_verify_godot_live_crash.py::test_sentinel_lifecycle PASSED [ 36%]
+tests/integration/test_verify_godot_live_crash.py::test_controlled_fixture_preparation ERROR [ 36%]
+tests/integration/test_verify_godot_live_crash.py::test_wrapper_intercepts_subprocess_launch ERROR [ 36%]
+tests/integration/test_verify_godot_live_crash.py::test_real_godot_live_crash ERROR [ 37%]
+tests/integration/test_verify_godot_live_crash.py::test_unknown_child_state_is_not_successful_cleanup[os_error: denied] PASSED [ 37%]
+tests/integration/test_verify_godot_live_crash.py::test_unknown_child_state_is_not_successful_cleanup[os_error: [Errno 2] No such file or directory: '/proc/3117/exe'] PASSED [ 37%]
+tests/integration/test_verify_godot_live_crash.py::test_unknown_child_state_is_not_successful_cleanup[malformed_stat] PASSED [ 38%]
+tests/integration/test_verify_godot_live_crash.py::test_unknown_child_state_is_not_successful_cleanup[starttime_mismatch: reused] PASSED [ 38%]
+tests/integration/test_verify_godot_live_crash.py::test_unknown_child_state_is_not_successful_cleanup[exe_mismatch: other] PASSED [ 38%]
+tests/integration/test_verify_godot_live_crash.py::test_live_thread_group_is_not_terminal PASSED [ 39%]
+tests/integration/test_verify_godot_live_crash.py::test_unreaped_zombie_is_terminal_only_with_pidfd PASSED [ 39%]
+tests/integration/test_verify_godot_live_crash.py::test_leader_zombie_with_live_worker_is_not_terminal PASSED [ 39%]
+tests/integration/test_verify_godot_live_crash.py::test_exe_enoent_between_reads_is_not_success_or_uncaught PASSED [ 40%]
+tests/integration/test_verify_godot_live_crash.py::test_permission_error_stays_unknown PASSED [ 40%]
+tests/integration/test_verify_godot_live_crash.py::test_starttime_mismatch_does_not_signal PASSED [ 40%]
+tests/integration/test_verify_godot_live_crash.py::test_matching_identity_signals_the_retained_fd_not_a_pid PASSED [ 40%]
+tests/integration/test_verify_godot_live_crash.py::test_live_process_at_deadline_fails_with_evidence PASSED [ 41%]
+tests/integration/test_verify_godot_live_crash.py::test_wait_for_owned_thread_group_early_poll_and_decreasing_remaining PASSED [ 41%]
+tests/integration/test_verify_godot_live_crash.py::test_wait_for_owned_thread_group_terminal_before_deadline PASSED [ 41%]
+tests/integration/test_verify_godot_live_crash.py::test_process_ref_closes_descriptor_when_observation_fails PASSED [ 42%]
+tests/integration/test_verify_godot_live_crash.py::test_pidfd_reference_is_not_offered_outside_linux PASSED [ 42%]
+tests/integration/test_verify_godot_live_crash.py::test_linux_unreaped_exit_is_observed_without_waitpid PASSED [ 42%]
+tests/integration/test_verify_godot_live_crash.py::test_linux_leader_exit_leaves_worker_alive_until_worker_exits ERROR [ 43%]
+tests/integration/test_verify_godot_python_resolution.py::test_valid_interpreter_path_resolved_to_absolute[recovery] PASSED [ 43%]
+tests/integration/test_verify_godot_python_resolution.py::test_valid_interpreter_path_resolved_to_absolute[live_crash] PASSED [ 43%]
+tests/integration/test_verify_godot_python_resolution.py::test_relative_interpreter_path_resolved_to_absolute[recovery] PASSED [ 44%]
+tests/integration/test_verify_godot_python_resolution.py::test_relative_interpreter_path_resolved_to_absolute[live_crash] PASSED [ 44%]
+tests/integration/test_verify_godot_python_resolution.py::test_nonexistent_python_path_rejected[recovery] ERROR [ 44%]
+tests/integration/test_verify_godot_python_resolution.py::test_nonexistent_python_path_rejected[live_crash] ERROR [ 45%]
+tests/integration/test_verify_godot_python_resolution.py::test_directory_python_path_rejected[recovery] ERROR [ 45%]
+tests/integration/test_verify_godot_python_resolution.py::test_directory_python_path_rejected[live_crash] ERROR [ 45%]
+tests/integration/test_verify_godot_python_resolution.py::test_symlink_interpreter_path_preserved_filesystem[recovery] ERROR [ 46%]
+tests/integration/test_verify_godot_python_resolution.py::test_symlink_interpreter_path_preserved_filesystem[live_crash] ERROR [ 46%]
+tests/integration/test_verify_godot_python_resolution.py::test_broken_symlink_rejected[recovery] ERROR [ 46%]
+tests/integration/test_verify_godot_python_resolution.py::test_broken_symlink_rejected[live_crash] ERROR [ 46%]
+tests/integration/test_verify_godot_python_resolution.py::test_symlink_preservation_synthetic_mock[recovery] ERROR [ 47%]
+tests/integration/test_verify_godot_python_resolution.py::test_symlink_preservation_synthetic_mock[live_crash] ERROR [ 47%]
+tests/integration/test_verify_godot_python_resolution.py::test_real_venv_regression_without_downloads[recovery] ERROR [ 47%]
+tests/integration/test_verify_godot_python_resolution.py::test_real_venv_regression_without_downloads[live_crash] ERROR [ 48%]
+tests/integration/test_verify_godot_python_resolution.py::test_cli_rejects_missing_python_executable ERROR [ 48%]
+tests/integration/test_workflow_engine.py::TestWorkflowEngine::test_demo_workflow_lifecycle_with_approval_gate ERROR [ 48%]
+tests/integration/test_workflow_regressions.py::test_budget_lost_between_evaluation_and_claim_persists_blocked_state ERROR [ 49%]
+tests/integration/test_workflow_regressions.py::test_paid_unknown_outcome_is_never_retried_and_invocation_is_durable ERROR [ 49%]
+tests/integration/test_workflow_regressions.py::test_claim_rolls_back_task_state_if_attempt_insert_fails ERROR [ 49%]
+tests/integration/test_workflow_regressions.py::test_approved_input_mutation_requires_new_approval_and_never_calls_provider ERROR [ 50%]
+tests/integration/test_workflow_regressions.py::test_tampering_while_approval_is_blocked_prevents_completion ERROR [ 50%]
+tests/integration/test_workflow_regressions.py::test_retries_cannot_mutate_another_workflows_task ERROR [ 50%]
+tests/integration/test_workflow_regressions.py::test_approval_compare_and_set_records_one_decision_and_audit ERROR [ 51%]
+tests/integration/test_workflow_regressions.py::test_rejected_approval_is_terminal_until_operator_changes_plan ERROR [ 51%]
+tests/integration/test_workflow_regressions.py::test_provider_cost_class_cannot_be_downgraded_and_ledger_is_generic ERROR [ 51%]
+tests/integration/test_workflow_regressions.py::test_metered_accepted_call_with_unknown_result_is_not_replayed ERROR [ 52%]
+tests/integration/test_workflow_regressions.py::test_missing_or_failed_provider_result_never_creates_artifact[None] ERROR [ 52%]
+tests/integration/test_workflow_regressions.py::test_missing_or_failed_provider_result_never_creates_artifact[provider1] ERROR [ 52%]
+tests/integration/test_workflow_regressions.py::test_project_budget_is_reserved_across_workflows ERROR [ 53%]
+tests/integration/test_workflow_regressions.py::test_concurrent_workflow_claims_cannot_overreserve_project_budget ERROR [ 53%]
+tests/integration/test_workflow_regressions.py::test_repository_write_policy_pauses_before_concept_artifact_creation ERROR [ 53%]
+tests/integration/test_workflow_regressions.py::test_artifacts_from_two_workflows_do_not_overwrite_each_other ERROR [ 53%]
+tests/integration/test_workflow_regressions.py::test_registered_handler_result_is_versioned_and_engine_verified ERROR [ 54%]
+tests/integration/test_workflow_regressions.py::test_malformed_handler_results_fail_closed[handler_result0] ERROR [ 54%]
+tests/integration/test_workflow_regressions.py::test_malformed_handler_results_fail_closed[handler_result1] ERROR [ 54%]
+tests/integration/test_workflow_regressions.py::test_malformed_handler_results_fail_closed[handler_result2] ERROR [ 55%]
+tests/unit/test_approvals.py::TestApprovalService::test_create_and_approve_with_matching_inputs PASSED [ 55%]
+tests/unit/test_approvals.py::TestApprovalService::test_approve_with_tampered_inputs_fails PASSED [ 55%]
+tests/unit/test_approvals.py::TestApprovalService::test_reject_and_request_changes PASSED [ 56%]
+tests/unit/test_artifacts.py::TestArtifactManager::test_create_and_verify_artifact ERROR [ 56%]
+tests/unit/test_artifacts.py::TestArtifactManager::test_missing_artifact_fails_verification ERROR [ 56%]
+tests/unit/test_artifacts.py::TestArtifactManager::test_tampered_artifact_fails_verification ERROR [ 57%]
+tests/unit/test_closeout_evidence.py::test_valid_bundle_verifies_cold ERROR [ 57%]
+tests/unit/test_closeout_evidence.py::test_builder_copies_only_catalogued_files_and_rejects_nonempty_output ERROR [ 57%]
+tests/unit/test_closeout_evidence.py::test_missing_mandatory_observation_is_rejected ERROR [ 58%]
+tests/unit/test_closeout_evidence.py::test_modified_log_is_rejected_by_hash ERROR [ 58%]
+tests/unit/test_closeout_evidence.py::test_mixed_execution_fails_relationship_even_with_updated_hash ERROR [ 58%]
+tests/unit/test_closeout_evidence.py::test_unsafe_bundle_paths_rejected[../outside] PASSED [ 59%]
+tests/unit/test_closeout_evidence.py::test_unsafe_bundle_paths_rejected[C:/outside] PASSED [ 59%]
+tests/unit/test_closeout_evidence.py::test_unsafe_bundle_paths_rejected[a//b] PASSED [ 59%]
+tests/unit/test_closeout_evidence.py::test_unsafe_bundle_paths_rejected[a/./b] PASSED [ 60%]
+tests/unit/test_closeout_evidence.py::test_unsafe_bundle_paths_rejected[a/../b] PASSED [ 60%]
+tests/unit/test_closeout_evidence.py::test_unsafe_bundle_paths_rejected[a/file:stream] PASSED [ 60%]
+tests/unit/test_closeout_evidence.py::test_unsafe_bundle_paths_rejected[a\\b] PASSED [ 60%]
+tests/unit/test_closeout_evidence.py::test_capture_bundle_binds_images_and_rejects_broken_evidence ERROR [ 61%]
+tests/unit/test_closeout_evidence.py::test_swapped_unlisted_review_png_is_rejected ERROR [ 61%]
+tests/unit/test_closeout_evidence.py::test_bound_review_html_rejects_displayed_image_tampering ERROR [ 61%]
+tests/unit/test_config.py::TestConfigLoader::test_init_project_idempotent_and_non_destructive ERROR [ 62%]
+tests/unit/test_config.py::TestConfigLoader::test_unknown_field_rejected ERROR [ 62%]
+tests/unit/test_config.py::TestConfigLoader::test_unsupported_schema_version_rejected ERROR [ 62%]
+tests/unit/test_config.py::TestConfigLoader::test_non_finite_or_negative_budgets_rejected[-1] ERROR [ 63%]
+tests/unit/test_config.py::TestConfigLoader::test_non_finite_or_negative_budgets_rejected[.nan] ERROR [ 63%]
+tests/unit/test_config.py::TestConfigLoader::test_non_finite_or_negative_budgets_rejected[.inf] ERROR [ 63%]
+tests/unit/test_config.py::TestConfigLoader::test_secret_field_and_missing_schema_version_rejected ERROR [ 64%]
+tests/unit/test_config.py::TestConfigLoader::test_user_defaults_are_overridden_by_project_values ERROR [ 64%]
+tests/unit/test_config.py::TestConfigLoader::test_unicode_project_name_generates_valid_ascii_id ERROR [ 64%]
+tests/unit/test_config.py::TestConfigLoader::test_malformed_yaml_rejected ERROR [ 65%]
+tests/unit/test_config.py::TestConfigLoader::test_init_rejects_factory_junction_escape_without_touching_target SKIPPED [ 65%]
+tests/unit/test_config.py::TestConfigLoader::test_init_rejects_state_junction_escape_without_touching_target SKIPPED [ 65%]
+tests/unit/test_dag.py::TestWorkflowDAG::test_linear_dependencies PASSED [ 66%]
+tests/unit/test_dag.py::TestWorkflowDAG::test_fan_out_and_fan_in PASSED  [ 66%]
+tests/unit/test_dag.py::TestWorkflowDAG::test_independent_tasks PASSED   [ 66%]
+tests/unit/test_dag.py::TestWorkflowDAG::test_direct_cycle_detected PASSED [ 66%]
+tests/unit/test_dag.py::TestWorkflowDAG::test_indirect_cycle_detected PASSED [ 67%]
+tests/unit/test_dag.py::TestWorkflowDAG::test_self_dependency_detected PASSED [ 67%]
+tests/unit/test_dag.py::TestWorkflowDAG::test_missing_dependency_detected PASSED [ 67%]
+tests/unit/test_dag.py::TestWorkflowDAG::test_duplicate_task_id_detected PASSED [ 68%]
+tests/unit/test_dag.py::TestWorkflowDAG::test_downstream_query_and_failure_propagation PASSED [ 68%]
+tests/unit/test_godot_capture.py::test_v02_scenario_stays_headless_and_capture_schema_rejects_other_sizes PASSED [ 68%]
+tests/unit/test_godot_capture.py::test_binary_read_preserves_png_signature ERROR [ 69%]
+tests/unit/test_godot_capture.py::test_png_decode_rejects_header_only_and_wrong_size PASSED [ 69%]
+tests/unit/test_godot_capture.py::test_fixture_roi_fails_when_health_bar_ignores_hp PASSED [ 69%]
+tests/unit/test_godot_capture.py::test_review_html_escapes_markup_and_rejects_remote_images PASSED [ 70%]
+tests/unit/test_godot_contracts.py::test_load_fixture_scenario_and_build_oracle_free_request PASSED [ 70%]
+tests/unit/test_godot_contracts.py::test_scenario_rejects_invalid_fields_and_values[change0-schema_version] PASSED [ 70%]
+tests/unit/test_godot_contracts.py::test_scenario_rejects_invalid_fields_and_values[change1-unknown] PASSED [ 71%]
+tests/unit/test_godot_contracts.py::test_scenario_rejects_invalid_fields_and_values[change2-scene] PASSED [ 71%]
+tests/unit/test_godot_contracts.py::test_scenario_rejects_invalid_fields_and_values[change3-scene] PASSED [ 71%]
+tests/unit/test_godot_contracts.py::test_scenario_rejects_invalid_fields_and_values[change4-scene] PASSED [ 72%]
+tests/unit/test_godot_contracts.py::test_scenario_rejects_invalid_fields_and_values[change5-scene] PASSED [ 72%]
+tests/unit/test_godot_contracts.py::test_scenario_rejects_invalid_fields_and_values[change6-scene] PASSED [ 72%]
+tests/unit/test_godot_contracts.py::test_scenario_rejects_invalid_fields_and_values[change7-scene] PASSED [ 73%]
+tests/unit/test_godot_contracts.py::test_scenario_rejects_invalid_fields_and_values[change8-scene] PASSED [ 73%]
+tests/unit/test_godot_contracts.py::test_scenario_rejects_invalid_fields_and_values[change9-scene] PASSED [ 73%]
+tests/unit/test_godot_contracts.py::test_scenario_rejects_invalid_fields_and_values[change10-max_tick] PASSED [ 73%]
+tests/unit/test_godot_contracts.py::test_scenario_rejects_invalid_fields_and_values[change11-finite] PASSED [ 74%]
+tests/unit/test_godot_contracts.py::test_scenario_rejects_invalid_fields_and_values[change12-action] PASSED [ 74%]
+tests/unit/test_godot_contracts.py::test_scenario_rejects_invalid_fields_and_values[change13-amount] PASSED [ 74%]
+tests/unit/test_godot_contracts.py::test_scenario_rejects_invalid_fields_and_values[change14-does not accept amount] PASSED [ 75%]
+tests/unit/test_godot_contracts.py::test_scenario_rejects_invalid_fields_and_values[change15-tick 0] PASSED [ 75%]
+tests/unit/test_godot_contracts.py::test_scenario_rejects_invalid_fields_and_values[change16-expected] PASSED [ 75%]
+tests/unit/test_godot_contracts.py::test_scenario_rejects_invalid_fields_and_values[change17-at least 1 item] PASSED [ 76%]
+tests/unit/test_godot_contracts.py::test_scenario_rejects_duplicate_json_keys ERROR [ 76%]
+tests/unit/test_godot_contracts.py::test_scenario_size_limit_is_enforced ERROR [ 76%]
+tests/unit/test_godot_contracts.py::test_scenario_path_must_be_a_regular_file ERROR [ 77%]
+tests/unit/test_godot_contracts.py::test_schema_scene_pattern_rejects_non_normalized_paths PASSED [ 77%]
+tests/unit/test_godot_contracts.py::test_observation_is_bound_to_execution_scenario_and_requested_ticks PASSED [ 77%]
+tests/unit/test_godot_contracts.py::test_observation_rejects_report_supplied_oracle_or_spoofed_state PASSED [ 78%]
+tests/unit/test_godot_contracts.py::test_python_assertions_compare_expected_values_to_observed_state PASSED [ 78%]
+tests/unit/test_godot_contracts.py::test_assertion_operators_are_inclusive[equals-5-5-True] PASSED [ 78%]
+tests/unit/test_godot_contracts.py::test_assertion_operators_are_inclusive[minimum-5-5-True] PASSED [ 79%]
+tests/unit/test_godot_contracts.py::test_assertion_operators_are_inclusive[minimum-6-5-False] PASSED [ 79%]
+tests/unit/test_godot_contracts.py::test_assertion_operators_are_inclusive[maximum-5-5-True] PASSED [ 79%]
+tests/unit/test_godot_contracts.py::test_assertion_operators_are_inclusive[maximum-4-5-False] PASSED [ 80%]
+tests/unit/test_godot_staging.py::test_manifest_excludes_scenario_state_caches_and_secrets ERROR [ 80%]
+tests/unit/test_godot_staging.py::test_manifest_enforces_file_and_total_byte_bounds ERROR [ 80%]
+tests/unit/test_godot_staging.py::test_create_stage_is_attempt_scoped_and_preserves_original_project ERROR [ 80%]
+tests/unit/test_godot_staging.py::test_source_change_after_preflight_fingerprint_is_rejected ERROR [ 81%]
+tests/unit/test_godot_staging.py::test_source_change_between_manifest_and_copy_is_rejected ERROR [ 81%]
+tests/unit/test_godot_staging.py::test_manifest_rejects_symlinked_file_when_supported ERROR [ 81%]
+tests/unit/test_godot_staging.py::test_manifest_rejects_linked_source_directory ERROR [ 82%]
+tests/unit/test_godot_staging.py::test_stager_rejects_root_directory_link ERROR [ 82%]
+tests/unit/test_godot_staging.py::test_attempt_parent_link_is_rejected_before_writing_outside_scratch ERROR [ 82%]
+tests/unit/test_path_guard.py::TestPathGuard::test_safe_relative_path ERROR [ 83%]
+tests/unit/test_path_guard.py::TestPathGuard::test_traversal_attack_rejected ERROR [ 83%]
+tests/unit/test_path_guard.py::TestPathGuard::test_traversal_with_nested_dots ERROR [ 83%]
+tests/unit/test_path_guard.py::TestPathGuard::test_unc_path_rejected ERROR [ 84%]
+tests/unit/test_path_guard.py::TestPathGuard::test_empty_path_rejected ERROR [ 84%]
+tests/unit/test_path_guard.py::TestPathGuard::test_ensure_safe_parent_creates_directories ERROR [ 84%]
+tests/unit/test_path_guard.py::TestPathGuard::test_symlink_escape_rejected_if_pointing_outside ERROR [ 85%]
+tests/unit/test_path_guard.py::TestPathGuard::test_windows_special_paths_rejected_on_all_platforms[safe.txt:secret] ERROR [ 85%]
+tests/unit/test_path_guard.py::TestPathGuard::test_windows_special_paths_rejected_on_all_platforms[CON] ERROR [ 85%]
+tests/unit/test_path_guard.py::TestPathGuard::test_windows_special_paths_rejected_on_all_platforms[NUL.txt] ERROR [ 86%]
+tests/unit/test_path_guard.py::TestPathGuard::test_windows_special_paths_rejected_on_all_platforms[folder/name. ] ERROR [ 86%]
+tests/unit/test_path_guard.py::TestPathGuard::test_symlink_parent_escape_rejected_for_missing_leaf ERROR [ 86%]
+tests/unit/test_policy.py::TestPolicyEngine::test_local_read_allowed_without_approval PASSED [ 86%]
+tests/unit/test_policy.py::TestPolicyEngine::test_visual_review_requires_approval_even_when_process_execution_does_not PASSED [ 87%]
+tests/unit/test_policy.py::TestPolicyEngine::test_process_execution_allowed_without_approval PASSED [ 87%]
+tests/unit/test_policy.py::TestPolicyEngine::test_managed_process_write_obeys_existing_repository_write_policy PASSED [ 87%]
+tests/unit/test_policy.py::TestPolicyEngine::test_process_approval_policy_applies_without_managed_write PASSED [ 88%]
+tests/unit/test_policy.py::TestPolicyEngine::test_free_external_allowed_without_approval PASSED [ 88%]
+tests/unit/test_policy.py::TestPolicyEngine::test_repo_write_without_approval_when_rule_disabled PASSED [ 88%]
+tests/unit/test_policy.py::TestPolicyEngine::test_repo_write_requires_approval_when_configured PASSED [ 89%]
+tests/unit/test_policy.py::TestPolicyEngine::test_paid_operation_blocked_without_approval PASSED [ 89%]
+tests/unit/test_policy.py::TestPolicyEngine::test_paid_operation_allowed_with_approval PASSED [ 89%]
+tests/unit/test_policy.py::TestPolicyEngine::test_destructive_operation_blocked_without_approval PASSED [ 90%]
+tests/unit/test_policy.py::TestPolicyEngine::test_destructive_operation_allowed_with_approval PASSED [ 90%]
+tests/unit/test_policy.py::TestPolicyEngine::test_budget_exceeded_per_operation PASSED [ 90%]
+tests/unit/test_policy.py::TestPolicyEngine::test_budget_exceeded_total_project PASSED [ 91%]
+tests/unit/test_policy.py::TestPolicyEngine::test_external_cost_classes_require_approval_even_for_free_operation[METERED] PASSED [ 91%]
+tests/unit/test_policy.py::TestPolicyEngine::test_external_cost_classes_require_approval_even_for_free_operation[PAID] PASSED [ 91%]
+tests/unit/test_policy.py::TestPolicyEngine::test_external_cost_classes_require_approval_even_for_free_operation[EXPENSIVE] PASSED [ 92%]
+tests/unit/test_policy.py::TestPolicyEngine::test_invalid_estimated_cost_is_rejected[-1.0] PASSED [ 92%]
+tests/unit/test_policy.py::TestPolicyEngine::test_invalid_estimated_cost_is_rejected[nan] PASSED [ 92%]
+tests/unit/test_policy.py::TestPolicyEngine::test_invalid_estimated_cost_is_rejected[inf] PASSED [ 93%]
+tests/unit/test_policy.py::TestPolicyEngine::test_invalid_estimated_cost_is_rejected[-inf] PASSED [ 93%]
+tests/unit/test_policy.py::TestPolicyEngine::test_invalid_budget_configuration_is_rejected[-1.0-max_operation_cost] PASSED [ 93%]
+tests/unit/test_policy.py::TestPolicyEngine::test_invalid_budget_configuration_is_rejected[-1.0-project_budget] PASSED [ 93%]
+tests/unit/test_policy.py::TestPolicyEngine::test_invalid_budget_configuration_is_rejected[nan-max_operation_cost] PASSED [ 94%]
+tests/unit/test_policy.py::TestPolicyEngine::test_invalid_budget_configuration_is_rejected[nan-project_budget] PASSED [ 94%]
+tests/unit/test_policy.py::TestPolicyEngine::test_invalid_budget_configuration_is_rejected[inf-max_operation_cost] PASSED [ 94%]
+tests/unit/test_policy.py::TestPolicyEngine::test_invalid_budget_configuration_is_rejected[inf-project_budget] PASSED [ 95%]
+tests/unit/test_policy.py::TestPolicyEngine::test_invalid_current_spend_is_rejected[-1.0] PASSED [ 95%]
+tests/unit/test_policy.py::TestPolicyEngine::test_invalid_current_spend_is_rejected[nan] PASSED [ 95%]
+tests/unit/test_policy.py::TestPolicyEngine::test_invalid_current_spend_is_rejected[inf] PASSED [ 96%]
+tests/unit/test_redaction.py::TestSecretRedactor::test_redact_bearer_token PASSED [ 96%]
+tests/unit/test_redaction.py::TestSecretRedactor::test_redact_api_key_syntax PASSED [ 96%]
+tests/unit/test_redaction.py::TestSecretRedactor::test_redact_sk_prefixed_keys PASSED [ 97%]
+tests/unit/test_redaction.py::TestSecretRedactor::test_redact_custom_exact_secrets PASSED [ 97%]
+tests/unit/test_redaction.py::TestSecretRedactor::test_redact_nested_dictionary PASSED [ 97%]
+tests/unit/test_redaction.py::TestSecretRedactor::test_normal_text_untouched PASSED [ 98%]
+tests/unit/test_redaction.py::TestSecretRedactor::test_redact_short_punctuated_password_and_auth_headers PASSED [ 98%]
+tests/unit/test_redaction.py::TestSecretRedactor::test_redact_data_recurses_through_tuples PASSED [ 98%]
+tests/unit/test_state_machine.py::TestTaskStateMachine::test_valid_transitions PASSED [ 99%]
+tests/unit/test_state_machine.py::TestTaskStateMachine::test_invalid_transitions PASSED [ 99%]
+tests/unit/test_state_machine.py::TestWorkflowStateMachine::test_valid_transitions PASSED [ 99%]
+tests/unit/test_state_machine.py::TestWorkflowStateMachine::test_invalid_transitions PASSED [100%]
+
+==================================== ERRORS ====================================
+_ ERROR at setup of test_cli_paid_workflow_requires_approval_and_resumes_across_processes _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+___ ERROR at setup of test_doctor_keeps_invalid_explicit_paths_misconfigured ___
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of test_database_lock_and_readonly_errors_are_actionable_json _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_________ ERROR at setup of test_cli_engine_uses_project_policy_values _________
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of TestCrashRecoveryAndFailures.test_deterministic_failure_and_retry_history _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of TestCrashRecoveryAndFailures.test_crash_during_paid_operation_blocks_for_reconciliation _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of TestGodotAndBlenderDetection.test_inspect_godot_project_file _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of TestGodotAndBlenderDetection.test_inspect_empty_directory_not_godot_project _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of test_fake_capture_blocks_for_visual_review_and_resume_does_not_rerun _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+__ ERROR at setup of test_hud_mutation_keeps_state_pass_and_fails_visual_gate __
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_____ ERROR at setup of test_missing_png_and_dummy_renderer_are_not_passes _____
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_________ ERROR at setup of test_reject_does_not_start_another_capture _________
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_____ ERROR at setup of test_tampered_png_cannot_be_approved_or_completed ______
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of test_approved_capture_rejects_changed_png_on_a_new_cli_resume _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of test_linux_capture_allowlists_display_and_refuses_headless_fallback _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+__________ ERROR at setup of test_portrait_profile_is_a_separate_size __________
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of test_fake_godot_pipeline_passes_independent_assertions_and_no_duplicate_resume _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of test_staging_excludes_plural_secret_files_and_generic_cache_directories _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of test_process_and_stale_report_failures_keep_attempt_artifacts[import-failure-0] _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of test_process_and_stale_report_failures_keep_attempt_artifacts[runtime-failure-1] _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of test_process_and_stale_report_failures_keep_attempt_artifacts[missing-report-1] _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of test_process_and_stale_report_failures_keep_attempt_artifacts[stale-execution-1] _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of test_malformed_or_self_asserted_runtime_evidence_never_completes_workflow[completed-missing-snapshot] _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of test_malformed_or_self_asserted_runtime_evidence_never_completes_workflow[self-declared-pass] _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of test_malformed_or_self_asserted_runtime_evidence_never_completes_workflow[pass-stdout-nonzero] _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of test_malformed_or_self_asserted_runtime_evidence_never_completes_workflow[malformed-report] _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of test_malformed_or_self_asserted_runtime_evidence_never_completes_workflow[truncated-output] _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of test_prior_attempt_report_is_preserved_and_rejected_when_reused_by_retry _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of test_observation_integrity_or_managed_path_escape_blocks_validation[observation-bytes] _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of test_observation_integrity_or_managed_path_escape_blocks_validation[report-path-escape] _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of test_approval_precedes_all_godot_processes_and_changed_inputs_request_new_approval _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of test_recovery_with_unknown_child_intent_blocks_in_fresh_cli_processes _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of test_known_terminal_or_no_intent_recovery_allows_only_explicit_new_attempt[False] _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of test_known_terminal_or_no_intent_recovery_allows_only_explicit_new_attempt[True] _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of test_metered_conservative_handler_never_uses_safe_terminal_retry_path _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of test_terminal_journal_persistence_failure_preserves_unknown_child_state _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_________ ERROR at setup of TestExecutionLock.test_acquire_and_release _________
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+________ ERROR at setup of TestExecutionLock.test_hold_context_manager _________
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of TestExecutionLock.test_competing_runner_blocked_when_active _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of TestExecutionLock.test_stale_lock_reclaimed_when_process_is_dead _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+__ ERROR at setup of TestExecutionLock.test_workflow_id_never_becomes_a_path ___
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of TestExecutionLock.test_symlink_lock_leaf_cannot_write_outside_lock_directory _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+___ ERROR at setup of TestExecutionLock.test_hardlink_lock_leaf_is_rejected ____
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+______ ERROR at setup of test_two_processes_cannot_acquire_same_workflow _______
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of TestPaidOperationSafety.test_paid_operation_safety_invariants _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+____ ERROR at setup of TestPersistence.test_migrations_and_version_tracking ____
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+____ ERROR at setup of TestPersistence.test_future_schema_version_rejected _____
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of TestPersistence.test_gapped_migration_history_is_rejected __
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of TestPersistence.test_migration_failure_rolls_back_ddl_and_version_records _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of TestPersistence.test_concurrent_fresh_migrations_apply_once _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+________ ERROR at setup of TestPersistence.test_foreign_key_enforcement ________
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+____________ ERROR at setup of TestPersistence.test_cascade_delete _____________
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_____ ERROR at setup of TestPersistence.test_attempt_history_preservation ______
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+___ ERROR at setup of TestPersistence.test_reopen_database_preserves_records ___
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+___ ERROR at setup of TestPersistence.test_full_entity_persistence_roundtrip ___
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+___ ERROR at setup of test_engine_provider_error_is_redacted_from_db_and_wal ___
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of test_task_parameters_with_sensitive_inputs_are_rejected[prompt-task] _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of test_task_parameters_with_sensitive_inputs_are_rejected[prompt-workflow] _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of test_task_parameters_with_sensitive_inputs_are_rejected[output_path-task] _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of test_task_parameters_with_sensitive_inputs_are_rejected[output_path-workflow] _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of test_sensitive_task_parameter_keys_are_rejected_without_modifying_metadata _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+__ ERROR at setup of test_evidence_approval_and_audit_payloads_are_sanitized ___
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+____ ERROR at setup of test_finalize_task_rejects_invalid_state_transition _____
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of TestProcessMetadata.test_successful_execution_metadata_contract _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of TestProcessMetadata.test_nonzero_execution_metadata_contract _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of TestProcessMetadata.test_timeout_metadata_contract_and_serializability _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of TestProcessMetadata.test_timeout_redaction_metadata_safety _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+___ ERROR at setup of TestProcessMetadata.test_truncation_stdout_and_stderr ____
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+__ ERROR at setup of TestProcessMetadata.test_tool_execution_error_redaction ___
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+______ ERROR at setup of TestProcessRunner.test_run_simple_command_stdout ______
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_________ ERROR at setup of TestProcessRunner.test_run_command_stderr __________
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_____ ERROR at setup of TestProcessRunner.test_minimal_env_filters_secrets _____
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_________ ERROR at setup of TestProcessRunner.test_timeout_enforcement _________
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_____ ERROR at setup of TestProcessRunner.test_secret_redaction_in_output ______
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of TestProcessRunner.test_nonexistent_executable_raises_error _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of TestProcessRunner.test_request_override_secret_is_redacted_from_output_and_errors _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of TestProcessRunner.test_sensitive_argument_flag_secret_is_redacted _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of TestProcessRunner.test_short_override_secret_and_malformed_unicode_are_safe _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+__________ ERROR at setup of TestProcessRunner.test_output_is_bounded __________
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+__ ERROR at setup of TestProcessRunner.test_timeout_kills_descendant_process ___
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+______ ERROR at setup of TestProcessRunner.test_run_success_with_metadata ______
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+________ ERROR at setup of TestProcessRunner.test_run_nonzero_exit_code ________
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of TestProcessRunner.test_timeout_attaches_serializable_metadata _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of TestProcessRunner.test_redaction_expansion_stays_within_output_limit _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of TestProcessRunner.test_posix_parent_exit_kills_descendant_ignoring_sigterm _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of TestProcessRunner.test_incomplete_pipe_read_fails_with_evidence _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of TestProcessRunner.test_cleanup_error_message_redacts_request_secret _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of TestProcessRunner.test_timeout_redacts_secrets_in_details __
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of TestProcessRunner.test_stdout_truncation_flag_and_multibyte_safety _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_______ ERROR at setup of TestProcessRunner.test_stderr_truncation_flag ________
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of TestProcessRunner.test_error_redacts_credentials_in_details _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of TestProcessRunner.test_parent_exit_descendant_bounded_and_cleaned _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+__ ERROR at setup of TestProcessRunner.test_cleanup_failure_retains_metadata ___
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of test_v01_approved_workflow_resumes_with_original_input_hash _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of test_update_parameters_rejects_secrets_without_overwriting_previous_snapshot _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+____________ ERROR at setup of test_controlled_fixture_preparation _____________
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_________ ERROR at setup of test_wrapper_intercepts_subprocess_launch __________
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_________________ ERROR at setup of test_real_godot_live_crash _________________
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of test_linux_leader_exit_leaves_worker_alive_until_worker_exits _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+______ ERROR at setup of test_nonexistent_python_path_rejected[recovery] _______
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_____ ERROR at setup of test_nonexistent_python_path_rejected[live_crash] ______
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_______ ERROR at setup of test_directory_python_path_rejected[recovery] ________
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+______ ERROR at setup of test_directory_python_path_rejected[live_crash] _______
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of test_symlink_interpreter_path_preserved_filesystem[recovery] _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of test_symlink_interpreter_path_preserved_filesystem[live_crash] _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+___________ ERROR at setup of test_broken_symlink_rejected[recovery] ___________
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+__________ ERROR at setup of test_broken_symlink_rejected[live_crash] __________
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_____ ERROR at setup of test_symlink_preservation_synthetic_mock[recovery] _____
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+____ ERROR at setup of test_symlink_preservation_synthetic_mock[live_crash] ____
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+___ ERROR at setup of test_real_venv_regression_without_downloads[recovery] ____
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+__ ERROR at setup of test_real_venv_regression_without_downloads[live_crash] ___
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_________ ERROR at setup of test_cli_rejects_missing_python_executable _________
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of TestWorkflowEngine.test_demo_workflow_lifecycle_with_approval_gate _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of test_budget_lost_between_evaluation_and_claim_persists_blocked_state _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of test_paid_unknown_outcome_is_never_retried_and_invocation_is_durable _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+__ ERROR at setup of test_claim_rolls_back_task_state_if_attempt_insert_fails __
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of test_approved_input_mutation_requires_new_approval_and_never_calls_provider _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of test_tampering_while_approval_is_blocked_prevents_completion _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_____ ERROR at setup of test_retries_cannot_mutate_another_workflows_task ______
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of test_approval_compare_and_set_records_one_decision_and_audit _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of test_rejected_approval_is_terminal_until_operator_changes_plan _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of test_provider_cost_class_cannot_be_downgraded_and_ledger_is_generic _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of test_metered_accepted_call_with_unknown_result_is_not_replayed _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of test_missing_or_failed_provider_result_never_creates_artifact[None] _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of test_missing_or_failed_provider_result_never_creates_artifact[provider1] _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+______ ERROR at setup of test_project_budget_is_reserved_across_workflows ______
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of test_concurrent_workflow_claims_cannot_overreserve_project_budget _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of test_repository_write_policy_pauses_before_concept_artifact_creation _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of test_artifacts_from_two_workflows_do_not_overwrite_each_other _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of test_registered_handler_result_is_versioned_and_engine_verified _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of test_malformed_handler_results_fail_closed[handler_result0] _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of test_malformed_handler_results_fail_closed[handler_result1] _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of test_malformed_handler_results_fail_closed[handler_result2] _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+____ ERROR at setup of TestArtifactManager.test_create_and_verify_artifact _____
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of TestArtifactManager.test_missing_artifact_fails_verification _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of TestArtifactManager.test_tampered_artifact_fails_verification _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+______________ ERROR at setup of test_valid_bundle_verifies_cold _______________
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of test_builder_copies_only_catalogued_files_and_rejects_nonempty_output _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_______ ERROR at setup of test_missing_mandatory_observation_is_rejected _______
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+___________ ERROR at setup of test_modified_log_is_rejected_by_hash ____________
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of test_mixed_execution_fails_relationship_even_with_updated_hash _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of test_capture_bundle_binds_images_and_rejects_broken_evidence _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+________ ERROR at setup of test_swapped_unlisted_review_png_is_rejected ________
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+__ ERROR at setup of test_bound_review_html_rejects_displayed_image_tampering __
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of TestConfigLoader.test_init_project_idempotent_and_non_destructive _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+________ ERROR at setup of TestConfigLoader.test_unknown_field_rejected ________
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of TestConfigLoader.test_unsupported_schema_version_rejected __
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of TestConfigLoader.test_non_finite_or_negative_budgets_rejected[-1] _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of TestConfigLoader.test_non_finite_or_negative_budgets_rejected[.nan] _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of TestConfigLoader.test_non_finite_or_negative_budgets_rejected[.inf] _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of TestConfigLoader.test_secret_field_and_missing_schema_version_rejected _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of TestConfigLoader.test_user_defaults_are_overridden_by_project_values _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of TestConfigLoader.test_unicode_project_name_generates_valid_ascii_id _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_______ ERROR at setup of TestConfigLoader.test_malformed_yaml_rejected ________
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+__________ ERROR at setup of test_binary_read_preserves_png_signature __________
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_________ ERROR at setup of test_scenario_rejects_duplicate_json_keys __________
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+____________ ERROR at setup of test_scenario_size_limit_is_enforced ____________
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_________ ERROR at setup of test_scenario_path_must_be_a_regular_file __________
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+__ ERROR at setup of test_manifest_excludes_scenario_state_caches_and_secrets __
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_____ ERROR at setup of test_manifest_enforces_file_and_total_byte_bounds ______
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of test_create_stage_is_attempt_scoped_and_preserves_original_project _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of test_source_change_after_preflight_fingerprint_is_rejected _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+__ ERROR at setup of test_source_change_between_manifest_and_copy_is_rejected __
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+____ ERROR at setup of test_manifest_rejects_symlinked_file_when_supported _____
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_______ ERROR at setup of test_manifest_rejects_linked_source_directory ________
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+__________ ERROR at setup of test_stager_rejects_root_directory_link ___________
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of test_attempt_parent_link_is_rejected_before_writing_outside_scratch _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+___________ ERROR at setup of TestPathGuard.test_safe_relative_path ____________
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+________ ERROR at setup of TestPathGuard.test_traversal_attack_rejected ________
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_______ ERROR at setup of TestPathGuard.test_traversal_with_nested_dots ________
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+____________ ERROR at setup of TestPathGuard.test_unc_path_rejected ____________
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+___________ ERROR at setup of TestPathGuard.test_empty_path_rejected ___________
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of TestPathGuard.test_ensure_safe_parent_creates_directories __
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of TestPathGuard.test_symlink_escape_rejected_if_pointing_outside _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of TestPathGuard.test_windows_special_paths_rejected_on_all_platforms[safe.txt:secret] _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of TestPathGuard.test_windows_special_paths_rejected_on_all_platforms[CON] _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of TestPathGuard.test_windows_special_paths_rejected_on_all_platforms[NUL.txt] _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of TestPathGuard.test_windows_special_paths_rejected_on_all_platforms[folder/name. ] _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of TestPathGuard.test_symlink_parent_escape_rejected_for_missing_leaf _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-full')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-full'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+--------------- generated xml file: /evidence/linux-311-full.xml ---------------
+=========================== short test summary info ============================
+SKIPPED [1] tests/integration/test_godot_real.py:18: Set GAMEFACTORY_TEST_GODOT to run real-engine acceptance
+SKIPPED [1] tests/integration/test_process_runner.py:504: Windows Job Objects are only available on Windows
+SKIPPED [1] tests/integration/test_process_runner.py:630: Windows Job Objects only
+SKIPPED [1] tests/unit/test_config.py:126: Windows junction validation
+SKIPPED [1] tests/unit/test_config.py:146: Windows junction validation
+ERROR tests/integration/test_cli.py::test_cli_paid_workflow_requires_approval_and_resumes_across_processes
+ERROR tests/integration/test_cli.py::test_doctor_keeps_invalid_explicit_paths_misconfigured
+ERROR tests/integration/test_cli.py::test_database_lock_and_readonly_errors_are_actionable_json
+ERROR tests/integration/test_cli.py::test_cli_engine_uses_project_policy_values
+ERROR tests/integration/test_crash_recovery.py::TestCrashRecoveryAndFailures::test_deterministic_failure_and_retry_history
+ERROR tests/integration/test_crash_recovery.py::TestCrashRecoveryAndFailures::test_crash_during_paid_operation_blocks_for_reconciliation
+ERROR tests/integration/test_godot_blender_detection.py::TestGodotAndBlenderDetection::test_inspect_godot_project_file
+ERROR tests/integration/test_godot_blender_detection.py::TestGodotAndBlenderDetection::test_inspect_empty_directory_not_godot_project
+ERROR tests/integration/test_godot_capture_pipeline.py::test_fake_capture_blocks_for_visual_review_and_resume_does_not_rerun
+ERROR tests/integration/test_godot_capture_pipeline.py::test_hud_mutation_keeps_state_pass_and_fails_visual_gate
+ERROR tests/integration/test_godot_capture_pipeline.py::test_missing_png_and_dummy_renderer_are_not_passes
+ERROR tests/integration/test_godot_capture_pipeline.py::test_reject_does_not_start_another_capture
+ERROR tests/integration/test_godot_capture_pipeline.py::test_tampered_png_cannot_be_approved_or_completed
+ERROR tests/integration/test_godot_capture_pipeline.py::test_approved_capture_rejects_changed_png_on_a_new_cli_resume
+ERROR tests/integration/test_godot_capture_pipeline.py::test_linux_capture_allowlists_display_and_refuses_headless_fallback
+ERROR tests/integration/test_godot_capture_pipeline.py::test_portrait_profile_is_a_separate_size
+ERROR tests/integration/test_godot_pipeline.py::test_fake_godot_pipeline_passes_independent_assertions_and_no_duplicate_resume
+ERROR tests/integration/test_godot_pipeline.py::test_staging_excludes_plural_secret_files_and_generic_cache_directories
+ERROR tests/integration/test_godot_pipeline.py::test_process_and_stale_report_failures_keep_attempt_artifacts[import-failure-0]
+ERROR tests/integration/test_godot_pipeline.py::test_process_and_stale_report_failures_keep_attempt_artifacts[runtime-failure-1]
+ERROR tests/integration/test_godot_pipeline.py::test_process_and_stale_report_failures_keep_attempt_artifacts[missing-report-1]
+ERROR tests/integration/test_godot_pipeline.py::test_process_and_stale_report_failures_keep_attempt_artifacts[stale-execution-1]
+ERROR tests/integration/test_godot_pipeline.py::test_malformed_or_self_asserted_runtime_evidence_never_completes_workflow[completed-missing-snapshot]
+ERROR tests/integration/test_godot_pipeline.py::test_malformed_or_self_asserted_runtime_evidence_never_completes_workflow[self-declared-pass]
+ERROR tests/integration/test_godot_pipeline.py::test_malformed_or_self_asserted_runtime_evidence_never_completes_workflow[pass-stdout-nonzero]
+ERROR tests/integration/test_godot_pipeline.py::test_malformed_or_self_asserted_runtime_evidence_never_completes_workflow[malformed-report]
+ERROR tests/integration/test_godot_pipeline.py::test_malformed_or_self_asserted_runtime_evidence_never_completes_workflow[truncated-output]
+ERROR tests/integration/test_godot_pipeline.py::test_prior_attempt_report_is_preserved_and_rejected_when_reused_by_retry
+ERROR tests/integration/test_godot_pipeline.py::test_observation_integrity_or_managed_path_escape_blocks_validation[observation-bytes]
+ERROR tests/integration/test_godot_pipeline.py::test_observation_integrity_or_managed_path_escape_blocks_validation[report-path-escape]
+ERROR tests/integration/test_godot_pipeline.py::test_approval_precedes_all_godot_processes_and_changed_inputs_request_new_approval
+ERROR tests/integration/test_godot_pipeline.py::test_recovery_with_unknown_child_intent_blocks_in_fresh_cli_processes
+ERROR tests/integration/test_godot_pipeline.py::test_known_terminal_or_no_intent_recovery_allows_only_explicit_new_attempt[False]
+ERROR tests/integration/test_godot_pipeline.py::test_known_terminal_or_no_intent_recovery_allows_only_explicit_new_attempt[True]
+ERROR tests/integration/test_godot_pipeline.py::test_metered_conservative_handler_never_uses_safe_terminal_retry_path
+ERROR tests/integration/test_godot_pipeline.py::test_terminal_journal_persistence_failure_preserves_unknown_child_state
+ERROR tests/integration/test_locks.py::TestExecutionLock::test_acquire_and_release
+ERROR tests/integration/test_locks.py::TestExecutionLock::test_hold_context_manager
+ERROR tests/integration/test_locks.py::TestExecutionLock::test_competing_runner_blocked_when_active
+ERROR tests/integration/test_locks.py::TestExecutionLock::test_stale_lock_reclaimed_when_process_is_dead
+ERROR tests/integration/test_locks.py::TestExecutionLock::test_workflow_id_never_becomes_a_path
+ERROR tests/integration/test_locks.py::TestExecutionLock::test_symlink_lock_leaf_cannot_write_outside_lock_directory
+ERROR tests/integration/test_locks.py::TestExecutionLock::test_hardlink_lock_leaf_is_rejected
+ERROR tests/integration/test_locks.py::test_two_processes_cannot_acquire_same_workflow
+ERROR tests/integration/test_paid_safety.py::TestPaidOperationSafety::test_paid_operation_safety_invariants
+ERROR tests/integration/test_persistence.py::TestPersistence::test_migrations_and_version_tracking
+ERROR tests/integration/test_persistence.py::TestPersistence::test_future_schema_version_rejected
+ERROR tests/integration/test_persistence.py::TestPersistence::test_gapped_migration_history_is_rejected
+ERROR tests/integration/test_persistence.py::TestPersistence::test_migration_failure_rolls_back_ddl_and_version_records
+ERROR tests/integration/test_persistence.py::TestPersistence::test_concurrent_fresh_migrations_apply_once
+ERROR tests/integration/test_persistence.py::TestPersistence::test_foreign_key_enforcement
+ERROR tests/integration/test_persistence.py::TestPersistence::test_cascade_delete
+ERROR tests/integration/test_persistence.py::TestPersistence::test_attempt_history_preservation
+ERROR tests/integration/test_persistence.py::TestPersistence::test_reopen_database_preserves_records
+ERROR tests/integration/test_persistence.py::TestPersistence::test_full_entity_persistence_roundtrip
+ERROR tests/integration/test_persistence_redaction.py::test_engine_provider_error_is_redacted_from_db_and_wal
+ERROR tests/integration/test_persistence_redaction.py::test_task_parameters_with_sensitive_inputs_are_rejected[prompt-task]
+ERROR tests/integration/test_persistence_redaction.py::test_task_parameters_with_sensitive_inputs_are_rejected[prompt-workflow]
+ERROR tests/integration/test_persistence_redaction.py::test_task_parameters_with_sensitive_inputs_are_rejected[output_path-task]
+ERROR tests/integration/test_persistence_redaction.py::test_task_parameters_with_sensitive_inputs_are_rejected[output_path-workflow]
+ERROR tests/integration/test_persistence_redaction.py::test_sensitive_task_parameter_keys_are_rejected_without_modifying_metadata
+ERROR tests/integration/test_persistence_redaction.py::test_evidence_approval_and_audit_payloads_are_sanitized
+ERROR tests/integration/test_persistence_redaction.py::test_finalize_task_rejects_invalid_state_transition
+ERROR tests/integration/test_process_metadata.py::TestProcessMetadata::test_successful_execution_metadata_contract
+ERROR tests/integration/test_process_metadata.py::TestProcessMetadata::test_nonzero_execution_metadata_contract
+ERROR tests/integration/test_process_metadata.py::TestProcessMetadata::test_timeout_metadata_contract_and_serializability
+ERROR tests/integration/test_process_metadata.py::TestProcessMetadata::test_timeout_redaction_metadata_safety
+ERROR tests/integration/test_process_metadata.py::TestProcessMetadata::test_truncation_stdout_and_stderr
+ERROR tests/integration/test_process_metadata.py::TestProcessMetadata::test_tool_execution_error_redaction
+ERROR tests/integration/test_process_runner.py::TestProcessRunner::test_run_simple_command_stdout
+ERROR tests/integration/test_process_runner.py::TestProcessRunner::test_run_command_stderr
+ERROR tests/integration/test_process_runner.py::TestProcessRunner::test_minimal_env_filters_secrets
+ERROR tests/integration/test_process_runner.py::TestProcessRunner::test_timeout_enforcement
+ERROR tests/integration/test_process_runner.py::TestProcessRunner::test_secret_redaction_in_output
+ERROR tests/integration/test_process_runner.py::TestProcessRunner::test_nonexistent_executable_raises_error
+ERROR tests/integration/test_process_runner.py::TestProcessRunner::test_request_override_secret_is_redacted_from_output_and_errors
+ERROR tests/integration/test_process_runner.py::TestProcessRunner::test_sensitive_argument_flag_secret_is_redacted
+ERROR tests/integration/test_process_runner.py::TestProcessRunner::test_short_override_secret_and_malformed_unicode_are_safe
+ERROR tests/integration/test_process_runner.py::TestProcessRunner::test_output_is_bounded
+ERROR tests/integration/test_process_runner.py::TestProcessRunner::test_timeout_kills_descendant_process
+ERROR tests/integration/test_process_runner.py::TestProcessRunner::test_run_success_with_metadata
+ERROR tests/integration/test_process_runner.py::TestProcessRunner::test_run_nonzero_exit_code
+ERROR tests/integration/test_process_runner.py::TestProcessRunner::test_timeout_attaches_serializable_metadata
+ERROR tests/integration/test_process_runner.py::TestProcessRunner::test_redaction_expansion_stays_within_output_limit
+ERROR tests/integration/test_process_runner.py::TestProcessRunner::test_posix_parent_exit_kills_descendant_ignoring_sigterm
+ERROR tests/integration/test_process_runner.py::TestProcessRunner::test_incomplete_pipe_read_fails_with_evidence
+ERROR tests/integration/test_process_runner.py::TestProcessRunner::test_cleanup_error_message_redacts_request_secret
+ERROR tests/integration/test_process_runner.py::TestProcessRunner::test_timeout_redacts_secrets_in_details
+ERROR tests/integration/test_process_runner.py::TestProcessRunner::test_stdout_truncation_flag_and_multibyte_safety
+ERROR tests/integration/test_process_runner.py::TestProcessRunner::test_stderr_truncation_flag
+ERROR tests/integration/test_process_runner.py::TestProcessRunner::test_error_redacts_credentials_in_details
+ERROR tests/integration/test_process_runner.py::TestProcessRunner::test_parent_exit_descendant_bounded_and_cleaned
+ERROR tests/integration/test_process_runner.py::TestProcessRunner::test_cleanup_failure_retains_metadata
+ERROR tests/integration/test_v02_compatibility.py::test_v01_approved_workflow_resumes_with_original_input_hash
+ERROR tests/integration/test_v02_compatibility.py::test_update_parameters_rejects_secrets_without_overwriting_previous_snapshot
+ERROR tests/integration/test_verify_godot_live_crash.py::test_controlled_fixture_preparation
+ERROR tests/integration/test_verify_godot_live_crash.py::test_wrapper_intercepts_subprocess_launch
+ERROR tests/integration/test_verify_godot_live_crash.py::test_real_godot_live_crash
+ERROR tests/integration/test_verify_godot_live_crash.py::test_linux_leader_exit_leaves_worker_alive_until_worker_exits
+ERROR tests/integration/test_verify_godot_python_resolution.py::test_nonexistent_python_path_rejected[recovery]
+ERROR tests/integration/test_verify_godot_python_resolution.py::test_nonexistent_python_path_rejected[live_crash]
+ERROR tests/integration/test_verify_godot_python_resolution.py::test_directory_python_path_rejected[recovery]
+ERROR tests/integration/test_verify_godot_python_resolution.py::test_directory_python_path_rejected[live_crash]
+ERROR tests/integration/test_verify_godot_python_resolution.py::test_symlink_interpreter_path_preserved_filesystem[recovery]
+ERROR tests/integration/test_verify_godot_python_resolution.py::test_symlink_interpreter_path_preserved_filesystem[live_crash]
+ERROR tests/integration/test_verify_godot_python_resolution.py::test_broken_symlink_rejected[recovery]
+ERROR tests/integration/test_verify_godot_python_resolution.py::test_broken_symlink_rejected[live_crash]
+ERROR tests/integration/test_verify_godot_python_resolution.py::test_symlink_preservation_synthetic_mock[recovery]
+ERROR tests/integration/test_verify_godot_python_resolution.py::test_symlink_preservation_synthetic_mock[live_crash]
+ERROR tests/integration/test_verify_godot_python_resolution.py::test_real_venv_regression_without_downloads[recovery]
+ERROR tests/integration/test_verify_godot_python_resolution.py::test_real_venv_regression_without_downloads[live_crash]
+ERROR tests/integration/test_verify_godot_python_resolution.py::test_cli_rejects_missing_python_executable
+ERROR tests/integration/test_workflow_engine.py::TestWorkflowEngine::test_demo_workflow_lifecycle_with_approval_gate
+ERROR tests/integration/test_workflow_regressions.py::test_budget_lost_between_evaluation_and_claim_persists_blocked_state
+ERROR tests/integration/test_workflow_regressions.py::test_paid_unknown_outcome_is_never_retried_and_invocation_is_durable
+ERROR tests/integration/test_workflow_regressions.py::test_claim_rolls_back_task_state_if_attempt_insert_fails
+ERROR tests/integration/test_workflow_regressions.py::test_approved_input_mutation_requires_new_approval_and_never_calls_provider
+ERROR tests/integration/test_workflow_regressions.py::test_tampering_while_approval_is_blocked_prevents_completion
+ERROR tests/integration/test_workflow_regressions.py::test_retries_cannot_mutate_another_workflows_task
+ERROR tests/integration/test_workflow_regressions.py::test_approval_compare_and_set_records_one_decision_and_audit
+ERROR tests/integration/test_workflow_regressions.py::test_rejected_approval_is_terminal_until_operator_changes_plan
+ERROR tests/integration/test_workflow_regressions.py::test_provider_cost_class_cannot_be_downgraded_and_ledger_is_generic
+ERROR tests/integration/test_workflow_regressions.py::test_metered_accepted_call_with_unknown_result_is_not_replayed
+ERROR tests/integration/test_workflow_regressions.py::test_missing_or_failed_provider_result_never_creates_artifact[None]
+ERROR tests/integration/test_workflow_regressions.py::test_missing_or_failed_provider_result_never_creates_artifact[provider1]
+ERROR tests/integration/test_workflow_regressions.py::test_project_budget_is_reserved_across_workflows
+ERROR tests/integration/test_workflow_regressions.py::test_concurrent_workflow_claims_cannot_overreserve_project_budget
+ERROR tests/integration/test_workflow_regressions.py::test_repository_write_policy_pauses_before_concept_artifact_creation
+ERROR tests/integration/test_workflow_regressions.py::test_artifacts_from_two_workflows_do_not_overwrite_each_other
+ERROR tests/integration/test_workflow_regressions.py::test_registered_handler_result_is_versioned_and_engine_verified
+ERROR tests/integration/test_workflow_regressions.py::test_malformed_handler_results_fail_closed[handler_result0]
+ERROR tests/integration/test_workflow_regressions.py::test_malformed_handler_results_fail_closed[handler_result1]
+ERROR tests/integration/test_workflow_regressions.py::test_malformed_handler_results_fail_closed[handler_result2]
+ERROR tests/unit/test_artifacts.py::TestArtifactManager::test_create_and_verify_artifact
+ERROR tests/unit/test_artifacts.py::TestArtifactManager::test_missing_artifact_fails_verification
+ERROR tests/unit/test_artifacts.py::TestArtifactManager::test_tampered_artifact_fails_verification
+ERROR tests/unit/test_closeout_evidence.py::test_valid_bundle_verifies_cold
+ERROR tests/unit/test_closeout_evidence.py::test_builder_copies_only_catalogued_files_and_rejects_nonempty_output
+ERROR tests/unit/test_closeout_evidence.py::test_missing_mandatory_observation_is_rejected
+ERROR tests/unit/test_closeout_evidence.py::test_modified_log_is_rejected_by_hash
+ERROR tests/unit/test_closeout_evidence.py::test_mixed_execution_fails_relationship_even_with_updated_hash
+ERROR tests/unit/test_closeout_evidence.py::test_capture_bundle_binds_images_and_rejects_broken_evidence
+ERROR tests/unit/test_closeout_evidence.py::test_swapped_unlisted_review_png_is_rejected
+ERROR tests/unit/test_closeout_evidence.py::test_bound_review_html_rejects_displayed_image_tampering
+ERROR tests/unit/test_config.py::TestConfigLoader::test_init_project_idempotent_and_non_destructive
+ERROR tests/unit/test_config.py::TestConfigLoader::test_unknown_field_rejected
+ERROR tests/unit/test_config.py::TestConfigLoader::test_unsupported_schema_version_rejected
+ERROR tests/unit/test_config.py::TestConfigLoader::test_non_finite_or_negative_budgets_rejected[-1]
+ERROR tests/unit/test_config.py::TestConfigLoader::test_non_finite_or_negative_budgets_rejected[.nan]
+ERROR tests/unit/test_config.py::TestConfigLoader::test_non_finite_or_negative_budgets_rejected[.inf]
+ERROR tests/unit/test_config.py::TestConfigLoader::test_secret_field_and_missing_schema_version_rejected
+ERROR tests/unit/test_config.py::TestConfigLoader::test_user_defaults_are_overridden_by_project_values
+ERROR tests/unit/test_config.py::TestConfigLoader::test_unicode_project_name_generates_valid_ascii_id
+ERROR tests/unit/test_config.py::TestConfigLoader::test_malformed_yaml_rejected
+ERROR tests/unit/test_godot_capture.py::test_binary_read_preserves_png_signature
+ERROR tests/unit/test_godot_contracts.py::test_scenario_rejects_duplicate_json_keys
+ERROR tests/unit/test_godot_contracts.py::test_scenario_size_limit_is_enforced
+ERROR tests/unit/test_godot_contracts.py::test_scenario_path_must_be_a_regular_file
+ERROR tests/unit/test_godot_staging.py::test_manifest_excludes_scenario_state_caches_and_secrets
+ERROR tests/unit/test_godot_staging.py::test_manifest_enforces_file_and_total_byte_bounds
+ERROR tests/unit/test_godot_staging.py::test_create_stage_is_attempt_scoped_and_preserves_original_project
+ERROR tests/unit/test_godot_staging.py::test_source_change_after_preflight_fingerprint_is_rejected
+ERROR tests/unit/test_godot_staging.py::test_source_change_between_manifest_and_copy_is_rejected
+ERROR tests/unit/test_godot_staging.py::test_manifest_rejects_symlinked_file_when_supported
+ERROR tests/unit/test_godot_staging.py::test_manifest_rejects_linked_source_directory
+ERROR tests/unit/test_godot_staging.py::test_stager_rejects_root_directory_link
+ERROR tests/unit/test_godot_staging.py::test_attempt_parent_link_is_rejected_before_writing_outside_scratch
+ERROR tests/unit/test_path_guard.py::TestPathGuard::test_safe_relative_path
+ERROR tests/unit/test_path_guard.py::TestPathGuard::test_traversal_attack_rejected
+ERROR tests/unit/test_path_guard.py::TestPathGuard::test_traversal_with_nested_dots
+ERROR tests/unit/test_path_guard.py::TestPathGuard::test_unc_path_rejected - ...
+ERROR tests/unit/test_path_guard.py::TestPathGuard::test_empty_path_rejected
+ERROR tests/unit/test_path_guard.py::TestPathGuard::test_ensure_safe_parent_creates_directories
+ERROR tests/unit/test_path_guard.py::TestPathGuard::test_symlink_escape_rejected_if_pointing_outside
+ERROR tests/unit/test_path_guard.py::TestPathGuard::test_windows_special_paths_rejected_on_all_platforms[safe.txt:secret]
+ERROR tests/unit/test_path_guard.py::TestPathGuard::test_windows_special_paths_rejected_on_all_platforms[CON]
+ERROR tests/unit/test_path_guard.py::TestPathGuard::test_windows_special_paths_rejected_on_all_platforms[NUL.txt]
+ERROR tests/unit/test_path_guard.py::TestPathGuard::test_windows_special_paths_rejected_on_all_platforms[folder/name. ]
+ERROR tests/unit/test_path_guard.py::TestPathGuard::test_symlink_parent_escape_rejected_for_missing_leaf
+================= 131 passed, 5 skipped, 179 errors in 10.73s ==================

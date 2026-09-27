@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="24" failures="0" skipped="2" tests="27" time="1.201" timestamp="2026-09-27T09:43:53.067742+00:00" hostname="857a8d6c5c5d"><testcase classname="tests.integration.test_process_runner.TestProcessRunner" name="test_run_simple_command_stdout" time="0.003"><error message="failed on setup with &quot;FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-target'&quot;">self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-target')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+&gt;           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-target'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError</error></testcase><testcase classname="tests.integration.test_process_runner.TestProcessRunner" name="test_run_command_stderr" time="0.001"><error message="failed on setup with &quot;FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-target'&quot;">self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-target')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+&gt;           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-target'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError</error></testcase><testcase classname="tests.integration.test_process_runner.TestProcessRunner" name="test_minimal_env_filters_secrets" time="0.001"><error message="failed on setup with &quot;FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-target'&quot;">self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-target')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+&gt;           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-target'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError</error></testcase><testcase classname="tests.integration.test_process_runner.TestProcessRunner" name="test_timeout_enforcement" time="0.004"><error message="failed on setup with &quot;FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-target'&quot;">self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-target')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+&gt;           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-target'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError</error></testcase><testcase classname="tests.integration.test_process_runner.TestProcessRunner" name="test_secret_redaction_in_output" time="0.001"><error message="failed on setup with &quot;FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-target'&quot;">self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-target')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+&gt;           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-target'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError</error></testcase><testcase classname="tests.integration.test_process_runner.TestProcessRunner" name="test_nonexistent_executable_raises_error" time="0.001"><error message="failed on setup with &quot;FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-target'&quot;">self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-target')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+&gt;           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-target'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError</error></testcase><testcase classname="tests.integration.test_process_runner.TestProcessRunner" name="test_request_override_secret_is_redacted_from_output_and_errors" time="0.004"><error message="failed on setup with &quot;FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-target'&quot;">self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-target')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+&gt;           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-target'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError</error></testcase><testcase classname="tests.integration.test_process_runner.TestProcessRunner" name="test_sensitive_argument_flag_secret_is_redacted" time="0.001"><error message="failed on setup with &quot;FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-target'&quot;">self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-target')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+&gt;           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-target'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError</error></testcase><testcase classname="tests.integration.test_process_runner.TestProcessRunner" name="test_short_override_secret_and_malformed_unicode_are_safe" time="0.002"><error message="failed on setup with &quot;FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-target'&quot;">self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-target')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+&gt;           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-target'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError</error></testcase><testcase classname="tests.integration.test_process_runner.TestProcessRunner" name="test_output_is_bounded" time="0.001"><error message="failed on setup with &quot;FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-target'&quot;">self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-target')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+&gt;           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-target'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError</error></testcase><testcase classname="tests.integration.test_process_runner.TestProcessRunner" name="test_timeout_kills_descendant_process" time="0.001"><error message="failed on setup with &quot;FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-target'&quot;">self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-target')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+&gt;           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-target'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError</error></testcase><testcase classname="tests.integration.test_process_runner.TestProcessRunner" name="test_run_success_with_metadata" time="0.001"><error message="failed on setup with &quot;FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-target'&quot;">self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-target')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+&gt;           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-target'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError</error></testcase><testcase classname="tests.integration.test_process_runner.TestProcessRunner" name="test_run_nonzero_exit_code" time="0.001"><error message="failed on setup with &quot;FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-target'&quot;">self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-target')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+&gt;           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-target'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError</error></testcase><testcase classname="tests.integration.test_process_runner.TestProcessRunner" name="test_timeout_attaches_serializable_metadata" time="0.001"><error message="failed on setup with &quot;FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-target'&quot;">self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-target')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+&gt;           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-target'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError</error></testcase><testcase classname="tests.integration.test_process_runner.TestProcessRunner" name="test_redaction_expansion_stays_within_output_limit" time="0.001"><error message="failed on setup with &quot;FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-target'&quot;">self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-target')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+&gt;           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-target'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError</error></testcase><testcase classname="tests.integration.test_process_runner.TestProcessRunner" name="test_posix_parent_exit_kills_descendant_ignoring_sigterm" time="0.001"><error message="failed on setup with &quot;FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-target'&quot;">self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-target')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+&gt;           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-target'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError</error></testcase><testcase classname="tests.integration.test_process_runner.TestProcessRunner" name="test_incomplete_pipe_read_fails_with_evidence" time="0.001"><error message="failed on setup with &quot;FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-target'&quot;">self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-target')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+&gt;           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-target'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError</error></testcase><testcase classname="tests.integration.test_process_runner.TestProcessRunner" name="test_cleanup_error_message_redacts_request_secret" time="0.001"><error message="failed on setup with &quot;FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-target'&quot;">self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-target')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+&gt;           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-target'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError</error></testcase><testcase classname="tests.integration.test_process_runner.TestProcessRunner" name="test_windows_job_close_failure_is_reported" time="0.003"><skipped type="pytest.skip" message="Windows Job Objects are only available on Windows">/tmp/descendant-candidate/tests/integration/test_process_runner.py:504: Windows Job Objects are only available on Windows</skipped></testcase><testcase classname="tests.integration.test_process_runner.TestProcessRunner" name="test_timeout_redacts_secrets_in_details" time="0.001"><error message="failed on setup with &quot;FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-target'&quot;">self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-target')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+&gt;           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-target'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError</error></testcase><testcase classname="tests.integration.test_process_runner.TestProcessRunner" name="test_stdout_truncation_flag_and_multibyte_safety" time="0.001"><error message="failed on setup with &quot;FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-target'&quot;">self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-target')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+&gt;           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-target'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError</error></testcase><testcase classname="tests.integration.test_process_runner.TestProcessRunner" name="test_stderr_truncation_flag" time="0.001"><error message="failed on setup with &quot;FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-target'&quot;">self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-target')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+&gt;           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-target'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError</error></testcase><testcase classname="tests.integration.test_process_runner.TestProcessRunner" name="test_error_redacts_credentials_in_details" time="0.001"><error message="failed on setup with &quot;FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-target'&quot;">self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-target')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+&gt;           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-target'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError</error></testcase><testcase classname="tests.integration.test_process_runner.TestProcessRunner" name="test_command_result_backward_compatibility" time="0.001" /><testcase classname="tests.integration.test_process_runner.TestProcessRunner" name="test_job_attach_failure_fails_closed" time="0.001"><skipped type="pytest.skip" message="Windows Job Objects only">/tmp/descendant-candidate/tests/integration/test_process_runner.py:630: Windows Job Objects only</skipped></testcase><testcase classname="tests.integration.test_process_runner.TestProcessRunner" name="test_parent_exit_descendant_bounded_and_cleaned" time="0.001"><error message="failed on setup with &quot;FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-target'&quot;">self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-target')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+&gt;           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-target'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError</error></testcase><testcase classname="tests.integration.test_process_runner.TestProcessRunner" name="test_cleanup_failure_retains_metadata" time="0.001"><error message="failed on setup with &quot;FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-target'&quot;">self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-target')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+&gt;           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-target'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError</error></testcase></testsuite></testsuites>

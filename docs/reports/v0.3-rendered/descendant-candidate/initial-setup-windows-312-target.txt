@@ -1,0 +1,22 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.14, pytest-9.1.1, pluggy-1.6.0 -- C:\Users\lenovo\devel\ai-game-factory\.venv\Scripts\python.exe
+rootdir: C:\Users\lenovo\devel\ai-game-factory
+configfile: pyproject.toml
+collecting ... collected 0 items / 1 error
+
+=================================== ERRORS ====================================
+__________ ERROR collecting tests/integration/test_process_runner.py __________
+ImportError while importing test module 'C:\Users\lenovo\devel\ai-game-factory\tests\integration\test_process_runner.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+..\..\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\integration\test_process_runner.py:15: in <module>
+    from gamefactory.core.domain.errors import TimeoutError, ToolExecutionError
+E   ModuleNotFoundError: No module named 'gamefactory'
+- generated xml file: C:\Users\lenovo\devel\ai-game-factory\docs\reports\v0.3-rendered\descendant-candidate\windows-312-target.xml -
+=========================== short test summary info ===========================
+ERROR tests/integration/test_process_runner.py
+!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!
+============================== 1 error in 0.46s ===============================

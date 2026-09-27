@@ -1,6 +1,9 @@
 import json
 import os
+import select
+import signal
 import sys
+import threading
 import time
 from datetime import datetime
 from pathlib import Path
@@ -16,6 +19,139 @@ from gamefactory.core.execution.process_runner import (
     CommandResult,
     ProcessRunner,
 )
+
+
+class _ProcessIdentityHandle:
+    """Retained process handle / pidfd for cross-platform reliable identity tracking."""
+
+    def __init__(self, pid: int) -> None:
+        self.pid = pid
+        self._win_handle: int | None = None
+        self._linux_fd: int | None = None
+
+        if sys.platform == "win32":
+            import _winapi
+
+            # SYNCHRONIZE (0x00100000) | PROCESS_QUERY_LIMITED_INFORMATION (0x1000) | PROCESS_TERMINATE (0x0001)
+            self._win_handle = _winapi.OpenProcess(
+                _winapi.SYNCHRONIZE | 0x1000 | 0x0001,
+                False,
+                pid,
+            )
+        elif hasattr(os, "pidfd_open"):
+            self._linux_fd = os.pidfd_open(pid, 0)
+        else:
+            raise RuntimeError("pidfd_open is unavailable on this platform")
+
+    def is_alive(self) -> bool:
+        """Return True if the identified process is actively running."""
+        if sys.platform == "win32":
+            if self._win_handle is None:
+                raise RuntimeError("Process handle is closed")
+            import _winapi
+
+            res = _winapi.WaitForSingleObject(self._win_handle, 0)
+            if res == _winapi.WAIT_TIMEOUT:
+                return True
+            if res == _winapi.WAIT_OBJECT_0:
+                return False
+            raise RuntimeError(f"Unexpected WaitForSingleObject result: {res}")
+
+        if self._linux_fd is None:
+            raise RuntimeError("Process handle is closed")
+        poller = select.poll()
+        poller.register(self._linux_fd, select.POLLIN)
+        events = poller.poll(0)
+        if any(bool(revents & (select.POLLERR | select.POLLNVAL)) for _, revents in events):
+            raise RuntimeError(f"Poll error on pidfd: {events}")
+        if any(bool(revents & select.POLLIN) for _, revents in events):
+            return False
+        return True
+
+    def wait_terminal(self, timeout_seconds: float = 1.0) -> bool:
+        """Wait boundedly for process termination. Return True if terminated."""
+        if sys.platform == "win32":
+            if self._win_handle is None:
+                raise RuntimeError("Process handle is closed")
+            import _winapi
+
+            timeout_ms = max(0, int(timeout_seconds * 1000))
+            res = _winapi.WaitForSingleObject(self._win_handle, timeout_ms)
+            if res == _winapi.WAIT_OBJECT_0:
+                return True
+            if res == _winapi.WAIT_TIMEOUT:
+                return False
+            raise RuntimeError(f"Unexpected WaitForSingleObject result: {res}")
+
+        if self._linux_fd is None:
+            raise RuntimeError("Process handle is closed")
+        poller = select.poll()
+        poller.register(self._linux_fd, select.POLLIN)
+        timeout_ms = max(0, int(timeout_seconds * 1000))
+        events = poller.poll(timeout_ms)
+        if any(bool(revents & (select.POLLERR | select.POLLNVAL)) for _, revents in events):
+            raise RuntimeError(f"pidfd poll error: {events}")
+        if any(bool(revents & select.POLLIN) for _, revents in events):
+            return True
+        return False
+
+    def close(self) -> None:
+        """Release underlying system handles."""
+        if self._win_handle is not None:
+            import _winapi
+
+            try:
+                _winapi.CloseHandle(self._win_handle)
+            except OSError:
+                pass
+            self._win_handle = None
+
+        if self._linux_fd is not None:
+            try:
+                os.close(self._linux_fd)
+            except OSError:
+                pass
+            self._linux_fd = None
+
+    def cleanup_if_alive(self) -> None:
+        """Bounded failure cleanup to prevent leaked processes on test failure."""
+        if self._win_handle is None and self._linux_fd is None:
+            return
+        try:
+            if self.is_alive():
+                if sys.platform == "win32":
+                    import _winapi
+
+                    try:
+                        _winapi.TerminateProcess(self._win_handle, 1)
+                    except OSError as exc:
+                        if not self.wait_terminal(timeout_seconds=1.0):
+                            raise RuntimeError(
+                                f"TerminateProcess failed for PID {self.pid}"
+                            ) from exc
+                    else:
+                        if not self.wait_terminal(timeout_seconds=1.0):
+                            raise RuntimeError(
+                                f"Process {self.pid} did not terminate after TerminateProcess"
+                            )
+                else:
+                    sig = getattr(signal, "SIGKILL", signal.SIGTERM)
+                    try:
+                        signal.pidfd_send_signal(self._linux_fd, sig)
+                    except ProcessLookupError:
+                        pass
+                    except OSError as exc:
+                        if not self.wait_terminal(timeout_seconds=1.0):
+                            raise RuntimeError(
+                                f"pidfd_send_signal failed for PID {self.pid}"
+                            ) from exc
+                    else:
+                        if not self.wait_terminal(timeout_seconds=1.0):
+                            raise RuntimeError(
+                                f"Process {self.pid} did not terminate after pidfd_send_signal"
+                            )
+        finally:
+            self.close()
 
 
 class TestProcessRunner:
@@ -544,34 +680,126 @@ class TestProcessRunner:
     def test_parent_exit_descendant_bounded_and_cleaned(self, tmp_path: Path) -> None:
         """When parent spawns descendant inheriting pipes and exits, runner bounds wait and cleans descendant."""
         marker = tmp_path / "descendant-marker.txt"
+        ready_file = tmp_path / "descendant-ready.txt"
+        release_file = tmp_path / "parent-release.txt"
         grandchild = tmp_path / "grandchild.py"
-        grandchild.write_text(
-            "import time; from pathlib import Path; time.sleep(3.0); Path(r'"
-            + str(marker)
-            + "').write_text('survived', encoding='utf-8')",
-            encoding="utf-8",
-        )
-        # Parent spawns grandchild and exits immediately
-        parent_code = (
-            "import subprocess, sys; subprocess.Popen([sys.executable, r'"
-            + str(grandchild)
-            + "']); sys.exit(0)"
-        )
-        t_start = time.perf_counter()
-        req = CommandRequest(
-            args=[sys.executable, "-c", parent_code],
-            cwd=tmp_path,
-            timeout_seconds=0.5,
-        )
-        res = self.runner.run(req)
-        elapsed = time.perf_counter() - t_start
 
-        # Must finish boundedly, well before grandchild's 3.0s sleep
-        assert elapsed < 2.0
-        time.sleep(1.0)
-        # Grandchild must have been killed and marker not created
-        assert not marker.exists()
-        assert res.cleanup_completed is True
+        # Descendant writes its PID to signal READY, writes to stdout to verify pipe inheritance,
+        # then sleeps long enough to exceed runner deadline unless terminated by cleanup.
+        grandchild_code = (
+            "import os, sys, time\n"
+            "from pathlib import Path\n"
+            f"ready_path = Path({str(ready_file)!r})\n"
+            "tmp_ready = ready_path.with_suffix('.tmp')\n"
+            "tmp_ready.write_text(str(os.getpid()), encoding='utf-8')\n"
+            "sys.stdout.write('descendant pipe active\\n')\n"
+            "sys.stdout.flush()\n"
+            "tmp_ready.replace(ready_path)\n"
+            "time.sleep(3.0)\n"
+            f"Path({str(marker)!r}).write_text('survived', encoding='utf-8')\n"
+        )
+        grandchild.write_text(grandchild_code, encoding="utf-8")
+
+        # Parent spawns grandchild (inheriting stdout/stderr pipes), waits for bounded READY handshake
+        # and release signal, then exits 0 ONLY if both ready and release were observed.
+        parent_code = (
+            "import subprocess, sys, time\n"
+            "from pathlib import Path\n"
+            f"ready_path = Path({str(ready_file)!r})\n"
+            f"release_path = Path({str(release_file)!r})\n"
+            f"subprocess.Popen([sys.executable, {str(grandchild)!r}])\n"
+            "end = time.monotonic() + 0.35\n"
+            "while not ready_path.exists() and time.monotonic() < end:\n"
+            "    time.sleep(0.002)\n"
+            "while not release_path.exists() and time.monotonic() < end:\n"
+            "    time.sleep(0.002)\n"
+            "if ready_path.exists() and release_path.exists():\n"
+            "    sys.exit(0)\n"
+            "sys.exit(1)\n"
+        )
+
+        handle_holder: list[_ProcessIdentityHandle] = []
+        coord_error: list[Exception] = []
+        stop_coord = threading.Event()
+
+        def coordinator() -> None:
+            try:
+                ready_deadline = time.monotonic() + 1.0
+                pid_text = ""
+                while not stop_coord.is_set() and time.monotonic() < ready_deadline:
+                    if ready_file.exists():
+                        try:
+                            pid_text = ready_file.read_text(encoding="utf-8").strip()
+                            if pid_text:
+                                break
+                        except OSError:
+                            pass
+                    time.sleep(0.002)
+
+                if stop_coord.is_set():
+                    return
+
+                if not pid_text:
+                    raise RuntimeError("Descendant failed to signal READY within bounded timeout")
+
+                descendant_pid = int(pid_text)
+                handle = _ProcessIdentityHandle(descendant_pid)
+                handle_holder.append(handle)
+
+                if not handle.is_alive():
+                    raise RuntimeError(
+                        f"Descendant PID {descendant_pid} was not alive before release"
+                    )
+
+                release_file.write_text("release", encoding="utf-8")
+            except Exception as exc:
+                coord_error.append(exc)
+                try:
+                    release_file.write_text("release", encoding="utf-8")
+                except OSError:
+                    pass
+
+        coord_thread = threading.Thread(target=coordinator, daemon=True)
+        coord_thread.start()
+
+        try:
+            t_start = time.perf_counter()
+            req = CommandRequest(
+                args=[sys.executable, "-c", parent_code],
+                cwd=tmp_path,
+                timeout_seconds=0.5,
+            )
+            res = self.runner.run(req)
+
+            coord_thread.join(timeout=1.0)
+            assert not coord_thread.is_alive(), "Coordinator thread failed to stop"
+            if coord_error:
+                raise coord_error[0]
+
+            assert len(handle_holder) == 1, "Process identity handle was not acquired"
+            handle = handle_holder[0]
+
+            # Normal parent exit
+            assert res.exit_code == 0
+            assert res.timed_out is False
+            assert "descendant pipe active" in res.stdout
+            assert res.cleanup_completed is True
+
+            # Terminal observation bounded from runner start (<2 sec) to precede natural 3.0s exit
+            remaining = 2.0 - (time.perf_counter() - t_start)
+            assert remaining > 0, "Execution exceeded 2.0s bound before terminal observation"
+            assert handle.wait_terminal(timeout_seconds=remaining) is True
+            assert time.perf_counter() - t_start < 2.0
+
+            # Marker check supplements only
+            time.sleep(1.0)
+            assert not marker.exists()
+        finally:
+            stop_coord.set()
+            coord_thread.join(timeout=1.0)
+            assert not coord_thread.is_alive(), "Coordinator thread failed to stop"
+            for h in handle_holder:
+                h.cleanup_if_alive()
 
     def test_cleanup_failure_retains_metadata(
         self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch

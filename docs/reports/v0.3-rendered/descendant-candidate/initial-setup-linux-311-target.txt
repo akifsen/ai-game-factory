@@ -1,0 +1,400 @@
+============================= test session starts ==============================
+platform linux -- Python 3.11.16, pytest-9.1.1, pluggy-1.6.0 -- /usr/local/bin/python
+rootdir: /tmp/descendant-candidate
+configfile: pyproject.toml
+collecting ... collected 27 items
+
+tests/integration/test_process_runner.py::TestProcessRunner::test_run_simple_command_stdout ERROR [  3%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_run_command_stderr ERROR [  7%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_minimal_env_filters_secrets ERROR [ 11%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_timeout_enforcement ERROR [ 14%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_secret_redaction_in_output ERROR [ 18%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_nonexistent_executable_raises_error ERROR [ 22%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_request_override_secret_is_redacted_from_output_and_errors ERROR [ 25%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_sensitive_argument_flag_secret_is_redacted ERROR [ 29%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_short_override_secret_and_malformed_unicode_are_safe ERROR [ 33%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_output_is_bounded ERROR [ 37%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_timeout_kills_descendant_process ERROR [ 40%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_run_success_with_metadata ERROR [ 44%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_run_nonzero_exit_code ERROR [ 48%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_timeout_attaches_serializable_metadata ERROR [ 51%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_redaction_expansion_stays_within_output_limit ERROR [ 55%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_posix_parent_exit_kills_descendant_ignoring_sigterm ERROR [ 59%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_incomplete_pipe_read_fails_with_evidence ERROR [ 62%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_cleanup_error_message_redacts_request_secret ERROR [ 66%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_windows_job_close_failure_is_reported SKIPPED [ 70%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_timeout_redacts_secrets_in_details ERROR [ 74%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_stdout_truncation_flag_and_multibyte_safety ERROR [ 77%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_stderr_truncation_flag ERROR [ 81%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_error_redacts_credentials_in_details ERROR [ 85%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_command_result_backward_compatibility PASSED [ 88%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_job_attach_failure_fails_closed SKIPPED [ 92%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_parent_exit_descendant_bounded_and_cleaned ERROR [ 96%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_cleanup_failure_retains_metadata ERROR [100%]
+
+==================================== ERRORS ====================================
+______ ERROR at setup of TestProcessRunner.test_run_simple_command_stdout ______
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-target')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-target'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_________ ERROR at setup of TestProcessRunner.test_run_command_stderr __________
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-target')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-target'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_____ ERROR at setup of TestProcessRunner.test_minimal_env_filters_secrets _____
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-target')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-target'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_________ ERROR at setup of TestProcessRunner.test_timeout_enforcement _________
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-target')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-target'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_____ ERROR at setup of TestProcessRunner.test_secret_redaction_in_output ______
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-target')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-target'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of TestProcessRunner.test_nonexistent_executable_raises_error _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-target')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-target'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of TestProcessRunner.test_request_override_secret_is_redacted_from_output_and_errors _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-target')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-target'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of TestProcessRunner.test_sensitive_argument_flag_secret_is_redacted _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-target')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-target'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of TestProcessRunner.test_short_override_secret_and_malformed_unicode_are_safe _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-target')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-target'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+__________ ERROR at setup of TestProcessRunner.test_output_is_bounded __________
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-target')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-target'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+__ ERROR at setup of TestProcessRunner.test_timeout_kills_descendant_process ___
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-target')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-target'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+______ ERROR at setup of TestProcessRunner.test_run_success_with_metadata ______
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-target')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-target'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+________ ERROR at setup of TestProcessRunner.test_run_nonzero_exit_code ________
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-target')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-target'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of TestProcessRunner.test_timeout_attaches_serializable_metadata _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-target')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-target'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of TestProcessRunner.test_redaction_expansion_stays_within_output_limit _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-target')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-target'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of TestProcessRunner.test_posix_parent_exit_kills_descendant_ignoring_sigterm _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-target')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-target'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of TestProcessRunner.test_incomplete_pipe_read_fails_with_evidence _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-target')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-target'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of TestProcessRunner.test_cleanup_error_message_redacts_request_secret _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-target')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-target'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of TestProcessRunner.test_timeout_redacts_secrets_in_details __
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-target')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-target'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of TestProcessRunner.test_stdout_truncation_flag_and_multibyte_safety _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-target')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-target'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_______ ERROR at setup of TestProcessRunner.test_stderr_truncation_flag ________
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-target')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-target'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of TestProcessRunner.test_error_redacts_credentials_in_details _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-target')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-target'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+_ ERROR at setup of TestProcessRunner.test_parent_exit_descendant_bounded_and_cleaned _
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-target')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-target'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+__ ERROR at setup of TestProcessRunner.test_cleanup_failure_retains_metadata ___
+
+self = PosixPath('/tmp/descendant-candidate/.verification/linux-311-target')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [Errno 2] No such file or directory: '/tmp/descendant-candidate/.verification/linux-311-target'
+
+/usr/local/lib/python3.11/pathlib.py:1116: FileNotFoundError
+-------------- generated xml file: /evidence/linux-311-target.xml --------------
+=========================== short test summary info ============================
+SKIPPED [1] tests/integration/test_process_runner.py:504: Windows Job Objects are only available on Windows
+SKIPPED [1] tests/integration/test_process_runner.py:630: Windows Job Objects only
+ERROR tests/integration/test_process_runner.py::TestProcessRunner::test_run_simple_command_stdout
+ERROR tests/integration/test_process_runner.py::TestProcessRunner::test_run_command_stderr
+ERROR tests/integration/test_process_runner.py::TestProcessRunner::test_minimal_env_filters_secrets
+ERROR tests/integration/test_process_runner.py::TestProcessRunner::test_timeout_enforcement
+ERROR tests/integration/test_process_runner.py::TestProcessRunner::test_secret_redaction_in_output
+ERROR tests/integration/test_process_runner.py::TestProcessRunner::test_nonexistent_executable_raises_error
+ERROR tests/integration/test_process_runner.py::TestProcessRunner::test_request_override_secret_is_redacted_from_output_and_errors
+ERROR tests/integration/test_process_runner.py::TestProcessRunner::test_sensitive_argument_flag_secret_is_redacted
+ERROR tests/integration/test_process_runner.py::TestProcessRunner::test_short_override_secret_and_malformed_unicode_are_safe
+ERROR tests/integration/test_process_runner.py::TestProcessRunner::test_output_is_bounded
+ERROR tests/integration/test_process_runner.py::TestProcessRunner::test_timeout_kills_descendant_process
+ERROR tests/integration/test_process_runner.py::TestProcessRunner::test_run_success_with_metadata
+ERROR tests/integration/test_process_runner.py::TestProcessRunner::test_run_nonzero_exit_code
+ERROR tests/integration/test_process_runner.py::TestProcessRunner::test_timeout_attaches_serializable_metadata
+ERROR tests/integration/test_process_runner.py::TestProcessRunner::test_redaction_expansion_stays_within_output_limit
+ERROR tests/integration/test_process_runner.py::TestProcessRunner::test_posix_parent_exit_kills_descendant_ignoring_sigterm
+ERROR tests/integration/test_process_runner.py::TestProcessRunner::test_incomplete_pipe_read_fails_with_evidence
+ERROR tests/integration/test_process_runner.py::TestProcessRunner::test_cleanup_error_message_redacts_request_secret
+ERROR tests/integration/test_process_runner.py::TestProcessRunner::test_timeout_redacts_secrets_in_details
+ERROR tests/integration/test_process_runner.py::TestProcessRunner::test_stdout_truncation_flag_and_multibyte_safety
+ERROR tests/integration/test_process_runner.py::TestProcessRunner::test_stderr_truncation_flag
+ERROR tests/integration/test_process_runner.py::TestProcessRunner::test_error_redacts_credentials_in_details
+ERROR tests/integration/test_process_runner.py::TestProcessRunner::test_parent_exit_descendant_bounded_and_cleaned
+ERROR tests/integration/test_process_runner.py::TestProcessRunner::test_cleanup_failure_retains_metadata
+=================== 1 passed, 2 skipped, 24 errors in 1.21s ====================
