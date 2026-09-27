@@ -254,6 +254,7 @@ jobs:
           set -euo pipefail
           evidence="$GITHUB_WORKSPACE/.verification/ci-asset-production"
           mkdir -p "$evidence"
+          mkdir -p "$RUNNER_TEMP/asset-production-workspace"
           xvfb-run -a --server-args="-screen 0 1600x1200x24" \
             "$RUNNER_TEMP/gamefactory-venv/bin/python" \
             "$GITHUB_WORKSPACE/scripts/verify_asset_acceptance.py" \
