@@ -42,3 +42,19 @@ Core V0.1**; üretim asset/AI entegrasyonları bu teslimin parçası değildir.
 İnceleme raporları bir kusurun saptandığı andaki kayıtlardır; düzeltmelerin kapanış
 kanıtı nihai raporda ve ilgili regresyon testlerinde bulunur. Bir testin planlanmış
 olması çalıştırıldığı veya geçtiği anlamına gelmez.
+
+## V0.2 — Real Godot verification
+
+- [Complete sprint requirements](requirements/v0.2-feature-completion.md)
+- [Step-by-step work plan and requirement mapping](work-plan-v0.2.md)
+- [Godot integration and recovery contract](integrations/godot-headless-verification.md)
+- [ADR 0005: staging and independent oracle](adr/0005-godot-staging-and-independent-oracle.md)
+- [V0.2 completion report](reports/v0.2-completion-report.md)
+- [V0.2 quality checks](reports/v0.2-quality.json)
+- [Installed-package real Godot acceptance](reports/v0.2-acceptance.json)
+- [Real crash/recovery acceptance](reports/v0.2-recovery-acceptance.json)
+- [Clean wheel installation](reports/v0.2-installation.json)
+- [V0.1 CLI regression on V0.2](reports/v0.2-v01-acceptance.json)
+- [Final artifact/source integrity verification](reports/v0.2-final-verification.json)
+
+V0.1 reports above remain historical records; V0.2 evidence uses separate files.

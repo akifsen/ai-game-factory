@@ -69,7 +69,11 @@ from gamefactory.core.policies.policy_engine import (
     PolicyEngine,
 )
 from gamefactory.workflows.builtin_tasks import BuiltinTaskActions
-from gamefactory.workflows.handlers import TaskHandlerRegistry
+from gamefactory.workflows.handlers import (
+    HandlerOperation,
+    HandlerRecovery,
+    TaskHandlerRegistry,
+)
 from gamefactory.workflows.ports import AssetGenerationProvider
 
 
@@ -211,8 +215,53 @@ class WorkflowEngine:
                     ExecutionStatus.RUNNING,
                     ExecutionStatus.UNCERTAIN,
                 ):
-                    if t.cost_class in (CostClass.PAID, CostClass.EXPENSIVE):
-                        # Crash during paid operation: BLOCK FOR RECONCILIATION!
+                    handler_profile = self.handler_registry.metadata(t.task_type)
+                    is_paid_or_metered = t.task_type == "paid_generation" or t.cost_class in (
+                        CostClass.METERED,
+                        CostClass.PAID,
+                        CostClass.EXPENSIVE,
+                    )
+                    is_conservative_process = (
+                        handler_profile is not None
+                        and handler_profile.recovery == HandlerRecovery.CONSERVATIVE_PROCESS
+                    )
+                    recovery_known_terminal = False
+                    recovery_callback = (
+                        handler_profile.recovery_check if handler_profile is not None else None
+                    )
+                    if is_conservative_process and recovery_callback is not None:
+                        try:
+                            recovery_known_terminal = recovery_callback(wf, t, latest_attempt)
+                        except Exception:
+                            recovery_known_terminal = False
+                    if is_paid_or_metered or is_conservative_process:
+                        if (
+                            is_conservative_process
+                            and not is_paid_or_metered
+                            and recovery_known_terminal
+                        ):
+                            latest_attempt.status = ExecutionStatus.FAILED
+                            latest_attempt.error_message = "Orchestrator restarted after the owned process reached a durable terminal state; explicit retry required"
+                            latest_attempt.retryable = True
+                            latest_attempt.completed_at = utc_now_iso()
+                            t.status = TaskStatus.FAILED
+                            self._finalize_execution(
+                                t,
+                                latest_attempt,
+                                AuditEvent(
+                                    id=generate_id("AUDIT"),
+                                    entity_type="Task",
+                                    entity_id=t.id,
+                                    action="RECOVERED_TERMINAL_PROCESS",
+                                    actor="WorkflowEngine",
+                                    details={"execution_id": latest_attempt.id, "retryable": True},
+                                ),
+                            )
+                            continue
+                        # Unknown child-process ownership is never treated as a safe retry.
+                        latest_attempt.status = ExecutionStatus.UNCERTAIN
+                        latest_attempt.error_message = "Process ownership or terminal state cannot be verified after orchestrator restart"
+                        self.exec_repo.save(latest_attempt)
                         TaskStateMachine.validate_transition(t.id, t.status, TaskStatus.BLOCKED)
                         t.status = TaskStatus.BLOCKED
                         self.task_repo.update_status(t.id, t.status)
@@ -223,7 +272,7 @@ class WorkflowEngine:
                             wf.status = WorkflowStatus.BLOCKED
                             self.wf_repo.update_status(wf.id, wf.status)
                         raise ReconciliationRequired(
-                            f"Crash recovery: Task '{t.id}' has uncertain execution attempt {latest_attempt.id} for paid operation '{latest_attempt.external_op_id}'. Blind re-execution is forbidden; reconciliation required.",
+                            f"Crash recovery: Task '{t.id}' has uncertain owned execution attempt {latest_attempt.id}. Blind re-execution is forbidden; reconciliation required until process state is resolved.",
                             task_id=t.id,
                             execution_id=latest_attempt.id,
                         )
@@ -379,10 +428,19 @@ class WorkflowEngine:
             ExecutionStatus.RUNNING,
             ExecutionStatus.UNCERTAIN,
         ):
-            if task.task_type == "paid_generation" or task.cost_class in (
-                CostClass.METERED,
-                CostClass.PAID,
-                CostClass.EXPENSIVE,
+            handler_profile = self.handler_registry.metadata(task.task_type)
+            if (
+                task.task_type == "paid_generation"
+                or task.cost_class
+                in (
+                    CostClass.METERED,
+                    CostClass.PAID,
+                    CostClass.EXPENSIVE,
+                )
+                or (
+                    handler_profile is not None
+                    and handler_profile.recovery == HandlerRecovery.CONSERVATIVE_PROCESS
+                )
             ):
                 # An execution was started but process died/interrupted before completion.
                 # BLOCK for reconciliation per Requirement 38 & 74!
@@ -397,8 +455,13 @@ class WorkflowEngine:
                     wf.status = WorkflowStatus.BLOCKED
                     self.wf_repo.update_status(wf.id, wf.status)
 
+                latest_attempt.status = ExecutionStatus.UNCERTAIN
+                latest_attempt.error_message = (
+                    "Process ownership or terminal state remains uncertain"
+                )
+                self.exec_repo.save(latest_attempt)
                 raise ReconciliationRequired(
-                    f"Crash recovery: Task '{task.id}' has uncertain execution attempt {latest_attempt.id} for paid operation '{latest_attempt.external_op_id}'. Blind re-execution is forbidden; reconciliation required.",
+                    f"Crash recovery: Task '{task.id}' has uncertain owned execution attempt {latest_attempt.id}. Blind re-execution is forbidden; reconciliation required until process state is resolved.",
                     task_id=task.id,
                     execution_id=latest_attempt.id,
                 )
@@ -429,12 +492,26 @@ class WorkflowEngine:
         elif task.task_type == "controlled_command":
             op_type = OperationType.PROCESS_EXECUTION
         else:
-            op_type = OperationType.LOCAL_READ
+            profile = self.handler_registry.metadata(task.task_type)
+            op_type = (
+                {
+                    HandlerOperation.LOCAL_READ: OperationType.LOCAL_READ,
+                    HandlerOperation.REPOSITORY_WRITE: OperationType.REPOSITORY_WRITE,
+                    HandlerOperation.PROCESS_EXECUTION: OperationType.PROCESS_EXECUTION,
+                }[profile.operation]
+                if profile is not None
+                else OperationType.LOCAL_READ
+            )
+        handler_profile = self.handler_registry.metadata(task.task_type)
         estimated_cost = float(task.parameters.get("cost", 0.0))
 
         # Check if an approval exists
         approvals = [a for a in self.app_repo.list_by_workflow(wf.id) if a.task_id == task.id]
-        active_approval: ApprovalRequest | None = approvals[0] if approvals else None
+        active_approval: ApprovalRequest | None = (
+            max(approvals, key=lambda approval: (approval.requested_at, approval.id))
+            if approvals
+            else None
+        )
 
         has_approved_decision = (
             active_approval is not None and active_approval.status == ApprovalStatus.APPROVED
@@ -442,7 +519,11 @@ class WorkflowEngine:
         approval_type = (
             "paid_generation"
             if op_type == OperationType.PAID_OPERATION
-            else (active_approval.approval_type if active_approval else "repository_write")
+            else "process_execution"
+            if op_type == OperationType.PROCESS_EXECUTION and handler_profile is not None
+            else active_approval.approval_type
+            if active_approval
+            else "repository_write"
         )
         approval_inputs = self.approval_inputs(wf, task, effective_cost_class)
         current_op_hash = compute_operation_hash(task.id, approval_type, approval_inputs)
@@ -468,6 +549,7 @@ class WorkflowEngine:
                 estimated_cost=estimated_cost,
                 current_spent=current_spent,
                 has_approval=has_approved_decision,
+                context={"managed_write": bool(handler_profile and handler_profile.managed_write)},
             )
         except BudgetExceeded as exc:
             return self._block_for_budget(wf, task, exc)
@@ -627,8 +709,14 @@ class WorkflowEngine:
             )
 
         except Exception as exc:
+            handler_profile = self.handler_registry.metadata(task.task_type)
+            failure_details = getattr(exc, "details", {}) or {}
             uncertain = (
                 task.task_type == "paid_generation" and effective_cost_class in charged_classes
+            ) or (
+                handler_profile is not None
+                and handler_profile.recovery == HandlerRecovery.CONSERVATIVE_PROCESS
+                and bool(failure_details.get("process_state_uncertain", False))
             )
             execution.status = ExecutionStatus.UNCERTAIN if uncertain else ExecutionStatus.FAILED
             execution.error_message = str(exc)
@@ -662,7 +750,7 @@ class WorkflowEngine:
                 failed_tasks=[task.id],
                 blocked_tasks=[task.id] if uncertain else [],
                 error_message=(
-                    f"Paid operation outcome is uncertain; reconciliation required: {exc}"
+                    f"Operation outcome is uncertain; reconciliation required: {exc}"
                     if uncertain
                     else str(exc)
                 ),
@@ -759,6 +847,18 @@ class WorkflowEngine:
         self, workflow: Workflow, task: Task, cost_class: CostClass | None = None
     ) -> dict[str, object]:
         """Return the complete operation scope used at request and dispatch time."""
+        profile = self.handler_registry.metadata(task.task_type)
+        if profile is not None and profile.refresh_parameters is not None:
+            refreshed = profile.refresh_parameters(workflow, task)
+            if not isinstance(refreshed, dict):
+                raise ValidationError("Task input refresh must return an object")
+            # Ensure refreshed data is finite JSON before persisting it as a task snapshot.
+            import json
+
+            json.dumps(refreshed, allow_nan=False)
+            if refreshed != task.parameters:
+                self.task_repo.update_parameters(task.id, refreshed)
+                task.parameters = refreshed
         effective_class = cost_class or task.cost_class
         if (
             cost_class is None
@@ -777,18 +877,21 @@ class WorkflowEngine:
             }
             effective_class = max((effective_class, provider_class), key=rank.__getitem__)
         artifacts = self.art_repo.list_by_workflow(workflow.id)
+        scope: dict[str, object] = {
+            "workflow_id": workflow.id,
+            "task_type": task.task_type,
+            "cost_class": effective_class.value,
+            "provider": self.asset_provider.name
+            if task.task_type == "paid_generation" and self.asset_provider
+            else None,
+            "artifacts": sorted((item.id, item.content_hash) for item in artifacts),
+            "estimated_cost": float(task.parameters.get("cost", 0.0)),
+        }
+        if profile is not None and profile.approval_context is not None:
+            scope["handler_context"] = profile.approval_context(workflow, task)
         return {
             "parameters": task.parameters,
-            "scope": {
-                "workflow_id": workflow.id,
-                "task_type": task.task_type,
-                "cost_class": effective_class.value,
-                "provider": self.asset_provider.name
-                if task.task_type == "paid_generation" and self.asset_provider
-                else None,
-                "artifacts": sorted((item.id, item.content_hash) for item in artifacts),
-                "estimated_cost": float(task.parameters.get("cost", 0.0)),
-            },
+            "scope": scope,
         }
 
     def _record_final_workflow_evidence(

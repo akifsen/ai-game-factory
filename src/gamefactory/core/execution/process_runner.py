@@ -10,11 +10,18 @@ import threading
 import time
 from ctypes import wintypes
 from dataclasses import dataclass, field
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import IO, Any, cast
+from typing import IO, Any, NamedTuple, cast
 
 from gamefactory.core.domain.errors import TimeoutError, ToolExecutionError
 from gamefactory.core.execution.redaction import _SENSITIVE_ENV_SUBSTRINGS, redactor
+
+
+def utc_now_iso() -> str:
+    """Return current UTC timestamp in ISO 8601 format."""
+    return datetime.now(UTC).isoformat()
+
 
 _ESSENTIAL_ENV_VARS = {
     "PATH",
@@ -36,6 +43,14 @@ _ESSENTIAL_ENV_VARS = {
 _MAX_CAPTURE_CHARS = 1_000_000
 
 
+class BoundedReadResult(NamedTuple):
+    """Result of reading bounded stream output."""
+
+    data: bytes
+    truncated: bool
+    read_completed: bool = True
+
+
 @dataclass
 class CommandRequest:
     """Specification of an external command to execute."""
@@ -54,10 +69,40 @@ class CommandResult:
     exit_code: int
     stdout: str
     stderr: str
-    duration_seconds: float
+    duration_seconds: float = 0.0
     timed_out: bool = False
     command_display: str = ""
     pid: int | None = None
+    started_at: str | None = None
+    completed_at: str | None = None
+    stdout_truncated: bool = False
+    stderr_truncated: bool = False
+    termination_status: str = "completed"
+    cleanup_completed: bool = True
+    cleanup_status: str = "completed"
+    args: list[str] = field(default_factory=list)
+    cwd: str = ""
+
+    def to_dict(self) -> dict[str, Any]:
+        """Return serializable dictionary representation of the command result."""
+        return {
+            "exit_code": self.exit_code,
+            "stdout": self.stdout,
+            "stderr": self.stderr,
+            "duration_seconds": self.duration_seconds,
+            "timed_out": self.timed_out,
+            "command_display": self.command_display,
+            "pid": self.pid,
+            "started_at": self.started_at,
+            "completed_at": self.completed_at,
+            "stdout_truncated": self.stdout_truncated,
+            "stderr_truncated": self.stderr_truncated,
+            "termination_status": self.termination_status,
+            "cleanup_completed": self.cleanup_completed,
+            "cleanup_status": self.cleanup_status,
+            "args": self.args,
+            "cwd": self.cwd,
+        }
 
 
 class ProcessRunner:
@@ -172,7 +217,8 @@ class ProcessRunner:
             kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
             kernel32.CloseHandle.argtypes = [wintypes.HANDLE]
             kernel32.CloseHandle.restype = wintypes.BOOL
-            kernel32.CloseHandle(wintypes.HANDLE(job))
+            if not kernel32.CloseHandle(wintypes.HANDLE(job)):
+                raise OSError(ctypes.get_last_error(), "Failed to close Windows Job Object")
 
     @staticmethod
     def _kill_tree(proc: subprocess.Popen[bytes]) -> None:
@@ -216,20 +262,76 @@ class ProcessRunner:
             proc.wait(timeout=2)
         except subprocess.TimeoutExpired:
             proc.kill()
-            proc.wait(timeout=2)
+            try:
+                proc.wait(timeout=1)
+            except subprocess.TimeoutExpired:
+                pass
 
     @staticmethod
-    def _read_bounded(stream: IO[Any]) -> bytes:
+    def _trim_incomplete_multibyte(data: bytearray | bytes) -> bytes:
+        """Trim incomplete UTF-8 trailing sequence from truncated byte buffer."""
+        b = bytes(data)
+        if not b:
+            return b
+        for i in range(1, min(5, len(b) + 1)):
+            byte = b[-i]
+            if byte & 0b10000000 == 0:
+                return b
+            if byte & 0b11000000 == 0b11000000:
+                if byte & 0b11100000 == 0b11000000:
+                    expected = 2
+                elif byte & 0b11110000 == 0b11100000:
+                    expected = 3
+                elif byte & 0b11111000 == 0b11110000:
+                    expected = 4
+                else:
+                    expected = 1
+                if i < expected:
+                    return b[:-i]
+                return b
+        return b
+
+    @classmethod
+    def _cap_redacted_text(cls, value: str) -> tuple[str, bool]:
+        """Keep replacement-heavy redaction within the same output byte budget."""
+        encoded = value.encode("utf-8")
+        if len(encoded) <= _MAX_CAPTURE_CHARS:
+            return value, False
+        bounded = cls._trim_incomplete_multibyte(encoded[:_MAX_CAPTURE_CHARS])
+        return bounded.decode("utf-8"), True
+
+    @classmethod
+    def _read_bounded(
+        cls, stream: IO[Any], max_bytes: int = _MAX_CAPTURE_CHARS
+    ) -> BoundedReadResult:
         """Drain a pipe to avoid child deadlock while retaining bounded output."""
         kept = bytearray()
-        while True:
-            chunk = stream.read(64 * 1024)
-            if not chunk:
-                break
-            remaining = _MAX_CAPTURE_CHARS - len(kept)
-            if remaining > 0:
-                kept.extend(chunk[:remaining])
-        return bytes(kept)
+        truncated = False
+        read_completed = False
+        try:
+            while True:
+                chunk = stream.read(64 * 1024)
+                if not chunk:
+                    read_completed = True
+                    break
+                if isinstance(chunk, str):
+                    chunk = chunk.encode("utf-8", errors="replace")
+                remaining = max_bytes - len(kept)
+                if remaining > 0:
+                    if len(chunk) > remaining:
+                        kept.extend(chunk[:remaining])
+                        truncated = True
+                    else:
+                        kept.extend(chunk)
+                else:
+                    truncated = True
+        except (OSError, ValueError):
+            truncated = True
+            read_completed = False
+
+        if truncated:
+            return BoundedReadResult(cls._trim_incomplete_multibyte(kept), True, read_completed)
+        return BoundedReadResult(bytes(kept), False, read_completed)
 
     def run(self, request: CommandRequest) -> CommandResult:
         """Run the requested command synchronously with shell=False."""
@@ -259,12 +361,23 @@ class ProcessRunner:
             return redactor.redact_text(value, secrets)
 
         command_display = redact(" ".join(str(a) for a in request.args))
+        redacted_args = [redact(str(a)) for a in request.args]
+        redacted_cwd = redact(str(cwd_path))
+
         if not cwd_path.is_dir():
             raise ToolExecutionError(
-                f"Working directory does not exist: {redact(str(cwd_path))}",
-                details={"cwd": redact(str(cwd_path))},
+                f"Working directory does not exist: {redacted_cwd}",
+                details={
+                    "cwd": redacted_cwd,
+                    "command": command_display,
+                    "args": redacted_args,
+                },
             )
+
+        start_wall_time = utc_now_iso()
         start_time = time.perf_counter()
+        deadline = start_time + request.timeout_seconds
+
         try:
             if sys.platform == "win32":
                 proc = subprocess.Popen(  # noqa: S603
@@ -286,75 +399,324 @@ class ProcessRunner:
                     shell=False,
                     start_new_session=True,
                 )
-            windows_job = self._attach_windows_job(proc)
-            assert proc.stdout is not None and proc.stderr is not None
-            stdout_pipe = proc.stdout
-            stderr_pipe = proc.stderr
-            captured: dict[str, bytes] = {}
-            readers = [
-                threading.Thread(
-                    target=lambda: captured.setdefault("stdout", self._read_bounded(stdout_pipe)),
-                    daemon=True,
-                ),
-                threading.Thread(
-                    target=lambda: captured.setdefault("stderr", self._read_bounded(stderr_pipe)),
-                    daemon=True,
-                ),
-            ]
-            for reader in readers:
-                reader.start()
-            try:
-                proc.wait(timeout=request.timeout_seconds)
-                self._close_windows_job(windows_job)
-                windows_job = None
-                for reader in readers:
-                    reader.join(timeout=2)
-                if any(reader.is_alive() for reader in readers):
-                    proc.stdout.close()
-                    proc.stderr.close()
-                    for reader in readers:
-                        reader.join(timeout=1)
-            except subprocess.TimeoutExpired as exc:
-                self._close_windows_job(windows_job)
-                windows_job = None
-                self._kill_tree(proc)
-                for reader in readers:
-                    reader.join(timeout=2)
-                stdout = captured.get("stdout", b"").decode("utf-8", errors="replace")
-                stderr = captured.get("stderr", b"").decode("utf-8", errors="replace")
-                raise TimeoutError(
-                    f"Command timed out after {request.timeout_seconds} seconds: {command_display}",
-                    timeout_seconds=request.timeout_seconds,
-                    details={
-                        "command": command_display,
-                        "duration": time.perf_counter() - start_time,
-                        "pid": proc.pid,
-                        "stdout": redact(stdout),
-                        "stderr": redact(stderr),
-                    },
-                ) from exc
-            finally:
-                self._close_windows_job(windows_job)
-            stdout = captured.get("stdout", b"").decode("utf-8", errors="replace")
-            stderr = captured.get("stderr", b"").decode("utf-8", errors="replace")
-            stdout, stderr = redact(stdout), redact(stderr)
-            return CommandResult(
-                exit_code=proc.returncode,
-                stdout=stdout,
-                stderr=stderr,
-                duration_seconds=round(time.perf_counter() - start_time, 3),
-                command_display=command_display,
-                pid=proc.pid,
-            )
         except FileNotFoundError as exc:
             safe_exe = redact(str(request.args[0]))
             raise ToolExecutionError(
                 f"Executable not found: '{safe_exe}'",
-                details={"executable": safe_exe, "command": command_display},
+                details={
+                    "executable": safe_exe,
+                    "command": command_display,
+                    "args": redacted_args,
+                    "cwd": redacted_cwd,
+                },
             ) from exc
         except OSError as exc:
             safe_error = redact(str(exc))
             raise ToolExecutionError(
                 f"Failed to execute command '{command_display}': {safe_error}",
-                details={"command": command_display, "error": safe_error},
+                details={
+                    "command": command_display,
+                    "error": safe_error,
+                    "args": redacted_args,
+                    "cwd": redacted_cwd,
+                },
             ) from exc
+
+        windows_job: int | None = None
+        if sys.platform == "win32":
+            try:
+                windows_job = self._attach_windows_job(proc)
+            except Exception:
+                windows_job = None
+
+            if windows_job is None:
+                # Fail closed: Tree containment cannot be guaranteed without job object
+                try:
+                    self._kill_tree(proc)
+                except Exception:
+                    pass
+                completed_wall_time = utc_now_iso()
+                duration = round(time.perf_counter() - start_time, 3)
+                raise ToolExecutionError(
+                    f"Failed to attach process {proc.pid} to Windows Job Object: {command_display}",
+                    details={
+                        "command": command_display,
+                        "args": redacted_args,
+                        "cwd": redacted_cwd,
+                        "pid": proc.pid,
+                        "started_at": start_wall_time,
+                        "completed_at": completed_wall_time,
+                        "duration": duration,
+                        "duration_seconds": duration,
+                        "cleanup_completed": False,
+                        "cleanup_status": "uncertain",
+                        "stdout": "",
+                        "stderr": "",
+                        "stdout_truncated": False,
+                        "stderr_truncated": False,
+                        "timed_out": False,
+                        "exit_code": proc.returncode,
+                        "termination_status": "failed",
+                    },
+                )
+
+        assert proc.stdout is not None and proc.stderr is not None
+        stdout_pipe = proc.stdout
+        stderr_pipe = proc.stderr
+        captured: dict[str, BoundedReadResult] = {}
+        readers = [
+            threading.Thread(
+                target=lambda: captured.setdefault("stdout", self._read_bounded(stdout_pipe)),
+                daemon=True,
+            ),
+            threading.Thread(
+                target=lambda: captured.setdefault("stderr", self._read_bounded(stderr_pipe)),
+                daemon=True,
+            ),
+        ]
+        for reader in readers:
+            reader.start()
+
+        cleanup_completed = True
+        cleanup_status = "completed"
+        cleanup_error: Exception | None = None
+        timed_out = False
+        timeout_exc: Exception | None = None
+
+        try:
+            # 1. Bounded wait for process exit up to deadline
+            remaining_proc_wait = max(0.0, deadline - time.perf_counter())
+            try:
+                proc.wait(timeout=remaining_proc_wait)
+            except subprocess.TimeoutExpired as exc:
+                timed_out = True
+                timeout_exc = exc
+
+            # 2. Cleanup process tree / descendants
+            if timed_out:
+                try:
+                    if windows_job is not None:
+                        self._close_windows_job(windows_job)
+                        windows_job = None
+                except Exception as exc:
+                    cleanup_completed = False
+                    cleanup_status = "failed"
+                    cleanup_error = exc
+
+                try:
+                    self._kill_tree(proc)
+                except Exception as exc:
+                    cleanup_completed = False
+                    cleanup_status = "failed"
+                    if cleanup_error is None:
+                        cleanup_error = exc
+            else:
+                # Parent exited before deadline!
+                # Terminate any surviving pipe-inheriting descendants.
+                if windows_job is not None:
+                    try:
+                        self._close_windows_job(windows_job)
+                        windows_job = None
+                    except Exception as exc:
+                        cleanup_completed = False
+                        cleanup_status = "failed"
+                        cleanup_error = exc
+
+                if sys.platform != "win32":
+                    try:
+                        # Reap the owned group even when descendants close inherited pipes
+                        # or ignore SIGTERM. A child that starts its own session is outside
+                        # this group's ownership and cannot be claimed as cleaned up here.
+                        self._kill_tree(proc)
+                    except Exception as exc:
+                        cleanup_completed = False
+                        cleanup_status = "failed"
+                        if cleanup_error is None:
+                            cleanup_error = exc
+
+            # 3. Drain readers boundedly, honoring overall deadline.
+            # Never block close concurrently with reader!
+            for reader in readers:
+                remaining_time = max(0.0, deadline - time.perf_counter())
+                if timed_out:
+                    join_timeout = min(0.5, remaining_time) if remaining_time > 0 else 0.2
+                else:
+                    join_timeout = min(2.0, remaining_time)
+                reader.join(timeout=join_timeout)
+
+            # Check if any reader is still active or overall deadline expired
+            now = time.perf_counter()
+            readers_alive = any(reader.is_alive() for reader in readers)
+            if readers_alive or now >= deadline:
+                if not timed_out and now >= deadline:
+                    timed_out = True
+                if readers_alive:
+                    cleanup_completed = False
+                    if cleanup_status == "completed":
+                        cleanup_status = "uncertain"
+
+            if sys.platform != "win32" and (timed_out or readers_alive):
+                try:
+                    os.killpg(proc.pid, signal.SIGKILL)
+                except ProcessLookupError:
+                    pass
+                except Exception as exc:
+                    cleanup_completed = False
+                    cleanup_status = "failed"
+                    if cleanup_error is None:
+                        cleanup_error = exc
+
+        finally:
+            if windows_job is not None:
+                try:
+                    self._close_windows_job(windows_job)
+                except Exception as exc:
+                    cleanup_completed = False
+                    cleanup_status = "failed"
+                    if cleanup_error is None:
+                        cleanup_error = exc
+                windows_job = None
+
+            # NEVER call close() concurrently with reader! Only close pipe if reader has stopped!
+            if not readers[0].is_alive():
+                try:
+                    stdout_pipe.close()
+                except OSError:
+                    pass
+            if not readers[1].is_alive():
+                try:
+                    stderr_pipe.close()
+                except OSError:
+                    pass
+
+        stdout_res = captured.get("stdout", BoundedReadResult(b"", False))
+        stderr_res = captured.get("stderr", BoundedReadResult(b"", False))
+        stdout_str = stdout_res.data.decode("utf-8", errors="replace")
+        stderr_str = stderr_res.data.decode("utf-8", errors="replace")
+        stdout_redacted, stdout_redaction_truncated = self._cap_redacted_text(redact(stdout_str))
+        stderr_redacted, stderr_redaction_truncated = self._cap_redacted_text(redact(stderr_str))
+        stdout_truncated = stdout_res.truncated or stdout_redaction_truncated
+        stderr_truncated = stderr_res.truncated or stderr_redaction_truncated
+        completed_wall_time = utc_now_iso()
+        duration = round(time.perf_counter() - start_time, 3)
+
+        if cleanup_error is not None:
+            if timed_out:
+                raise TimeoutError(
+                    f"Command timed out after {request.timeout_seconds} seconds: {command_display}",
+                    timeout_seconds=request.timeout_seconds,
+                    details={
+                        "command": command_display,
+                        "args": redacted_args,
+                        "cwd": redacted_cwd,
+                        "duration": duration,
+                        "duration_seconds": duration,
+                        "pid": proc.pid,
+                        "exit_code": proc.returncode,
+                        "timed_out": True,
+                        "termination_status": "timed_out",
+                        "cleanup_completed": False,
+                        "cleanup_status": "failed",
+                        "stdout": stdout_redacted,
+                        "stderr": stderr_redacted,
+                        "stdout_truncated": stdout_truncated,
+                        "stderr_truncated": stderr_truncated,
+                        "started_at": start_wall_time,
+                        "completed_at": completed_wall_time,
+                    },
+                ) from cleanup_error
+            raise ToolExecutionError(
+                f"Command cleanup failed for '{command_display}': {redact(str(cleanup_error))}",
+                details={
+                    "command": command_display,
+                    "args": redacted_args,
+                    "cwd": redacted_cwd,
+                    "duration": duration,
+                    "duration_seconds": duration,
+                    "pid": proc.pid,
+                    "exit_code": proc.returncode,
+                    "timed_out": False,
+                    "termination_status": "failed",
+                    "cleanup_completed": False,
+                    "cleanup_status": "failed",
+                    "stdout": stdout_redacted,
+                    "stderr": stderr_redacted,
+                    "stdout_truncated": stdout_truncated,
+                    "stderr_truncated": stderr_truncated,
+                    "started_at": start_wall_time,
+                    "completed_at": completed_wall_time,
+                },
+            ) from cleanup_error
+
+        if timed_out:
+            raise TimeoutError(
+                f"Command timed out after {request.timeout_seconds} seconds: {command_display}",
+                timeout_seconds=request.timeout_seconds,
+                details={
+                    "command": command_display,
+                    "args": redacted_args,
+                    "cwd": redacted_cwd,
+                    "duration": duration,
+                    "duration_seconds": duration,
+                    "pid": proc.pid,
+                    "exit_code": proc.returncode,
+                    "timed_out": True,
+                    "termination_status": "timed_out",
+                    "cleanup_completed": cleanup_completed,
+                    "cleanup_status": cleanup_status,
+                    "stdout": stdout_redacted,
+                    "stderr": stderr_redacted,
+                    "stdout_truncated": stdout_truncated,
+                    "stderr_truncated": stderr_truncated,
+                    "started_at": start_wall_time,
+                    "completed_at": completed_wall_time,
+                },
+            ) from timeout_exc
+
+        if not stdout_res.read_completed or not stderr_res.read_completed:
+            raise ToolExecutionError(
+                f"Command output capture incomplete for '{command_display}'",
+                details={
+                    "command": command_display,
+                    "args": redacted_args,
+                    "cwd": redacted_cwd,
+                    "duration": duration,
+                    "duration_seconds": duration,
+                    "pid": proc.pid,
+                    "exit_code": proc.returncode,
+                    "timed_out": False,
+                    "termination_status": "completed",
+                    "cleanup_completed": cleanup_completed,
+                    "cleanup_status": cleanup_status,
+                    "capture_completed": False,
+                    "stdout_read_completed": stdout_res.read_completed,
+                    "stderr_read_completed": stderr_res.read_completed,
+                    "stdout": stdout_redacted,
+                    "stderr": stderr_redacted,
+                    "stdout_truncated": stdout_truncated,
+                    "stderr_truncated": stderr_truncated,
+                    "started_at": start_wall_time,
+                    "completed_at": completed_wall_time,
+                },
+            )
+
+        was_killed = proc.returncode is not None and proc.returncode < 0
+        termination_status = "terminated" if was_killed else "completed"
+        return CommandResult(
+            exit_code=proc.returncode if proc.returncode is not None else 0,
+            stdout=stdout_redacted,
+            stderr=stderr_redacted,
+            duration_seconds=duration,
+            timed_out=False,
+            command_display=command_display,
+            pid=proc.pid,
+            started_at=start_wall_time,
+            completed_at=completed_wall_time,
+            stdout_truncated=stdout_truncated,
+            stderr_truncated=stderr_truncated,
+            termination_status=termination_status,
+            cleanup_completed=cleanup_completed,
+            cleanup_status=cleanup_status,
+            args=redacted_args,
+            cwd=redacted_cwd,
+        )

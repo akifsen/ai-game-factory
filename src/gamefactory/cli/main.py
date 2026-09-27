@@ -39,7 +39,12 @@ from gamefactory.cli.exit_codes import (
 )
 from gamefactory.config.loader import ConfigLoader
 from gamefactory.core.approvals.approval_service import ApprovalService
-from gamefactory.core.domain.errors import ConfigurationError, FactoryError, ValidationError
+from gamefactory.core.domain.errors import (
+    ConfigurationError,
+    FactoryError,
+    ProviderUnavailable,
+    ValidationError,
+)
 from gamefactory.core.domain.models import AuditEvent, generate_id
 from gamefactory.core.execution.path_guard import PathGuard, assert_managed_directory
 from gamefactory.core.execution.redaction import redactor
@@ -50,6 +55,10 @@ from gamefactory.workflows.definitions import (
     create_paid_safety_workflow,
 )
 from gamefactory.workflows.engine import WorkflowEngine
+from gamefactory.workflows.godot_verification import (
+    create_godot_verification_workflow,
+    register_godot_handlers,
+)
 
 
 def _add_common(parser: argparse.ArgumentParser, *, nested: bool = False) -> None:
@@ -100,7 +109,8 @@ def build_parser() -> argparse.ArgumentParser:
 
     run = commands.add_parser("run", help="run a built-in demonstrator workflow")
     _add_common(run, nested=True)
-    run.add_argument("kind", choices=("demo", "failure", "paid-safety"))
+    run.add_argument("kind", choices=("demo", "failure", "paid-safety", "godot-verify"))
+    run.add_argument("--scenario", help="strict Godot verification scenario JSON")
 
     resume = commands.add_parser("resume")
     _add_common(resume, nested=True)
@@ -314,8 +324,41 @@ def _inspect(db: Database, workflow_id: str) -> dict[str, Any]:
     }
 
 
-def _run_workflow(root: Path, db: Database, kind: str) -> Any:
+def _run_workflow(
+    root: Path,
+    db: Database,
+    kind: str,
+    scenario_path: str | None = None,
+    godot_path: str | None = None,
+) -> Any:
     cfg = ConfigLoader.load_config(root)
+    if kind == "godot-verify":
+        if not scenario_path:
+            raise ConfigurationError("run godot-verify requires --scenario <scenario.json>")
+        configured = godot_path if godot_path is not None else cfg.engine.executable_path
+        if configured is None:
+            configured = os.environ.get("GAMEFACTORY_GODOT_PATH")
+        adapter = GodotAdapter()
+        if configured is None:
+            configured = adapter.find_candidate_executable()
+        if configured is None:
+            raise ProviderUnavailable("Godot executable was not found", provider="godot")
+        executable = Path(configured).expanduser().resolve(strict=False)
+        if not executable.is_file():
+            raise ProviderUnavailable(
+                f"Configured Godot executable does not exist: {executable}", provider="godot"
+            )
+        scenario = Path(scenario_path).expanduser()
+        if not scenario.is_absolute():
+            scenario = root / scenario
+        workflow, tasks = create_godot_verification_workflow(
+            cfg.project.id, root, executable, scenario
+        )
+        engine = _engine(root, db)
+        engine.register_workflow(workflow, tasks)
+        return engine.run_workflow(workflow.id)
+    if scenario_path:
+        raise ConfigurationError("--scenario is only valid with 'run godot-verify'")
     creators = {
         "demo": create_demo_workflow,
         "failure": create_failure_workflow,
@@ -327,7 +370,7 @@ def _run_workflow(root: Path, db: Database, kind: str) -> Any:
     return engine.run_workflow(workflow.id)
 
 
-def _engine(root: Path, db: Database) -> WorkflowEngine:
+def _engine(root: Path, db: Database, godot_path: str | None = None) -> WorkflowEngine:
     """Build a CLI engine whose only generation provider is the explicitly named fake."""
     config = ConfigLoader.load_config(root)
     policy = config.policies
@@ -336,16 +379,28 @@ def _engine(root: Path, db: Database) -> WorkflowEngine:
             require_approval_for_paid=policy.paid_operations_require_approval,
             require_approval_for_destructive=policy.destructive_operations_require_approval,
             require_approval_for_repo_write=policy.require_approval_for_repo_write,
+            require_approval_for_process_execution=policy.require_approval_for_process_execution,
             max_operation_cost=policy.max_operation_cost,
             project_budget=policy.project_budget,
         )
     )
-    return WorkflowEngine(
+    engine = WorkflowEngine(
         root,
         db,
         policy_engine=policy_engine,
         asset_provider=FakeAssetGenerationProvider(),
     )
+    register_godot_handlers(
+        engine.handler_registry,
+        root,
+        engine.artifact_mgr,
+        engine.art_repo,
+        engine.exec_repo,
+        engine.evi_repo,
+        engine.gate_repo,
+        engine.process_runner,
+    )
+    return engine
 
 
 def _list_project_files(root: Path) -> list[Path]:
@@ -471,7 +526,9 @@ def _dispatch(args: argparse.Namespace) -> tuple[Any, int, str | None]:
             return _status(root, args.godot_path, args.blender_path), EXIT_SUCCESS, None
         if args.command == "run":
             ConfigLoader.load_config(root)
-            result = _run_workflow(root, db, args.kind)
+            result = _run_workflow(
+                root, db, args.kind, getattr(args, "scenario", None), args.godot_path
+            )
             payload = _result_payload(result)
             message = f"Workflow {result.workflow_id}: {result.status.value}"
             if result.pending_approval_id:
@@ -575,6 +632,10 @@ def _dispatch(args: argparse.Namespace) -> tuple[Any, int, str | None]:
 
 def main(argv: Sequence[str] | None = None) -> int:
     global _JSON_ERRORS
+    for output in (sys.stdout, sys.stderr):
+        reconfigure = getattr(output, "reconfigure", None)
+        if reconfigure is not None:
+            reconfigure(encoding="utf-8", errors="replace")
     _JSON_ERRORS = "--json" in (list(argv) if argv is not None else sys.argv[1:])
     parser = build_parser()
     args = parser.parse_args(argv)

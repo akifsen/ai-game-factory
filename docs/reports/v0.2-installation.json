@@ -1,0 +1,140 @@
+{
+  "started_at": "2026-09-27T01:38:41.316037+00:00",
+  "outside_checkout_cwd": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory v02 installed cab11095",
+  "commands": [
+    {
+      "argv": [
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verify-venv\\Scripts\\python.exe",
+        "-m",
+        "pip",
+        "wheel",
+        ".",
+        "--no-deps",
+        "--no-build-isolation",
+        "--no-cache-dir",
+        "--no-index",
+        "-w",
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\v02\\wheels"
+      ],
+      "cwd": "C:\\Users\\lenovo\\devel\\ai-game-factory",
+      "exit_code": 0,
+      "stdout": "Processing c:\\users\\lenovo\\devel\\ai-game-factory\n  Preparing metadata (pyproject.toml): started\n  Preparing metadata (pyproject.toml): finished with status 'done'\nBuilding wheels for collected packages: gamefactory\n  Building wheel for gamefactory (pyproject.toml): started\n  Building wheel for gamefactory (pyproject.toml): finished with status 'done'\n  Created wheel for gamefactory: filename=gamefactory-0.2.0-py3-none-any.whl size=102536 sha256=436804268825500881ca94fedff21f1c5528d3f92936654d9b06d03fd3b2346e\n  Stored in directory: C:\\Users\\lenovo\\AppData\\Local\\Temp\\pip-ephem-wheel-cache-yzh0wghv\\wheels\\3d\\88\\a3\\286e2f374a5f23b0b7168d23237dc19e0a25f5cb260d22e468\nSuccessfully built gamefactory\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\v02\\installed-v02\\Scripts\\python.exe",
+        "-m",
+        "pip",
+        "install",
+        "--no-index",
+        "--no-deps",
+        "--force-reinstall",
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\v02\\wheels\\gamefactory-0.2.0-py3-none-any.whl"
+      ],
+      "cwd": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory v02 installed cab11095",
+      "exit_code": 0,
+      "stdout": "Processing c:\\users\\lenovo\\devel\\ai-game-factory\\.verification\\v02\\wheels\\gamefactory-0.2.0-py3-none-any.whl\nInstalling collected packages: gamefactory\n  Attempting uninstall: gamefactory\n    Found existing installation: gamefactory 0.2.0\n    Uninstalling gamefactory-0.2.0:\n      Successfully uninstalled gamefactory-0.2.0\nSuccessfully installed gamefactory-0.2.0\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\v02\\installed-v02\\Scripts\\python.exe",
+        "-I",
+        "-c",
+        "import json,gamefactory;from importlib.resources import files;print(json.dumps({'version':gamefactory.__version__,'module':gamefactory.__file__,'resource_sizes':{p:len(files('gamefactory').joinpath(p).read_bytes()) for p in ['resources/godot/harness.gd','schemas/godot-scenario-0.2.0.schema.json','schemas/godot-observation-0.2.0.schema.json']}}))"
+      ],
+      "cwd": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory v02 installed cab11095",
+      "exit_code": 0,
+      "stdout": "{\"version\": \"0.2.0\", \"module\": \"C:\\\\Users\\\\lenovo\\\\devel\\\\ai-game-factory\\\\.verification\\\\v02\\\\installed-v02\\\\Lib\\\\site-packages\\\\gamefactory\\\\__init__.py\", \"resource_sizes\": {\"resources/godot/harness.gd\": 8855, \"schemas/godot-scenario-0.2.0.schema.json\": 2411, \"schemas/godot-observation-0.2.0.schema.json\": 1629}}\n",
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\v02\\installed-v02\\Scripts\\gamefactory.exe",
+        "--version"
+      ],
+      "cwd": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory v02 installed cab11095",
+      "exit_code": 0,
+      "stdout": "gamefactory 0.2.0\n",
+      "stderr": ""
+    }
+  ],
+  "wheel": {
+    "path": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\v02\\wheels\\gamefactory-0.2.0-py3-none-any.whl",
+    "sha256": "436804268825500881ca94fedff21f1c5528d3f92936654d9b06d03fd3b2346e",
+    "required_resources": [
+      "gamefactory/resources/godot/harness.gd",
+      "gamefactory/schemas/godot-scenario-0.2.0.schema.json",
+      "gamefactory/schemas/godot-observation-0.2.0.schema.json",
+      "gamefactory/schemas/project-config-0.1.0.schema.json"
+    ]
+  },
+  "installed_probe": {
+    "version": "0.2.0",
+    "module": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\v02\\installed-v02\\Lib\\site-packages\\gamefactory\\__init__.py",
+    "resource_sizes": {
+      "resources/godot/harness.gd": 8855,
+      "schemas/godot-scenario-0.2.0.schema.json": 2411,
+      "schemas/godot-observation-0.2.0.schema.json": 1629
+    }
+  },
+  "installed_source_hash_matches": {
+    "__init__.py": true,
+    "__main__.py": true,
+    "adapters\\dcc\\__init__.py": true,
+    "adapters\\dcc\\base.py": true,
+    "adapters\\dcc\\blender.py": true,
+    "adapters\\engines\\__init__.py": true,
+    "adapters\\engines\\base.py": true,
+    "adapters\\engines\\godot.py": true,
+    "adapters\\engines\\godot_contracts.py": true,
+    "adapters\\engines\\godot_execution.py": true,
+    "adapters\\engines\\godot_staging.py": true,
+    "adapters\\external\\__init__.py": true,
+    "adapters\\external\\base.py": true,
+    "adapters\\external\\meshy.py": true,
+    "adapters\\fakes\\__init__.py": true,
+    "adapters\\fakes\\fake_provider.py": true,
+    "adapters\\persistence\\__init__.py": true,
+    "adapters\\persistence\\database.py": true,
+    "adapters\\persistence\\migrations.py": true,
+    "adapters\\persistence\\repositories.py": true,
+    "capabilities\\__init__.py": true,
+    "capabilities\\registry.py": true,
+    "cli\\exit_codes.py": true,
+    "cli\\main.py": true,
+    "config\\__init__.py": true,
+    "config\\loader.py": true,
+    "config\\schema.py": true,
+    "core\\approvals\\__init__.py": true,
+    "core\\approvals\\approval_service.py": true,
+    "core\\artifacts\\__init__.py": true,
+    "core\\artifacts\\artifact_manager.py": true,
+    "core\\domain\\__init__.py": true,
+    "core\\domain\\dag.py": true,
+    "core\\domain\\errors.py": true,
+    "core\\domain\\models.py": true,
+    "core\\domain\\state_machine.py": true,
+    "core\\execution\\__init__.py": true,
+    "core\\execution\\locks.py": true,
+    "core\\execution\\path_guard.py": true,
+    "core\\execution\\process_runner.py": true,
+    "core\\execution\\redaction.py": true,
+    "core\\policies\\__init__.py": true,
+    "core\\policies\\policy_engine.py": true,
+    "resources\\godot\\harness.gd": true,
+    "schemas\\godot-observation-0.2.0.schema.json": true,
+    "schemas\\godot-scenario-0.2.0.schema.json": true,
+    "schemas\\project-config-0.1.0.schema.json": true,
+    "workflows\\__init__.py": true,
+    "workflows\\builtin_tasks.py": true,
+    "workflows\\definitions.py": true,
+    "workflows\\engine.py": true,
+    "workflows\\godot_verification.py": true,
+    "workflows\\handlers.py": true,
+    "workflows\\ports.py": true
+  },
+  "status": "PASSED",
+  "finished_at": "2026-09-27T01:38:46.782133+00:00"
+}

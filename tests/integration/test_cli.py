@@ -36,7 +36,7 @@ def test_help_version_and_json_usage_error() -> None:
         [sys.executable, "-m", "gamefactory", "--version"], text=True, capture_output=True
     )
     assert version_result.returncode == 0
-    assert version_result.stdout.strip() == "gamefactory 0.1.0"
+    assert version_result.stdout.strip() == "gamefactory 0.2.0"
 
     bad = subprocess.run(
         [sys.executable, "-m", "gamefactory", "run", "bogus", "--json"],

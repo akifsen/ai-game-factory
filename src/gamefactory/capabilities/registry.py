@@ -22,6 +22,7 @@ class CapabilityStatus(StrEnum):
     UNAVAILABLE = "UNAVAILABLE"
     MISCONFIGURED = "MISCONFIGURED"
     APPROVAL_REQUIRED = "APPROVAL_REQUIRED"
+    NOT_VERIFIED = "NOT_VERIFIED"
 
 
 @dataclass
@@ -87,6 +88,18 @@ class CapabilityRegistry:
                 "version": godot_res.version,
                 "executable_path": godot_res.executable_path,
                 "details": godot_res.details,
+            },
+        )
+        entries["engine.godot.headless_verification"] = CapabilityEntry(
+            name="engine.godot.headless_verification",
+            description="Godot headless verification pipeline; an approved workflow probes the installed CLI before execution",
+            status=(CapabilityStatus.NOT_VERIFIED if godot_res.available else godot_status),
+            provider="godot",
+            details={
+                "executable_path": godot_res.executable_path,
+                "engine_version": godot_res.version,
+                "runtime_cli_probed": False,
+                "requires_approval_when_configured": True,
             },
         )
         # 2. Blender DCC detection

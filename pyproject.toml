@@ -43,7 +43,7 @@ where = ["src"]
 version = {attr = "gamefactory.__version__"}
 
 [tool.setuptools.package-data]
-gamefactory = ["schemas/*.json"]
+gamefactory = ["schemas/*.json", "resources/godot/*.gd"]
 
 [tool.ruff]
 line-length = 100
@@ -81,3 +81,4 @@ minversion = "8.0"
 testpaths = ["tests"]
 python_files = ["test_*.py"]
 addopts = "-v"
+markers = ["real_godot: opt-in tests against an actual Godot executable"]

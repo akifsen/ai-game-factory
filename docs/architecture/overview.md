@@ -1,4 +1,4 @@
-# V0.1 architecture
+# Architecture through V0.2
 
 Factory is development-time tooling. The game project is the target being inspected and edited; the game does not depend on the Factory at runtime.
 
@@ -55,7 +55,7 @@ Configuration layers are defaults, user config under the platform user config di
 
 ## Lifecycle and extension limits
 
-The Factory initializes local project state, creates and runs demonstrator workflows, persists attempts, pauses for approval, resumes or retries, and exposes status/inspection. It does not yet create projects, plan natural-language work, launch Godot, automate Blender, generate real assets, or host plugins from third parties. See [integration status](../integrations/status.md) and the [deferred boundaries](../requirements/future-boundaries.md).
+The Factory initializes local project state, creates and runs demonstrator workflows, persists attempts, pauses for approval, resumes or retries, and exposes status/inspection. V0.2 also launches bounded Godot verification in an attempt-owned staged project. It does not create projects, plan natural-language work, automate Blender, generate real assets, or host plugins from third parties. See [integration status](../integrations/status.md) and the [deferred boundaries](../requirements/future-boundaries.md).
 
 `core/domain` contains plain Python models, state machines, and DAG checks. `workflows` coordinates the state machine and policy checks and owns the provider port in `ports.py`. Built-in task actions are registered in `builtin_tasks.py`; extensions use `handlers.py`. `adapters/persistence` owns SQLite and versioned migrations. `adapters/engines` and `adapters/dcc` isolate local tool detection. `adapters/external` implements provider boundaries; its legacy `base` module re-exports the inward contracts for compatibility. The CLI explicitly injects the fake provider only for demonstrator workflows.
 
@@ -63,4 +63,25 @@ V0.1 execution is sequential. An approval pauses a task and persists the request
 
 Handlers are trusted local Python extensions, not a sandbox for hostile executable code. Their returned claims remain untrusted: the engine validates result shape, artifact ownership, physical files, and hashes before completion. Project policy settings are explicitly mapped into the policy engine by the CLI composition function.
 
-Current real tool support is detection and Godot project metadata inspection. The capability registry does not advertise Godot run. Blender does not modify assets. Meshy does not call a service. See [integration status](../integrations/status.md) and [ADRs](../adr/).
+Current real tool support includes Godot detection, metadata inspection and the bounded headless verification pipeline. Blender does not modify assets. Meshy does not call a service. See [integration status](../integrations/status.md) and [ADRs](../adr/).
+
+
+## V0.2 Godot verification boundary
+
+```mermaid
+flowchart LR
+  S[Strict scenario and source manifest] --> P[Central policy and fingerprinted approval]
+  P --> X[godot_execute]
+  X --> I[Staged Godot import]
+  I --> R[Real scene plus packaged harness]
+  R --> O[Correlated observations and process artifacts]
+  O --> V[godot_validate: Python assertions]
+  S --> V
+  V --> E[record_evidence: existing final gate]
+```
+
+The runtime request carries actions and sample ticks; expected values stay outside
+the harness. Handler metadata exposes process/write effects to the central policy.
+Attempt launch intent and terminal receipts support conservative recovery without
+changing the domain's state machines or SQLite schema. Interrupted ownership is
+not inferred from PID or a released lock. See [ADR 0005](../adr/0005-godot-staging-and-independent-oracle.md).

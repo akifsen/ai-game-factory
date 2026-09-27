@@ -458,6 +458,22 @@ class TaskRepository:
             updated_at=row["updated_at"],
         )
 
+    def update_parameters(self, task_id: str, parameters: dict[str, Any]) -> None:
+        """Persist a refreshed immutable input snapshot before policy/approval evaluation."""
+        if _contains_task_secret(parameters):
+            raise ValidationError(
+                "Task parameters contain a sensitive field or known credential; remove it before persistence",
+                details={"task_id": task_id},
+            )
+        payload = json.dumps(parameters, sort_keys=True, separators=(",", ":"), allow_nan=False)
+        with self.db.transaction() as conn:
+            cursor = conn.execute(
+                "UPDATE tasks SET parameters_json = ?, updated_at = ? WHERE id = ?",
+                (payload, utc_now_iso(), task_id),
+            )
+            if cursor.rowcount != 1:
+                raise ValidationError(f"Task '{task_id}' not found while updating parameters")
+
 
 class ExecutionRepository:
     def __init__(self, db: Database) -> None:

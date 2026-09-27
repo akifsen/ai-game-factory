@@ -61,6 +61,11 @@
           "title": "Require Approval For Repo Write",
           "type": "boolean"
         },
+        "require_approval_for_process_execution": {
+          "default": false,
+          "title": "Require Approval For Process Execution",
+          "type": "boolean"
+        },
         "max_operation_cost": {
           "default": 50.0,
           "minimum": 0,

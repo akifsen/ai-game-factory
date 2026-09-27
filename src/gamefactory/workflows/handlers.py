@@ -1,7 +1,9 @@
 """Adapter-neutral, versioned contracts for bounded workflow task handlers."""
 
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Protocol
+from enum import StrEnum
+from typing import Any, Protocol
 
 from gamefactory.core.domain.models import Execution, Task, Workflow
 
@@ -31,6 +33,35 @@ class TaskHandler(Protocol):
     ) -> TaskHandlerResult: ...
 
 
+class HandlerOperation(StrEnum):
+    LOCAL_READ = "LOCAL_READ"
+    REPOSITORY_WRITE = "REPOSITORY_WRITE"
+    PROCESS_EXECUTION = "PROCESS_EXECUTION"
+
+
+class HandlerRecovery(StrEnum):
+    SAFE_TO_RETRY = "SAFE_TO_RETRY"
+    CONSERVATIVE_PROCESS = "CONSERVATIVE_PROCESS"
+
+
+@dataclass(frozen=True)
+class TaskHandlerMetadata:
+    """Policy and recovery profile for a registered task handler."""
+
+    operation: HandlerOperation = HandlerOperation.LOCAL_READ
+    managed_write: bool = False
+    recovery: HandlerRecovery = HandlerRecovery.SAFE_TO_RETRY
+    approval_context: Callable[[Workflow, Task], dict[str, Any]] | None = None
+    refresh_parameters: Callable[[Workflow, Task], dict[str, Any]] | None = None
+    recovery_check: Callable[[Workflow, Task, Execution], bool] | None = None
+
+
+@dataclass(frozen=True)
+class RegisteredTaskHandler:
+    handler: TaskHandler
+    metadata: TaskHandlerMetadata
+
+
 class TaskHandlerRegistry:
     """Explicit extension registry with reserved core task names protected."""
 
@@ -47,12 +78,24 @@ class TaskHandlerRegistry:
     )
 
     def __init__(self) -> None:
-        self._handlers: dict[str, TaskHandler] = {}
+        self._handlers: dict[str, RegisteredTaskHandler] = {}
 
-    def register(self, task_type: str, handler: TaskHandler) -> None:
+    def register(
+        self,
+        task_type: str,
+        handler: TaskHandler,
+        metadata: TaskHandlerMetadata | None = None,
+    ) -> None:
         if not task_type or task_type in self._RESERVED or task_type in self._handlers:
             raise ValueError(f"Invalid, reserved, or duplicate task handler type: {task_type}")
-        self._handlers[task_type] = handler
+        self._handlers[task_type] = RegisteredTaskHandler(
+            handler, metadata or TaskHandlerMetadata()
+        )
 
     def get(self, task_type: str) -> TaskHandler | None:
-        return self._handlers.get(task_type)
+        registered = self._handlers.get(task_type)
+        return registered.handler if registered else None
+
+    def metadata(self, task_type: str) -> TaskHandlerMetadata | None:
+        registered = self._handlers.get(task_type)
+        return registered.metadata if registered else None

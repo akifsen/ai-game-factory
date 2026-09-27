@@ -18,6 +18,7 @@ dist/
 .gamefactory/state/
 .gamefactory/locks/
 .gamefactory/artifacts/
+.gamefactory/scratch/
 
 # Blender backups
 *.blend1

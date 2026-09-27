@@ -56,6 +56,7 @@ class PolicyConfig(BaseModel):
     paid_operations_require_approval: bool = True
     destructive_operations_require_approval: bool = True
     require_approval_for_repo_write: bool = False
+    require_approval_for_process_execution: bool = False
     max_operation_cost: float = Field(default=50.0, ge=0, allow_inf_nan=False)
     project_budget: float = Field(default=500.0, ge=0, allow_inf_nan=False)
 

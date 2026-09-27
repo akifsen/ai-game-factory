@@ -33,6 +33,24 @@ class TestPolicyEngine:
         assert res.allowed is True
         assert res.requires_approval is False
 
+    def test_managed_process_write_obeys_existing_repository_write_policy(self) -> None:
+        engine = PolicyEngine(PolicyRule(require_approval_for_repo_write=True))
+        result = engine.evaluate(OperationType.PROCESS_EXECUTION, context={"managed_write": True})
+        assert result.requires_approval is True
+        assert result.approval_type == "process_execution"
+        approved = engine.evaluate(
+            OperationType.PROCESS_EXECUTION,
+            context={"managed_write": True},
+            has_approval=True,
+        )
+        assert approved.allowed is True
+
+    def test_process_approval_policy_applies_without_managed_write(self) -> None:
+        engine = PolicyEngine(PolicyRule(require_approval_for_process_execution=True))
+        result = engine.evaluate(OperationType.PROCESS_EXECUTION)
+        assert result.requires_approval is True
+        assert result.approval_type == "process_execution"
+
     def test_free_external_allowed_without_approval(self) -> None:
         res = self.engine.evaluate(OperationType.FREE_EXTERNAL, cost_class=CostClass.FREE_EXTERNAL)
         assert res.allowed is True

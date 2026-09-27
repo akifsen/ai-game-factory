@@ -2,7 +2,7 @@
 
 AI Game Factory is local development tooling for coordinating bounded game-development workflows. It stores workflow state, task attempts, artifacts, evidence, approvals, and policy decisions locally. A managed game remains usable without the Factory installed.
 
-V0.1 is an orchestration foundation. It provides SQLite persistence, sequential DAG workflows, approval gates, local fake demo providers, Godot and Blender detection, and an argparse CLI. It does not implement Meshy generation, Godot project execution, automatic Blender processing, or AI workers.
+V0.2 adds real Godot headless scene verification with staged projects, bounded import/runtime processes, durable evidence and independent Python assertions. It preserves the V0.1 SQLite workflow, approvals, fake demo providers and CLI. Meshy generation, Blender processing and AI workers remain outside this release.
 
 ## Install and run
 
@@ -56,9 +56,43 @@ The CLI accepts `--project DIR` / `-p DIR` and explicit `--godot-path` / `--blen
 
 The versioned project contract is `.gamefactory/factory.yml`; the JSON Schema is in `schemas/`. Unknown fields are rejected. User-wide defaults can be set in `%APPDATA%/gamefactory/config.yml` on Windows or `$XDG_CONFIG_HOME/gamefactory/config.yml` (falling back to `~/.config/gamefactory/config.yml`) on Linux/macOS. Precedence is defaults, user config, project config, then explicit command-line executable paths. Do not put credentials in either YAML file; provider secrets belong in environment variables, and no V0.1 command sends them anywhere. Local state is in `.gamefactory/state/factory.db`. State and config paths are checked against project-root escapes before use.
 
-Godot and Blender are optional. `doctor` reports availability and versions; it does not claim that detection implies execution support. Meshy is classified as paid but unavailable because generation is not implemented. Never run paid external operations with this milestone.
+Godot is required only for `godot-verify`; other core workflows remain usable without it. Blender is optional and detection-only. `doctor` reports actual capabilities and versions. Meshy remains unavailable and no real paid-provider operation is implemented.
 
 See [architecture overview](docs/architecture/overview.md), [integration status](docs/integrations/status.md), [development workflow](docs/development/README.md), [acceptance requirements](docs/requirements/03-acceptance.md), and [deferred boundaries](docs/requirements/future-boundaries.md).
 
 The [documentation index](docs/README.md) links the detailed implementation plan,
 all 123 requirement sections, and the [V0.1 verification report](docs/reports/v0.1-completion-report.md).
+
+## V0.2 real Godot journey
+
+Use a trusted local Godot project. The included fixture implements actual damage,
+enemy and score behavior; its scenario expects HP 40, two enemies and score 100
+at tick 90.
+
+```bash
+gamefactory --project examples/godot-verification init
+gamefactory --project examples/godot-verification --json run godot-verify --scenario scenario.json
+gamefactory --project examples/godot-verification inspect WORKFLOW_ID
+gamefactory --project examples/godot-verification artifacts --workflow WORKFLOW_ID
+```
+
+Supply `--godot-path PATH` if detection cannot locate your executable. Configure
+`policies.require_approval_for_process_execution: true` to require approval before
+launch; use `approvals`, `approve` and `resume` as in the existing workflow. The
+approved source/scenario/executable/harness fingerprint is checked before dispatch.
+The package is 0.2.0; project config schema stays 0.1.0.
+
+Godot runs a separate staged copy and writes observations without receiving the
+assertion expectations. Python validates current-attempt evidence and checks the
+assertions. Zero exit code alone cannot pass a gate. Unknown child-process state
+after interruption stays blocked; terminal failures can create a fresh attempt
+with `retry WORKFLOW_ID TASK_ID`. Historical logs remain available.
+
+Staging is for source preservation and reproducibility, not an OS security sandbox.
+The original game remains runnable without Factory or its harness. Verification
+covers the bounded integer-state fixture contract, not visual quality, arbitrary
+physics determinism, AI gameplay or mobile exports.
+
+See the [V0.2 plan](docs/work-plan-v0.2.md),
+[Godot contract and recovery guide](docs/integrations/godot-headless-verification.md)
+and [V0.2 completion report](docs/reports/v0.2-completion-report.md).

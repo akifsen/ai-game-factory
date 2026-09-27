@@ -1,0 +1,1139 @@
+{
+  "status": "PASSED",
+  "verified_at": "2026-09-27T01:41:37.056151+00:00",
+  "artifact_count": 197,
+  "artifacts": [
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\fixture game Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-52e21aa5\\WF-GODOT-52e21aa5-EXECUTE\\EXEC-49b8aed3\\source-manifest.json",
+      "type": "godot-source-manifest",
+      "sha256": "96fa61893b3025cc959935b3850e456430336b15f8d73ac6b0de8b8deecb03de"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\fixture game Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-52e21aa5\\WF-GODOT-52e21aa5-EXECUTE\\EXEC-49b8aed3\\scenario-snapshot.json",
+      "type": "godot-scenario-snapshot",
+      "sha256": "53f5cf62c152269cb73a13e6d7fb26e86b4d0fd5ddd30e40e7faaa04ac12aa32"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\fixture game Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-52e21aa5\\WF-GODOT-52e21aa5-EXECUTE\\EXEC-49b8aed3\\version.json",
+      "type": "godot-process-journal",
+      "sha256": "6b1aca41e16edff457329206dbba8767f8acff0ff802c231584afe928669d789"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\fixture game Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-52e21aa5\\WF-GODOT-52e21aa5-EXECUTE\\EXEC-49b8aed3\\version-terminal.json",
+      "type": "godot-process-journal",
+      "sha256": "9903bb94beed6e47199dea1f3c4eb43c4cea9dd3c18087b21c306ad06f34d838"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\fixture game Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-52e21aa5\\WF-GODOT-52e21aa5-EXECUTE\\EXEC-49b8aed3\\help.json",
+      "type": "godot-process-journal",
+      "sha256": "b1adeb8067439d7eace9c9a9a0ee63600257e46e9977f62fdf34751bf0bf426b"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\fixture game Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-52e21aa5\\WF-GODOT-52e21aa5-EXECUTE\\EXEC-49b8aed3\\help-terminal.json",
+      "type": "godot-process-journal",
+      "sha256": "c80e770ab8f61eb217a54edd97825ea229f3ee2a6d33b59c3afb00722e94d2d4"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\fixture game Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-52e21aa5\\WF-GODOT-52e21aa5-EXECUTE\\EXEC-49b8aed3\\import.json",
+      "type": "godot-process-journal",
+      "sha256": "05d4f5a477a200484ef5b41dde2a592f56ae94804194a6e631c4b406adbb3e51"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\fixture game Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-52e21aa5\\WF-GODOT-52e21aa5-EXECUTE\\EXEC-49b8aed3\\import-terminal.json",
+      "type": "godot-process-journal",
+      "sha256": "bb72ccb829cc14b9fd3a78a254580647b0edd24faec85aef9f73be69f851df7a"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\fixture game Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-52e21aa5\\WF-GODOT-52e21aa5-EXECUTE\\EXEC-49b8aed3\\runtime.json",
+      "type": "godot-process-journal",
+      "sha256": "f2a28a5e38aca8edb84b756081523d5de1e5cfee9623560f96fff73697b72a6e"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\fixture game Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-52e21aa5\\WF-GODOT-52e21aa5-EXECUTE\\EXEC-49b8aed3\\runtime-terminal.json",
+      "type": "godot-process-journal",
+      "sha256": "0c7b1dde824e359c745252b71e25409d975746e4b3f32a2b5e0980c4d45551f3"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\fixture game Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-52e21aa5\\WF-GODOT-52e21aa5-EXECUTE\\EXEC-49b8aed3\\help-process.json",
+      "type": "godot-help-process",
+      "sha256": "0511423f8b9c533a284077fec78af56d1c4e8852423a74de9cb370492e249e53"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\fixture game Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-52e21aa5\\WF-GODOT-52e21aa5-EXECUTE\\EXEC-49b8aed3\\help-stderr.log",
+      "type": "godot-help-stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\fixture game Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-52e21aa5\\WF-GODOT-52e21aa5-EXECUTE\\EXEC-49b8aed3\\help-stdout.log",
+      "type": "godot-help-stdout",
+      "sha256": "e4160ad4187fba1cbc092d2412a03535e83464eb9d8c446075cc29f4cad5b1d3"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\fixture game Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-52e21aa5\\WF-GODOT-52e21aa5-EXECUTE\\EXEC-49b8aed3\\import-process.json",
+      "type": "godot-import-process",
+      "sha256": "2af86d832a9abd0ed1d8e083758b95244451056d93fba5d9b2f3a6fc84b3a1be"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\fixture game Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-52e21aa5\\WF-GODOT-52e21aa5-EXECUTE\\EXEC-49b8aed3\\import-stderr.log",
+      "type": "godot-import-stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\fixture game Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-52e21aa5\\WF-GODOT-52e21aa5-EXECUTE\\EXEC-49b8aed3\\import-stdout.log",
+      "type": "godot-import-stdout",
+      "sha256": "21fcb9c0b9f0607f38457386670bd71c0303fd972e623bb024dfeaaf58a56b59"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\fixture game Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-52e21aa5\\WF-GODOT-52e21aa5-EXECUTE\\EXEC-49b8aed3\\runtime-observation.json",
+      "type": "godot-runtime-observation",
+      "sha256": "9e01035bf163391527f2a8cfae0a27a3fc0e56c07044e0f924ba75909d46abf0"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\fixture game Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-52e21aa5\\WF-GODOT-52e21aa5-EXECUTE\\EXEC-49b8aed3\\runtime-process.json",
+      "type": "godot-runtime-process",
+      "sha256": "ba3f510126334f5e5c787bb67db60ecc05ae48e6d20a680396a9b8df160bc8b2"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\fixture game Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-52e21aa5\\WF-GODOT-52e21aa5-EXECUTE\\EXEC-49b8aed3\\runtime-request.json",
+      "type": "godot-runtime-request",
+      "sha256": "8ec0bcc499cb8e90740ba96a344ea98c9c18b2be0a93b5ec06d1832929bb7fe1"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\fixture game Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-52e21aa5\\WF-GODOT-52e21aa5-EXECUTE\\EXEC-49b8aed3\\runtime-stderr.log",
+      "type": "godot-runtime-stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\fixture game Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-52e21aa5\\WF-GODOT-52e21aa5-EXECUTE\\EXEC-49b8aed3\\runtime-stdout.log",
+      "type": "godot-runtime-stdout",
+      "sha256": "85040aeb00d8286aed45096a50fb1007783ed6433ad0e11e9a76547c77eb5df9"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\fixture game Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-52e21aa5\\WF-GODOT-52e21aa5-EXECUTE\\EXEC-49b8aed3\\version-process.json",
+      "type": "godot-version-process",
+      "sha256": "b442d804c6d8be59969051b48d80a75aa91d3afb854e421b54258a71cf31a357"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\fixture game Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-52e21aa5\\WF-GODOT-52e21aa5-EXECUTE\\EXEC-49b8aed3\\version-stderr.log",
+      "type": "godot-version-stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\fixture game Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-52e21aa5\\WF-GODOT-52e21aa5-EXECUTE\\EXEC-49b8aed3\\version-stdout.log",
+      "type": "godot-version-stdout",
+      "sha256": "c070177873f0f0acfbd7940156bb455d896c7b3694a65fa71d6d8c0ed65fb3fb"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\fixture game Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-52e21aa5\\WF-GODOT-52e21aa5-EXECUTE\\EXEC-49b8aed3\\execution-summary.json",
+      "type": "godot-execution-summary",
+      "sha256": "b6036557e2b4055d84efc53effe8a36209fd35dd620eee0d2984a969838a7969"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\fixture game Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-52e21aa5\\WF-GODOT-52e21aa5-VALIDATE\\EXEC-5e21994e\\validation-report.json",
+      "type": "godot-validation-report",
+      "sha256": "def28ed09b272e1ef1b3faf9040231cb27b27082dbf171eb9930436c57a4e3fe"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\fixture game Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-c13ac4a5\\WF-GODOT-c13ac4a5-EXECUTE\\EXEC-d9f92356\\source-manifest.json",
+      "type": "godot-source-manifest",
+      "sha256": "4974808cf0740a00e081c9562e87057489695343ab90f851afa2d2fd163adea0"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\fixture game Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-c13ac4a5\\WF-GODOT-c13ac4a5-EXECUTE\\EXEC-d9f92356\\scenario-snapshot.json",
+      "type": "godot-scenario-snapshot",
+      "sha256": "53f5cf62c152269cb73a13e6d7fb26e86b4d0fd5ddd30e40e7faaa04ac12aa32"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\fixture game Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-c13ac4a5\\WF-GODOT-c13ac4a5-EXECUTE\\EXEC-d9f92356\\version.json",
+      "type": "godot-process-journal",
+      "sha256": "cbd58877cd2db6a21aab5c0241dbaccbc8f6ae52e5623082c4d22b4d8bbcc02f"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\fixture game Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-c13ac4a5\\WF-GODOT-c13ac4a5-EXECUTE\\EXEC-d9f92356\\version-terminal.json",
+      "type": "godot-process-journal",
+      "sha256": "378dab04252e101a205c078e72c6b08a1ab6242ef7297bb807a126db544446db"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\fixture game Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-c13ac4a5\\WF-GODOT-c13ac4a5-EXECUTE\\EXEC-d9f92356\\help.json",
+      "type": "godot-process-journal",
+      "sha256": "eb2b04c49e637e8d10ea348e5adf246f38b38dae278392f33aeb6610c12d7658"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\fixture game Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-c13ac4a5\\WF-GODOT-c13ac4a5-EXECUTE\\EXEC-d9f92356\\help-terminal.json",
+      "type": "godot-process-journal",
+      "sha256": "584eb97819115ec09567cfae02811d8bd6034324c71e334f24ac0d5807d3d012"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\fixture game Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-c13ac4a5\\WF-GODOT-c13ac4a5-EXECUTE\\EXEC-d9f92356\\import.json",
+      "type": "godot-process-journal",
+      "sha256": "8a03263ecdd70196948223be4522ad6dbe5fdd02e027a94b5ac47ebf1a368b46"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\fixture game Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-c13ac4a5\\WF-GODOT-c13ac4a5-EXECUTE\\EXEC-d9f92356\\import-terminal.json",
+      "type": "godot-process-journal",
+      "sha256": "feb3f09653fbb38ee7dc793853a4708365cf44549625713c7ce32a4f542af800"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\fixture game Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-c13ac4a5\\WF-GODOT-c13ac4a5-EXECUTE\\EXEC-d9f92356\\runtime.json",
+      "type": "godot-process-journal",
+      "sha256": "7802abce107c4f46be2df74858c6c7c2f918597b731e44c207e399b14f3d60f2"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\fixture game Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-c13ac4a5\\WF-GODOT-c13ac4a5-EXECUTE\\EXEC-d9f92356\\runtime-terminal.json",
+      "type": "godot-process-journal",
+      "sha256": "432e5101f8570593ff68d0453303215473fa201b17b56cd8cd943fecc8bd39d0"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\fixture game Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-c13ac4a5\\WF-GODOT-c13ac4a5-EXECUTE\\EXEC-d9f92356\\help-process.json",
+      "type": "godot-help-process",
+      "sha256": "d7a0b2208a7ca6083e9a86a3764acea142b66b426737f085e5d81e68a08f51a6"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\fixture game Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-c13ac4a5\\WF-GODOT-c13ac4a5-EXECUTE\\EXEC-d9f92356\\help-stderr.log",
+      "type": "godot-help-stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\fixture game Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-c13ac4a5\\WF-GODOT-c13ac4a5-EXECUTE\\EXEC-d9f92356\\help-stdout.log",
+      "type": "godot-help-stdout",
+      "sha256": "e4160ad4187fba1cbc092d2412a03535e83464eb9d8c446075cc29f4cad5b1d3"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\fixture game Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-c13ac4a5\\WF-GODOT-c13ac4a5-EXECUTE\\EXEC-d9f92356\\import-process.json",
+      "type": "godot-import-process",
+      "sha256": "971e509de02c5330ec6b3c6ee8db697b5f8c6cb94c760385de114a21a939743d"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\fixture game Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-c13ac4a5\\WF-GODOT-c13ac4a5-EXECUTE\\EXEC-d9f92356\\import-stderr.log",
+      "type": "godot-import-stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\fixture game Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-c13ac4a5\\WF-GODOT-c13ac4a5-EXECUTE\\EXEC-d9f92356\\import-stdout.log",
+      "type": "godot-import-stdout",
+      "sha256": "21fcb9c0b9f0607f38457386670bd71c0303fd972e623bb024dfeaaf58a56b59"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\fixture game Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-c13ac4a5\\WF-GODOT-c13ac4a5-EXECUTE\\EXEC-d9f92356\\runtime-observation.json",
+      "type": "godot-runtime-observation",
+      "sha256": "4558aa32949fcee46c8629ad82a048fa84653638d3e279821e0952545fd63cdd"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\fixture game Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-c13ac4a5\\WF-GODOT-c13ac4a5-EXECUTE\\EXEC-d9f92356\\runtime-process.json",
+      "type": "godot-runtime-process",
+      "sha256": "e58b03d20b640f9fb670c018f01cbb30a04a64acb51e1a5c431cb39a07ae3c7e"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\fixture game Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-c13ac4a5\\WF-GODOT-c13ac4a5-EXECUTE\\EXEC-d9f92356\\runtime-request.json",
+      "type": "godot-runtime-request",
+      "sha256": "3c7b87b32d9fcaaa52016dc00491244866a9d3dee5cfb6cf145546eb218e7241"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\fixture game Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-c13ac4a5\\WF-GODOT-c13ac4a5-EXECUTE\\EXEC-d9f92356\\runtime-stderr.log",
+      "type": "godot-runtime-stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\fixture game Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-c13ac4a5\\WF-GODOT-c13ac4a5-EXECUTE\\EXEC-d9f92356\\runtime-stdout.log",
+      "type": "godot-runtime-stdout",
+      "sha256": "85040aeb00d8286aed45096a50fb1007783ed6433ad0e11e9a76547c77eb5df9"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\fixture game Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-c13ac4a5\\WF-GODOT-c13ac4a5-EXECUTE\\EXEC-d9f92356\\version-process.json",
+      "type": "godot-version-process",
+      "sha256": "af8b4557f34e7db3c7961837881fdb29d8235ff8e50f102cc21323e9008705ea"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\fixture game Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-c13ac4a5\\WF-GODOT-c13ac4a5-EXECUTE\\EXEC-d9f92356\\version-stderr.log",
+      "type": "godot-version-stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\fixture game Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-c13ac4a5\\WF-GODOT-c13ac4a5-EXECUTE\\EXEC-d9f92356\\version-stdout.log",
+      "type": "godot-version-stdout",
+      "sha256": "c070177873f0f0acfbd7940156bb455d896c7b3694a65fa71d6d8c0ed65fb3fb"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\fixture game Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-c13ac4a5\\WF-GODOT-c13ac4a5-EXECUTE\\EXEC-d9f92356\\execution-summary.json",
+      "type": "godot-execution-summary",
+      "sha256": "bf83c03169e0267a487e3e95e8d285a32758bfcc29d72158191fcda0d9b1c0ec"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\fixture game Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-c13ac4a5\\WF-GODOT-c13ac4a5-VALIDATE\\EXEC-3268a303\\validation-report.json",
+      "type": "godot-validation-report",
+      "sha256": "def28ed09b272e1ef1b3faf9040231cb27b27082dbf171eb9930436c57a4e3fe"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\fixture game Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-f62d908b\\WF-GODOT-f62d908b-EXECUTE\\EXEC-991ab3c3\\source-manifest.json",
+      "type": "godot-source-manifest",
+      "sha256": "5e6af9508d3d842d4708b180456c7ad953efe8cb114b68bed49efeceff171442"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\fixture game Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-f62d908b\\WF-GODOT-f62d908b-EXECUTE\\EXEC-991ab3c3\\scenario-snapshot.json",
+      "type": "godot-scenario-snapshot",
+      "sha256": "53f5cf62c152269cb73a13e6d7fb26e86b4d0fd5ddd30e40e7faaa04ac12aa32"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\fixture game Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-f62d908b\\WF-GODOT-f62d908b-EXECUTE\\EXEC-991ab3c3\\version.json",
+      "type": "godot-process-journal",
+      "sha256": "d7d3e4693bd56ac1d9467aa874c0e1954f22d287c71724629d6eadd72649f638"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\fixture game Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-f62d908b\\WF-GODOT-f62d908b-EXECUTE\\EXEC-991ab3c3\\version-terminal.json",
+      "type": "godot-process-journal",
+      "sha256": "cfefab21b434c8c029e59fb7517e5e9d214e3474221f44d50bc7c48474a0d69d"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\fixture game Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-f62d908b\\WF-GODOT-f62d908b-EXECUTE\\EXEC-991ab3c3\\help.json",
+      "type": "godot-process-journal",
+      "sha256": "500a4d210266c9fed0ce3b68d927f0ce85159d79ca92c815c6a7e45b79b59795"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\fixture game Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-f62d908b\\WF-GODOT-f62d908b-EXECUTE\\EXEC-991ab3c3\\help-terminal.json",
+      "type": "godot-process-journal",
+      "sha256": "4ddba453526b08a64514622dae0b76e7ad15f64b7ceeab8b6deb6b0f6853fa37"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\fixture game Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-f62d908b\\WF-GODOT-f62d908b-EXECUTE\\EXEC-991ab3c3\\import.json",
+      "type": "godot-process-journal",
+      "sha256": "91314956ef59227bafdb24dcd8a01d7479d123b9b29e3e1714bb5756c4425ac3"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\fixture game Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-f62d908b\\WF-GODOT-f62d908b-EXECUTE\\EXEC-991ab3c3\\import-terminal.json",
+      "type": "godot-process-journal",
+      "sha256": "5e0d5170dbe4a48a1962897ed948c0f0680c140cb8d1470c8091c79aece465d1"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\fixture game Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-f62d908b\\WF-GODOT-f62d908b-EXECUTE\\EXEC-991ab3c3\\runtime.json",
+      "type": "godot-process-journal",
+      "sha256": "6525afb17a72216e22bf5a6e1f0784e1b9f144af787109ae95510116222cf6c2"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\fixture game Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-f62d908b\\WF-GODOT-f62d908b-EXECUTE\\EXEC-991ab3c3\\runtime-terminal.json",
+      "type": "godot-process-journal",
+      "sha256": "f4e5162a90a4c846fbf4946f295991805dac3110a10ff89d42a49083c39fa878"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\fixture game Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-f62d908b\\WF-GODOT-f62d908b-EXECUTE\\EXEC-991ab3c3\\help-process.json",
+      "type": "godot-help-process",
+      "sha256": "12514fe7f7c985195e71643b25e59bbec009f0f249de773a05df21c5db6b7027"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\fixture game Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-f62d908b\\WF-GODOT-f62d908b-EXECUTE\\EXEC-991ab3c3\\help-stderr.log",
+      "type": "godot-help-stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\fixture game Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-f62d908b\\WF-GODOT-f62d908b-EXECUTE\\EXEC-991ab3c3\\help-stdout.log",
+      "type": "godot-help-stdout",
+      "sha256": "e4160ad4187fba1cbc092d2412a03535e83464eb9d8c446075cc29f4cad5b1d3"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\fixture game Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-f62d908b\\WF-GODOT-f62d908b-EXECUTE\\EXEC-991ab3c3\\import-process.json",
+      "type": "godot-import-process",
+      "sha256": "627c947e464f3a323eb3604698f8805ac4e97c2ad2f5cbf742cdeed875f69258"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\fixture game Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-f62d908b\\WF-GODOT-f62d908b-EXECUTE\\EXEC-991ab3c3\\import-stderr.log",
+      "type": "godot-import-stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\fixture game Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-f62d908b\\WF-GODOT-f62d908b-EXECUTE\\EXEC-991ab3c3\\import-stdout.log",
+      "type": "godot-import-stdout",
+      "sha256": "21fcb9c0b9f0607f38457386670bd71c0303fd972e623bb024dfeaaf58a56b59"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\fixture game Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-f62d908b\\WF-GODOT-f62d908b-EXECUTE\\EXEC-991ab3c3\\runtime-observation.json",
+      "type": "godot-runtime-observation",
+      "sha256": "efb90a87f99fcf022ecd80e41976885fadf95a746f61aae59e6b278f0fe90d90"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\fixture game Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-f62d908b\\WF-GODOT-f62d908b-EXECUTE\\EXEC-991ab3c3\\runtime-process.json",
+      "type": "godot-runtime-process",
+      "sha256": "850582794457d181cdfc59fcd69eff396e7aba0ae67a27e1473eb40995b83fa9"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\fixture game Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-f62d908b\\WF-GODOT-f62d908b-EXECUTE\\EXEC-991ab3c3\\runtime-request.json",
+      "type": "godot-runtime-request",
+      "sha256": "ac6197363d6e0f1d8ab55c2eac139b7d82e3a785602e56091e2184e61fd27225"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\fixture game Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-f62d908b\\WF-GODOT-f62d908b-EXECUTE\\EXEC-991ab3c3\\runtime-stderr.log",
+      "type": "godot-runtime-stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\fixture game Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-f62d908b\\WF-GODOT-f62d908b-EXECUTE\\EXEC-991ab3c3\\runtime-stdout.log",
+      "type": "godot-runtime-stdout",
+      "sha256": "85040aeb00d8286aed45096a50fb1007783ed6433ad0e11e9a76547c77eb5df9"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\fixture game Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-f62d908b\\WF-GODOT-f62d908b-EXECUTE\\EXEC-991ab3c3\\version-process.json",
+      "type": "godot-version-process",
+      "sha256": "2eb56ea3c0cf7239c76bde996deaf7b0b70c91efcd72c6d5202ec1f08b4c01d1"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\fixture game Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-f62d908b\\WF-GODOT-f62d908b-EXECUTE\\EXEC-991ab3c3\\version-stderr.log",
+      "type": "godot-version-stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\fixture game Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-f62d908b\\WF-GODOT-f62d908b-EXECUTE\\EXEC-991ab3c3\\version-stdout.log",
+      "type": "godot-version-stdout",
+      "sha256": "c070177873f0f0acfbd7940156bb455d896c7b3694a65fa71d6d8c0ed65fb3fb"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\fixture game Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-f62d908b\\WF-GODOT-f62d908b-EXECUTE\\EXEC-991ab3c3\\execution-summary.json",
+      "type": "godot-execution-summary",
+      "sha256": "942dfcd46166b4c05559cf9932ba9e828dfdf88c72a7e80cb35db1100ce221b7"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\fixture game Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-f62d908b\\WF-GODOT-f62d908b-VALIDATE\\EXEC-8cc3b121\\validation-report.json",
+      "type": "godot-validation-report",
+      "sha256": "def28ed09b272e1ef1b3faf9040231cb27b27082dbf171eb9930436c57a4e3fe"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\wrong expectation Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-d6613587\\WF-GODOT-d6613587-EXECUTE\\EXEC-9793d04c\\source-manifest.json",
+      "type": "godot-source-manifest",
+      "sha256": "a95b14d3c16de3fe9ca8d472663429a9608614191579da36e33a3a02e4490875"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\wrong expectation Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-d6613587\\WF-GODOT-d6613587-EXECUTE\\EXEC-9793d04c\\scenario-snapshot.json",
+      "type": "godot-scenario-snapshot",
+      "sha256": "6d069220adb257c097258d1d581ff81449da24b043bbefc05434d97b824301ec"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\wrong expectation Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-d6613587\\WF-GODOT-d6613587-EXECUTE\\EXEC-9793d04c\\version.json",
+      "type": "godot-process-journal",
+      "sha256": "c32b2bf5bc7b48c239f2c756671a2fa4c74c50a7974d121cf552546db6dee6fe"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\wrong expectation Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-d6613587\\WF-GODOT-d6613587-EXECUTE\\EXEC-9793d04c\\version-terminal.json",
+      "type": "godot-process-journal",
+      "sha256": "9c7f4a655493f88f5411cdb421226fb40b530f7d1e522a87048648002ce3fdfd"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\wrong expectation Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-d6613587\\WF-GODOT-d6613587-EXECUTE\\EXEC-9793d04c\\help.json",
+      "type": "godot-process-journal",
+      "sha256": "dcd705180f3329d1b456aeb03710ee4b2444d4e0b16cdffffdcdebc01ac61326"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\wrong expectation Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-d6613587\\WF-GODOT-d6613587-EXECUTE\\EXEC-9793d04c\\help-terminal.json",
+      "type": "godot-process-journal",
+      "sha256": "e8dafe753dfbaa330c41e19b06338123733bd31b999cb95492ba8c986428312b"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\wrong expectation Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-d6613587\\WF-GODOT-d6613587-EXECUTE\\EXEC-9793d04c\\import.json",
+      "type": "godot-process-journal",
+      "sha256": "1c5b7eada691cf5a72d7dd9fdcc1724a9afd71b79a7e62e5282bef18bdb4b613"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\wrong expectation Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-d6613587\\WF-GODOT-d6613587-EXECUTE\\EXEC-9793d04c\\import-terminal.json",
+      "type": "godot-process-journal",
+      "sha256": "73d495f7d48344059f2064d7680e447abe0a9da641e1e10c2101e63dc00c9863"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\wrong expectation Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-d6613587\\WF-GODOT-d6613587-EXECUTE\\EXEC-9793d04c\\runtime.json",
+      "type": "godot-process-journal",
+      "sha256": "f8b9177782fae745d7d01dc86eb78fab92c9e490ed2834afbc1736f5d9550239"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\wrong expectation Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-d6613587\\WF-GODOT-d6613587-EXECUTE\\EXEC-9793d04c\\runtime-terminal.json",
+      "type": "godot-process-journal",
+      "sha256": "f5be7e130eb4bf523547807344d6ca9ad7d30ea7dddefa296f211b41d3a68b78"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\wrong expectation Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-d6613587\\WF-GODOT-d6613587-EXECUTE\\EXEC-9793d04c\\help-process.json",
+      "type": "godot-help-process",
+      "sha256": "497a657bd354c873b022ba5634bf8d0b582f3f5d1ab12b6c0041ac4b225e246e"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\wrong expectation Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-d6613587\\WF-GODOT-d6613587-EXECUTE\\EXEC-9793d04c\\help-stderr.log",
+      "type": "godot-help-stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\wrong expectation Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-d6613587\\WF-GODOT-d6613587-EXECUTE\\EXEC-9793d04c\\help-stdout.log",
+      "type": "godot-help-stdout",
+      "sha256": "e4160ad4187fba1cbc092d2412a03535e83464eb9d8c446075cc29f4cad5b1d3"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\wrong expectation Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-d6613587\\WF-GODOT-d6613587-EXECUTE\\EXEC-9793d04c\\import-process.json",
+      "type": "godot-import-process",
+      "sha256": "bf09e7d3caffe7579412aaf88cdbc9c7768b7e83e88d903677c2ca4d038d7eb0"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\wrong expectation Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-d6613587\\WF-GODOT-d6613587-EXECUTE\\EXEC-9793d04c\\import-stderr.log",
+      "type": "godot-import-stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\wrong expectation Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-d6613587\\WF-GODOT-d6613587-EXECUTE\\EXEC-9793d04c\\import-stdout.log",
+      "type": "godot-import-stdout",
+      "sha256": "21fcb9c0b9f0607f38457386670bd71c0303fd972e623bb024dfeaaf58a56b59"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\wrong expectation Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-d6613587\\WF-GODOT-d6613587-EXECUTE\\EXEC-9793d04c\\runtime-observation.json",
+      "type": "godot-runtime-observation",
+      "sha256": "137f24c13f2cd8e0e6920cb1451d2b39f5a829009e5006421a82542017d64d6f"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\wrong expectation Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-d6613587\\WF-GODOT-d6613587-EXECUTE\\EXEC-9793d04c\\runtime-process.json",
+      "type": "godot-runtime-process",
+      "sha256": "1d9a6d163af773d023c162fd6314a72f1567043b726687886ec985e7ee440d87"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\wrong expectation Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-d6613587\\WF-GODOT-d6613587-EXECUTE\\EXEC-9793d04c\\runtime-request.json",
+      "type": "godot-runtime-request",
+      "sha256": "d5756184e5756d640f1fdf9feff32ab615852f04b7229eb7296e39459e086a16"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\wrong expectation Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-d6613587\\WF-GODOT-d6613587-EXECUTE\\EXEC-9793d04c\\runtime-stderr.log",
+      "type": "godot-runtime-stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\wrong expectation Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-d6613587\\WF-GODOT-d6613587-EXECUTE\\EXEC-9793d04c\\runtime-stdout.log",
+      "type": "godot-runtime-stdout",
+      "sha256": "85040aeb00d8286aed45096a50fb1007783ed6433ad0e11e9a76547c77eb5df9"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\wrong expectation Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-d6613587\\WF-GODOT-d6613587-EXECUTE\\EXEC-9793d04c\\version-process.json",
+      "type": "godot-version-process",
+      "sha256": "02252470732c65e2b7f601ea395976e370606c1cb90b341416f26f60aff09d2a"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\wrong expectation Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-d6613587\\WF-GODOT-d6613587-EXECUTE\\EXEC-9793d04c\\version-stderr.log",
+      "type": "godot-version-stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\wrong expectation Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-d6613587\\WF-GODOT-d6613587-EXECUTE\\EXEC-9793d04c\\version-stdout.log",
+      "type": "godot-version-stdout",
+      "sha256": "c070177873f0f0acfbd7940156bb455d896c7b3694a65fa71d6d8c0ed65fb3fb"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\wrong expectation Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-d6613587\\WF-GODOT-d6613587-EXECUTE\\EXEC-9793d04c\\execution-summary.json",
+      "type": "godot-execution-summary",
+      "sha256": "50b74634a55e28e6b851389dd617bda603ee189e0d8dbb2571b5af946b055b87"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\wrong expectation Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-d6613587\\WF-GODOT-d6613587-VALIDATE\\EXEC-b9d8a8a4\\validation-report.json",
+      "type": "godot-validation-report",
+      "sha256": "2165cafc17321bf1c70e1c1f10543b0c1d0d7ad59dac2bae49132d0f3eacba12"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\logic mutation Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-86c4fb5c\\WF-GODOT-86c4fb5c-EXECUTE\\EXEC-76f184f4\\source-manifest.json",
+      "type": "godot-source-manifest",
+      "sha256": "d9038b7abab6f68ede0374706550010fa0c56ca0787e7e9742c08dccc4f0e79d"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\logic mutation Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-86c4fb5c\\WF-GODOT-86c4fb5c-EXECUTE\\EXEC-76f184f4\\scenario-snapshot.json",
+      "type": "godot-scenario-snapshot",
+      "sha256": "53f5cf62c152269cb73a13e6d7fb26e86b4d0fd5ddd30e40e7faaa04ac12aa32"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\logic mutation Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-86c4fb5c\\WF-GODOT-86c4fb5c-EXECUTE\\EXEC-76f184f4\\version.json",
+      "type": "godot-process-journal",
+      "sha256": "d6b7f376c2dcb301ae5ce71565e12e79cc841c4aa64155c21739ccd4869830b8"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\logic mutation Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-86c4fb5c\\WF-GODOT-86c4fb5c-EXECUTE\\EXEC-76f184f4\\version-terminal.json",
+      "type": "godot-process-journal",
+      "sha256": "ffb518aaa22cc23e51f2e19ee86f2ac9e44679ec0039074f672e1ae49775c836"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\logic mutation Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-86c4fb5c\\WF-GODOT-86c4fb5c-EXECUTE\\EXEC-76f184f4\\help.json",
+      "type": "godot-process-journal",
+      "sha256": "12446a338c94f72a61a0118b5a748a61decc44444a9825d82f83ca9d19f97461"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\logic mutation Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-86c4fb5c\\WF-GODOT-86c4fb5c-EXECUTE\\EXEC-76f184f4\\help-terminal.json",
+      "type": "godot-process-journal",
+      "sha256": "d9b9b2bf58e7d0a65244b900df200802783f2d319b096f2ec166778efaed6fa7"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\logic mutation Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-86c4fb5c\\WF-GODOT-86c4fb5c-EXECUTE\\EXEC-76f184f4\\import.json",
+      "type": "godot-process-journal",
+      "sha256": "dbfa49bebdc181876b40c0123a4a319370b632f46eb6b21c13b1dc3a1ac23198"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\logic mutation Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-86c4fb5c\\WF-GODOT-86c4fb5c-EXECUTE\\EXEC-76f184f4\\import-terminal.json",
+      "type": "godot-process-journal",
+      "sha256": "78edb22dd5fdba346478d22a7f6da0858386baacd2a4a25137d9164dd6976f7e"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\logic mutation Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-86c4fb5c\\WF-GODOT-86c4fb5c-EXECUTE\\EXEC-76f184f4\\runtime.json",
+      "type": "godot-process-journal",
+      "sha256": "9ec20fcec8ef33dcc75d11e2e523107b4d4ac168ad51575ce41605c03971e29f"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\logic mutation Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-86c4fb5c\\WF-GODOT-86c4fb5c-EXECUTE\\EXEC-76f184f4\\runtime-terminal.json",
+      "type": "godot-process-journal",
+      "sha256": "cf5a9399d8ebe6080bde0d2667e39af008d1784dca568d74d2b17a463bc4ac8d"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\logic mutation Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-86c4fb5c\\WF-GODOT-86c4fb5c-EXECUTE\\EXEC-76f184f4\\help-process.json",
+      "type": "godot-help-process",
+      "sha256": "27b4ddebdd385ad06b6876581213311fde4c8543a1ee2ea4b606452a7e8c55f3"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\logic mutation Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-86c4fb5c\\WF-GODOT-86c4fb5c-EXECUTE\\EXEC-76f184f4\\help-stderr.log",
+      "type": "godot-help-stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\logic mutation Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-86c4fb5c\\WF-GODOT-86c4fb5c-EXECUTE\\EXEC-76f184f4\\help-stdout.log",
+      "type": "godot-help-stdout",
+      "sha256": "e4160ad4187fba1cbc092d2412a03535e83464eb9d8c446075cc29f4cad5b1d3"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\logic mutation Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-86c4fb5c\\WF-GODOT-86c4fb5c-EXECUTE\\EXEC-76f184f4\\import-process.json",
+      "type": "godot-import-process",
+      "sha256": "52a6c58f032579a578e21601577e8936ce56185da472bdc5deae6b4f99b3d4f1"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\logic mutation Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-86c4fb5c\\WF-GODOT-86c4fb5c-EXECUTE\\EXEC-76f184f4\\import-stderr.log",
+      "type": "godot-import-stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\logic mutation Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-86c4fb5c\\WF-GODOT-86c4fb5c-EXECUTE\\EXEC-76f184f4\\import-stdout.log",
+      "type": "godot-import-stdout",
+      "sha256": "21fcb9c0b9f0607f38457386670bd71c0303fd972e623bb024dfeaaf58a56b59"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\logic mutation Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-86c4fb5c\\WF-GODOT-86c4fb5c-EXECUTE\\EXEC-76f184f4\\runtime-observation.json",
+      "type": "godot-runtime-observation",
+      "sha256": "54baa3b6015ed8658308f3599c1f0f29bd0322d6e3ef130005fb357ba3c10959"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\logic mutation Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-86c4fb5c\\WF-GODOT-86c4fb5c-EXECUTE\\EXEC-76f184f4\\runtime-process.json",
+      "type": "godot-runtime-process",
+      "sha256": "91ba570a3305c8ee5da525bbc49db371afa60d3e9cf700317a40b9cc16f869c1"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\logic mutation Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-86c4fb5c\\WF-GODOT-86c4fb5c-EXECUTE\\EXEC-76f184f4\\runtime-request.json",
+      "type": "godot-runtime-request",
+      "sha256": "77ebf5792c0446c7f0db1bda9e97211168c5bb4e89259a140d6ef2ccd4ef255a"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\logic mutation Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-86c4fb5c\\WF-GODOT-86c4fb5c-EXECUTE\\EXEC-76f184f4\\runtime-stderr.log",
+      "type": "godot-runtime-stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\logic mutation Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-86c4fb5c\\WF-GODOT-86c4fb5c-EXECUTE\\EXEC-76f184f4\\runtime-stdout.log",
+      "type": "godot-runtime-stdout",
+      "sha256": "85040aeb00d8286aed45096a50fb1007783ed6433ad0e11e9a76547c77eb5df9"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\logic mutation Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-86c4fb5c\\WF-GODOT-86c4fb5c-EXECUTE\\EXEC-76f184f4\\version-process.json",
+      "type": "godot-version-process",
+      "sha256": "b0717148518e32268b1fc9f4ca6360d0b6baac154e352edaf8fbe21db3876f46"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\logic mutation Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-86c4fb5c\\WF-GODOT-86c4fb5c-EXECUTE\\EXEC-76f184f4\\version-stderr.log",
+      "type": "godot-version-stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\logic mutation Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-86c4fb5c\\WF-GODOT-86c4fb5c-EXECUTE\\EXEC-76f184f4\\version-stdout.log",
+      "type": "godot-version-stdout",
+      "sha256": "c070177873f0f0acfbd7940156bb455d896c7b3694a65fa71d6d8c0ed65fb3fb"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\logic mutation Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-86c4fb5c\\WF-GODOT-86c4fb5c-EXECUTE\\EXEC-76f184f4\\execution-summary.json",
+      "type": "godot-execution-summary",
+      "sha256": "c697b8ac78bb8dc9491b75f3d5c7051abfebc774a499c038ca140d86ded0ca8f"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\logic mutation Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-86c4fb5c\\WF-GODOT-86c4fb5c-VALIDATE\\EXEC-768ae2d3\\validation-report.json",
+      "type": "godot-validation-report",
+      "sha256": "6c9cebc5ed59d6135e10a49a4b54ac32effa77b5cdfb95344bb1dbd04d36a073"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\script parse failure Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-5be30c92\\WF-GODOT-5be30c92-EXECUTE\\EXEC-1180860f\\source-manifest.json",
+      "type": "godot-source-manifest",
+      "sha256": "8cd7a158a69f89e21693760f4407d2b1b325013ee405374c201117e6e6fead0d"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\script parse failure Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-5be30c92\\WF-GODOT-5be30c92-EXECUTE\\EXEC-1180860f\\scenario-snapshot.json",
+      "type": "godot-scenario-snapshot",
+      "sha256": "53f5cf62c152269cb73a13e6d7fb26e86b4d0fd5ddd30e40e7faaa04ac12aa32"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\script parse failure Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-5be30c92\\WF-GODOT-5be30c92-EXECUTE\\EXEC-1180860f\\version.json",
+      "type": "godot-process-journal",
+      "sha256": "d9da46db7c720ea62ac6e230063cb8ad76c376123931e5f7ee18e015f7fc1460"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\script parse failure Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-5be30c92\\WF-GODOT-5be30c92-EXECUTE\\EXEC-1180860f\\version-terminal.json",
+      "type": "godot-process-journal",
+      "sha256": "f54ecbcf1bdc247f48484fea6e0f8b1acfeb30a1523b22207ee6ae16a71a2519"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\script parse failure Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-5be30c92\\WF-GODOT-5be30c92-EXECUTE\\EXEC-1180860f\\help.json",
+      "type": "godot-process-journal",
+      "sha256": "910a5b345c76941b4c29498ab9d26d40b7cc1d90201c0ca0c898b707920153c2"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\script parse failure Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-5be30c92\\WF-GODOT-5be30c92-EXECUTE\\EXEC-1180860f\\help-terminal.json",
+      "type": "godot-process-journal",
+      "sha256": "79526dbbc79e9820bf894ff70655f5214ef3a9f28de65d83897f36dc2c9bc1d9"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\script parse failure Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-5be30c92\\WF-GODOT-5be30c92-EXECUTE\\EXEC-1180860f\\import.json",
+      "type": "godot-process-journal",
+      "sha256": "0cd8c2d487273518b3d00ed26d76d6597122be43e7634d91fad54a8f13905102"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\script parse failure Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-5be30c92\\WF-GODOT-5be30c92-EXECUTE\\EXEC-1180860f\\import-terminal.json",
+      "type": "godot-process-journal",
+      "sha256": "2688441e72bda6a18c9e2b1a302897a63c422b53f5f44713eb9632d217c6de62"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\script parse failure Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-5be30c92\\WF-GODOT-5be30c92-EXECUTE\\EXEC-1180860f\\help-process.json",
+      "type": "godot-help-process",
+      "sha256": "26088599e6b80c8f4218d8ad350fa43fb1944eb6e67fd2d1ca7f69134302df28"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\script parse failure Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-5be30c92\\WF-GODOT-5be30c92-EXECUTE\\EXEC-1180860f\\help-stderr.log",
+      "type": "godot-help-stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\script parse failure Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-5be30c92\\WF-GODOT-5be30c92-EXECUTE\\EXEC-1180860f\\help-stdout.log",
+      "type": "godot-help-stdout",
+      "sha256": "a0312b699fc3404bb43aa3a2fd65cd61afc49b5a5beeb2c7d6ed4071aa9b6204"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\script parse failure Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-5be30c92\\WF-GODOT-5be30c92-EXECUTE\\EXEC-1180860f\\import-process.json",
+      "type": "godot-import-process",
+      "sha256": "70be9cc51d4f2ca80787c0736c49376d096551c9e497af64d40987265597ebf5"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\script parse failure Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-5be30c92\\WF-GODOT-5be30c92-EXECUTE\\EXEC-1180860f\\import-stderr.log",
+      "type": "godot-import-stderr",
+      "sha256": "3de1885b223e2cfb5be9e962114e0bfa79e8f90ec1fb16096edc2749d6c4f3ca"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\script parse failure Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-5be30c92\\WF-GODOT-5be30c92-EXECUTE\\EXEC-1180860f\\import-stdout.log",
+      "type": "godot-import-stdout",
+      "sha256": "6d51f349f7d3af814525539a8b79618093e16c693c070bfface3b99bea10f11e"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\script parse failure Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-5be30c92\\WF-GODOT-5be30c92-EXECUTE\\EXEC-1180860f\\runtime-request.json",
+      "type": "godot-runtime-request",
+      "sha256": "12798f47b68aef40e9a256021f79c08a9c9ee299dab3af414b3f8dc90aa502f9"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\script parse failure Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-5be30c92\\WF-GODOT-5be30c92-EXECUTE\\EXEC-1180860f\\version-process.json",
+      "type": "godot-version-process",
+      "sha256": "7ee55d3f43f15979a859dbc617c2013bdbdbe6992ac48faf359ac6b46352f42b"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\script parse failure Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-5be30c92\\WF-GODOT-5be30c92-EXECUTE\\EXEC-1180860f\\version-stderr.log",
+      "type": "godot-version-stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\script parse failure Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-5be30c92\\WF-GODOT-5be30c92-EXECUTE\\EXEC-1180860f\\version-stdout.log",
+      "type": "godot-version-stdout",
+      "sha256": "bf8803022b574250bb04dea65053a46b7c58570725316c1f7fe2aa6735706498"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\finite timeout Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-ce7dc395\\WF-GODOT-ce7dc395-EXECUTE\\EXEC-34e02dcb\\source-manifest.json",
+      "type": "godot-source-manifest",
+      "sha256": "a5e4e8df03b9355934f9a5656f2f954198726e6bc3dc58c4ac7ac56530cc8399"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\finite timeout Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-ce7dc395\\WF-GODOT-ce7dc395-EXECUTE\\EXEC-34e02dcb\\scenario-snapshot.json",
+      "type": "godot-scenario-snapshot",
+      "sha256": "d171ade687195e138ddafd394458f482134128f32717545d53ff218e7de943ce"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\finite timeout Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-ce7dc395\\WF-GODOT-ce7dc395-EXECUTE\\EXEC-34e02dcb\\version.json",
+      "type": "godot-process-journal",
+      "sha256": "c3535c782ec6f45501423a73c1165e53a807ee9a2154e158c7a432d00c2b101f"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\finite timeout Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-ce7dc395\\WF-GODOT-ce7dc395-EXECUTE\\EXEC-34e02dcb\\version-terminal.json",
+      "type": "godot-process-journal",
+      "sha256": "9c8e9f6d0f8fad77b8ad665b83938998b4a9353e8ba867590c303e9533a15a1e"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\finite timeout Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-ce7dc395\\WF-GODOT-ce7dc395-EXECUTE\\EXEC-34e02dcb\\help.json",
+      "type": "godot-process-journal",
+      "sha256": "6eaa63095b8d47b3adf95775c2f7e76f65ed20cc4a43c380ca9a6f4f97180418"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\finite timeout Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-ce7dc395\\WF-GODOT-ce7dc395-EXECUTE\\EXEC-34e02dcb\\help-terminal.json",
+      "type": "godot-process-journal",
+      "sha256": "baa85cee39a33dffe2a9f6297c9d100e9bc29cab37e681402d9abb71d95bf59e"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\finite timeout Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-ce7dc395\\WF-GODOT-ce7dc395-EXECUTE\\EXEC-34e02dcb\\import.json",
+      "type": "godot-process-journal",
+      "sha256": "b0fe63e9f01613a4265017505e9f03066dfd4473709717129c4580f31132de88"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\finite timeout Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-ce7dc395\\WF-GODOT-ce7dc395-EXECUTE\\EXEC-34e02dcb\\import-terminal.json",
+      "type": "godot-process-journal",
+      "sha256": "abeecd5f301b837e37dd9afda4e3c8706c3ac08f7d106a17c1ebf72984c0f5d7"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\finite timeout Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-ce7dc395\\WF-GODOT-ce7dc395-EXECUTE\\EXEC-34e02dcb\\runtime.json",
+      "type": "godot-process-journal",
+      "sha256": "65fb0ed48880c02073bb6e39fed0e2f6d09930f827b305b7a9f9c2c79464fab7"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\finite timeout Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-ce7dc395\\WF-GODOT-ce7dc395-EXECUTE\\EXEC-34e02dcb\\runtime-terminal.json",
+      "type": "godot-process-journal",
+      "sha256": "8a551cb82e45ec7754037da150a6ddb6f427b0dbdec9f80186cdacea87c7586b"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\finite timeout Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-ce7dc395\\WF-GODOT-ce7dc395-EXECUTE\\EXEC-34e02dcb\\help-process.json",
+      "type": "godot-help-process",
+      "sha256": "70618bbca1d63cbfda11a3563f76e3123669679cca8efb80682c9df3756542f5"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\finite timeout Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-ce7dc395\\WF-GODOT-ce7dc395-EXECUTE\\EXEC-34e02dcb\\help-stderr.log",
+      "type": "godot-help-stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\finite timeout Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-ce7dc395\\WF-GODOT-ce7dc395-EXECUTE\\EXEC-34e02dcb\\help-stdout.log",
+      "type": "godot-help-stdout",
+      "sha256": "a0312b699fc3404bb43aa3a2fd65cd61afc49b5a5beeb2c7d6ed4071aa9b6204"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\finite timeout Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-ce7dc395\\WF-GODOT-ce7dc395-EXECUTE\\EXEC-34e02dcb\\import-process.json",
+      "type": "godot-import-process",
+      "sha256": "846fd14a3797a77883570f90df5db5ae8defe31a40102488178e86f6b97a3fc1"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\finite timeout Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-ce7dc395\\WF-GODOT-ce7dc395-EXECUTE\\EXEC-34e02dcb\\import-stderr.log",
+      "type": "godot-import-stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\finite timeout Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-ce7dc395\\WF-GODOT-ce7dc395-EXECUTE\\EXEC-34e02dcb\\import-stdout.log",
+      "type": "godot-import-stdout",
+      "sha256": "6d51f349f7d3af814525539a8b79618093e16c693c070bfface3b99bea10f11e"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\finite timeout Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-ce7dc395\\WF-GODOT-ce7dc395-EXECUTE\\EXEC-34e02dcb\\runtime-process.json",
+      "type": "godot-runtime-process",
+      "sha256": "4531a9e583dff77cc3a1fc15ae8ab02d66d8fe678d67d7856b7227a6676c3c16"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\finite timeout Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-ce7dc395\\WF-GODOT-ce7dc395-EXECUTE\\EXEC-34e02dcb\\runtime-request.json",
+      "type": "godot-runtime-request",
+      "sha256": "d6d64b26d8f47432fdd738f42b266c85427ba6c2e8ecba4f8e9a74e15bfdf6ea"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\finite timeout Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-ce7dc395\\WF-GODOT-ce7dc395-EXECUTE\\EXEC-34e02dcb\\runtime-stderr.log",
+      "type": "godot-runtime-stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\finite timeout Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-ce7dc395\\WF-GODOT-ce7dc395-EXECUTE\\EXEC-34e02dcb\\runtime-stdout.log",
+      "type": "godot-runtime-stdout",
+      "sha256": "83cf0b082206af2aa236c83064fbcfa76be1e00a4aa3558574b2f65965d9481c"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\finite timeout Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-ce7dc395\\WF-GODOT-ce7dc395-EXECUTE\\EXEC-34e02dcb\\version-process.json",
+      "type": "godot-version-process",
+      "sha256": "24ec0fc4f76b8607cb2d54fc474edeed1276de91637d0a7b23d7c2d0d0959ba0"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\finite timeout Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-ce7dc395\\WF-GODOT-ce7dc395-EXECUTE\\EXEC-34e02dcb\\version-stderr.log",
+      "type": "godot-version-stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\finite timeout Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-ce7dc395\\WF-GODOT-ce7dc395-EXECUTE\\EXEC-34e02dcb\\version-stdout.log",
+      "type": "godot-version-stdout",
+      "sha256": "bf8803022b574250bb04dea65053a46b7c58570725316c1f7fe2aa6735706498"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\approval and source binding Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-d81dc9c1\\WF-GODOT-d81dc9c1-EXECUTE\\EXEC-538f4a62\\source-manifest.json",
+      "type": "godot-source-manifest",
+      "sha256": "fb8c265898aefa024996c923f95e7555e30245b90aa03e2cab87f84e2caa0c1b"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\approval and source binding Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-d81dc9c1\\WF-GODOT-d81dc9c1-EXECUTE\\EXEC-538f4a62\\scenario-snapshot.json",
+      "type": "godot-scenario-snapshot",
+      "sha256": "53f5cf62c152269cb73a13e6d7fb26e86b4d0fd5ddd30e40e7faaa04ac12aa32"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\approval and source binding Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-d81dc9c1\\WF-GODOT-d81dc9c1-EXECUTE\\EXEC-538f4a62\\version.json",
+      "type": "godot-process-journal",
+      "sha256": "b5261fd2890f95a774a24f4e6256849ea39645a5ea9eab27c29c4bd4983061eb"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\approval and source binding Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-d81dc9c1\\WF-GODOT-d81dc9c1-EXECUTE\\EXEC-538f4a62\\version-terminal.json",
+      "type": "godot-process-journal",
+      "sha256": "8da14cc7b450bf14e16bdd619c08815b6445ff04336b8b8892449a540098da54"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\approval and source binding Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-d81dc9c1\\WF-GODOT-d81dc9c1-EXECUTE\\EXEC-538f4a62\\help.json",
+      "type": "godot-process-journal",
+      "sha256": "93f051697a97188b0a263e41c77be7a35bbbc30583ffe1f6e756a7a9bc4f73fa"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\approval and source binding Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-d81dc9c1\\WF-GODOT-d81dc9c1-EXECUTE\\EXEC-538f4a62\\help-terminal.json",
+      "type": "godot-process-journal",
+      "sha256": "91d4150a7ddb7e394471f93a919032a92ef9df3ae55ed56e8cb0a6356e09bbba"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\approval and source binding Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-d81dc9c1\\WF-GODOT-d81dc9c1-EXECUTE\\EXEC-538f4a62\\import.json",
+      "type": "godot-process-journal",
+      "sha256": "347d28bb5d2c57328549ab58516ba4a93b648cdc7dfd1f219058a01862799cf4"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\approval and source binding Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-d81dc9c1\\WF-GODOT-d81dc9c1-EXECUTE\\EXEC-538f4a62\\import-terminal.json",
+      "type": "godot-process-journal",
+      "sha256": "7c5da75e58246930711797736e8a6cdacb8410115a7d7bfd563d8389d115ac38"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\approval and source binding Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-d81dc9c1\\WF-GODOT-d81dc9c1-EXECUTE\\EXEC-538f4a62\\runtime.json",
+      "type": "godot-process-journal",
+      "sha256": "38e3cc32f5c2790769814c0ebb6819e8490719cf4df4f8a3ee567b586975a632"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\approval and source binding Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-d81dc9c1\\WF-GODOT-d81dc9c1-EXECUTE\\EXEC-538f4a62\\runtime-terminal.json",
+      "type": "godot-process-journal",
+      "sha256": "dfb2a14da8b6b079ea0cb93c1957c2e4181535bfd592631c5d1dbf23351ca146"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\approval and source binding Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-d81dc9c1\\WF-GODOT-d81dc9c1-EXECUTE\\EXEC-538f4a62\\help-process.json",
+      "type": "godot-help-process",
+      "sha256": "e51d4ec4497d7a35f79c5d3f2f9e645b2cba4457d665225bf75591390f0513f9"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\approval and source binding Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-d81dc9c1\\WF-GODOT-d81dc9c1-EXECUTE\\EXEC-538f4a62\\help-stderr.log",
+      "type": "godot-help-stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\approval and source binding Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-d81dc9c1\\WF-GODOT-d81dc9c1-EXECUTE\\EXEC-538f4a62\\help-stdout.log",
+      "type": "godot-help-stdout",
+      "sha256": "e4160ad4187fba1cbc092d2412a03535e83464eb9d8c446075cc29f4cad5b1d3"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\approval and source binding Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-d81dc9c1\\WF-GODOT-d81dc9c1-EXECUTE\\EXEC-538f4a62\\import-process.json",
+      "type": "godot-import-process",
+      "sha256": "1cdbee72a6a8aa688c1bb30aa87f9ed1bde62ac85992e32084f29703c3d38807"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\approval and source binding Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-d81dc9c1\\WF-GODOT-d81dc9c1-EXECUTE\\EXEC-538f4a62\\import-stderr.log",
+      "type": "godot-import-stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\approval and source binding Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-d81dc9c1\\WF-GODOT-d81dc9c1-EXECUTE\\EXEC-538f4a62\\import-stdout.log",
+      "type": "godot-import-stdout",
+      "sha256": "21fcb9c0b9f0607f38457386670bd71c0303fd972e623bb024dfeaaf58a56b59"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\approval and source binding Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-d81dc9c1\\WF-GODOT-d81dc9c1-EXECUTE\\EXEC-538f4a62\\runtime-observation.json",
+      "type": "godot-runtime-observation",
+      "sha256": "27f24d1e0a0c827a538099afd8245e5920966e9b7614a434353b4f7154ef9e84"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\approval and source binding Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-d81dc9c1\\WF-GODOT-d81dc9c1-EXECUTE\\EXEC-538f4a62\\runtime-process.json",
+      "type": "godot-runtime-process",
+      "sha256": "82adc71f7c3d9ed6a32f9b20a380ddc0b8e90c1aa1c4f3d301f5dbee68a40d68"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\approval and source binding Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-d81dc9c1\\WF-GODOT-d81dc9c1-EXECUTE\\EXEC-538f4a62\\runtime-request.json",
+      "type": "godot-runtime-request",
+      "sha256": "4bb7a72396ea832918a22ea373820fe74873a5432131509249a946569f25d189"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\approval and source binding Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-d81dc9c1\\WF-GODOT-d81dc9c1-EXECUTE\\EXEC-538f4a62\\runtime-stderr.log",
+      "type": "godot-runtime-stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\approval and source binding Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-d81dc9c1\\WF-GODOT-d81dc9c1-EXECUTE\\EXEC-538f4a62\\runtime-stdout.log",
+      "type": "godot-runtime-stdout",
+      "sha256": "85040aeb00d8286aed45096a50fb1007783ed6433ad0e11e9a76547c77eb5df9"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\approval and source binding Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-d81dc9c1\\WF-GODOT-d81dc9c1-EXECUTE\\EXEC-538f4a62\\version-process.json",
+      "type": "godot-version-process",
+      "sha256": "6cd05c36765a218644afe3032cbeb25befc11249e3463aa75986c4fc64e8267d"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\approval and source binding Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-d81dc9c1\\WF-GODOT-d81dc9c1-EXECUTE\\EXEC-538f4a62\\version-stderr.log",
+      "type": "godot-version-stderr",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\approval and source binding Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-d81dc9c1\\WF-GODOT-d81dc9c1-EXECUTE\\EXEC-538f4a62\\version-stdout.log",
+      "type": "godot-version-stdout",
+      "sha256": "c070177873f0f0acfbd7940156bb455d896c7b3694a65fa71d6d8c0ed65fb3fb"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\approval and source binding Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-d81dc9c1\\WF-GODOT-d81dc9c1-EXECUTE\\EXEC-538f4a62\\execution-summary.json",
+      "type": "godot-execution-summary",
+      "sha256": "2782452a4f2bd8f01388c1afddd5aad99a667d895c03bf3897d683e9f877ab74"
+    },
+    {
+      "path": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\approval and source binding Ω\\.gamefactory\\artifacts\\godot\\WF-GODOT-d81dc9c1\\WF-GODOT-d81dc9c1-VALIDATE\\EXEC-6b15890b\\validation-report.json",
+      "type": "godot-validation-report",
+      "sha256": "def28ed09b272e1ef1b3faf9040231cb27b27082dbf171eb9930436c57a4e3fe"
+    }
+  ],
+  "three_equal_actual_snapshots": [
+    {
+      "state": {
+        "enemies_remaining": 3,
+        "player_hp": 100,
+        "score": 0
+      },
+      "tick": 0
+    },
+    {
+      "state": {
+        "enemies_remaining": 3,
+        "player_hp": 80,
+        "score": 0
+      },
+      "tick": 30
+    },
+    {
+      "state": {
+        "enemies_remaining": 2,
+        "player_hp": 80,
+        "score": 100
+      },
+      "tick": 60
+    },
+    {
+      "state": {
+        "enemies_remaining": 2,
+        "player_hp": 40,
+        "score": 100
+      },
+      "tick": 90
+    }
+  ],
+  "tested_source_unchanged": true,
+  "installed_package_still_matches_source": true,
+  "historical_tracked_reports_unchanged": true,
+  "timeout_metadata": [
+    {
+      "cleanup_completed": true,
+      "completed_at": "2026-09-27T01:39:52.191891+00:00",
+      "exit_code": 0,
+      "phase": "runtime",
+      "pid": 17540,
+      "timed_out": true
+    },
+    {
+      "args": [
+        "C:\\Users\\lenovo\\devel\\godot\\Godot_v4.7.2-stable_win64.exe\\Godot_v4.7.2-stable_win64_console.exe",
+        "--headless",
+        "--path",
+        "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\finite timeout Ω\\.gamefactory\\scratch\\WF-GODOT-ce7dc395\\EXEC-34e02dcb\\project",
+        "--script",
+        "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\finite timeout Ω\\.gamefactory\\scratch\\WF-GODOT-ce7dc395\\EXEC-34e02dcb\\project\\.factory-harness.gd",
+        "--",
+        "--request",
+        "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\finite timeout Ω\\.gamefactory\\scratch\\WF-GODOT-ce7dc395\\EXEC-34e02dcb\\runtime-request.json",
+        "--output",
+        "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\finite timeout Ω\\.gamefactory\\scratch\\WF-GODOT-ce7dc395\\EXEC-34e02dcb\\runtime-observation.json"
+      ],
+      "argv": [
+        "C:\\Users\\lenovo\\devel\\godot\\Godot_v4.7.2-stable_win64.exe\\Godot_v4.7.2-stable_win64_console.exe",
+        "--headless",
+        "--path",
+        "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\finite timeout Ω\\.gamefactory\\scratch\\WF-GODOT-ce7dc395\\EXEC-34e02dcb\\project",
+        "--script",
+        "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\finite timeout Ω\\.gamefactory\\scratch\\WF-GODOT-ce7dc395\\EXEC-34e02dcb\\project\\.factory-harness.gd",
+        "--",
+        "--request",
+        "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\finite timeout Ω\\.gamefactory\\scratch\\WF-GODOT-ce7dc395\\EXEC-34e02dcb\\runtime-request.json",
+        "--output",
+        "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\finite timeout Ω\\.gamefactory\\scratch\\WF-GODOT-ce7dc395\\EXEC-34e02dcb\\runtime-observation.json"
+      ],
+      "attempt_number": 1,
+      "cleanup_completed": true,
+      "cleanup_status": "completed",
+      "command": "C:\\Users\\lenovo\\devel\\godot\\Godot_v4.7.2-stable_win64.exe\\Godot_v4.7.2-stable_win64_console.exe --headless --path C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\finite timeout Ω\\.gamefactory\\scratch\\WF-GODOT-ce7dc395\\EXEC-34e02dcb\\project --script C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\finite timeout Ω\\.gamefactory\\scratch\\WF-GODOT-ce7dc395\\EXEC-34e02dcb\\project\\.factory-harness.gd -- --request C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\finite timeout Ω\\.gamefactory\\scratch\\WF-GODOT-ce7dc395\\EXEC-34e02dcb\\runtime-request.json --output C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\finite timeout Ω\\.gamefactory\\scratch\\WF-GODOT-ce7dc395\\EXEC-34e02dcb\\runtime-observation.json",
+      "completed_at": "2026-09-27T01:39:52.191891+00:00",
+      "cwd": "C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\finite timeout Ω\\.gamefactory\\scratch\\WF-GODOT-ce7dc395\\EXEC-34e02dcb\\project",
+      "duration": 1.687,
+      "duration_seconds": 1.687,
+      "error": "Command timed out after 1.0 seconds: C:\\Users\\lenovo\\devel\\godot\\Godot_v4.7.2-stable_win64.exe\\Godot_v4.7.2-stable_win64_console.exe --headless --path C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\finite timeout Ω\\.gamefactory\\scratch\\WF-GODOT-ce7dc395\\EXEC-34e02dcb\\project --script C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\finite timeout Ω\\.gamefactory\\scratch\\WF-GODOT-ce7dc395\\EXEC-34e02dcb\\project\\.factory-harness.gd -- --request C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\finite timeout Ω\\.gamefactory\\scratch\\WF-GODOT-ce7dc395\\EXEC-34e02dcb\\runtime-request.json --output C:\\Users\\lenovo\\AppData\\Local\\Temp\\gamefactory-v02-real-20260927\\godot-acceptance-20260927T013906Z-14d8c58b\\finite timeout Ω\\.gamefactory\\scratch\\WF-GODOT-ce7dc395\\EXEC-34e02dcb\\runtime-observation.json",
+      "exception": "TimeoutError",
+      "executable_sha256": "c8f0a6bc45a19b33541501e57f6f7cd972ab18453743266339d495cbbe846643",
+      "execution_id": "EXEC-34e02dcb",
+      "exit_code": 0,
+      "harness_sha256": "429e7e7961dc65a07741f59d1bc40f883a03754673de27ff2d88a5c0bb5949c1",
+      "harness_version": "0.2.0",
+      "phase": "runtime",
+      "pid": 17540,
+      "scenario_fingerprint": "cf0d225e42306ec124841d9da2df40b16b2460fcc3b879da0e306a5083d277dc",
+      "source_manifest_sha256": "c8f96d02d4e1a0fb03e5429afdc0d8f10655702269d636b8ab53405cd8ab5fd0",
+      "started_at": "2026-09-27T01:39:50.509681+00:00",
+      "started_intent_at": "2026-09-27T01:39:50.460527+00:00",
+      "stderr": "",
+      "stderr_truncated": false,
+      "stdout": "Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org\r\n\r\n",
+      "stdout_truncated": false,
+      "task_id": "WF-GODOT-ce7dc395-EXECUTE",
+      "termination_status": "timed_out",
+      "timed_out": true,
+      "timeout_seconds": 1.0,
+      "workflow_id": "WF-GODOT-ce7dc395"
+    }
+  ],
+  "real_recovery": {
+    "status": "PASSED",
+    "commands": 23,
+    "artifact_count": 45,
+    "cases": [
+      {
+        "mode": "after-runtime-return",
+        "workflow": "BLOCKED",
+        "execute_attempts": [
+          {
+            "id": "EXEC-8e08a1d8",
+            "status": "UNCERTAIN",
+            "attempt": 1
+          }
+        ],
+        "package": {
+          "package_path": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\v02\\installed-v02\\Lib\\site-packages\\gamefactory\\__init__.py",
+          "fault_mode": "after-runtime-return"
+        }
+      },
+      {
+        "mode": "after-terminal-journal",
+        "workflow": "COMPLETED",
+        "execute_attempts": [
+          {
+            "id": "EXEC-17b6702a",
+            "status": "FAILED",
+            "attempt": 1
+          },
+          {
+            "id": "EXEC-6800e5f6",
+            "status": "COMPLETED",
+            "attempt": 2
+          }
+        ],
+        "package": {
+          "package_path": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\v02\\installed-v02\\Lib\\site-packages\\gamefactory\\__init__.py",
+          "fault_mode": "after-terminal-journal"
+        }
+      }
+    ]
+  }
+}

@@ -23,3 +23,37 @@ jobs:
       - run: ruff check src tests
       - run: ruff format --check src tests
       - run: mypy src/gamefactory
+
+  godot-real:
+    runs-on: ubuntu-latest
+    # Official Godot release metadata, pinned and reviewed with this source:
+    # https://raw.githubusercontent.com/godotengine/godot-builds/main/releases/godot-4.7.2-stable.json
+    env:
+      GODOT_VERSION: 4.7.2-stable
+      GODOT_ARCHIVE_SHA512: 9aa00f7a605200940bce3027a567b782f49bd8e940dd06ae9e987bd65aee1b1467edd56ed84fcdcbdd44354bf613bdbb4e5d2913e925850368e150c59ed54c65
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install package and test dependencies
+        run: python -m pip install ".[dev]"
+      - name: Download and verify pinned official Godot
+        shell: bash
+        run: |
+          set -euo pipefail
+          archive="Godot_v${GODOT_VERSION}_linux.x86_64.zip"
+          curl --fail --location --retry 3 "https://github.com/godotengine/godot-builds/releases/download/${GODOT_VERSION}/${archive}" --output "$RUNNER_TEMP/$archive"
+          printf '%s  %s\n' "$GODOT_ARCHIVE_SHA512" "$RUNNER_TEMP/$archive" | sha512sum --check --strict
+          unzip "$RUNNER_TEMP/$archive" -d "$RUNNER_TEMP/godot"
+          chmod +x "$RUNNER_TEMP/godot/Godot_v${GODOT_VERSION}_linux.x86_64"
+          echo "GAMEFACTORY_TEST_GODOT=$RUNNER_TEMP/godot/Godot_v${GODOT_VERSION}_linux.x86_64" >> "$GITHUB_ENV"
+      - name: Verify real engine behavior
+        run: python -m pytest -p no:cacheprovider -m real_godot
+      - name: Archive real-engine acceptance evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: godot-real-evidence
+          path: .verification/ci-godot/
+          if-no-files-found: warn

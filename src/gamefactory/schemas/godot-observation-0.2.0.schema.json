@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-game-factory.local/schemas/godot-observation-0.2.0.schema.json",
+  "title": "AI Game Factory Godot Observation 0.2.0",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "execution_id", "scenario_id", "scenario_sha256", "completed_tick", "snapshots", "completion", "error"],
+  "properties": {
+    "schema_version": {"const": "0.2.0"},
+    "execution_id": {"type": "string", "minLength": 1, "maxLength": 64, "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$"},
+    "scenario_id": {"type": "string", "minLength": 1, "maxLength": 64, "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$"},
+    "scenario_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "completed_tick": {"type": "integer", "minimum": 0, "maximum": 10000},
+    "snapshots": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 256,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["tick", "state"],
+        "properties": {
+          "tick": {"type": "integer", "minimum": 0, "maximum": 10000},
+          "state": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["player_hp", "enemies_remaining", "score"],
+            "properties": {
+              "player_hp": {"type": "integer"},
+              "enemies_remaining": {"type": "integer", "minimum": 0},
+              "score": {"type": "integer", "minimum": 0}
+            }
+          }
+        }
+      }
+    },
+    "completion": {"const": "COMPLETED"},
+    "error": {"type": "null"}
+  }
+}

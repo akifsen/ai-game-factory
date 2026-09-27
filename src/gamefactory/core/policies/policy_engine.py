@@ -32,6 +32,7 @@ class PolicyRule:
     require_approval_for_paid: bool = True
     require_approval_for_destructive: bool = True
     require_approval_for_repo_write: bool = False
+    require_approval_for_process_execution: bool = False
     max_operation_cost: float = 100.0
     project_budget: float = 500.0
 
@@ -146,10 +147,29 @@ class PolicyEngine:
                 allowed=True, requires_approval=False, reason="Repository write permitted"
             )
 
+        if op_type == OperationType.PROCESS_EXECUTION:
+            managed_write = bool((context or {}).get("managed_write", False))
+            approval_required = self.rule.require_approval_for_process_execution or (
+                managed_write and self.rule.require_approval_for_repo_write
+            )
+            if approval_required and not has_approval:
+                return PolicyEvaluationResult(
+                    allowed=False,
+                    requires_approval=True,
+                    approval_type="process_execution",
+                    reason=(
+                        "Local process execution requires approval"
+                        if self.rule.require_approval_for_process_execution
+                        else "Process execution writes to the managed project and requires approval"
+                    ),
+                )
+            return PolicyEvaluationResult(
+                allowed=True, requires_approval=False, reason="Process execution permitted"
+            )
+
         # 5. Process execution and local reads
         if op_type in (
             OperationType.LOCAL_READ,
-            OperationType.PROCESS_EXECUTION,
             OperationType.FREE_EXTERNAL,
         ):
             return PolicyEvaluationResult(
