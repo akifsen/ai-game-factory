@@ -1,0 +1,36 @@
+[
+  {
+    "label": "module-stages",
+    "exit_code": 0,
+    "argv": [
+      "C:\\Users\\lenovo\\devel\\ai-game-factory\\.venv\\Scripts\\python.exe",
+      "-m",
+      "pytest",
+      "-ra",
+      "-p",
+      "no:cacheprovider",
+      "-p",
+      "diag_plugin",
+      "tests/integration/test_process_runner.py",
+      "--basetemp=C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\windows-process-timeout\\runs\\module-stages",
+      "--junitxml=C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.3-rendered\\windows-process-timeout\\module-stages.xml"
+    ]
+  },
+  {
+    "label": "full-stages",
+    "exit_code": 0,
+    "argv": [
+      "C:\\Users\\lenovo\\devel\\ai-game-factory\\.venv\\Scripts\\python.exe",
+      "-m",
+      "pytest",
+      "-ra",
+      "-p",
+      "no:cacheprovider",
+      "-p",
+      "diag_plugin",
+      "tests",
+      "--basetemp=C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\windows-process-timeout\\runs\\full-stages",
+      "--junitxml=C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.3-rendered\\windows-process-timeout\\full-stages.xml"
+    ]
+  }
+]

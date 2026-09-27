@@ -7,6 +7,7 @@ import os
 import subprocess
 import sys
 import time
+import uuid
 from pathlib import Path
 
 import pytest
@@ -22,6 +23,7 @@ from scripts.verify_godot_live_crash import (  # noqa: E402
     _check_sentinel_alive,
     _cleanup_sentinel,
     _get_process_identity,
+    _linux_fate_record,
     _prepare_controlled_fixture,
     _spawn_sentinel,
     _win32_close_handle,
@@ -409,18 +411,123 @@ def test_matching_identity_signals_the_retained_fd_not_a_pid() -> None:
     assert calls == [(7, 9)]
 
 
-def test_live_process_at_deadline_fails_with_evidence() -> None:
+def test_live_process_at_deadline_fails_with_evidence(monkeypatch: pytest.MonkeyPatch) -> None:
+    current_time = 0.0
+
+    def fake_monotonic() -> float:
+        return current_time
+
+    monkeypatch.setattr(time, "monotonic", fake_monotonic)
+    poll_timeouts: list[float] = []
+
+    def fake_poll(_fd: int, timeout: float) -> tuple[bool, str | None]:
+        nonlocal current_time
+        poll_timeouts.append(timeout)
+        current_time += timeout
+        return False, None
+
+    deadline = current_time + 0.05
     obs = wait_for_owned_thread_group(
         _ref(),
-        time.monotonic() + 0.05,
+        deadline,
         probe=_Proc({40: "R"}, "/bin/sleep"),
-        poll_pidfd=lambda _fd, timeout: (False, None) if timeout >= 0 else (False, None),
+        poll_pidfd=fake_poll,
     )
     assert obs.status == "unknown"
     assert obs.reason.startswith("deadline:")
     assert "alive" in obs.reason
     assert obs.leader_state == "R"
-    assert obs.elapsed_seconds is not None and obs.elapsed_seconds >= 0.05
+    assert obs.elapsed_seconds == 0.05
+    assert poll_timeouts == [0.05]
+
+    record = _linux_fate_record(
+        obs,
+        initial_pid=40,
+        initial_starttime="100",
+        cleaned_up=False,
+        final_status="alive",
+        post_interrupt_status="alive",
+        runtime_launches_count=1,
+        sentinel_survived=True,
+    )
+    assert record["cleaned_up"] is False
+    assert record["wait_result"] == "unknown"
+
+
+def test_wait_for_owned_thread_group_early_poll_and_decreasing_remaining(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    current_time = 0.0
+
+    def fake_monotonic() -> float:
+        return current_time
+
+    monkeypatch.setattr(time, "monotonic", fake_monotonic)
+    poll_timeouts: list[float] = []
+    step_increments = [0.0, 0.015625, 0.015625, 0.015625]
+    step_idx = 0
+
+    def fake_poll(_fd: int, timeout: float) -> tuple[bool, str | None]:
+        nonlocal current_time, step_idx
+        poll_timeouts.append(timeout)
+        delta = step_increments[step_idx]
+        step_idx += 1
+        current_time += delta
+        return False, None
+
+    deadline = 0.0625
+    current_time = 0.015625
+    obs = wait_for_owned_thread_group(
+        _ref(),
+        deadline,
+        probe=_Proc({40: "S"}, "/bin/sleep"),
+        poll_pidfd=fake_poll,
+    )
+    assert obs.status == "unknown"
+    assert "alive" in obs.reason
+    assert poll_timeouts == [0.046875, 0.046875, 0.03125, 0.015625]
+    assert current_time == 0.0625
+    assert obs.elapsed_seconds == 0.046875
+
+
+def test_wait_for_owned_thread_group_terminal_before_deadline(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    current_time = 0.0
+
+    def fake_monotonic() -> float:
+        return current_time
+
+    monkeypatch.setattr(time, "monotonic", fake_monotonic)
+
+    def fake_poll(_fd: int, timeout: float) -> tuple[bool, str | None]:
+        nonlocal current_time
+        current_time += 0.02
+        return True, None
+
+    deadline = current_time + 0.10
+    obs = wait_for_owned_thread_group(
+        _ref(),
+        deadline,
+        probe=_Proc({40: "Z"}, _enoent(40)),
+        poll_pidfd=fake_poll,
+    )
+    assert obs.status == "terminal"
+    assert obs.reason == "pidfd_readable_thread_group_exited"
+    assert obs.elapsed_seconds == 0.02
+
+    record = _linux_fate_record(
+        obs,
+        initial_pid=40,
+        initial_starttime="100",
+        cleaned_up=True,
+        final_status="terminated",
+        post_interrupt_status="alive",
+        runtime_launches_count=1,
+        sentinel_survived=True,
+    )
+    assert record["cleaned_up"] is True
+    assert record["wait_result"] == "terminal"
 
 
 def test_process_ref_closes_descriptor_when_observation_fails() -> None:
@@ -474,87 +581,220 @@ def test_linux_unreaped_exit_is_observed_without_waitpid() -> None:
 def test_linux_leader_exit_leaves_worker_alive_until_worker_exits(tmp_path: Path) -> None:
     """Not a Godot render. Proves leader Z or exe ENOENT is not process termination."""
     ready = tmp_path / "ready"
-    beat = tmp_path / "beat"
     release = tmp_path / "release"
+    nonce_req = tmp_path / "nonce_req"
+    nonce_ack = tmp_path / "nonce_ack"
     stop = tmp_path / "stop"
+    stderr_log = tmp_path / "child_stderr.log"
+
     script = r"""
 import ctypes, os, platform, sys, threading, time
-ready, beat, release, stop = sys.argv[1:5]
+
+ready, release, nonce_req, nonce_ack, stop = sys.argv[1:6]
+child_deadline = time.monotonic() + 15.0
 
 def worker():
+    tmp_ready = ready + ".tmp"
+    with open(tmp_ready, "w", encoding="utf-8") as handle:
+        handle.write(f"{os.getpid()}:{threading.get_native_id()}")
+    os.replace(tmp_ready, ready)
+
     while not os.path.exists(stop):
-        temporary = beat + ".tmp"
-        with open(temporary, "w", encoding="utf-8") as handle:
-            handle.write(str(time.monotonic()))
-        os.replace(temporary, beat)
-        time.sleep(0.05)
+        if time.monotonic() > child_deadline:
+            sys.stderr.write("child worker exceeded deadline waiting for stop\n")
+            sys.stderr.flush()
+            os._exit(2)
+        if os.path.exists(nonce_req) and not os.path.exists(nonce_ack):
+            with open(nonce_req, "r", encoding="utf-8") as h:
+                val = h.read().strip()
+            if val:
+                tmp_ack = nonce_ack + ".tmp"
+                with open(tmp_ack, "w", encoding="utf-8") as h:
+                    h.write(f"{os.getpid()}:{threading.get_native_id()}:{val}")
+                os.replace(tmp_ack, nonce_ack)
+        time.sleep(0.01)
 
 threading.Thread(target=worker, daemon=False).start()
-time.sleep(0.2)
-with open(ready, "w", encoding="utf-8") as handle:
-    handle.write("ready")
+
 while not os.path.exists(release):
-    time.sleep(0.02)
+    if time.monotonic() > child_deadline:
+        sys.stderr.write("child leader exceeded deadline waiting for release\n")
+        sys.stderr.flush()
+        sys.exit(3)
+    time.sleep(0.01)
+
 numbers = {"x86_64": 60, "aarch64": 93, "i386": 1, "i686": 1}
 number = numbers.get(platform.machine())
 if number is None:
     raise SystemExit("unsupported machine")
-save = ctypes.pythonapi.PyEval_SaveThread
-save.restype = ctypes.c_void_p
-save()
+
+# ctypes.CDLL releases the GIL during foreign calls; worker thread keeps running.
 libc = ctypes.CDLL(None, use_errno=True)
 libc.syscall.restype = ctypes.c_long
 libc.syscall.argtypes = [ctypes.c_long, ctypes.c_int]
 libc.syscall(number, 0)
 """
-    proc = subprocess.Popen(
-        [sys.executable, "-c", script, str(ready), str(beat), str(release), str(stop)]
-    )
+    with open(stderr_log, "w", encoding="utf-8") as stderr_handle:
+        proc = subprocess.Popen(
+            [
+                sys.executable,
+                "-c",
+                script,
+                str(ready),
+                str(release),
+                str(nonce_req),
+                str(nonce_ack),
+                str(stop),
+            ],
+            stderr=stderr_handle,
+        )
+
     ref: LinuxProcessRef | None = None
     try:
-        deadline = time.monotonic() + 3
+        ready_deadline = time.monotonic() + 3.0
         while not ready.is_file():
-            if time.monotonic() > deadline:
-                raise AssertionError(f"worker did not become ready: {proc.poll()}")
-            time.sleep(0.02)
+            if time.monotonic() > ready_deadline:
+                err = (
+                    stderr_log.read_text(encoding="utf-8", errors="replace")
+                    if stderr_log.is_file()
+                    else ""
+                )
+                raise AssertionError(
+                    f"worker did not become ready: poll={proc.poll()}, stderr={err}"
+                )
+            time.sleep(0.01)
+
+        pid_str, tid_str = ready.read_text(encoding="utf-8").strip().split(":")
+        worker_pid = int(pid_str)
+        worker_tid = int(tid_str)
+        assert worker_pid == proc.pid
+        assert worker_tid != proc.pid
+
         starttime = RealProcProbe().starttime(proc.pid)
         assert starttime is not None
         ref = open_owned_linux_process(proc.pid, Path(sys.executable), starttime)
-        release.write_text("go\n", encoding="utf-8")
-        leader_deadline = time.monotonic() + 2
+
+        release_tmp = release.with_suffix(".tmp")
+        release_tmp.write_text("go\n", encoding="utf-8")
+        os.replace(release_tmp, release)
+
+        leader_deadline = time.monotonic() + 3.0
         leader_state = ""
+        stat_file = Path(f"/proc/{proc.pid}/stat")
         while time.monotonic() < leader_deadline:
-            text = Path(f"/proc/{proc.pid}/stat")
-            if text.is_file():
-                raw = text.read_text(encoding="utf-8")
+            if stat_file.is_file():
+                raw = stat_file.read_text(encoding="utf-8")
                 paren = raw.rfind(")")
                 leader_state = raw[paren + 1 :].split()[0] if paren != -1 else ""
-            if leader_state == "Z":
-                break
-            time.sleep(0.02)
-        assert leader_state == "Z", leader_state
-        first = beat.read_text(encoding="utf-8")
-        time.sleep(0.2)
-        second = beat.read_text(encoding="utf-8")
-        assert second != first
+                if leader_state == "Z":
+                    break
+            time.sleep(0.01)
+        if leader_state != "Z":
+            err = (
+                stderr_log.read_text(encoding="utf-8", errors="replace")
+                if stderr_log.is_file()
+                else ""
+            )
+            raise AssertionError(
+                f"Expected leader state Z, got {leader_state!r}, poll={proc.poll()}, stderr={err}"
+            )
+
+        fresh_nonce = uuid.uuid4().hex
+        req_tmp = nonce_req.with_suffix(".tmp")
+        req_tmp.write_text(fresh_nonce, encoding="utf-8")
+        os.replace(req_tmp, nonce_req)
+
+        nonce_deadline = time.monotonic() + 3.0
+        received_ack = ""
+        while time.monotonic() < nonce_deadline:
+            if nonce_ack.is_file():
+                received_ack = nonce_ack.read_text(encoding="utf-8").strip()
+                if received_ack:
+                    break
+            time.sleep(0.01)
+        if not received_ack:
+            err = (
+                stderr_log.read_text(encoding="utf-8", errors="replace")
+                if stderr_log.is_file()
+                else ""
+            )
+            raise AssertionError(
+                f"Worker failed to respond with fresh nonce: poll={proc.poll()}, stderr={err}"
+            )
+
+        ack_pid_str, ack_tid_str, ack_nonce = received_ack.split(":", 2)
+        assert int(ack_pid_str) == worker_pid == proc.pid
+        assert int(ack_tid_str) == worker_tid
+        assert ack_nonce == fresh_nonce
+
         states = RealProcProbe().task_states(proc.pid)
         assert states is not None
-        assert any(tid != proc.pid and state not in {"Z", "X"} for tid, state in states.items())
+        assert states.get(worker_tid) not in {None, "Z", "X"}
+
         readable, poll_err = poll_linux_pidfd(ref.pidfd, 0.05)
         assert poll_err is None
         obs = observe_owned_posix(proc.pid, pidfd_readable=readable, probe=RealProcProbe())
         assert obs.status == "alive"
         assert obs.leader_state == "Z"
-        stop.write_text("stop\n", encoding="utf-8")
-        done = wait_for_owned_thread_group(ref, time.monotonic() + 2.0)
+
+        wait_started = time.monotonic()
+        timeout_deadline = wait_started + 0.05
+        timed_out = wait_for_owned_thread_group(ref, timeout_deadline)
+        wait_finished = time.monotonic()
+        assert wait_finished >= timeout_deadline
+        assert timed_out.status == "unknown"
+        assert timed_out.reason.startswith("deadline:")
+        assert "alive" in timed_out.reason
+        assert timed_out.leader_state == "Z"
+        # Internal elapsed excludes caller-to-entry time; the outer clock proves the deadline.
+        assert timed_out.elapsed_seconds is not None
+        assert timed_out.elapsed_seconds <= wait_finished - wait_started
+        uncleaned_record = _linux_fate_record(
+            timed_out,
+            initial_pid=proc.pid,
+            initial_starttime=starttime,
+            cleaned_up=False,
+            final_status="alive",
+            post_interrupt_status="alive",
+            runtime_launches_count=1,
+            sentinel_survived=True,
+        )
+        assert uncleaned_record["cleaned_up"] is False
+        assert uncleaned_record["wait_result"] == "unknown"
+        assert uncleaned_record["status"] == "alive"
+
+        stop_tmp = stop.with_suffix(".tmp")
+        stop_tmp.write_text("stop\n", encoding="utf-8")
+        os.replace(stop_tmp, stop)
+
+        done = wait_for_owned_thread_group(ref, time.monotonic() + 3.0)
         assert done.status == "terminal"
         assert done.method == "pidfd"
         assert done.reason.startswith("pidfd_readable_")
-        proc.wait(timeout=2)
+        cleaned_record = _linux_fate_record(
+            done,
+            initial_pid=proc.pid,
+            initial_starttime=starttime,
+            cleaned_up=True,
+            final_status="terminated",
+            post_interrupt_status="alive",
+            runtime_launches_count=1,
+            sentinel_survived=True,
+        )
+        assert cleaned_record["cleaned_up"] is True
+        assert cleaned_record["wait_result"] == "terminal"
+        assert cleaned_record["status"] == "terminated"
+
+        assert proc.wait(timeout=3) == 0
     finally:
-        stop.write_text("stop\n", encoding="utf-8")
+        stop_tmp = stop.with_suffix(".tmp")
+        try:
+            stop_tmp.write_text("stop\n", encoding="utf-8")
+            os.replace(stop_tmp, stop)
+        except OSError:
+            pass
         if ref is not None:
             ref.close()
         if proc.poll() is None:
             proc.kill()
-            proc.wait(timeout=2)
+            proc.wait(timeout=3)

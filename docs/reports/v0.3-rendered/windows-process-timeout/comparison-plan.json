@@ -1,0 +1,46 @@
+{
+  "python": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.venv\\Scripts\\python.exe",
+  "fixed_attempts": [
+    [
+      "ready-b1",
+      "base",
+      false
+    ],
+    [
+      "ready-c1",
+      "cand",
+      false
+    ],
+    [
+      "ready-c2",
+      "cand",
+      false
+    ],
+    [
+      "ready-b2",
+      "base",
+      false
+    ],
+    [
+      "ready-b3",
+      "base",
+      false
+    ],
+    [
+      "ready-c3",
+      "cand",
+      false
+    ],
+    [
+      "ready-b-stage",
+      "base",
+      true
+    ],
+    [
+      "ready-c-stage",
+      "cand",
+      true
+    ]
+  ],
+  "outer_process_timeout": 30
+}

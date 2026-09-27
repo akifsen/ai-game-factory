@@ -1,0 +1,133 @@
+{
+  "metadata": {
+    "python": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.venv\\Scripts\\python.exe",
+    "version": "3.12.14 (main, Aug 25 2026, 14:01:42) [MSC v.1944 64 bit (AMD64)]",
+    "source": "C:\\Users\\lenovo\\devel\\ai-game-factory\\src\\gamefactory\\core\\execution\\process_runner.py",
+    "gamefactory": "C:\\Users\\lenovo\\devel\\ai-game-factory\\src\\gamefactory\\__init__.py",
+    "cwd": "C:\\Users\\lenovo\\devel\\ai-game-factory",
+    "instrumentation": true,
+    "dependencies": {
+      "pytest": "9.1.1",
+      "pydantic": "2.13.5",
+      "pyyaml": "6.0.3",
+      "pillow": "12.3.0"
+    },
+    "linux_module_imported": false,
+    "pytest_exit_code": 0
+  },
+  "events": [
+    {
+      "event": "runner_call",
+      "perf_counter": 911102.4371919,
+      "timeout": 0.5
+    },
+    {
+      "event": "runner_deadline",
+      "perf_counter": 911102.4395668,
+      "start_time": 911102.4395556,
+      "deadline": 911102.9395556
+    },
+    {
+      "event": "popen_begin",
+      "perf_counter": 911102.4397594,
+      "executable": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.venv\\Scripts\\python.exe"
+    },
+    {
+      "event": "popen_created",
+      "perf_counter": 911102.4539301,
+      "pid": 37496
+    },
+    {
+      "event": "job_attach_begin",
+      "perf_counter": 911102.4539675,
+      "pid": 37496
+    },
+    {
+      "event": "job_attach_end",
+      "perf_counter": 911102.4544491,
+      "handle": 204
+    },
+    {
+      "event": "reader_begin",
+      "perf_counter": 911102.4551547,
+      "channel": "stdout"
+    },
+    {
+      "event": "reader_begin",
+      "perf_counter": 911102.4554635,
+      "channel": "stderr"
+    },
+    {
+      "event": "parent_wait_begin",
+      "perf_counter": 911102.4555372,
+      "pid": 37496,
+      "timeout": 0.4840329000726342
+    },
+    {
+      "event": "parent_exit_requested",
+      "perf_counter": 911102.5088287,
+      "pid": 6136
+    },
+    {
+      "event": "parent_exit_observed",
+      "perf_counter": 911102.5150961,
+      "pid": 37496,
+      "exit_code": 0
+    },
+    {
+      "event": "job_cleanup_begin",
+      "perf_counter": 911102.5151285,
+      "handle": 204
+    },
+    {
+      "event": "job_cleanup_return",
+      "perf_counter": 911102.5152433,
+      "handle": 204
+    },
+    {
+      "event": "reader_completed",
+      "perf_counter": 911102.5158164,
+      "channel": "stdout",
+      "eof": true,
+      "bytes": 0
+    },
+    {
+      "event": "reader_completed",
+      "perf_counter": 911102.5158682,
+      "channel": "stderr",
+      "eof": true,
+      "bytes": 0
+    },
+    {
+      "event": "runner_return",
+      "perf_counter": 911102.5166697,
+      "result": {
+        "exit_code": 0,
+        "stdout": "",
+        "stderr": "",
+        "duration_seconds": 0.077,
+        "timed_out": false,
+        "command_display": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.venv\\Scripts\\python.exe -c import subprocess, sys; subprocess.Popen([sys.executable, r'C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\windows-process-timeout\\runs\\root-stages\\test_parent_exit_descendant_bo0\\grandchild.py']); import os,json,time; open('C:\\\\Users\\\\lenovo\\\\devel\\\\ai-game-factory\\\\.verification\\\\windows-process-timeout\\\\runs\\\\root-stages\\\\test_parent_exit_descendant_bo0\\\\parent-exit-requested.json', \"w\").write(json.dumps({\"event\":\"parent_exit_requested\",\"perf_counter\":time.perf_counter(),\"pid\":os.getpid()})); sys.exit(0)",
+        "pid": 37496,
+        "started_at": "2026-09-27T09:12:05.065183+00:00",
+        "completed_at": "2026-09-27T09:12:05.138109+00:00",
+        "stdout_truncated": false,
+        "stderr_truncated": false,
+        "termination_status": "completed",
+        "cleanup_completed": true,
+        "cleanup_status": "completed",
+        "args": [
+          "C:\\Users\\lenovo\\devel\\ai-game-factory\\.venv\\Scripts\\python.exe",
+          "-c",
+          "import subprocess, sys; subprocess.Popen([sys.executable, r'C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\windows-process-timeout\\runs\\root-stages\\test_parent_exit_descendant_bo0\\grandchild.py']); import os,json,time; open('C:\\\\Users\\\\lenovo\\\\devel\\\\ai-game-factory\\\\.verification\\\\windows-process-timeout\\\\runs\\\\root-stages\\\\test_parent_exit_descendant_bo0\\\\parent-exit-requested.json', \"w\").write(json.dumps({\"event\":\"parent_exit_requested\",\"perf_counter\":time.perf_counter(),\"pid\":os.getpid()})); sys.exit(0)"
+        ],
+        "cwd": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\windows-process-timeout\\runs\\root-stages\\test_parent_exit_descendant_bo0"
+      }
+    },
+    {
+      "event": "checkpoint_absent",
+      "perf_counter": 911102.5167893,
+      "file": "descendant-ready.json"
+    }
+  ]
+}

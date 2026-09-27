@@ -1,0 +1,10 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.14, pytest-9.1.1, pluggy-1.6.0 -- C:\Users\lenovo\devel\ai-game-factory\.venv\Scripts\python.exe
+rootdir: C:\Users\lenovo\devel\ai-game-factory
+configfile: pyproject.toml
+collecting ... collected 1 item
+
+tests/integration/test_process_runner.py::TestProcessRunner::test_parent_exit_descendant_bounded_and_cleaned PASSED [100%]
+
+- generated xml file: C:\Users\lenovo\devel\ai-game-factory\docs\reports\v0.3-rendered\windows-process-timeout\root-plain.xml -
+============================== 1 passed in 1.18s ==============================

@@ -1,0 +1,10 @@
+[
+  [
+    "module-stages",
+    "tests/integration/test_process_runner.py"
+  ],
+  [
+    "full-stages",
+    "tests"
+  ]
+]

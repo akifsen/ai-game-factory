@@ -1,0 +1,11 @@
+============================= test session starts ==============================
+platform linux -- Python 3.11.16, pytest-9.1.1, pluggy-1.6.0 -- /usr/local/bin/python
+rootdir: /tmp/gf-candidate-final
+configfile: pyproject.toml
+collecting ... collected 25 items / 23 deselected / 2 selected
+
+tests/integration/test_verify_godot_live_crash.py::test_live_process_at_deadline_fails_with_evidence PASSED [ 50%]
+tests/integration/test_verify_godot_live_crash.py::test_linux_leader_exit_leaves_worker_alive_until_worker_exits PASSED [100%]
+
+------- generated xml file: /evidence/candidate-final-311-targeted-3.xml -------
+======================= 2 passed, 23 deselected in 0.19s =======================

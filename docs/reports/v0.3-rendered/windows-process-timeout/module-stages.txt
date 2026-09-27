@@ -1,0 +1,38 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.14, pytest-9.1.1, pluggy-1.6.0 -- C:\Users\lenovo\devel\ai-game-factory\.venv\Scripts\python.exe
+rootdir: C:\Users\lenovo\devel\ai-game-factory
+configfile: pyproject.toml
+collecting ... collected 27 items
+
+tests/integration/test_process_runner.py::TestProcessRunner::test_run_simple_command_stdout PASSED [  3%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_run_command_stderr PASSED [  7%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_minimal_env_filters_secrets PASSED [ 11%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_timeout_enforcement PASSED [ 14%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_secret_redaction_in_output PASSED [ 18%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_nonexistent_executable_raises_error PASSED [ 22%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_request_override_secret_is_redacted_from_output_and_errors PASSED [ 25%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_sensitive_argument_flag_secret_is_redacted PASSED [ 29%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_short_override_secret_and_malformed_unicode_are_safe PASSED [ 33%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_output_is_bounded PASSED [ 37%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_timeout_kills_descendant_process PASSED [ 40%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_run_success_with_metadata PASSED [ 44%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_run_nonzero_exit_code PASSED [ 48%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_timeout_attaches_serializable_metadata PASSED [ 51%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_redaction_expansion_stays_within_output_limit PASSED [ 55%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_posix_parent_exit_kills_descendant_ignoring_sigterm SKIPPED [ 59%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_incomplete_pipe_read_fails_with_evidence PASSED [ 62%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_cleanup_error_message_redacts_request_secret PASSED [ 66%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_windows_job_close_failure_is_reported PASSED [ 70%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_timeout_redacts_secrets_in_details PASSED [ 74%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_stdout_truncation_flag_and_multibyte_safety PASSED [ 77%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_stderr_truncation_flag PASSED [ 81%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_error_redacts_credentials_in_details PASSED [ 85%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_command_result_backward_compatibility PASSED [ 88%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_job_attach_failure_fails_closed PASSED [ 92%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_parent_exit_descendant_bounded_and_cleaned PASSED [ 96%]
+tests/integration/test_process_runner.py::TestProcessRunner::test_cleanup_failure_retains_metadata PASSED [100%]
+
+- generated xml file: C:\Users\lenovo\devel\ai-game-factory\docs\reports\v0.3-rendered\windows-process-timeout\module-stages.xml -
+=========================== short test summary info ===========================
+SKIPPED [1] tests\integration\test_process_runner.py:290: POSIX process-group cleanup
+======================== 26 passed, 1 skipped in 9.33s ========================

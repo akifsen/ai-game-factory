@@ -1,0 +1,154 @@
+[
+  {
+    "attempt": "ready-b1",
+    "snapshot": "base",
+    "instrumented": false,
+    "exit_code": 0,
+    "argv": [
+      "C:\\Users\\lenovo\\devel\\ai-game-factory\\.venv\\Scripts\\python.exe",
+      "-m",
+      "pytest",
+      "-ra",
+      "-p",
+      "no:cacheprovider",
+      "-p",
+      "diag_plugin",
+      "tests/integration/test_process_runner.py::TestProcessRunner::test_parent_exit_descendant_bounded_and_cleaned",
+      "--basetemp=C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\windows-process-timeout\\runs\\ready-b1",
+      "--junitxml=C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.3-rendered\\windows-process-timeout\\ready-b1.xml"
+    ]
+  },
+  {
+    "attempt": "ready-c1",
+    "snapshot": "cand",
+    "instrumented": false,
+    "exit_code": 0,
+    "argv": [
+      "C:\\Users\\lenovo\\devel\\ai-game-factory\\.venv\\Scripts\\python.exe",
+      "-m",
+      "pytest",
+      "-ra",
+      "-p",
+      "no:cacheprovider",
+      "-p",
+      "diag_plugin",
+      "tests/integration/test_process_runner.py::TestProcessRunner::test_parent_exit_descendant_bounded_and_cleaned",
+      "--basetemp=C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\windows-process-timeout\\runs\\ready-c1",
+      "--junitxml=C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.3-rendered\\windows-process-timeout\\ready-c1.xml"
+    ]
+  },
+  {
+    "attempt": "ready-c2",
+    "snapshot": "cand",
+    "instrumented": false,
+    "exit_code": 0,
+    "argv": [
+      "C:\\Users\\lenovo\\devel\\ai-game-factory\\.venv\\Scripts\\python.exe",
+      "-m",
+      "pytest",
+      "-ra",
+      "-p",
+      "no:cacheprovider",
+      "-p",
+      "diag_plugin",
+      "tests/integration/test_process_runner.py::TestProcessRunner::test_parent_exit_descendant_bounded_and_cleaned",
+      "--basetemp=C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\windows-process-timeout\\runs\\ready-c2",
+      "--junitxml=C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.3-rendered\\windows-process-timeout\\ready-c2.xml"
+    ]
+  },
+  {
+    "attempt": "ready-b2",
+    "snapshot": "base",
+    "instrumented": false,
+    "exit_code": 0,
+    "argv": [
+      "C:\\Users\\lenovo\\devel\\ai-game-factory\\.venv\\Scripts\\python.exe",
+      "-m",
+      "pytest",
+      "-ra",
+      "-p",
+      "no:cacheprovider",
+      "-p",
+      "diag_plugin",
+      "tests/integration/test_process_runner.py::TestProcessRunner::test_parent_exit_descendant_bounded_and_cleaned",
+      "--basetemp=C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\windows-process-timeout\\runs\\ready-b2",
+      "--junitxml=C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.3-rendered\\windows-process-timeout\\ready-b2.xml"
+    ]
+  },
+  {
+    "attempt": "ready-b3",
+    "snapshot": "base",
+    "instrumented": false,
+    "exit_code": 0,
+    "argv": [
+      "C:\\Users\\lenovo\\devel\\ai-game-factory\\.venv\\Scripts\\python.exe",
+      "-m",
+      "pytest",
+      "-ra",
+      "-p",
+      "no:cacheprovider",
+      "-p",
+      "diag_plugin",
+      "tests/integration/test_process_runner.py::TestProcessRunner::test_parent_exit_descendant_bounded_and_cleaned",
+      "--basetemp=C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\windows-process-timeout\\runs\\ready-b3",
+      "--junitxml=C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.3-rendered\\windows-process-timeout\\ready-b3.xml"
+    ]
+  },
+  {
+    "attempt": "ready-c3",
+    "snapshot": "cand",
+    "instrumented": false,
+    "exit_code": 0,
+    "argv": [
+      "C:\\Users\\lenovo\\devel\\ai-game-factory\\.venv\\Scripts\\python.exe",
+      "-m",
+      "pytest",
+      "-ra",
+      "-p",
+      "no:cacheprovider",
+      "-p",
+      "diag_plugin",
+      "tests/integration/test_process_runner.py::TestProcessRunner::test_parent_exit_descendant_bounded_and_cleaned",
+      "--basetemp=C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\windows-process-timeout\\runs\\ready-c3",
+      "--junitxml=C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.3-rendered\\windows-process-timeout\\ready-c3.xml"
+    ]
+  },
+  {
+    "attempt": "ready-b-stage",
+    "snapshot": "base",
+    "instrumented": true,
+    "exit_code": 0,
+    "argv": [
+      "C:\\Users\\lenovo\\devel\\ai-game-factory\\.venv\\Scripts\\python.exe",
+      "-m",
+      "pytest",
+      "-ra",
+      "-p",
+      "no:cacheprovider",
+      "-p",
+      "diag_plugin",
+      "tests/integration/test_process_runner.py::TestProcessRunner::test_parent_exit_descendant_bounded_and_cleaned",
+      "--basetemp=C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\windows-process-timeout\\runs\\ready-b-stage",
+      "--junitxml=C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.3-rendered\\windows-process-timeout\\ready-b-stage.xml"
+    ]
+  },
+  {
+    "attempt": "ready-c-stage",
+    "snapshot": "cand",
+    "instrumented": true,
+    "exit_code": 0,
+    "argv": [
+      "C:\\Users\\lenovo\\devel\\ai-game-factory\\.venv\\Scripts\\python.exe",
+      "-m",
+      "pytest",
+      "-ra",
+      "-p",
+      "no:cacheprovider",
+      "-p",
+      "diag_plugin",
+      "tests/integration/test_process_runner.py::TestProcessRunner::test_parent_exit_descendant_bounded_and_cleaned",
+      "--basetemp=C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\windows-process-timeout\\runs\\ready-c-stage",
+      "--junitxml=C:\\Users\\lenovo\\devel\\ai-game-factory\\docs\\reports\\v0.3-rendered\\windows-process-timeout\\ready-c-stage.xml"
+    ]
+  }
+]

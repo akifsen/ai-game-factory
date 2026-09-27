@@ -1,0 +1,30 @@
+python=Python 3.12.14
+platform=Linux runnervmtr4k5 6.17.0-1022-azure #22-Ubuntu SMP Mon Jul 27 17:24:03 UTC 2026 x86_64 x86_64 x86_64 GNU/Linux
+godot_version=4.7.2.stable.official.ed1daf0bf
+godot_executable_sha256=8d106cbe6144c2dc7e881d61d2429c1a8a76e6b22ef48bd5e48dcf934953f71e  /home/runner/work/_temp/godot/Godot_v4.7.2-stable_linux.x86_64
+
+installed_package_from_runner_temp:
+No broken requirements found.
+Name: gamefactory
+Version: 0.3.0
+Summary: Deterministic orchestration core for agentic game development
+Home-page: 
+Author: AI Game Factory Core Team
+Author-email: 
+License: 
+Location: /home/runner/work/_temp/gamefactory-venv/lib/python3.12/site-packages
+Requires: pillow, pydantic, pyyaml
+Required-by: 
+module_path=/home/runner/work/_temp/gamefactory-venv/lib/python3.12/site-packages/gamefactory/__init__.py
+
+checkout_mount:
+TARGET SOURCE         FSTYPE OPTIONS
+/      /dev/nvme0n1p1 ext4   rw,relatime,discard,journal_async_commit,nobarrier,errors=remount-ro,commit=30,data=writeback
+
+runner_temp_mount:
+TARGET SOURCE         FSTYPE OPTIONS
+/      /dev/nvme0n1p1 ext4   rw,relatime,discard,journal_async_commit,nobarrier,errors=remount-ro,commit=30,data=writeback
+
+runner_temp_filesystem:
+Filesystem     Type 1K-blocks     Used Available Use% Mounted on
+/dev/root      ext4  75085112 61542556  13526172  82% /

@@ -1,0 +1,580 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.14, pytest-9.1.1, pluggy-1.6.0 -- C:\Users\lenovo\devel\ai-game-factory\.venv\Scripts\python.exe
+rootdir: C:\Users\lenovo\devel\ai-game-factory
+configfile: pyproject.toml
+collecting ... collected 1 item
+
+tests/integration/test_process_runner.py::TestProcessRunner::test_parent_exit_descendant_bounded_and_cleaned FAILED [100%]
+
+================================== FAILURES ===================================
+______ TestProcessRunner.test_parent_exit_descendant_bounded_and_cleaned ______
+
+self = <gamefactory.core.execution.process_runner.ProcessRunner object at 0x00000279566B0290>
+request = CommandRequest(args=['C:\\Users\\lenovo\\devel\\ai-game-factory\\.venv\\Scripts\\python.exe', '-c', "import subprocess.../windows-candidate-isolated/test_parent_exit_descendant_bo0'), env_overrides={}, timeout_seconds=0.5, minimal_env=True)
+
+    def run(self, request: CommandRequest) -> CommandResult:
+        """Run the requested command synchronously with shell=False."""
+        if not request.args:
+            raise ToolExecutionError("Cannot execute empty argument list")
+        if (
+            isinstance(request.timeout_seconds, bool)
+            or not isinstance(request.timeout_seconds, (int, float))
+            or not math.isfinite(request.timeout_seconds)
+            or request.timeout_seconds <= 0
+        ):
+            raise ToolExecutionError("Command timeout must be a finite positive number")
+        if sys.platform == "win32" and Path(str(request.args[0])).suffix.lower() in {
+            ".bat",
+            ".cmd",
+        }:
+            raise ToolExecutionError("Batch script executables are not allowed")
+        cwd_path = Path(request.cwd).resolve()
+        secrets = [
+            v
+            for k, v in request.env_overrides.items()
+            if v and any(part in k.upper() for part in _SENSITIVE_ENV_SUBSTRINGS)
+        ]
+        secrets.extend(self._sensitive_argument_values(request.args))
+    
+        def redact(value: str) -> str:
+            return redactor.redact_text(value, secrets)
+    
+        command_display = redact(" ".join(str(a) for a in request.args))
+        redacted_args = [redact(str(a)) for a in request.args]
+        redacted_cwd = redact(str(cwd_path))
+    
+        if not cwd_path.is_dir():
+            raise ToolExecutionError(
+                f"Working directory does not exist: {redacted_cwd}",
+                details={
+                    "cwd": redacted_cwd,
+                    "command": command_display,
+                    "args": redacted_args,
+                },
+            )
+    
+        start_wall_time = utc_now_iso()
+        start_time = time.perf_counter()
+        deadline = start_time + request.timeout_seconds
+    
+        try:
+            if sys.platform == "win32":
+                proc = subprocess.Popen(  # noqa: S603
+                    request.args,
+                    cwd=str(cwd_path),
+                    env=self.build_env(request),
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    shell=False,
+                    creationflags=subprocess.CREATE_NEW_PROCESS_GROUP,
+                )
+            else:
+                proc = subprocess.Popen(  # noqa: S603
+                    request.args,
+                    cwd=str(cwd_path),
+                    env=self.build_env(request),
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    shell=False,
+                    start_new_session=True,
+                )
+        except FileNotFoundError as exc:
+            safe_exe = redact(str(request.args[0]))
+            raise ToolExecutionError(
+                f"Executable not found: '{safe_exe}'",
+                details={
+                    "executable": safe_exe,
+                    "command": command_display,
+                    "args": redacted_args,
+                    "cwd": redacted_cwd,
+                },
+            ) from exc
+        except OSError as exc:
+            safe_error = redact(str(exc))
+            raise ToolExecutionError(
+                f"Failed to execute command '{command_display}': {safe_error}",
+                details={
+                    "command": command_display,
+                    "error": safe_error,
+                    "args": redacted_args,
+                    "cwd": redacted_cwd,
+                },
+            ) from exc
+    
+        windows_job: int | None = None
+        if sys.platform == "win32":
+            try:
+                windows_job = self._attach_windows_job(proc)
+            except Exception:
+                windows_job = None
+    
+            if windows_job is None:
+                # Fail closed: Tree containment cannot be guaranteed without job object
+                try:
+                    self._kill_tree(proc)
+                except Exception:
+                    pass
+                completed_wall_time = utc_now_iso()
+                duration = round(time.perf_counter() - start_time, 3)
+                raise ToolExecutionError(
+                    f"Failed to attach process {proc.pid} to Windows Job Object: {command_display}",
+                    details={
+                        "command": command_display,
+                        "args": redacted_args,
+                        "cwd": redacted_cwd,
+                        "pid": proc.pid,
+                        "started_at": start_wall_time,
+                        "completed_at": completed_wall_time,
+                        "duration": duration,
+                        "duration_seconds": duration,
+                        "cleanup_completed": False,
+                        "cleanup_status": "uncertain",
+                        "stdout": "",
+                        "stderr": "",
+                        "stdout_truncated": False,
+                        "stderr_truncated": False,
+                        "timed_out": False,
+                        "exit_code": proc.returncode,
+                        "termination_status": "failed",
+                    },
+                )
+    
+        assert proc.stdout is not None and proc.stderr is not None
+        stdout_pipe = proc.stdout
+        stderr_pipe = proc.stderr
+        captured: dict[str, BoundedReadResult] = {}
+        readers = [
+            threading.Thread(
+                target=lambda: captured.setdefault("stdout", self._read_bounded(stdout_pipe)),
+                daemon=True,
+            ),
+            threading.Thread(
+                target=lambda: captured.setdefault("stderr", self._read_bounded(stderr_pipe)),
+                daemon=True,
+            ),
+        ]
+        for reader in readers:
+            reader.start()
+    
+        cleanup_completed = True
+        cleanup_status = "completed"
+        cleanup_error: Exception | None = None
+        timed_out = False
+        timeout_exc: Exception | None = None
+    
+        try:
+            # 1. Bounded wait for process exit up to deadline
+            remaining_proc_wait = max(0.0, deadline - time.perf_counter())
+            try:
+>               proc.wait(timeout=remaining_proc_wait)
+
+src\gamefactory\core\execution\process_runner.py:490: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+..\..\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\Lib\subprocess.py:1264: in wait
+    return self._wait(timeout=timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <Popen: returncode: 0 args: ['C:\\Users\\lenovo\\devel\\ai-game-factory\\.ve...>
+timeout = 0.4870783999795094
+
+    def _wait(self, timeout):
+        """Internal implementation of wait() on Windows."""
+        if timeout is None:
+            timeout_millis = _winapi.INFINITE
+        elif timeout <= 0:
+            timeout_millis = 0
+        else:
+            timeout_millis = int(timeout * 1000)
+        if self.returncode is None:
+            # API note: Returns immediately if timeout_millis == 0.
+            result = _winapi.WaitForSingleObject(self._handle,
+                                                 timeout_millis)
+            if result == _winapi.WAIT_TIMEOUT:
+>               raise TimeoutExpired(self.args, timeout)
+E               subprocess.TimeoutExpired: Command '['C:\\Users\\lenovo\\devel\\ai-game-factory\\.venv\\Scripts\\python.exe', '-c', "import subprocess, sys; subprocess.Popen([sys.executable, r'C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\linux-regression-fix\\windows-candidate-isolated\\test_parent_exit_descendant_bo0\\grandchild.py']); sys.exit(0)"]' timed out after 0.4870783999795094 seconds
+
+..\..\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\Lib\subprocess.py:1593: TimeoutExpired
+
+The above exception was the direct cause of the following exception:
+
+self = <test_process_runner.TestProcessRunner object at 0x00000279566CC350>
+tmp_path = WindowsPath('C:/Users/lenovo/devel/ai-game-factory/.verification/linux-regression-fix/windows-candidate-isolated/test_parent_exit_descendant_bo0')
+
+    def test_parent_exit_descendant_bounded_and_cleaned(self, tmp_path: Path) -> None:
+        """When parent spawns descendant inheriting pipes and exits, runner bounds wait and cleans descendant."""
+        marker = tmp_path / "descendant-marker.txt"
+        grandchild = tmp_path / "grandchild.py"
+        grandchild.write_text(
+            "import time; from pathlib import Path; time.sleep(3.0); Path(r'"
+            + str(marker)
+            + "').write_text('survived', encoding='utf-8')",
+            encoding="utf-8",
+        )
+        # Parent spawns grandchild and exits immediately
+        parent_code = (
+            "import subprocess, sys; subprocess.Popen([sys.executable, r'"
+            + str(grandchild)
+            + "']); sys.exit(0)"
+        )
+        t_start = time.perf_counter()
+        req = CommandRequest(
+            args=[sys.executable, "-c", parent_code],
+            cwd=tmp_path,
+            timeout_seconds=0.5,
+        )
+>       res = self.runner.run(req)
+              ^^^^^^^^^^^^^^^^^^^^
+
+tests\integration\test_process_runner.py:566: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <gamefactory.core.execution.process_runner.ProcessRunner object at 0x00000279566B0290>
+request = CommandRequest(args=['C:\\Users\\lenovo\\devel\\ai-game-factory\\.venv\\Scripts\\python.exe', '-c', "import subprocess.../windows-candidate-isolated/test_parent_exit_descendant_bo0'), env_overrides={}, timeout_seconds=0.5, minimal_env=True)
+
+    def run(self, request: CommandRequest) -> CommandResult:
+        """Run the requested command synchronously with shell=False."""
+        if not request.args:
+            raise ToolExecutionError("Cannot execute empty argument list")
+        if (
+            isinstance(request.timeout_seconds, bool)
+            or not isinstance(request.timeout_seconds, (int, float))
+            or not math.isfinite(request.timeout_seconds)
+            or request.timeout_seconds <= 0
+        ):
+            raise ToolExecutionError("Command timeout must be a finite positive number")
+        if sys.platform == "win32" and Path(str(request.args[0])).suffix.lower() in {
+            ".bat",
+            ".cmd",
+        }:
+            raise ToolExecutionError("Batch script executables are not allowed")
+        cwd_path = Path(request.cwd).resolve()
+        secrets = [
+            v
+            for k, v in request.env_overrides.items()
+            if v and any(part in k.upper() for part in _SENSITIVE_ENV_SUBSTRINGS)
+        ]
+        secrets.extend(self._sensitive_argument_values(request.args))
+    
+        def redact(value: str) -> str:
+            return redactor.redact_text(value, secrets)
+    
+        command_display = redact(" ".join(str(a) for a in request.args))
+        redacted_args = [redact(str(a)) for a in request.args]
+        redacted_cwd = redact(str(cwd_path))
+    
+        if not cwd_path.is_dir():
+            raise ToolExecutionError(
+                f"Working directory does not exist: {redacted_cwd}",
+                details={
+                    "cwd": redacted_cwd,
+                    "command": command_display,
+                    "args": redacted_args,
+                },
+            )
+    
+        start_wall_time = utc_now_iso()
+        start_time = time.perf_counter()
+        deadline = start_time + request.timeout_seconds
+    
+        try:
+            if sys.platform == "win32":
+                proc = subprocess.Popen(  # noqa: S603
+                    request.args,
+                    cwd=str(cwd_path),
+                    env=self.build_env(request),
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    shell=False,
+                    creationflags=subprocess.CREATE_NEW_PROCESS_GROUP,
+                )
+            else:
+                proc = subprocess.Popen(  # noqa: S603
+                    request.args,
+                    cwd=str(cwd_path),
+                    env=self.build_env(request),
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    shell=False,
+                    start_new_session=True,
+                )
+        except FileNotFoundError as exc:
+            safe_exe = redact(str(request.args[0]))
+            raise ToolExecutionError(
+                f"Executable not found: '{safe_exe}'",
+                details={
+                    "executable": safe_exe,
+                    "command": command_display,
+                    "args": redacted_args,
+                    "cwd": redacted_cwd,
+                },
+            ) from exc
+        except OSError as exc:
+            safe_error = redact(str(exc))
+            raise ToolExecutionError(
+                f"Failed to execute command '{command_display}': {safe_error}",
+                details={
+                    "command": command_display,
+                    "error": safe_error,
+                    "args": redacted_args,
+                    "cwd": redacted_cwd,
+                },
+            ) from exc
+    
+        windows_job: int | None = None
+        if sys.platform == "win32":
+            try:
+                windows_job = self._attach_windows_job(proc)
+            except Exception:
+                windows_job = None
+    
+            if windows_job is None:
+                # Fail closed: Tree containment cannot be guaranteed without job object
+                try:
+                    self._kill_tree(proc)
+                except Exception:
+                    pass
+                completed_wall_time = utc_now_iso()
+                duration = round(time.perf_counter() - start_time, 3)
+                raise ToolExecutionError(
+                    f"Failed to attach process {proc.pid} to Windows Job Object: {command_display}",
+                    details={
+                        "command": command_display,
+                        "args": redacted_args,
+                        "cwd": redacted_cwd,
+                        "pid": proc.pid,
+                        "started_at": start_wall_time,
+                        "completed_at": completed_wall_time,
+                        "duration": duration,
+                        "duration_seconds": duration,
+                        "cleanup_completed": False,
+                        "cleanup_status": "uncertain",
+                        "stdout": "",
+                        "stderr": "",
+                        "stdout_truncated": False,
+                        "stderr_truncated": False,
+                        "timed_out": False,
+                        "exit_code": proc.returncode,
+                        "termination_status": "failed",
+                    },
+                )
+    
+        assert proc.stdout is not None and proc.stderr is not None
+        stdout_pipe = proc.stdout
+        stderr_pipe = proc.stderr
+        captured: dict[str, BoundedReadResult] = {}
+        readers = [
+            threading.Thread(
+                target=lambda: captured.setdefault("stdout", self._read_bounded(stdout_pipe)),
+                daemon=True,
+            ),
+            threading.Thread(
+                target=lambda: captured.setdefault("stderr", self._read_bounded(stderr_pipe)),
+                daemon=True,
+            ),
+        ]
+        for reader in readers:
+            reader.start()
+    
+        cleanup_completed = True
+        cleanup_status = "completed"
+        cleanup_error: Exception | None = None
+        timed_out = False
+        timeout_exc: Exception | None = None
+    
+        try:
+            # 1. Bounded wait for process exit up to deadline
+            remaining_proc_wait = max(0.0, deadline - time.perf_counter())
+            try:
+                proc.wait(timeout=remaining_proc_wait)
+            except subprocess.TimeoutExpired as exc:
+                timed_out = True
+                timeout_exc = exc
+    
+            # 2. Cleanup process tree / descendants
+            if timed_out:
+                try:
+                    if windows_job is not None:
+                        self._close_windows_job(windows_job)
+                        windows_job = None
+                except Exception as exc:
+                    cleanup_completed = False
+                    cleanup_status = "failed"
+                    cleanup_error = exc
+    
+                try:
+                    self._kill_tree(proc)
+                except Exception as exc:
+                    cleanup_completed = False
+                    cleanup_status = "failed"
+                    if cleanup_error is None:
+                        cleanup_error = exc
+            else:
+                # Parent exited before deadline!
+                # Terminate any surviving pipe-inheriting descendants.
+                if windows_job is not None:
+                    try:
+                        self._close_windows_job(windows_job)
+                        windows_job = None
+                    except Exception as exc:
+                        cleanup_completed = False
+                        cleanup_status = "failed"
+                        cleanup_error = exc
+    
+                if sys.platform != "win32":
+                    try:
+                        # Reap the owned group even when descendants close inherited pipes
+                        # or ignore SIGTERM. A child that starts its own session is outside
+                        # this group's ownership and cannot be claimed as cleaned up here.
+                        self._kill_tree(proc)
+                    except Exception as exc:
+                        cleanup_completed = False
+                        cleanup_status = "failed"
+                        if cleanup_error is None:
+                            cleanup_error = exc
+    
+            # 3. Drain readers boundedly, honoring overall deadline.
+            # Never block close concurrently with reader!
+            for reader in readers:
+                remaining_time = max(0.0, deadline - time.perf_counter())
+                if timed_out:
+                    join_timeout = min(0.5, remaining_time) if remaining_time > 0 else 0.2
+                else:
+                    join_timeout = min(2.0, remaining_time)
+                reader.join(timeout=join_timeout)
+    
+            # Check if any reader is still active or overall deadline expired
+            now = time.perf_counter()
+            readers_alive = any(reader.is_alive() for reader in readers)
+            if readers_alive or now >= deadline:
+                if not timed_out and now >= deadline:
+                    timed_out = True
+                if readers_alive:
+                    cleanup_completed = False
+                    if cleanup_status == "completed":
+                        cleanup_status = "uncertain"
+    
+            if sys.platform != "win32" and (timed_out or readers_alive):
+                try:
+                    os.killpg(proc.pid, signal.SIGKILL)
+                except ProcessLookupError:
+                    pass
+                except Exception as exc:
+                    cleanup_completed = False
+                    cleanup_status = "failed"
+                    if cleanup_error is None:
+                        cleanup_error = exc
+    
+        finally:
+            if windows_job is not None:
+                try:
+                    self._close_windows_job(windows_job)
+                except Exception as exc:
+                    cleanup_completed = False
+                    cleanup_status = "failed"
+                    if cleanup_error is None:
+                        cleanup_error = exc
+                windows_job = None
+    
+            # NEVER call close() concurrently with reader! Only close pipe if reader has stopped!
+            if not readers[0].is_alive():
+                try:
+                    stdout_pipe.close()
+                except OSError:
+                    pass
+            if not readers[1].is_alive():
+                try:
+                    stderr_pipe.close()
+                except OSError:
+                    pass
+    
+        stdout_res = captured.get("stdout", BoundedReadResult(b"", False))
+        stderr_res = captured.get("stderr", BoundedReadResult(b"", False))
+        stdout_str = stdout_res.data.decode("utf-8", errors="replace")
+        stderr_str = stderr_res.data.decode("utf-8", errors="replace")
+        stdout_redacted, stdout_redaction_truncated = self._cap_redacted_text(redact(stdout_str))
+        stderr_redacted, stderr_redaction_truncated = self._cap_redacted_text(redact(stderr_str))
+        stdout_truncated = stdout_res.truncated or stdout_redaction_truncated
+        stderr_truncated = stderr_res.truncated or stderr_redaction_truncated
+        completed_wall_time = utc_now_iso()
+        duration = round(time.perf_counter() - start_time, 3)
+    
+        if cleanup_error is not None:
+            if timed_out:
+                raise TimeoutError(
+                    f"Command timed out after {request.timeout_seconds} seconds: {command_display}",
+                    timeout_seconds=request.timeout_seconds,
+                    details={
+                        "command": command_display,
+                        "args": redacted_args,
+                        "cwd": redacted_cwd,
+                        "duration": duration,
+                        "duration_seconds": duration,
+                        "pid": proc.pid,
+                        "exit_code": proc.returncode,
+                        "timed_out": True,
+                        "termination_status": "timed_out",
+                        "cleanup_completed": False,
+                        "cleanup_status": "failed",
+                        "stdout": stdout_redacted,
+                        "stderr": stderr_redacted,
+                        "stdout_truncated": stdout_truncated,
+                        "stderr_truncated": stderr_truncated,
+                        "started_at": start_wall_time,
+                        "completed_at": completed_wall_time,
+                    },
+                ) from cleanup_error
+            raise ToolExecutionError(
+                f"Command cleanup failed for '{command_display}': {redact(str(cleanup_error))}",
+                details={
+                    "command": command_display,
+                    "args": redacted_args,
+                    "cwd": redacted_cwd,
+                    "duration": duration,
+                    "duration_seconds": duration,
+                    "pid": proc.pid,
+                    "exit_code": proc.returncode,
+                    "timed_out": False,
+                    "termination_status": "failed",
+                    "cleanup_completed": False,
+                    "cleanup_status": "failed",
+                    "stdout": stdout_redacted,
+                    "stderr": stderr_redacted,
+                    "stdout_truncated": stdout_truncated,
+                    "stderr_truncated": stderr_truncated,
+                    "started_at": start_wall_time,
+                    "completed_at": completed_wall_time,
+                },
+            ) from cleanup_error
+    
+        if timed_out:
+>           raise TimeoutError(
+                f"Command timed out after {request.timeout_seconds} seconds: {command_display}",
+                timeout_seconds=request.timeout_seconds,
+                details={
+                    "command": command_display,
+                    "args": redacted_args,
+                    "cwd": redacted_cwd,
+                    "duration": duration,
+                    "duration_seconds": duration,
+                    "pid": proc.pid,
+                    "exit_code": proc.returncode,
+                    "timed_out": True,
+                    "termination_status": "timed_out",
+                    "cleanup_completed": cleanup_completed,
+                    "cleanup_status": cleanup_status,
+                    "stdout": stdout_redacted,
+                    "stderr": stderr_redacted,
+                    "stdout_truncated": stdout_truncated,
+                    "stderr_truncated": stderr_truncated,
+                    "started_at": start_wall_time,
+                    "completed_at": completed_wall_time,
+                },
+            ) from timeout_exc
+E           gamefactory.core.domain.errors.TimeoutError: Command timed out after 0.5 seconds: C:\Users\lenovo\devel\ai-game-factory\.venv\Scripts\python.exe -c import subprocess, sys; subprocess.Popen([sys.executable, r'C:\Users\lenovo\devel\ai-game-factory\.verification\linux-regression-fix\windows-candidate-isolated\test_parent_exit_descendant_bo0\grandchild.py']); sys.exit(0)
+
+src\gamefactory\core\execution\process_runner.py:652: TimeoutError
+- generated xml file: C:\Users\lenovo\devel\ai-game-factory\docs\reports\v0.3-rendered\linux-regression-fix\windows-candidate-isolated.xml -
+=========================== short test summary info ===========================
+FAILED tests/integration/test_process_runner.py::TestProcessRunner::test_parent_exit_descendant_bounded_and_cleaned
+============================== 1 failed in 0.74s ==============================

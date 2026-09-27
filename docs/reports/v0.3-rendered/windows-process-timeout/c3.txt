@@ -1,0 +1,27 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.14, pytest-9.1.1, pluggy-1.6.0 -- C:\Users\lenovo\devel\ai-game-factory\.venv\Scripts\python.exe
+rootdir: C:\Users\lenovo\devel\ai-game-factory\.verification\windows-process-timeout\cand
+configfile: pyproject.toml
+collecting ... collected 1 item
+
+tests/integration/test_process_runner.py::TestProcessRunner::test_parent_exit_descendant_bounded_and_cleaned ERROR [100%]
+
+=================================== ERRORS ====================================
+_ ERROR at setup of TestProcessRunner.test_parent_exit_descendant_bounded_and_cleaned _
+
+self = WindowsPath('C:/Users/lenovo/devel/ai-game-factory/.verification/windows-process-timeout/runs/c3')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+>           os.mkdir(self, mode)
+E           FileNotFoundError: [WinError 3] Sistem belirtilen yolu bulamýyor: 'C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\windows-process-timeout\\runs\\c3'
+
+..\..\..\..\..\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\Lib\pathlib.py:1311: FileNotFoundError
+- generated xml file: C:\Users\lenovo\devel\ai-game-factory\docs\reports\v0.3-rendered\windows-process-timeout\c3.xml -
+=========================== short test summary info ===========================
+ERROR tests/integration/test_process_runner.py::TestProcessRunner::test_parent_exit_descendant_bounded_and_cleaned
+============================== 1 error in 0.14s ===============================

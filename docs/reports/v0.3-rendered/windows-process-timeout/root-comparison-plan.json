@@ -1,0 +1,22 @@
+[
+  [
+    "root-plain",
+    false,
+    false
+  ],
+  [
+    "root-stages",
+    true,
+    false
+  ],
+  [
+    "collection-plain",
+    false,
+    true
+  ],
+  [
+    "collection-stages",
+    true,
+    true
+  ]
+]

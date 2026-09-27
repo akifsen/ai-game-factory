@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="1" failures="0" skipped="0" tests="1" time="0.117" timestamp="2026-09-27T12:10:05.677180+03:00" hostname="DESKTOP-LMPJ3VK"><testcase classname="tests.integration.test_process_runner.TestProcessRunner" name="test_parent_exit_descendant_bounded_and_cleaned" time="0.003"><error message="failed on setup with &quot;FileNotFoundError: [WinError 3] Sistem belirtilen yolu bulamıyor: 'C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\windows-process-timeout\\runs\\b-stage'&quot;">self = WindowsPath('C:/Users/lenovo/devel/ai-game-factory/.verification/windows-process-timeout/runs/b-stage')
+mode = 448, parents = False, exist_ok = False
+
+    def mkdir(self, mode=0o777, parents=False, exist_ok=False):
+        """
+        Create a new directory at this given path.
+        """
+        try:
+&gt;           os.mkdir(self, mode)
+E           FileNotFoundError: [WinError 3] Sistem belirtilen yolu bulamıyor: 'C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\windows-process-timeout\\runs\\b-stage'
+
+..\..\..\..\..\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\Lib\pathlib.py:1311: FileNotFoundError</error></testcase></testsuite></testsuites>

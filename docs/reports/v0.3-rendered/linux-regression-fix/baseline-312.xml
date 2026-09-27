@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="2" time="1.032" timestamp="2026-09-27T08:41:10.877271+00:00" hostname="c68e9340e779"><testcase classname="tests.integration.test_verify_godot_live_crash" name="test_live_process_at_deadline_fails_with_evidence" time="0.051"><failure message="AssertionError: assert (0.04999912200000267 is not None and 0.04999912200000267 &gt;= 0.05)&#10; +  where 0.04999912200000267 = PosixLifeObservation(status='unknown', method='pidfd', reason='deadline: alive: live_threads', leader_state='R', task_ids=[40], exe_result='/bin/sleep', elapsed_seconds=0.04999912200000267, pidfd_readable=False).elapsed_seconds&#10; +  and   0.04999912200000267 = PosixLifeObservation(status='unknown', method='pidfd', reason='deadline: alive: live_threads', leader_state='R', task_ids=[40], exe_result='/bin/sleep', elapsed_seconds=0.04999912200000267, pidfd_readable=False).elapsed_seconds">def test_live_process_at_deadline_fails_with_evidence() -&gt; None:
+        obs = wait_for_owned_thread_group(
+            _ref(),
+            time.monotonic() + 0.05,
+            probe=_Proc({40: "R"}, "/bin/sleep"),
+            poll_pidfd=lambda _fd, timeout: (False, None) if timeout &gt;= 0 else (False, None),
+        )
+        assert obs.status == "unknown"
+        assert obs.reason.startswith("deadline:")
+        assert "alive" in obs.reason
+        assert obs.leader_state == "R"
+&gt;       assert obs.elapsed_seconds is not None and obs.elapsed_seconds &gt;= 0.05
+E       AssertionError: assert (0.04999912200000267 is not None and 0.04999912200000267 &gt;= 0.05)
+E        +  where 0.04999912200000267 = PosixLifeObservation(status='unknown', method='pidfd', reason='deadline: alive: live_threads', leader_state='R', task_ids=[40], exe_result='/bin/sleep', elapsed_seconds=0.04999912200000267, pidfd_readable=False).elapsed_seconds
+E        +  and   0.04999912200000267 = PosixLifeObservation(status='unknown', method='pidfd', reason='deadline: alive: live_threads', leader_state='R', task_ids=[40], exe_result='/bin/sleep', elapsed_seconds=0.04999912200000267, pidfd_readable=False).elapsed_seconds
+
+tests/integration/test_verify_godot_live_crash.py:423: AssertionError</failure></testcase><testcase classname="tests.integration.test_verify_godot_live_crash" name="test_linux_leader_exit_leaves_worker_alive_until_worker_exits" time="0.654"><failure message="AssertionError: assert '225.510770756' != '225.510770756'">tmp_path = PosixPath('/tmp/pytest-of-root/pytest-0/test_linux_leader_exit_leaves_0')
+
+    @pytest.mark.skipif(not sys.platform.startswith("linux"), reason="Linux pidfd thread group")
+    def test_linux_leader_exit_leaves_worker_alive_until_worker_exits(tmp_path: Path) -&gt; None:
+        """Not a Godot render. Proves leader Z or exe ENOENT is not process termination."""
+        ready = tmp_path / "ready"
+        beat = tmp_path / "beat"
+        release = tmp_path / "release"
+        stop = tmp_path / "stop"
+        script = r"""
+    import ctypes, os, platform, sys, threading, time
+    ready, beat, release, stop = sys.argv[1:5]
+    
+    def worker():
+        while not os.path.exists(stop):
+            temporary = beat + ".tmp"
+            with open(temporary, "w", encoding="utf-8") as handle:
+                handle.write(str(time.monotonic()))
+            os.replace(temporary, beat)
+            time.sleep(0.05)
+    
+    threading.Thread(target=worker, daemon=False).start()
+    time.sleep(0.2)
+    with open(ready, "w", encoding="utf-8") as handle:
+        handle.write("ready")
+    while not os.path.exists(release):
+        time.sleep(0.02)
+    numbers = {"x86_64": 60, "aarch64": 93, "i386": 1, "i686": 1}
+    number = numbers.get(platform.machine())
+    if number is None:
+        raise SystemExit("unsupported machine")
+    save = ctypes.pythonapi.PyEval_SaveThread
+    save.restype = ctypes.c_void_p
+    save()
+    libc = ctypes.CDLL(None, use_errno=True)
+    libc.syscall.restype = ctypes.c_long
+    libc.syscall.argtypes = [ctypes.c_long, ctypes.c_int]
+    libc.syscall(number, 0)
+    """
+        proc = subprocess.Popen(
+            [sys.executable, "-c", script, str(ready), str(beat), str(release), str(stop)]
+        )
+        ref: LinuxProcessRef | None = None
+        try:
+            deadline = time.monotonic() + 3
+            while not ready.is_file():
+                if time.monotonic() &gt; deadline:
+                    raise AssertionError(f"worker did not become ready: {proc.poll()}")
+                time.sleep(0.02)
+            starttime = RealProcProbe().starttime(proc.pid)
+            assert starttime is not None
+            ref = open_owned_linux_process(proc.pid, Path(sys.executable), starttime)
+            release.write_text("go\n", encoding="utf-8")
+            leader_deadline = time.monotonic() + 2
+            leader_state = ""
+            while time.monotonic() &lt; leader_deadline:
+                text = Path(f"/proc/{proc.pid}/stat")
+                if text.is_file():
+                    raw = text.read_text(encoding="utf-8")
+                    paren = raw.rfind(")")
+                    leader_state = raw[paren + 1 :].split()[0] if paren != -1 else ""
+                if leader_state == "Z":
+                    break
+                time.sleep(0.02)
+            assert leader_state == "Z", leader_state
+            first = beat.read_text(encoding="utf-8")
+            time.sleep(0.2)
+            second = beat.read_text(encoding="utf-8")
+&gt;           assert second != first
+E           AssertionError: assert '225.510770756' != '225.510770756'
+
+tests/integration/test_verify_godot_live_crash.py:539: AssertionError</failure></testcase></testsuite></testsuites>

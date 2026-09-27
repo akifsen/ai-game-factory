@@ -1,0 +1,129 @@
+{
+  "base_sha": "8af661f9e2e407c6ec0ac22a9a9ed91f43d3de92",
+  "new_remote_sha": null,
+  "platform_closure": "NOT CLOSED",
+  "human_review": "PENDING",
+  "browser_loaded": false,
+  "linux": {
+    "311": {
+      "python": "3.11.16 (main, Sep 19 2026, 01:04:43) [GCC 14.2.0]",
+      "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.41",
+      "source_manifest_matches_final_worktree": true,
+      "fixed_series": [
+        {
+          "tests": 2,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "tests": 2,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "tests": 2,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "tests": 2,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "tests": 2,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        }
+      ],
+      "full_suite": {
+        "tests": 315,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 6
+      },
+      "all_recorded_commands_exit_zero": true
+    },
+    "312": {
+      "python": "3.12.14 (main, Sep 19 2026, 01:04:57) [GCC 14.2.0]",
+      "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.41",
+      "source_manifest_matches_final_worktree": true,
+      "fixed_series": [
+        {
+          "tests": 2,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "tests": 2,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "tests": 2,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "tests": 2,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "tests": 2,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        }
+      ],
+      "full_suite": {
+        "tests": 315,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 6
+      },
+      "all_recorded_commands_exit_zero": true
+    }
+  },
+  "windows": {
+    "python": "3.12.14",
+    "full_suite": {
+      "tests": 315,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 13
+    },
+    "baseline_isolated": {
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "candidate_isolated": {
+      "tests": 1,
+      "failures": 1,
+      "errors": 0,
+      "skipped": 0
+    },
+    "remaining_failure": "tests/integration/test_process_runner.py::TestProcessRunner::test_parent_exit_descendant_bounded_and_cleaned: TimeoutError after 0.5 seconds",
+    "ruff_check": "PASS",
+    "ruff_format": "PASS",
+    "mypy_initial": "module-name collision in expanded invocation",
+    "mypy_explicit_package_bases": "PASS"
+  },
+  "baseline_unchanged_files": {
+    "scripts/verify_godot_live_crash.py": "1415c0924aa66e866e9d90abc59056b09a94a90f7085fdbca98bd3d62a161f55",
+    "tests/integration/test_process_runner.py": "671bda5c75b5f8268a851784b6845fa1014c81c864a4f5008fab6ab6d8cf990d",
+    "src/gamefactory/core/execution/process_runner.py": "db59408ee90785a88a339d2634a6153b4243ffb6ffb8a77646aa6ab6d7f24108"
+  },
+  "candidate_test_sha256_normalized_lf": "9cfd426a6afa5a95e19c216c6be5860300399fe07cbe778eb855781c25edaad0"
+}

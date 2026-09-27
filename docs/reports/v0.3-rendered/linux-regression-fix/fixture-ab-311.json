@@ -1,0 +1,36 @@
+{
+  "python": "3.11.16 (main, Sep 19 2026, 01:04:43) [GCC 14.2.0]",
+  "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.41",
+  "supervisor_used": false,
+  "results": [
+    {
+      "variant": "original",
+      "pid": 13,
+      "ready": true,
+      "leader_state": "Z",
+      "first": "143.739421605",
+      "second": "143.739421605",
+      "worker_progress": false,
+      "tasks": {
+        "13": "Z"
+      },
+      "exit_code": -11,
+      "stderr": "Fatal Python error: Segmentation fault\n\nThread 0x0000733bc54b66c0 (most recent call first):\n  File \"<string>\", line 11 in worker\n  File \"/usr/local/lib/python3.11/threading.py\", line 982 in run\n  File \"/usr/local/lib/python3.11/threading.py\", line 1045 in _bootstrap_inner\n  File \"/usr/local/lib/python3.11/threading.py\", line 1002 in _bootstrap\n\nCurrent thread 0x0000733bc58ba340 (most recent call first):\n  File \"<string>\", line 25 in <module>\n"
+    },
+    {
+      "variant": "without_manual_save_thread",
+      "pid": 15,
+      "ready": true,
+      "leader_state": "Z",
+      "first": "145.09116442",
+      "second": "145.141581689",
+      "worker_progress": true,
+      "tasks": {
+        "15": "Z",
+        "16": "S"
+      },
+      "exit_code": 0,
+      "stderr": ""
+    }
+  ]
+}

@@ -1,0 +1,40 @@
+Obtaining file:///tmp/gf-candidate-final
+  Installing build dependencies: started
+  Installing build dependencies: finished with status 'done'
+  Checking if build backend supports build_editable: started
+  Checking if build backend supports build_editable: finished with status 'done'
+  Getting requirements to build editable: started
+  Getting requirements to build editable: finished with status 'done'
+  Preparing editable metadata (pyproject.toml): started
+  Preparing editable metadata (pyproject.toml): finished with status 'done'
+Requirement already satisfied: pydantic>=2.0.0 in /usr/local/lib/python3.12/site-packages (from gamefactory==0.3.0) (2.13.5)
+Requirement already satisfied: pyyaml>=6.0 in /usr/local/lib/python3.12/site-packages (from gamefactory==0.3.0) (6.0.3)
+Requirement already satisfied: pillow>=10.0.0 in /usr/local/lib/python3.12/site-packages (from gamefactory==0.3.0) (12.3.0)
+Requirement already satisfied: pytest>=8.0.0 in /usr/local/lib/python3.12/site-packages (from gamefactory==0.3.0) (9.1.1)
+Requirement already satisfied: ruff>=0.4.0 in /usr/local/lib/python3.12/site-packages (from gamefactory==0.3.0) (0.16.9)
+Requirement already satisfied: mypy>=1.9.0 in /usr/local/lib/python3.12/site-packages (from gamefactory==0.3.0) (2.3.1)
+Requirement already satisfied: types-PyYAML>=6.0.0 in /usr/local/lib/python3.12/site-packages (from gamefactory==0.3.0) (6.0.12.20260906)
+Requirement already satisfied: typing_extensions>=4.6.0 in /usr/local/lib/python3.12/site-packages (from mypy>=1.9.0->gamefactory==0.3.0) (4.16.0)
+Requirement already satisfied: mypy_extensions>=1.0.0 in /usr/local/lib/python3.12/site-packages (from mypy>=1.9.0->gamefactory==0.3.0) (1.1.0)
+Requirement already satisfied: pathspec>=1.0.0 in /usr/local/lib/python3.12/site-packages (from mypy>=1.9.0->gamefactory==0.3.0) (1.1.1)
+Requirement already satisfied: librt>=0.13.0 in /usr/local/lib/python3.12/site-packages (from mypy>=1.9.0->gamefactory==0.3.0) (0.15.0)
+Requirement already satisfied: ast-serialize<1.0.0,>=0.6.0 in /usr/local/lib/python3.12/site-packages (from mypy>=1.9.0->gamefactory==0.3.0) (0.11.2)
+Requirement already satisfied: annotated-types>=0.6.0 in /usr/local/lib/python3.12/site-packages (from pydantic>=2.0.0->gamefactory==0.3.0) (0.8.0)
+Requirement already satisfied: pydantic-core==2.46.5 in /usr/local/lib/python3.12/site-packages (from pydantic>=2.0.0->gamefactory==0.3.0) (2.46.5)
+Requirement already satisfied: typing-inspection>=0.4.2 in /usr/local/lib/python3.12/site-packages (from pydantic>=2.0.0->gamefactory==0.3.0) (0.4.4)
+Requirement already satisfied: iniconfig>=1.0.1 in /usr/local/lib/python3.12/site-packages (from pytest>=8.0.0->gamefactory==0.3.0) (2.3.0)
+Requirement already satisfied: packaging>=22 in /usr/local/lib/python3.12/site-packages (from pytest>=8.0.0->gamefactory==0.3.0) (26.3)
+Requirement already satisfied: pluggy<2,>=1.5 in /usr/local/lib/python3.12/site-packages (from pytest>=8.0.0->gamefactory==0.3.0) (1.6.0)
+Requirement already satisfied: pygments>=2.7.2 in /usr/local/lib/python3.12/site-packages (from pytest>=8.0.0->gamefactory==0.3.0) (2.21.0)
+Building wheels for collected packages: gamefactory
+  Building editable for gamefactory (pyproject.toml): started
+  Building editable for gamefactory (pyproject.toml): finished with status 'done'
+  Created wheel for gamefactory: filename=gamefactory-0.3.0-0.editable-py3-none-any.whl size=4702 sha256=e042010207749ae243a4bc4babc748ad0c8a7c63d12c8ec64830fdef1f274d46
+  Stored in directory: /tmp/pip-ephem-wheel-cache-_unlnl98/wheels/33/af/be/2d8bf70cd49dff22e54328b76759b2cce3f599f566cc480484
+Successfully built gamefactory
+Installing collected packages: gamefactory
+Successfully installed gamefactory-0.3.0
+WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager, possibly rendering your system unusable. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv. Use the --root-user-action option if you know what you are doing and want to suppress this warning.
+
+[notice] A new release of pip is available: 25.0.1 -> 26.2.1
+[notice] To update, run: pip install --upgrade pip

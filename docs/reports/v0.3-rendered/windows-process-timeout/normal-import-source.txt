@@ -1,0 +1,3 @@
+C:\Users\lenovo\devel\ai-game-factory\.venv\Scripts\python.exe
+C:\Users\lenovo\devel\ai-game-factory\src\gamefactory\__init__.py
+C:\Users\lenovo\devel\ai-game-factory\src\gamefactory\core\execution\process_runner.py

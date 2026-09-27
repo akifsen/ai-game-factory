@@ -1,0 +1,46 @@
+{
+  "baseline": "8af661f9e2e407c6ec0ac22a9a9ed91f43d3de92",
+  "deadline_created_at": 0.0,
+  "deadline": 0.0625,
+  "entry_and_elapsed_start": 0.015625,
+  "return_time": 0.0625,
+  "observation": {
+    "status": "unknown",
+    "method": "pidfd",
+    "reason": "deadline: alive: live_threads",
+    "leader_state": "R",
+    "task_ids": [
+      40
+    ],
+    "exe_result": "/bin/sleep",
+    "elapsed_seconds": 0.046875,
+    "pidfd_readable": false
+  },
+  "early_empty_polls": [
+    {
+      "at": 0.015625,
+      "timeout": 0.046875
+    },
+    {
+      "at": 0.0234375,
+      "timeout": 0.0390625
+    },
+    {
+      "at": 0.03125,
+      "timeout": 0.03125
+    },
+    {
+      "at": 0.0390625,
+      "timeout": 0.0234375
+    },
+    {
+      "at": 0.046875,
+      "timeout": 0.015625
+    },
+    {
+      "at": 0.0546875,
+      "timeout": 0.0078125
+    }
+  ],
+  "conclusion": "Deadline reached exactly; internal elapsed excludes caller-to-entry delay."
+}
