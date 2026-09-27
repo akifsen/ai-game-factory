@@ -75,3 +75,40 @@ def test_acceptance_script_still_requires_the_caller_to_create_the_workspace(
             ),
             {},
         )
+
+
+def test_blender_dependency_verification_step_structure() -> None:
+    workflow = yaml.safe_load((REPO_ROOT / ".github/workflows/ci.yml").read_text(encoding="utf-8"))
+    job = workflow["jobs"]["godot-rendered"]
+    steps = job["steps"]
+
+    preflight_step_idx = next(
+        idx
+        for idx, s in enumerate(steps)
+        if "verify_blender_dependencies.py" in str(s.get("run", ""))
+    )
+    acceptance_step_idx = next(
+        idx for idx, s in enumerate(steps) if "verify_asset_acceptance.py" in str(s.get("run", ""))
+    )
+    fixture_step_idx = next(
+        idx for idx, s in enumerate(steps) if "verify_profile_fixtures.py" in str(s.get("run", ""))
+    )
+
+    # Dependency verification precedes offline acceptance and profile fixtures
+    assert preflight_step_idx < acceptance_step_idx < fixture_step_idx
+
+    preflight_script = steps[preflight_step_idx]["run"]
+    # numpy path resolved via /usr/bin/python3
+    assert "/usr/bin/python3" in preflight_script
+    assert "numpy" in preflight_script
+    # GAMEFACTORY_BLENDER_PYTHONPATH exported to GITHUB_ENV
+    assert 'echo "GAMEFACTORY_BLENDER_PYTHONPATH=' in preflight_script
+    assert '>> "$GITHUB_ENV"' in preflight_script
+
+    # No hard-coded dist-packages anywhere in workflow
+    workflow_text = (REPO_ROOT / ".github/workflows/ci.yml").read_text(encoding="utf-8")
+    assert "dist-packages" not in workflow_text
+
+    # No if: always() on fixture or acceptance steps
+    assert "always()" not in str(steps[acceptance_step_idx].get("if", ""))
+    assert "always()" not in str(steps[fixture_step_idx].get("if", ""))

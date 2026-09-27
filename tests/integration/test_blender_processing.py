@@ -1,6 +1,7 @@
 """Integration tests for Blender asset processing pipeline (Sections 12-17, 32, 48)."""
 
 import json
+import os
 import struct
 from pathlib import Path
 
@@ -206,3 +207,28 @@ def test_real_blender_glb_axis_mapping_with_unequal_height_and_depth(tmp_path: P
         abs(actual - expected) <= 0.01
         for actual, expected in zip(dimensions, [1.2, 1.6, 0.8], strict=True)
     )
+
+
+def test_real_blender_dependency_preflight(blender_available: bool) -> None:
+    if not blender_available:
+        pytest.skip("Blender executable not available on host")
+    detection = BlenderAdapter().detect_tool()
+    assert detection.executable_path
+
+    from gamefactory.adapters.dcc.blender_environment import (
+        BLENDER_PYTHONPATH_ENV,
+        parse_blender_python_paths,
+        run_blender_dependency_preflight,
+    )
+
+    # Same explicit contract as production: only the Factory variable is honored.
+    preflight = run_blender_dependency_preflight(
+        detection.executable_path,
+        ProcessRunner(sanitize_output=True),
+        python_paths=parse_blender_python_paths(os.environ.get(BLENDER_PYTHONPATH_ENV)),
+    )
+    assert preflight.status == "PASS"
+    assert preflight.blender_version is not None
+    assert preflight.python_executable is not None
+    assert preflight.modules["numpy"]["available"] is True
+    assert preflight.exit_code == 0

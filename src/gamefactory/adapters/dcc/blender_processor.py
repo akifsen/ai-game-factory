@@ -6,6 +6,7 @@ import hashlib
 import json
 import os
 import shlex
+from collections.abc import Sequence
 from dataclasses import asdict, dataclass, field
 from importlib.resources import files
 from pathlib import Path
@@ -13,14 +14,20 @@ from typing import Any
 
 from gamefactory.adapters.assets.glb_validator import preflight_glb
 from gamefactory.adapters.dcc.blender import BlenderAdapter
+from gamefactory.adapters.dcc.blender_environment import (
+    BLENDER_PYTHON_FAILURE_EXIT_CODE,
+    BLENDER_PYTHONPATH_ENV,
+    BlenderDependencyPreflight,
+    blender_env_overrides,
+    format_blender_preflight_failure_message,
+    parse_blender_python_paths,
+    run_blender_dependency_preflight,
+)
 from gamefactory.core.domain.asset_contracts import AssetSpecification
 from gamefactory.core.domain.errors import DccFailedError
 from gamefactory.core.domain.models import utc_now_iso
 from gamefactory.core.execution.process_runner import CommandRequest, CommandResult, ProcessRunner
 
-# Blender exits 0 after a --python exception unless this flag is set.
-# 4.0.2 documents the value as an exit code in 0..255; 0 disables the flag.
-BLENDER_PYTHON_FAILURE_EXIT_CODE = 17
 _INLINE_LOG_CHARS = 16_000
 
 
@@ -75,18 +82,25 @@ def _artifact_note(path: Path) -> str:
     return f"path={path} exists=false size=0 absolute={path.is_absolute()}"
 
 
-def _environment_note(runner: ProcessRunner, request: CommandRequest) -> str:
+def _environment_note(
+    runner: ProcessRunner,
+    request: CommandRequest,
+    python_paths: Sequence[Path | str] = (),
+) -> str:
     build_env = getattr(runner, "build_env", None)
     overrides = len(request.env_overrides)
+    paths_str = os.pathsep.join(str(p) for p in python_paths) if python_paths else "(none)"
     if not callable(build_env):
         return (
             f"minimal_env={str(request.minimal_env).lower()}; "
-            f"env_overrides_count={overrides}; keys=(unavailable)"
+            f"env_overrides_count={overrides}; keys=(unavailable); "
+            f"blender_python_paths={paths_str}"
         )
     keys = ",".join(sorted(str(key) for key in build_env(request)))
     return (
         f"minimal_env={str(request.minimal_env).lower()}; "
-        f"env_overrides_count={overrides}; keys={keys or '(none)'}"
+        f"env_overrides_count={overrides}; keys={keys or '(none)'}; "
+        f"blender_python_paths={paths_str}"
     )
 
 
@@ -112,6 +126,7 @@ def _blender_failure(
     contract_path: Path,
     diagnostics_path: Path,
     asset_id: str,
+    python_paths: Sequence[Path | str] = (),
 ) -> DccFailedError:
     """Build a DCC failure whose message keeps the Blender evidence CI persists."""
     if contract_path.is_file():
@@ -145,7 +160,7 @@ def _blender_failure(
             f"writable={os.access(parent, os.W_OK)}"
         ),
         f"processing_contract: {contract_path}",
-        f"environment: {_environment_note(runner, request)}",
+        f"environment: {_environment_note(runner, request, python_paths)}",
         f"capture: {capture}",
     ]
     full_body = "\n".join(
@@ -189,6 +204,7 @@ def _blender_failure(
             "stdout_truncated": res.stdout_truncated,
             "stderr_truncated": res.stderr_truncated,
             "blender_version": _blender_version_line(res.stdout),
+            "blender_python_paths": [str(p) for p in python_paths],
         },
     )
 
@@ -206,6 +222,7 @@ class BlenderProcessResult:
     processed_metrics: dict[str, Any]
     report_data: dict[str, Any]
     processed_at: str = field(default_factory=utc_now_iso)
+    dependency_preflight: dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -218,6 +235,8 @@ class BlenderAssetProcessor:
         self,
         blender_executable: Path | str | None = None,
         runner: ProcessRunner | None = None,
+        python_paths: Sequence[Path | str] | None = None,
+        dependency_preflight: bool = True,
     ) -> None:
         self.runner = runner or ProcessRunner(sanitize_output=True)
         if blender_executable:
@@ -230,6 +249,16 @@ class BlenderAssetProcessor:
                     details={"status": detect.status, "reason": detect.details.get("reason")},
                 )
             self.blender_exe = detect.executable_path
+
+        if python_paths is None:
+            raw_env = os.environ.get(BLENDER_PYTHONPATH_ENV)
+            self.python_paths = parse_blender_python_paths(raw_env)
+        else:
+            self.python_paths = parse_blender_python_paths(python_paths)
+
+        self.dependency_preflight = dependency_preflight
+        self.last_dependency_preflight: BlenderDependencyPreflight | None = None
+        self._cached_preflight: BlenderDependencyPreflight | None = None
 
     @staticmethod
     def get_script_path() -> Path:
@@ -302,6 +331,27 @@ class BlenderAssetProcessor:
 
         processed_glb.parent.mkdir(parents=True, exist_ok=True)
 
+        if self.dependency_preflight:
+            if self._cached_preflight is None or self._cached_preflight.status != "PASS":
+                preflight = run_blender_dependency_preflight(
+                    blender_executable=self.blender_exe,
+                    runner=self.runner,
+                    python_paths=self.python_paths,
+                )
+                self.last_dependency_preflight = preflight
+                if preflight.status != "PASS":
+                    msg = format_blender_preflight_failure_message(preflight)
+                    raise DccFailedError(
+                        msg,
+                        exit_code=preflight.exit_code,
+                        stderr=preflight.stderr_excerpt or "",
+                        details={
+                            "reason": "BLENDER_DEPENDENCY_UNAVAILABLE",
+                            "preflight": preflight.to_dict(),
+                        },
+                    )
+                self._cached_preflight = preflight
+
         script_file = self.get_script_path()
         script_bytes = script_file.read_bytes()
         script_hash = hashlib.sha256(script_bytes).hexdigest()
@@ -350,6 +400,7 @@ class BlenderAssetProcessor:
         req = CommandRequest(
             args=cmd,
             cwd=processed_glb.parent,
+            env_overrides=blender_env_overrides(self.python_paths),
             timeout_seconds=timeout_seconds,
         )
 
@@ -373,6 +424,7 @@ class BlenderAssetProcessor:
                 contract_path=contract_path,
                 diagnostics_path=diagnostics_path,
                 asset_id=spec.asset_id,
+                python_paths=self.python_paths,
             )
 
         if not processed_glb.is_file() or processed_glb.stat().st_size == 0:
@@ -387,6 +439,7 @@ class BlenderAssetProcessor:
                 contract_path=contract_path,
                 diagnostics_path=diagnostics_path,
                 asset_id=spec.asset_id,
+                python_paths=self.python_paths,
             )
 
         # Invariant check: raw GLB was untouched and preserved!
@@ -434,4 +487,9 @@ class BlenderAssetProcessor:
             raw_metrics=report_data.get("raw_metrics", {}),
             processed_metrics=report_data.get("processed_metrics", {}),
             report_data=report_data,
+            dependency_preflight=(
+                self.last_dependency_preflight.to_dict()
+                if self.last_dependency_preflight is not None
+                else {}
+            ),
         )

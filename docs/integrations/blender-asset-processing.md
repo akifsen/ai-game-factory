@@ -76,3 +76,32 @@ met that contract. They are not a second processing policy.
 `BLENDER_PYTHON_FAILURE_EXIT_CODE`. A Python exception in the processing script
 is a non-zero process exit. A zero exit that leaves no nonempty processed GLB
 is still a failure. Blender exit status alone is not a successful export.
+
+## Python dependency resolution and preflight
+
+Blender embeds a Python interpreter (or links to system libpython) to run scripts
+and internal add-ons such as `io_scene_gltf2`. Debian/Ubuntu Blender packages embed
+the system Python 3.12 and resolve their Python executable by locating the first
+`python3.12` binary found on the `PATH`. In CI environments like GitHub Actions,
+`actions/setup-python` prepends a toolcache Python binary to `PATH`. Although
+`ProcessRunner` maintains a minimal environment, it preserves `PATH` for essential
+tool discovery, which redirects Blender's `sys.prefix` to the toolcache Python. As
+a result, `/usr/lib/python3/dist-packages` (where system packages like `python3-numpy`
+reside) is excluded from Blender's `sys.path`, causing glTF import
+(`io_scene_gltf2/blender/imp/gltf2_blender_mesh.py`) to fail with:
+`ModuleNotFoundError: No module named 'numpy'`.
+
+To resolve this deterministically without relaxing generic environment isolation:
+- `GAMEFACTORY_BLENDER_PYTHONPATH`: An explicit environment variable containing
+  `os.pathsep`-delimited absolute paths to Python module directories. When configured,
+  `BlenderAssetProcessor` injects these paths into the Blender process execution via
+  request-scoped `PYTHONPATH` overrides. Host `PYTHONPATH` and `PYTHONHOME` are never
+  read or forwarded globally.
+- **Blender dependency preflight**: Before writing the processing contract or launching
+  the processing command, `BlenderAssetProcessor` runs an automated preflight probe
+  (`run_blender_dependency_preflight`). The probe executes non-destructively in
+  background mode (`--python-expr`), verifies the Blender version (minimum 4.0.2),
+  queries runtime metadata (`sys.executable`, `sys.prefix`, `sys.path`), and checks
+  that all required modules (`numpy`) are importable. Preflight results are cached per
+  processor instance. If preflight fails, a `DccFailedError` is raised with detailed,
+  actionable diagnostics and the processing command is never run.

@@ -8,9 +8,11 @@ import json
 import os
 from pathlib import Path
 from types import ModuleType
+from typing import Any
 
 import pytest
 
+from gamefactory.adapters.dcc.blender_environment import extract_preflight_result_path
 from gamefactory.adapters.dcc.blender_processor import (
     BLENDER_PYTHON_FAILURE_EXIT_CODE,
     BlenderAssetProcessor,
@@ -37,17 +39,61 @@ def _spec() -> AssetSpecification:
 
 
 class _RecordingRunner:
-    def __init__(self, result: CommandResult, writer=None) -> None:
+    def __init__(
+        self,
+        result: CommandResult,
+        writer: Any = None,
+        preflight_result: CommandResult | None = None,
+    ) -> None:
         self.result = result
         self.writer = writer
+        self.preflight_result = preflight_result
         self.requests: list[CommandRequest] = []
         self.env = {"PATH": "secret-value", "HOME": "/home/runner"}
 
     def build_env(self, request: CommandRequest) -> dict[str, str]:
-        return dict(self.env)
+        env = dict(self.env)
+        env.update(request.env_overrides)
+        return env
 
     def run(self, request: CommandRequest) -> CommandResult:
         self.requests.append(request)
+        if "--python-expr" in request.args:
+            res_path = extract_preflight_result_path(request.args)
+            if self.preflight_result is not None:
+                if (
+                    res_path is not None
+                    and "GAMEFACTORY_BLENDER_PREFLIGHT=" in self.preflight_result.stdout
+                ):
+                    for line in self.preflight_result.stdout.splitlines():
+                        if line.startswith("GAMEFACTORY_BLENDER_PREFLIGHT="):
+                            res_path.write_text(line.split("=", 1)[1], encoding="utf-8")
+                            break
+                return self.preflight_result
+            payload = {
+                "blender_version": "4.0.2",
+                "python_version": "3.12.3",
+                "python_version_info": [3, 12, 3, "final", 0],
+                "python_executable": "/usr/bin/python3",
+                "python_prefix": "/usr",
+                "python_base_prefix": "/usr",
+                "sys_path": ["/usr/lib/python3/dist-packages"],
+                "modules": {
+                    "numpy": {
+                        "available": True,
+                        "version": "1.26.4",
+                        "file": "/usr/lib/python3/dist-packages/numpy/__init__.py",
+                        "error": None,
+                    }
+                },
+            }
+            if res_path is not None:
+                res_path.write_text(json.dumps(payload), encoding="utf-8")
+            return CommandResult(
+                exit_code=0,
+                stdout="GAMEFACTORY_BLENDER_PREFLIGHT_WRITTEN\nBlender 4.0.2\n",
+                stderr="",
+            )
         if self.writer is not None:
             self.writer(request)
         return self.result
@@ -88,7 +134,7 @@ def test_command_sets_python_exit_code_and_absolute_spaced_output(tmp_path: Path
     output = tmp_path / "out dir" / "processed.glb"
     report = tmp_path / "out dir" / "report.json"
     result = processor.process_asset(raw, output, _spec(), report_path=report)
-    args = runner.requests[0].args
+    args = runner.requests[-1].args
     flag = args.index("--python-exit-code")
     assert args[flag + 1] == str(BLENDER_PYTHON_FAILURE_EXIT_CODE)
     assert args[flag + 2] == "--python"
@@ -98,7 +144,7 @@ def test_command_sets_python_exit_code_and_absolute_spaced_output(tmp_path: Path
     assert Path(output_arg).is_absolute()
     assert "out dir" in output_arg
     assert output_arg.endswith(".glb")
-    assert runner.requests[0].cwd == output.parent
+    assert runner.requests[-1].cwd == output.parent
     assert result.exit_code == 0
     assert output.stat().st_size > 0
     assert not report.with_suffix(".blender-diagnostics.txt").exists()
@@ -188,3 +234,107 @@ def test_export_operator_must_finish_and_write_nonempty_file(tmp_path: Path) -> 
     output.unlink()
     with pytest.raises(RuntimeError, match="output is missing"):
         script._require_finished_export({"FINISHED"}, output)
+
+
+def test_env_override_pythonpath_reaches_blender_processing_request_when_configured(
+    tmp_path: Path,
+) -> None:
+    module_dir = tmp_path / "blender_modules"
+    module_dir.mkdir()
+    runner = _RecordingRunner(CommandResult(exit_code=0, stdout="Blender 4.0.2\n", stderr=""))
+    runner.writer = _write_success
+
+    raw = tmp_path / "raw.glb"
+    create_box_glb(output_path=raw)
+    processor = BlenderAssetProcessor("blender-test", runner, python_paths=[module_dir])  # type: ignore[arg-type]
+    output = tmp_path / "processed.glb"
+    result = processor.process_asset(raw, output, _spec())
+
+    assert result.exit_code == 0
+    processing_req = runner.requests[-1]
+    assert "--python" in processing_req.args
+    assert "--python-expr" not in processing_req.args
+    assert processing_req.env_overrides.get("PYTHONPATH") == str(module_dir.resolve())
+    built_env = runner.build_env(processing_req)
+    assert built_env.get("PYTHONPATH") == str(module_dir.resolve())
+
+
+def test_preflight_failure_raises_dcc_failed_and_does_not_execute_processing_command(
+    tmp_path: Path,
+) -> None:
+    bad_preflight = CommandResult(
+        exit_code=0,
+        stdout="GAMEFACTORY_BLENDER_PREFLIGHT="
+        + json.dumps(
+            {
+                "blender_version": "4.0.2",
+                "python_version": "3.12.3",
+                "python_version_info": [3, 12, 3, "final", 0],
+                "python_executable": "/usr/bin/python3",
+                "python_prefix": "/usr",
+                "python_base_prefix": "/usr",
+                "sys_path": [],
+                "modules": {
+                    "numpy": {
+                        "available": False,
+                        "version": None,
+                        "file": None,
+                        "error": "No module named 'numpy'",
+                    }
+                },
+            }
+        )
+        + "\n",
+        stderr="",
+    )
+    runner = _RecordingRunner(
+        CommandResult(exit_code=0, stdout="Blender 4.0.2\n", stderr=""),
+        preflight_result=bad_preflight,
+    )
+    raw = tmp_path / "raw.glb"
+    create_box_glb(output_path=raw)
+    processor = BlenderAssetProcessor("blender-test", runner)  # type: ignore[arg-type]
+    output = tmp_path / "processed.glb"
+    report = tmp_path / "report.json"
+    contract = tmp_path / "report.contract.json"
+
+    with pytest.raises(DccFailedError, match="Blender dependency preflight failed") as caught:
+        processor.process_asset(raw, output, _spec(), report_path=report)
+
+    error = caught.value
+    assert error.code == "DCC_FAILED"
+    assert error.details.get("reason") == "BLENDER_DEPENDENCY_UNAVAILABLE"
+    preflight_details = error.details.get("preflight", {})
+    assert preflight_details.get("status") == "FAIL"
+    assert not contract.exists(), "contract file must not be written if preflight fails"
+    assert not output.exists(), "processing must not have run"
+
+    # Verify only the preflight command was executed, not the processing command
+    assert len(runner.requests) == 1
+    assert "--python-expr" in runner.requests[0].args
+    assert "--output-glb" not in runner.requests[0].args
+
+
+def test_preflight_runs_once_per_processor_instance(tmp_path: Path) -> None:
+    runner = _RecordingRunner(CommandResult(exit_code=0, stdout="Blender 4.0.2\n", stderr=""))
+    runner.writer = _write_success
+
+    raw = tmp_path / "raw.glb"
+    create_box_glb(output_path=raw)
+    processor = BlenderAssetProcessor("blender-test", runner)  # type: ignore[arg-type]
+
+    output1 = tmp_path / "out1" / "processed.glb"
+    output2 = tmp_path / "out2" / "processed.glb"
+
+    res1 = processor.process_asset(raw, output1, _spec())
+    assert res1.exit_code == 0
+    # Two requests so far: preflight + processing
+    assert len(runner.requests) == 2
+    assert "--python-expr" in runner.requests[0].args
+    assert "--python-expr" not in runner.requests[1].args
+
+    res2 = processor.process_asset(raw, output2, _spec())
+    assert res2.exit_code == 0
+    # Three requests total: cached preflight was NOT rerun, only the second processing command
+    assert len(runner.requests) == 3
+    assert "--python-expr" not in runner.requests[2].args

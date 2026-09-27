@@ -216,8 +216,14 @@ def _run(args: argparse.Namespace, result: dict[str, Any]) -> None:
 
     blender_version = _probe_tool(args.blender.expanduser().resolve(), ["--version"], "Blender")
     godot_version = _probe_tool(args.godot.expanduser().resolve(), ["--version"], "Godot")
+    blender_tools: dict[str, Any] = {
+        "path": str(args.blender.resolve()),
+        "version": blender_version,
+    }
+    if "GAMEFACTORY_BLENDER_PYTHONPATH" in os.environ:
+        blender_tools["blender_python_paths"] = os.environ["GAMEFACTORY_BLENDER_PYTHONPATH"]
     result["tools"] = {
-        "blender": {"path": str(args.blender.resolve()), "version": blender_version},
+        "blender": blender_tools,
         "godot": {"path": str(args.godot.resolve()), "version": godot_version},
         "python": str(python),
         "cli": str(args.cli.resolve()) if args.cli else "python -I -m gamefactory",

@@ -248,6 +248,21 @@ jobs:
             --output "$evidence/rendered-interrupt.json" \
             --workspace "$RUNNER_TEMP/rendered-interrupt-workspaces" \
             --timeout 180
+      - name: Configure and verify Blender Python dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          evidence="$GITHUB_WORKSPACE/.verification/ci-asset-production"
+          mkdir -p "$evidence"
+          BLENDER_NUMPY_PATH="$(/usr/bin/python3 -c 'import pathlib, numpy; print(pathlib.Path(numpy.__file__).resolve().parent.parent)')"
+          printf 'host_python=%s\n' "$(/usr/bin/python3 --version)"
+          printf 'host_numpy_version=%s\n' "$(/usr/bin/python3 -c 'import numpy; print(numpy.__version__)')"
+          printf 'blender_numpy_path=%s\n' "$BLENDER_NUMPY_PATH"
+          echo "GAMEFACTORY_BLENDER_PYTHONPATH=$BLENDER_NUMPY_PATH" >> "$GITHUB_ENV"
+          "$RUNNER_TEMP/gamefactory-venv/bin/python" "$GITHUB_WORKSPACE/scripts/verify_blender_dependencies.py" \
+            --blender "$(command -v blender)" \
+            --python-path "$BLENDER_NUMPY_PATH" \
+            --output "$evidence/blender-dependencies.json"
       - name: Verify offline asset production with real Blender and Godot
         shell: bash
         run: |
