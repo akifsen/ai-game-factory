@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import shlex
 from dataclasses import asdict, dataclass, field
 from importlib.resources import files
 from pathlib import Path
@@ -15,7 +16,12 @@ from gamefactory.adapters.dcc.blender import BlenderAdapter
 from gamefactory.core.domain.asset_contracts import AssetSpecification
 from gamefactory.core.domain.errors import DccFailedError
 from gamefactory.core.domain.models import utc_now_iso
-from gamefactory.core.execution.process_runner import CommandRequest, ProcessRunner
+from gamefactory.core.execution.process_runner import CommandRequest, CommandResult, ProcessRunner
+
+# Blender exits 0 after a --python exception unless this flag is set.
+# 4.0.2 documents the value as an exit code in 0..255; 0 disables the flag.
+BLENDER_PYTHON_FAILURE_EXIT_CODE = 17
+_INLINE_LOG_CHARS = 16_000
 
 
 def _absolute_lexical(path: Path | str) -> Path:
@@ -31,6 +37,160 @@ def _reject_linked_components(path: Path, label: str) -> None:
         if current.parent == current:
             break
         current = current.parent
+
+
+def _command_display(args: list[str]) -> str:
+    return " ".join(shlex.quote(arg) for arg in args)
+
+
+def _blender_version_line(stdout: str) -> str:
+    for line in stdout.splitlines():
+        stripped = line.strip()
+        if stripped.startswith("Blender "):
+            return stripped
+    return "(not present in captured stdout)"
+
+
+def _prefer_traceback(text: str) -> tuple[str, bool]:
+    """Keep a Python traceback in the inline message when the log is large."""
+    if not text:
+        return "(empty)", False
+    if len(text) <= _INLINE_LOG_CHARS:
+        return text, False
+    marker = text.find("Traceback (most recent call last):")
+    note = "[inline excerpt; full captured text is in the diagnostics artifact]"
+    if marker != -1:
+        tail = text[marker:]
+        if len(tail) <= _INLINE_LOG_CHARS:
+            return f"...{note}...\n{tail}", True
+        return f"{tail[:_INLINE_LOG_CHARS]}\n...{note}...\n", True
+    head = 2_000
+    tail = text[-(_INLINE_LOG_CHARS - head) :]
+    return f"{text[:head]}\n...{note}...\n{tail}", True
+
+
+def _artifact_note(path: Path) -> str:
+    if path.is_file():
+        return f"path={path} exists=true size={path.stat().st_size} absolute={path.is_absolute()}"
+    return f"path={path} exists=false size=0 absolute={path.is_absolute()}"
+
+
+def _environment_note(runner: ProcessRunner, request: CommandRequest) -> str:
+    build_env = getattr(runner, "build_env", None)
+    overrides = len(request.env_overrides)
+    if not callable(build_env):
+        return (
+            f"minimal_env={str(request.minimal_env).lower()}; "
+            f"env_overrides_count={overrides}; keys=(unavailable)"
+        )
+    keys = ",".join(sorted(str(key) for key in build_env(request)))
+    return (
+        f"minimal_env={str(request.minimal_env).lower()}; "
+        f"env_overrides_count={overrides}; keys={keys or '(none)'}"
+    )
+
+
+def _write_diagnostics(path: Path, body: str) -> str:
+    try:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        with path.open("x", encoding="utf-8", newline="\n") as handle:
+            handle.write(body)
+    except OSError as exc:
+        return f"(diagnostics artifact not written: {exc})"
+    return str(path)
+
+
+def _blender_failure(
+    summary: str,
+    res: CommandResult,
+    request: CommandRequest,
+    runner: ProcessRunner,
+    *,
+    script_file: Path,
+    raw_glb: Path,
+    processed_glb: Path,
+    contract_path: Path,
+    diagnostics_path: Path,
+    asset_id: str,
+) -> DccFailedError:
+    """Build a DCC failure whose message keeps the Blender evidence CI persists."""
+    if contract_path.is_file():
+        contract_text = contract_path.read_text(encoding="utf-8")
+    else:
+        contract_text = ""
+    stdout_view, stdout_excerpted = _prefer_traceback(res.stdout)
+    stderr_view, stderr_excerpted = _prefer_traceback(res.stderr)
+    contract_view, contract_excerpted = _prefer_traceback(contract_text)
+    parent = processed_glb.parent
+    notes: list[str] = []
+    if res.stdout_truncated:
+        notes.append("stdout capture hit the process runner bound")
+    if res.stderr_truncated:
+        notes.append("stderr capture hit the process runner bound")
+    if stdout_excerpted or stderr_excerpted or contract_excerpted:
+        notes.append("inline message is an excerpt")
+    capture = "; ".join(notes) if notes else "captured logs fit in this message"
+    header = [
+        summary,
+        f"blender_version: {_blender_version_line(res.stdout)}",
+        f"executable: {request.args[0] if request.args else ''}",
+        f"command: {_command_display(list(request.args))}",
+        f"cwd: {request.cwd}",
+        f"exit_code: {res.exit_code}",
+        f"processing_script: {script_file}",
+        f"input_glb: {_artifact_note(raw_glb)}",
+        f"output_glb: {_artifact_note(processed_glb)}",
+        (
+            f"output_parent: path={parent} exists={parent.is_dir()} "
+            f"writable={os.access(parent, os.W_OK)}"
+        ),
+        f"processing_contract: {contract_path}",
+        f"environment: {_environment_note(runner, request)}",
+        f"capture: {capture}",
+    ]
+    full_body = "\n".join(
+        [
+            *header,
+            "--- processing contract ---",
+            contract_text or "(empty)",
+            "--- stdout ---",
+            res.stdout or "(empty)",
+            "--- stderr ---",
+            res.stderr or "(empty)",
+        ]
+    )
+    artifact = _write_diagnostics(diagnostics_path, full_body + "\n")
+    message = "\n".join(
+        [
+            *header,
+            "--- processing contract ---",
+            contract_view,
+            "--- stdout ---",
+            stdout_view,
+            "--- stderr ---",
+            stderr_view,
+            f"diagnostics_artifact: {artifact}",
+        ]
+    )
+    return DccFailedError(
+        message,
+        exit_code=res.exit_code,
+        stderr=res.stderr,
+        details={
+            "stdout": res.stdout,
+            "asset_id": asset_id,
+            "command": list(request.args),
+            "cwd": str(request.cwd),
+            "processing_script": str(script_file),
+            "input_glb": str(raw_glb),
+            "output_glb": str(processed_glb),
+            "processing_contract": str(contract_path),
+            "diagnostics_artifact": artifact,
+            "stdout_truncated": res.stdout_truncated,
+            "stderr_truncated": res.stderr_truncated,
+            "blender_version": _blender_version_line(res.stdout),
+        },
+    )
 
 
 @dataclass(frozen=True)
@@ -158,6 +318,8 @@ class BlenderAssetProcessor:
             self.blender_exe,
             "--background",
             "--factory-startup",
+            "--python-exit-code",
+            str(BLENDER_PYTHON_FAILURE_EXIT_CODE),
             "--python",
             str(script_file),
             "--",
@@ -198,18 +360,33 @@ class BlenderAssetProcessor:
             (resolved_report, "processing report"),
         ):
             _reject_linked_components(path, label)
+        diagnostics_path = resolved_report.with_suffix(".blender-diagnostics.txt")
         if res.exit_code != 0:
-            raise DccFailedError(
-                f"Blender processing failed with exit code {res.exit_code}: {res.stderr or res.stdout}",
-                exit_code=res.exit_code,
-                stderr=res.stderr,
-                details={"stdout": res.stdout, "asset_id": spec.asset_id},
+            raise _blender_failure(
+                f"Blender processing failed with exit code {res.exit_code}",
+                res,
+                req,
+                self.runner,
+                script_file=script_file,
+                raw_glb=raw_glb,
+                processed_glb=processed_glb,
+                contract_path=contract_path,
+                diagnostics_path=diagnostics_path,
+                asset_id=spec.asset_id,
             )
 
         if not processed_glb.is_file() or processed_glb.stat().st_size == 0:
-            raise DccFailedError(
+            raise _blender_failure(
                 f"Blender succeeded but output processed GLB is missing or empty: {processed_glb}",
-                exit_code=res.exit_code,
+                res,
+                req,
+                self.runner,
+                script_file=script_file,
+                raw_glb=raw_glb,
+                processed_glb=processed_glb,
+                contract_path=contract_path,
+                diagnostics_path=diagnostics_path,
+                asset_id=spec.asset_id,
             )
 
         # Invariant check: raw GLB was untouched and preserved!

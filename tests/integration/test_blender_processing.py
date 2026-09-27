@@ -8,10 +8,14 @@ import pytest
 
 from gamefactory.adapters.assets.glb_validator import validate_glb
 from gamefactory.adapters.dcc.blender import BlenderAdapter
-from gamefactory.adapters.dcc.blender_processor import BlenderAssetProcessor
+from gamefactory.adapters.dcc.blender_processor import (
+    BLENDER_PYTHON_FAILURE_EXIT_CODE,
+    BlenderAssetProcessor,
+)
 from gamefactory.adapters.fakes.glb_generator import create_box_glb
 from gamefactory.core.domain.asset_contracts import parse_asset_specification
 from gamefactory.core.domain.errors import DccFailedError
+from gamefactory.core.execution.process_runner import CommandRequest, ProcessRunner
 
 
 def _rewrite_glb(source: Path, destination: Path, mutate) -> None:
@@ -52,8 +56,8 @@ def test_blender_process_asset_end_to_end(tmp_path: Path, blender_available: boo
     spec_path = Path("src/gamefactory/resources/specs/prop_energy_crate_01.yml")
     spec = parse_asset_specification(spec_path)
 
-    processed_glb = tmp_path / "processed.glb"
-    report_file = tmp_path / "report.json"
+    processed_glb = tmp_path / "out dir" / "processed.glb"
+    report_file = tmp_path / "out dir" / "report.json"
 
     processor = BlenderAssetProcessor()
     result = processor.process_asset(
@@ -66,6 +70,8 @@ def test_blender_process_asset_end_to_end(tmp_path: Path, blender_available: boo
 
     assert result.status == "SUCCESS"
     assert result.exit_code == 0
+    assert processed_glb.is_absolute()
+    assert " " in processed_glb.name or " " in str(processed_glb.parent)
     assert processed_glb.is_file()
     assert processed_glb.stat().st_size > 0
     assert report_file.is_file()
@@ -120,6 +126,37 @@ def test_blender_process_asset_end_to_end(tmp_path: Path, blender_available: boo
     _rewrite_glb(processed_glb, oversized, scale_visual)
     oversized_rules = {f.rule_id: f.severity.value for f in validate_glb(oversized, spec).findings}
     assert oversized_rules["scale.bounds"] == "FAIL"
+
+
+def test_blender_python_exception_exits_with_configured_code(
+    tmp_path: Path, blender_available: bool
+) -> None:
+    if not blender_available:
+        pytest.skip("Blender executable not available on host")
+    detection = BlenderAdapter().detect_tool()
+    assert detection.executable_path
+    script = tmp_path / "raise_processing_error.py"
+    script.write_text("raise RuntimeError('factory-probe')\n", encoding="utf-8")
+    result = ProcessRunner().run(
+        CommandRequest(
+            args=[
+                detection.executable_path,
+                "--background",
+                "--factory-startup",
+                "--python-exit-code",
+                str(BLENDER_PYTHON_FAILURE_EXIT_CODE),
+                "--python",
+                str(script),
+            ],
+            cwd=tmp_path,
+            timeout_seconds=60,
+        )
+    )
+    assert result.exit_code == BLENDER_PYTHON_FAILURE_EXIT_CODE
+    assert result.exit_code != 0
+    combined = f"{result.stdout}\n{result.stderr}"
+    assert "Traceback (most recent call last):" in combined
+    assert "factory-probe" in combined
 
 
 def test_blender_process_nonexistent_raw_raises(tmp_path: Path, blender_available: bool) -> None:

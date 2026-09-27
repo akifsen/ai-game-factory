@@ -58,3 +58,21 @@ validation evidence.
 Real Blender processing is an integration check. Tests skip it when Blender is
 unavailable; a fake GLB fixture validates the parser and mutations but does not
 count as real Blender acceptance. No paid provider call is made by this stage.
+
+## Supported Blender
+
+Minimum supported Blender is 4.0.2. ADR 0004 still allows the 4.x and 5.x
+range. CI acceptance uses the Ubuntu `blender` apt package on `ubuntu-latest`
+together with `python3-numpy`. On the current GitHub image that package is
+4.0.2. CI does not download an unpinned newer build.
+
+A clean Ubuntu 24.04 run of `blender 4.0.2+dfsg-1ubuntu8` exported a nonempty
+processed GLB for the offline acceptance fixture. That is why 4.0.2 stays
+inside the contract. A newer local Blender is allowed when this same processing
+script finishes the export. Blender 4.3.2 on Linux and 5.2.1 on Windows already
+met that contract. They are not a second processing policy.
+
+`BlenderAssetProcessor` always passes `--python-exit-code` with
+`BLENDER_PYTHON_FAILURE_EXIT_CODE`. A Python exception in the processing script
+is a non-zero process exit. A zero exit that leaves no nonempty processed GLB
+is still a failure. Blender exit status alone is not a successful export.

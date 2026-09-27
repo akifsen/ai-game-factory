@@ -9,6 +9,7 @@ import math
 import os
 import sys
 import time
+from collections.abc import Iterable
 from pathlib import Path
 
 
@@ -54,6 +55,25 @@ def _assert_new_distinct_targets(source: Path, output: Path, report: Path) -> No
             raise ValueError(f"refusing to overwrite existing artifact: {path}")
         if path.suffix.casefold() != suffix:
             raise ValueError(f"output path must use {suffix}: {path}")
+
+
+def _require_finished_export(operator_result: Iterable[object], output: Path) -> None:
+    """Fail unless glTF export finished and the output file is already nonempty."""
+    if isinstance(operator_result, (str, bytes)):
+        raise RuntimeError(
+            f"glTF export operator returned text instead of a status set: {operator_result!r}"
+        )
+    statuses = {str(item) for item in operator_result}
+    if statuses != {"FINISHED"}:
+        actual = ", ".join(sorted(statuses)) or "(empty)"
+        raise RuntimeError(f"glTF export operator expected FINISHED, actual {actual}")
+    if not output.is_file():
+        raise RuntimeError(f"glTF export reported FINISHED but output is missing: {output}")
+    size = output.stat().st_size
+    if size <= 0:
+        raise RuntimeError(
+            f"glTF export reported FINISHED but output is empty: {output} ({size} bytes)"
+        )
 
 
 def main() -> None:
@@ -171,8 +191,7 @@ def main() -> None:
     export = bpy.ops.export_scene.gltf(
         filepath=str(output), export_format="GLB", use_selection=True
     )
-    if "FINISHED" not in export or not output.is_file() or not output.stat().st_size:
-        raise RuntimeError("Blender failed to export nonempty processed GLB")
+    _require_finished_export(export, output)
     if hashlib.sha256(source.read_bytes()).hexdigest() != raw_hash:
         raise RuntimeError("raw GLB changed during processing")
     low, high = bounds([lod0])
@@ -216,5 +235,5 @@ if __name__ == "__main__":
     try:
         main()
     except Exception as exc:
-        print(f"PROCESSING_FAILED: {type(exc).__name__}: {exc}", file=sys.stderr)
+        print(f"PROCESSING_FAILED: {type(exc).__name__}: {exc}", file=sys.stderr, flush=True)
         raise
