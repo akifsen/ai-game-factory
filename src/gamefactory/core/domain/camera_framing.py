@@ -101,17 +101,172 @@ class CameraFrame:
     view: str
 
 
-def _silhouette(bounds: BoundsAABB, view: str) -> tuple[float, float]:
-    """Return (vertical, horizontal) world extents facing the camera."""
-    width, height, depth = bounds.size
-    if view == "top":
-        return depth, width
-    if view == "side":
-        return height, depth
-    if view == "front":
-        return height, width
-    dominant = max(width, height, depth)
-    return dominant, dominant
+def _cross(
+    a: tuple[float, float, float], b: tuple[float, float, float]
+) -> tuple[float, float, float]:
+    return (
+        a[1] * b[2] - a[2] * b[1],
+        a[2] * b[0] - a[0] * b[2],
+        a[0] * b[1] - a[1] * b[0],
+    )
+
+
+def _dot(a: tuple[float, float, float], b: tuple[float, float, float]) -> float:
+    return a[0] * b[0] + a[1] * b[1] + a[2] * b[2]
+
+
+def _support_extent(
+    axis: tuple[float, float, float], half_extents: tuple[float, float, float]
+) -> float:
+    return (
+        abs(axis[0]) * half_extents[0]
+        + abs(axis[1]) * half_extents[1]
+        + abs(axis[2]) * half_extents[2]
+    )
+
+
+def camera_basis(
+    view: str,
+) -> tuple[
+    tuple[float, float, float],
+    tuple[float, float, float],
+    tuple[float, float, float],
+    tuple[float, float, float],
+    tuple[float, float, float],
+]:
+    """Camera basis from view direction d and view up vector, matching Godot look_at.
+
+    Returns:
+        (direction d, up_target up, forward f, right r, up u)
+    """
+    d = view_direction(view)
+    up = view_up(view)
+    f = (-d[0], -d[1], -d[2])
+    r = _normalize(_cross(f, up))
+    u = _cross(r, f)
+    return d, up, f, r, u
+
+
+@dataclass(frozen=True)
+class FramingGeometry:
+    view: str
+    direction: tuple[float, float, float]
+    up_vector: tuple[float, float, float]
+    forward: tuple[float, float, float]
+    right: tuple[float, float, float]
+    up: tuple[float, float, float]
+    projected_right_half: float  # e_r
+    projected_up_half: float  # e_u
+    view_depth_half: float  # e_f
+    conservative_distance: float  # d_c
+    distance: float  # solved distance
+    vertical_fraction: float
+    horizontal_fraction: float
+
+    @property
+    def e_r(self) -> float:
+        return self.projected_right_half
+
+    @property
+    def e_u(self) -> float:
+        return self.projected_up_half
+
+    @property
+    def e_f(self) -> float:
+        return self.view_depth_half
+
+    @property
+    def d_c(self) -> float:
+        return self.conservative_distance
+
+
+def framing_geometry(
+    bounds: BoundsAABB,
+    view: str,
+    fov_degrees: float = 38.0,
+    target_screen_fraction: float = 0.65,
+    viewport: tuple[int, int] = (1280, 720),
+) -> FramingGeometry:
+    """Compute basis projection extents and exact bisection distance."""
+    if viewport[0] <= 0 or viewport[1] <= 0:
+        raise ValueError("viewport size must be positive")
+    if not 0.05 <= target_screen_fraction <= 0.95:
+        raise ValueError("target screen fraction is outside 0.05-0.95")
+    if not 1.0 <= fov_degrees <= 120.0:
+        raise ValueError("fov is outside 1-120 degrees")
+    size = bounds.size
+    if min(size) <= 1e-6:
+        raise ValueError("asset bounds are empty")
+
+    hx, hy, hz = size[0] * 0.5, size[1] * 0.5, size[2] * 0.5
+    h = (hx, hy, hz)
+    d, view_up_vec, f, r, u = camera_basis(view)
+    e_r = _support_extent(r, h)
+    e_u = _support_extent(u, h)
+    e_f = _support_extent(f, h)
+
+    half_fov = math.radians(fov_degrees * 0.5)
+    t = math.tan(half_fov)
+    aspect = viewport[0] / viewport[1]
+
+    d_c = e_f + max(
+        e_u / (t * target_screen_fraction),
+        e_r / (t * target_screen_fraction * aspect),
+    )
+
+    corners = [
+        (sx * hx, sy * hy, sz * hz)
+        for sx in (-1.0, 1.0)
+        for sy in (-1.0, 1.0)
+        for sz in (-1.0, 1.0)
+    ]
+
+    def _screen_fractions(dist: float) -> tuple[float, float]:
+        min_x = float("inf")
+        max_x = float("-inf")
+        min_y = float("inf")
+        max_y = float("-inf")
+        for p in corners:
+            z = dist + _dot(f, p)
+            y = _dot(u, p) / (z * t)
+            x = _dot(r, p) / (z * t * aspect)
+            if y < min_y:
+                min_y = y
+            if y > max_y:
+                max_y = y
+            if x < min_x:
+                min_x = x
+            if x > max_x:
+                max_x = x
+        return (max_y - min_y) * 0.5, (max_x - min_x) * 0.5
+
+    low = e_f + min(1e-4, (d_c - e_f) * 0.5)
+    high = d_c
+    for _ in range(60):
+        mid = (low + high) * 0.5
+        v_mid, h_mid = _screen_fractions(mid)
+        if max(v_mid, h_mid) > target_screen_fraction:
+            low = mid
+        else:
+            high = mid
+
+    distance = high
+    vert_frac, horiz_frac = _screen_fractions(distance)
+    return FramingGeometry(
+        view=view,
+        direction=d,
+        up_vector=view_up_vec,
+        forward=f,
+        right=r,
+        up=u,
+        projected_right_half=e_r,
+        projected_up_half=e_u,
+        view_depth_half=e_f,
+        conservative_distance=d_c,
+        distance=distance,
+        vertical_fraction=vert_frac,
+        horizontal_fraction=horiz_frac,
+    )
 
 
 def frame_camera(
@@ -123,34 +278,30 @@ def frame_camera(
     viewport: tuple[int, int],
 ) -> CameraFrame:
     """Place a camera so the asset fills about ``target_screen_fraction`` of the frame."""
-    if viewport[0] <= 0 or viewport[1] <= 0:
-        raise ValueError("viewport size must be positive")
-    if not 0.05 <= target_screen_fraction <= 0.95:
-        raise ValueError("target screen fraction is outside 0.05-0.95")
-    if not 1.0 <= fov_degrees <= 120.0:
-        raise ValueError("fov is outside 1-120 degrees")
-    vertical, horizontal = _silhouette(bounds, view)
-    if min(vertical, horizontal) <= 1e-6:
-        raise ValueError("asset bounds are empty")
-    half_fov = math.radians(fov_degrees * 0.5)
-    aspect = viewport[0] / viewport[1]
-    tangent = math.tan(half_fov)
-    distance_vertical = vertical / (2.0 * tangent * target_screen_fraction)
-    distance_horizontal = horizontal / (2.0 * tangent * target_screen_fraction * aspect)
-    distance = max(distance_vertical, distance_horizontal)
-    direction = view_direction(view)
+    geom = framing_geometry(
+        bounds,
+        view,
+        fov_degrees=fov_degrees,
+        target_screen_fraction=target_screen_fraction,
+        viewport=viewport,
+    )
+    distance = geom.distance
+    direction = geom.direction
     center = bounds.center
     position = (
         center[0] + direction[0] * distance,
         center[1] + direction[1] * distance,
         center[2] + direction[2] * distance,
     )
+    e_f = geom.view_depth_half
+    near = max(0.001, min(max(distance * 0.01, 0.01), (distance - e_f) * 0.5))
+    far = max(distance * 20.0, 50.0, distance + e_f + 10.0)
     return CameraFrame(
         position=position,
         target=center,
         up=view_up(view),
-        near=max(distance * 0.01, 0.01),
-        far=max(distance * 20.0, 50.0),
+        near=near,
+        far=far,
         fov_degrees=fov_degrees,
         view=view,
     )
