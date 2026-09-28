@@ -346,7 +346,7 @@ class BlenderAssetProcessor:
                         exit_code=preflight.exit_code,
                         stderr=preflight.stderr_excerpt or "",
                         details={
-                            "reason": "BLENDER_DEPENDENCY_UNAVAILABLE",
+                            "reason": preflight.reason_code or "BLENDER_DEPENDENCY_UNAVAILABLE",
                             "preflight": preflight.to_dict(),
                         },
                     )

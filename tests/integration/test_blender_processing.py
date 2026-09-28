@@ -231,4 +231,64 @@ def test_real_blender_dependency_preflight(blender_available: bool) -> None:
     assert preflight.blender_version is not None
     assert preflight.python_executable is not None
     assert preflight.modules["numpy"]["available"] is True
+    assert preflight.runtime_modules.get("ctypes", {}).get("available") is True
     assert preflight.exit_code == 0
+
+
+def test_real_blender_contaminated_prefix_negative_integration(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    if not os.environ.get("GAMEFACTORY_TEST_BLENDER") or not os.environ.get(
+        "GAMEFACTORY_TEST_CONTAMINATING_PYTHON_BIN"
+    ):
+        pytest.skip(
+            "Opt-in test requires GAMEFACTORY_TEST_BLENDER and "
+            "GAMEFACTORY_TEST_CONTAMINATING_PYTHON_BIN environment variables"
+        )
+    contaminating_bin = os.environ["GAMEFACTORY_TEST_CONTAMINATING_PYTHON_BIN"]
+    current_path = os.environ.get("PATH", "")
+    monkeypatch.setenv("PATH", f"{contaminating_bin}{os.pathsep}{current_path}")
+
+    detection = BlenderAdapter().detect_tool()
+    if not detection.available or not detection.executable_path:
+        pytest.skip("Blender executable not available on host")
+
+    from gamefactory.adapters.dcc.blender_environment import (
+        BLENDER_PYTHONPATH_ENV,
+        parse_blender_python_paths,
+        run_blender_dependency_preflight,
+    )
+
+    preflight = run_blender_dependency_preflight(
+        detection.executable_path,
+        ProcessRunner(sanitize_output=True),
+        python_paths=parse_blender_python_paths(os.environ.get(BLENDER_PYTHONPATH_ENV)),
+    )
+    assert preflight.status == "FAIL"
+    assert preflight.reason_code == "BLENDER_PYTHON_RUNTIME_UNAVAILABLE"
+    prefix = preflight.python_prefix or ""
+    assert not prefix.startswith("/usr")
+
+
+def test_real_blender_runtime_integrity_positive_integration() -> None:
+    if not os.environ.get("GAMEFACTORY_TEST_BLENDER"):
+        pytest.skip("Opt-in test requires GAMEFACTORY_TEST_BLENDER environment variable")
+
+    detection = BlenderAdapter().detect_tool()
+    if not detection.available or not detection.executable_path:
+        pytest.skip("Blender executable not available on host")
+
+    from gamefactory.adapters.dcc.blender_environment import (
+        BLENDER_PYTHONPATH_ENV,
+        parse_blender_python_paths,
+        run_blender_dependency_preflight,
+    )
+
+    preflight = run_blender_dependency_preflight(
+        detection.executable_path,
+        ProcessRunner(sanitize_output=True),
+        python_paths=parse_blender_python_paths(os.environ.get(BLENDER_PYTHONPATH_ENV)),
+    )
+    assert preflight.status == "PASS"
+    assert preflight.reason_code is None
+    assert preflight.runtime_modules.get("ctypes", {}).get("available") is True

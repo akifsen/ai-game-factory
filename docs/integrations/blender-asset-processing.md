@@ -105,3 +105,32 @@ To resolve this deterministically without relaxing generic environment isolation
   that all required modules (`numpy`) are importable. Preflight results are cached per
   processor instance. If preflight fails, a `DccFailedError` is raised with detailed,
   actionable diagnostics and the processing command is never run.
+
+## Runtime integrity and CI Python isolation
+
+In addition to third-party dependencies like `numpy`, Blender's embedded Python interpreter depends on internal C-extension stdlib modules (such as `ctypes`). Debian/Ubuntu apt Blender links against system `libpython3.12.so.1.0` but resolves its standard library and `sys.prefix` by discovering the first `python3.12` binary on `PATH`.
+
+When CI workflows (such as `actions/setup-python`) place a different CPython patch release (such as toolcache 3.12.14 vs system 3.12.3) earlier on `PATH`, Blender's embedded interpreter attempts to load C-extensions from the toolcache stdlib/lib-dynload. This ABI mismatch causes runtime failures during operations such as glTF import:
+```
+ImportError: /opt/hostedtoolcache/Python/3.12.14/x64/lib/python3.12/lib-dynload/_ctypes.cpython-312-x86_64-linux-gnu.so: undefined symbol: _PyErr_SetLocaleString
+```
+
+### Preflight runtime-integrity check and reason codes
+
+Before inspecting third-party packages, `run_blender_dependency_preflight` tests runtime integrity by importing `BLENDER_RUNTIME_INTEGRITY_MODULES` (`ctypes`) first in the same Blender process:
+- `BLENDER_PREFLIGHT_FAILED`: Process non-zero exit, missing probe output file, or corrupted JSON.
+- `BLENDER_VERSION_UNSUPPORTED`: Blender version is below minimum supported version 4.0.2.
+- `BLENDER_PYTHON_RUNTIME_UNAVAILABLE`: Runtime integrity modules (`ctypes`) failed to import, indicating stdlib prefix contamination or missing C-extensions.
+- `BLENDER_DEPENDENCY_UNAVAILABLE`: Required third-party dependencies (`numpy`) could not be resolved.
+
+When runtime integrity fails, `BlenderAssetProcessor` raises `DccFailedError` with reason `BLENDER_PYTHON_RUNTIME_UNAVAILABLE` before writing contracts or invoking any processing commands.
+
+### CI isolation rule
+
+The `godot-rendered` GitHub Actions job isolates Blender execution from toolcache Python contamination:
+1. `actions/setup-python` is removed from `godot-rendered`.
+2. System packages `python3-venv` and `python3-pip` are installed via `apt-get`.
+3. The virtual environment is created explicitly with `/usr/bin/python3 -m venv`.
+4. All commands within the job use absolute interpreter paths (`/usr/bin/python3` or `$RUNNER_TEMP/gamefactory-venv/bin/python`).
+5. Preflight verification enforces `--forbid-python-prefix /opt/hostedtoolcache` to assert that `sys.executable`, `sys.prefix`, and `sys.base_prefix` remain uncontaminated.
+

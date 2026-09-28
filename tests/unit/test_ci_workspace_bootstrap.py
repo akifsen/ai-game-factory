@@ -112,3 +112,76 @@ def test_blender_dependency_verification_step_structure() -> None:
     # No if: always() on fixture or acceptance steps
     assert "always()" not in str(steps[acceptance_step_idx].get("if", ""))
     assert "always()" not in str(steps[fixture_step_idx].get("if", ""))
+
+    # Verifier invoked with --forbid-python-prefix /opt/hostedtoolcache
+    assert "--forbid-python-prefix /opt/hostedtoolcache" in preflight_script
+
+
+def test_godot_rendered_system_python_isolation_invariants() -> None:
+    import re
+
+    workflow = yaml.safe_load((REPO_ROOT / ".github/workflows/ci.yml").read_text(encoding="utf-8"))
+    job = workflow["jobs"]["godot-rendered"]
+    steps = job["steps"]
+
+    # 1. godot-rendered has no actions/setup-python step
+    for step in steps:
+        assert "actions/setup-python" not in step.get("uses", "")
+
+    # 2. test matrix and godot-real still have actions/setup-python
+    assert any(
+        "actions/setup-python" in step.get("uses", "") for step in workflow["jobs"]["test"]["steps"]
+    )
+    assert any(
+        "actions/setup-python" in step.get("uses", "")
+        for step in workflow["jobs"]["godot-real"]["steps"]
+    )
+
+    # 3. apt install step precedes build step and includes python3-venv
+    apt_step_idx = next(
+        idx for idx, s in enumerate(steps) if "Install a local software OpenGL" in s.get("name", "")
+    )
+    build_step_idx = next(idx for idx, s in enumerate(steps) if "Build wheel" in s.get("name", ""))
+    assert apt_step_idx < build_step_idx
+    apt_script = steps[apt_step_idx]["run"]
+    assert "python3-venv" in apt_script
+
+    # 4. build step contains /usr/bin/python3 -m venv
+    build_script = steps[build_step_idx]["run"]
+    assert "/usr/bin/python3 -m venv" in build_script
+
+    # 5. no bare python -m, pip install, python3 -m (other than /usr/bin/python3) in run scripts
+    for step in steps:
+        run_text = step.get("run", "")
+        if not run_text:
+            continue
+        for line in run_text.splitlines():
+            line = line.strip()
+            if not line or line.startswith("#"):
+                continue
+            if re.search(r"\bpip\d*\s+install\b", line):
+                assert re.search(r"-m\s+pip\b", line), f"bare pip install: {line}"
+            if re.search(r"\bpython3\s+-m\b", line):
+                assert "/usr/bin/python3" in line, f"bare python3 -m: {line}"
+            if re.search(r"\bpython\s+-m\b", line):
+                assert re.search(r"[/\$]python\s+-m\b", line), f"bare python -m: {line}"
+
+
+def test_verify_blender_dependencies_prefix_containment() -> None:
+    from scripts.verify_blender_dependencies import is_path_under_prefix
+
+    forbidden = "/opt/hostedtoolcache"
+
+    # Contaminated paths
+    assert (
+        is_path_under_prefix("/opt/hostedtoolcache/Python/3.12.14/x64/bin/python3.12", forbidden)
+        is True
+    )
+    assert is_path_under_prefix("/opt/hostedtoolcache", forbidden) is True
+    assert is_path_under_prefix("/opt/hostedtoolcache/", forbidden) is True
+
+    # Clean paths
+    assert is_path_under_prefix("/usr", forbidden) is False
+    assert is_path_under_prefix("/usr/bin/python3.12", forbidden) is False
+    assert is_path_under_prefix("/opt/hostedtoolcacheX", forbidden) is False
+    assert is_path_under_prefix(None, forbidden) is False

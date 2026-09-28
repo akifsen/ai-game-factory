@@ -78,6 +78,14 @@ class _RecordingRunner:
                 "python_prefix": "/usr",
                 "python_base_prefix": "/usr",
                 "sys_path": ["/usr/lib/python3/dist-packages"],
+                "runtime_modules": {
+                    "ctypes": {
+                        "available": True,
+                        "version": None,
+                        "file": "/usr/lib/python3.12/ctypes/__init__.py",
+                        "error": None,
+                    }
+                },
                 "modules": {
                     "numpy": {
                         "available": True,
@@ -274,6 +282,14 @@ def test_preflight_failure_raises_dcc_failed_and_does_not_execute_processing_com
                 "python_prefix": "/usr",
                 "python_base_prefix": "/usr",
                 "sys_path": [],
+                "runtime_modules": {
+                    "ctypes": {
+                        "available": True,
+                        "version": None,
+                        "file": "/usr/lib/python3.12/ctypes/__init__.py",
+                        "error": None,
+                    }
+                },
                 "modules": {
                     "numpy": {
                         "available": False,
@@ -338,3 +354,69 @@ def test_preflight_runs_once_per_processor_instance(tmp_path: Path) -> None:
     # Three requests total: cached preflight was NOT rerun, only the second processing command
     assert len(runner.requests) == 3
     assert "--python-expr" not in runner.requests[2].args
+
+
+def test_preflight_runtime_failure_raises_dcc_failed_with_runtime_reason_code_and_skips_processing(
+    tmp_path: Path,
+) -> None:
+    bad_preflight = CommandResult(
+        exit_code=0,
+        stdout="GAMEFACTORY_BLENDER_PREFLIGHT="
+        + json.dumps(
+            {
+                "blender_version": "4.0.2",
+                "python_version": "3.12.3",
+                "python_version_info": [3, 12, 3, "final", 0],
+                "python_executable": "/usr/bin/python3",
+                "python_prefix": "/usr",
+                "python_base_prefix": "/usr",
+                "sys_path": [],
+                "runtime_modules": {
+                    "ctypes": {
+                        "available": False,
+                        "version": None,
+                        "file": None,
+                        "error": "ImportError: undefined symbol: _PyErr_SetLocaleString",
+                    }
+                },
+                "modules": {
+                    "numpy": {
+                        "available": True,
+                        "version": "1.26.4",
+                        "file": "/usr/lib/python3/dist-packages/numpy/__init__.py",
+                        "error": None,
+                    }
+                },
+            }
+        )
+        + "\n",
+        stderr="",
+    )
+    runner = _RecordingRunner(
+        CommandResult(exit_code=0, stdout="Blender 4.0.2\n", stderr=""),
+        preflight_result=bad_preflight,
+    )
+    raw = tmp_path / "raw.glb"
+    create_box_glb(output_path=raw)
+    processor = BlenderAssetProcessor("blender-test", runner)  # type: ignore[arg-type]
+    output = tmp_path / "processed.glb"
+    report = tmp_path / "report.json"
+    contract = tmp_path / "report.contract.json"
+
+    with pytest.raises(DccFailedError, match="Blender dependency preflight failed") as caught:
+        processor.process_asset(raw, output, _spec(), report_path=report)
+
+    error = caught.value
+    assert error.code == "DCC_FAILED"
+    assert error.details.get("reason") == "BLENDER_PYTHON_RUNTIME_UNAVAILABLE"
+    preflight_details = error.details.get("preflight", {})
+    assert preflight_details.get("status") == "FAIL"
+    assert preflight_details.get("reason_code") == "BLENDER_PYTHON_RUNTIME_UNAVAILABLE"
+    assert not contract.exists(), "contract file must not be written if preflight fails"
+    assert not output.exists(), "processing must not have run"
+
+    # Verify only the preflight command was executed, not the processing command
+    assert len(runner.requests) == 1
+    assert "--python-expr" in runner.requests[0].args
+    assert "--output-glb" not in runner.requests[0].args
+    assert "process_asset.py" not in " ".join(runner.requests[0].args)

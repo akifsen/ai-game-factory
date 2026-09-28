@@ -20,6 +20,7 @@ from gamefactory.core.execution.process_runner import CommandRequest, ProcessRun
 
 BLENDER_PYTHONPATH_ENV = "GAMEFACTORY_BLENDER_PYTHONPATH"
 REQUIRED_BLENDER_PYTHON_MODULES: tuple[str, ...] = ("numpy",)
+BLENDER_RUNTIME_INTEGRITY_MODULES: tuple[str, ...] = ("ctypes",)
 BLENDER_PYTHON_FAILURE_EXIT_CODE = 17
 MIN_SUPPORTED_BLENDER_VERSION: tuple[int, int, int] = (4, 0, 2)
 BLENDER_PREFLIGHT_MARKER = "GAMEFACTORY_BLENDER_PREFLIGHT_WRITTEN"
@@ -51,7 +52,9 @@ def _preflight_result_path_from_code(code: str) -> Path | None:
 def _generate_preflight_script(
     required_modules: Sequence[str],
     result_path: Path,
+    runtime_modules: Sequence[str] = BLENDER_RUNTIME_INTEGRITY_MODULES,
 ) -> str:
+    runtime_repr = repr(list(runtime_modules))
     modules_repr = repr(list(required_modules))
     path_repr = repr(str(result_path))
     return f"""import importlib, json, sys
@@ -71,6 +74,26 @@ try:
         blender_version = ".".join(str(x) for x in bpy.app.version)
 except Exception:
     blender_version = None
+
+runtime_modules = {{}}
+for name in {runtime_repr}:
+    try:
+        mod = importlib.import_module(name)
+        v = getattr(mod, "__version__", None)
+        f = getattr(mod, "__file__", None)
+        runtime_modules[name] = {{
+            "available": True,
+            "version": str(v) if v is not None else None,
+            "file": str(f) if f is not None else None,
+            "error": None,
+        }}
+    except Exception as exc:
+        runtime_modules[name] = {{
+            "available": False,
+            "version": None,
+            "file": None,
+            "error": f"{{type(exc).__name__}}: {{exc}}",
+        }}
 
 modules = {{}}
 for name in {modules_repr}:
@@ -100,6 +123,7 @@ payload = {{
     "python_prefix": sys.prefix,
     "python_base_prefix": getattr(sys, "base_prefix", None),
     "sys_path": list(sys.path),
+    "runtime_modules": runtime_modules,
     "modules": modules,
 }}
 with open(result_path, "w", encoding="utf-8") as f:
@@ -203,6 +227,10 @@ class BlenderDependencyPreflight:
     reason: str | None = None
     stdout_excerpt: str | None = None
     stderr_excerpt: str | None = None
+    python_version_info: list[Any] = field(default_factory=list)
+    python_base_prefix: str | None = None
+    runtime_modules: dict[str, Any] = field(default_factory=dict)
+    reason_code: str | None = None
 
     def to_dict(self) -> dict[str, Any]:
         """Return serializable dictionary representation."""
@@ -213,21 +241,46 @@ def format_blender_preflight_failure_message(preflight: BlenderDependencyPreflig
     """Build an actionable human-readable failure message without leaking secrets."""
     missing = [name for name, info in preflight.modules.items() if not info.get("available", False)]
     missing_str = ", ".join(missing) if missing else "(none)"
+    failed_runtime = [
+        name for name, info in preflight.runtime_modules.items() if not info.get("available", False)
+    ]
+    failed_runtime_str = ", ".join(failed_runtime) if failed_runtime else "(none)"
     paths_str = (
         os.pathsep.join(preflight.configured_python_paths)
         if preflight.configured_python_paths
         else "(none configured; set GAMEFACTORY_BLENDER_PYTHONPATH)"
     )
+
+    if preflight.reason_code == "BLENDER_PYTHON_RUNTIME_UNAVAILABLE":
+        hint = (
+            "Blender's embedded Python resolved a stdlib prefix that does not match its libpython. "
+            "Ensure the system Python Blender was packaged against is first on PATH."
+        )
+    elif preflight.reason_code == "BLENDER_VERSION_UNSUPPORTED":
+        hint = (
+            f"Blender version is unsupported. Ensure Blender version >= "
+            f"{'.'.join(str(x) for x in MIN_SUPPORTED_BLENDER_VERSION)} is installed."
+        )
+    else:
+        hint = (
+            "Ensure required Python modules are installed and set GAMEFACTORY_BLENDER_PYTHONPATH "
+            "to the directory containing them (e.g. system python dist-packages)."
+        )
+
     lines = [
         "Blender dependency preflight failed:",
         f"  blender_executable: {preflight.executable}",
         f"  blender_version: {preflight.blender_version or '(unknown)'}",
+        f"  failed_runtime_modules: {failed_runtime_str}",
         f"  missing_modules: {missing_str}",
         f"  python_version: {preflight.python_version or '(unknown)'}",
         f"  python_executable: {preflight.python_executable or '(unknown)'}",
+        f"  python_prefix: {preflight.python_prefix or '(unknown)'}",
+        f"  python_base_prefix: {preflight.python_base_prefix or '(unknown)'}",
         f"  configured_python_paths: {paths_str}",
+        f"  failure_reason_code: {preflight.reason_code or '(unknown)'}",
         f"  failure_reason: {preflight.reason or 'unknown failure'}",
-        "  hint: Ensure required Python modules are installed and set GAMEFACTORY_BLENDER_PYTHONPATH to the directory containing them (e.g. system python dist-packages).",
+        f"  hint: {hint}",
     ]
     if preflight.stderr_excerpt:
         lines.append(f"  stderr: {preflight.stderr_excerpt.strip()}")
@@ -239,6 +292,7 @@ def run_blender_dependency_preflight(
     runner: ProcessRunner,
     python_paths: Sequence[Path | str] = (),
     required_modules: Sequence[str] = REQUIRED_BLENDER_PYTHON_MODULES,
+    runtime_modules: Sequence[str] = BLENDER_RUNTIME_INTEGRITY_MODULES,
     timeout_seconds: float = 60.0,
     check_version: bool = True,
 ) -> BlenderDependencyPreflight:
@@ -260,7 +314,11 @@ def run_blender_dependency_preflight(
         temp_dir = Path(temp_dir_str).resolve()
         result_file = temp_dir / "preflight_result.json"
 
-        code = _generate_preflight_script(required_modules, result_file)
+        code = _generate_preflight_script(
+            required_modules=required_modules,
+            result_path=result_file,
+            runtime_modules=runtime_modules,
+        )
         cmd = [
             exe_str,
             "--background",
@@ -298,8 +356,10 @@ def run_blender_dependency_preflight(
                 sys_path=[],
                 configured_python_paths=configured_paths_list,
                 modules={},
+                runtime_modules={},
                 exit_code=res.exit_code,
                 reason=f"Blender process exited with code {res.exit_code}",
+                reason_code="BLENDER_PREFLIGHT_FAILED",
                 stdout_excerpt=stdout_excerpt,
                 stderr_excerpt=stderr_excerpt,
             )
@@ -315,8 +375,10 @@ def run_blender_dependency_preflight(
                 sys_path=[],
                 configured_python_paths=configured_paths_list,
                 modules={},
+                runtime_modules={},
                 exit_code=res.exit_code,
                 reason=f"Preflight result file not found: {result_file}",
+                reason_code="BLENDER_PREFLIGHT_FAILED",
                 stdout_excerpt=stdout_excerpt,
                 stderr_excerpt=stderr_excerpt,
             )
@@ -335,39 +397,61 @@ def run_blender_dependency_preflight(
                 sys_path=[],
                 configured_python_paths=configured_paths_list,
                 modules={},
+                runtime_modules={},
                 exit_code=res.exit_code,
                 reason=f"Failed to parse preflight JSON: {exc}",
+                reason_code="BLENDER_PREFLIGHT_FAILED",
                 stdout_excerpt=stdout_excerpt,
                 stderr_excerpt=stderr_excerpt,
             )
 
         blender_version = data.get("blender_version")
         python_version = data.get("python_version")
+        python_version_info = data.get("python_version_info", [])
         python_executable = data.get("python_executable")
         python_prefix = data.get("python_prefix")
+        python_base_prefix = data.get("python_base_prefix")
         sys_path = data.get("sys_path", [])
+        runtime_modules_info = data.get("runtime_modules", {})
         modules_info = data.get("modules", {})
 
         failure_reason: str | None = None
+        failure_reason_code: str | None = None
 
         if check_version:
             parsed_ver = parse_blender_version(blender_version)
             if parsed_ver is None:
+                failure_reason_code = "BLENDER_VERSION_UNSUPPORTED"
                 failure_reason = (
                     f"Blender version {blender_version!r} is unknown or could not be parsed"
                 )
             elif parsed_ver < MIN_SUPPORTED_BLENDER_VERSION:
+                failure_reason_code = "BLENDER_VERSION_UNSUPPORTED"
                 failure_reason = (
                     f"Blender version {blender_version!r} is below minimum supported version 4.0.2"
                 )
 
         if failure_reason is None:
+            failed_runtime = [
+                (mod_name, runtime_modules_info.get(mod_name, {}).get("error"))
+                for mod_name in runtime_modules
+                if not runtime_modules_info.get(mod_name, {}).get("available", False)
+            ]
+            if failed_runtime:
+                failure_reason_code = "BLENDER_PYTHON_RUNTIME_UNAVAILABLE"
+                err_strs = [f"{name} ({err or 'unavailable'})" for name, err in failed_runtime]
+                failure_reason = (
+                    f"Blender Python runtime integrity module(s) unavailable: {', '.join(err_strs)}"
+                )
+
+        if failure_reason is None:
             missing_modules = [
                 mod_name
-                for mod_name, mod_data in modules_info.items()
-                if not mod_data.get("available", False)
+                for mod_name in required_modules
+                if not modules_info.get(mod_name, {}).get("available", False)
             ]
             if missing_modules:
+                failure_reason_code = "BLENDER_DEPENDENCY_UNAVAILABLE"
                 failure_reason = (
                     f"Required Blender Python module(s) unavailable: {', '.join(missing_modules)}"
                 )
@@ -379,13 +463,17 @@ def run_blender_dependency_preflight(
             executable=exe_str,
             blender_version=blender_version,
             python_version=python_version,
+            python_version_info=python_version_info,
             python_executable=python_executable,
             python_prefix=python_prefix,
+            python_base_prefix=python_base_prefix,
             sys_path=sys_path,
             configured_python_paths=configured_paths_list,
             modules=modules_info,
+            runtime_modules=runtime_modules_info,
             exit_code=res.exit_code,
             reason=failure_reason,
+            reason_code=failure_reason_code,
             stdout_excerpt=stdout_excerpt if status == "FAIL" else None,
             stderr_excerpt=stderr_excerpt if status == "FAIL" else None,
         )

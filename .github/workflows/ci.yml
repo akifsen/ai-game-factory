@@ -174,28 +174,25 @@ jobs:
       LIBGL_ALWAYS_SOFTWARE: "1"
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
       - name: Install a local software OpenGL display
         shell: bash
         run: |
           set -euo pipefail
           sudo apt-get update
-          sudo apt-get install -y xvfb libgl1-mesa-dri mesa-utils blender python3-numpy
+          sudo apt-get install -y xvfb libgl1-mesa-dri mesa-utils blender python3-numpy python3-venv python3-pip
       - name: Build wheel and install it into a clean virtual environment
         shell: bash
         run: |
           set -euo pipefail
-          python -m pip install --upgrade pip build
-          mkdir -p "$RUNNER_TEMP/wheelhouse"
-          python -m build --wheel --outdir "$RUNNER_TEMP/wheelhouse"
-          python -m venv "$RUNNER_TEMP/gamefactory-venv"
+          /usr/bin/python3 -m venv "$RUNNER_TEMP/gamefactory-venv"
           venv_python="$RUNNER_TEMP/gamefactory-venv/bin/python"
+          "$venv_python" -m pip install --upgrade pip
+          "$venv_python" -m pip install build
+          mkdir -p "$RUNNER_TEMP/wheelhouse"
+          "$venv_python" -m build --wheel --outdir "$RUNNER_TEMP/wheelhouse"
           wheel="$(find "$RUNNER_TEMP/wheelhouse" -maxdepth 1 -name 'gamefactory-*.whl' -print -quit)"
           test -n "$wheel"
           sha256sum "$wheel" > "$RUNNER_TEMP/gamefactory-wheel.sha256"
-          "$venv_python" -m pip install --upgrade pip
           "$venv_python" -m pip install "$wheel"
       - name: Download and verify pinned official Godot
         shell: bash
@@ -254,14 +251,22 @@ jobs:
           set -euo pipefail
           evidence="$GITHUB_WORKSPACE/.verification/ci-asset-production"
           mkdir -p "$evidence"
-          BLENDER_NUMPY_PATH="$(/usr/bin/python3 -c 'import pathlib, numpy; print(pathlib.Path(numpy.__file__).resolve().parent.parent)')"
+          venv_python="$RUNNER_TEMP/gamefactory-venv/bin/python"
           printf 'host_python=%s\n' "$(/usr/bin/python3 --version)"
+          printf 'command_python3=%s\n' "$(command -v python3 || true)"
+          printf 'command_python312=%s\n' "$(command -v python3.12 || true)"
+          printf 'factory_venv_python=%s\n' "$venv_python"
+          printf 'factory_venv_version=%s\n' "$("$venv_python" --version)"
+          printf 'factory_venv_provenance=%s\n' "$("$venv_python" -c 'import sys; print(sys.base_prefix, sys.version)')"
+          printf 'factory_venv_base_readlink=%s\n' "$(readlink -f "$("$venv_python" -c 'import sys; print(getattr(sys, "_base_executable", sys.executable))')" || true)"
+          BLENDER_NUMPY_PATH="$(/usr/bin/python3 -c 'import pathlib, numpy; print(pathlib.Path(numpy.__file__).resolve().parent.parent)')"
           printf 'host_numpy_version=%s\n' "$(/usr/bin/python3 -c 'import numpy; print(numpy.__version__)')"
           printf 'blender_numpy_path=%s\n' "$BLENDER_NUMPY_PATH"
           echo "GAMEFACTORY_BLENDER_PYTHONPATH=$BLENDER_NUMPY_PATH" >> "$GITHUB_ENV"
-          "$RUNNER_TEMP/gamefactory-venv/bin/python" "$GITHUB_WORKSPACE/scripts/verify_blender_dependencies.py" \
+          "$venv_python" "$GITHUB_WORKSPACE/scripts/verify_blender_dependencies.py" \
             --blender "$(command -v blender)" \
             --python-path "$BLENDER_NUMPY_PATH" \
+            --forbid-python-prefix /opt/hostedtoolcache \
             --output "$evidence/blender-dependencies.json"
       - name: Verify offline asset production with real Blender and Godot
         shell: bash
