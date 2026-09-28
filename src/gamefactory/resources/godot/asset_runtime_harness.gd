@@ -154,17 +154,26 @@ func _run() -> void:
 			continue
 		var direction: Vector3 = angles[angle]
 		_park_reference(scale_reference, global_bounds, direction, extent)
-		var distance := _view_distance(global_bounds, camera, str(angle), target_fraction)
+		var geom := _framing_geometry(global_bounds, camera, str(angle), target_fraction)
+		var distance: float = geom["distance"]
+		var conservative_dist: float = geom["conservative_distance"]
+		var e_r: float = geom["projected_right_half"]
+		var e_u: float = geom["projected_up_half"]
+		var e_f: float = geom["view_depth_half"]
 		var up_vector := Vector3.UP if str(angle) != "top" else Vector3(0, 0, -1)
 		camera.position = center + direction * distance
 		camera.look_at(center, up_vector)
 		await process_frame
 		var viewport := root.get_viewport().get_visible_rect().size
 		var fitted := _projected_rect(camera, global_bounds)
+		var initial_height_ratio := 0.0
+		var correction_applied := false
 		if viewport.y > 0.0 and fitted.size.y > 0.0:
-			var ratio := fitted.size.y / viewport.y
-			if ratio < min_fraction or ratio > max_fraction:
-				distance *= ratio / target_fraction
+			initial_height_ratio = fitted.size.y / viewport.y
+			if initial_height_ratio < min_fraction or initial_height_ratio > max_fraction:
+				var near := maxf(distance - e_f, 0.001)
+				distance = maxf(e_f + 0.01, e_f + near * initial_height_ratio / target_fraction)
+				correction_applied = true
 				camera.position = center + direction * distance
 				camera.look_at(center, up_vector)
 				await process_frame
@@ -174,6 +183,13 @@ func _run() -> void:
 			_fail("capture resolution is not 1280x720")
 			continue
 		var measured := _measure_view_framing(camera, global_bounds, scale_reference, Vector2(image.get_width(), image.get_height()), str(angle), min_fraction, max_fraction, margin_fraction)
+		measured["camera_distance"] = distance
+		measured["conservative_distance"] = conservative_dist
+		measured["projected_right_half"] = e_r
+		measured["projected_up_half"] = e_u
+		measured["view_depth_half"] = e_f
+		measured["initial_height_ratio"] = initial_height_ratio
+		measured["correction_applied"] = correction_applied
 		view_framing[str(angle)] = measured
 		if str(angle) == "side":
 			side_framing = measured
@@ -214,28 +230,80 @@ func _hide_non_lod0(node: Node) -> void:
 	for child in node.get_children():
 		_hide_non_lod0(child)
 
+func _view_direction_vector(angle: String) -> Vector3:
+	if angle == "side":
+		return Vector3(1, 0, 0)
+	elif angle == "top":
+		return Vector3(0, 1, 0)
+	elif angle == "front":
+		return Vector3(0, 0, -1)
+	return Vector3(1, 0.65, -1).normalized()
+
+func _view_up_vector(angle: String) -> Vector3:
+	if angle == "top":
+		return Vector3(0, 0, -1)
+	return Vector3.UP
+
+func _framing_geometry(bounds: AABB, camera: Camera3D, angle: String, target_fraction: float) -> Dictionary:
+	var d := _view_direction_vector(angle)
+	var up := _view_up_vector(angle)
+	var f := -d
+	var r := f.cross(up).normalized()
+	var u := r.cross(f)
+	var h := bounds.size * 0.5
+	var e_r := absf(r.x) * h.x + absf(r.y) * h.y + absf(r.z) * h.z
+	var e_u := absf(u.x) * h.x + absf(u.y) * h.y + absf(u.z) * h.z
+	var e_f := absf(f.x) * h.x + absf(f.y) * h.y + absf(f.z) * h.z
+
+	var half_fov := deg_to_rad(camera.fov * 0.5)
+	var t := tan(half_fov)
+	var viewport: Vector2 = root.get_viewport().get_visible_rect().size if root != null else Vector2(1280, 720)
+	var aspect: float = (viewport.x / maxf(viewport.y, 1.0)) if viewport.y > 0.0 else (1280.0 / 720.0)
+	var d_c := e_f + maxf(e_u / (t * target_fraction), e_r / (t * target_fraction * aspect))
+
+	var corners: Array[Vector3] = []
+	for sx in [-1.0, 1.0]:
+		for sy in [-1.0, 1.0]:
+			for sz in [-1.0, 1.0]:
+				corners.append(Vector3(sx * h.x, sy * h.y, sz * h.z))
+
+	var low := e_f + minf(0.0001, (d_c - e_f) * 0.5)
+	var high := d_c
+	for _i in 60:
+		var mid := (low + high) * 0.5
+		var max_v := -INF
+		var min_v := INF
+		var max_h := -INF
+		var min_h := INF
+		for p in corners:
+			var z := mid + f.dot(p)
+			var py := u.dot(p) / (z * t)
+			var px := r.dot(p) / (z * t * aspect)
+			if py > max_v: max_v = py
+			if py < min_v: min_v = py
+			if px > max_h: max_h = px
+			if px < min_h: min_h = px
+		var vf := (max_v - min_v) * 0.5
+		var hf := (max_h - min_h) * 0.5
+		if maxf(vf, hf) > target_fraction:
+			low = mid
+		else:
+			high = mid
+
+	return {
+		"distance": high,
+		"conservative_distance": d_c,
+		"projected_right_half": e_r,
+		"projected_up_half": e_u,
+		"view_depth_half": e_f,
+	}
+
 func _side_view_distance(bounds: AABB, camera: Camera3D) -> float:
 	return _view_distance(bounds, camera, "side", 0.65)
 
 func _view_distance(bounds: AABB, camera: Camera3D, angle: String, target_fraction: float) -> float:
-	var half_fov := deg_to_rad(camera.fov * 0.5)
-	var vertical := bounds.size.y
-	var horizontal := bounds.size.x
-	if angle == "side":
-		horizontal = bounds.size.z
-	elif angle == "top":
-		vertical = bounds.size.z
-		horizontal = bounds.size.x
-	elif angle != "front":
-		var dominant: float = maxf(bounds.size.x, maxf(bounds.size.y, bounds.size.z))
-		vertical = dominant
-		horizontal = dominant
-	var viewport: Vector2 = root.get_viewport().get_visible_rect().size
-	var aspect: float = viewport.x / maxf(viewport.y, 1.0)
-	var tangent: float = tan(half_fov)
-	var distance_vertical: float = vertical / (2.0 * tangent * target_fraction)
-	var distance_horizontal: float = horizontal / (2.0 * tangent * target_fraction * aspect)
-	return maxf(distance_vertical, distance_horizontal)
+	var geom := _framing_geometry(bounds, camera, angle, target_fraction)
+	return float(geom.get("distance", 0.0))
 
 func _park_reference(reference: MeshInstance3D, bounds: AABB, direction: Vector3, extent: float) -> void:
 	var center := bounds.get_center()
