@@ -49,6 +49,7 @@ from gamefactory.core.domain.errors import (
     ProviderUncertainError,
     RawArtifactInvalidError,
     RuntimeValidationFailedError,
+    ToolUnavailableError,
     ValidationError,
 )
 from gamefactory.core.domain.models import (
@@ -1001,7 +1002,38 @@ def run_asset_in_godot(
     if observation_artifact_type not in {"asset-runtime-observation", "asset-side-correction"}:
         raise ValidationError("Unsupported runtime observation artifact type")
     if not godot_path:
-        raise EngineImportFailedError("Godot executable is required for asset runtime verification")
+        raise ToolUnavailableError(
+            "Godot executable is required for asset runtime verification",
+            tool="godot",
+            reason="executable_missing",
+            configured_path=None,
+            task_id=task.id,
+        )
+    candidate_path = Path(godot_path)
+    if not candidate_path.exists():
+        raise ToolUnavailableError(
+            f"Configured Godot executable does not exist: {godot_path}",
+            tool="godot",
+            reason="executable_not_found",
+            configured_path=godot_path,
+            task_id=task.id,
+        )
+    if not candidate_path.is_file():
+        raise ToolUnavailableError(
+            f"Configured Godot path is not a regular file: {godot_path}",
+            tool="godot",
+            reason="executable_not_file",
+            configured_path=godot_path,
+            task_id=task.id,
+        )
+    if not os.access(candidate_path, os.X_OK):
+        raise ToolUnavailableError(
+            f"Configured Godot executable is not executable: {godot_path}",
+            tool="godot",
+            reason="executable_not_executable",
+            configured_path=godot_path,
+            task_id=task.id,
+        )
     processed = next(
         (
             a

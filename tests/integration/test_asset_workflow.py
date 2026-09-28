@@ -24,8 +24,19 @@ from gamefactory.adapters.persistence.repositories import (
 )
 from gamefactory.core.approvals.approval_service import ApprovalService
 from gamefactory.core.domain.asset_contracts import parse_asset_specification
-from gamefactory.core.domain.errors import ArtifactError, ToolExecutionError
-from gamefactory.core.domain.models import AuditEvent, Project, WorkflowStatus, generate_id
+from gamefactory.core.domain.errors import (
+    ArtifactError,
+    EngineImportFailedError,
+    ToolExecutionError,
+    ValidationError,
+)
+from gamefactory.core.domain.models import (
+    AuditEvent,
+    Project,
+    TaskStatus,
+    WorkflowStatus,
+    generate_id,
+)
 from gamefactory.core.policies.policy_engine import PolicyEngine, PolicyRule
 from gamefactory.workflows.asset_production import (
     AssetProductionHandlers,
@@ -33,7 +44,7 @@ from gamefactory.workflows.asset_production import (
     register_asset_production_handlers,
 )
 from gamefactory.workflows.engine import WorkflowEngine
-from gamefactory.workflows.handlers import TaskHandlerResult
+from gamefactory.workflows.handlers import RegisteredTaskHandler, TaskHandlerResult
 
 SPEC = (
     Path(__file__).resolve().parents[2] / "src/gamefactory/resources/specs/prop_energy_crate_01.yml"
@@ -151,6 +162,10 @@ def _setup(
             fail_godot_once=fail_godot_once,
         )
     register_asset_production_handlers(engine.handler_registry, handlers)
+    godot_meta = engine.handler_registry._handlers["asset_godot"].metadata
+    engine.handler_registry._handlers["asset_godot"] = RegisteredTaskHandler(
+        lambda *args, **kwargs: handlers.godot(*args, **kwargs), godot_meta
+    )
     engine.register_workflow(workflow, tasks, allow_existing_empty_placeholder=True)
     return engine, db, workflow.id, fake, handlers
 
@@ -710,3 +725,152 @@ def test_known_id_crash_recovery_queries_once_without_second_budget_liability(
     attempts = ExecutionRepository(db).list_by_task(f"{workflow_id}-PAID-GENERATION")
     assert len(attempts) == 2
     assert sum(attempt.cost for attempt in attempts) <= 10.0
+
+
+def test_godot_missing_executable_retryable_workflow_regression(tmp_path: Path) -> None:
+    engine, db, workflow_id, fake, handlers = _setup(
+        tmp_path,
+        stub_downstream=True,
+    )
+    handlers.godot = AssetProductionHandlers.godot.__get__(handlers, AssetProductionHandlers)
+    handlers.godot_path = None
+
+    paid_id = _at_paid_gate(engine, db, workflow_id)
+    _decision(engine, db, paid_id, approve=True)
+
+    first = engine.run_workflow(workflow_id)
+    assert first.status == WorkflowStatus.FAILED
+
+    godot_task_id = f"{workflow_id}-GODOT"
+    tasks_by_type = {t.task_type: t for t in TaskRepository(db).list_by_workflow(workflow_id)}
+    assert tasks_by_type["asset_prepare"].status == TaskStatus.COMPLETED
+    assert tasks_by_type["asset_concept_review"].status == TaskStatus.COMPLETED
+    assert tasks_by_type["asset_paid_generation"].status == TaskStatus.COMPLETED
+    assert tasks_by_type["asset_process"].status == TaskStatus.COMPLETED
+    assert tasks_by_type["asset_validate"].status == TaskStatus.COMPLETED
+    assert tasks_by_type["asset_godot"].status == TaskStatus.FAILED
+
+    godot_executions = ExecutionRepository(db).list_by_task(godot_task_id)
+    assert len(godot_executions) == 1
+    assert godot_executions[-1].retryable is True
+
+    # Record baseline state
+    assert fake.invocation_count == 1
+    intents = ProviderOperationIntentRepository(db).list_by_workflow(workflow_id)
+    intent_count = len(intents)
+    external_task_ids = [i.external_task_id for i in intents]
+    processed_artifact = next(
+        a
+        for a in ArtifactRepository(db).list_by_workflow(workflow_id)
+        if a.artifact_type == "asset-processed-glb"
+    )
+    recorded_processed_hash = processed_artifact.content_hash
+
+    # Swap handlers.godot to a stub that asserts the processed GLB hash equals the recorded one
+    consumed_hashes: list[str] = []
+
+    def successful_godot(workflow, task, execution):
+        proc = next(
+            a
+            for a in handlers.artifacts.list_by_workflow(workflow.id)
+            if a.artifact_type == "asset-processed-glb"
+        )
+        handlers.artifact_manager.verify_artifact_integrity(proc)
+        consumed_hashes.append(proc.content_hash)
+        assert proc.content_hash == recorded_processed_hash
+
+        path = handlers._path(task, f"runtime-{execution.id}.json")
+        path.write_text(
+            json.dumps({"status": "PASS", "execution_id": execution.id}), encoding="utf-8"
+        )
+        ids = [handlers._register(workflow, task, execution, "asset-runtime-observation", path)]
+        for angle in ("front", "three_quarter", "side"):
+            capture = handlers._path(task, f"{execution.id}-{angle}.png")
+            Image.new("RGB", (2, 2), (20, 70, 140)).save(capture)
+            ids.append(
+                handlers._register(workflow, task, execution, "asset-runtime-capture", capture)
+            )
+        return TaskHandlerResult(1, "deterministic runtime stub", ids)
+
+    handlers.godot = successful_godot
+
+    resumed = engine.retry_task(workflow_id, godot_task_id)
+    assert resumed.status == WorkflowStatus.BLOCKED
+
+    final_approval = ApprovalRepository(db).get(resumed.pending_approval_id or "")
+    assert final_approval is not None
+    assert final_approval.approval_type == "final_visual_review"
+    assert final_approval.status.value == "PENDING"
+
+    assert fake.invocation_count == 1
+    new_intents = ProviderOperationIntentRepository(db).list_by_workflow(workflow_id)
+    assert len(new_intents) == intent_count
+    assert [i.external_task_id for i in new_intents] == external_task_ids
+    assert len(ExecutionRepository(db).list_by_task(f"{workflow_id}-PAID-GENERATION")) == 1
+    assert len(ExecutionRepository(db).list_by_task(f"{workflow_id}-PROCESS")) == 1
+    assert len(ExecutionRepository(db).list_by_task(f"{workflow_id}-VALIDATE")) == 1
+    assert len(ExecutionRepository(db).list_by_task(godot_task_id)) == 2
+    assert consumed_hashes == [recorded_processed_hash]
+    current_processed = next(
+        a
+        for a in ArtifactRepository(db).list_by_workflow(workflow_id)
+        if a.artifact_type == "asset-processed-glb"
+    )
+    assert current_processed.content_hash == recorded_processed_hash
+
+
+def test_godot_retryable_failure_retry_limit_semantics(tmp_path: Path) -> None:
+    engine, db, workflow_id, fake, handlers = _setup(
+        tmp_path,
+        stub_downstream=True,
+    )
+    handlers.godot = AssetProductionHandlers.godot.__get__(handlers, AssetProductionHandlers)
+    handlers.godot_path = None
+
+    paid_id = _at_paid_gate(engine, db, workflow_id)
+    _decision(engine, db, paid_id, approve=True)
+
+    first = engine.run_workflow(workflow_id)
+    assert first.status == WorkflowStatus.FAILED
+    godot_task_id = f"{workflow_id}-GODOT"
+
+    attempts = ExecutionRepository(db).list_by_task(godot_task_id)
+    assert len(attempts) == 1
+    assert attempts[0].retryable is True
+
+    # First retry is allowed (second failure occurs because godot_path is still None)
+    second = engine.retry_task(workflow_id, godot_task_id)
+    assert second.status == WorkflowStatus.FAILED
+    attempts = ExecutionRepository(db).list_by_task(godot_task_id)
+    assert len(attempts) == 2
+    assert attempts[1].retryable is True
+
+    # Second retry is refused because max_retries=1 has been exhausted
+    with pytest.raises(ValidationError, match="exhausted its retry limit"):
+        engine.retry_task(workflow_id, godot_task_id)
+
+
+def test_godot_engine_import_failure_is_non_retryable(tmp_path: Path) -> None:
+    engine, db, workflow_id, fake, handlers = _setup(
+        tmp_path,
+        stub_downstream=True,
+    )
+
+    def failing_import_godot(workflow, task, execution):
+        raise EngineImportFailedError("simulated post-launch engine import failure")
+
+    handlers.godot = failing_import_godot
+
+    paid_id = _at_paid_gate(engine, db, workflow_id)
+    _decision(engine, db, paid_id, approve=True)
+
+    result = engine.run_workflow(workflow_id)
+    assert result.status == WorkflowStatus.FAILED
+    godot_task_id = f"{workflow_id}-GODOT"
+
+    attempts = ExecutionRepository(db).list_by_task(godot_task_id)
+    assert len(attempts) == 1
+    assert attempts[0].retryable is False
+
+    with pytest.raises(ValidationError, match="not classified as safely retryable"):
+        engine.retry_task(workflow_id, godot_task_id)

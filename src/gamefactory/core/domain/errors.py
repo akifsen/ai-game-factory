@@ -223,6 +223,33 @@ class DccFailedError(ToolExecutionError):
         self.code = "DCC_FAILED"
 
 
+class ToolUnavailableError(ToolExecutionError):
+    """Raised before launch when a required local tool executable is missing or unusable."""
+
+    def __init__(
+        self,
+        message: str,
+        tool: str,
+        reason: str,
+        configured_path: str | None = None,
+        task_id: str | None = None,
+        details: dict[str, Any] | None = None,
+    ) -> None:
+        merged = dict(details or {})
+        merged["tool"] = tool
+        merged["reason"] = reason
+        if configured_path is not None:
+            merged["configured_path"] = configured_path
+        if task_id is not None:
+            merged["task_id"] = task_id
+        super().__init__(message, details=merged)
+        self.code = "TOOL_UNAVAILABLE"
+        self.tool = tool
+        self.reason = reason
+        self.configured_path = configured_path
+        self.task_id = task_id
+
+
 class AssetValidationFailedError(ValidationError):
     """Raised when deterministic asset validation checks fail on the processed asset."""
 
