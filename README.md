@@ -2,7 +2,7 @@
 
 AI Game Factory is local development tooling for coordinating bounded game-development workflows. It stores workflow state, task attempts, artifacts, evidence, approvals, and policy decisions locally. A managed game remains usable without the Factory installed.
 
-The package version is 0.5.0. V0.4 added a gated production pipeline: concept ingestion and human review, separately approved Meshy CLI generation, deterministic Blender processing, decoded GLB validation, and staged Godot runtime/render evidence. V0.5 runs that same pipeline from an asset profile (`static_prop@1`, `pickup@1`, `modular_piece@1`) instead of crate-specific rules. Real paid generation and final visual approval remain explicit human checkpoints. See the [V0.5 completion report](docs/reports/v0.5-completion-report.md). V0.2 headless verification and V0.3 rendered capture remain available.
+The package version is 0.5.1 (V0.5 recovery fixes; see the [v0.5.1 release notes](docs/releases/v0.5.1.md)). V0.4 added a gated production pipeline: concept ingestion and human review, separately approved Meshy CLI generation, deterministic Blender processing, decoded GLB validation, and staged Godot runtime/render evidence. V0.5 runs that same pipeline from an asset profile (`static_prop@1`, `pickup@1`, `modular_piece@1`) instead of crate-specific rules. Real paid generation and final visual approval remain explicit human checkpoints. See the [V0.5 completion report](docs/reports/v0.5-completion-report.md). V0.2 headless verification and V0.3 rendered capture remain available.
 
 ## Install and run
 
