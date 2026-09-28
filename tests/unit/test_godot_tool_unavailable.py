@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import os
+import sys
 from pathlib import Path
 from typing import Any
 from unittest.mock import patch
@@ -253,7 +255,12 @@ def test_non_executable_configured_path_raises_tool_unavailable(tmp_path: Path) 
     assert not scratch.exists() or list(scratch.iterdir()) == []
 
 
-def test_post_launch_import_failure_raises_engine_import_failed(tmp_path: Path) -> None:
+def test_post_launch_import_failure_raises_engine_import_failed(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # The fake runner stands in for Godot; satisfy the Linux capture DISPLAY gate.
+    if sys.platform.startswith("linux") and not os.environ.get("DISPLAY"):
+        monkeypatch.setenv("DISPLAY", ":99")
     engine, db, workflow_id, fake, handlers = _setup(tmp_path, stub_downstream=True)
     paid_id = _at_paid_gate(engine, db, workflow_id)
     _decision(engine, db, paid_id, approve=True)
