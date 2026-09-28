@@ -357,6 +357,75 @@ def test_reported_actual_above_reservation_is_counted_once(tmp_path: Path) -> No
     assert sum(attempt.cost for attempt in paid_attempts) == 15.0
 
 
+@pytest.mark.parametrize(
+    ("estimate", "reservation"),
+    [(None, 20.0), (20.0, None)],
+    ids=["unknown-estimate-explicit-reservation", "known-estimate"],
+)
+def test_reported_actual_below_reservation_settles_at_actual(
+    tmp_path: Path, estimate: float | None, reservation: float | None
+) -> None:
+    engine, db, workflow_id, fake, _ = _setup(
+        tmp_path,
+        estimate=estimate,
+        reservation=reservation,
+        budget=50.0,
+        provider=HigherActualCostFake(),
+        stub_downstream=True,
+    )
+    paid_id = _at_paid_gate(engine, db, workflow_id)
+    _decision(engine, db, paid_id, approve=True)
+    pending = engine.run_workflow(workflow_id)
+    assert pending.status == WorkflowStatus.BLOCKED
+    assert fake.invocation_count == 1
+    paid_attempts = ExecutionRepository(db).list_by_task(f"{workflow_id}-PAID-GENERATION")
+    assert len(paid_attempts) == 1
+    # The 20-credit reservation is released once terminal success reports 15.
+    assert paid_attempts[0].estimated_cost == 20.0
+    assert paid_attempts[0].cost == 15.0
+    intent = ProviderOperationIntentRepository(db).get_by_task(f"{workflow_id}-PAID-GENERATION")
+    assert intent is not None and intent.actual_cost == 15.0
+    with db.transaction() as conn:
+        spent = conn.execute(
+            "SELECT COALESCE(SUM(e.cost), 0) AS total FROM executions e "
+            "JOIN tasks t ON t.id=e.task_id JOIN workflows w ON w.id=t.workflow_id "
+            "WHERE w.project_id=?",
+            ("asset-test",),
+        ).fetchone()["total"]
+    assert spent == 15.0
+
+
+def test_success_with_unknown_actual_cost_preserves_reservation(tmp_path: Path) -> None:
+    fake_prov = FakeAssetGenerationProvider(report_unknown_cost=True)
+    engine, db, workflow_id, fake, _ = _setup(
+        tmp_path,
+        estimate=None,
+        reservation=20.0,
+        budget=50.0,
+        provider=fake_prov,
+        stub_downstream=True,
+    )
+    paid_id = _at_paid_gate(engine, db, workflow_id)
+    _decision(engine, db, paid_id, approve=True)
+    pending = engine.run_workflow(workflow_id)
+    assert pending.status == WorkflowStatus.BLOCKED
+    assert fake.invocation_count == 1
+    paid_attempts = ExecutionRepository(db).list_by_task(f"{workflow_id}-PAID-GENERATION")
+    assert len(paid_attempts) == 1
+    assert paid_attempts[0].estimated_cost == 20.0
+    assert paid_attempts[0].cost == 20.0
+    intent = ProviderOperationIntentRepository(db).get_by_task(f"{workflow_id}-PAID-GENERATION")
+    assert intent is not None and intent.actual_cost is None
+    with db.transaction() as conn:
+        spent = conn.execute(
+            "SELECT COALESCE(SUM(e.cost), 0) AS total FROM executions e "
+            "JOIN tasks t ON t.id=e.task_id JOIN workflows w ON w.id=t.workflow_id "
+            "WHERE w.project_id=?",
+            ("asset-test",),
+        ).fetchone()["total"]
+    assert spent == 20.0
+
+
 @pytest.mark.parametrize("provider_kind", ["malformed", "missing"])
 def test_actual_billing_survives_raw_failure_before_blender(
     tmp_path: Path,
