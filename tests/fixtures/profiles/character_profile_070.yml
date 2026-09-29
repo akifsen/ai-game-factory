@@ -1,0 +1,46 @@
+schema_version: asset-profile-0.7.0
+profile_id: character_test
+version: 1
+categories:
+  - character
+review_views:
+  - front
+  - three_quarter
+  - side
+framing:
+  min_screen_fraction: 0.55
+  max_screen_fraction: 0.75
+  target_screen_fraction: 0.65
+  margin_fraction: 0.04
+  fov_degrees: 38
+dimension_rules:
+  min_m: 0.2
+  max_m: 3.0
+processing:
+  lod0_required: true
+  lod1_required: false
+  allowed_lod_policies:
+    - lod0_only
+    - lod0_lod1
+  allowed_collider_policies:
+    - capsule
+  allowed_origin_policies:
+    - bottom_center
+  default_origin_policy: bottom_center
+  dimension_tolerance_m: 0.02
+  snap_grid_m: null
+  rig_forbidden: true
+  animation_forbidden: true
+  max_materials: 4
+  max_texture_dimension: 2048
+  max_triangles_lod0: 50000
+godot:
+  body_kind: static_body
+  require_ray_hit: true
+  require_area: false
+runtime:
+  bounds_tolerance_ratio: 0.1
+  bounds_tolerance_floor_m: 0.05
+geometry_mode: single_mesh
+accepted_source_kinds:
+  - provider_generated
