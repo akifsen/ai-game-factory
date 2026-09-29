@@ -979,39 +979,88 @@ def test_meshy_download_glb_bounded_and_hashed(tmp_path: Path) -> None:
 # =========================================================================
 
 
-def test_concurrency_race_exactly_one_create(tmp_path: Path) -> None:
-    """Requirement 2: Two threads race => exactly 1 create invocation, loser blocked or queries."""
+_RACE_EXTERNAL_TASK_ID = "0192e2b8-93d3-7d72-9749-cfa098670ab3"
+
+
+class _CountingMeshyRunner:
+    """Fake ProcessRunner that counts provider CREATE and GET invocations separately.
+
+    Classification is by argv (`image-to-3d create` vs `image-to-3d get`), so a
+    legitimate GET/query by a race loser is never counted as a second CREATE.
+    Optional hooks let tests pause the CREATE deterministically (no sleeps).
+    """
+
+    def __init__(self) -> None:
+        self.create_count = 0
+        self.get_count = 0
+        self.get_task_ids: list[str] = []
+        self.unexpected: list[list[str]] = []
+        self.create_entered = threading.Event()
+        self.release_create: threading.Event | None = None
+        self._lock = threading.Lock()
+
+    def run(self, cmd_req: CommandRequest) -> CommandResult:
+        args = [str(a) for a in cmd_req.args]
+        idx = args.index("image-to-3d") if "image-to-3d" in args else -1
+        subcommand = args[idx + 1] if 0 <= idx < len(args) - 1 else None
+        if subcommand == "create":
+            with self._lock:
+                self.create_count += 1
+            self.create_entered.set()
+            if self.release_create is not None:
+                assert self.release_create.wait(timeout=10), "create was never released"
+            return CommandResult(
+                exit_code=0,
+                stdout=json.dumps(
+                    {
+                        "schema_version": "meshy.cli/v1",
+                        "command": "image-to-3d create",
+                        "ok": True,
+                        "result": {
+                            "submission": {"task_id": _RACE_EXTERNAL_TASK_ID, "status": "PENDING"}
+                        },
+                    }
+                ),
+                stderr="",
+            )
+        if subcommand == "get":
+            with self._lock:
+                self.get_count += 1
+                self.get_task_ids.append(args[idx + 2])
+            return CommandResult(
+                exit_code=0,
+                stdout=json.dumps(
+                    {
+                        "schema_version": "meshy.cli/v1",
+                        "command": "image-to-3d get",
+                        "ok": True,
+                        "result": {
+                            "task": {
+                                "task_id": args[idx + 2],
+                                "status": "PENDING",
+                                "progress": 0,
+                            }
+                        },
+                    }
+                ),
+                stderr="",
+            )
+        with self._lock:
+            self.unexpected.append(args)
+        return CommandResult(exit_code=1, stdout="", stderr="unexpected command")
+
+
+def _make_race_provider(
+    tmp_path: Path,
+) -> tuple[MeshyAssetGenerationProvider, GenerationRequest, _CountingMeshyRunner, Any]:
     db = Database(tmp_path / "factory.db")
     MigrationRunner(db).apply_all()
     concept_file, concept_hash, op_hash = _setup_full_context(db, tmp_path)
     intent_repo = ProviderOperationIntentRepository(db)
 
-    create_invocations = 0
-    create_lock = threading.Lock()
-
+    fake = _CountingMeshyRunner()
     mock_runner = MagicMock(spec=ProcessRunner)
-
-    def side_effect(cmd_req: CommandRequest) -> CommandResult:
-        nonlocal create_invocations
-        with create_lock:
-            create_invocations += 1
-        time.sleep(0.05)  # simulate network delay to ensure overlap
-        stdout = json.dumps(
-            {
-                "schema_version": "meshy.cli/v1",
-                "command": "image-to-3d create",
-                "ok": True,
-                "result": {
-                    "submission": {
-                        "task_id": "0192e2b8-93d3-7d72-9749-cfa098670ab3",
-                        "status": "PENDING",
-                    }
-                },
-            }
-        )
-        return CommandResult(exit_code=0, stdout=stdout, stderr="")
-
-    mock_runner.run.side_effect = side_effect
+    mock_runner.run.side_effect = fake.run
     cli_runner = MeshyCliRunner(runner=mock_runner)
     cli_runner._cached_runner_cmd = ["meshy"]
 
@@ -1035,14 +1084,25 @@ def test_concurrency_race_exactly_one_create(tmp_path: Path) -> None:
         },
         paid_request=snap,
     )
+    return provider, req, fake, intent_repo
+
+
+def test_concurrency_race_exactly_one_create(tmp_path: Path) -> None:
+    """Requirement 2: Two threads race => exactly 1 provider CREATE, whatever the interleaving.
+
+    The loser either observes the in-flight intent (ProviderUncertainError, no query) or
+    observes the persisted external id and issues a GET. A GET is not a CREATE.
+    """
+    provider, req, fake, _ = _make_race_provider(tmp_path)
 
     results: list[Any] = []
     exceptions: list[Exception] = []
+    start = threading.Barrier(2)
 
     def worker() -> None:
+        start.wait(timeout=10)
         try:
-            resp = provider.generate(req)
-            results.append(resp)
+            results.append(provider.generate(req))
         except Exception as exc:
             exceptions.append(exc)
 
@@ -1052,15 +1112,86 @@ def test_concurrency_race_exactly_one_create(tmp_path: Path) -> None:
         t1.result()
         t2.result()
 
-    # Exactly 1 fake create was invoked!
-    assert create_invocations == 1
-    # Winner succeeded with SUBMITTED
-    assert len(results) == 1
-    assert results[0].status == "SUBMITTED"
-    assert results[0].external_op_id == "0192e2b8-93d3-7d72-9749-cfa098670ab3"
-    # Loser was blocked with ProviderUncertainError
-    assert len(exceptions) == 1
-    assert isinstance(exceptions[0], ProviderUncertainError)
+    # Exactly-once invariant: exactly 1 provider CREATE, never weakened.
+    assert fake.create_count == 1
+    assert fake.unexpected == []
+    assert all(r.status == "SUBMITTED" for r in results)
+    assert all(r.external_op_id == _RACE_EXTERNAL_TASK_ID for r in results)
+    if exceptions:
+        # Loser saw the in-flight intent before the external id was persisted.
+        assert len(results) == 1
+        assert len(exceptions) == 1
+        assert isinstance(exceptions[0], ProviderUncertainError)
+        assert fake.get_count == 0
+    else:
+        # Loser saw the persisted external id and queried it (GET, not CREATE).
+        assert len(results) == 2
+        assert fake.get_count == 1
+        assert fake.get_task_ids == [_RACE_EXTERNAL_TASK_ID]
+
+
+def test_concurrency_race_loser_blocked_before_submission(tmp_path: Path) -> None:
+    """Deterministic: loser arrives while the winner's CREATE is in flight => blocked, no query."""
+    provider, req, fake, intent_repo = _make_race_provider(tmp_path)
+    fake.release_create = threading.Event()
+
+    with ThreadPoolExecutor(max_workers=1) as executor:
+        try:
+            winner = executor.submit(provider.generate, req)
+            assert fake.create_entered.wait(timeout=10), "winner never reached CREATE"
+
+            with pytest.raises(ProviderUncertainError):
+                provider.generate(req)
+            assert fake.create_count == 1
+            assert fake.get_count == 0
+        finally:
+            fake.release_create.set()
+        winner_resp = winner.result(timeout=10)
+
+    assert winner_resp.status == "SUBMITTED"
+    assert winner_resp.external_op_id == _RACE_EXTERNAL_TASK_ID
+    assert fake.create_count == 1
+    assert fake.get_count == 0
+    assert fake.unexpected == []
+    intent = intent_repo.get_by_task("task-01")
+    assert intent is not None
+    assert intent.status == "SUBMITTED"
+    assert intent.external_task_id == _RACE_EXTERNAL_TASK_ID
+
+
+def test_concurrency_race_loser_queries_persisted_external_id(tmp_path: Path) -> None:
+    """Deterministic: loser arrives after the external id is persisted => GET only, no CREATE."""
+    provider, req, fake, intent_repo = _make_race_provider(tmp_path)
+    winner_persisted = threading.Event()
+
+    def winner() -> Any:
+        try:
+            return provider.generate(req)
+        finally:
+            winner_persisted.set()
+
+    def loser() -> Any:
+        assert winner_persisted.wait(timeout=10), "winner never finished"
+        return provider.generate(req)
+
+    with ThreadPoolExecutor(max_workers=2) as executor:
+        loser_future = executor.submit(loser)
+        winner_future = executor.submit(winner)
+        winner_resp = winner_future.result(timeout=10)
+        loser_resp = loser_future.result(timeout=10)
+
+    assert winner_resp.status == "SUBMITTED"
+    assert loser_resp.status == "SUBMITTED"
+    assert winner_resp.external_op_id == _RACE_EXTERNAL_TASK_ID
+    assert loser_resp.external_op_id == _RACE_EXTERNAL_TASK_ID
+    # Exactly 1 CREATE; the loser's legitimate GET is counted separately.
+    assert fake.create_count == 1
+    assert fake.get_count == 1
+    assert fake.get_task_ids == [_RACE_EXTERNAL_TASK_ID]
+    assert fake.unexpected == []
+    intent = intent_repo.get_by_task("task-01")
+    assert intent is not None
+    assert intent.external_task_id == _RACE_EXTERNAL_TASK_ID
 
 
 def test_approval_verification_missing_rejected_or_forged(tmp_path: Path) -> None:
