@@ -1,0 +1,3203 @@
+{
+  "glb_validation": {
+    "modular_piece": {
+      "animation_present": {
+        "findings": [
+          {
+            "actual": "animations are forbidden by the asset profile",
+            "artifact": "<ARTIFACT>",
+            "expected": "supported safe profile GLB subset",
+            "message": "GLB could not be safely validated",
+            "rule_id": "glb.parse",
+            "severity": "FAIL"
+          }
+        ],
+        "status": "FAIL",
+        "summary": "Failed with 1 failing rule(s)"
+      },
+      "collider_mismatch": {
+        "findings": [
+          {
+            "actual": "parsed",
+            "artifact": "<ARTIFACT>",
+            "expected": "GLB 2.0 with bounded embedded buffers",
+            "message": "GLB structure and accessors are valid",
+            "rule_id": "glb.parse",
+            "severity": "PASS"
+          },
+          {
+            "actual": "800ee6add1b3db61755d97b6c7c60a096fc453f165024e7d2ba5547752c973f2",
+            "artifact": "<ARTIFACT>",
+            "expected": "SHA-256 recorded",
+            "message": "Artifact hash computed",
+            "rule_id": "glb.hash",
+            "severity": "PASS"
+          },
+          {
+            "actual": "['SM_wall_panel_test_LOD0']",
+            "artifact": "<ARTIFACT>",
+            "expected": "unique mesh node names",
+            "message": "Duplicate names are ambiguous during engine import",
+            "rule_id": "nodes.unique",
+            "severity": "PASS"
+          },
+          {
+            "actual": "['SM_wall_panel_test_LOD0']",
+            "artifact": "<ARTIFACT>",
+            "expected": "exactly ['COL_wall_panel_test', 'SM_wall_panel_test_LOD0']",
+            "message": "Unexpected or missing mesh nodes are rejected",
+            "rule_id": "nodes.profile",
+            "severity": "FAIL"
+          },
+          {
+            "actual": "12 triangles",
+            "artifact": "<ARTIFACT>",
+            "expected": "nonempty triangle geometry",
+            "message": "Actual POSITION and index data decoded",
+            "rule_id": "mesh.nonempty",
+            "severity": "PASS"
+          },
+          {
+            "actual": "present",
+            "artifact": "<ARTIFACT>",
+            "expected": "LOD0 mesh geometry",
+            "message": "LOD0 node must reference nonempty triangles",
+            "rule_id": "lod0.present",
+            "severity": "PASS"
+          },
+          {
+            "actual": "missing",
+            "artifact": "<ARTIFACT>",
+            "expected": "LOD1 optional",
+            "message": "LOD1 is optional for this profile",
+            "rule_id": "lod1.present",
+            "severity": "PASS"
+          },
+          {
+            "actual": "0 collider mesh(es)",
+            "artifact": "<ARTIFACT>",
+            "expected": "axis-aligned box geometry matching visual bounds",
+            "message": "Collider decoded vertices and triangles are checked against visual bounds",
+            "rule_id": "collider.geometry",
+            "severity": "FAIL"
+          },
+          {
+            "actual": "12",
+            "artifact": "<ARTIFACT>",
+            "expected": "<= 12000",
+            "message": "LOD0 triangle budget",
+            "rule_id": "geometry.lod0_budget",
+            "severity": "PASS"
+          },
+          {
+            "actual": "0",
+            "artifact": "<ARTIFACT>",
+            "expected": "<= 4000",
+            "message": "LOD1 triangle budget",
+            "rule_id": "geometry.lod1_budget",
+            "severity": "PASS"
+          },
+          {
+            "actual": "1",
+            "artifact": "<ARTIFACT>",
+            "expected": "<= 2",
+            "message": "Declared material count in GLB",
+            "rule_id": "materials.budget",
+            "severity": "PASS"
+          },
+          {
+            "actual": "64",
+            "artifact": "<ARTIFACT>",
+            "expected": "<= 2048px",
+            "message": "Embedded texture dimensions decoded from image bytes",
+            "rule_id": "textures.dimension",
+            "severity": "PASS"
+          },
+          {
+            "actual": "[1.0, 2.0, 0.25]",
+            "artifact": "<ARTIFACT>",
+            "expected": "X/Y/Z = [1.0, 2.0, 0.25]m \u00b1 0.002m",
+            "message": "Dimensions measured from transformed decoded vertices",
+            "rule_id": "scale.bounds",
+            "severity": "PASS"
+          },
+          {
+            "actual": "min=[-0.5, 0.0, -0.125], max=[0.5, 2.0, 0.125]",
+            "artifact": "<ARTIFACT>",
+            "expected": "bottom_center",
+            "message": "Origin evaluated from transformed geometry",
+            "rule_id": "origin.policy",
+            "severity": "PASS"
+          },
+          {
+            "actual": "[1.0, 2.0, 0.25]",
+            "artifact": "<ARTIFACT>",
+            "expected": "module axes are multiples of 0.25 m and the origin is on the snap pivot",
+            "message": "Modular dimensions and origin must land on the profile snap grid",
+            "rule_id": "dimensions.snap",
+            "severity": "PASS"
+          },
+          {
+            "actual": "None",
+            "artifact": "<ARTIFACT>",
+            "expected": "LOD1 bounds match LOD0 \u00b1 0.002m",
+            "message": "LOD1 geometry must preserve the visual envelope",
+            "rule_id": "lod1.bounds",
+            "severity": "PASS"
+          },
+          {
+            "actual": "identity",
+            "artifact": "<ARTIFACT>",
+            "expected": "mesh nodes carry no residual transforms; +Y up/-Z front coordinates",
+            "message": "Coordinate convention is checked through node transforms and world-space bounds",
+            "rule_id": "orientation.identity",
+            "severity": "PASS"
+          }
+        ],
+        "status": "FAIL",
+        "summary": "Failed with 2 failing rule(s)"
+      },
+      "non_identity_transform": {
+        "findings": [
+          {
+            "actual": "parsed",
+            "artifact": "<ARTIFACT>",
+            "expected": "GLB 2.0 with bounded embedded buffers",
+            "message": "GLB structure and accessors are valid",
+            "rule_id": "glb.parse",
+            "severity": "PASS"
+          },
+          {
+            "actual": "68249ee7647a54eef1f3611ff080edf356e368cc06844576ac6676d036bccea0",
+            "artifact": "<ARTIFACT>",
+            "expected": "SHA-256 recorded",
+            "message": "Artifact hash computed",
+            "rule_id": "glb.hash",
+            "severity": "PASS"
+          },
+          {
+            "actual": "['SM_wall_panel_test_LOD0', 'COL_wall_panel_test']",
+            "artifact": "<ARTIFACT>",
+            "expected": "unique mesh node names",
+            "message": "Duplicate names are ambiguous during engine import",
+            "rule_id": "nodes.unique",
+            "severity": "PASS"
+          },
+          {
+            "actual": "['SM_wall_panel_test_LOD0', 'COL_wall_panel_test']",
+            "artifact": "<ARTIFACT>",
+            "expected": "exactly ['COL_wall_panel_test', 'SM_wall_panel_test_LOD0']",
+            "message": "Unexpected or missing mesh nodes are rejected",
+            "rule_id": "nodes.profile",
+            "severity": "PASS"
+          },
+          {
+            "actual": "24 triangles",
+            "artifact": "<ARTIFACT>",
+            "expected": "nonempty triangle geometry",
+            "message": "Actual POSITION and index data decoded",
+            "rule_id": "mesh.nonempty",
+            "severity": "PASS"
+          },
+          {
+            "actual": "present",
+            "artifact": "<ARTIFACT>",
+            "expected": "LOD0 mesh geometry",
+            "message": "LOD0 node must reference nonempty triangles",
+            "rule_id": "lod0.present",
+            "severity": "PASS"
+          },
+          {
+            "actual": "missing",
+            "artifact": "<ARTIFACT>",
+            "expected": "LOD1 optional",
+            "message": "LOD1 is optional for this profile",
+            "rule_id": "lod1.present",
+            "severity": "PASS"
+          },
+          {
+            "actual": "1 collider mesh(es)",
+            "artifact": "<ARTIFACT>",
+            "expected": "axis-aligned box geometry matching visual bounds",
+            "message": "Collider decoded vertices and triangles are checked against visual bounds",
+            "rule_id": "collider.geometry",
+            "severity": "FAIL"
+          },
+          {
+            "actual": "12",
+            "artifact": "<ARTIFACT>",
+            "expected": "<= 12000",
+            "message": "LOD0 triangle budget",
+            "rule_id": "geometry.lod0_budget",
+            "severity": "PASS"
+          },
+          {
+            "actual": "0",
+            "artifact": "<ARTIFACT>",
+            "expected": "<= 4000",
+            "message": "LOD1 triangle budget",
+            "rule_id": "geometry.lod1_budget",
+            "severity": "PASS"
+          },
+          {
+            "actual": "1",
+            "artifact": "<ARTIFACT>",
+            "expected": "<= 2",
+            "message": "Declared material count in GLB",
+            "rule_id": "materials.budget",
+            "severity": "PASS"
+          },
+          {
+            "actual": "64",
+            "artifact": "<ARTIFACT>",
+            "expected": "<= 2048px",
+            "message": "Embedded texture dimensions decoded from image bytes",
+            "rule_id": "textures.dimension",
+            "severity": "PASS"
+          },
+          {
+            "actual": "[1.0, 2.0, 0.25]",
+            "artifact": "<ARTIFACT>",
+            "expected": "X/Y/Z = [1.0, 2.0, 0.25]m \u00b1 0.002m",
+            "message": "Dimensions measured from transformed decoded vertices",
+            "rule_id": "scale.bounds",
+            "severity": "PASS"
+          },
+          {
+            "actual": "min=[-0.5, 1.0, -0.125], max=[0.5, 3.0, 0.125]",
+            "artifact": "<ARTIFACT>",
+            "expected": "bottom_center",
+            "message": "Origin evaluated from transformed geometry",
+            "rule_id": "origin.policy",
+            "severity": "FAIL"
+          },
+          {
+            "actual": "[1.0, 2.0, 0.25]",
+            "artifact": "<ARTIFACT>",
+            "expected": "module axes are multiples of 0.25 m and the origin is on the snap pivot",
+            "message": "Modular dimensions and origin must land on the profile snap grid",
+            "rule_id": "dimensions.snap",
+            "severity": "FAIL"
+          },
+          {
+            "actual": "None",
+            "artifact": "<ARTIFACT>",
+            "expected": "LOD1 bounds match LOD0 \u00b1 0.002m",
+            "message": "LOD1 geometry must preserve the visual envelope",
+            "rule_id": "lod1.bounds",
+            "severity": "PASS"
+          },
+          {
+            "actual": "non-identity transform",
+            "artifact": "<ARTIFACT>",
+            "expected": "mesh nodes carry no residual transforms; +Y up/-Z front coordinates",
+            "message": "Coordinate convention is checked through node transforms and world-space bounds",
+            "rule_id": "orientation.identity",
+            "severity": "FAIL"
+          }
+        ],
+        "status": "FAIL",
+        "summary": "Failed with 4 failing rule(s)"
+      },
+      "off_grid_dimensions": {
+        "findings": [
+          {
+            "actual": "parsed",
+            "artifact": "<ARTIFACT>",
+            "expected": "GLB 2.0 with bounded embedded buffers",
+            "message": "GLB structure and accessors are valid",
+            "rule_id": "glb.parse",
+            "severity": "PASS"
+          },
+          {
+            "actual": "aacacd760c58cd468d7e4ab64948ac45704019ef0c1999879f8823cd7170d6c7",
+            "artifact": "<ARTIFACT>",
+            "expected": "SHA-256 recorded",
+            "message": "Artifact hash computed",
+            "rule_id": "glb.hash",
+            "severity": "PASS"
+          },
+          {
+            "actual": "['SM_wall_panel_test_LOD0', 'COL_wall_panel_test']",
+            "artifact": "<ARTIFACT>",
+            "expected": "unique mesh node names",
+            "message": "Duplicate names are ambiguous during engine import",
+            "rule_id": "nodes.unique",
+            "severity": "PASS"
+          },
+          {
+            "actual": "['SM_wall_panel_test_LOD0', 'COL_wall_panel_test']",
+            "artifact": "<ARTIFACT>",
+            "expected": "exactly ['COL_wall_panel_test', 'SM_wall_panel_test_LOD0']",
+            "message": "Unexpected or missing mesh nodes are rejected",
+            "rule_id": "nodes.profile",
+            "severity": "PASS"
+          },
+          {
+            "actual": "24 triangles",
+            "artifact": "<ARTIFACT>",
+            "expected": "nonempty triangle geometry",
+            "message": "Actual POSITION and index data decoded",
+            "rule_id": "mesh.nonempty",
+            "severity": "PASS"
+          },
+          {
+            "actual": "present",
+            "artifact": "<ARTIFACT>",
+            "expected": "LOD0 mesh geometry",
+            "message": "LOD0 node must reference nonempty triangles",
+            "rule_id": "lod0.present",
+            "severity": "PASS"
+          },
+          {
+            "actual": "missing",
+            "artifact": "<ARTIFACT>",
+            "expected": "LOD1 optional",
+            "message": "LOD1 is optional for this profile",
+            "rule_id": "lod1.present",
+            "severity": "PASS"
+          },
+          {
+            "actual": "1 collider mesh(es)",
+            "artifact": "<ARTIFACT>",
+            "expected": "axis-aligned box geometry matching visual bounds",
+            "message": "Collider decoded vertices and triangles are checked against visual bounds",
+            "rule_id": "collider.geometry",
+            "severity": "PASS"
+          },
+          {
+            "actual": "12",
+            "artifact": "<ARTIFACT>",
+            "expected": "<= 12000",
+            "message": "LOD0 triangle budget",
+            "rule_id": "geometry.lod0_budget",
+            "severity": "PASS"
+          },
+          {
+            "actual": "0",
+            "artifact": "<ARTIFACT>",
+            "expected": "<= 4000",
+            "message": "LOD1 triangle budget",
+            "rule_id": "geometry.lod1_budget",
+            "severity": "PASS"
+          },
+          {
+            "actual": "1",
+            "artifact": "<ARTIFACT>",
+            "expected": "<= 2",
+            "message": "Declared material count in GLB",
+            "rule_id": "materials.budget",
+            "severity": "PASS"
+          },
+          {
+            "actual": "64",
+            "artifact": "<ARTIFACT>",
+            "expected": "<= 2048px",
+            "message": "Embedded texture dimensions decoded from image bytes",
+            "rule_id": "textures.dimension",
+            "severity": "PASS"
+          },
+          {
+            "actual": "[1.100000023841858, 2.0, 0.25]",
+            "artifact": "<ARTIFACT>",
+            "expected": "X/Y/Z = [1.0, 2.0, 0.25]m \u00b1 0.002m",
+            "message": "Dimensions measured from transformed decoded vertices",
+            "rule_id": "scale.bounds",
+            "severity": "FAIL"
+          },
+          {
+            "actual": "min=[-0.550000011920929, 0.0, -0.125], max=[0.550000011920929, 2.0, 0.125]",
+            "artifact": "<ARTIFACT>",
+            "expected": "bottom_center",
+            "message": "Origin evaluated from transformed geometry",
+            "rule_id": "origin.policy",
+            "severity": "PASS"
+          },
+          {
+            "actual": "[1.100000023841858, 2.0, 0.25]",
+            "artifact": "<ARTIFACT>",
+            "expected": "module axes are multiples of 0.25 m and the origin is on the snap pivot",
+            "message": "Modular dimensions and origin must land on the profile snap grid",
+            "rule_id": "dimensions.snap",
+            "severity": "FAIL"
+          },
+          {
+            "actual": "None",
+            "artifact": "<ARTIFACT>",
+            "expected": "LOD1 bounds match LOD0 \u00b1 0.002m",
+            "message": "LOD1 geometry must preserve the visual envelope",
+            "rule_id": "lod1.bounds",
+            "severity": "PASS"
+          },
+          {
+            "actual": "identity",
+            "artifact": "<ARTIFACT>",
+            "expected": "mesh nodes carry no residual transforms; +Y up/-Z front coordinates",
+            "message": "Coordinate convention is checked through node transforms and world-space bounds",
+            "rule_id": "orientation.identity",
+            "severity": "PASS"
+          }
+        ],
+        "status": "FAIL",
+        "summary": "Failed with 2 failing rule(s)"
+      },
+      "over_budget": {
+        "findings": [
+          {
+            "actual": "parsed",
+            "artifact": "<ARTIFACT>",
+            "expected": "GLB 2.0 with bounded embedded buffers",
+            "message": "GLB structure and accessors are valid",
+            "rule_id": "glb.parse",
+            "severity": "PASS"
+          },
+          {
+            "actual": "ecc28db9ac4e874e9fcdc58a908e1ad198bc9cb581552af6672ba7419de6a058",
+            "artifact": "<ARTIFACT>",
+            "expected": "SHA-256 recorded",
+            "message": "Artifact hash computed",
+            "rule_id": "glb.hash",
+            "severity": "PASS"
+          },
+          {
+            "actual": "['SM_wall_panel_test_LOD0', 'COL_wall_panel_test']",
+            "artifact": "<ARTIFACT>",
+            "expected": "unique mesh node names",
+            "message": "Duplicate names are ambiguous during engine import",
+            "rule_id": "nodes.unique",
+            "severity": "PASS"
+          },
+          {
+            "actual": "['SM_wall_panel_test_LOD0', 'COL_wall_panel_test']",
+            "artifact": "<ARTIFACT>",
+            "expected": "exactly ['COL_wall_panel_test', 'SM_wall_panel_test_LOD0']",
+            "message": "Unexpected or missing mesh nodes are rejected",
+            "rule_id": "nodes.profile",
+            "severity": "PASS"
+          },
+          {
+            "actual": "72 triangles",
+            "artifact": "<ARTIFACT>",
+            "expected": "nonempty triangle geometry",
+            "message": "Actual POSITION and index data decoded",
+            "rule_id": "mesh.nonempty",
+            "severity": "PASS"
+          },
+          {
+            "actual": "present",
+            "artifact": "<ARTIFACT>",
+            "expected": "LOD0 mesh geometry",
+            "message": "LOD0 node must reference nonempty triangles",
+            "rule_id": "lod0.present",
+            "severity": "PASS"
+          },
+          {
+            "actual": "missing",
+            "artifact": "<ARTIFACT>",
+            "expected": "LOD1 optional",
+            "message": "LOD1 is optional for this profile",
+            "rule_id": "lod1.present",
+            "severity": "PASS"
+          },
+          {
+            "actual": "1 collider mesh(es)",
+            "artifact": "<ARTIFACT>",
+            "expected": "axis-aligned box geometry matching visual bounds",
+            "message": "Collider decoded vertices and triangles are checked against visual bounds",
+            "rule_id": "collider.geometry",
+            "severity": "PASS"
+          },
+          {
+            "actual": "60",
+            "artifact": "<ARTIFACT>",
+            "expected": "<= 12000",
+            "message": "LOD0 triangle budget",
+            "rule_id": "geometry.lod0_budget",
+            "severity": "PASS"
+          },
+          {
+            "actual": "0",
+            "artifact": "<ARTIFACT>",
+            "expected": "<= 4000",
+            "message": "LOD1 triangle budget",
+            "rule_id": "geometry.lod1_budget",
+            "severity": "PASS"
+          },
+          {
+            "actual": "5",
+            "artifact": "<ARTIFACT>",
+            "expected": "<= 2",
+            "message": "Declared material count in GLB",
+            "rule_id": "materials.budget",
+            "severity": "FAIL"
+          },
+          {
+            "actual": "64",
+            "artifact": "<ARTIFACT>",
+            "expected": "<= 2048px",
+            "message": "Embedded texture dimensions decoded from image bytes",
+            "rule_id": "textures.dimension",
+            "severity": "PASS"
+          },
+          {
+            "actual": "[1.0, 2.0, 0.25]",
+            "artifact": "<ARTIFACT>",
+            "expected": "X/Y/Z = [1.0, 2.0, 0.25]m \u00b1 0.002m",
+            "message": "Dimensions measured from transformed decoded vertices",
+            "rule_id": "scale.bounds",
+            "severity": "PASS"
+          },
+          {
+            "actual": "min=[-0.5, 0.0, -0.125], max=[0.5, 2.0, 0.125]",
+            "artifact": "<ARTIFACT>",
+            "expected": "bottom_center",
+            "message": "Origin evaluated from transformed geometry",
+            "rule_id": "origin.policy",
+            "severity": "PASS"
+          },
+          {
+            "actual": "[1.0, 2.0, 0.25]",
+            "artifact": "<ARTIFACT>",
+            "expected": "module axes are multiples of 0.25 m and the origin is on the snap pivot",
+            "message": "Modular dimensions and origin must land on the profile snap grid",
+            "rule_id": "dimensions.snap",
+            "severity": "PASS"
+          },
+          {
+            "actual": "None",
+            "artifact": "<ARTIFACT>",
+            "expected": "LOD1 bounds match LOD0 \u00b1 0.002m",
+            "message": "LOD1 geometry must preserve the visual envelope",
+            "rule_id": "lod1.bounds",
+            "severity": "PASS"
+          },
+          {
+            "actual": "identity",
+            "artifact": "<ARTIFACT>",
+            "expected": "mesh nodes carry no residual transforms; +Y up/-Z front coordinates",
+            "message": "Coordinate convention is checked through node transforms and world-space bounds",
+            "rule_id": "orientation.identity",
+            "severity": "PASS"
+          }
+        ],
+        "status": "FAIL",
+        "summary": "Failed with 1 failing rule(s)"
+      },
+      "pass": {
+        "findings": [
+          {
+            "actual": "parsed",
+            "artifact": "<ARTIFACT>",
+            "expected": "GLB 2.0 with bounded embedded buffers",
+            "message": "GLB structure and accessors are valid",
+            "rule_id": "glb.parse",
+            "severity": "PASS"
+          },
+          {
+            "actual": "2818eb1b13f1a1cc9e199db54f79883553c4a8fc6e06b08f732c78ad2ea97834",
+            "artifact": "<ARTIFACT>",
+            "expected": "SHA-256 recorded",
+            "message": "Artifact hash computed",
+            "rule_id": "glb.hash",
+            "severity": "PASS"
+          },
+          {
+            "actual": "['SM_wall_panel_test_LOD0', 'COL_wall_panel_test']",
+            "artifact": "<ARTIFACT>",
+            "expected": "unique mesh node names",
+            "message": "Duplicate names are ambiguous during engine import",
+            "rule_id": "nodes.unique",
+            "severity": "PASS"
+          },
+          {
+            "actual": "['SM_wall_panel_test_LOD0', 'COL_wall_panel_test']",
+            "artifact": "<ARTIFACT>",
+            "expected": "exactly ['COL_wall_panel_test', 'SM_wall_panel_test_LOD0']",
+            "message": "Unexpected or missing mesh nodes are rejected",
+            "rule_id": "nodes.profile",
+            "severity": "PASS"
+          },
+          {
+            "actual": "24 triangles",
+            "artifact": "<ARTIFACT>",
+            "expected": "nonempty triangle geometry",
+            "message": "Actual POSITION and index data decoded",
+            "rule_id": "mesh.nonempty",
+            "severity": "PASS"
+          },
+          {
+            "actual": "present",
+            "artifact": "<ARTIFACT>",
+            "expected": "LOD0 mesh geometry",
+            "message": "LOD0 node must reference nonempty triangles",
+            "rule_id": "lod0.present",
+            "severity": "PASS"
+          },
+          {
+            "actual": "missing",
+            "artifact": "<ARTIFACT>",
+            "expected": "LOD1 optional",
+            "message": "LOD1 is optional for this profile",
+            "rule_id": "lod1.present",
+            "severity": "PASS"
+          },
+          {
+            "actual": "1 collider mesh(es)",
+            "artifact": "<ARTIFACT>",
+            "expected": "axis-aligned box geometry matching visual bounds",
+            "message": "Collider decoded vertices and triangles are checked against visual bounds",
+            "rule_id": "collider.geometry",
+            "severity": "PASS"
+          },
+          {
+            "actual": "12",
+            "artifact": "<ARTIFACT>",
+            "expected": "<= 12000",
+            "message": "LOD0 triangle budget",
+            "rule_id": "geometry.lod0_budget",
+            "severity": "PASS"
+          },
+          {
+            "actual": "0",
+            "artifact": "<ARTIFACT>",
+            "expected": "<= 4000",
+            "message": "LOD1 triangle budget",
+            "rule_id": "geometry.lod1_budget",
+            "severity": "PASS"
+          },
+          {
+            "actual": "1",
+            "artifact": "<ARTIFACT>",
+            "expected": "<= 2",
+            "message": "Declared material count in GLB",
+            "rule_id": "materials.budget",
+            "severity": "PASS"
+          },
+          {
+            "actual": "64",
+            "artifact": "<ARTIFACT>",
+            "expected": "<= 2048px",
+            "message": "Embedded texture dimensions decoded from image bytes",
+            "rule_id": "textures.dimension",
+            "severity": "PASS"
+          },
+          {
+            "actual": "[1.0, 2.0, 0.25]",
+            "artifact": "<ARTIFACT>",
+            "expected": "X/Y/Z = [1.0, 2.0, 0.25]m \u00b1 0.002m",
+            "message": "Dimensions measured from transformed decoded vertices",
+            "rule_id": "scale.bounds",
+            "severity": "PASS"
+          },
+          {
+            "actual": "min=[-0.5, 0.0, -0.125], max=[0.5, 2.0, 0.125]",
+            "artifact": "<ARTIFACT>",
+            "expected": "bottom_center",
+            "message": "Origin evaluated from transformed geometry",
+            "rule_id": "origin.policy",
+            "severity": "PASS"
+          },
+          {
+            "actual": "[1.0, 2.0, 0.25]",
+            "artifact": "<ARTIFACT>",
+            "expected": "module axes are multiples of 0.25 m and the origin is on the snap pivot",
+            "message": "Modular dimensions and origin must land on the profile snap grid",
+            "rule_id": "dimensions.snap",
+            "severity": "PASS"
+          },
+          {
+            "actual": "None",
+            "artifact": "<ARTIFACT>",
+            "expected": "LOD1 bounds match LOD0 \u00b1 0.002m",
+            "message": "LOD1 geometry must preserve the visual envelope",
+            "rule_id": "lod1.bounds",
+            "severity": "PASS"
+          },
+          {
+            "actual": "identity",
+            "artifact": "<ARTIFACT>",
+            "expected": "mesh nodes carry no residual transforms; +Y up/-Z front coordinates",
+            "message": "Coordinate convention is checked through node transforms and world-space bounds",
+            "rule_id": "orientation.identity",
+            "severity": "PASS"
+          }
+        ],
+        "status": "PASS",
+        "summary": "Passed with 0 failing rule(s)"
+      },
+      "skin_present": {
+        "findings": [
+          {
+            "actual": "skins/rigging are forbidden by the asset profile",
+            "artifact": "<ARTIFACT>",
+            "expected": "supported safe profile GLB subset",
+            "message": "GLB could not be safely validated",
+            "rule_id": "glb.parse",
+            "severity": "FAIL"
+          }
+        ],
+        "status": "FAIL",
+        "summary": "Failed with 1 failing rule(s)"
+      },
+      "wrong_origin": {
+        "findings": [
+          {
+            "actual": "parsed",
+            "artifact": "<ARTIFACT>",
+            "expected": "GLB 2.0 with bounded embedded buffers",
+            "message": "GLB structure and accessors are valid",
+            "rule_id": "glb.parse",
+            "severity": "PASS"
+          },
+          {
+            "actual": "38092dc0c8e455253d79a450334afc939b4834782fa441d31326c89b38883509",
+            "artifact": "<ARTIFACT>",
+            "expected": "SHA-256 recorded",
+            "message": "Artifact hash computed",
+            "rule_id": "glb.hash",
+            "severity": "PASS"
+          },
+          {
+            "actual": "['SM_wall_panel_test_LOD0', 'COL_wall_panel_test']",
+            "artifact": "<ARTIFACT>",
+            "expected": "unique mesh node names",
+            "message": "Duplicate names are ambiguous during engine import",
+            "rule_id": "nodes.unique",
+            "severity": "PASS"
+          },
+          {
+            "actual": "['SM_wall_panel_test_LOD0', 'COL_wall_panel_test']",
+            "artifact": "<ARTIFACT>",
+            "expected": "exactly ['COL_wall_panel_test', 'SM_wall_panel_test_LOD0']",
+            "message": "Unexpected or missing mesh nodes are rejected",
+            "rule_id": "nodes.profile",
+            "severity": "PASS"
+          },
+          {
+            "actual": "24 triangles",
+            "artifact": "<ARTIFACT>",
+            "expected": "nonempty triangle geometry",
+            "message": "Actual POSITION and index data decoded",
+            "rule_id": "mesh.nonempty",
+            "severity": "PASS"
+          },
+          {
+            "actual": "present",
+            "artifact": "<ARTIFACT>",
+            "expected": "LOD0 mesh geometry",
+            "message": "LOD0 node must reference nonempty triangles",
+            "rule_id": "lod0.present",
+            "severity": "PASS"
+          },
+          {
+            "actual": "missing",
+            "artifact": "<ARTIFACT>",
+            "expected": "LOD1 optional",
+            "message": "LOD1 is optional for this profile",
+            "rule_id": "lod1.present",
+            "severity": "PASS"
+          },
+          {
+            "actual": "1 collider mesh(es)",
+            "artifact": "<ARTIFACT>",
+            "expected": "axis-aligned box geometry matching visual bounds",
+            "message": "Collider decoded vertices and triangles are checked against visual bounds",
+            "rule_id": "collider.geometry",
+            "severity": "PASS"
+          },
+          {
+            "actual": "12",
+            "artifact": "<ARTIFACT>",
+            "expected": "<= 12000",
+            "message": "LOD0 triangle budget",
+            "rule_id": "geometry.lod0_budget",
+            "severity": "PASS"
+          },
+          {
+            "actual": "0",
+            "artifact": "<ARTIFACT>",
+            "expected": "<= 4000",
+            "message": "LOD1 triangle budget",
+            "rule_id": "geometry.lod1_budget",
+            "severity": "PASS"
+          },
+          {
+            "actual": "1",
+            "artifact": "<ARTIFACT>",
+            "expected": "<= 2",
+            "message": "Declared material count in GLB",
+            "rule_id": "materials.budget",
+            "severity": "PASS"
+          },
+          {
+            "actual": "64",
+            "artifact": "<ARTIFACT>",
+            "expected": "<= 2048px",
+            "message": "Embedded texture dimensions decoded from image bytes",
+            "rule_id": "textures.dimension",
+            "severity": "PASS"
+          },
+          {
+            "actual": "[1.0, 2.0, 0.25]",
+            "artifact": "<ARTIFACT>",
+            "expected": "X/Y/Z = [1.0, 2.0, 0.25]m \u00b1 0.002m",
+            "message": "Dimensions measured from transformed decoded vertices",
+            "rule_id": "scale.bounds",
+            "severity": "PASS"
+          },
+          {
+            "actual": "min=[-0.5, -1.0, -0.125], max=[0.5, 1.0, 0.125]",
+            "artifact": "<ARTIFACT>",
+            "expected": "bottom_center",
+            "message": "Origin evaluated from transformed geometry",
+            "rule_id": "origin.policy",
+            "severity": "FAIL"
+          },
+          {
+            "actual": "[1.0, 2.0, 0.25]",
+            "artifact": "<ARTIFACT>",
+            "expected": "module axes are multiples of 0.25 m and the origin is on the snap pivot",
+            "message": "Modular dimensions and origin must land on the profile snap grid",
+            "rule_id": "dimensions.snap",
+            "severity": "FAIL"
+          },
+          {
+            "actual": "None",
+            "artifact": "<ARTIFACT>",
+            "expected": "LOD1 bounds match LOD0 \u00b1 0.002m",
+            "message": "LOD1 geometry must preserve the visual envelope",
+            "rule_id": "lod1.bounds",
+            "severity": "PASS"
+          },
+          {
+            "actual": "identity",
+            "artifact": "<ARTIFACT>",
+            "expected": "mesh nodes carry no residual transforms; +Y up/-Z front coordinates",
+            "message": "Coordinate convention is checked through node transforms and world-space bounds",
+            "rule_id": "orientation.identity",
+            "severity": "PASS"
+          }
+        ],
+        "status": "FAIL",
+        "summary": "Failed with 2 failing rule(s)"
+      }
+    },
+    "pickup": {
+      "animation_present": {
+        "findings": [
+          {
+            "actual": "animations are forbidden by the asset profile",
+            "artifact": "<ARTIFACT>",
+            "expected": "supported safe profile GLB subset",
+            "message": "GLB could not be safely validated",
+            "rule_id": "glb.parse",
+            "severity": "FAIL"
+          }
+        ],
+        "status": "FAIL",
+        "summary": "Failed with 1 failing rule(s)"
+      },
+      "collider_mismatch": {
+        "findings": [
+          {
+            "actual": "parsed",
+            "artifact": "<ARTIFACT>",
+            "expected": "GLB 2.0 with bounded embedded buffers",
+            "message": "GLB structure and accessors are valid",
+            "rule_id": "glb.parse",
+            "severity": "PASS"
+          },
+          {
+            "actual": "88145c1850a6720afa50f42c3c2bededeb604489e1ebcf534432d066452ca8ee",
+            "artifact": "<ARTIFACT>",
+            "expected": "SHA-256 recorded",
+            "message": "Artifact hash computed",
+            "rule_id": "glb.hash",
+            "severity": "PASS"
+          },
+          {
+            "actual": "['SM_pickup_energy_cell_01_LOD0']",
+            "artifact": "<ARTIFACT>",
+            "expected": "unique mesh node names",
+            "message": "Duplicate names are ambiguous during engine import",
+            "rule_id": "nodes.unique",
+            "severity": "PASS"
+          },
+          {
+            "actual": "['SM_pickup_energy_cell_01_LOD0']",
+            "artifact": "<ARTIFACT>",
+            "expected": "exactly ['COL_pickup_energy_cell_01', 'SM_pickup_energy_cell_01_LOD0']",
+            "message": "Unexpected or missing mesh nodes are rejected",
+            "rule_id": "nodes.profile",
+            "severity": "FAIL"
+          },
+          {
+            "actual": "12 triangles",
+            "artifact": "<ARTIFACT>",
+            "expected": "nonempty triangle geometry",
+            "message": "Actual POSITION and index data decoded",
+            "rule_id": "mesh.nonempty",
+            "severity": "PASS"
+          },
+          {
+            "actual": "present",
+            "artifact": "<ARTIFACT>",
+            "expected": "LOD0 mesh geometry",
+            "message": "LOD0 node must reference nonempty triangles",
+            "rule_id": "lod0.present",
+            "severity": "PASS"
+          },
+          {
+            "actual": "missing",
+            "artifact": "<ARTIFACT>",
+            "expected": "LOD1 optional",
+            "message": "LOD1 is optional for this profile",
+            "rule_id": "lod1.present",
+            "severity": "PASS"
+          },
+          {
+            "actual": "0 collider mesh(es)",
+            "artifact": "<ARTIFACT>",
+            "expected": "axis-aligned box geometry matching visual bounds",
+            "message": "Collider decoded vertices and triangles are checked against visual bounds",
+            "rule_id": "collider.geometry",
+            "severity": "FAIL"
+          },
+          {
+            "actual": "12",
+            "artifact": "<ARTIFACT>",
+            "expected": "<= 8000",
+            "message": "LOD0 triangle budget",
+            "rule_id": "geometry.lod0_budget",
+            "severity": "PASS"
+          },
+          {
+            "actual": "0",
+            "artifact": "<ARTIFACT>",
+            "expected": "<= 3000",
+            "message": "LOD1 triangle budget",
+            "rule_id": "geometry.lod1_budget",
+            "severity": "PASS"
+          },
+          {
+            "actual": "1",
+            "artifact": "<ARTIFACT>",
+            "expected": "<= 2",
+            "message": "Declared material count in GLB",
+            "rule_id": "materials.budget",
+            "severity": "PASS"
+          },
+          {
+            "actual": "64",
+            "artifact": "<ARTIFACT>",
+            "expected": "<= 2048px",
+            "message": "Embedded texture dimensions decoded from image bytes",
+            "rule_id": "textures.dimension",
+            "severity": "PASS"
+          },
+          {
+            "actual": "[0.2199999988079071, 0.47999998927116394, 0.2199999988079071]",
+            "artifact": "<ARTIFACT>",
+            "expected": "X/Y/Z = [0.22, 0.48, 0.22]m \u00b1 0.01m",
+            "message": "Dimensions measured from transformed decoded vertices",
+            "rule_id": "scale.bounds",
+            "severity": "PASS"
+          },
+          {
+            "actual": "min=[-0.10999999940395355, -0.23999999463558197, -0.10999999940395355], max=[0.10999999940395355, 0.23999999463558197, 0.10999999940395355]",
+            "artifact": "<ARTIFACT>",
+            "expected": "center",
+            "message": "Origin evaluated from transformed geometry",
+            "rule_id": "origin.policy",
+            "severity": "PASS"
+          },
+          {
+            "actual": "None",
+            "artifact": "<ARTIFACT>",
+            "expected": "LOD1 bounds match LOD0 \u00b1 0.01m",
+            "message": "LOD1 geometry must preserve the visual envelope",
+            "rule_id": "lod1.bounds",
+            "severity": "PASS"
+          },
+          {
+            "actual": "identity",
+            "artifact": "<ARTIFACT>",
+            "expected": "mesh nodes carry no residual transforms; +Y up/-Z front coordinates",
+            "message": "Coordinate convention is checked through node transforms and world-space bounds",
+            "rule_id": "orientation.identity",
+            "severity": "PASS"
+          }
+        ],
+        "status": "FAIL",
+        "summary": "Failed with 2 failing rule(s)"
+      },
+      "non_identity_transform": {
+        "findings": [
+          {
+            "actual": "parsed",
+            "artifact": "<ARTIFACT>",
+            "expected": "GLB 2.0 with bounded embedded buffers",
+            "message": "GLB structure and accessors are valid",
+            "rule_id": "glb.parse",
+            "severity": "PASS"
+          },
+          {
+            "actual": "bf04366eb5d335ccc471c66237d89019df592e11c43c5f109e0c63224bcfe0ef",
+            "artifact": "<ARTIFACT>",
+            "expected": "SHA-256 recorded",
+            "message": "Artifact hash computed",
+            "rule_id": "glb.hash",
+            "severity": "PASS"
+          },
+          {
+            "actual": "['SM_pickup_energy_cell_01_LOD0', 'COL_pickup_energy_cell_01']",
+            "artifact": "<ARTIFACT>",
+            "expected": "unique mesh node names",
+            "message": "Duplicate names are ambiguous during engine import",
+            "rule_id": "nodes.unique",
+            "severity": "PASS"
+          },
+          {
+            "actual": "['SM_pickup_energy_cell_01_LOD0', 'COL_pickup_energy_cell_01']",
+            "artifact": "<ARTIFACT>",
+            "expected": "exactly ['COL_pickup_energy_cell_01', 'SM_pickup_energy_cell_01_LOD0']",
+            "message": "Unexpected or missing mesh nodes are rejected",
+            "rule_id": "nodes.profile",
+            "severity": "PASS"
+          },
+          {
+            "actual": "24 triangles",
+            "artifact": "<ARTIFACT>",
+            "expected": "nonempty triangle geometry",
+            "message": "Actual POSITION and index data decoded",
+            "rule_id": "mesh.nonempty",
+            "severity": "PASS"
+          },
+          {
+            "actual": "present",
+            "artifact": "<ARTIFACT>",
+            "expected": "LOD0 mesh geometry",
+            "message": "LOD0 node must reference nonempty triangles",
+            "rule_id": "lod0.present",
+            "severity": "PASS"
+          },
+          {
+            "actual": "missing",
+            "artifact": "<ARTIFACT>",
+            "expected": "LOD1 optional",
+            "message": "LOD1 is optional for this profile",
+            "rule_id": "lod1.present",
+            "severity": "PASS"
+          },
+          {
+            "actual": "1 collider mesh(es)",
+            "artifact": "<ARTIFACT>",
+            "expected": "axis-aligned box geometry matching visual bounds",
+            "message": "Collider decoded vertices and triangles are checked against visual bounds",
+            "rule_id": "collider.geometry",
+            "severity": "FAIL"
+          },
+          {
+            "actual": "12",
+            "artifact": "<ARTIFACT>",
+            "expected": "<= 8000",
+            "message": "LOD0 triangle budget",
+            "rule_id": "geometry.lod0_budget",
+            "severity": "PASS"
+          },
+          {
+            "actual": "0",
+            "artifact": "<ARTIFACT>",
+            "expected": "<= 3000",
+            "message": "LOD1 triangle budget",
+            "rule_id": "geometry.lod1_budget",
+            "severity": "PASS"
+          },
+          {
+            "actual": "1",
+            "artifact": "<ARTIFACT>",
+            "expected": "<= 2",
+            "message": "Declared material count in GLB",
+            "rule_id": "materials.budget",
+            "severity": "PASS"
+          },
+          {
+            "actual": "64",
+            "artifact": "<ARTIFACT>",
+            "expected": "<= 2048px",
+            "message": "Embedded texture dimensions decoded from image bytes",
+            "rule_id": "textures.dimension",
+            "severity": "PASS"
+          },
+          {
+            "actual": "[0.2199999988079071, 0.47999998927116394, 0.2199999988079071]",
+            "artifact": "<ARTIFACT>",
+            "expected": "X/Y/Z = [0.22, 0.48, 0.22]m \u00b1 0.01m",
+            "message": "Dimensions measured from transformed decoded vertices",
+            "rule_id": "scale.bounds",
+            "severity": "PASS"
+          },
+          {
+            "actual": "min=[-0.10999999940395355, 0.760000005364418, -0.10999999940395355], max=[0.10999999940395355, 1.239999994635582, 0.10999999940395355]",
+            "artifact": "<ARTIFACT>",
+            "expected": "center",
+            "message": "Origin evaluated from transformed geometry",
+            "rule_id": "origin.policy",
+            "severity": "FAIL"
+          },
+          {
+            "actual": "None",
+            "artifact": "<ARTIFACT>",
+            "expected": "LOD1 bounds match LOD0 \u00b1 0.01m",
+            "message": "LOD1 geometry must preserve the visual envelope",
+            "rule_id": "lod1.bounds",
+            "severity": "PASS"
+          },
+          {
+            "actual": "non-identity transform",
+            "artifact": "<ARTIFACT>",
+            "expected": "mesh nodes carry no residual transforms; +Y up/-Z front coordinates",
+            "message": "Coordinate convention is checked through node transforms and world-space bounds",
+            "rule_id": "orientation.identity",
+            "severity": "FAIL"
+          }
+        ],
+        "status": "FAIL",
+        "summary": "Failed with 3 failing rule(s)"
+      },
+      "over_budget": {
+        "findings": [
+          {
+            "actual": "parsed",
+            "artifact": "<ARTIFACT>",
+            "expected": "GLB 2.0 with bounded embedded buffers",
+            "message": "GLB structure and accessors are valid",
+            "rule_id": "glb.parse",
+            "severity": "PASS"
+          },
+          {
+            "actual": "faf3350921b8672ecfbbff9467918218403812f2ff1742db14606bf4c7d3987c",
+            "artifact": "<ARTIFACT>",
+            "expected": "SHA-256 recorded",
+            "message": "Artifact hash computed",
+            "rule_id": "glb.hash",
+            "severity": "PASS"
+          },
+          {
+            "actual": "['SM_pickup_energy_cell_01_LOD0', 'COL_pickup_energy_cell_01']",
+            "artifact": "<ARTIFACT>",
+            "expected": "unique mesh node names",
+            "message": "Duplicate names are ambiguous during engine import",
+            "rule_id": "nodes.unique",
+            "severity": "PASS"
+          },
+          {
+            "actual": "['SM_pickup_energy_cell_01_LOD0', 'COL_pickup_energy_cell_01']",
+            "artifact": "<ARTIFACT>",
+            "expected": "exactly ['COL_pickup_energy_cell_01', 'SM_pickup_energy_cell_01_LOD0']",
+            "message": "Unexpected or missing mesh nodes are rejected",
+            "rule_id": "nodes.profile",
+            "severity": "PASS"
+          },
+          {
+            "actual": "48 triangles",
+            "artifact": "<ARTIFACT>",
+            "expected": "nonempty triangle geometry",
+            "message": "Actual POSITION and index data decoded",
+            "rule_id": "mesh.nonempty",
+            "severity": "PASS"
+          },
+          {
+            "actual": "present",
+            "artifact": "<ARTIFACT>",
+            "expected": "LOD0 mesh geometry",
+            "message": "LOD0 node must reference nonempty triangles",
+            "rule_id": "lod0.present",
+            "severity": "PASS"
+          },
+          {
+            "actual": "missing",
+            "artifact": "<ARTIFACT>",
+            "expected": "LOD1 optional",
+            "message": "LOD1 is optional for this profile",
+            "rule_id": "lod1.present",
+            "severity": "PASS"
+          },
+          {
+            "actual": "1 collider mesh(es)",
+            "artifact": "<ARTIFACT>",
+            "expected": "axis-aligned box geometry matching visual bounds",
+            "message": "Collider decoded vertices and triangles are checked against visual bounds",
+            "rule_id": "collider.geometry",
+            "severity": "PASS"
+          },
+          {
+            "actual": "36",
+            "artifact": "<ARTIFACT>",
+            "expected": "<= 8000",
+            "message": "LOD0 triangle budget",
+            "rule_id": "geometry.lod0_budget",
+            "severity": "PASS"
+          },
+          {
+            "actual": "0",
+            "artifact": "<ARTIFACT>",
+            "expected": "<= 3000",
+            "message": "LOD1 triangle budget",
+            "rule_id": "geometry.lod1_budget",
+            "severity": "PASS"
+          },
+          {
+            "actual": "3",
+            "artifact": "<ARTIFACT>",
+            "expected": "<= 2",
+            "message": "Declared material count in GLB",
+            "rule_id": "materials.budget",
+            "severity": "FAIL"
+          },
+          {
+            "actual": "4096",
+            "artifact": "<ARTIFACT>",
+            "expected": "<= 2048px",
+            "message": "Embedded texture dimensions decoded from image bytes",
+            "rule_id": "textures.dimension",
+            "severity": "FAIL"
+          },
+          {
+            "actual": "[0.2199999988079071, 0.47999998927116394, 0.2199999988079071]",
+            "artifact": "<ARTIFACT>",
+            "expected": "X/Y/Z = [0.22, 0.48, 0.22]m \u00b1 0.01m",
+            "message": "Dimensions measured from transformed decoded vertices",
+            "rule_id": "scale.bounds",
+            "severity": "PASS"
+          },
+          {
+            "actual": "min=[-0.10999999940395355, -0.23999999463558197, -0.10999999940395355], max=[0.10999999940395355, 0.23999999463558197, 0.10999999940395355]",
+            "artifact": "<ARTIFACT>",
+            "expected": "center",
+            "message": "Origin evaluated from transformed geometry",
+            "rule_id": "origin.policy",
+            "severity": "PASS"
+          },
+          {
+            "actual": "None",
+            "artifact": "<ARTIFACT>",
+            "expected": "LOD1 bounds match LOD0 \u00b1 0.01m",
+            "message": "LOD1 geometry must preserve the visual envelope",
+            "rule_id": "lod1.bounds",
+            "severity": "PASS"
+          },
+          {
+            "actual": "identity",
+            "artifact": "<ARTIFACT>",
+            "expected": "mesh nodes carry no residual transforms; +Y up/-Z front coordinates",
+            "message": "Coordinate convention is checked through node transforms and world-space bounds",
+            "rule_id": "orientation.identity",
+            "severity": "PASS"
+          }
+        ],
+        "status": "FAIL",
+        "summary": "Failed with 2 failing rule(s)"
+      },
+      "pass": {
+        "findings": [
+          {
+            "actual": "parsed",
+            "artifact": "<ARTIFACT>",
+            "expected": "GLB 2.0 with bounded embedded buffers",
+            "message": "GLB structure and accessors are valid",
+            "rule_id": "glb.parse",
+            "severity": "PASS"
+          },
+          {
+            "actual": "fab49b1dbe036612e1674d8237a382e2a3576016a392c5705b8978adf101bdd1",
+            "artifact": "<ARTIFACT>",
+            "expected": "SHA-256 recorded",
+            "message": "Artifact hash computed",
+            "rule_id": "glb.hash",
+            "severity": "PASS"
+          },
+          {
+            "actual": "['SM_pickup_energy_cell_01_LOD0', 'COL_pickup_energy_cell_01']",
+            "artifact": "<ARTIFACT>",
+            "expected": "unique mesh node names",
+            "message": "Duplicate names are ambiguous during engine import",
+            "rule_id": "nodes.unique",
+            "severity": "PASS"
+          },
+          {
+            "actual": "['SM_pickup_energy_cell_01_LOD0', 'COL_pickup_energy_cell_01']",
+            "artifact": "<ARTIFACT>",
+            "expected": "exactly ['COL_pickup_energy_cell_01', 'SM_pickup_energy_cell_01_LOD0']",
+            "message": "Unexpected or missing mesh nodes are rejected",
+            "rule_id": "nodes.profile",
+            "severity": "PASS"
+          },
+          {
+            "actual": "24 triangles",
+            "artifact": "<ARTIFACT>",
+            "expected": "nonempty triangle geometry",
+            "message": "Actual POSITION and index data decoded",
+            "rule_id": "mesh.nonempty",
+            "severity": "PASS"
+          },
+          {
+            "actual": "present",
+            "artifact": "<ARTIFACT>",
+            "expected": "LOD0 mesh geometry",
+            "message": "LOD0 node must reference nonempty triangles",
+            "rule_id": "lod0.present",
+            "severity": "PASS"
+          },
+          {
+            "actual": "missing",
+            "artifact": "<ARTIFACT>",
+            "expected": "LOD1 optional",
+            "message": "LOD1 is optional for this profile",
+            "rule_id": "lod1.present",
+            "severity": "PASS"
+          },
+          {
+            "actual": "1 collider mesh(es)",
+            "artifact": "<ARTIFACT>",
+            "expected": "axis-aligned box geometry matching visual bounds",
+            "message": "Collider decoded vertices and triangles are checked against visual bounds",
+            "rule_id": "collider.geometry",
+            "severity": "PASS"
+          },
+          {
+            "actual": "12",
+            "artifact": "<ARTIFACT>",
+            "expected": "<= 8000",
+            "message": "LOD0 triangle budget",
+            "rule_id": "geometry.lod0_budget",
+            "severity": "PASS"
+          },
+          {
+            "actual": "0",
+            "artifact": "<ARTIFACT>",
+            "expected": "<= 3000",
+            "message": "LOD1 triangle budget",
+            "rule_id": "geometry.lod1_budget",
+            "severity": "PASS"
+          },
+          {
+            "actual": "1",
+            "artifact": "<ARTIFACT>",
+            "expected": "<= 2",
+            "message": "Declared material count in GLB",
+            "rule_id": "materials.budget",
+            "severity": "PASS"
+          },
+          {
+            "actual": "64",
+            "artifact": "<ARTIFACT>",
+            "expected": "<= 2048px",
+            "message": "Embedded texture dimensions decoded from image bytes",
+            "rule_id": "textures.dimension",
+            "severity": "PASS"
+          },
+          {
+            "actual": "[0.2199999988079071, 0.47999998927116394, 0.2199999988079071]",
+            "artifact": "<ARTIFACT>",
+            "expected": "X/Y/Z = [0.22, 0.48, 0.22]m \u00b1 0.01m",
+            "message": "Dimensions measured from transformed decoded vertices",
+            "rule_id": "scale.bounds",
+            "severity": "PASS"
+          },
+          {
+            "actual": "min=[-0.10999999940395355, -0.23999999463558197, -0.10999999940395355], max=[0.10999999940395355, 0.23999999463558197, 0.10999999940395355]",
+            "artifact": "<ARTIFACT>",
+            "expected": "center",
+            "message": "Origin evaluated from transformed geometry",
+            "rule_id": "origin.policy",
+            "severity": "PASS"
+          },
+          {
+            "actual": "None",
+            "artifact": "<ARTIFACT>",
+            "expected": "LOD1 bounds match LOD0 \u00b1 0.01m",
+            "message": "LOD1 geometry must preserve the visual envelope",
+            "rule_id": "lod1.bounds",
+            "severity": "PASS"
+          },
+          {
+            "actual": "identity",
+            "artifact": "<ARTIFACT>",
+            "expected": "mesh nodes carry no residual transforms; +Y up/-Z front coordinates",
+            "message": "Coordinate convention is checked through node transforms and world-space bounds",
+            "rule_id": "orientation.identity",
+            "severity": "PASS"
+          }
+        ],
+        "status": "PASS",
+        "summary": "Passed with 0 failing rule(s)"
+      },
+      "skin_present": {
+        "findings": [
+          {
+            "actual": "skins/rigging are forbidden by the asset profile",
+            "artifact": "<ARTIFACT>",
+            "expected": "supported safe profile GLB subset",
+            "message": "GLB could not be safely validated",
+            "rule_id": "glb.parse",
+            "severity": "FAIL"
+          }
+        ],
+        "status": "FAIL",
+        "summary": "Failed with 1 failing rule(s)"
+      },
+      "unexpected_lod1": {
+        "findings": [
+          {
+            "actual": "parsed",
+            "artifact": "<ARTIFACT>",
+            "expected": "GLB 2.0 with bounded embedded buffers",
+            "message": "GLB structure and accessors are valid",
+            "rule_id": "glb.parse",
+            "severity": "PASS"
+          },
+          {
+            "actual": "3394e8deca0b25133576ecef0347ad6434f34f19190d6b85851298d5d65ff18e",
+            "artifact": "<ARTIFACT>",
+            "expected": "SHA-256 recorded",
+            "message": "Artifact hash computed",
+            "rule_id": "glb.hash",
+            "severity": "PASS"
+          },
+          {
+            "actual": "['SM_pickup_energy_cell_01_LOD0', 'SM_pickup_energy_cell_01_LOD1', 'COL_pickup_energy_cell_01']",
+            "artifact": "<ARTIFACT>",
+            "expected": "unique mesh node names",
+            "message": "Duplicate names are ambiguous during engine import",
+            "rule_id": "nodes.unique",
+            "severity": "PASS"
+          },
+          {
+            "actual": "['SM_pickup_energy_cell_01_LOD0', 'SM_pickup_energy_cell_01_LOD1', 'COL_pickup_energy_cell_01']",
+            "artifact": "<ARTIFACT>",
+            "expected": "exactly ['COL_pickup_energy_cell_01', 'SM_pickup_energy_cell_01_LOD0']",
+            "message": "Unexpected or missing mesh nodes are rejected",
+            "rule_id": "nodes.profile",
+            "severity": "FAIL"
+          },
+          {
+            "actual": "32 triangles",
+            "artifact": "<ARTIFACT>",
+            "expected": "nonempty triangle geometry",
+            "message": "Actual POSITION and index data decoded",
+            "rule_id": "mesh.nonempty",
+            "severity": "PASS"
+          },
+          {
+            "actual": "present",
+            "artifact": "<ARTIFACT>",
+            "expected": "LOD0 mesh geometry",
+            "message": "LOD0 node must reference nonempty triangles",
+            "rule_id": "lod0.present",
+            "severity": "PASS"
+          },
+          {
+            "actual": "present",
+            "artifact": "<ARTIFACT>",
+            "expected": "LOD1 optional",
+            "message": "LOD1 is optional for this profile",
+            "rule_id": "lod1.present",
+            "severity": "PASS"
+          },
+          {
+            "actual": "1 collider mesh(es)",
+            "artifact": "<ARTIFACT>",
+            "expected": "axis-aligned box geometry matching visual bounds",
+            "message": "Collider decoded vertices and triangles are checked against visual bounds",
+            "rule_id": "collider.geometry",
+            "severity": "PASS"
+          },
+          {
+            "actual": "12",
+            "artifact": "<ARTIFACT>",
+            "expected": "<= 8000",
+            "message": "LOD0 triangle budget",
+            "rule_id": "geometry.lod0_budget",
+            "severity": "PASS"
+          },
+          {
+            "actual": "8",
+            "artifact": "<ARTIFACT>",
+            "expected": "<= 3000",
+            "message": "LOD1 triangle budget",
+            "rule_id": "geometry.lod1_budget",
+            "severity": "PASS"
+          },
+          {
+            "actual": "1",
+            "artifact": "<ARTIFACT>",
+            "expected": "<= 2",
+            "message": "Declared material count in GLB",
+            "rule_id": "materials.budget",
+            "severity": "PASS"
+          },
+          {
+            "actual": "64",
+            "artifact": "<ARTIFACT>",
+            "expected": "<= 2048px",
+            "message": "Embedded texture dimensions decoded from image bytes",
+            "rule_id": "textures.dimension",
+            "severity": "PASS"
+          },
+          {
+            "actual": "[0.2199999988079071, 0.47999998927116394, 0.2199999988079071]",
+            "artifact": "<ARTIFACT>",
+            "expected": "X/Y/Z = [0.22, 0.48, 0.22]m \u00b1 0.01m",
+            "message": "Dimensions measured from transformed decoded vertices",
+            "rule_id": "scale.bounds",
+            "severity": "PASS"
+          },
+          {
+            "actual": "min=[-0.10999999940395355, -0.23999999463558197, -0.10999999940395355], max=[0.10999999940395355, 0.23999999463558197, 0.10999999940395355]",
+            "artifact": "<ARTIFACT>",
+            "expected": "center",
+            "message": "Origin evaluated from transformed geometry",
+            "rule_id": "origin.policy",
+            "severity": "PASS"
+          },
+          {
+            "actual": "((-0.10999999940395355, -0.23999999463558197, -0.10999999940395355),)",
+            "artifact": "<ARTIFACT>",
+            "expected": "LOD1 bounds match LOD0 \u00b1 0.01m",
+            "message": "LOD1 geometry must preserve the visual envelope",
+            "rule_id": "lod1.bounds",
+            "severity": "PASS"
+          },
+          {
+            "actual": "identity",
+            "artifact": "<ARTIFACT>",
+            "expected": "mesh nodes carry no residual transforms; +Y up/-Z front coordinates",
+            "message": "Coordinate convention is checked through node transforms and world-space bounds",
+            "rule_id": "orientation.identity",
+            "severity": "PASS"
+          }
+        ],
+        "status": "FAIL",
+        "summary": "Failed with 1 failing rule(s)"
+      },
+      "wrong_origin": {
+        "findings": [
+          {
+            "actual": "parsed",
+            "artifact": "<ARTIFACT>",
+            "expected": "GLB 2.0 with bounded embedded buffers",
+            "message": "GLB structure and accessors are valid",
+            "rule_id": "glb.parse",
+            "severity": "PASS"
+          },
+          {
+            "actual": "01939c987b481b1faf38a6d276430f6e4dc02227db6eb57afc51113ed12a48f2",
+            "artifact": "<ARTIFACT>",
+            "expected": "SHA-256 recorded",
+            "message": "Artifact hash computed",
+            "rule_id": "glb.hash",
+            "severity": "PASS"
+          },
+          {
+            "actual": "['SM_pickup_energy_cell_01_LOD0', 'COL_pickup_energy_cell_01']",
+            "artifact": "<ARTIFACT>",
+            "expected": "unique mesh node names",
+            "message": "Duplicate names are ambiguous during engine import",
+            "rule_id": "nodes.unique",
+            "severity": "PASS"
+          },
+          {
+            "actual": "['SM_pickup_energy_cell_01_LOD0', 'COL_pickup_energy_cell_01']",
+            "artifact": "<ARTIFACT>",
+            "expected": "exactly ['COL_pickup_energy_cell_01', 'SM_pickup_energy_cell_01_LOD0']",
+            "message": "Unexpected or missing mesh nodes are rejected",
+            "rule_id": "nodes.profile",
+            "severity": "PASS"
+          },
+          {
+            "actual": "24 triangles",
+            "artifact": "<ARTIFACT>",
+            "expected": "nonempty triangle geometry",
+            "message": "Actual POSITION and index data decoded",
+            "rule_id": "mesh.nonempty",
+            "severity": "PASS"
+          },
+          {
+            "actual": "present",
+            "artifact": "<ARTIFACT>",
+            "expected": "LOD0 mesh geometry",
+            "message": "LOD0 node must reference nonempty triangles",
+            "rule_id": "lod0.present",
+            "severity": "PASS"
+          },
+          {
+            "actual": "missing",
+            "artifact": "<ARTIFACT>",
+            "expected": "LOD1 optional",
+            "message": "LOD1 is optional for this profile",
+            "rule_id": "lod1.present",
+            "severity": "PASS"
+          },
+          {
+            "actual": "1 collider mesh(es)",
+            "artifact": "<ARTIFACT>",
+            "expected": "axis-aligned box geometry matching visual bounds",
+            "message": "Collider decoded vertices and triangles are checked against visual bounds",
+            "rule_id": "collider.geometry",
+            "severity": "PASS"
+          },
+          {
+            "actual": "12",
+            "artifact": "<ARTIFACT>",
+            "expected": "<= 8000",
+            "message": "LOD0 triangle budget",
+            "rule_id": "geometry.lod0_budget",
+            "severity": "PASS"
+          },
+          {
+            "actual": "0",
+            "artifact": "<ARTIFACT>",
+            "expected": "<= 3000",
+            "message": "LOD1 triangle budget",
+            "rule_id": "geometry.lod1_budget",
+            "severity": "PASS"
+          },
+          {
+            "actual": "1",
+            "artifact": "<ARTIFACT>",
+            "expected": "<= 2",
+            "message": "Declared material count in GLB",
+            "rule_id": "materials.budget",
+            "severity": "PASS"
+          },
+          {
+            "actual": "64",
+            "artifact": "<ARTIFACT>",
+            "expected": "<= 2048px",
+            "message": "Embedded texture dimensions decoded from image bytes",
+            "rule_id": "textures.dimension",
+            "severity": "PASS"
+          },
+          {
+            "actual": "[0.2199999988079071, 0.47999998927116394, 0.2199999988079071]",
+            "artifact": "<ARTIFACT>",
+            "expected": "X/Y/Z = [0.22, 0.48, 0.22]m \u00b1 0.01m",
+            "message": "Dimensions measured from transformed decoded vertices",
+            "rule_id": "scale.bounds",
+            "severity": "PASS"
+          },
+          {
+            "actual": "min=[-0.10999999940395355, 0.0, -0.10999999940395355], max=[0.10999999940395355, 0.47999998927116394, 0.10999999940395355]",
+            "artifact": "<ARTIFACT>",
+            "expected": "center",
+            "message": "Origin evaluated from transformed geometry",
+            "rule_id": "origin.policy",
+            "severity": "FAIL"
+          },
+          {
+            "actual": "None",
+            "artifact": "<ARTIFACT>",
+            "expected": "LOD1 bounds match LOD0 \u00b1 0.01m",
+            "message": "LOD1 geometry must preserve the visual envelope",
+            "rule_id": "lod1.bounds",
+            "severity": "PASS"
+          },
+          {
+            "actual": "identity",
+            "artifact": "<ARTIFACT>",
+            "expected": "mesh nodes carry no residual transforms; +Y up/-Z front coordinates",
+            "message": "Coordinate convention is checked through node transforms and world-space bounds",
+            "rule_id": "orientation.identity",
+            "severity": "PASS"
+          }
+        ],
+        "status": "FAIL",
+        "summary": "Failed with 1 failing rule(s)"
+      }
+    },
+    "static_prop": {
+      "animation_present": {
+        "findings": [
+          {
+            "actual": "animations are forbidden by the asset profile",
+            "artifact": "<ARTIFACT>",
+            "expected": "supported safe profile GLB subset",
+            "message": "GLB could not be safely validated",
+            "rule_id": "glb.parse",
+            "severity": "FAIL"
+          }
+        ],
+        "status": "FAIL",
+        "summary": "Failed with 1 failing rule(s)"
+      },
+      "collider_mismatch": {
+        "findings": [
+          {
+            "actual": "parsed",
+            "artifact": "<ARTIFACT>",
+            "expected": "GLB 2.0 with bounded embedded buffers",
+            "message": "GLB structure and accessors are valid",
+            "rule_id": "glb.parse",
+            "severity": "PASS"
+          },
+          {
+            "actual": "30b62d844d83a17342280172e81d12994e9d75d6a958e303f16ca6bb9813f6f1",
+            "artifact": "<ARTIFACT>",
+            "expected": "SHA-256 recorded",
+            "message": "Artifact hash computed",
+            "rule_id": "glb.hash",
+            "severity": "PASS"
+          },
+          {
+            "actual": "['SM_prop_energy_crate_01_LOD0', 'SM_prop_energy_crate_01_LOD1']",
+            "artifact": "<ARTIFACT>",
+            "expected": "unique mesh node names",
+            "message": "Duplicate names are ambiguous during engine import",
+            "rule_id": "nodes.unique",
+            "severity": "PASS"
+          },
+          {
+            "actual": "['SM_prop_energy_crate_01_LOD0', 'SM_prop_energy_crate_01_LOD1']",
+            "artifact": "<ARTIFACT>",
+            "expected": "exactly ['COL_prop_energy_crate_01', 'SM_prop_energy_crate_01_LOD0', 'SM_prop_energy_crate_01_LOD1']",
+            "message": "Unexpected or missing mesh nodes are rejected",
+            "rule_id": "nodes.profile",
+            "severity": "FAIL"
+          },
+          {
+            "actual": "20 triangles",
+            "artifact": "<ARTIFACT>",
+            "expected": "nonempty triangle geometry",
+            "message": "Actual POSITION and index data decoded",
+            "rule_id": "mesh.nonempty",
+            "severity": "PASS"
+          },
+          {
+            "actual": "present",
+            "artifact": "<ARTIFACT>",
+            "expected": "LOD0 mesh geometry",
+            "message": "LOD0 node must reference nonempty triangles",
+            "rule_id": "lod0.present",
+            "severity": "PASS"
+          },
+          {
+            "actual": "present",
+            "artifact": "<ARTIFACT>",
+            "expected": "LOD1 mesh geometry",
+            "message": "LOD1 is required by the profile contract",
+            "rule_id": "lod1.present",
+            "severity": "PASS"
+          },
+          {
+            "actual": "0 collider mesh(es)",
+            "artifact": "<ARTIFACT>",
+            "expected": "axis-aligned box geometry matching visual bounds",
+            "message": "Collider decoded vertices and triangles are checked against visual bounds",
+            "rule_id": "collider.geometry",
+            "severity": "FAIL"
+          },
+          {
+            "actual": "12",
+            "artifact": "<ARTIFACT>",
+            "expected": "<= 20000",
+            "message": "LOD0 triangle budget",
+            "rule_id": "geometry.lod0_budget",
+            "severity": "PASS"
+          },
+          {
+            "actual": "8",
+            "artifact": "<ARTIFACT>",
+            "expected": "<= 10000",
+            "message": "LOD1 triangle budget",
+            "rule_id": "geometry.lod1_budget",
+            "severity": "PASS"
+          },
+          {
+            "actual": "1",
+            "artifact": "<ARTIFACT>",
+            "expected": "<= 2",
+            "message": "Declared material count in GLB",
+            "rule_id": "materials.budget",
+            "severity": "PASS"
+          },
+          {
+            "actual": "64",
+            "artifact": "<ARTIFACT>",
+            "expected": "<= 2048px",
+            "message": "Embedded texture dimensions decoded from image bytes",
+            "rule_id": "textures.dimension",
+            "severity": "PASS"
+          },
+          {
+            "actual": "[1.2000000476837158, 1.0, 1.0]",
+            "artifact": "<ARTIFACT>",
+            "expected": "X/Y/Z = [1.2, 1.0, 1.0]m \u00b1 0.01m",
+            "message": "Dimensions measured from transformed decoded vertices",
+            "rule_id": "scale.bounds",
+            "severity": "PASS"
+          },
+          {
+            "actual": "min=[-0.6000000238418579, 0.0, -0.5], max=[0.6000000238418579, 1.0, 0.5]",
+            "artifact": "<ARTIFACT>",
+            "expected": "bottom_center",
+            "message": "Origin evaluated from transformed geometry",
+            "rule_id": "origin.policy",
+            "severity": "PASS"
+          },
+          {
+            "actual": "((-0.6000000238418579, 0.0, -0.5),)",
+            "artifact": "<ARTIFACT>",
+            "expected": "LOD1 bounds match LOD0 \u00b1 0.01m",
+            "message": "LOD1 geometry must preserve the visual envelope",
+            "rule_id": "lod1.bounds",
+            "severity": "PASS"
+          },
+          {
+            "actual": "identity",
+            "artifact": "<ARTIFACT>",
+            "expected": "mesh nodes carry no residual transforms; +Y up/-Z front coordinates",
+            "message": "Coordinate convention is checked through node transforms and world-space bounds",
+            "rule_id": "orientation.identity",
+            "severity": "PASS"
+          }
+        ],
+        "status": "FAIL",
+        "summary": "Failed with 2 failing rule(s)"
+      },
+      "missing_lod1": {
+        "findings": [
+          {
+            "actual": "parsed",
+            "artifact": "<ARTIFACT>",
+            "expected": "GLB 2.0 with bounded embedded buffers",
+            "message": "GLB structure and accessors are valid",
+            "rule_id": "glb.parse",
+            "severity": "PASS"
+          },
+          {
+            "actual": "287193ca07b89eccbbb5cb2f9b7b6016bbf35e94fa8ee509352c2b60981224b9",
+            "artifact": "<ARTIFACT>",
+            "expected": "SHA-256 recorded",
+            "message": "Artifact hash computed",
+            "rule_id": "glb.hash",
+            "severity": "PASS"
+          },
+          {
+            "actual": "['SM_prop_energy_crate_01_LOD0', 'COL_prop_energy_crate_01']",
+            "artifact": "<ARTIFACT>",
+            "expected": "unique mesh node names",
+            "message": "Duplicate names are ambiguous during engine import",
+            "rule_id": "nodes.unique",
+            "severity": "PASS"
+          },
+          {
+            "actual": "['SM_prop_energy_crate_01_LOD0', 'COL_prop_energy_crate_01']",
+            "artifact": "<ARTIFACT>",
+            "expected": "exactly ['COL_prop_energy_crate_01', 'SM_prop_energy_crate_01_LOD0', 'SM_prop_energy_crate_01_LOD1']",
+            "message": "Unexpected or missing mesh nodes are rejected",
+            "rule_id": "nodes.profile",
+            "severity": "FAIL"
+          },
+          {
+            "actual": "24 triangles",
+            "artifact": "<ARTIFACT>",
+            "expected": "nonempty triangle geometry",
+            "message": "Actual POSITION and index data decoded",
+            "rule_id": "mesh.nonempty",
+            "severity": "PASS"
+          },
+          {
+            "actual": "present",
+            "artifact": "<ARTIFACT>",
+            "expected": "LOD0 mesh geometry",
+            "message": "LOD0 node must reference nonempty triangles",
+            "rule_id": "lod0.present",
+            "severity": "PASS"
+          },
+          {
+            "actual": "missing",
+            "artifact": "<ARTIFACT>",
+            "expected": "LOD1 mesh geometry",
+            "message": "LOD1 is required by the profile contract",
+            "rule_id": "lod1.present",
+            "severity": "FAIL"
+          },
+          {
+            "actual": "1 collider mesh(es)",
+            "artifact": "<ARTIFACT>",
+            "expected": "axis-aligned box geometry matching visual bounds",
+            "message": "Collider decoded vertices and triangles are checked against visual bounds",
+            "rule_id": "collider.geometry",
+            "severity": "PASS"
+          },
+          {
+            "actual": "12",
+            "artifact": "<ARTIFACT>",
+            "expected": "<= 20000",
+            "message": "LOD0 triangle budget",
+            "rule_id": "geometry.lod0_budget",
+            "severity": "PASS"
+          },
+          {
+            "actual": "0",
+            "artifact": "<ARTIFACT>",
+            "expected": "<= 10000",
+            "message": "LOD1 triangle budget",
+            "rule_id": "geometry.lod1_budget",
+            "severity": "PASS"
+          },
+          {
+            "actual": "1",
+            "artifact": "<ARTIFACT>",
+            "expected": "<= 2",
+            "message": "Declared material count in GLB",
+            "rule_id": "materials.budget",
+            "severity": "PASS"
+          },
+          {
+            "actual": "64",
+            "artifact": "<ARTIFACT>",
+            "expected": "<= 2048px",
+            "message": "Embedded texture dimensions decoded from image bytes",
+            "rule_id": "textures.dimension",
+            "severity": "PASS"
+          },
+          {
+            "actual": "[1.2000000476837158, 1.0, 1.0]",
+            "artifact": "<ARTIFACT>",
+            "expected": "X/Y/Z = [1.2, 1.0, 1.0]m \u00b1 0.01m",
+            "message": "Dimensions measured from transformed decoded vertices",
+            "rule_id": "scale.bounds",
+            "severity": "PASS"
+          },
+          {
+            "actual": "min=[-0.6000000238418579, 0.0, -0.5], max=[0.6000000238418579, 1.0, 0.5]",
+            "artifact": "<ARTIFACT>",
+            "expected": "bottom_center",
+            "message": "Origin evaluated from transformed geometry",
+            "rule_id": "origin.policy",
+            "severity": "PASS"
+          },
+          {
+            "actual": "None",
+            "artifact": "<ARTIFACT>",
+            "expected": "LOD1 bounds match LOD0 \u00b1 0.01m",
+            "message": "LOD1 geometry must preserve the visual envelope",
+            "rule_id": "lod1.bounds",
+            "severity": "FAIL"
+          },
+          {
+            "actual": "identity",
+            "artifact": "<ARTIFACT>",
+            "expected": "mesh nodes carry no residual transforms; +Y up/-Z front coordinates",
+            "message": "Coordinate convention is checked through node transforms and world-space bounds",
+            "rule_id": "orientation.identity",
+            "severity": "PASS"
+          }
+        ],
+        "status": "FAIL",
+        "summary": "Failed with 3 failing rule(s)"
+      },
+      "non_identity_transform": {
+        "findings": [
+          {
+            "actual": "parsed",
+            "artifact": "<ARTIFACT>",
+            "expected": "GLB 2.0 with bounded embedded buffers",
+            "message": "GLB structure and accessors are valid",
+            "rule_id": "glb.parse",
+            "severity": "PASS"
+          },
+          {
+            "actual": "76c2f6fb46d7994441fc1b32378ede2b7fc9ad42dd7d05a16c1cb3c09d52009a",
+            "artifact": "<ARTIFACT>",
+            "expected": "SHA-256 recorded",
+            "message": "Artifact hash computed",
+            "rule_id": "glb.hash",
+            "severity": "PASS"
+          },
+          {
+            "actual": "['SM_prop_energy_crate_01_LOD0', 'SM_prop_energy_crate_01_LOD1', 'COL_prop_energy_crate_01']",
+            "artifact": "<ARTIFACT>",
+            "expected": "unique mesh node names",
+            "message": "Duplicate names are ambiguous during engine import",
+            "rule_id": "nodes.unique",
+            "severity": "PASS"
+          },
+          {
+            "actual": "['SM_prop_energy_crate_01_LOD0', 'SM_prop_energy_crate_01_LOD1', 'COL_prop_energy_crate_01']",
+            "artifact": "<ARTIFACT>",
+            "expected": "exactly ['COL_prop_energy_crate_01', 'SM_prop_energy_crate_01_LOD0', 'SM_prop_energy_crate_01_LOD1']",
+            "message": "Unexpected or missing mesh nodes are rejected",
+            "rule_id": "nodes.profile",
+            "severity": "PASS"
+          },
+          {
+            "actual": "32 triangles",
+            "artifact": "<ARTIFACT>",
+            "expected": "nonempty triangle geometry",
+            "message": "Actual POSITION and index data decoded",
+            "rule_id": "mesh.nonempty",
+            "severity": "PASS"
+          },
+          {
+            "actual": "present",
+            "artifact": "<ARTIFACT>",
+            "expected": "LOD0 mesh geometry",
+            "message": "LOD0 node must reference nonempty triangles",
+            "rule_id": "lod0.present",
+            "severity": "PASS"
+          },
+          {
+            "actual": "present",
+            "artifact": "<ARTIFACT>",
+            "expected": "LOD1 mesh geometry",
+            "message": "LOD1 is required by the profile contract",
+            "rule_id": "lod1.present",
+            "severity": "PASS"
+          },
+          {
+            "actual": "1 collider mesh(es)",
+            "artifact": "<ARTIFACT>",
+            "expected": "axis-aligned box geometry matching visual bounds",
+            "message": "Collider decoded vertices and triangles are checked against visual bounds",
+            "rule_id": "collider.geometry",
+            "severity": "FAIL"
+          },
+          {
+            "actual": "12",
+            "artifact": "<ARTIFACT>",
+            "expected": "<= 20000",
+            "message": "LOD0 triangle budget",
+            "rule_id": "geometry.lod0_budget",
+            "severity": "PASS"
+          },
+          {
+            "actual": "8",
+            "artifact": "<ARTIFACT>",
+            "expected": "<= 10000",
+            "message": "LOD1 triangle budget",
+            "rule_id": "geometry.lod1_budget",
+            "severity": "PASS"
+          },
+          {
+            "actual": "1",
+            "artifact": "<ARTIFACT>",
+            "expected": "<= 2",
+            "message": "Declared material count in GLB",
+            "rule_id": "materials.budget",
+            "severity": "PASS"
+          },
+          {
+            "actual": "64",
+            "artifact": "<ARTIFACT>",
+            "expected": "<= 2048px",
+            "message": "Embedded texture dimensions decoded from image bytes",
+            "rule_id": "textures.dimension",
+            "severity": "PASS"
+          },
+          {
+            "actual": "[1.2000000476837158, 1.0, 1.0]",
+            "artifact": "<ARTIFACT>",
+            "expected": "X/Y/Z = [1.2, 1.0, 1.0]m \u00b1 0.01m",
+            "message": "Dimensions measured from transformed decoded vertices",
+            "rule_id": "scale.bounds",
+            "severity": "PASS"
+          },
+          {
+            "actual": "min=[-0.6000000238418579, 1.0, -0.5], max=[0.6000000238418579, 2.0, 0.5]",
+            "artifact": "<ARTIFACT>",
+            "expected": "bottom_center",
+            "message": "Origin evaluated from transformed geometry",
+            "rule_id": "origin.policy",
+            "severity": "FAIL"
+          },
+          {
+            "actual": "((-0.6000000238418579, 0.0, -0.5),)",
+            "artifact": "<ARTIFACT>",
+            "expected": "LOD1 bounds match LOD0 \u00b1 0.01m",
+            "message": "LOD1 geometry must preserve the visual envelope",
+            "rule_id": "lod1.bounds",
+            "severity": "FAIL"
+          },
+          {
+            "actual": "non-identity transform",
+            "artifact": "<ARTIFACT>",
+            "expected": "mesh nodes carry no residual transforms; +Y up/-Z front coordinates",
+            "message": "Coordinate convention is checked through node transforms and world-space bounds",
+            "rule_id": "orientation.identity",
+            "severity": "FAIL"
+          }
+        ],
+        "status": "FAIL",
+        "summary": "Failed with 4 failing rule(s)"
+      },
+      "over_budget": {
+        "findings": [
+          {
+            "actual": "parsed",
+            "artifact": "<ARTIFACT>",
+            "expected": "GLB 2.0 with bounded embedded buffers",
+            "message": "GLB structure and accessors are valid",
+            "rule_id": "glb.parse",
+            "severity": "PASS"
+          },
+          {
+            "actual": "becf869da8c0835a65fd8b73844547d599f415c8ff8a213bf39c82a0c682cd10",
+            "artifact": "<ARTIFACT>",
+            "expected": "SHA-256 recorded",
+            "message": "Artifact hash computed",
+            "rule_id": "glb.hash",
+            "severity": "PASS"
+          },
+          {
+            "actual": "['SM_prop_energy_crate_01_LOD0', 'SM_prop_energy_crate_01_LOD1', 'COL_prop_energy_crate_01']",
+            "artifact": "<ARTIFACT>",
+            "expected": "unique mesh node names",
+            "message": "Duplicate names are ambiguous during engine import",
+            "rule_id": "nodes.unique",
+            "severity": "PASS"
+          },
+          {
+            "actual": "['SM_prop_energy_crate_01_LOD0', 'SM_prop_energy_crate_01_LOD1', 'COL_prop_energy_crate_01']",
+            "artifact": "<ARTIFACT>",
+            "expected": "exactly ['COL_prop_energy_crate_01', 'SM_prop_energy_crate_01_LOD0', 'SM_prop_energy_crate_01_LOD1']",
+            "message": "Unexpected or missing mesh nodes are rejected",
+            "rule_id": "nodes.profile",
+            "severity": "PASS"
+          },
+          {
+            "actual": "56 triangles",
+            "artifact": "<ARTIFACT>",
+            "expected": "nonempty triangle geometry",
+            "message": "Actual POSITION and index data decoded",
+            "rule_id": "mesh.nonempty",
+            "severity": "PASS"
+          },
+          {
+            "actual": "present",
+            "artifact": "<ARTIFACT>",
+            "expected": "LOD0 mesh geometry",
+            "message": "LOD0 node must reference nonempty triangles",
+            "rule_id": "lod0.present",
+            "severity": "PASS"
+          },
+          {
+            "actual": "present",
+            "artifact": "<ARTIFACT>",
+            "expected": "LOD1 mesh geometry",
+            "message": "LOD1 is required by the profile contract",
+            "rule_id": "lod1.present",
+            "severity": "PASS"
+          },
+          {
+            "actual": "1 collider mesh(es)",
+            "artifact": "<ARTIFACT>",
+            "expected": "axis-aligned box geometry matching visual bounds",
+            "message": "Collider decoded vertices and triangles are checked against visual bounds",
+            "rule_id": "collider.geometry",
+            "severity": "PASS"
+          },
+          {
+            "actual": "36",
+            "artifact": "<ARTIFACT>",
+            "expected": "<= 20000",
+            "message": "LOD0 triangle budget",
+            "rule_id": "geometry.lod0_budget",
+            "severity": "PASS"
+          },
+          {
+            "actual": "8",
+            "artifact": "<ARTIFACT>",
+            "expected": "<= 10000",
+            "message": "LOD1 triangle budget",
+            "rule_id": "geometry.lod1_budget",
+            "severity": "PASS"
+          },
+          {
+            "actual": "3",
+            "artifact": "<ARTIFACT>",
+            "expected": "<= 2",
+            "message": "Declared material count in GLB",
+            "rule_id": "materials.budget",
+            "severity": "FAIL"
+          },
+          {
+            "actual": "4096",
+            "artifact": "<ARTIFACT>",
+            "expected": "<= 2048px",
+            "message": "Embedded texture dimensions decoded from image bytes",
+            "rule_id": "textures.dimension",
+            "severity": "FAIL"
+          },
+          {
+            "actual": "[1.2000000476837158, 1.0, 1.0]",
+            "artifact": "<ARTIFACT>",
+            "expected": "X/Y/Z = [1.2, 1.0, 1.0]m \u00b1 0.01m",
+            "message": "Dimensions measured from transformed decoded vertices",
+            "rule_id": "scale.bounds",
+            "severity": "PASS"
+          },
+          {
+            "actual": "min=[-0.6000000238418579, 0.0, -0.5], max=[0.6000000238418579, 1.0, 0.5]",
+            "artifact": "<ARTIFACT>",
+            "expected": "bottom_center",
+            "message": "Origin evaluated from transformed geometry",
+            "rule_id": "origin.policy",
+            "severity": "PASS"
+          },
+          {
+            "actual": "((-0.6000000238418579, 0.0, -0.5),)",
+            "artifact": "<ARTIFACT>",
+            "expected": "LOD1 bounds match LOD0 \u00b1 0.01m",
+            "message": "LOD1 geometry must preserve the visual envelope",
+            "rule_id": "lod1.bounds",
+            "severity": "PASS"
+          },
+          {
+            "actual": "identity",
+            "artifact": "<ARTIFACT>",
+            "expected": "mesh nodes carry no residual transforms; +Y up/-Z front coordinates",
+            "message": "Coordinate convention is checked through node transforms and world-space bounds",
+            "rule_id": "orientation.identity",
+            "severity": "PASS"
+          }
+        ],
+        "status": "FAIL",
+        "summary": "Failed with 2 failing rule(s)"
+      },
+      "pass": {
+        "findings": [
+          {
+            "actual": "parsed",
+            "artifact": "<ARTIFACT>",
+            "expected": "GLB 2.0 with bounded embedded buffers",
+            "message": "GLB structure and accessors are valid",
+            "rule_id": "glb.parse",
+            "severity": "PASS"
+          },
+          {
+            "actual": "b928c5fc40a476a18f8d5d914eb5c5623e3fc61733e5b1aa53b779c98fe35bc4",
+            "artifact": "<ARTIFACT>",
+            "expected": "SHA-256 recorded",
+            "message": "Artifact hash computed",
+            "rule_id": "glb.hash",
+            "severity": "PASS"
+          },
+          {
+            "actual": "['SM_prop_energy_crate_01_LOD0', 'SM_prop_energy_crate_01_LOD1', 'COL_prop_energy_crate_01']",
+            "artifact": "<ARTIFACT>",
+            "expected": "unique mesh node names",
+            "message": "Duplicate names are ambiguous during engine import",
+            "rule_id": "nodes.unique",
+            "severity": "PASS"
+          },
+          {
+            "actual": "['SM_prop_energy_crate_01_LOD0', 'SM_prop_energy_crate_01_LOD1', 'COL_prop_energy_crate_01']",
+            "artifact": "<ARTIFACT>",
+            "expected": "exactly ['COL_prop_energy_crate_01', 'SM_prop_energy_crate_01_LOD0', 'SM_prop_energy_crate_01_LOD1']",
+            "message": "Unexpected or missing mesh nodes are rejected",
+            "rule_id": "nodes.profile",
+            "severity": "PASS"
+          },
+          {
+            "actual": "32 triangles",
+            "artifact": "<ARTIFACT>",
+            "expected": "nonempty triangle geometry",
+            "message": "Actual POSITION and index data decoded",
+            "rule_id": "mesh.nonempty",
+            "severity": "PASS"
+          },
+          {
+            "actual": "present",
+            "artifact": "<ARTIFACT>",
+            "expected": "LOD0 mesh geometry",
+            "message": "LOD0 node must reference nonempty triangles",
+            "rule_id": "lod0.present",
+            "severity": "PASS"
+          },
+          {
+            "actual": "present",
+            "artifact": "<ARTIFACT>",
+            "expected": "LOD1 mesh geometry",
+            "message": "LOD1 is required by the profile contract",
+            "rule_id": "lod1.present",
+            "severity": "PASS"
+          },
+          {
+            "actual": "1 collider mesh(es)",
+            "artifact": "<ARTIFACT>",
+            "expected": "axis-aligned box geometry matching visual bounds",
+            "message": "Collider decoded vertices and triangles are checked against visual bounds",
+            "rule_id": "collider.geometry",
+            "severity": "PASS"
+          },
+          {
+            "actual": "12",
+            "artifact": "<ARTIFACT>",
+            "expected": "<= 20000",
+            "message": "LOD0 triangle budget",
+            "rule_id": "geometry.lod0_budget",
+            "severity": "PASS"
+          },
+          {
+            "actual": "8",
+            "artifact": "<ARTIFACT>",
+            "expected": "<= 10000",
+            "message": "LOD1 triangle budget",
+            "rule_id": "geometry.lod1_budget",
+            "severity": "PASS"
+          },
+          {
+            "actual": "1",
+            "artifact": "<ARTIFACT>",
+            "expected": "<= 2",
+            "message": "Declared material count in GLB",
+            "rule_id": "materials.budget",
+            "severity": "PASS"
+          },
+          {
+            "actual": "64",
+            "artifact": "<ARTIFACT>",
+            "expected": "<= 2048px",
+            "message": "Embedded texture dimensions decoded from image bytes",
+            "rule_id": "textures.dimension",
+            "severity": "PASS"
+          },
+          {
+            "actual": "[1.2000000476837158, 1.0, 1.0]",
+            "artifact": "<ARTIFACT>",
+            "expected": "X/Y/Z = [1.2, 1.0, 1.0]m \u00b1 0.01m",
+            "message": "Dimensions measured from transformed decoded vertices",
+            "rule_id": "scale.bounds",
+            "severity": "PASS"
+          },
+          {
+            "actual": "min=[-0.6000000238418579, 0.0, -0.5], max=[0.6000000238418579, 1.0, 0.5]",
+            "artifact": "<ARTIFACT>",
+            "expected": "bottom_center",
+            "message": "Origin evaluated from transformed geometry",
+            "rule_id": "origin.policy",
+            "severity": "PASS"
+          },
+          {
+            "actual": "((-0.6000000238418579, 0.0, -0.5),)",
+            "artifact": "<ARTIFACT>",
+            "expected": "LOD1 bounds match LOD0 \u00b1 0.01m",
+            "message": "LOD1 geometry must preserve the visual envelope",
+            "rule_id": "lod1.bounds",
+            "severity": "PASS"
+          },
+          {
+            "actual": "identity",
+            "artifact": "<ARTIFACT>",
+            "expected": "mesh nodes carry no residual transforms; +Y up/-Z front coordinates",
+            "message": "Coordinate convention is checked through node transforms and world-space bounds",
+            "rule_id": "orientation.identity",
+            "severity": "PASS"
+          }
+        ],
+        "status": "PASS",
+        "summary": "Passed with 0 failing rule(s)"
+      },
+      "skin_present": {
+        "findings": [
+          {
+            "actual": "skins/rigging are forbidden by the asset profile",
+            "artifact": "<ARTIFACT>",
+            "expected": "supported safe profile GLB subset",
+            "message": "GLB could not be safely validated",
+            "rule_id": "glb.parse",
+            "severity": "FAIL"
+          }
+        ],
+        "status": "FAIL",
+        "summary": "Failed with 1 failing rule(s)"
+      },
+      "wrong_origin": {
+        "findings": [
+          {
+            "actual": "parsed",
+            "artifact": "<ARTIFACT>",
+            "expected": "GLB 2.0 with bounded embedded buffers",
+            "message": "GLB structure and accessors are valid",
+            "rule_id": "glb.parse",
+            "severity": "PASS"
+          },
+          {
+            "actual": "6f7bf193cc414c3d0c7c3186245d4186a2e16ff097e343bb1202f215d0c9ef17",
+            "artifact": "<ARTIFACT>",
+            "expected": "SHA-256 recorded",
+            "message": "Artifact hash computed",
+            "rule_id": "glb.hash",
+            "severity": "PASS"
+          },
+          {
+            "actual": "['SM_prop_energy_crate_01_LOD0', 'SM_prop_energy_crate_01_LOD1', 'COL_prop_energy_crate_01']",
+            "artifact": "<ARTIFACT>",
+            "expected": "unique mesh node names",
+            "message": "Duplicate names are ambiguous during engine import",
+            "rule_id": "nodes.unique",
+            "severity": "PASS"
+          },
+          {
+            "actual": "['SM_prop_energy_crate_01_LOD0', 'SM_prop_energy_crate_01_LOD1', 'COL_prop_energy_crate_01']",
+            "artifact": "<ARTIFACT>",
+            "expected": "exactly ['COL_prop_energy_crate_01', 'SM_prop_energy_crate_01_LOD0', 'SM_prop_energy_crate_01_LOD1']",
+            "message": "Unexpected or missing mesh nodes are rejected",
+            "rule_id": "nodes.profile",
+            "severity": "PASS"
+          },
+          {
+            "actual": "32 triangles",
+            "artifact": "<ARTIFACT>",
+            "expected": "nonempty triangle geometry",
+            "message": "Actual POSITION and index data decoded",
+            "rule_id": "mesh.nonempty",
+            "severity": "PASS"
+          },
+          {
+            "actual": "present",
+            "artifact": "<ARTIFACT>",
+            "expected": "LOD0 mesh geometry",
+            "message": "LOD0 node must reference nonempty triangles",
+            "rule_id": "lod0.present",
+            "severity": "PASS"
+          },
+          {
+            "actual": "present",
+            "artifact": "<ARTIFACT>",
+            "expected": "LOD1 mesh geometry",
+            "message": "LOD1 is required by the profile contract",
+            "rule_id": "lod1.present",
+            "severity": "PASS"
+          },
+          {
+            "actual": "1 collider mesh(es)",
+            "artifact": "<ARTIFACT>",
+            "expected": "axis-aligned box geometry matching visual bounds",
+            "message": "Collider decoded vertices and triangles are checked against visual bounds",
+            "rule_id": "collider.geometry",
+            "severity": "PASS"
+          },
+          {
+            "actual": "12",
+            "artifact": "<ARTIFACT>",
+            "expected": "<= 20000",
+            "message": "LOD0 triangle budget",
+            "rule_id": "geometry.lod0_budget",
+            "severity": "PASS"
+          },
+          {
+            "actual": "8",
+            "artifact": "<ARTIFACT>",
+            "expected": "<= 10000",
+            "message": "LOD1 triangle budget",
+            "rule_id": "geometry.lod1_budget",
+            "severity": "PASS"
+          },
+          {
+            "actual": "1",
+            "artifact": "<ARTIFACT>",
+            "expected": "<= 2",
+            "message": "Declared material count in GLB",
+            "rule_id": "materials.budget",
+            "severity": "PASS"
+          },
+          {
+            "actual": "64",
+            "artifact": "<ARTIFACT>",
+            "expected": "<= 2048px",
+            "message": "Embedded texture dimensions decoded from image bytes",
+            "rule_id": "textures.dimension",
+            "severity": "PASS"
+          },
+          {
+            "actual": "[1.2000000476837158, 1.0, 1.0]",
+            "artifact": "<ARTIFACT>",
+            "expected": "X/Y/Z = [1.2, 1.0, 1.0]m \u00b1 0.01m",
+            "message": "Dimensions measured from transformed decoded vertices",
+            "rule_id": "scale.bounds",
+            "severity": "PASS"
+          },
+          {
+            "actual": "min=[-0.6000000238418579, -0.5, -0.5], max=[0.6000000238418579, 0.5, 0.5]",
+            "artifact": "<ARTIFACT>",
+            "expected": "bottom_center",
+            "message": "Origin evaluated from transformed geometry",
+            "rule_id": "origin.policy",
+            "severity": "FAIL"
+          },
+          {
+            "actual": "((-0.6000000238418579, -0.5, -0.5),)",
+            "artifact": "<ARTIFACT>",
+            "expected": "LOD1 bounds match LOD0 \u00b1 0.01m",
+            "message": "LOD1 geometry must preserve the visual envelope",
+            "rule_id": "lod1.bounds",
+            "severity": "PASS"
+          },
+          {
+            "actual": "identity",
+            "artifact": "<ARTIFACT>",
+            "expected": "mesh nodes carry no residual transforms; +Y up/-Z front coordinates",
+            "message": "Coordinate convention is checked through node transforms and world-space bounds",
+            "rule_id": "orientation.identity",
+            "severity": "PASS"
+          }
+        ],
+        "status": "FAIL",
+        "summary": "Failed with 1 failing rule(s)"
+      }
+    }
+  },
+  "profile_contracts": {
+    "modular_piece": {
+      "capture_request_profile": {
+        "body_kind": "static_body",
+        "framing": {
+          "fov_degrees": 38.0,
+          "margin_fraction": 0.04,
+          "max_screen_fraction": 0.75,
+          "min_screen_fraction": 0.5,
+          "target_screen_fraction": 0.62
+        },
+        "profile_id": "modular_piece",
+        "profile_version": 1,
+        "require_area": false,
+        "require_ray_hit": true,
+        "review_views": [
+          "front",
+          "side",
+          "three_quarter"
+        ],
+        "scene": {
+          "body_kind": "static_body",
+          "collision": "CollisionShape3D",
+          "physics": "StaticBody3D",
+          "root": "Node3D",
+          "visual": "Visual"
+        }
+      },
+      "processing_contract": {
+        "animation_forbidden": true,
+        "asset_id": "wall_panel_test",
+        "collider_policy": "box",
+        "dimension_tolerance_m": 0.002,
+        "lod1_ratio": 0.5,
+        "lod1_required": false,
+        "lod_policy": "lod0_only",
+        "origin_policy": "bottom_center",
+        "profile_id": "modular_piece",
+        "profile_qualified": "modular_piece@1",
+        "profile_version": 1,
+        "rig_forbidden": true,
+        "schema_version": "asset-processing-contract-0.5.0",
+        "snap_grid_m": 0.25,
+        "target_depth_m": 0.25,
+        "target_height_m": 2.0,
+        "target_width_m": 1.0
+      },
+      "runtime_requirements": {
+        "bounds_tolerance_floor_m": 0.02,
+        "bounds_tolerance_ratio": 0.02,
+        "dimension_tolerance_m": 0.002,
+        "require_area": false,
+        "require_collision": true,
+        "require_mesh_visible": true,
+        "require_physics_body": true,
+        "require_ray_hit": true
+      },
+      "scene_contract": {
+        "body_kind": "static_body",
+        "collision": "CollisionShape3D",
+        "physics": "StaticBody3D",
+        "root": "Node3D",
+        "visual": "Visual"
+      }
+    },
+    "pickup": {
+      "capture_request_profile": {
+        "body_kind": "area",
+        "framing": {
+          "fov_degrees": 38.0,
+          "margin_fraction": 0.04,
+          "max_screen_fraction": 0.75,
+          "min_screen_fraction": 0.5,
+          "target_screen_fraction": 0.62
+        },
+        "profile_id": "pickup",
+        "profile_version": 1,
+        "require_area": true,
+        "require_ray_hit": false,
+        "review_views": [
+          "front",
+          "three_quarter",
+          "top"
+        ],
+        "scene": {
+          "body_kind": "area",
+          "collision": "CollisionShape3D",
+          "physics": "Area3D",
+          "root": "Node3D",
+          "visual": "Visual"
+        }
+      },
+      "processing_contract": {
+        "animation_forbidden": true,
+        "asset_id": "pickup_energy_cell_01",
+        "collider_policy": "box",
+        "dimension_tolerance_m": 0.01,
+        "lod1_ratio": 0.4,
+        "lod1_required": false,
+        "lod_policy": "lod0_only",
+        "origin_policy": "center",
+        "profile_id": "pickup",
+        "profile_qualified": "pickup@1",
+        "profile_version": 1,
+        "rig_forbidden": true,
+        "schema_version": "asset-processing-contract-0.5.0",
+        "snap_grid_m": null,
+        "target_depth_m": 0.22,
+        "target_height_m": 0.48,
+        "target_width_m": 0.22
+      },
+      "runtime_requirements": {
+        "bounds_tolerance_floor_m": 0.05,
+        "bounds_tolerance_ratio": 0.15,
+        "dimension_tolerance_m": 0.01,
+        "require_area": true,
+        "require_collision": true,
+        "require_mesh_visible": true,
+        "require_physics_body": false,
+        "require_ray_hit": false
+      },
+      "scene_contract": {
+        "body_kind": "area",
+        "collision": "CollisionShape3D",
+        "physics": "Area3D",
+        "root": "Node3D",
+        "visual": "Visual"
+      }
+    },
+    "static_prop": {
+      "capture_request_profile": {
+        "body_kind": "static_body",
+        "framing": {
+          "fov_degrees": 38.0,
+          "margin_fraction": 0.04,
+          "max_screen_fraction": 0.75,
+          "min_screen_fraction": 0.55,
+          "target_screen_fraction": 0.65
+        },
+        "profile_id": "static_prop",
+        "profile_version": 1,
+        "require_area": false,
+        "require_ray_hit": true,
+        "review_views": [
+          "front",
+          "three_quarter",
+          "side"
+        ],
+        "scene": {
+          "body_kind": "static_body",
+          "collision": "CollisionShape3D",
+          "physics": "StaticBody3D",
+          "root": "Node3D",
+          "visual": "Visual"
+        }
+      },
+      "processing_contract": {
+        "animation_forbidden": true,
+        "asset_id": "prop_energy_crate_01",
+        "collider_policy": "box",
+        "dimension_tolerance_m": 0.01,
+        "lod1_ratio": 0.5,
+        "lod1_required": true,
+        "lod_policy": "lod0_lod1",
+        "origin_policy": "bottom_center",
+        "profile_id": "static_prop",
+        "profile_qualified": "static_prop@1",
+        "profile_version": 1,
+        "rig_forbidden": true,
+        "schema_version": "asset-processing-contract-0.5.0",
+        "snap_grid_m": null,
+        "target_depth_m": 1.0,
+        "target_height_m": 1.0,
+        "target_width_m": 1.2
+      },
+      "runtime_requirements": {
+        "bounds_tolerance_floor_m": 0.15,
+        "bounds_tolerance_ratio": 0.2,
+        "dimension_tolerance_m": 0.01,
+        "require_area": false,
+        "require_collision": true,
+        "require_mesh_visible": true,
+        "require_physics_body": true,
+        "require_ray_hit": true
+      },
+      "scene_contract": {
+        "body_kind": "static_body",
+        "collision": "CollisionShape3D",
+        "physics": "StaticBody3D",
+        "root": "Node3D",
+        "visual": "Visual"
+      }
+    }
+  },
+  "registry": {
+    "availability": [
+      {
+        "profile_id": "static_prop",
+        "qualified": "static_prop@1",
+        "status": "AVAILABLE",
+        "version": "1"
+      },
+      {
+        "profile_id": "pickup",
+        "qualified": "pickup@1",
+        "status": "AVAILABLE",
+        "version": "1"
+      },
+      {
+        "profile_id": "modular_piece",
+        "qualified": "modular_piece@1",
+        "status": "AVAILABLE",
+        "version": "1"
+      },
+      {
+        "profile_id": "character",
+        "qualified": "character",
+        "status": "UNSUPPORTED",
+        "version": ""
+      },
+      {
+        "profile_id": "rigged_character",
+        "qualified": "rigged_character",
+        "status": "UNSUPPORTED",
+        "version": ""
+      },
+      {
+        "profile_id": "weapon",
+        "qualified": "weapon",
+        "status": "UNSUPPORTED",
+        "version": ""
+      },
+      {
+        "profile_id": "vehicle",
+        "qualified": "vehicle",
+        "status": "UNSUPPORTED",
+        "version": ""
+      },
+      {
+        "profile_id": "building",
+        "qualified": "building",
+        "status": "UNSUPPORTED",
+        "version": ""
+      },
+      {
+        "profile_id": "terrain",
+        "qualified": "terrain",
+        "status": "UNSUPPORTED",
+        "version": ""
+      },
+      {
+        "profile_id": "animation",
+        "qualified": "animation",
+        "status": "UNSUPPORTED",
+        "version": ""
+      },
+      {
+        "profile_id": "vfx",
+        "qualified": "vfx",
+        "status": "UNSUPPORTED",
+        "version": ""
+      },
+      {
+        "profile_id": "foliage",
+        "qualified": "foliage",
+        "status": "UNSUPPORTED",
+        "version": ""
+      }
+    ],
+    "parsed_profiles": {
+      "modular_piece": {
+        "categories": [
+          "modular"
+        ],
+        "dimension_rules": {
+          "max_m": 8.0,
+          "min_m": 0.1
+        },
+        "framing": {
+          "fov_degrees": 38.0,
+          "margin_fraction": 0.04,
+          "max_screen_fraction": 0.75,
+          "min_screen_fraction": 0.5,
+          "target_screen_fraction": 0.62
+        },
+        "godot": {
+          "body_kind": "static_body",
+          "require_area": false,
+          "require_ray_hit": true
+        },
+        "processing": {
+          "allowed_collider_policies": [
+            "box"
+          ],
+          "allowed_lod_policies": [
+            "lod0_only",
+            "lod0_lod1"
+          ],
+          "allowed_origin_policies": [
+            "bottom_center"
+          ],
+          "animation_forbidden": true,
+          "default_origin_policy": "bottom_center",
+          "dimension_tolerance_m": 0.002,
+          "lod0_required": true,
+          "lod1_required": false,
+          "max_materials": 4,
+          "max_texture_dimension": 2048,
+          "max_triangles_lod0": 30000,
+          "rig_forbidden": true,
+          "snap_grid_m": 0.25
+        },
+        "profile_id": "modular_piece",
+        "review_views": [
+          "front",
+          "side",
+          "three_quarter"
+        ],
+        "runtime": {
+          "bounds_tolerance_floor_m": 0.02,
+          "bounds_tolerance_ratio": 0.02
+        },
+        "schema_version": "asset-profile-0.5.0",
+        "version": 1
+      },
+      "pickup": {
+        "categories": [
+          "pickup"
+        ],
+        "dimension_rules": {
+          "max_m": 1.5,
+          "min_m": 0.05
+        },
+        "framing": {
+          "fov_degrees": 38.0,
+          "margin_fraction": 0.04,
+          "max_screen_fraction": 0.75,
+          "min_screen_fraction": 0.5,
+          "target_screen_fraction": 0.62
+        },
+        "godot": {
+          "body_kind": "area",
+          "require_area": true,
+          "require_ray_hit": false
+        },
+        "processing": {
+          "allowed_collider_policies": [
+            "box"
+          ],
+          "allowed_lod_policies": [
+            "lod0_only",
+            "lod0_lod1"
+          ],
+          "allowed_origin_policies": [
+            "center",
+            "bottom_center"
+          ],
+          "animation_forbidden": true,
+          "default_origin_policy": "center",
+          "dimension_tolerance_m": 0.01,
+          "lod0_required": true,
+          "lod1_required": false,
+          "max_materials": 2,
+          "max_texture_dimension": 2048,
+          "max_triangles_lod0": 20000,
+          "rig_forbidden": true,
+          "snap_grid_m": null
+        },
+        "profile_id": "pickup",
+        "review_views": [
+          "front",
+          "three_quarter",
+          "top"
+        ],
+        "runtime": {
+          "bounds_tolerance_floor_m": 0.05,
+          "bounds_tolerance_ratio": 0.15
+        },
+        "schema_version": "asset-profile-0.5.0",
+        "version": 1
+      },
+      "static_prop": {
+        "categories": [
+          "prop"
+        ],
+        "dimension_rules": {
+          "max_m": 100.0,
+          "min_m": 0.001
+        },
+        "framing": {
+          "fov_degrees": 38.0,
+          "margin_fraction": 0.04,
+          "max_screen_fraction": 0.75,
+          "min_screen_fraction": 0.55,
+          "target_screen_fraction": 0.65
+        },
+        "godot": {
+          "body_kind": "static_body",
+          "require_area": false,
+          "require_ray_hit": true
+        },
+        "processing": {
+          "allowed_collider_policies": [
+            "box"
+          ],
+          "allowed_lod_policies": [
+            "lod0_lod1"
+          ],
+          "allowed_origin_policies": [
+            "bottom_center",
+            "center"
+          ],
+          "animation_forbidden": true,
+          "default_origin_policy": "bottom_center",
+          "dimension_tolerance_m": 0.01,
+          "lod0_required": true,
+          "lod1_required": true,
+          "max_materials": 8,
+          "max_texture_dimension": 4096,
+          "max_triangles_lod0": 100000,
+          "rig_forbidden": true,
+          "snap_grid_m": null
+        },
+        "profile_id": "static_prop",
+        "review_views": [
+          "front",
+          "three_quarter",
+          "side"
+        ],
+        "runtime": {
+          "bounds_tolerance_floor_m": 0.15,
+          "bounds_tolerance_ratio": 0.2
+        },
+        "schema_version": "asset-profile-0.5.0",
+        "version": 1
+      }
+    }
+  },
+  "spec_documents": {
+    "energy_pickup_test_v050": {
+      "fingerprint": "ba8848f948faec578d1e15de420f7c0c398bef5423cbaba60ea8ff2063ff34cf",
+      "model_dump": {
+        "asset_id": "energy_pickup_test",
+        "category": "pickup",
+        "collider_policy": "box",
+        "dimensions": {
+          "depth_m": 0.3,
+          "height_m": 0.4,
+          "width_m": 0.3
+        },
+        "geometry_budget": {
+          "lod_ratio": 0.5,
+          "max_triangles_lod0": 8000,
+          "max_triangles_lod1": 3000
+        },
+        "intent": "TEST FIXTURE. Small stylized energy pickup used to exercise the pickup profile. Not a production Meshy asset.",
+        "lod_policy": "lod0_only",
+        "material_budget": {
+          "max_materials": 2
+        },
+        "orientation": {
+          "front": "-Z",
+          "up": "+Y"
+        },
+        "origin_policy": "center",
+        "profile": "pickup",
+        "profile_version": 1,
+        "schema_version": "0.5.0",
+        "style_constraints": {
+          "detail_density": "low",
+          "family": "stylized_scifi",
+          "readability": "high",
+          "silhouette": "readable"
+        },
+        "target_engine": "godot",
+        "target_import_path": "assets/generated/pickup/energy_pickup_test/",
+        "texture_budget": {
+          "max_dimension": 2048
+        }
+      }
+    },
+    "pickup_energy_cell_01_v050": {
+      "fingerprint": "d9bb56bbe5da3c6d375201a2be8d39ff0f51d87263c59ebe156f750f8fd29089",
+      "model_dump": {
+        "asset_id": "pickup_energy_cell_01",
+        "category": "pickup",
+        "collider_policy": "box",
+        "dimensions": {
+          "depth_m": 0.22,
+          "height_m": 0.48,
+          "width_m": 0.22
+        },
+        "geometry_budget": {
+          "lod_ratio": 0.4,
+          "max_triangles_lod0": 8000,
+          "max_triangles_lod1": 3000
+        },
+        "intent": "Stylized sci-fi energy cell, a small collectible with a clear glowing core and a readable upright silhouette.",
+        "lod_policy": "lod0_only",
+        "material_budget": {
+          "max_materials": 2
+        },
+        "orientation": {
+          "front": "-Z",
+          "up": "+Y"
+        },
+        "origin_policy": "center",
+        "profile": "pickup",
+        "profile_version": 1,
+        "schema_version": "0.5.0",
+        "style_constraints": {
+          "detail_density": "low",
+          "family": "stylized_scifi",
+          "readability": "high",
+          "silhouette": "upright_capsule"
+        },
+        "target_engine": "godot",
+        "target_import_path": "assets/generated/pickup/pickup_energy_cell_01/",
+        "texture_budget": {
+          "max_dimension": 2048
+        }
+      }
+    },
+    "prop_energy_crate_01_v040": {
+      "fingerprint": "42f1a38e28c7b95e36505e47318fb4ed116ca723a67d46c3e895e750ea99e432",
+      "model_dump": {
+        "asset_id": "prop_energy_crate_01",
+        "category": "prop",
+        "collider_policy": "box",
+        "dimensions": {
+          "depth_m": 1.0,
+          "height_m": 1.0,
+          "width_m": 1.2
+        },
+        "geometry_budget": {
+          "lod_ratio": 0.5,
+          "max_triangles_lod0": 20000,
+          "max_triangles_lod1": 10000
+        },
+        "intent": "Stylized Sci-Fi Energy Crate for in-game prop placement",
+        "lod_policy": "lod0_lod1",
+        "material_budget": {
+          "max_materials": 2
+        },
+        "orientation": {
+          "front": "-Z",
+          "up": "+Y"
+        },
+        "origin_policy": "bottom_center",
+        "profile": "static_prop",
+        "schema_version": "0.4.0",
+        "style_constraints": {
+          "detail_density": "medium",
+          "family": "stylized_scifi",
+          "readability": "high",
+          "silhouette": "chunky"
+        },
+        "target_engine": "godot",
+        "target_import_path": "assets/generated/props/prop_energy_crate_01/",
+        "texture_budget": {
+          "max_dimension": 2048
+        }
+      }
+    },
+    "prop_energy_crate_01_v050": {
+      "fingerprint": "5f579dbffce0a33d5c426a40c295c9f1bdb1337d23fdb67303ee99f96963ef39",
+      "model_dump": {
+        "asset_id": "prop_energy_crate_01",
+        "category": "prop",
+        "collider_policy": "box",
+        "dimensions": {
+          "depth_m": 1.0,
+          "height_m": 1.0,
+          "width_m": 1.2
+        },
+        "geometry_budget": {
+          "lod_ratio": 0.5,
+          "max_triangles_lod0": 20000,
+          "max_triangles_lod1": 10000
+        },
+        "intent": "Stylized Sci-Fi Energy Crate for in-game prop placement",
+        "lod_policy": "lod0_lod1",
+        "material_budget": {
+          "max_materials": 2
+        },
+        "orientation": {
+          "front": "-Z",
+          "up": "+Y"
+        },
+        "origin_policy": "bottom_center",
+        "profile": "static_prop",
+        "profile_version": 1,
+        "schema_version": "0.5.0",
+        "style_constraints": {
+          "detail_density": "medium",
+          "family": "stylized_scifi",
+          "readability": "high",
+          "silhouette": "chunky"
+        },
+        "target_engine": "godot",
+        "target_import_path": "assets/generated/props/prop_energy_crate_01/",
+        "texture_budget": {
+          "max_dimension": 2048
+        }
+      }
+    },
+    "wall_panel_test_v050": {
+      "fingerprint": "b57c4831060d87fd72af6cd64c74c2d2ba5b14953b9280089463a6c3b31751a2",
+      "model_dump": {
+        "asset_id": "wall_panel_test",
+        "category": "modular",
+        "collider_policy": "box",
+        "dimensions": {
+          "depth_m": 0.25,
+          "height_m": 2.0,
+          "width_m": 1.0
+        },
+        "geometry_budget": {
+          "lod_ratio": 0.5,
+          "max_triangles_lod0": 12000,
+          "max_triangles_lod1": 4000
+        },
+        "intent": "TEST FIXTURE. Modular wall panel used to exercise snap dimensions and origin. Not a production Meshy asset.",
+        "lod_policy": "lod0_only",
+        "material_budget": {
+          "max_materials": 2
+        },
+        "orientation": {
+          "front": "-Z",
+          "up": "+Y"
+        },
+        "origin_policy": "bottom_center",
+        "profile": "modular_piece",
+        "profile_version": 1,
+        "schema_version": "0.5.0",
+        "style_constraints": {
+          "detail_density": "low",
+          "family": "stylized_scifi",
+          "readability": "high",
+          "silhouette": "planar"
+        },
+        "target_engine": "godot",
+        "target_import_path": "assets/generated/modular/wall_panel_test/",
+        "texture_budget": {
+          "max_dimension": 2048
+        }
+      }
+    }
+  }
+}

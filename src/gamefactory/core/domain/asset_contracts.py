@@ -18,7 +18,15 @@ from pathlib import Path
 from typing import Any, Literal
 
 import yaml
-from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    PrivateAttr,
+    ValidationInfo,
+    field_validator,
+    model_validator,
+)
 
 from gamefactory.core.domain.errors import SpecInvalidError, ValidationError
 from gamefactory.core.domain.models import utc_now_iso
@@ -192,6 +200,177 @@ class StyleConstraintsConfig(BaseModel):
     detail_density: str = Field(default="medium", min_length=1, max_length=100)
 
 
+class CapsuleSpec(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    radius_m: float
+    height_m: float
+
+    @field_validator("radius_m", "height_m", mode="before")
+    @classmethod
+    def reject_bool_and_str(cls, value: Any, info: Any) -> Any:
+        return _reject_bool_and_string(value, info.field_name, "number")
+
+    @model_validator(mode="after")
+    def validate_capsule(self) -> CapsuleSpec:
+        if not math.isfinite(self.radius_m) or not math.isfinite(self.height_m):
+            raise ValueError("capsule dimensions must be finite numbers")
+        if self.radius_m <= 0:
+            raise ValueError(f"capsule radius_m must be strictly positive, got {self.radius_m}")
+        if self.radius_m < 0.10:
+            raise ValueError(f"capsule radius_m must be >= 0.10, got {self.radius_m}")
+        if self.height_m <= 2 * self.radius_m:
+            raise ValueError(
+                f"capsule height_m ({self.height_m}) must be strictly greater than 2 * radius_m ({2 * self.radius_m})"
+            )
+        return self
+
+
+class SpecColliderConfig(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    policy: Literal["box", "capsule"]
+    capsule: CapsuleSpec | None = None
+
+    @model_validator(mode="after")
+    def validate_collider_policy_match(self) -> SpecColliderConfig:
+        if self.policy == "capsule" and self.capsule is None:
+            raise ValueError("capsule specification is required when policy is capsule")
+        if self.policy == "box" and self.capsule is not None:
+            raise ValueError("capsule specification must be null when policy is box")
+        return self
+
+
+class PartMotionSpec(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    kind: Literal["fixed", "revolute", "prismatic"]
+    axis: list[float] | None = None
+    limits: Any = None
+
+    @field_validator("axis")
+    @classmethod
+    def validate_axis(cls, v: list[float] | None) -> list[float] | None:
+        if v is None:
+            return None
+        if len(v) != 3 or any(not math.isfinite(x) for x in v):
+            raise ValueError("motion axis must be 3 finite floats")
+        norm = math.sqrt(sum(x * x for x in v))
+        if abs(norm - 1.0) > 1e-6:
+            raise ValueError(f"motion axis must be a unit vector within 1e-6 (norm={norm})")
+        return v
+
+    @model_validator(mode="after")
+    def validate_motion(self) -> PartMotionSpec:
+        if self.kind == "fixed":
+            if self.axis is not None:
+                raise ValueError("motion axis forbidden for fixed motion")
+        else:
+            if self.axis is None:
+                raise ValueError(f"motion axis required for {self.kind} motion")
+        return self
+
+
+class PartPivotSpec(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    position_m: list[float]
+    basis: Literal["identity"] | list[float] = "identity"
+    motion: PartMotionSpec
+
+    @field_validator("position_m")
+    @classmethod
+    def validate_position(cls, v: list[float]) -> list[float]:
+        if len(v) != 3 or any(not math.isfinite(x) for x in v):
+            raise ValueError("position_m must be 3 finite floats")
+        return v
+
+    @field_validator("basis")
+    @classmethod
+    def validate_basis(cls, v: Any) -> Any:
+        if v == "identity":
+            return v
+        if isinstance(v, (list, tuple)):
+            if len(v) != 4 or any(not math.isfinite(x) for x in v):
+                raise ValueError("quaternion basis must be 4 finite floats")
+            norm = math.sqrt(sum(x * x for x in v))
+            if abs(norm - 1.0) > 1e-6:
+                raise ValueError(f"quaternion basis must be normalized within 1e-6 (norm={norm})")
+            return list(v)
+        raise ValueError("basis must be 'identity' or a 4-element unit quaternion [x, y, z, w]")
+
+
+class PartSpec(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    part_id: str
+    role: str
+    parent: str
+    pivot: PartPivotSpec
+
+    @field_validator("part_id", "role")
+    @classmethod
+    def validate_identifiers(cls, v: str) -> str:
+        if not v.replace("_", "").isalnum() or not v[0].isalpha() or v != v.lower():
+            raise ValueError(f"identifier must be lowercase alphanumeric: {v}")
+        return v
+
+    @field_validator("parent")
+    @classmethod
+    def validate_parent(cls, v: str) -> str:
+        if v == "root":
+            return v
+        if not v.replace("_", "").isalnum() or not v[0].isalpha() or v != v.lower():
+            raise ValueError(f"parent must be 'root' or a lowercase alphanumeric identifier: {v}")
+        return v
+
+    @model_validator(mode="after")
+    def reject_self_parent(self) -> PartSpec:
+        if self.parent == self.part_id:
+            raise ValueError(f"part '{self.part_id}' cannot parent to itself")
+        return self
+
+
+class SocketSpec(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    socket_id: str
+    parent_part: str
+    translation_m: list[float]
+    rotation: Literal["identity"] | list[float] = "identity"
+    placement: Literal["forward_end"] = "forward_end"
+
+    @field_validator("socket_id", "parent_part")
+    @classmethod
+    def validate_identifiers(cls, v: str) -> str:
+        if not v.replace("_", "").isalnum() or not v[0].isalpha() or v != v.lower():
+            raise ValueError(f"identifier must be lowercase alphanumeric: {v}")
+        return v
+
+    @field_validator("translation_m")
+    @classmethod
+    def validate_translation(cls, v: list[float]) -> list[float]:
+        if len(v) != 3 or any(not math.isfinite(x) for x in v):
+            raise ValueError("translation_m must be 3 finite floats")
+        return v
+
+    @field_validator("rotation")
+    @classmethod
+    def validate_rotation(cls, v: Any) -> Any:
+        if v == "identity":
+            return v
+        if isinstance(v, (list, tuple)):
+            if len(v) != 4 or any(not math.isfinite(x) for x in v):
+                raise ValueError("rotation quaternion must be 4 finite floats")
+            norm = math.sqrt(sum(x * x for x in v))
+            if abs(norm - 1.0) > 1e-6:
+                raise ValueError(
+                    f"rotation quaternion must be normalized within 1e-6 (norm={norm})"
+                )
+            return list(v)
+        raise ValueError("rotation must be 'identity' or a 4-element unit quaternion [x, y, z, w]")
+
+
 class AssetSpecification(BaseModel):
     """Strict specification for one asset revision.
 
@@ -199,14 +378,15 @@ class AssetSpecification(BaseModel):
     profile_version; readers bind those documents to static_prop@1.
     schema 0.5.0 records profile_version explicitly. Profile behavior lives on
     the profile registry, not in this value object.
+    schema 0.7.0 adds source_kind, parts, sockets, and collider policies.
     """
 
     model_config = ConfigDict(extra="forbid")
 
-    schema_version: Literal["0.4.0", "0.5.0"] = "0.4.0"
+    schema_version: Literal["0.4.0", "0.5.0", "0.7.0"] = "0.4.0"
     asset_id: str = Field(..., min_length=2, max_length=80)
-    category: Literal["prop", "pickup", "modular"] = "prop"
-    profile: Literal["static_prop", "pickup", "modular_piece"] = "static_prop"
+    category: str = "prop"
+    profile: str = "static_prop"
     profile_version: int | None = None
     intent: str = Field(..., min_length=1, max_length=500)
     dimensions: DimensionsConfig
@@ -215,11 +395,35 @@ class AssetSpecification(BaseModel):
     geometry_budget: GeometryBudgetConfig = Field(default_factory=GeometryBudgetConfig)
     material_budget: MaterialBudgetConfig = Field(default_factory=MaterialBudgetConfig)
     texture_budget: TextureBudgetConfig = Field(default_factory=TextureBudgetConfig)
-    collider_policy: Literal["box"] = "box"
+    collider_policy: str = "box"
     lod_policy: Literal["lod0_lod1", "lod0_only"] = "lod0_lod1"
     style_constraints: StyleConstraintsConfig = Field(default_factory=StyleConstraintsConfig)
     target_engine: Literal["godot"] = "godot"
     target_import_path: str = Field(default="")
+
+    # V0.7 optional fields
+    source_kind: Literal["provider_generated", "local_operator_assembly"] | None = None
+    parts: list[PartSpec] | None = None
+    sockets: list[SocketSpec] | None = None
+    collider: SpecColliderConfig | None = None
+
+    _bound_profile: Any = PrivateAttr(default=None)
+
+    @model_validator(mode="before")
+    @classmethod
+    def reject_v07_fields_in_historical_specs(cls, data: Any) -> Any:
+        if not isinstance(data, dict):
+            return data
+        schema_version = data.get("schema_version")
+        if schema_version is None or schema_version in ("0.4.0", "0.5.0"):
+            ver_str = "0.4.0" if schema_version is None else schema_version
+            v07_keys = ("source_kind", "parts", "sockets", "collider")
+            for key in v07_keys:
+                if key in data:
+                    raise ValueError(
+                        f"Extra inputs are not permitted: asset-spec-{ver_str} does not accept field '{key}'"
+                    )
+        return data
 
     @field_validator("asset_id")
     @classmethod
@@ -274,9 +478,52 @@ class AssetSpecification(BaseModel):
         return _reject_bool_and_string(value, "profile_version", "integer")
 
     @model_validator(mode="after")
-    def bind_profile_contract(self) -> AssetSpecification:
+    def validate_parts_and_sockets_structure(self) -> AssetSpecification:
+        if self.parts is not None:
+            ids = [p.part_id for p in self.parts]
+            if len(ids) != len(set(ids)):
+                raise ValueError("parts list contains duplicate part_id")
+            part_id_set = set(ids)
+            parent_map: dict[str, str] = {}
+            has_root = False
+            for p in self.parts:
+                if p.parent == "root":
+                    has_root = True
+                elif p.parent not in part_id_set:
+                    raise ValueError(
+                        f"part '{p.part_id}' parent '{p.parent}' does not exist (orphan)"
+                    )
+                parent_map[p.part_id] = p.parent
+            if self.parts and not has_root:
+                raise ValueError("at least one part must have parent 'root'")
+            for start_id in ids:
+                visited: set[str] = set()
+                curr = start_id
+                while curr != "root":
+                    if curr in visited:
+                        raise ValueError(f"cycle detected in parts hierarchy involving '{curr}'")
+                    visited.add(curr)
+                    curr = parent_map[curr]
+
+        if self.sockets is not None:
+            if not self.parts:
+                raise ValueError("sockets require parts to be defined")
+            sock_ids = [s.socket_id for s in self.sockets]
+            if len(sock_ids) != len(set(sock_ids)):
+                raise ValueError("sockets list contains duplicate socket_id")
+            part_id_set = {p.part_id for p in self.parts}
+            for s in self.sockets:
+                if s.parent_part not in part_id_set:
+                    raise ValueError(
+                        f"socket '{s.socket_id}' parent_part '{s.parent_part}' does not exist in parts"
+                    )
+        return self
+
+    @model_validator(mode="after")
+    def bind_profile_contract(self, info: ValidationInfo) -> AssetSpecification:
         from gamefactory.core.domain.asset_profiles import builtin_registry
 
+        # Version-specific structural checks
         if self.schema_version == "0.4.0":
             if self.profile != "static_prop" or self.category != "prop":
                 raise ValueError(
@@ -286,16 +533,69 @@ class AssetSpecification(BaseModel):
                 raise ValueError("asset-spec-0.4.0 does not carry profile_version")
             if self.collider_policy != "box" or self.lod_policy != "lod0_lod1":
                 raise ValueError("asset-spec-0.4.0 only accepts a box collider and lod0_lod1")
+            if (
+                self.source_kind is not None
+                or self.parts is not None
+                or self.sockets is not None
+                or self.collider is not None
+            ):
+                raise ValueError("asset-spec-0.4.0 does not accept 0.7 fields")
             version = 1
-        else:
+        elif self.schema_version == "0.5.0":
             if self.profile_version is None:
                 raise ValueError("asset-spec-0.5.0 requires profile_version")
+            if self.category not in {"prop", "pickup", "modular"}:
+                raise ValueError(f"category '{self.category}' is not supported by asset-spec-0.5.0")
+            if self.profile not in {"static_prop", "pickup", "modular_piece"}:
+                raise ValueError(f"profile '{self.profile}' is not supported by asset-spec-0.5.0")
+            if self.collider_policy != "box":
+                raise ValueError("asset-spec-0.5.0 only accepts collider_policy 'box'")
+            if (
+                self.source_kind is not None
+                or self.parts is not None
+                or self.sockets is not None
+                or self.collider is not None
+            ):
+                raise ValueError("asset-spec-0.5.0 does not accept 0.7 fields")
             version = self.profile_version
+        elif self.schema_version == "0.7.0":
+            if self.profile_version is None:
+                raise ValueError("asset-spec-0.7.0 requires profile_version")
+            if self.source_kind is None:
+                raise ValueError("asset-spec-0.7.0 requires explicit source_kind")
+            if self.collider_policy not in {"box", "capsule"}:
+                raise ValueError(
+                    f"unsupported collider_policy '{self.collider_policy}' for asset-spec-0.7.0"
+                )
+            if self.collider is not None:
+                if self.collider.policy != self.collider_policy:
+                    raise ValueError(
+                        f"collider block policy '{self.collider.policy}' does not match collider_policy '{self.collider_policy}'"
+                    )
+            elif self.collider_policy == "capsule":
+                raise ValueError("collider block is required when collider_policy is capsule")
+
+            if (
+                self.parts is not None or self.sockets is not None
+            ) and self.source_kind != "local_operator_assembly":
+                raise ValueError("parts and sockets require source_kind 'local_operator_assembly'")
+            version = self.profile_version
+        else:
+            raise ValueError(f"unsupported schema_version {self.schema_version}")
+
+        registry = (
+            info.context.get("registry")
+            if (info.context and isinstance(info.context, dict))
+            else None
+        ) or builtin_registry()
+
         try:
-            profile = builtin_registry().get(self.profile, version)
+            profile = registry.get(self.profile, version)
         except SpecInvalidError as exc:
             raise ValueError(str(exc)) from exc
+
         profile.check_specification(self)
+        self._bound_profile = profile
         return self
 
     @model_validator(mode="after")
@@ -307,20 +607,30 @@ class AssetSpecification(BaseModel):
 
     def bound_profile(self) -> Any:
         """Return the immutable profile this specification is bound to."""
+        if hasattr(self, "_bound_profile") and self._bound_profile is not None:
+            return self._bound_profile
         from gamefactory.core.domain.asset_profiles import builtin_registry
 
         version = 1 if self.schema_version == "0.4.0" else int(self.profile_version or 0)
         return builtin_registry().get(self.profile, version)
 
     def model_dump(self, *args: Any, **kwargs: Any) -> dict[str, Any]:
-        """Keep 0.4.0 fingerprints identical by omitting the unbound version field."""
+        """Keep 0.4.0 and 0.5.0 fingerprints identical by omitting unversioned/new fields."""
         payload = super().model_dump(*args, **kwargs)
-        if payload.get("schema_version") == "0.4.0":
+        schema = payload.get("schema_version")
+        if schema == "0.4.0":
             payload.pop("profile_version", None)
+        if schema in ("0.4.0", "0.5.0"):
+            for field_name in ("source_kind", "parts", "sockets", "collider"):
+                payload.pop(field_name, None)
         return payload
 
 
-def parse_asset_specification(content: str | dict[str, Any] | Path) -> AssetSpecification:
+def parse_asset_specification(
+    content: str | dict[str, Any] | Path,
+    *,
+    registry: Any = None,
+) -> AssetSpecification:
     """Parse and strictly validate an AssetSpecification from YAML, JSON, dict, or file."""
     data: dict[str, Any]
     if isinstance(content, Path):
@@ -349,8 +659,9 @@ def parse_asset_specification(content: str | dict[str, Any] | Path) -> AssetSpec
     else:
         raise SpecInvalidError(f"Unsupported specification input type: {type(content)}")
 
+    context = {"registry": registry} if registry is not None else None
     try:
-        return AssetSpecification.model_validate(data)
+        return AssetSpecification.model_validate(data, context=context)
     except Exception as exc:
         raise SpecInvalidError(
             f"Asset specification validation failed: {exc}", details={"error": str(exc)}
