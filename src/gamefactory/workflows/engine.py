@@ -18,10 +18,12 @@ from gamefactory.adapters.persistence.repositories import (
     ApprovalRepository,
     ArtifactRepository,
     AuditLogRepository,
+    CostLedgerRepository,
     EvidenceRepository,
     ExecutionRepository,
     ProjectRepository,
     ProviderInvocationRepository,
+    ProviderOperationIntentRepository,
     QualityGateRepository,
     TaskRepository,
     WorkflowRepository,
@@ -69,6 +71,7 @@ from gamefactory.core.policies.policy_engine import (
     OperationType,
     PolicyEngine,
 )
+from gamefactory.workflows.accounting import CostAccounting
 from gamefactory.workflows.builtin_tasks import BuiltinTaskActions
 from gamefactory.workflows.handlers import (
     HandlerOperation,
@@ -150,6 +153,9 @@ class WorkflowEngine:
         self.gate_repo = QualityGateRepository(db)
         self.audit_repo = AuditLogRepository(db)
         self.invocation_repo = ProviderInvocationRepository(db)
+        self.intent_repo = ProviderOperationIntentRepository(db)
+        self.ledger_repo = CostLedgerRepository(db)
+        self.accounting = CostAccounting(self.ledger_repo, self.audit_repo)
         self.artifact_mgr = ArtifactManager(self.project_root)
         self.locks_dir = self.project_root / ".gamefactory" / "locks"
         self.builtin_actions = BuiltinTaskActions(
@@ -618,14 +624,7 @@ class WorkflowEngine:
         )
 
         # Evaluate policy
-        project_workflows = self.wf_repo.list_by_project(wf.project_id)
-        current_spent = 0.0
-        for project_workflow in project_workflows:
-            for project_task in self.task_repo.list_by_workflow(project_workflow.id):
-                current_spent += sum(
-                    max(0.0, attempt.cost)
-                    for attempt in self.exec_repo.list_by_task(project_task.id)
-                )
+        current_spent = self.ledger_repo.project_net(wf.project_id)
         try:
             policy_res = self.policy_engine.evaluate(
                 op_type=op_type,
@@ -668,6 +667,10 @@ class WorkflowEngine:
                     operation_inputs=approval_inputs,
                     artifact_ids=[artifact.id for artifact in artifacts],
                 )
+                if "paid_request_snapshot_sha256" in task.parameters:
+                    active_approval.paid_request_snapshot_hash = str(
+                        task.parameters["paid_request_snapshot_sha256"]
+                    )
                 self.app_repo.save(active_approval)
             elif (
                 active_approval.status != ApprovalStatus.PENDING
@@ -684,6 +687,10 @@ class WorkflowEngine:
                         artifact.id for artifact in self.art_repo.list_by_workflow(wf.id)
                     ],
                 )
+                if "paid_request_snapshot_sha256" in task.parameters:
+                    active_approval.paid_request_snapshot_hash = str(
+                        task.parameters["paid_request_snapshot_sha256"]
+                    )
                 self.app_repo.save(active_approval)
 
             if task.status != TaskStatus.BLOCKED:
@@ -714,6 +721,36 @@ class WorkflowEngine:
                 failed_tasks=[],
                 blocked_tasks=[task.id],
                 pending_approval_id=active_approval.id,
+            )
+
+        # If approval has changes requested and handler blocks on changes requested
+        if (
+            active_approval
+            and active_approval.status == ApprovalStatus.CHANGES_REQUESTED
+            and handler_profile is not None
+            and handler_profile.changes_requested_blocks is not None
+            and handler_profile.changes_requested_blocks(task)
+        ):
+            if task.status != TaskStatus.BLOCKED:
+                TaskStateMachine.validate_transition(task.id, task.status, TaskStatus.BLOCKED)
+                task.status = TaskStatus.BLOCKED
+                self.task_repo.update_status(task.id, task.status)
+            if wf.status != WorkflowStatus.BLOCKED:
+                WorkflowStateMachine.validate_transition(wf.id, wf.status, WorkflowStatus.BLOCKED)
+                wf.status = WorkflowStatus.BLOCKED
+                self.wf_repo.update_status(wf.id, wf.status)
+            return WorkflowExecutionResult(
+                workflow_id=wf.id,
+                status=WorkflowStatus.BLOCKED,
+                completed_tasks=[],
+                failed_tasks=[],
+                blocked_tasks=[task.id],
+                pending_approval_id=None,
+                error_code="CONCEPT_REVISION_REQUIRED",
+                error_message=(
+                    f"Changes requested on task '{task.id}': {active_approval.comment or 'concept revision required'}. "
+                    "Use 'gamefactory asset concept replace' to provide a new concept version."
+                ),
             )
 
         # If approval was rejected, fail task
@@ -783,6 +820,13 @@ class WorkflowEngine:
             if task.task_type == "record_evidence":
                 self._record_final_workflow_evidence(wf, task, execution)
                 self._verify_task_gates(wf, task)
+            if task.task_type == "paid_generation":
+                self.accounting.settle_builtin_paid(
+                    task.id,
+                    execution.cost,
+                    execution_id=execution.id,
+                    cost_unit=execution.cost_unit,
+                )
             execution.status = ExecutionStatus.COMPLETED
             execution.completed_at = utc_now_iso()
             task.status = TaskStatus.COMPLETED
@@ -816,6 +860,14 @@ class WorkflowEngine:
                 handler_profile is not None
                 and handler_profile.recovery == HandlerRecovery.CONSERVATIVE_PROCESS
                 and bool(failure_details.get("process_state_uncertain", False))
+            )
+            # An uncertain outcome keeps its reservation held until reconciliation.
+            self.accounting.handle_failure(
+                task.id,
+                execution_id=execution.id,
+                intent=self.intent_repo.get_by_task(task.id),
+                cost_unit=execution.cost_unit,
+                submission_uncertain=uncertain,
             )
             execution.status = ExecutionStatus.UNCERTAIN if uncertain else ExecutionStatus.FAILED
             execution.error_message = str(exc)

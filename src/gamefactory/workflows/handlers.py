@@ -57,6 +57,7 @@ class TaskHandlerMetadata:
     approval_context: Callable[[Workflow, Task], dict[str, Any]] | None = None
     refresh_parameters: Callable[[Workflow, Task], dict[str, Any]] | None = None
     recovery_check: Callable[[Workflow, Task, Execution], bool] | None = None
+    changes_requested_blocks: Callable[[Task], bool] | None = None
 
 
 @dataclass(frozen=True)

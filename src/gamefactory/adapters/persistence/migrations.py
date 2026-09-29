@@ -237,6 +237,240 @@ def _migration_0006_asset_revision_profile(conn: sqlite3.Connection) -> None:
     conn.execute("ALTER TABLE asset_revisions ADD COLUMN profile_version INTEGER")
 
 
+def _migration_0007_cost_ledger(conn: sqlite3.Connection) -> None:
+    conn.execute(
+        """
+        CREATE TABLE IF NOT EXISTS cost_ledger (
+            id TEXT PRIMARY KEY,
+            project_id TEXT NOT NULL,
+            workflow_id TEXT NOT NULL,
+            task_id TEXT NOT NULL,
+            execution_id TEXT,
+            intent_id TEXT,
+            request_fingerprint TEXT,
+            entry_type TEXT NOT NULL CHECK(entry_type IN ('RESERVE','SETTLE','RELEASE','ADJUSTMENT')),
+            amount REAL NOT NULL,
+            cost_unit TEXT NOT NULL,
+            reason TEXT NOT NULL,
+            source TEXT NOT NULL,
+            actor TEXT NOT NULL,
+            created_at TEXT NOT NULL,
+            CHECK (entry_type = 'ADJUSTMENT' OR amount >= 0)
+        );
+        """
+    )
+    conn.execute("CREATE INDEX IF NOT EXISTS idx_cost_ledger_project ON cost_ledger(project_id);")
+    conn.execute("CREATE INDEX IF NOT EXISTS idx_cost_ledger_workflow ON cost_ledger(workflow_id);")
+    conn.execute("CREATE INDEX IF NOT EXISTS idx_cost_ledger_task ON cost_ledger(task_id);")
+    conn.execute(
+        """
+        CREATE TRIGGER IF NOT EXISTS trg_cost_ledger_no_update
+        BEFORE UPDATE ON cost_ledger
+        BEGIN
+            SELECT RAISE(ABORT, 'cost_ledger is append-only: updates are forbidden');
+        END;
+        """
+    )
+    conn.execute(
+        """
+        CREATE TRIGGER IF NOT EXISTS trg_cost_ledger_no_delete
+        BEFORE DELETE ON cost_ledger
+        BEGIN
+            SELECT RAISE(ABORT, 'cost_ledger is append-only: deletes are forbidden');
+        END;
+        """
+    )
+    conn.execute(
+        """
+        INSERT INTO cost_ledger (
+            id, project_id, workflow_id, task_id, execution_id, intent_id, request_fingerprint,
+            entry_type, amount, cost_unit, reason, source, actor, created_at
+        )
+        SELECT
+            'LEDGER-LEGACY-' || e.id,
+            w.project_id,
+            w.id,
+            t.id,
+            e.id,
+            poi.id,
+            poi.request_fingerprint,
+            'RESERVE',
+            e.cost,
+            e.cost_unit,
+            'Historical execution cost carried forward as a conservative hold',
+            'legacy_execution_cost',
+            'migration-0007',
+            e.started_at
+        FROM executions e
+        JOIN tasks t ON t.id = e.task_id
+        JOIN workflows w ON w.id = t.workflow_id
+        LEFT JOIN provider_operation_intents poi ON poi.task_id = t.id
+        WHERE e.cost > 0;
+        """
+    )
+
+
+def _migration_0008_paid_request_and_readiness(conn: sqlite3.Connection) -> None:
+    conn.execute(
+        """
+        CREATE TABLE IF NOT EXISTS paid_request_snapshots (
+            id TEXT PRIMARY KEY,
+            workflow_id TEXT NOT NULL,
+            task_id TEXT NOT NULL,
+            asset_id TEXT NOT NULL,
+            revision_number INTEGER NOT NULL,
+            concept_version INTEGER NOT NULL,
+            schema_version TEXT NOT NULL,
+            snapshot_sha256 TEXT NOT NULL,
+            canonical_json TEXT NOT NULL,
+            artifact_id TEXT,
+            status TEXT NOT NULL CHECK(status IN ('ACTIVE', 'SUPERSEDED')),
+            created_at TEXT NOT NULL,
+            superseded_at TEXT
+        );
+        """
+    )
+    conn.execute(
+        "CREATE INDEX IF NOT EXISTS idx_paid_request_snapshots_workflow ON paid_request_snapshots(workflow_id);"
+    )
+    conn.execute(
+        """
+        CREATE TABLE IF NOT EXISTS production_readiness_reports (
+            id TEXT PRIMARY KEY,
+            workflow_id TEXT NOT NULL,
+            task_id TEXT NOT NULL,
+            snapshot_sha256 TEXT NOT NULL,
+            result TEXT NOT NULL CHECK(result IN ('PASS', 'FAIL')),
+            schema_version TEXT NOT NULL,
+            report_json TEXT NOT NULL,
+            report_sha256 TEXT NOT NULL,
+            artifact_id TEXT,
+            status TEXT NOT NULL CHECK(status IN ('ACTIVE', 'SUPERSEDED')),
+            created_at TEXT NOT NULL,
+            superseded_at TEXT
+        );
+        """
+    )
+    conn.execute(
+        "CREATE INDEX IF NOT EXISTS idx_production_readiness_reports_workflow ON production_readiness_reports(workflow_id);"
+    )
+    conn.execute(
+        "ALTER TABLE provider_operation_intents ADD COLUMN paid_request_snapshot_hash TEXT;"
+    )
+    conn.execute("ALTER TABLE approvals ADD COLUMN paid_request_snapshot_hash TEXT;")
+    conn.execute(
+        """
+        CREATE TRIGGER IF NOT EXISTS trg_paid_request_snapshots_immutable
+        BEFORE UPDATE ON paid_request_snapshots
+        BEGIN
+            SELECT CASE
+                WHEN OLD.canonical_json != NEW.canonical_json
+                  OR OLD.snapshot_sha256 != NEW.snapshot_sha256
+                  OR OLD.id != NEW.id
+                  OR OLD.workflow_id != NEW.workflow_id
+                  OR OLD.task_id != NEW.task_id
+                  OR OLD.asset_id != NEW.asset_id
+                  OR OLD.revision_number != NEW.revision_number
+                  OR OLD.concept_version != NEW.concept_version
+                  OR OLD.schema_version != NEW.schema_version
+                  OR OLD.created_at != NEW.created_at
+                THEN RAISE(ABORT, 'paid_request_snapshots: canonical_json and snapshot_sha256 are immutable')
+            END;
+        END;
+        """
+    )
+    conn.execute(
+        """
+        CREATE TRIGGER IF NOT EXISTS trg_production_readiness_reports_immutable
+        BEFORE UPDATE ON production_readiness_reports
+        BEGIN
+            SELECT CASE
+                WHEN OLD.report_json != NEW.report_json
+                  OR OLD.report_sha256 != NEW.report_sha256
+                  OR OLD.id != NEW.id
+                  OR OLD.workflow_id != NEW.workflow_id
+                  OR OLD.task_id != NEW.task_id
+                  OR OLD.snapshot_sha256 != NEW.snapshot_sha256
+                  OR OLD.result != NEW.result
+                  OR OLD.schema_version != NEW.schema_version
+                  OR OLD.created_at != NEW.created_at
+                THEN RAISE(ABORT, 'production_readiness_reports: report_json and report_sha256 are immutable')
+            END;
+        END;
+        """
+    )
+
+
+def _migration_0009_concept_versions(conn: sqlite3.Connection) -> None:
+    conn.execute(
+        """
+        CREATE TABLE IF NOT EXISTS concept_versions (
+            id TEXT PRIMARY KEY,
+            workflow_id TEXT NOT NULL,
+            asset_id TEXT NOT NULL,
+            revision_number INTEGER NOT NULL,
+            version INTEGER NOT NULL,
+            artifact_id TEXT NOT NULL,
+            content_hash TEXT NOT NULL,
+            provenance_artifact_id TEXT,
+            provenance_hash TEXT,
+            provenance_type TEXT,
+            source_type TEXT,
+            status TEXT NOT NULL CHECK(status IN ('ACTIVE', 'SUPERSEDED')),
+            actor TEXT NOT NULL,
+            reason TEXT NOT NULL,
+            created_at TEXT NOT NULL,
+            superseded_at TEXT,
+            UNIQUE(asset_id, revision_number, version)
+        );
+        """
+    )
+    conn.execute(
+        """
+        CREATE UNIQUE INDEX IF NOT EXISTS uq_concept_versions_active
+        ON concept_versions(asset_id, revision_number)
+        WHERE status = 'ACTIVE';
+        """
+    )
+    conn.execute(
+        "CREATE INDEX IF NOT EXISTS idx_concept_versions_workflow ON concept_versions(workflow_id);"
+    )
+    conn.execute(
+        """
+        CREATE TRIGGER IF NOT EXISTS trg_concept_versions_update_restricted
+        BEFORE UPDATE ON concept_versions
+        BEGIN
+            SELECT CASE
+                WHEN OLD.id != NEW.id
+                  OR OLD.workflow_id != NEW.workflow_id
+                  OR OLD.asset_id != NEW.asset_id
+                  OR OLD.revision_number != NEW.revision_number
+                  OR OLD.version != NEW.version
+                  OR OLD.artifact_id != NEW.artifact_id
+                  OR OLD.content_hash != NEW.content_hash
+                  OR OLD.provenance_artifact_id IS NOT NEW.provenance_artifact_id
+                  OR OLD.provenance_hash IS NOT NEW.provenance_hash
+                  OR OLD.provenance_type IS NOT NEW.provenance_type
+                  OR OLD.source_type IS NOT NEW.source_type
+                  OR OLD.actor != NEW.actor
+                  OR OLD.reason != NEW.reason
+                  OR OLD.created_at != NEW.created_at
+                THEN RAISE(ABORT, 'concept_versions: only status and superseded_at may change on update')
+            END;
+        END;
+        """
+    )
+    conn.execute(
+        """
+        CREATE TRIGGER IF NOT EXISTS trg_concept_versions_no_delete
+        BEFORE DELETE ON concept_versions
+        BEGIN
+            SELECT RAISE(ABORT, 'concept_versions: deletes are forbidden');
+        END;
+        """
+    )
+
+
 MIGRATIONS: list[tuple[int, str, Callable[[sqlite3.Connection], None]]] = [
     (1, "0001_initial_schema", _migration_0001_initial),
     (2, "0002_provider_invocations", _migration_0002_provider_invocations),
@@ -244,6 +478,9 @@ MIGRATIONS: list[tuple[int, str, Callable[[sqlite3.Connection], None]]] = [
     (4, "0004_execution_retry_classification", _migration_0004_execution_retry_classification),
     (5, "0005_asset_operations_and_intent", _migration_0005_asset_operations_and_intent),
     (6, "0006_asset_revision_profile", _migration_0006_asset_revision_profile),
+    (7, "0007_cost_ledger", _migration_0007_cost_ledger),
+    (8, "0008_paid_request_and_readiness", _migration_0008_paid_request_and_readiness),
+    (9, "0009_concept_versions", _migration_0009_concept_versions),
 ]
 
 

@@ -13,6 +13,7 @@ from gamefactory.adapters.persistence.repositories import (
     ApprovalRepository,
     ArtifactRepository,
     AssetRevisionRepository,
+    ConceptVersionRepository,
     ExecutionRepository,
     ProviderOperationIntentRepository,
     TaskRepository,
@@ -70,6 +71,23 @@ def export_asset_evidence_bundle(
         if not candidates:
             raise ArtifactError(f"Missing required evidence artifact: {kind}")
         selected[role] = candidates[-1]
+    active_concept_ver = ConceptVersionRepository(db).active_for_workflow(workflow_id)
+    if active_concept_ver is not None:
+        concept_art = next((a for a in artifacts if a.id == active_concept_ver.artifact_id), None)
+        if concept_art is None:
+            raise ArtifactError(
+                f"Active concept artifact {active_concept_ver.artifact_id} is missing"
+            )
+        selected["concept"] = concept_art
+        if active_concept_ver.provenance_artifact_id:
+            prov_art = next(
+                (a for a in artifacts if a.id == active_concept_ver.provenance_artifact_id), None
+            )
+            if prov_art is None:
+                raise ArtifactError(
+                    f"Active concept provenance artifact {active_concept_ver.provenance_artifact_id} is missing"
+                )
+            selected["concept_provenance"] = prov_art
     runtime_task = next(t for t in tasks if t.task_type == "asset_godot")
     runtime_runs = ExecutionRepository(db).list_by_task(runtime_task.id)
     if not runtime_runs:
@@ -175,8 +193,48 @@ def export_asset_evidence_bundle(
     intent = ProviderOperationIntentRepository(db).get_by_task(paid_task_id)
     if intent is None or not intent.external_task_id or intent.status != "SUCCEEDED":
         raise ArtifactError("Provider operation is not confirmed successful")
-    paid_receipt = receipt_data["paid_approval"][0]
-    if intent.request_fingerprint != paid_receipt.operation_hash:
+    paid_receipt, paid_inputs = receipt_data["paid_approval"]
+    # V0.6 intents bind the approved canonical paid request snapshot; the paid
+    # approval binds the same snapshot hash through its immutable parameters.
+    v06_evidence: dict[str, Any] | None = None
+    if intent.paid_request_snapshot_hash:
+        snapshot_sha = intent.paid_request_snapshot_hash
+        parameters = paid_inputs.get("parameters", {})
+        readiness_sha = parameters.get("production_readiness_report_sha256")
+        if (
+            intent.request_fingerprint != snapshot_sha
+            or paid_receipt.paid_request_snapshot_hash != snapshot_sha
+            or parameters.get("paid_request_snapshot_sha256") != snapshot_sha
+            or not readiness_sha
+        ):
+            raise ValidationError(
+                "Provider operation is not bound to the approved paid request snapshot"
+            )
+        snapshot_artifact = next(
+            (
+                a
+                for a in types.get("asset-paid-request-snapshot", [])
+                if a.content_hash == snapshot_sha
+            ),
+            None,
+        )
+        readiness_artifact = next(
+            (
+                a
+                for a in types.get("asset-production-readiness-report", [])
+                if a.content_hash == readiness_sha
+            ),
+            None,
+        )
+        if snapshot_artifact is None or readiness_artifact is None:
+            raise ArtifactError("Approved paid request snapshot or readiness report is missing")
+        v06_evidence = {
+            "paid_request_snapshot": snapshot_artifact,
+            "production_readiness_report": readiness_artifact,
+            "snapshot_sha256": snapshot_sha,
+            "readiness_sha256": readiness_sha,
+        }
+    elif intent.request_fingerprint != paid_receipt.operation_hash:
         raise ValidationError("Provider operation fingerprint differs from paid approval")
     requested_output = Path(output_dir)
     if not requested_output.is_absolute():
@@ -217,6 +275,10 @@ def export_asset_evidence_bundle(
             project / artifact.relative_path,
             f"evidence/{role}{Path(artifact.relative_path).suffix}",
         )
+    if v06_evidence is not None:
+        for role in ("paid_request_snapshot", "production_readiness_report"):
+            artifact = v06_evidence[role]
+            add(role, project / artifact.relative_path, f"evidence/{role}.json")
     for artifact in captures:
         angle = Path(artifact.relative_path).stem
         execution_prefix = f"{runtime_execution.id}-"
@@ -310,6 +372,11 @@ def export_asset_evidence_bundle(
         "status": intent.status,
         "external_task_id": intent.external_task_id,
         "request_fingerprint": intent.request_fingerprint,
+        **(
+            {"paid_request_snapshot_sha256": v06_evidence["snapshot_sha256"]}
+            if v06_evidence is not None
+            else {}
+        ),
         "actual_cost": intent.actual_cost if intent.actual_cost is not None else "UNKNOWN",
         "workflow_id": workflow_id,
         "task_id": intent.task_id,
@@ -402,8 +469,10 @@ def export_asset_evidence_bundle(
             for role, (approval, _) in receipt_data.items()
         ],
     )
-    receipt = {
-        "schema_version": "production-receipt-0.5.0",
+    production_receipt: dict[str, Any] = {
+        "schema_version": (
+            "production-receipt-0.6.0" if v06_evidence is not None else "production-receipt-0.5.0"
+        ),
         "asset_id": asset_id,
         "revision": revision_number,
         "profile_id": profile.profile_id,
@@ -427,7 +496,10 @@ def export_asset_evidence_bundle(
         "approval_ids": {role: approval.id for role, (approval, _inputs) in receipt_data.items()},
         "completed_at": workflow.updated_at,
     }
-    receipt_bytes = _write_json(output / "evidence/production-receipt.json", receipt)
+    if v06_evidence is not None:
+        production_receipt["paid_request_snapshot_sha256"] = v06_evidence["snapshot_sha256"]
+        production_receipt["production_readiness_report_sha256"] = v06_evidence["readiness_sha256"]
+    receipt_bytes = _write_json(output / "evidence/production-receipt.json", production_receipt)
     entries.append(
         {
             "role": "production_receipt",
@@ -468,7 +540,9 @@ def export_asset_evidence_bundle(
         }
     )
     manifest = {
-        "schema_version": "asset-evidence-0.5.0",
+        "schema_version": (
+            "asset-evidence-0.6.0" if v06_evidence is not None else "asset-evidence-0.5.0"
+        ),
         **binding,
         "profile_id": profile.profile_id,
         "profile_version": profile.version,

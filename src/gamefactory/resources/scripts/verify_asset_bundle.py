@@ -300,7 +300,7 @@ def verify_bundle(bundle: Path) -> dict[str, Any]:
     if schema == "asset-evidence-0.4.0":
         required_angles = set(_ANGLES)
         extra_single_roles: set[str] = set()
-    elif schema == "asset-evidence-0.5.0":
+    elif schema in ("asset-evidence-0.5.0", "asset-evidence-0.6.0"):
         views = manifest.get("review_views")
         allowed_views = {
             "front",
@@ -322,6 +322,8 @@ def verify_bundle(bundle: Path) -> dict[str, Any]:
             raise ValueError("0.5.0 bundle review_views are missing or unsupported")
         required_angles = set(views)
         extra_single_roles = {"production_receipt"}
+        if schema == "asset-evidence-0.6.0":
+            extra_single_roles |= {"paid_request_snapshot", "production_readiness_report"}
     else:
         raise ValueError("unsupported evidence manifest schema")
     workflow_id, revision = manifest.get("workflow_id"), manifest.get("revision")
@@ -440,7 +442,10 @@ def verify_bundle(bundle: Path) -> dict[str, Any]:
             parameters.get("asset_id") != specification.get("asset_id")
             or parameters.get("revision_number") != revision
             or parameters.get("specification_hash") != spec_hash
-            or parameters.get("concept_source_hash") != concept_hash
+            or (
+                schema != "asset-evidence-0.6.0"
+                and parameters.get("concept_source_hash") != concept_hash
+            )
             or scope.get("workflow_id") != workflow_id
             or not isinstance(artifact_hashes, list)
             or not all(isinstance(row, list) and len(row) == 2 for row in artifact_hashes)
@@ -448,15 +453,64 @@ def verify_bundle(bundle: Path) -> dict[str, Any]:
             <= {row[1] for row in artifact_hashes}
         ):
             raise ValueError(f"{kind} approval does not bind specification and concept")
+    if schema == "asset-evidence-0.6.0":
+        # V0.6 concepts are versioned inside a revision; the creation-time
+        # concept_source_hash parameter may name an earlier version. The approved
+        # concept is the one named by the hashed concept-review context.
+        context = concept["inputs"]["scope"].get("handler_context")
+        if (
+            not isinstance(context, dict)
+            or context.get("concept_sha256") != concept_hash
+            or context.get("concept_provenance_sha256") != one("concept_provenance")["sha256"]
+        ):
+            raise ValueError("concept approval does not bind the bundled concept version")
 
     provider = _object(root / one("provider_operation")["path"])
+    if schema == "asset-evidence-0.6.0":
+        # The provider request is bound to the approved canonical snapshot, and the
+        # paid approval's hashed inputs bind that snapshot and the readiness report.
+        snapshot_entry = one("paid_request_snapshot")
+        readiness_entry = one("production_readiness_report")
+        paid_parameters = (
+            paid["inputs"].get("parameters", {}) if isinstance(paid["inputs"], dict) else {}
+        )
+        expected_fingerprint = snapshot_entry["sha256"]
+        if (
+            provider.get("paid_request_snapshot_sha256") != expected_fingerprint
+            or paid_parameters.get("paid_request_snapshot_sha256") != expected_fingerprint
+            or paid_parameters.get("production_readiness_report_sha256")
+            != readiness_entry["sha256"]
+        ):
+            raise ValueError(
+                "paid approval does not bind the bundled request snapshot and readiness"
+            )
+        snapshot = _object(root / snapshot_entry["path"])
+        snapshot_binding = snapshot.get("binding")
+        if (
+            snapshot.get("schema") != "paid-request-0.6.0"
+            or not isinstance(snapshot_binding, dict)
+            or snapshot_binding.get("asset_id") != specification.get("asset_id")
+            or snapshot_binding.get("revision_number") != revision
+            or snapshot_binding.get("specification_sha256") != spec_hash
+            or snapshot_binding.get("concept_sha256") != concept_hash
+        ):
+            raise ValueError("paid request snapshot does not bind this revision and concept")
+        readiness = _object(root / readiness_entry["path"])
+        if (
+            readiness.get("schema") != "production-readiness-0.6.0"
+            or readiness.get("result") != "PASS"
+            or readiness.get("paid_request_snapshot_sha256") != expected_fingerprint
+        ):
+            raise ValueError("production readiness report is not a PASS for the approved snapshot")
+    else:
+        expected_fingerprint = paid["fingerprint"]
     if (
         not isinstance(provider.get("provider"), str)
         or not provider["provider"]
         or provider.get("operation") != "image-to-3d"
         or provider.get("status") != "SUCCEEDED"
         or not provider.get("external_task_id")
-        or provider.get("request_fingerprint") != paid["fingerprint"]
+        or provider.get("request_fingerprint") != expected_fingerprint
     ):
         raise ValueError("provider operation does not bind the paid approval")
     if (

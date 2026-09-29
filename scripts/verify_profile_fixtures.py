@@ -226,8 +226,12 @@ def _run_one(
     exported = factory("report", "--workflow", workflow_id)
     bundle = Path(str(exported["bundle"])).resolve(strict=True)
     manifest = json.loads((bundle / "manifest.json").read_text(encoding="utf-8"))
-    if manifest.get("schema_version") != "asset-evidence-0.5.0":
-        raise FixtureFailure(f"evidence schema is not 0.5.0: {manifest.get('schema_version')}")
+    # V0.6 workflows bind the approved paid request snapshot and readiness report.
+    if manifest.get("schema_version") != "asset-evidence-0.6.0":
+        raise FixtureFailure(f"evidence schema is not 0.6.0: {manifest.get('schema_version')}")
+    roles = {entry.get("role") for entry in manifest.get("files", [])}
+    if not {"paid_request_snapshot", "production_readiness_report"} <= roles:
+        raise FixtureFailure(f"V0.6 bundle lacks snapshot/readiness evidence: {sorted(roles)}")
     if tuple(manifest.get("review_views", [])) != views:
         raise FixtureFailure(f"review views {manifest.get('review_views')} != {views}")
     verifier = subprocess.run(

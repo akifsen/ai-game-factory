@@ -39,14 +39,18 @@ def _png_chunk(kind: bytes, payload: bytes) -> bytes:
     )
 
 
-def _write_concept_fixture(path: Path) -> None:
-    """Draw a small deterministic crate icon without external image libraries."""
+def _write_concept_fixture(path: Path, variant: int = 1) -> None:
+    """Draw a small deterministic crate icon without external image libraries.
+
+    ``variant`` 2 is the revised concept used by the in-revision iteration check.
+    """
     width = height = 256
+    background = (25, 34, 48) if variant == 1 else (48, 30, 26)
     pixels = bytearray()
     for y in range(height):
         row = bytearray([0])  # PNG filter: None
         for x in range(width):
-            color = (25, 34, 48)
+            color = background
             if 47 <= x < 209 and 51 <= y < 210:
                 color = (77, 98, 124)
             if 56 <= x < 200 and 61 <= y < 201:
@@ -344,7 +348,51 @@ def _run(args: argparse.Namespace, result: dict[str, Any]) -> None:
                 f"TEST ONLY: deterministic offline acceptance decision for {gate_type}; not a production human approval.",
             )
 
-        concept_approval_id = _parse_approval_id(create, "concept review")
+        first_concept_approval_id = _parse_approval_id(create, "concept review")
+
+        # V0.6 in-revision concept iteration: request changes on concept v1, append a
+        # revised concept v2 inside the same revision, and review v2 before any spend.
+        factory(
+            "request-changes",
+            first_concept_approval_id,
+            "--actor",
+            "TEST-ONLY-ACCEPTANCE",
+            "--comment",
+            "TEST ONLY: request a revised concept to exercise in-revision iteration.",
+        )
+        blocked = factory("resume", workflow_id, expected_exit=3)
+        if blocked.get("error_code") != "CONCEPT_REVISION_REQUIRED":
+            raise AcceptanceFailure(f"changes requested did not block for revision: {blocked}")
+        concept_v2_path = project / ".acceptance-inputs" / "concept-v2.png"
+        provenance_v2_path = project / ".acceptance-inputs" / "concept-v2-provenance.json"
+        _write_concept_fixture(concept_v2_path, variant=2)
+        concept_digest = _sha256(concept_v2_path)
+        provenance_v2_path.write_text(
+            json.dumps({**provenance, "sha256": concept_digest}, indent=2), encoding="utf-8"
+        )
+        replaced = factory(
+            "asset",
+            "concept",
+            "replace",
+            "--workflow",
+            workflow_id,
+            "--concept",
+            str(concept_v2_path),
+            "--provenance",
+            str(provenance_v2_path),
+            "--actor",
+            "TEST-ONLY-ACCEPTANCE",
+            "--reason",
+            "TEST ONLY: revised concept for in-revision iteration acceptance.",
+        )
+        if replaced.get("new_version") != 2 or replaced.get("new_concept_sha256") != concept_digest:
+            raise AcceptanceFailure(f"concept replacement did not append version 2: {replaced}")
+        result["checks"]["concept_iteration"] = {
+            "old_version": replaced.get("old_version"),
+            "new_version": replaced.get("new_version"),
+            "new_concept_sha256": concept_digest,
+        }
+        concept_approval_id = str(replaced.get("new_approval_id", ""))
         approve_gate(concept_approval_id, "concept_review")
         concept_resume = factory("resume", workflow_id, expected_exit=3)
         if concept_resume.get("status") != "BLOCKED":
@@ -406,6 +454,19 @@ def _run(args: argparse.Namespace, result: dict[str, Any]) -> None:
         manifest = json.loads((bundle_path / "manifest.json").read_text(encoding="utf-8"))
         if manifest.get("workflow_id") != workflow_id:
             raise AcceptanceFailure("evidence manifest belongs to another workflow")
+        bundle_roles = {entry.get("role") for entry in manifest.get("files", [])}
+        if (
+            manifest.get("schema_version") != "asset-evidence-0.6.0"
+            or not {
+                "paid_request_snapshot",
+                "production_readiness_report",
+            }
+            <= bundle_roles
+        ):
+            raise AcceptanceFailure(
+                f"V0.6 bundle lacks the approved request snapshot or readiness report: {manifest.get('schema_version')}"
+            )
+        result["checks"]["paid_request_snapshot_bound"] = "PASS"
         bundle_copy = output.parent / f"{output.stem}.bundle"
         if bundle_copy.exists() or bundle_copy.is_symlink():
             raise AcceptanceFailure(f"refusing to overwrite evidence bundle: {bundle_copy}")

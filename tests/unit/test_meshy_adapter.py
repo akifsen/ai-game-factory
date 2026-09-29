@@ -18,6 +18,7 @@ from gamefactory.adapters.external.meshy_cli import (
     MeshyCliRunner,
     MeshyDoctorResult,
     _validate_finite_nonnegative_cost,
+    resolve_paid_request,
 )
 from gamefactory.adapters.persistence.database import Database
 from gamefactory.adapters.persistence.migrations import MigrationRunner
@@ -40,6 +41,7 @@ from gamefactory.core.domain.asset_contracts import (
 )
 from gamefactory.core.domain.errors import (
     ApprovalRequired,
+    PaidRequestInvalidError,
     ProviderFailedError,
     ProviderUncertainError,
     RawArtifactInvalidError,
@@ -53,6 +55,7 @@ from gamefactory.core.domain.models import (
     Task,
     Workflow,
 )
+from gamefactory.core.domain.paid_request import PaidRequestSnapshot
 from gamefactory.core.execution.process_runner import CommandRequest, CommandResult, ProcessRunner
 from gamefactory.workflows.ports import GenerationRequest
 
@@ -236,6 +239,40 @@ def _setup_full_context(
     return concept_file, concept_hash, approval.operation_hash
 
 
+def _make_paid_request_snapshot(
+    asset_id: str = "prop_energy_crate_01",
+    revision_number: int = 1,
+    concept_hash: str = HEX_HASH_1,
+    spec_hash: str = HEX_HASH_2,
+    polycount: int = 10000,
+    cost: float | None = 4.0,
+    specification: dict[str, Any] | None = None,
+    budget_reservation: float | None = None,
+) -> PaidRequestSnapshot:
+    binding = {
+        "asset_id": asset_id,
+        "revision_number": revision_number,
+        "concept_version": 1,
+        "concept_sha256": concept_hash,
+        "specification_sha256": spec_hash,
+        "profile_id": "static_prop",
+        "profile_version": 1,
+    }
+    spec = (
+        specification
+        if specification is not None
+        else {"geometry_budget": {"max_triangles_lod0": polycount}}
+    )
+    res_val = (
+        budget_reservation
+        if budget_reservation is not None
+        else (cost if cost is not None else 10.0)
+    )
+    cost_dict = {"estimate": cost, "reservation": res_val, "unit": "credits"}
+    content = resolve_paid_request(binding, spec, cost_dict)
+    return PaidRequestSnapshot.from_content(content)
+
+
 def test_meshy_cli_runner_doctor_available() -> None:
     mock_runner = MagicMock(spec=ProcessRunner)
     doctor_stdout = """{
@@ -401,6 +438,7 @@ def test_meshy_provider_blocks_paid_calls_by_default(tmp_path: Path) -> None:
     assert provider.name == "meshy"
     assert provider.cost_class == CostClass.PAID
 
+    snap = _make_paid_request_snapshot(concept_hash=concept_hash)
     req = GenerationRequest(
         prompt="Energy Crate",
         operation_hash=op_hash,
@@ -412,7 +450,9 @@ def test_meshy_provider_blocks_paid_calls_by_default(tmp_path: Path) -> None:
             "approval_id": "app-01",
             "concept_hash": concept_hash,
             "concept_image_path": str(concept_file),
+            "paid_request_snapshot_sha256": snap.sha256,
         },
+        paid_request=snap,
     )
 
     with pytest.raises(ApprovalRequired) as exc_info:
@@ -566,6 +606,7 @@ def test_meshy_create_enforces_2k_and_smart_topology_within_budget(tmp_path: Pat
         cli_runner=cli_runner, intent_repo=intent_repo, allow_paid_calls=True
     )
 
+    snap = _make_paid_request_snapshot(concept_hash=concept_hash, polycount=20000)
     req = GenerationRequest(
         prompt="Energy Crate",
         operation_hash=op_hash,
@@ -579,7 +620,9 @@ def test_meshy_create_enforces_2k_and_smart_topology_within_budget(tmp_path: Pat
             "concept_image_path": str(concept_file),
             "target_polycount": 20000,
             "max_triangles_lod0": 20000,
+            "paid_request_snapshot_sha256": snap.sha256,
         },
+        paid_request=snap,
     )
 
     resp = provider.generate(req)
@@ -604,9 +647,74 @@ def test_meshy_create_enforces_2k_and_smart_topology_within_budget(tmp_path: Pat
     assert "--operation-id" in called_args
 
     # Check durable intent was updated immediately with external_task_id
-    updated_intent = intent_repo.get_by_fingerprint(op_hash)
+    updated_intent = intent_repo.get_by_fingerprint(snap.sha256)
     assert updated_intent is not None
     assert updated_intent.external_task_id == "meshy-new-777"
+    assert updated_intent.status == "SUBMITTED"
+
+
+def test_meshy_create_submission_uses_protocol_stdout(tmp_path: Path) -> None:
+    db = Database(tmp_path / "factory.db")
+    MigrationRunner(db).apply_all()
+    concept_file, concept_hash, op_hash = _setup_full_context(db, tmp_path, polycount=10000)
+    intent_repo = ProviderOperationIntentRepository(db)
+
+    mock_runner = MagicMock(spec=ProcessRunner)
+    valid_protocol_json = json.dumps(
+        {
+            "schema_version": "meshy.cli/v1",
+            "command": "image-to-3d create",
+            "ok": True,
+            "result": {
+                "submission": {
+                    "task_id": "01a0e9c1-f324-75f4-ab7c-59ee3b6c541d",
+                    "status": "PENDING",
+                }
+            },
+        }
+    )
+    # Corrupted / redacted stdout would fail task-id regex if parsed
+    corrupted_stdout = '{"result": {"submission": {"task_id": "[REDACTED]"}}}'
+    mock_runner.run.return_value = CommandResult(
+        exit_code=0,
+        stdout=corrupted_stdout,
+        stderr="",
+        protocol_stdout=valid_protocol_json,
+    )
+
+    cli_runner = MeshyCliRunner(runner=mock_runner)
+    cli_runner._cached_runner_cmd = ["meshy"]
+
+    provider = MeshyAssetGenerationProvider(
+        cli_runner=cli_runner, intent_repo=intent_repo, allow_paid_calls=True
+    )
+
+    snap = _make_paid_request_snapshot(concept_hash=concept_hash, polycount=10000)
+    req = GenerationRequest(
+        prompt="Energy Crate",
+        operation_hash=op_hash,
+        parameters={
+            "asset_id": "prop_energy_crate_01",
+            "revision_number": 1,
+            "task_id": "task-01",
+            "workflow_id": "wf-01",
+            "approval_id": "app-01",
+            "concept_hash": concept_hash,
+            "concept_image_path": str(concept_file),
+            "target_polycount": 10000,
+            "max_triangles_lod0": 10000,
+            "paid_request_snapshot_sha256": snap.sha256,
+        },
+        paid_request=snap,
+    )
+
+    resp = provider.generate(req)
+    assert resp.external_op_id == "01a0e9c1-f324-75f4-ab7c-59ee3b6c541d"
+    assert resp.status == "SUBMITTED"
+
+    updated_intent = intent_repo.get_by_fingerprint(snap.sha256)
+    assert updated_intent is not None
+    assert updated_intent.external_task_id == "01a0e9c1-f324-75f4-ab7c-59ee3b6c541d"
     assert updated_intent.status == "SUBMITTED"
 
 
@@ -648,6 +756,13 @@ def test_actual_workflow_shape_preserves_unknown_estimate_and_binds_nested_spec(
     provider = MeshyAssetGenerationProvider(
         cli_runner=cli_runner, intent_repo=intent_repo, allow_paid_calls=True
     )
+    snap = _make_paid_request_snapshot(
+        concept_hash=concept_hash,
+        spec_hash=spec_hash,
+        specification=spec_data,
+        cost=None,
+        budget_reservation=10.0,
+    )
     request = GenerationRequest(
         prompt="Energy crate",
         operation_hash=op_hash,
@@ -666,11 +781,13 @@ def test_actual_workflow_shape_preserves_unknown_estimate_and_binds_nested_spec(
             "budget_reservation": 10.0,
             "cost": None,
             "max_triangles_lod0": 12000,
+            "paid_request_snapshot_sha256": snap.sha256,
         },
+        paid_request=snap,
     )
 
     response = provider.generate(request)
-    intent = intent_repo.get_by_fingerprint(op_hash)
+    intent = intent_repo.get_by_fingerprint(snap.sha256)
     assert response.external_op_id == "meshy-nested-1"
     assert intent is not None and intent.estimated_cost is None
     command_request = mock_runner.run.call_args.args[0]
@@ -734,9 +851,22 @@ def test_actual_workflow_shape_rejects_unbound_polycount_and_estimate(
     }
     parameters.update(overrides)
 
+    snap = _make_paid_request_snapshot(
+        concept_hash=concept_hash,
+        spec_hash=spec_hash,
+        specification=spec_data,
+        cost=None,
+        budget_reservation=10.0,
+    )
+
     with pytest.raises(ProviderFailedError, match=match):
         provider.generate(
-            GenerationRequest("Energy crate", operation_hash=op_hash, parameters=parameters)
+            GenerationRequest(
+                "Energy crate",
+                operation_hash=op_hash,
+                parameters=parameters,
+                paid_request=snap,
+            )
         )
     assert provider.invocation_count == 0
     assert mock_runner.run.call_count == 0
@@ -760,6 +890,7 @@ def test_meshy_create_failure_classified_as_uncertain(tmp_path: Path) -> None:
         cli_runner=cli_runner, intent_repo=intent_repo, allow_paid_calls=True
     )
 
+    snap = _make_paid_request_snapshot(concept_hash=concept_hash)
     req = GenerationRequest(
         prompt="Energy Crate",
         operation_hash=op_hash,
@@ -771,14 +902,16 @@ def test_meshy_create_failure_classified_as_uncertain(tmp_path: Path) -> None:
             "approval_id": "app-01",
             "concept_hash": concept_hash,
             "concept_image_path": str(concept_file),
+            "paid_request_snapshot_sha256": snap.sha256,
         },
+        paid_request=snap,
     )
 
     with pytest.raises(ProviderUncertainError):
         provider.generate(req)
 
     # Intent must be recorded as UNCERTAIN in DB to prevent duplicate calls
-    intent = intent_repo.get_by_fingerprint(op_hash)
+    intent = intent_repo.get_by_fingerprint(snap.sha256)
     assert intent is not None
     assert intent.status == "UNCERTAIN"
 
@@ -886,6 +1019,7 @@ def test_concurrency_race_exactly_one_create(tmp_path: Path) -> None:
         cli_runner=cli_runner, intent_repo=intent_repo, allow_paid_calls=True
     )
 
+    snap = _make_paid_request_snapshot(concept_hash=concept_hash)
     req = GenerationRequest(
         prompt="Energy Crate",
         operation_hash=op_hash,
@@ -897,7 +1031,9 @@ def test_concurrency_race_exactly_one_create(tmp_path: Path) -> None:
             "approval_id": "app-01",
             "concept_hash": concept_hash,
             "concept_image_path": str(concept_file),
+            "paid_request_snapshot_sha256": snap.sha256,
         },
+        paid_request=snap,
     )
 
     results: list[Any] = []
@@ -944,6 +1080,8 @@ def test_approval_verification_missing_rejected_or_forged(tmp_path: Path) -> Non
         cli_runner=cli_runner, intent_repo=intent_repo, allow_paid_calls=True
     )
 
+    snap = _make_paid_request_snapshot(concept_hash=concept_hash)
+
     # 1. Rejected approval
     req_rejected = GenerationRequest(
         prompt="Energy Crate",
@@ -956,7 +1094,9 @@ def test_approval_verification_missing_rejected_or_forged(tmp_path: Path) -> Non
             "approval_id": "app-01",
             "concept_hash": concept_hash,
             "concept_image_path": str(concept_file),
+            "paid_request_snapshot_sha256": snap.sha256,
         },
+        paid_request=snap,
     )
     with pytest.raises(ApprovalRequired, match="not approved"):
         provider.generate(req_rejected)
@@ -975,7 +1115,9 @@ def test_approval_verification_missing_rejected_or_forged(tmp_path: Path) -> Non
             "approval_id": "nonexistent-app",
             "concept_hash": concept_hash,
             "concept_image_path": str(concept_file),
+            "paid_request_snapshot_sha256": snap.sha256,
         },
+        paid_request=snap,
     )
     with pytest.raises(ApprovalRequired, match="not found"):
         provider.generate(req_missing)
@@ -999,7 +1141,9 @@ def test_approval_verification_missing_rejected_or_forged(tmp_path: Path) -> Non
             "approval_id": "app-01",
             "concept_hash": concept_hash,
             "concept_image_path": str(concept_file),
+            "paid_request_snapshot_sha256": snap.sha256,
         },
+        paid_request=snap,
     )
     with pytest.raises(
         ApprovalRequired, match="does not match current authoritative operation hash"
@@ -1024,6 +1168,7 @@ def test_revision_and_concept_hash_binding(tmp_path: Path) -> None:
     task.parameters["revision_number"] = 999
     task_repo.update_parameters("task-01", task.parameters)
 
+    snap_bad_rev = _make_paid_request_snapshot(concept_hash=concept_hash, revision_number=999)
     req_bad_rev = GenerationRequest(
         prompt="Energy Crate",
         operation_hash=op_hash,
@@ -1035,7 +1180,9 @@ def test_revision_and_concept_hash_binding(tmp_path: Path) -> None:
             "approval_id": "app-01",
             "concept_hash": concept_hash,
             "concept_image_path": str(concept_file),
+            "paid_request_snapshot_sha256": snap_bad_rev.sha256,
         },
+        paid_request=snap_bad_rev,
     )
     with pytest.raises(ProviderFailedError, match="revision 999 .* does not exist"):
         provider.generate(req_bad_rev)
@@ -1046,6 +1193,7 @@ def test_revision_and_concept_hash_binding(tmp_path: Path) -> None:
 
     # 2. Corrupted concept file on disk does not match concept_hash
     concept_file.write_bytes(b"corrupted content")
+    snap_corrupted = _make_paid_request_snapshot(concept_hash=concept_hash, revision_number=1)
     req_corrupted = GenerationRequest(
         prompt="Energy Crate",
         operation_hash=op_hash,
@@ -1057,7 +1205,9 @@ def test_revision_and_concept_hash_binding(tmp_path: Path) -> None:
             "approval_id": "app-01",
             "concept_hash": concept_hash,
             "concept_image_path": str(concept_file),
+            "paid_request_snapshot_sha256": snap_corrupted.sha256,
         },
+        paid_request=snap_corrupted,
     )
     with pytest.raises(ProviderFailedError, match="does not match expected concept_hash"):
         provider.generate(req_corrupted)
@@ -1325,6 +1475,7 @@ def test_tampered_request_parameters_rejected_zero_create(tmp_path: Path) -> Non
     )
 
     # 1. Tampered polycount in request (15000 vs authoritative 10000)
+    snap_bad_poly = _make_paid_request_snapshot(concept_hash=concept_hash, polycount=15000)
     req_bad_poly = GenerationRequest(
         prompt="Energy Crate",
         operation_hash=op_hash,
@@ -1337,7 +1488,9 @@ def test_tampered_request_parameters_rejected_zero_create(tmp_path: Path) -> Non
             "concept_hash": concept_hash,
             "concept_image_path": str(concept_file),
             "target_polycount": 15000,
+            "paid_request_snapshot_sha256": snap_bad_poly.sha256,
         },
+        paid_request=snap_bad_poly,
     )
     with pytest.raises(ProviderFailedError, match="does not match authoritative task polycount"):
         provider.generate(req_bad_poly)
@@ -1345,6 +1498,7 @@ def test_tampered_request_parameters_rejected_zero_create(tmp_path: Path) -> Non
     assert mock_runner.run.call_count == 0
 
     # 2. Tampered cost in request (50.0 vs authoritative 4.0)
+    snap_bad_cost = _make_paid_request_snapshot(concept_hash=concept_hash, cost=50.0)
     req_bad_cost = GenerationRequest(
         prompt="Energy Crate",
         operation_hash=op_hash,
@@ -1357,7 +1511,9 @@ def test_tampered_request_parameters_rejected_zero_create(tmp_path: Path) -> Non
             "concept_hash": concept_hash,
             "concept_image_path": str(concept_file),
             "cost": 50.0,
+            "paid_request_snapshot_sha256": snap_bad_cost.sha256,
         },
+        paid_request=snap_bad_cost,
     )
     with pytest.raises(ProviderFailedError, match="does not match authoritative task cost"):
         provider.generate(req_bad_cost)
@@ -1365,6 +1521,7 @@ def test_tampered_request_parameters_rejected_zero_create(tmp_path: Path) -> Non
     assert mock_runner.run.call_count == 0
 
     # 3. Tampered specification_hash in request
+    snap_bad_spec = _make_paid_request_snapshot(concept_hash=concept_hash, spec_hash=HEX_HASH_3)
     req_bad_spec = GenerationRequest(
         prompt="Energy Crate",
         operation_hash=op_hash,
@@ -1377,10 +1534,15 @@ def test_tampered_request_parameters_rejected_zero_create(tmp_path: Path) -> Non
             "concept_hash": concept_hash,
             "concept_image_path": str(concept_file),
             "specification_hash": HEX_HASH_3,
+            "paid_request_snapshot_sha256": snap_bad_spec.sha256,
         },
+        paid_request=snap_bad_spec,
     )
+    # V0.6: the snapshot binding check rejects a tampered specification hash before
+    # the legacy parameter checks run; the zero-create safety property is unchanged.
     with pytest.raises(
-        ProviderFailedError, match="does not match authoritative revision spec_hash"
+        PaidRequestInvalidError,
+        match="specification_sha256 .* does not match revision spec_hash",
     ):
         provider.generate(req_bad_spec)
     assert provider.invocation_count == 0
@@ -1412,6 +1574,7 @@ def test_tampered_authoritative_task_params_after_approval_rejected_zero_create(
         cli_runner=cli_runner, intent_repo=intent_repo, allow_paid_calls=True
     )
 
+    snap = _make_paid_request_snapshot(concept_hash=concept_hash, polycount=5000)
     req = GenerationRequest(
         prompt="Energy Crate",
         operation_hash=op_hash,
@@ -1424,7 +1587,9 @@ def test_tampered_authoritative_task_params_after_approval_rejected_zero_create(
             "concept_hash": concept_hash,
             "concept_image_path": str(concept_file),
             "target_polycount": 5000,
+            "paid_request_snapshot_sha256": snap.sha256,
         },
+        paid_request=snap,
     )
 
     # Must detect hash mismatch and reject with ApprovalRequired
@@ -1797,6 +1962,7 @@ def test_two_approved_tasks_same_asset_revision_race_creates_at_most_once(tmp_pa
         cli_runner=cli_runner, intent_repo=intent_repo, allow_paid_calls=True
     )
 
+    snap1 = _make_paid_request_snapshot(concept_hash=concept_hash, polycount=10000)
     req1 = GenerationRequest(
         prompt="Energy Crate",
         operation_hash=op_hash_1,
@@ -1809,9 +1975,12 @@ def test_two_approved_tasks_same_asset_revision_race_creates_at_most_once(tmp_pa
             "concept_hash": concept_hash,
             "concept_image_path": str(concept_file),
             "target_polycount": 10000,
+            "paid_request_snapshot_sha256": snap1.sha256,
         },
+        paid_request=snap1,
     )
 
+    snap2 = _make_paid_request_snapshot(concept_hash=concept_hash, polycount=10000)
     req2 = GenerationRequest(
         prompt="Energy Crate",
         operation_hash=op_hash_2,
@@ -1824,7 +1993,9 @@ def test_two_approved_tasks_same_asset_revision_race_creates_at_most_once(tmp_pa
             "concept_hash": concept_hash,
             "concept_image_path": str(concept_file),
             "target_polycount": 10000,
+            "paid_request_snapshot_sha256": snap2.sha256,
         },
+        paid_request=snap2,
     )
 
     results: list[Any] = []

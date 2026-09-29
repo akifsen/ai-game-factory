@@ -10,6 +10,11 @@ from dataclasses import asdict, dataclass, field, replace
 from typing import Any
 
 from gamefactory.adapters.persistence.database import Database
+from gamefactory.core.accounting.ledger import (
+    EntryType,
+    LedgerEntry,
+    OperationAccount,
+)
 from gamefactory.core.domain.asset_contracts import AssetRevision
 from gamefactory.core.domain.errors import ValidationError
 from gamefactory.core.domain.models import (
@@ -34,16 +39,9 @@ from gamefactory.core.domain.models import (
 from gamefactory.core.domain.state_machine import TaskStateMachine
 from gamefactory.core.execution.redaction import (
     _SENSITIVE_ENV_SUBSTRINGS,
+    _is_identity_key,
     redactor,
 )
-
-
-def _is_identity_key(key: Any) -> bool:
-    """Keep database identities and hashes byte-for-byte stable."""
-    normalized = str(key).strip().lower().replace("-", "_")
-    return normalized in {"id", "hash", "fingerprint"} or normalized.endswith(
-        ("_id", "_hash", "_fingerprint")
-    )
 
 
 def _sanitize_persisted_data(value: Any) -> Any:
@@ -54,7 +52,10 @@ def _sanitize_persisted_data(value: Any) -> Any:
             if _is_identity_key(key):
                 cleaned[key] = item
             elif any(part in str(key).upper() for part in _SENSITIVE_ENV_SUBSTRINGS):
-                cleaned[key] = "[REDACTED]"
+                if item is None or isinstance(item, bool):
+                    cleaned[key] = item
+                else:
+                    cleaned[key] = "[REDACTED]"
             else:
                 cleaned[key] = _sanitize_persisted_data(item)
         return cleaned
@@ -407,22 +408,41 @@ class TaskRepository:
         with self.db.transaction() as conn:
             # Serialize budget reads with reservations from other workflow locks.
             conn.execute("BEGIN IMMEDIATE")
-            spent = conn.execute(
-                "SELECT COALESCE(SUM(e.cost), 0) AS total FROM executions e JOIN tasks t ON t.id=e.task_id JOIN workflows w ON w.id=t.workflow_id WHERE w.project_id=?",
+            spent_row = conn.execute(
+                "SELECT COALESCE(SUM(CASE WHEN entry_type = 'RELEASE' THEN -amount ELSE amount END), 0.0) AS total FROM cost_ledger WHERE project_id = ?",
                 (project_id,),
-            ).fetchone()["total"]
-            if float(spent) + execution.cost > project_budget:
+            ).fetchone()
+            spent = float(spent_row["total"])
+            # A paid operation (task) is reserved once. A settled operation needs no new
+            # hold, and an unsettled one only tops up to the requested reservation, so a
+            # retry can never stack a second, never-released reservation.
+            account_row = conn.execute(
+                "SELECT "
+                "COALESCE(SUM(CASE WHEN entry_type = 'SETTLE' THEN 1 ELSE 0 END), 0) AS settles, "
+                "COALESCE(SUM(CASE WHEN entry_type = 'RESERVE' THEN amount "
+                "WHEN entry_type = 'RELEASE' THEN -amount ELSE 0 END), 0.0) AS held "
+                "FROM cost_ledger WHERE task_id = ?",
+                (task_id,),
+            ).fetchone()
+            reservation = (
+                0.0
+                if int(account_row["settles"]) > 0
+                else max(0.0, float(execution.cost) - max(0.0, float(account_row["held"])))
+            )
+            if spent + reservation > project_budget:
                 from gamefactory.core.domain.errors import BudgetExceeded
 
                 raise BudgetExceeded(
                     "Atomic project budget reservation would be exceeded",
                     details={
-                        "spent": float(spent),
-                        "estimate": execution.cost,
+                        "spent": spent,
+                        "estimate": reservation,
                         "budget": project_budget,
                     },
                 )
-            task_row = conn.execute("SELECT status FROM tasks WHERE id=?", (task_id,)).fetchone()
+            task_row = conn.execute(
+                "SELECT workflow_id, status FROM tasks WHERE id=?", (task_id,)
+            ).fetchone()
             changed = conn.execute(
                 "UPDATE tasks SET status = ?, updated_at = ? WHERE id = ? AND status IN (?, ?)",
                 (
@@ -458,6 +478,32 @@ class TaskRepository:
                     int(execution.retryable),
                 ),
             )
+            if reservation > 0:
+                conn.execute(
+                    """
+                    INSERT INTO cost_ledger (
+                        id, project_id, workflow_id, task_id, execution_id, intent_id,
+                        request_fingerprint, entry_type, amount, cost_unit, reason,
+                        source, actor, created_at
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    """,
+                    (
+                        generate_id("LEDGER"),
+                        project_id,
+                        task_row["workflow_id"],
+                        task_id,
+                        execution.id,
+                        None,
+                        None,
+                        "RESERVE",
+                        reservation,
+                        execution.cost_unit or "credits",
+                        "Reservation held for dispatch",
+                        "execution_claim",
+                        "WorkflowEngine",
+                        execution.started_at or utc_now_iso(),
+                    ),
+                )
             _append_status_event(
                 conn,
                 "Task",
@@ -499,6 +545,68 @@ class TaskRepository:
             )
             if cursor.rowcount != 1:
                 raise ValidationError(f"Task '{task_id}' not found while updating parameters")
+
+    def reopen_for_concept_replacement(
+        self, workflow_id: str, task_ids: list[str], audit_event: AuditEvent | None = None
+    ) -> None:
+        """Bypass TaskStateMachine to reset pre-paid tasks to PENDING and workflow to BLOCKED."""
+        now = utc_now_iso()
+        with self.db.transaction() as conn:
+            conn.execute("BEGIN IMMEDIATE")
+            for task_id in task_ids:
+                row = conn.execute(
+                    "SELECT status FROM tasks WHERE id = ? AND workflow_id = ?",
+                    (task_id, workflow_id),
+                ).fetchone()
+                if row is None:
+                    continue
+                old_status = row["status"]
+                conn.execute(
+                    "UPDATE tasks SET status = ?, updated_at = ? WHERE id = ? AND workflow_id = ?",
+                    (TaskStatus.PENDING.value, now, task_id, workflow_id),
+                )
+                actor = audit_event.actor if audit_event else "AssetConceptService"
+                details = dict(audit_event.details) if (audit_event and audit_event.details) else {}
+                details["workflow_id"] = workflow_id
+                _insert_audit_event(
+                    conn,
+                    AuditEvent(
+                        id=generate_id("AUDIT"),
+                        entity_type="Task",
+                        entity_id=task_id,
+                        action="TASK_REOPENED_FOR_CONCEPT_REPLACEMENT",
+                        actor=actor,
+                        timestamp=now,
+                        previous_state=old_status,
+                        new_state=TaskStatus.PENDING.value,
+                        details=details,
+                    ),
+                )
+            wf_row = conn.execute(
+                "SELECT status FROM workflows WHERE id = ?", (workflow_id,)
+            ).fetchone()
+            if wf_row is not None:
+                old_wf_status = wf_row["status"]
+                conn.execute(
+                    "UPDATE workflows SET status = ?, updated_at = ? WHERE id = ?",
+                    (WorkflowStatus.BLOCKED.value, now, workflow_id),
+                )
+                if old_wf_status != WorkflowStatus.BLOCKED.value:
+                    actor = audit_event.actor if audit_event else "AssetConceptService"
+                    _insert_audit_event(
+                        conn,
+                        AuditEvent(
+                            id=generate_id("AUDIT"),
+                            entity_type="Workflow",
+                            entity_id=workflow_id,
+                            action="STATE_CHANGED",
+                            actor=actor,
+                            timestamp=now,
+                            previous_state=old_wf_status,
+                            new_state=WorkflowStatus.BLOCKED.value,
+                            details={"reason": "reopened_for_concept_replacement"},
+                        ),
+                    )
 
 
 class ExecutionRepository:
@@ -629,6 +737,19 @@ class ExecutionRepository:
         finally:
             conn.close()
 
+    def reclassify_retryable(self, execution_id: str, audit_event: AuditEvent) -> bool:
+        """Atomically update retryable 0->1 for a failed execution and insert audit event."""
+        with self.db.transaction() as conn:
+            conn.execute("BEGIN IMMEDIATE")
+            changed = conn.execute(
+                "UPDATE executions SET retryable = 1 WHERE id = ? AND retryable = 0 AND status = 'FAILED'",
+                (execution_id,),
+            ).rowcount
+            if changed != 1:
+                return False
+            _insert_audit_event(conn, audit_event)
+            return True
+
     def _row_to_execution(self, row: Any) -> Execution:
         return Execution(
             id=row["id"],
@@ -662,13 +783,15 @@ class ApprovalRepository:
                 """
                 INSERT INTO approvals (
                     id, workflow_id, task_id, approval_type, status, reason, cost_class,
-                    operation_hash, actor, comment, requested_at, decided_at, artifact_ids_json
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    operation_hash, actor, comment, requested_at, decided_at, artifact_ids_json,
+                    paid_request_snapshot_hash
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 ON CONFLICT(id) DO UPDATE SET
                     status = excluded.status,
                     actor = excluded.actor,
                     comment = excluded.comment,
-                    decided_at = excluded.decided_at;
+                    decided_at = excluded.decided_at,
+                    paid_request_snapshot_hash = excluded.paid_request_snapshot_hash;
                 """,
                 (
                     approval.id,
@@ -684,6 +807,7 @@ class ApprovalRepository:
                     approval.requested_at,
                     approval.decided_at,
                     json.dumps(approval.artifact_ids),
+                    approval.paid_request_snapshot_hash,
                 ),
             )
 
@@ -790,6 +914,11 @@ class ApprovalRepository:
             requested_at=row["requested_at"],
             decided_at=row["decided_at"],
             artifact_ids=json.loads(row["artifact_ids_json"]),
+            paid_request_snapshot_hash=(
+                row["paid_request_snapshot_hash"]
+                if "paid_request_snapshot_hash" in row.keys()
+                else None
+            ),
         )
 
 
@@ -1052,6 +1181,7 @@ class ProviderOperationIntent:
     status: str = "INTENDED"  # INTENDED, SUBMITTING, SUBMITTED, SUCCEEDED, FAILED, UNCERTAIN
     created_at: str = field(default_factory=utc_now_iso)
     updated_at: str = field(default_factory=utc_now_iso)
+    paid_request_snapshot_hash: str | None = None
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -1139,7 +1269,7 @@ class AssetRevisionRepository:
         with self.db.transaction() as conn:
             conn.execute("BEGIN IMMEDIATE")
             existing = conn.execute(
-                "SELECT spec_hash, workflow_id, concept_hash, raw_glb_hash, processed_glb_hash, validation_report_hash, runtime_evidence_hashes_json, profile_id, profile_version FROM asset_revisions WHERE asset_id = ? AND revision_number = ?;",
+                "SELECT spec_hash, workflow_id, concept_hash, raw_glb_hash, processed_glb_hash, validation_report_hash, runtime_evidence_hashes_json, profile_id, profile_version, created_at, updated_at FROM asset_revisions WHERE asset_id = ? AND revision_number = ?;",
                 (revision.asset_id, revision.revision_number),
             ).fetchone()
 
@@ -1217,6 +1347,22 @@ class AssetRevisionRepository:
                         f"Cannot remove or change immutable runtime evidence hashes for revision "
                         f"{revision.revision_number} of '{revision.asset_id}'"
                     )
+
+                changed = (
+                    existing["concept_hash"] != revision.concept_hash
+                    or existing["raw_glb_hash"] != revision.raw_glb_hash
+                    or existing["processed_glb_hash"] != revision.processed_glb_hash
+                    or existing["validation_report_hash"] != revision.validation_report_hash
+                    or saved_runtime_hashes != proposed_runtime_hashes
+                )
+
+                revision.created_at = existing["created_at"]
+                if changed:
+                    now = utc_now_iso()
+                    revision.updated_at = now
+                else:
+                    revision.updated_at = existing["updated_at"]
+
                 conn.execute(
                     """
                     UPDATE asset_revisions SET
@@ -1234,11 +1380,31 @@ class AssetRevisionRepository:
                         revision.processed_glb_hash,
                         revision.validation_report_hash,
                         json.dumps(revision.runtime_evidence_hashes),
-                        revision.updated_at or utc_now_iso(),
+                        revision.updated_at,
                         revision.asset_id,
                         revision.revision_number,
                     ),
                 )
+
+    def supersede_concept_hash(
+        self, asset_id: str, revision_number: int, expected_old_hash: str, new_hash: str
+    ) -> bool:
+        """Atomically update concept_hash only when raw_glb_hash is NULL and concept_hash matches expected_old_hash."""
+        now = utc_now_iso()
+        with self.db.transaction() as conn:
+            conn.execute("BEGIN IMMEDIATE")
+            cursor = conn.execute(
+                """
+                UPDATE asset_revisions
+                SET concept_hash = ?, updated_at = ?
+                WHERE asset_id = ?
+                  AND revision_number = ?
+                  AND raw_glb_hash IS NULL
+                  AND concept_hash = ?;
+                """,
+                (new_hash, now, asset_id, revision_number, expected_old_hash),
+            )
+            return cursor.rowcount == 1
 
     def get(self, asset_id: str, revision_number: int) -> AssetRevision | None:
         conn = self.db.connect()
@@ -1312,43 +1478,118 @@ class ProviderOperationIntentRepository:
     def __init__(self, db: Database) -> None:
         self.db = db
 
+    @staticmethod
+    def _audit(
+        conn: Any,
+        intent: ProviderOperationIntent,
+        action: str,
+        previous: str | None = None,
+        details: dict[str, Any] | None = None,
+    ) -> None:
+        """Record a provider lifecycle transition in the intent's own transaction."""
+        _insert_audit_event(
+            conn,
+            AuditEvent(
+                id=generate_id("AUDIT"),
+                entity_type="ProviderOperationIntent",
+                entity_id=intent.id,
+                action=action,
+                actor="ProviderAdapter",
+                timestamp=utc_now_iso(),
+                previous_state=previous,
+                new_state=intent.status,
+                details={
+                    "workflow_id": intent.workflow_id,
+                    "task_id": intent.task_id,
+                    "provider": intent.provider,
+                    "operation": intent.operation,
+                    "request_fingerprint": intent.request_fingerprint,
+                    "external_task_id": intent.external_task_id,
+                    **(details or {}),
+                },
+            ),
+        )
+
     def save(self, intent: ProviderOperationIntent) -> None:
         with self.db.transaction() as conn:
             conn.execute("BEGIN IMMEDIATE")
-            conn.execute(
-                """
-                INSERT INTO provider_operation_intents (
-                    id, workflow_id, task_id, asset_id, revision_number,
-                    provider, operation, concept_hash, request_fingerprint,
-                    approval_id, estimated_cost, actual_cost, cost_unit,
-                    external_task_id, status, created_at, updated_at
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                ON CONFLICT(id) DO UPDATE SET
-                    external_task_id = excluded.external_task_id,
-                    actual_cost = excluded.actual_cost,
-                    status = excluded.status,
-                    updated_at = excluded.updated_at;
-                """,
-                (
-                    intent.id,
-                    intent.workflow_id,
-                    intent.task_id,
-                    intent.asset_id,
-                    intent.revision_number,
-                    intent.provider,
-                    intent.operation,
-                    intent.concept_hash,
-                    intent.request_fingerprint,
-                    intent.approval_id,
-                    intent.estimated_cost,
-                    intent.actual_cost,
-                    intent.cost_unit,
-                    intent.external_task_id,
-                    intent.status,
-                    intent.created_at,
-                    intent.updated_at,
-                ),
-            )
+            existing = conn.execute(
+                "SELECT created_at, updated_at, status, external_task_id, actual_cost "
+                "FROM provider_operation_intents WHERE id = ?;",
+                (intent.id,),
+            ).fetchone()
+            if existing is None:
+                conn.execute(
+                    """
+                    INSERT INTO provider_operation_intents (
+                        id, workflow_id, task_id, asset_id, revision_number,
+                        provider, operation, concept_hash, request_fingerprint,
+                        approval_id, estimated_cost, actual_cost, cost_unit,
+                        external_task_id, status, created_at, updated_at,
+                        paid_request_snapshot_hash
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+                    """,
+                    (
+                        intent.id,
+                        intent.workflow_id,
+                        intent.task_id,
+                        intent.asset_id,
+                        intent.revision_number,
+                        intent.provider,
+                        intent.operation,
+                        intent.concept_hash,
+                        intent.request_fingerprint,
+                        intent.approval_id,
+                        intent.estimated_cost,
+                        intent.actual_cost,
+                        intent.cost_unit,
+                        intent.external_task_id,
+                        intent.status,
+                        intent.created_at,
+                        intent.updated_at,
+                        intent.paid_request_snapshot_hash,
+                    ),
+                )
+                self._audit(conn, intent, "PROVIDER_INTENT_RECORDED")
+            else:
+                now = utc_now_iso()
+                intent.created_at = existing["created_at"]
+                intent.updated_at = now
+                conn.execute(
+                    """
+                    UPDATE provider_operation_intents SET
+                        external_task_id = ?,
+                        actual_cost = ?,
+                        status = ?,
+                        updated_at = ?
+                    WHERE id = ?;
+                    """,
+                    (
+                        intent.external_task_id,
+                        intent.actual_cost,
+                        intent.status,
+                        now,
+                        intent.id,
+                    ),
+                )
+                if intent.external_task_id and not existing["external_task_id"]:
+                    self._audit(conn, intent, "PROVIDER_TASK_ID_PERSISTED", existing["status"])
+                if intent.status != existing["status"]:
+                    self._audit(
+                        conn,
+                        intent,
+                        "PROVIDER_STATUS_CHANGED",
+                        existing["status"],
+                        {"actual_cost": intent.actual_cost},
+                    )
+                elif intent.actual_cost != existing["actual_cost"]:
+                    self._audit(
+                        conn,
+                        intent,
+                        "PROVIDER_ACTUAL_COST_RECORDED",
+                        existing["status"],
+                        {"actual_cost": intent.actual_cost},
+                    )
 
     def claim_intent(self, intent: ProviderOperationIntent) -> tuple[ProviderOperationIntent, bool]:
         """Atomically claim intent for an operation using BEGIN IMMEDIATE.
@@ -1358,6 +1599,7 @@ class ProviderOperationIntentRepository:
         request_fingerprint, or (asset_id, revision_number, provider, operation)
         already exists.
         """
+        intent.updated_at = intent.created_at
         with self.db.transaction() as conn:
             conn.execute("BEGIN IMMEDIATE")
             row = conn.execute(
@@ -1387,8 +1629,9 @@ class ProviderOperationIntentRepository:
                         id, workflow_id, task_id, asset_id, revision_number,
                         provider, operation, concept_hash, request_fingerprint,
                         approval_id, estimated_cost, actual_cost, cost_unit,
-                        external_task_id, status, created_at, updated_at
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+                        external_task_id, status, created_at, updated_at,
+                        paid_request_snapshot_hash
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
                     """,
                     (
                         intent.id,
@@ -1408,7 +1651,14 @@ class ProviderOperationIntentRepository:
                         intent.status,
                         intent.created_at,
                         intent.updated_at,
+                        intent.paid_request_snapshot_hash,
                     ),
+                )
+                self._audit(
+                    conn,
+                    intent,
+                    "PROVIDER_INTENT_CLAIMED",
+                    details={"paid_request_snapshot_hash": intent.paid_request_snapshot_hash},
                 )
                 return intent, True
             except sqlite3.IntegrityError:
@@ -1526,4 +1776,506 @@ class ProviderOperationIntentRepository:
             status=row["status"],
             created_at=row["created_at"],
             updated_at=row["updated_at"],
+            paid_request_snapshot_hash=(
+                row["paid_request_snapshot_hash"]
+                if "paid_request_snapshot_hash" in row.keys()
+                else None
+            ),
+        )
+
+
+class CostLedgerRepository:
+    """Repository for appending and reading append-only cost ledger records."""
+
+    def __init__(self, db: Database) -> None:
+        self.db = db
+
+    def append(
+        self, entries: list[LedgerEntry], audit_event: AuditEvent | None = None
+    ) -> list[LedgerEntry]:
+        """Atomically append ledger entries and an optional audit event in one transaction."""
+        if not entries and audit_event is None:
+            return []
+        with self.db.transaction() as conn:
+            conn.execute("BEGIN IMMEDIATE")
+            for entry in entries:
+                conn.execute(
+                    """
+                    INSERT INTO cost_ledger (
+                        id, project_id, workflow_id, task_id, execution_id, intent_id,
+                        request_fingerprint, entry_type, amount, cost_unit, reason,
+                        source, actor, created_at
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    """,
+                    (
+                        entry.id or generate_id("LEDGER"),
+                        entry.project_id,
+                        entry.workflow_id,
+                        entry.task_id,
+                        entry.execution_id,
+                        entry.intent_id,
+                        entry.request_fingerprint,
+                        entry.entry_type.value
+                        if hasattr(entry.entry_type, "value")
+                        else str(entry.entry_type),
+                        float(entry.amount),
+                        entry.cost_unit,
+                        _redact_text(entry.reason),
+                        _redact_text(entry.source),
+                        _redact_text(entry.actor),
+                        entry.created_at or utc_now_iso(),
+                    ),
+                )
+            if audit_event is not None:
+                _insert_audit_event(conn, audit_event)
+        return entries
+
+    def list_by_workflow(self, workflow_id: str) -> list[LedgerEntry]:
+        conn = self.db.connect()
+        try:
+            cursor = conn.execute(
+                "SELECT * FROM cost_ledger WHERE workflow_id = ? ORDER BY rowid ASC;",
+                (workflow_id,),
+            )
+            return [self._row_to_entry(row) for row in cursor.fetchall()]
+        finally:
+            conn.close()
+
+    def list_by_task(self, task_id: str) -> list[LedgerEntry]:
+        conn = self.db.connect()
+        try:
+            cursor = conn.execute(
+                "SELECT * FROM cost_ledger WHERE task_id = ? ORDER BY rowid ASC;",
+                (task_id,),
+            )
+            return [self._row_to_entry(row) for row in cursor.fetchall()]
+        finally:
+            conn.close()
+
+    def project_net(self, project_id: str) -> float:
+        conn = self.db.connect()
+        try:
+            row = conn.execute(
+                """
+                SELECT COALESCE(SUM(
+                    CASE
+                        WHEN entry_type = 'RELEASE' THEN -amount
+                        ELSE amount
+                    END
+                ), 0.0) AS net
+                FROM cost_ledger
+                WHERE project_id = ?;
+                """,
+                (project_id,),
+            ).fetchone()
+            return float(row["net"]) if row else 0.0
+        finally:
+            conn.close()
+
+    def operation_account(self, task_id: str) -> OperationAccount:
+        entries = self.list_by_task(task_id)
+        reserved_total = sum(e.amount for e in entries if e.entry_type == EntryType.RESERVE)
+        released_total = sum(e.amount for e in entries if e.entry_type == EntryType.RELEASE)
+        settled_total = sum(e.amount for e in entries if e.entry_type == EntryType.SETTLE)
+        adjustments = sum(e.amount for e in entries if e.entry_type == EntryType.ADJUSTMENT)
+        settled = any(e.entry_type == EntryType.SETTLE for e in entries)
+        project_id = entries[0].project_id if entries else ""
+        workflow_id = entries[0].workflow_id if entries else ""
+        cost_unit = entries[0].cost_unit if entries else "credits"
+        if not project_id or not workflow_id:
+            conn = self.db.connect()
+            try:
+                row = conn.execute(
+                    "SELECT t.workflow_id, w.project_id FROM tasks t JOIN workflows w ON w.id = t.workflow_id WHERE t.id = ?",
+                    (task_id,),
+                ).fetchone()
+                if row:
+                    project_id = row["project_id"]
+                    workflow_id = row["workflow_id"]
+            finally:
+                conn.close()
+        return OperationAccount(
+            task_id=task_id,
+            reserved_total=reserved_total,
+            released_total=released_total,
+            settled_total=settled_total,
+            adjustments=adjustments,
+            settled=settled,
+            project_id=project_id,
+            workflow_id=workflow_id,
+            cost_unit=cost_unit,
+        )
+
+    def _row_to_entry(self, row: Any) -> LedgerEntry:
+        return LedgerEntry(
+            id=row["id"],
+            project_id=row["project_id"],
+            workflow_id=row["workflow_id"],
+            task_id=row["task_id"],
+            execution_id=row["execution_id"],
+            intent_id=row["intent_id"],
+            request_fingerprint=row["request_fingerprint"],
+            entry_type=EntryType(row["entry_type"]),
+            amount=float(row["amount"]),
+            cost_unit=row["cost_unit"],
+            reason=row["reason"],
+            source=row["source"],
+            actor=row["actor"],
+            created_at=row["created_at"],
+        )
+
+
+@dataclass
+class PaidRequestSnapshotRecord:
+    id: str
+    workflow_id: str
+    task_id: str
+    asset_id: str
+    revision_number: int
+    concept_version: int
+    schema_version: str
+    snapshot_sha256: str
+    canonical_json: str
+    status: str = "ACTIVE"  # ACTIVE, SUPERSEDED
+    artifact_id: str | None = None
+    created_at: str = field(default_factory=utc_now_iso)
+    superseded_at: str | None = None
+
+    def to_dict(self) -> dict[str, Any]:
+        return asdict(self)
+
+
+class PaidRequestSnapshotRepository:
+    def __init__(self, db: Database) -> None:
+        self.db = db
+
+    def save(self, record: PaidRequestSnapshotRecord) -> None:
+        with self.db.transaction() as conn:
+            conn.execute(
+                """
+                INSERT INTO paid_request_snapshots (
+                    id, workflow_id, task_id, asset_id, revision_number,
+                    concept_version, schema_version, snapshot_sha256,
+                    canonical_json, artifact_id, status, created_at, superseded_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ON CONFLICT(id) DO UPDATE SET
+                    status = excluded.status,
+                    superseded_at = excluded.superseded_at,
+                    artifact_id = excluded.artifact_id;
+                """,
+                (
+                    record.id,
+                    record.workflow_id,
+                    record.task_id,
+                    record.asset_id,
+                    record.revision_number,
+                    record.concept_version,
+                    record.schema_version,
+                    record.snapshot_sha256,
+                    record.canonical_json,
+                    record.artifact_id,
+                    record.status,
+                    record.created_at,
+                    record.superseded_at,
+                ),
+            )
+
+    def get_active_for_workflow(self, workflow_id: str) -> PaidRequestSnapshotRecord | None:
+        conn = self.db.connect()
+        try:
+            row = conn.execute(
+                "SELECT * FROM paid_request_snapshots WHERE workflow_id = ? AND status = 'ACTIVE' ORDER BY created_at DESC LIMIT 1;",
+                (workflow_id,),
+            ).fetchone()
+            if not row:
+                return None
+            return self._row_to_record(row)
+        finally:
+            conn.close()
+
+    def list_by_workflow(self, workflow_id: str) -> list[PaidRequestSnapshotRecord]:
+        conn = self.db.connect()
+        try:
+            rows = conn.execute(
+                "SELECT * FROM paid_request_snapshots WHERE workflow_id = ? ORDER BY created_at ASC;",
+                (workflow_id,),
+            ).fetchall()
+            return [self._row_to_record(row) for row in rows]
+        finally:
+            conn.close()
+
+    def mark_superseded(self, ids: list[str], at: str | None = None) -> int:
+        if not ids:
+            return 0
+        now = at or utc_now_iso()
+        placeholders = ",".join("?" for _ in ids)
+        with self.db.transaction() as conn:
+            cursor = conn.execute(
+                f"UPDATE paid_request_snapshots SET status = 'SUPERSEDED', superseded_at = ? WHERE id IN ({placeholders}) AND status = 'ACTIVE';",
+                [now, *ids],
+            )
+            return cursor.rowcount
+
+    def _row_to_record(self, row: Any) -> PaidRequestSnapshotRecord:
+        return PaidRequestSnapshotRecord(
+            id=row["id"],
+            workflow_id=row["workflow_id"],
+            task_id=row["task_id"],
+            asset_id=row["asset_id"],
+            revision_number=row["revision_number"],
+            concept_version=row["concept_version"],
+            schema_version=row["schema_version"],
+            snapshot_sha256=row["snapshot_sha256"],
+            canonical_json=row["canonical_json"],
+            status=row["status"],
+            artifact_id=row["artifact_id"],
+            created_at=row["created_at"],
+            superseded_at=row["superseded_at"],
+        )
+
+
+@dataclass
+class ProductionReadinessRecord:
+    id: str
+    workflow_id: str
+    task_id: str
+    snapshot_sha256: str
+    result: str  # PASS, FAIL
+    schema_version: str
+    report_json: str
+    report_sha256: str
+    status: str = "ACTIVE"  # ACTIVE, SUPERSEDED
+    artifact_id: str | None = None
+    created_at: str = field(default_factory=utc_now_iso)
+    superseded_at: str | None = None
+
+    def to_dict(self) -> dict[str, Any]:
+        return asdict(self)
+
+
+class ProductionReadinessRepository:
+    def __init__(self, db: Database) -> None:
+        self.db = db
+
+    def save(self, record: ProductionReadinessRecord) -> None:
+        with self.db.transaction() as conn:
+            conn.execute(
+                """
+                INSERT INTO production_readiness_reports (
+                    id, workflow_id, task_id, snapshot_sha256, result,
+                    schema_version, report_json, report_sha256, artifact_id,
+                    status, created_at, superseded_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ON CONFLICT(id) DO UPDATE SET
+                    status = excluded.status,
+                    superseded_at = excluded.superseded_at,
+                    artifact_id = excluded.artifact_id;
+                """,
+                (
+                    record.id,
+                    record.workflow_id,
+                    record.task_id,
+                    record.snapshot_sha256,
+                    record.result,
+                    record.schema_version,
+                    record.report_json,
+                    record.report_sha256,
+                    record.artifact_id,
+                    record.status,
+                    record.created_at,
+                    record.superseded_at,
+                ),
+            )
+
+    def get_active_for_workflow(self, workflow_id: str) -> ProductionReadinessRecord | None:
+        conn = self.db.connect()
+        try:
+            row = conn.execute(
+                "SELECT * FROM production_readiness_reports WHERE workflow_id = ? AND status = 'ACTIVE' ORDER BY created_at DESC LIMIT 1;",
+                (workflow_id,),
+            ).fetchone()
+            if not row:
+                return None
+            return self._row_to_record(row)
+        finally:
+            conn.close()
+
+    def list_by_workflow(self, workflow_id: str) -> list[ProductionReadinessRecord]:
+        conn = self.db.connect()
+        try:
+            rows = conn.execute(
+                "SELECT * FROM production_readiness_reports WHERE workflow_id = ? ORDER BY created_at ASC;",
+                (workflow_id,),
+            ).fetchall()
+            return [self._row_to_record(row) for row in rows]
+        finally:
+            conn.close()
+
+    def mark_superseded(self, ids: list[str], at: str | None = None) -> int:
+        if not ids:
+            return 0
+        now = at or utc_now_iso()
+        placeholders = ",".join("?" for _ in ids)
+        with self.db.transaction() as conn:
+            cursor = conn.execute(
+                f"UPDATE production_readiness_reports SET status = 'SUPERSEDED', superseded_at = ? WHERE id IN ({placeholders}) AND status = 'ACTIVE';",
+                [now, *ids],
+            )
+            return cursor.rowcount
+
+    def _row_to_record(self, row: Any) -> ProductionReadinessRecord:
+        return ProductionReadinessRecord(
+            id=row["id"],
+            workflow_id=row["workflow_id"],
+            task_id=row["task_id"],
+            snapshot_sha256=row["snapshot_sha256"],
+            result=row["result"],
+            schema_version=row["schema_version"],
+            report_json=row["report_json"],
+            report_sha256=row["report_sha256"],
+            status=row["status"],
+            artifact_id=row["artifact_id"],
+            created_at=row["created_at"],
+            superseded_at=row["superseded_at"],
+        )
+
+
+@dataclass
+class ConceptVersionRecord:
+    id: str
+    workflow_id: str
+    asset_id: str
+    revision_number: int
+    version: int
+    artifact_id: str
+    content_hash: str
+    actor: str
+    reason: str
+    provenance_artifact_id: str | None = None
+    provenance_hash: str | None = None
+    provenance_type: str | None = None
+    source_type: str | None = None
+    status: str = "ACTIVE"
+    created_at: str = field(default_factory=utc_now_iso)
+    superseded_at: str | None = None
+
+    def to_dict(self) -> dict[str, Any]:
+        return asdict(self)
+
+
+class ConceptVersionRepository:
+    def __init__(self, db: Database) -> None:
+        self.db = db
+
+    def add(self, record: ConceptVersionRecord) -> None:
+        with self.db.transaction() as conn:
+            conn.execute(
+                """
+                INSERT INTO concept_versions (
+                    id, workflow_id, asset_id, revision_number, version,
+                    artifact_id, content_hash, provenance_artifact_id, provenance_hash,
+                    provenance_type, source_type, status, actor, reason,
+                    created_at, superseded_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+                """,
+                (
+                    record.id,
+                    record.workflow_id,
+                    record.asset_id,
+                    record.revision_number,
+                    record.version,
+                    record.artifact_id,
+                    record.content_hash,
+                    record.provenance_artifact_id,
+                    record.provenance_hash,
+                    record.provenance_type,
+                    record.source_type,
+                    record.status,
+                    record.actor,
+                    record.reason,
+                    record.created_at,
+                    record.superseded_at,
+                ),
+            )
+
+    def active_for_workflow(self, workflow_id: str) -> ConceptVersionRecord | None:
+        conn = self.db.connect()
+        try:
+            row = conn.execute(
+                "SELECT * FROM concept_versions WHERE workflow_id = ? AND status = 'ACTIVE' ORDER BY version DESC LIMIT 1;",
+                (workflow_id,),
+            ).fetchone()
+            if not row:
+                return None
+            return self._row_to_record(row)
+        finally:
+            conn.close()
+
+    def list_for_revision(self, asset_id: str, revision_number: int) -> list[ConceptVersionRecord]:
+        conn = self.db.connect()
+        try:
+            rows = conn.execute(
+                "SELECT * FROM concept_versions WHERE asset_id = ? AND revision_number = ? ORDER BY version ASC;",
+                (asset_id, revision_number),
+            ).fetchall()
+            return [self._row_to_record(row) for row in rows]
+        finally:
+            conn.close()
+
+    def supersede_and_add(self, old_id: str | None, new_record: ConceptVersionRecord) -> None:
+        now = new_record.created_at or utc_now_iso()
+        with self.db.transaction() as conn:
+            conn.execute("BEGIN IMMEDIATE")
+            if old_id:
+                conn.execute(
+                    "UPDATE concept_versions SET status = 'SUPERSEDED', superseded_at = ? WHERE id = ? AND status = 'ACTIVE';",
+                    (now, old_id),
+                )
+            conn.execute(
+                """
+                INSERT INTO concept_versions (
+                    id, workflow_id, asset_id, revision_number, version,
+                    artifact_id, content_hash, provenance_artifact_id, provenance_hash,
+                    provenance_type, source_type, status, actor, reason,
+                    created_at, superseded_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+                """,
+                (
+                    new_record.id,
+                    new_record.workflow_id,
+                    new_record.asset_id,
+                    new_record.revision_number,
+                    new_record.version,
+                    new_record.artifact_id,
+                    new_record.content_hash,
+                    new_record.provenance_artifact_id,
+                    new_record.provenance_hash,
+                    new_record.provenance_type,
+                    new_record.source_type,
+                    new_record.status,
+                    new_record.actor,
+                    new_record.reason,
+                    new_record.created_at,
+                    new_record.superseded_at,
+                ),
+            )
+
+    def _row_to_record(self, row: Any) -> ConceptVersionRecord:
+        return ConceptVersionRecord(
+            id=row["id"],
+            workflow_id=row["workflow_id"],
+            asset_id=row["asset_id"],
+            revision_number=row["revision_number"],
+            version=row["version"],
+            artifact_id=row["artifact_id"],
+            content_hash=row["content_hash"],
+            provenance_artifact_id=row["provenance_artifact_id"],
+            provenance_hash=row["provenance_hash"],
+            provenance_type=row["provenance_type"],
+            source_type=row["source_type"],
+            status=row["status"],
+            actor=row["actor"],
+            reason=row["reason"],
+            created_at=row["created_at"],
+            superseded_at=row["superseded_at"],
         )

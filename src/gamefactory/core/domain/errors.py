@@ -283,3 +283,42 @@ class VisualReviewRejectedError(FactoryError):
             merged["actor"] = actor
         super().__init__(message, code="VISUAL_REVIEW_REJECTED", details=merged)
         self.actor = actor
+
+
+class PaidRequestInvalidError(ValidationError):
+    """Raised when a paid request snapshot violates schema or canonical requirements."""
+
+    def __init__(self, message: str, details: dict[str, Any] | None = None) -> None:
+        super().__init__(message, details=details)
+        self.code = "PAID_REQUEST_INVALID"
+
+
+class PaidRequestIncompatibleError(ProviderFailedError):
+    """Raised when current adapter cannot faithfully execute the approved snapshot; no paid call was made."""
+
+    def __init__(
+        self, message: str, provider: str | None = None, details: dict[str, Any] | None = None
+    ) -> None:
+        super().__init__(message, provider=provider, details=details)
+        self.code = "PAID_REQUEST_INCOMPATIBLE"
+
+
+class PaidRequestRequiredError(FactoryError):
+    """Raised when a new paid submission is attempted without an approved snapshot."""
+
+    def __init__(self, message: str, details: dict[str, Any] | None = None) -> None:
+        super().__init__(message, code="PAID_REQUEST_REQUIRED", details=details)
+
+
+class ProductionReadinessFailedError(ToolExecutionError):
+    """Raised when pre-spend production readiness evaluation or checks fail."""
+
+    def __init__(
+        self,
+        message: str,
+        exit_code: int | None = None,
+        stderr: str | None = None,
+        details: dict[str, Any] | None = None,
+    ) -> None:
+        super().__init__(message, exit_code=exit_code, stderr=stderr, details=details)
+        self.code = "PRODUCTION_READINESS_FAILED"
