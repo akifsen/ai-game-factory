@@ -150,6 +150,13 @@ class ReconciliationRequired(FactoryError):
         self.execution_id = execution_id
 
 
+class ReconciliationStateChangedError(FactoryError):
+    """Raised when the reconciliation plan changed between preview and the apply transaction."""
+
+    def __init__(self, message: str, details: dict[str, Any] | None = None) -> None:
+        super().__init__(message, code="RECONCILIATION_STATE_CHANGED", details=details)
+
+
 # V0.4 Asset Pipeline Structured Failure Taxonomy (Section 34)
 
 

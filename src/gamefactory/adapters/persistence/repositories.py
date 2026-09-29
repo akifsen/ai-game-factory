@@ -94,6 +94,35 @@ def _redact_text(value: str | None) -> str | None:
     return redactor.redact_text(value) if value is not None else None
 
 
+def _insert_ledger_entry(conn: Any, entry: LedgerEntry) -> None:
+    """Append one ledger row on a caller-owned connection (no commit)."""
+    conn.execute(
+        """
+        INSERT INTO cost_ledger (
+            id, project_id, workflow_id, task_id, execution_id, intent_id,
+            request_fingerprint, entry_type, amount, cost_unit, reason,
+            source, actor, created_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """,
+        (
+            entry.id or generate_id("LEDGER"),
+            entry.project_id,
+            entry.workflow_id,
+            entry.task_id,
+            entry.execution_id,
+            entry.intent_id,
+            entry.request_fingerprint,
+            entry.entry_type.value if hasattr(entry.entry_type, "value") else str(entry.entry_type),
+            float(entry.amount),
+            entry.cost_unit,
+            _redact_text(entry.reason),
+            _redact_text(entry.source),
+            _redact_text(entry.actor),
+            entry.created_at or utc_now_iso(),
+        ),
+    )
+
+
 def _insert_audit_event(conn: Any, event: AuditEvent) -> None:
     """Persist an audit event through the same text/payload redaction boundary."""
     conn.execute(
@@ -378,16 +407,19 @@ class TaskRepository:
         finally:
             conn.close()
 
-    def list_by_workflow(self, workflow_id: str) -> list[Task]:
-        conn = self.db.connect()
+    def list_by_workflow(
+        self, workflow_id: str, conn: sqlite3.Connection | None = None
+    ) -> list[Task]:
+        active = conn or self.db.connect()
         try:
-            cursor = conn.execute(
+            cursor = active.execute(
                 "SELECT * FROM tasks WHERE workflow_id = ? ORDER BY created_at ASC;",
                 (workflow_id,),
             )
             return [self._row_to_task(row) for row in cursor.fetchall()]
         finally:
-            conn.close()
+            if conn is None:
+                active.close()
 
     def update_status(self, task_id: str, status: TaskStatus) -> None:
         with self.db.transaction() as conn:
@@ -713,16 +745,18 @@ class ExecutionRepository:
         finally:
             conn.close()
 
-    def list_by_task(self, task_id: str) -> list[Execution]:
-        conn = self.db.connect()
+    def list_by_task(self, task_id: str, conn: sqlite3.Connection | None = None) -> list[Execution]:
+        """List attempts; pass ``conn`` to read inside a caller-owned transaction."""
+        active = conn or self.db.connect()
         try:
-            cursor = conn.execute(
+            cursor = active.execute(
                 "SELECT * FROM executions WHERE task_id = ? ORDER BY attempt_number ASC;",
                 (task_id,),
             )
             return [self._row_to_execution(row) for row in cursor.fetchall()]
         finally:
-            conn.close()
+            if conn is None:
+                active.close()
 
     def get_latest_attempt(self, task_id: str) -> Execution | None:
         conn = self.db.connect()
@@ -1145,19 +1179,20 @@ class ProviderInvocationRepository:
                 ),
             )
 
-    def count(self, workflow_id: str | None = None) -> int:
-        conn = self.db.connect()
+    def count(self, workflow_id: str | None = None, conn: sqlite3.Connection | None = None) -> int:
+        active = conn or self.db.connect()
         try:
             if workflow_id is None:
-                row = conn.execute("SELECT COUNT(*) AS n FROM provider_invocations").fetchone()
+                row = active.execute("SELECT COUNT(*) AS n FROM provider_invocations").fetchone()
             else:
-                row = conn.execute(
+                row = active.execute(
                     "SELECT COUNT(*) AS n FROM provider_invocations WHERE workflow_id = ?",
                     (workflow_id,),
                 ).fetchone()
             return int(row["n"])
         finally:
-            conn.close()
+            if conn is None:
+                active.close()
 
 
 @dataclass
@@ -1697,10 +1732,12 @@ class ProviderOperationIntentRepository:
         finally:
             conn.close()
 
-    def get_by_task(self, task_id: str) -> ProviderOperationIntent | None:
-        conn = self.db.connect()
+    def get_by_task(
+        self, task_id: str, conn: sqlite3.Connection | None = None
+    ) -> ProviderOperationIntent | None:
+        active = conn or self.db.connect()
         try:
-            row = conn.execute(
+            row = active.execute(
                 "SELECT * FROM provider_operation_intents WHERE task_id = ? ORDER BY created_at DESC LIMIT 1;",
                 (task_id,),
             ).fetchone()
@@ -1708,7 +1745,8 @@ class ProviderOperationIntentRepository:
                 return None
             return self._row_to_intent(row)
         finally:
-            conn.close()
+            if conn is None:
+                active.close()
 
     def get_by_fingerprint(self, fingerprint: str) -> ProviderOperationIntent | None:
         conn = self.db.connect()
@@ -1799,33 +1837,7 @@ class CostLedgerRepository:
         with self.db.transaction() as conn:
             conn.execute("BEGIN IMMEDIATE")
             for entry in entries:
-                conn.execute(
-                    """
-                    INSERT INTO cost_ledger (
-                        id, project_id, workflow_id, task_id, execution_id, intent_id,
-                        request_fingerprint, entry_type, amount, cost_unit, reason,
-                        source, actor, created_at
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                    """,
-                    (
-                        entry.id or generate_id("LEDGER"),
-                        entry.project_id,
-                        entry.workflow_id,
-                        entry.task_id,
-                        entry.execution_id,
-                        entry.intent_id,
-                        entry.request_fingerprint,
-                        entry.entry_type.value
-                        if hasattr(entry.entry_type, "value")
-                        else str(entry.entry_type),
-                        float(entry.amount),
-                        entry.cost_unit,
-                        _redact_text(entry.reason),
-                        _redact_text(entry.source),
-                        _redact_text(entry.actor),
-                        entry.created_at or utc_now_iso(),
-                    ),
-                )
+                _insert_ledger_entry(conn, entry)
             if audit_event is not None:
                 _insert_audit_event(conn, audit_event)
         return entries
@@ -1841,21 +1853,25 @@ class CostLedgerRepository:
         finally:
             conn.close()
 
-    def list_by_task(self, task_id: str) -> list[LedgerEntry]:
-        conn = self.db.connect()
+    def list_by_task(
+        self, task_id: str, conn: sqlite3.Connection | None = None
+    ) -> list[LedgerEntry]:
+        active = conn or self.db.connect()
         try:
-            cursor = conn.execute(
+            cursor = active.execute(
                 "SELECT * FROM cost_ledger WHERE task_id = ? ORDER BY rowid ASC;",
                 (task_id,),
             )
             return [self._row_to_entry(row) for row in cursor.fetchall()]
         finally:
-            conn.close()
+            if conn is None:
+                active.close()
 
-    def project_net(self, project_id: str) -> float:
-        conn = self.db.connect()
+    def project_net(self, project_id: str, conn: sqlite3.Connection | None = None) -> float:
+        """Project committed spend; pass ``conn`` to read inside a caller-owned transaction."""
+        active = conn or self.db.connect()
         try:
-            row = conn.execute(
+            row = active.execute(
                 """
                 SELECT COALESCE(SUM(
                     CASE
@@ -1870,10 +1886,13 @@ class CostLedgerRepository:
             ).fetchone()
             return float(row["net"]) if row else 0.0
         finally:
-            conn.close()
+            if conn is None:
+                active.close()
 
-    def operation_account(self, task_id: str) -> OperationAccount:
-        entries = self.list_by_task(task_id)
+    def operation_account(
+        self, task_id: str, conn: sqlite3.Connection | None = None
+    ) -> OperationAccount:
+        entries = self.list_by_task(task_id, conn)
         reserved_total = sum(e.amount for e in entries if e.entry_type == EntryType.RESERVE)
         released_total = sum(e.amount for e in entries if e.entry_type == EntryType.RELEASE)
         settled_total = sum(e.amount for e in entries if e.entry_type == EntryType.SETTLE)
@@ -1883,9 +1902,9 @@ class CostLedgerRepository:
         workflow_id = entries[0].workflow_id if entries else ""
         cost_unit = entries[0].cost_unit if entries else "credits"
         if not project_id or not workflow_id:
-            conn = self.db.connect()
+            active = conn or self.db.connect()
             try:
-                row = conn.execute(
+                row = active.execute(
                     "SELECT t.workflow_id, w.project_id FROM tasks t JOIN workflows w ON w.id = t.workflow_id WHERE t.id = ?",
                     (task_id,),
                 ).fetchone()
@@ -1893,7 +1912,8 @@ class CostLedgerRepository:
                     project_id = row["project_id"]
                     workflow_id = row["workflow_id"]
             finally:
-                conn.close()
+                if conn is None:
+                    active.close()
         return OperationAccount(
             task_id=task_id,
             reserved_total=reserved_total,

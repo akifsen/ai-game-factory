@@ -118,20 +118,39 @@ Settlement is evaluated per paid **operation** (`task_id`), not per individual e
 The operator CLI provides audited, non-destructive reconciliation:
 
 ```bash
-# Dry run preview (default)
-gamefactory accounting reconcile --workflow WF-123
+# Dry run preview (default); prints a plan hash
+gamefactory accounting reconcile --workflow WF-123 --task TASK-ID
 
-# Apply reconciliation
-gamefactory accounting reconcile --workflow WF-123 --apply --actor operator-name --reason "Reconcile verified invoice"
+# Apply exactly the reviewed plan
+gamefactory accounting reconcile --workflow WF-123 --task TASK-ID --apply   --actor operator-name --reason "Reconcile verified invoice" --plan-hash <hash from dry run>
 ```
+
+> **The dry run is not a read-only command.** Like every CLI command that opens the
+> project database, `accounting reconcile` goes through `_db()`, which applies pending
+> schema migrations first. On a schema-6 (V0.5.1) database even the default dry run
+> migrates it to the current schema. Do not use it as a "read-only inspection" of a
+> live database; follow the operator procedure below.
 
 ### Eligibility Invariants
 An operation is eligible for reconciliation if and only if:
-1. **Provider Evidence Available**: The operation is unsettled, durable intent status is `SUCCEEDED` or `FAILED`, and `actual_cost` is non-null.
-2. **Definitive No-Submission**: The operation is unsettled, no provider intent exists, and all executions for the task are terminal (`COMPLETED` or `FAILED`, not `RUNNING` or `UNCERTAIN`). In this case, it is eligible for `RELEASE` only (`source='reconciliation_no_submission'`).
+1. **Provider Evidence Available**: The operation is unsettled, the durable intent status is `SUCCEEDED` or `FAILED`, and `actual_cost` is non-null. Proposal: `SETTLE actual` + `RELEASE held`.
+2. **Definitive No-Submission (asset paid generation only)**: The operation is unsettled, the task type is `asset_paid_generation`, no provider intent exists, a reservation is held, and every record supports that no provider request was sent: no `RUNNING` attempt, no attempt with an external operation ID, no `COMPLETED` attempt or task, and no recorded provider invocation for the workflow. Proposal: `RELEASE held` only (`source='reconciliation_no_submission'`). This relies on the invariant that asset paid generation journals a durable intent (`claim_intent`) before any provider contact, which has held since the task type was introduced in V0.4. An `UNCERTAIN` attempt without an intent is therefore a crash before contact.
+
+Everything else is **not eligible, manual evidence required** (`manual_evidence_required: true`), including:
+- any other paid, metered or expensive task type without an intent (for example the legacy builtin `paid_generation`), because those never journal an intent and a missing intent is not evidence that the provider was not called or charged;
+- an intent in `SUBMITTING`, `SUBMITTED` or `UNCERTAIN`, or a terminal intent with unknown actual cost.
 
 ### Apply Semantics
-- Executed atomically in a single `BEGIN IMMEDIATE` transaction.
-- Refuses if concurrent state changes occurred.
-- Emits audit event `ACCOUNTING_RECONCILED` with complete before/after spend details.
+- The preview is read in one read transaction. `--apply` then opens a `BEGIN IMMEDIATE` transaction and, under the write lock, re-evaluates the plan and re-reads the project balance on the same connection.
+- If the plan in the transaction differs from the previewed plan (or from `--plan-hash`), for example a changed intent, actual cost, reservation or eligibility, nothing is written and the command fails with `RECONCILIATION_STATE_CHANGED` (exit code `3`). Re-run the dry run and review the new plan.
+- The `ACCOUNTING_RECONCILED` audit event and the returned `spend_before`, `spend_after` and `net_change` are computed inside the apply transaction, so they match the ledger change that was actually committed, even when another workflow spent in between. The audit event also records the plan hash and the ledger entry IDs.
 - A second apply is a clean no-op returning exit code `0` (`EXIT_SUCCESS`) and reporting `Nothing to reconcile`.
+- Reconcile does not take the workflow lock. It never contacts a provider, and its only write is the ledger append inside `BEGIN IMMEDIATE`; the same-transaction plan check covers the races that matter. Running it with workflows stopped is still the operating rule for live databases (below).
+
+### Operator Procedure for a Live Database
+Reconciling a live production database is an operator decision, not a release prerequisite.
+
+1. **Inspect read-only.** Open the live database with SQLite `mode=ro` (for example `sqlite3 "file:factory.db?mode=ro"` or Python `sqlite3.connect("file:...?mode=ro", uri=True)`). Do not run any `gamefactory` command against it yet.
+2. **Make a consistent scratch copy** with the SQLite Backup API (`sqlite3` `.backup`, or Python `src.backup(dst)` from the read-only connection). Do not copy the file while a writer may be active.
+3. **On the scratch copy only**, run the migration and `accounting reconcile --workflow WF --task TASK` dry run, and check the plan against provider billing evidence.
+4. **Apply on the live database** only in a separate maintenance window: stop all workflows (quiescence), take a backup, confirm the provider cost evidence, re-run a dry run narrowed to the target task on the live database, then apply with `--plan-hash` from that dry run.

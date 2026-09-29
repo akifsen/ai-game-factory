@@ -6,6 +6,7 @@ import argparse
 import getpass
 import hashlib
 import json
+import math
 import os
 import sqlite3
 import sys
@@ -37,6 +38,7 @@ from gamefactory.adapters.persistence.repositories import (
     TaskRepository,
     WorkflowRepository,
     _insert_audit_event,
+    _insert_ledger_entry,
 )
 from gamefactory.capabilities.registry import CapabilityRegistry
 from gamefactory.cli.exit_codes import (
@@ -60,6 +62,7 @@ from gamefactory.core.domain.errors import (
     ConfigurationError,
     FactoryError,
     ProviderUnavailable,
+    ReconciliationStateChangedError,
     ValidationError,
 )
 from gamefactory.core.domain.models import (
@@ -253,6 +256,10 @@ def build_parser() -> argparse.ArgumentParser:
         "--actor", help="actor applying reconciliation (required with --apply)"
     )
     reconcile_cmd.add_argument("--reason", help="reason for reconciliation (required with --apply)")
+    reconcile_cmd.add_argument(
+        "--plan-hash",
+        help="plan hash from a reviewed dry-run; --apply refuses if the current plan differs",
+    )
 
     recovery = commands.add_parser(
         "recovery", help="evidence-driven failure inspection and recovery"
@@ -570,12 +577,217 @@ def _accounting_ledger(db: Database, workflow_id: str) -> tuple[dict[str, Any], 
     return payload, EXIT_SUCCESS, "\n".join(lines)
 
 
+_RECONCILED_COST_CLASSES = (CostClass.PAID, CostClass.METERED, CostClass.EXPENSIVE)
+
+# Only asset paid generation journals a durable provider intent (claim_intent) before
+# any provider contact, and has done so since the task type was introduced. For every
+# other paid/metered/expensive task type (e.g. legacy ``paid_generation``) the absence
+# of an intent says nothing about whether the provider was called or charged.
+_INTENT_JOURNALED_TASK_TYPES = frozenset({"asset_paid_generation"})
+
+
+def _no_intent_release_decision(
+    task: Task, executions: list[Any], workflow_invocations: int, held: float
+) -> tuple[bool, bool, str]:
+    """Decide whether a hold without a durable intent may be released.
+
+    Returns ``(eligible, manual_evidence_required, reason)``. RELEASE is only allowed
+    when the intent-before-contact invariant applies AND every record supports that
+    no provider request was ever sent.
+    """
+    if task.task_type not in _INTENT_JOURNALED_TASK_TYPES:
+        return (
+            False,
+            True,
+            f"No durable provider intent; task type '{task.task_type}' does not journal an "
+            "intent before provider contact, so a missing intent is not evidence of no "
+            "submission. Not eligible: manual provider evidence required",
+        )
+    # claim_execution creates the RUNNING attempt atomically with the hold, so a RUNNING
+    # attempt (not the task status) is the in-flight evidence.
+    if any(e.status == ExecutionStatus.RUNNING for e in executions):
+        return False, True, "Execution is in-flight; provider evidence is required"
+    if any(e.external_op_id for e in executions):
+        return (
+            False,
+            True,
+            "An execution records an external operation id; provider evidence is required",
+        )
+    if workflow_invocations > 0:
+        return (
+            False,
+            True,
+            "Provider invocations are recorded for this workflow; provider evidence is required",
+        )
+    if task.status == TaskStatus.COMPLETED or any(
+        e.status == ExecutionStatus.COMPLETED for e in executions
+    ):
+        return (
+            False,
+            True,
+            "A paid attempt completed without a durable intent; provider evidence is required",
+        )
+    if held <= 0:
+        return False, False, "No intent and no held reservation; nothing to release"
+    return (
+        True,
+        False,
+        "No durable intent for asset paid generation (the intent is journaled before any "
+        "provider contact), no in-flight attempt, external operation id or recorded "
+        "invocation; eligible to release reservation",
+    )
+
+
+def _reconcile_plan(
+    db: Database,
+    conn: sqlite3.Connection,
+    wf: Any,
+    task_filter: str | None,
+    actor: str | None,
+    reason: str | None,
+) -> tuple[list[dict[str, Any]], list[LedgerEntry], str]:
+    """Evaluate reconciliation from one connection so every read shares one snapshot.
+
+    Returns the per-operation payloads, the ledger entries that would be appended,
+    and a fingerprint of the plan (independent of generated ids and timestamps).
+    """
+    tasks = TaskRepository(db).list_by_workflow(wf.id, conn)
+    if task_filter:
+        tasks = [t for t in tasks if t.id == task_filter]
+        if not tasks:
+            raise ConfigurationError(f"Task not found in workflow {wf.id}: {task_filter}")
+
+    ledger_repo = CostLedgerRepository(db)
+    intent_repo = ProviderOperationIntentRepository(db)
+    exec_repo = ExecutionRepository(db)
+    workflow_invocations = ProviderInvocationRepository(db).count(wf.id, conn)
+
+    op_payloads: list[dict[str, Any]] = []
+    planned: list[LedgerEntry] = []
+    for task in tasks:
+        entries = ledger_repo.list_by_task(task.id, conn)
+        if task.cost_class not in _RECONCILED_COST_CLASSES and not entries:
+            continue
+
+        account = ledger_repo.operation_account(task.id, conn)
+        intent = intent_repo.get_by_task(task.id, conn)
+        task_executions = exec_repo.list_by_task(task.id, conn)
+        recorded_cost = sum(e.cost for e in task_executions)
+        held = account.held
+        settled = account.settled
+        provider_actual = intent.actual_cost if intent else None
+
+        eligible = False
+        manual_evidence = False
+        proposed: list[LedgerEntry] = []
+
+        if settled:
+            eligibility_reason = "Operation is already settled"
+        elif intent is not None:
+            if intent.status in ("SUCCEEDED", "FAILED") and intent.actual_cost is not None:
+                eligible = True
+                eligibility_reason = (
+                    f"Terminal intent status {intent.status} with verified actual cost "
+                    f"{intent.actual_cost}"
+                )
+                proposed = plan_settlement(
+                    account,
+                    intent.actual_cost,
+                    source="reconciliation",
+                    actor=actor or "reconciliation",
+                    reason=reason or f"Reconciliation to verified actual cost {intent.actual_cost}",
+                    intent_id=intent.id,
+                    request_fingerprint=intent.request_fingerprint,
+                    cost_unit=intent.cost_unit,
+                )
+            elif intent.status in ("SUCCEEDED", "FAILED"):
+                manual_evidence = True
+                eligibility_reason = (
+                    "Provider actual cost is unknown; provider evidence is required"
+                )
+            else:
+                manual_evidence = True
+                eligibility_reason = (
+                    f"Intent status is {intent.status}; provider evidence is required"
+                )
+        else:
+            eligible, manual_evidence, eligibility_reason = _no_intent_release_decision(
+                task, task_executions, workflow_invocations, held
+            )
+            if eligible:
+                proposed = [
+                    LedgerEntry(
+                        id=generate_id("LEDGER"),
+                        project_id=wf.project_id,
+                        workflow_id=wf.id,
+                        task_id=task.id,
+                        entry_type=EntryType.RELEASE,
+                        amount=held,
+                        cost_unit=account.cost_unit,
+                        reason=reason
+                        or "Release reservation via reconciliation: no provider submission",
+                        source="reconciliation_no_submission",
+                        actor=actor or "reconciliation",
+                        created_at=utc_now_iso(),
+                    )
+                ]
+
+        planned.extend(proposed)
+        op_payloads.append(
+            {
+                "task_id": task.id,
+                "task": task.id,
+                "task_type": task.task_type,
+                "intent_id": intent.id if intent else None,
+                "intent_status": intent.status if intent else None,
+                "external_task_id": intent.external_task_id if intent else None,
+                "reservation_held": held,
+                "held": held,
+                "reservation": held,
+                "recorded_cost": recorded_cost,
+                "legacy_execution_cost": recorded_cost,
+                "provider_actual": provider_actual,
+                "actual_cost": provider_actual,
+                "settled": settled,
+                "eligible": eligible,
+                "eligibility": "YES" if eligible else "NO",
+                "manual_evidence_required": manual_evidence,
+                "reason": eligibility_reason,
+                "proposed_entries": [_jsonable(e) for e in proposed],
+                "net_change": sum(signed_amount(e) for e in proposed),
+            }
+        )
+
+    material = [
+        {
+            "task_id": op["task_id"],
+            "intent_id": op["intent_id"],
+            "intent_status": op["intent_status"],
+            "external_task_id": op["external_task_id"],
+            "provider_actual": op["provider_actual"],
+            "held": op["held"],
+            "settled": op["settled"],
+            "eligible": op["eligible"],
+            "reason": op["reason"],
+            "proposed": [
+                [pe["entry_type"], pe["amount"], pe["cost_unit"]] for pe in op["proposed_entries"]
+            ],
+        }
+        for op in op_payloads
+    ]
+    plan_hash = hashlib.sha256(
+        json.dumps(material, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    ).hexdigest()
+    return op_payloads, planned, plan_hash
+
+
 def _accounting_reconcile(
     db: Database, args: argparse.Namespace
 ) -> tuple[dict[str, Any], int, str | None]:
     apply_mode = getattr(args, "apply", False)
     actor = getattr(args, "actor", None)
     reason = getattr(args, "reason", None)
+    expected_plan_hash = getattr(args, "plan_hash", None)
     if apply_mode:
         if not actor or not actor.strip():
             raise ValidationError("--apply requires non-empty --actor")
@@ -585,149 +797,82 @@ def _accounting_reconcile(
     wf = WorkflowRepository(db).get(args.workflow)
     if wf is None:
         raise ConfigurationError(f"Workflow not found: {args.workflow}")
-
     task_filter = getattr(args, "task", None)
-    task_repo = TaskRepository(db)
-    tasks = task_repo.list_by_workflow(args.workflow)
-    if task_filter:
-        tasks = [t for t in tasks if t.id == task_filter]
-        if not tasks:
-            raise ConfigurationError(f"Task not found in workflow {args.workflow}: {task_filter}")
-
     ledger_repo = CostLedgerRepository(db)
-    intent_repo = ProviderOperationIntentRepository(db)
-    exec_repo = ExecutionRepository(db)
 
-    def evaluate_operations() -> tuple[list[dict[str, Any]], list[tuple[Task, list[LedgerEntry]]]]:
-        op_payloads: list[dict[str, Any]] = []
-        eligible_entries: list[tuple[Task, list[LedgerEntry]]] = []
-
-        for task in tasks:
-            entries = ledger_repo.list_by_task(task.id)
-            if (
-                task.cost_class not in (CostClass.PAID, CostClass.METERED, CostClass.EXPENSIVE)
-                and not entries
-            ):
-                continue
-
-            account = ledger_repo.operation_account(task.id)
-            intent = intent_repo.get_by_task(task.id)
-            task_executions = exec_repo.list_by_task(task.id)
-            recorded_cost = sum(e.cost for e in task_executions)
-            held = account.held
-            settled = account.settled
-            provider_actual = intent.actual_cost if intent else None
-
-            eligible = False
-            eligibility_reason = ""
-            proposed: list[LedgerEntry] = []
-
-            if settled:
-                eligible = False
-                eligibility_reason = "Operation is already settled"
-            elif intent is not None:
-                if intent.status in ("SUCCEEDED", "FAILED"):
-                    if intent.actual_cost is not None:
-                        eligible = True
-                        eligibility_reason = f"Terminal intent status {intent.status} with verified actual cost {intent.actual_cost}"
-                        proposed = plan_settlement(
-                            account,
-                            intent.actual_cost,
-                            source="reconciliation",
-                            actor=actor or "reconciliation",
-                            reason=reason
-                            or f"Reconciliation to verified actual cost {intent.actual_cost}",
-                            intent_id=intent.id,
-                            request_fingerprint=intent.request_fingerprint,
-                            cost_unit=intent.cost_unit,
-                        )
-                    else:
-                        eligible = False
-                        eligibility_reason = (
-                            "Provider actual cost is unknown; provider evidence is required"
-                        )
-                else:
-                    eligible = False
-                    eligibility_reason = (
-                        f"Intent status is {intent.status}; provider evidence is required"
-                    )
-            else:
-                # Missing intent. Asset paid generation journals a durable intent before any
-                # provider contact, so an UNCERTAIN attempt with no intent, no recorded
-                # invocation and no external operation id provably never reached a provider.
-                provably_no_contact = (
-                    task.task_type == "asset_paid_generation"
-                    and ProviderInvocationRepository(db).count(wf.id) == 0
-                    and not any(e.external_op_id for e in task_executions)
-                )
-                in_flight = any(
-                    e.status == ExecutionStatus.RUNNING
-                    or (e.status == ExecutionStatus.UNCERTAIN and not provably_no_contact)
-                    for e in task_executions
-                )
-                if in_flight:
-                    eligible = False
-                    eligibility_reason = "Execution is in-flight; provider evidence is required"
-                elif held > 0:
-                    eligible = True
-                    eligibility_reason = "No provider submission and all executions terminal; eligible to release reservation"
-                    proposed = [
-                        LedgerEntry(
-                            id=generate_id("LEDGER"),
-                            project_id=wf.project_id,
-                            workflow_id=wf.id,
-                            task_id=task.id,
-                            entry_type=EntryType.RELEASE,
-                            amount=held,
-                            cost_unit=account.cost_unit,
-                            reason=reason
-                            or "Release reservation via reconciliation: no provider submission",
-                            source="reconciliation_no_submission",
-                            actor=actor or "reconciliation",
-                            created_at=utc_now_iso(),
-                        )
-                    ]
-                else:
-                    eligible = False
-                    eligibility_reason = (
-                        "No intent and held reservation is zero; provider evidence is required"
-                    )
-
-            net_change = sum(signed_amount(e) for e in proposed)
-            if eligible and proposed:
-                eligible_entries.append((task, proposed))
-
-            op_payloads.append(
-                {
-                    "task_id": task.id,
-                    "task": task.id,
-                    "intent_id": intent.id if intent else None,
-                    "intent_status": intent.status if intent else None,
-                    "external_task_id": intent.external_task_id if intent else None,
-                    "reservation_held": held,
-                    "held": held,
-                    "reservation": held,
-                    "recorded_cost": recorded_cost,
-                    "legacy_execution_cost": recorded_cost,
-                    "provider_actual": provider_actual,
-                    "actual_cost": provider_actual,
-                    "settled": settled,
-                    "eligible": eligible,
-                    "eligibility": "YES" if eligible else "NO",
-                    "reason": eligibility_reason,
-                    "proposed_entries": [_jsonable(e) for e in proposed],
-                    "net_change": net_change,
-                }
-            )
-        return op_payloads, eligible_entries
-
-    spend_before = ledger_repo.project_net(wf.project_id)
-    op_payloads, eligible_entries = evaluate_operations()
-    total_net_change = sum(op["net_change"] for op in op_payloads if op["eligible"])
+    # Preview: one read transaction, so the plan and the balance share a snapshot.
+    conn = db.connect()
+    try:
+        conn.execute("BEGIN")
+        op_payloads, planned, plan_hash = _reconcile_plan(db, conn, wf, task_filter, actor, reason)
+        spend_before = ledger_repo.project_net(wf.project_id, conn)
+    finally:
+        conn.rollback()
+        conn.close()
+    total_net_change = sum(signed_amount(e) for e in planned)
     spend_after = spend_before + total_net_change
 
     if apply_mode:
-        if not eligible_entries:
+        expected = expected_plan_hash or plan_hash
+        applied_ops: list[dict[str, Any]] = []
+        applied_entries: list[LedgerEntry] = []
+        if planned:
+            with db.transaction() as conn:
+                conn.execute("BEGIN IMMEDIATE")
+                # Re-evaluate and re-read the balance under the write lock; this is the
+                # plan that is applied and the balance the audit event reports.
+                applied_ops, applied_entries, fresh_hash = _reconcile_plan(
+                    db, conn, wf, task_filter, actor, reason
+                )
+                if applied_entries and fresh_hash != expected:
+                    raise ReconciliationStateChangedError(
+                        "Reconciliation state changed since the preview (intent, actual "
+                        "cost, reservation or eligibility); nothing was applied. "
+                        "Re-run the dry-run and review the new plan.",
+                        details={"expected_plan_hash": expected, "current_plan_hash": fresh_hash},
+                    )
+                if not applied_entries:
+                    raise ReconciliationStateChangedError(
+                        "Reconciliation state changed since the preview: the previewed "
+                        "operations are no longer eligible; nothing was applied. "
+                        "Re-run the dry-run.",
+                        details={"expected_plan_hash": expected, "current_plan_hash": fresh_hash},
+                    )
+                if applied_entries:
+                    spend_before = ledger_repo.project_net(wf.project_id, conn)
+                    for entry in applied_entries:
+                        _insert_ledger_entry(conn, entry)
+                    spend_after = ledger_repo.project_net(wf.project_id, conn)
+                    total_net_change = spend_after - spend_before
+                    planned_net = sum(signed_amount(e) for e in applied_entries)
+                    if not math.isclose(total_net_change, planned_net, abs_tol=1e-9):
+                        raise ReconciliationStateChangedError(
+                            "Ledger balance moved inside the reconciliation transaction; "
+                            "nothing was applied.",
+                            details={"planned_net": planned_net, "observed": total_net_change},
+                        )
+                    audit = AuditEvent(
+                        id=generate_id("AUDIT"),
+                        entity_type="Workflow",
+                        entity_id=wf.id,
+                        action="ACCOUNTING_RECONCILED",
+                        actor=actor or "reconciliation",
+                        timestamp=utc_now_iso(),
+                        details={
+                            "workflow_id": wf.id,
+                            "project_id": wf.project_id,
+                            "spend_before": spend_before,
+                            "spend_after": spend_after,
+                            "net_change": total_net_change,
+                            "plan_hash": fresh_hash,
+                            "reconciled_tasks": sorted({e.task_id for e in applied_entries}),
+                            "ledger_entry_ids": [e.id for e in applied_entries],
+                            "reason": reason,
+                        },
+                    )
+                    _insert_audit_event(conn, audit)
+
+        if not applied_entries:
             payload = {
                 "workflow_id": wf.id,
                 "project_id": wf.project_id,
@@ -735,6 +880,7 @@ def _accounting_reconcile(
                 "applied": False,
                 "reconciled": False,
                 "operations": op_payloads,
+                "plan_hash": plan_hash,
                 "spend_before": spend_before,
                 "project_spend_before": spend_before,
                 "spend_after": spend_before,
@@ -744,82 +890,24 @@ def _accounting_reconcile(
             }
             return payload, EXIT_SUCCESS, "Nothing to reconcile."
 
-        # Apply inside one BEGIN IMMEDIATE transaction
-        with db.transaction() as conn:
-            conn.execute("BEGIN IMMEDIATE")
-            fresh_ops, fresh_eligible = evaluate_operations()
-            if len(fresh_eligible) != len(eligible_entries):
-                raise ValidationError("State changed concurrently; reconciliation aborted")
-
-            all_new_entries: list[LedgerEntry] = []
-            for _, entries_to_add in fresh_eligible:
-                all_new_entries.extend(entries_to_add)
-
-            for entry in all_new_entries:
-                conn.execute(
-                    """
-                    INSERT INTO cost_ledger (
-                        id, project_id, workflow_id, task_id, execution_id, intent_id,
-                        request_fingerprint, entry_type, amount, cost_unit, reason,
-                        source, actor, created_at
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                    """,
-                    (
-                        entry.id or generate_id("LEDGER"),
-                        entry.project_id,
-                        entry.workflow_id,
-                        entry.task_id,
-                        entry.execution_id,
-                        entry.intent_id,
-                        entry.request_fingerprint,
-                        entry.entry_type.value
-                        if hasattr(entry.entry_type, "value")
-                        else str(entry.entry_type),
-                        float(entry.amount),
-                        entry.cost_unit,
-                        redactor.redact_text(entry.reason),
-                        redactor.redact_text(entry.source),
-                        redactor.redact_text(entry.actor),
-                        entry.created_at or utc_now_iso(),
-                    ),
-                )
-
-            audit = AuditEvent(
-                id=generate_id("AUDIT"),
-                entity_type="Workflow",
-                entity_id=wf.id,
-                action="ACCOUNTING_RECONCILED",
-                actor=actor or "reconciliation",
-                timestamp=utc_now_iso(),
-                details={
-                    "workflow_id": wf.id,
-                    "project_id": wf.project_id,
-                    "spend_before": spend_before,
-                    "spend_after": spend_after,
-                    "net_change": total_net_change,
-                    "reconciled_tasks": [t.id for t, _ in fresh_eligible],
-                    "reason": reason,
-                },
-            )
-            _insert_audit_event(conn, audit)
-
-        spend_after = ledger_repo.project_net(wf.project_id)
-        final_ops, _ = evaluate_operations()
         payload = {
             "workflow_id": wf.id,
             "project_id": wf.project_id,
             "dry_run": False,
             "applied": True,
             "reconciled": True,
-            "operations": final_ops,
+            "operations": applied_ops,
+            "plan_hash": expected,
+            "applied_entries": [_jsonable(e) for e in applied_entries],
             "spend_before": spend_before,
             "project_spend_before": spend_before,
             "spend_after": spend_after,
             "project_spend_after": spend_after,
             "net_change": total_net_change,
         }
+        reconciled_count = len({e.task_id for e in applied_entries})
         human_msg = (
-            f"Applied reconciliation to {len(eligible_entries)} operation(s). "
+            f"Applied reconciliation to {reconciled_count} operation(s). "
             f"Project committed spend: {spend_before:.2f} -> {spend_after:.2f}"
         )
         return payload, EXIT_SUCCESS, human_msg
@@ -831,6 +919,7 @@ def _accounting_reconcile(
         "applied": False,
         "reconciled": False,
         "operations": op_payloads,
+        "plan_hash": plan_hash,
         "spend_before": spend_before,
         "project_spend_before": spend_before,
         "spend_after": spend_after,
@@ -841,6 +930,7 @@ def _accounting_reconcile(
         f"Reconciliation preview for workflow {wf.id}:",
         f"  Project spend before: {spend_before:.2f}",
         f"  Project spend after:  {spend_after:.2f} (net change: {total_net_change:+.2f})",
+        f"  Plan hash: {plan_hash}",
         "",
     ]
     for op in op_payloads:
@@ -849,7 +939,10 @@ def _accounting_reconcile(
         human_lines.append(f"  Legacy recorded cost: {op['recorded_cost']:.2f}")
         human_lines.append(f"  Provider actual: {op['provider_actual']}")
         human_lines.append(f"  Settled: {op['settled']}")
-        human_lines.append(f"  Eligible: {op['eligibility']} ({op['reason']})")
+        eligibility = op["eligibility"]
+        if op["manual_evidence_required"]:
+            eligibility += ", manual evidence required"
+        human_lines.append(f"  Eligible: {eligibility} ({op['reason']})")
         if op["proposed_entries"]:
             human_lines.append("  Proposed entries:")
             for pe in op["proposed_entries"]:
@@ -857,7 +950,8 @@ def _accounting_reconcile(
         human_lines.append(f"  Net change: {op['net_change']:+.2f}")
         human_lines.append("")
     human_lines.append(
-        "Dry run complete; no database mutations made. Run with --apply --actor <A> --reason <R> to execute."
+        "Dry run complete; no ledger entries written. Run with --apply --actor <A> "
+        f"--reason <R> --plan-hash {plan_hash} to apply exactly this plan."
     )
     return payload, EXIT_SUCCESS, "\n".join(human_lines)
 
@@ -2154,6 +2248,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     except FactoryError as exc:
         code_by_error = {
             "RECONCILIATION_REQUIRED": EXIT_APPROVAL_BLOCKED,
+            "RECONCILIATION_STATE_CHANGED": EXIT_APPROVAL_BLOCKED,
             "LOCK_ERROR": EXIT_APPROVAL_BLOCKED,
             "APPROVAL_REQUIRED": EXIT_APPROVAL_BLOCKED,
             "PROVIDER_UNAVAILABLE": EXIT_TOOL_UNAVAILABLE,
