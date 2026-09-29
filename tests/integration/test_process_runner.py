@@ -277,7 +277,24 @@ class TestProcessRunner:
             env_overrides={"TOKEN": "x!"},
         )
         result = self.runner.run(request)
-        assert "x!" not in result.stdout
+        # V0.6: values shorter than the exact-secret eligibility minimum are not
+        # global replacement tokens (they corrupt hashes and IDs); key-aware patterns
+        # still redact "TOKEN=x!" style text. Malformed bytes must decode safely.
+        assert result.stdout == "x!�"
+
+    def test_long_override_secret_and_malformed_unicode_are_safe(self, tmp_path: Path) -> None:
+        secret = "tok_" + "Q7wLm2Rz9Kx4" * 3
+        request = CommandRequest(
+            args=[
+                sys.executable,
+                "-c",
+                "import os,sys; sys.stdout.buffer.write(os.environ['TOKEN'].encode()+b'\\xff')",
+            ],
+            cwd=tmp_path,
+            env_overrides={"TOKEN": secret},
+        )
+        result = self.runner.run(request)
+        assert secret not in result.stdout
         assert "[REDACTED]" in result.stdout
         assert "" in result.stdout
 
@@ -412,15 +429,15 @@ class TestProcessRunner:
 
     def test_redaction_expansion_stays_within_output_limit(self, tmp_path: Path) -> None:
         request = CommandRequest(
-            args=[sys.executable, "-c", "print('x!' * 200_000)"],
+            args=[sys.executable, "-c", "print('sk8!Zq2w' * 100_000)"],
             cwd=tmp_path,
-            env_overrides={"TOKEN": "x!"},
+            env_overrides={"TOKEN": "sk8!Zq2w"},
         )
         result = self.runner.run(request)
         assert result.exit_code == 0
         assert result.stdout_truncated is True
         assert len(result.stdout.encode("utf-8")) <= 1_000_000
-        assert "x!" not in result.stdout
+        assert "sk8!Zq2w" not in result.stdout
         assert "[REDACTED]" in result.stdout
 
     @pytest.mark.skipif(os.name == "nt", reason="POSIX process-group cleanup")
