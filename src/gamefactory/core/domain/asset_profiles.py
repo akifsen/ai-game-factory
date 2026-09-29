@@ -8,18 +8,23 @@ from strict YAML; they are not plugins and they do not execute caller code.
 from __future__ import annotations
 
 import math
+import re
 from dataclasses import dataclass
 from importlib.resources import files
-from typing import Any, Literal
+from typing import TYPE_CHECKING, Any, Literal
 
 import yaml
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
+from gamefactory.core.domain.asset_contracts import _as_number, _reject_bool_and_string
 from gamefactory.core.domain.camera_framing import PLACED_VIEWS
 from gamefactory.core.domain.errors import SpecInvalidError
 
+if TYPE_CHECKING:
+    from gamefactory.core.domain.asset_contracts import AssetSpecificationV07
+
 PROFILE_SCHEMA_VERSION = "asset-profile-0.5.0"
-SUPPORTED_PROFILE_SCHEMA_VERSIONS = {"asset-profile-0.5.0", "asset-profile-0.7.0"}
+PROFILE_SCHEMA_VERSION_V07 = "asset-profile-0.7.0"
 PROCESSING_CONTRACT_VERSION = "asset-processing-contract-0.5.0"
 
 UNSUPPORTED_PROFILE_IDS = (
@@ -97,7 +102,7 @@ class ProcessingPolicy(BaseModel):
     @model_validator(mode="after")
     def policies_are_known(self) -> ProcessingPolicy:
         lod = {"lod0_only", "lod0_lod1"}
-        colliders = {"box", "capsule"}
+        colliders = {"box"}
         origins = {"bottom_center", "center"}
         if any(item not in lod for item in self.allowed_lod_policies):
             raise ValueError("allowed_lod_policies contains an unsupported value")
@@ -143,95 +148,6 @@ class RuntimePolicy(BaseModel):
     bounds_tolerance_floor_m: float = Field(..., ge=0.0, le=10.0)
 
 
-class AssemblySocketRequirement(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-
-    socket_id: str
-    parent_role: str
-    placement: Literal["forward_end"] = "forward_end"
-    forward_end_fraction: float = Field(default=0.25, gt=0.0, le=1.0)
-    rest_forward: list[float] | None = None
-
-    @field_validator("socket_id", "parent_role")
-    @classmethod
-    def validate_identifier(cls, v: str) -> str:
-        if not v.replace("_", "").isalnum() or not v[0].isalpha() or v != v.lower():
-            raise ValueError(f"identifier must be lowercase alphanumeric: {v}")
-        return v
-
-    @field_validator("rest_forward")
-    @classmethod
-    def validate_rest_forward(cls, v: list[float] | None) -> list[float] | None:
-        if v is None:
-            return None
-        if len(v) != 3 or any(not math.isfinite(x) for x in v):
-            raise ValueError("rest_forward must be 3 finite floats")
-        norm = math.sqrt(sum(x * x for x in v))
-        if abs(norm - 1.0) > 1e-6:
-            raise ValueError("rest_forward must be a unit vector within 1e-6")
-        return v
-
-
-class RoleMotionConstraint(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-
-    kind: Literal["fixed", "revolute", "prismatic"]
-    axis: list[float] | None = None
-
-    @model_validator(mode="after")
-    def validate_motion(self) -> RoleMotionConstraint:
-        if self.kind == "fixed":
-            if self.axis is not None:
-                raise ValueError("motion axis must not be specified for fixed motion")
-        else:
-            if self.axis is None:
-                raise ValueError(f"motion axis is required for {self.kind} motion")
-            if len(self.axis) != 3 or any(not math.isfinite(x) for x in self.axis):
-                raise ValueError("motion axis must be 3 finite floats")
-            norm = math.sqrt(sum(x * x for x in self.axis))
-            if abs(norm - 1.0) > 1e-6:
-                raise ValueError("motion axis must be a unit vector within 1e-6")
-        return self
-
-
-class AssemblyContract(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-
-    roles: list[str] = Field(..., min_length=1)
-    required_roles: list[str] = Field(..., min_length=1)
-    role_motion_constraints: dict[str, RoleMotionConstraint] = Field(default_factory=dict)
-    required_sockets: list[AssemblySocketRequirement] = Field(default_factory=list)
-    socket_angle_tolerance_deg: float = Field(default=5.0, gt=0.0, le=90.0)
-    pivot_tolerance_m: float = Field(default=0.01, gt=0.0, le=1.0)
-    basis_tolerance_deg: float = Field(default=1.0, gt=0.0, le=90.0)
-
-    @field_validator("roles", "required_roles")
-    @classmethod
-    def validate_roles_list(cls, v: list[str]) -> list[str]:
-        if len(v) != len(set(v)):
-            raise ValueError("roles list contains duplicates")
-        for r in v:
-            if not r.replace("_", "").isalnum() or not r[0].isalpha() or r != r.lower():
-                raise ValueError(f"role name must be lowercase alphanumeric: {r}")
-        return v
-
-    @model_validator(mode="after")
-    def validate_cross_role_rules(self) -> AssemblyContract:
-        role_set = set(self.roles)
-        for req in self.required_roles:
-            if req not in role_set:
-                raise ValueError(f"required role '{req}' is not in role vocabulary")
-        for r_name in self.role_motion_constraints:
-            if r_name not in role_set:
-                raise ValueError(f"role motion constraint '{r_name}' is not in role vocabulary")
-        for socket in self.required_sockets:
-            if socket.parent_role not in role_set:
-                raise ValueError(
-                    f"required socket '{socket.socket_id}' parent_role '{socket.parent_role}' is not in role vocabulary"
-                )
-        return self
-
-
 class ProfileDocument(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -246,32 +162,10 @@ class ProfileDocument(BaseModel):
     godot: GodotPolicy
     runtime: RuntimePolicy
 
-    # V0.7 fields
-    geometry_mode: Literal["single_mesh", "assembly"] | None = None
-    accepted_source_kinds: list[Literal["provider_generated", "local_operator_assembly"]] | None = (
-        None
-    )
-    assembly: AssemblyContract | None = None
-
-    @model_validator(mode="before")
-    @classmethod
-    def reject_v07_fields_in_historical_profiles(cls, data: Any) -> Any:
-        if not isinstance(data, dict):
-            return data
-        schema_version = data.get("schema_version")
-        if schema_version == "asset-profile-0.5.0":
-            v07_keys = ("geometry_mode", "accepted_source_kinds", "assembly")
-            for key in v07_keys:
-                if key in data:
-                    raise ValueError(
-                        f"Extra inputs are not permitted: asset-profile-0.5.0 does not accept field '{key}'"
-                    )
-        return data
-
     @field_validator("schema_version")
     @classmethod
     def schema_is_current(cls, value: str) -> str:
-        if value not in SUPPORTED_PROFILE_SCHEMA_VERSIONS:
+        if value != PROFILE_SCHEMA_VERSION:
             raise ValueError(f"unsupported profile schema {value}")
         return value
 
@@ -296,57 +190,9 @@ class ProfileDocument(BaseModel):
     @classmethod
     def categories_are_safe(cls, value: list[str]) -> list[str]:
         for item in value:
-            if item not in {
-                "prop",
-                "pickup",
-                "modular",
-                "character",
-                "vehicle",
-                "weapon",
-                "aircraft",
-            }:
+            if item not in {"prop", "pickup", "modular"}:
                 raise ValueError(f"unsupported asset category {item}")
         return value
-
-    @model_validator(mode="after")
-    def validate_schema_version_rules(self) -> ProfileDocument:
-        if self.schema_version == "asset-profile-0.5.0":
-            if self.geometry_mode is not None:
-                raise ValueError("geometry_mode is forbidden for asset-profile-0.5.0")
-            if self.accepted_source_kinds is not None:
-                raise ValueError("accepted_source_kinds is forbidden for asset-profile-0.5.0")
-            if self.assembly is not None:
-                raise ValueError("assembly contract is forbidden for asset-profile-0.5.0")
-            if "capsule" in self.processing.allowed_collider_policies:
-                raise ValueError("capsule collider is only allowed for asset-profile-0.7.0")
-            for cat in self.categories:
-                if cat not in {"prop", "pickup", "modular"}:
-                    raise ValueError(f"unsupported asset category {cat} for asset-profile-0.5.0")
-        elif self.schema_version == "asset-profile-0.7.0":
-            if self.geometry_mode is None:
-                raise ValueError("geometry_mode is required for asset-profile-0.7.0")
-            if self.accepted_source_kinds is None:
-                raise ValueError("accepted_source_kinds is required for asset-profile-0.7.0")
-            if len(self.accepted_source_kinds) == 0:
-                raise ValueError("accepted_source_kinds cannot be empty")
-            if self.geometry_mode == "assembly":
-                if self.accepted_source_kinds != ["local_operator_assembly"]:
-                    raise ValueError(
-                        "geometry_mode 'assembly' requires accepted_source_kinds == ['local_operator_assembly']"
-                    )
-                if self.assembly is None:
-                    raise ValueError("geometry_mode 'assembly' requires an assembly contract")
-            elif self.geometry_mode == "single_mesh":
-                if self.assembly is not None:
-                    raise ValueError("geometry_mode 'single_mesh' forbids assembly contract")
-        return self
-
-    def model_dump(self, *args: Any, **kwargs: Any) -> dict[str, Any]:
-        payload = super().model_dump(*args, **kwargs)
-        if payload.get("schema_version") == "asset-profile-0.5.0":
-            for field_name in ("geometry_mode", "accepted_source_kinds", "assembly"):
-                payload.pop(field_name, None)
-        return payload
 
 
 def parse_profile_document(content: str | dict[str, Any]) -> ProfileDocument:
@@ -398,124 +244,17 @@ class AssetProfile:
     def framing(self) -> FramingPolicy:
         return self.document.framing
 
-    @property
-    def geometry_mode(self) -> str:
-        return self.document.geometry_mode or "single_mesh"
-
-    @property
-    def accepted_source_kinds(self) -> tuple[str, ...]:
-        if self.document.accepted_source_kinds is not None:
-            return tuple(self.document.accepted_source_kinds)
-        return ("provider_generated",)
-
-    @property
-    def assembly(self) -> AssemblyContract | None:
-        return self.document.assembly
-
     def check_specification(self, spec: Any) -> None:
         """Reject specification choices this profile does not implement."""
         document = self.document
-
-        # Version matching
-        if spec.schema_version == "0.7.0":
-            if self.schema_version != "asset-profile-0.7.0":
-                raise ValueError(
-                    f"asset-spec-0.7.0 cannot bind to {self.schema_version} profile {self.qualified}"
-                )
-            if spec.profile_version != self.version:
-                raise ValueError(
-                    f"specification profile_version {spec.profile_version} does not match {self.qualified}"
-                )
-        elif spec.schema_version in ("0.4.0", "0.5.0"):
-            if self.schema_version != "asset-profile-0.5.0":
-                raise ValueError(
-                    f"asset-spec-{spec.schema_version} cannot bind to {self.schema_version} profile {self.qualified}"
-                )
-            if spec.schema_version == "0.5.0" and spec.profile_version != self.version:
-                raise ValueError(
-                    f"specification profile_version {spec.profile_version} does not match {self.qualified}"
-                )
-
         if spec.category not in document.categories:
             raise ValueError(f"category {spec.category} is not supported by {self.qualified}")
         if spec.profile != self.profile_id:
             raise ValueError("specification profile does not match the bound profile")
-
-        # Source kind
-        if spec.schema_version == "0.7.0":
-            if not spec.source_kind:
-                raise ValueError("specification requires explicit source_kind")
-            if spec.source_kind not in self.accepted_source_kinds:
-                raise ValueError(
-                    f"source_kind '{spec.source_kind}' is not allowed by {self.qualified} (accepted: {self.accepted_source_kinds})"
-                )
-
-        # Geometry mode & parts/sockets
-        if self.geometry_mode == "assembly":
-            if not getattr(spec, "parts", None):
-                raise ValueError("assembly profile requires parts in specification")
-        elif self.geometry_mode == "single_mesh":
-            if getattr(spec, "parts", None):
-                raise ValueError("single_mesh profile forbids parts in specification")
-            if getattr(spec, "sockets", None):
-                raise ValueError("single_mesh profile forbids sockets in specification")
-
-        # Roles and assembly constraints
-        if self.geometry_mode == "assembly" and self.assembly is not None:
-            vocab = set(self.assembly.roles)
-            spec_roles = set()
-            for part in spec.parts or []:
-                if part.role not in vocab:
-                    raise ValueError(
-                        f"part '{part.part_id}' role '{part.role}' is not in profile role vocabulary"
-                    )
-                spec_roles.add(part.role)
-            for req in self.assembly.required_roles:
-                if req not in spec_roles:
-                    raise ValueError(f"required role '{req}' is missing from parts specification")
-
-            for part in spec.parts or []:
-                if part.role in self.assembly.role_motion_constraints:
-                    constraint = self.assembly.role_motion_constraints[part.role]
-                    if part.pivot.motion.kind != constraint.kind:
-                        raise ValueError(
-                            f"part '{part.part_id}' motion kind '{part.pivot.motion.kind}' "
-                            f"violates role '{part.role}' constraint '{constraint.kind}'"
-                        )
-                    if constraint.axis is not None:
-                        if part.pivot.motion.axis is None:
-                            raise ValueError(
-                                f"part '{part.part_id}' is missing required motion axis for role '{part.role}'"
-                            )
-                        if not all(
-                            abs(a - b) <= 1e-6
-                            for a, b in zip(part.pivot.motion.axis, constraint.axis, strict=True)
-                        ):
-                            raise ValueError(
-                                f"part '{part.part_id}' motion axis {part.pivot.motion.axis} "
-                                f"does not match required axis {constraint.axis} for role '{part.role}'"
-                            )
-
-            if self.assembly.required_sockets:
-                parts_by_id = {p.part_id: p for p in (spec.parts or [])}
-                spec_sockets_by_id = {s.socket_id: s for s in (spec.sockets or [])}
-                for req_socket in self.assembly.required_sockets:
-                    if req_socket.socket_id not in spec_sockets_by_id:
-                        raise ValueError(
-                            f"required socket '{req_socket.socket_id}' is missing from specification"
-                        )
-                    spec_sock = spec_sockets_by_id[req_socket.socket_id]
-                    parent_part = parts_by_id.get(spec_sock.parent_part)
-                    if parent_part is None:
-                        raise ValueError(
-                            f"socket '{spec_sock.socket_id}' parent part '{spec_sock.parent_part}' not found in parts"
-                        )
-                    if parent_part.role != req_socket.parent_role:
-                        raise ValueError(
-                            f"socket '{spec_sock.socket_id}' parent part '{parent_part.part_id}' has role '{parent_part.role}', "
-                            f"expected required role '{req_socket.parent_role}'"
-                        )
-
+        if spec.schema_version == "0.5.0" and spec.profile_version != self.version:
+            raise ValueError(
+                f"specification profile_version {spec.profile_version} does not match {self.qualified}"
+            )
         processing = document.processing
         if spec.lod_policy not in processing.allowed_lod_policies:
             raise ValueError(f"lod_policy {spec.lod_policy} is not allowed by {self.qualified}")
@@ -523,24 +262,6 @@ class AssetProfile:
             raise ValueError(
                 f"collider_policy {spec.collider_policy} is not allowed by {self.qualified}"
             )
-        if spec.collider_policy == "capsule":
-            if not getattr(spec, "collider", None) or not spec.collider.capsule:
-                raise ValueError(
-                    "capsule collider requires collider.capsule definition in specification"
-                )
-            capsule = spec.collider.capsule
-            tolerance = processing.dimension_tolerance_m
-            if capsule.height_m > spec.dimensions.height_m + tolerance:
-                raise ValueError(
-                    f"capsule height_m ({capsule.height_m}) exceeds specification height "
-                    f"({spec.dimensions.height_m}) + tolerance ({tolerance})"
-                )
-            max_horiz = max(spec.dimensions.width_m, spec.dimensions.depth_m)
-            if 2 * capsule.radius_m > max_horiz + tolerance:
-                raise ValueError(
-                    f"capsule diameter ({2 * capsule.radius_m}) exceeds max horizontal dimension "
-                    f"({max_horiz}) + tolerance ({tolerance})"
-                )
         if spec.origin_policy not in processing.allowed_origin_policies:
             raise ValueError(
                 f"origin_policy {spec.origin_policy} is not allowed by {self.qualified}"
@@ -648,10 +369,528 @@ def _on_snap_grid(value: float, grid: float, tolerance: float) -> bool:
     return abs(quotient - round(quotient)) * grid <= tolerance
 
 
+CATEGORY_V07_LITERAL = Literal[
+    "prop",
+    "pickup",
+    "modular",
+    "vehicle",
+    "weapon",
+    "aircraft",
+    "character",
+]
+
+
+class ProcessingPolicyV07(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    lod0_required: bool
+    lod1_required: bool
+    allowed_lod_policies: list[str] = Field(..., min_length=1)
+    allowed_collider_policies: list[Literal["box", "capsule"]] = Field(..., min_length=1)
+    allowed_origin_policies: list[str] = Field(..., min_length=1)
+    default_origin_policy: str
+    dimension_tolerance_m: float = Field(..., gt=0.0, le=1.0)
+    snap_grid_m: float | None = Field(default=None, allow_inf_nan=False)
+    rig_forbidden: bool
+    animation_forbidden: bool
+    max_materials: int = Field(..., ge=1, le=8)
+    max_texture_dimension: int = Field(..., ge=256, le=4096)
+    max_triangles_lod0: int = Field(..., ge=100, le=100000)
+
+    @field_validator(
+        "dimension_tolerance_m",
+        "snap_grid_m",
+        "max_materials",
+        "max_texture_dimension",
+        "max_triangles_lod0",
+        mode="before",
+    )
+    @classmethod
+    def reject_bool_and_str_policy(cls, value: Any, info: Any) -> Any:
+        if value is None:
+            return value
+        _reject_bool_and_string(value, info.field_name, "number")
+        return value
+
+    @field_validator("snap_grid_m")
+    @classmethod
+    def snap_is_positive(cls, value: float | None) -> float | None:
+        if value is not None and value <= 0:
+            raise ValueError("snap_grid_m must be positive when set")
+        return value
+
+    @model_validator(mode="after")
+    def policies_are_known(self) -> ProcessingPolicyV07:
+        lod = {"lod0_only", "lod0_lod1"}
+        origins = {"bottom_center", "center"}
+        if len(self.allowed_lod_policies) != len(set(self.allowed_lod_policies)):
+            raise ValueError("allowed_lod_policies contains duplicate values")
+        if len(self.allowed_collider_policies) != len(set(self.allowed_collider_policies)):
+            raise ValueError("allowed_collider_policies contains duplicate values")
+        if len(self.allowed_origin_policies) != len(set(self.allowed_origin_policies)):
+            raise ValueError("allowed_origin_policies contains duplicate values")
+        if any(item not in lod for item in self.allowed_lod_policies):
+            raise ValueError("allowed_lod_policies contains an unsupported value")
+        if any(item not in origins for item in self.allowed_origin_policies):
+            raise ValueError("allowed_origin_policies contains an unsupported value")
+        if self.default_origin_policy not in self.allowed_origin_policies:
+            raise ValueError("default origin is not in the allowed origin policies")
+        if self.lod1_required and "lod0_lod1" not in self.allowed_lod_policies:
+            raise ValueError("a required LOD1 needs the lod0_lod1 policy")
+        if self.lod1_required and "lod0_only" in self.allowed_lod_policies:
+            raise ValueError("lod0_only cannot be allowed when LOD1 is required")
+        if not self.lod0_required:
+            raise ValueError("LOD0 is required for every V0.7 profile")
+        return self
+
+
+class RoleMotionConstraint(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    kind: Literal["fixed", "revolute", "prismatic"]
+    axis: tuple[float, float, float] | list[float] | None = None
+
+    @field_validator("axis", mode="before")
+    @classmethod
+    def validate_axis_type(cls, value: Any) -> Any:
+        if value is None:
+            return value
+        if not isinstance(value, (list, tuple)) or len(value) != 3:
+            raise ValueError("axis must be a 3-element list or tuple")
+        for item in value:
+            _reject_bool_and_string(item, "axis component", "number")
+            if not math.isfinite(_as_number(item)):
+                raise ValueError("axis component must be finite")
+        return [float(x) for x in value]
+
+    @model_validator(mode="after")
+    def validate_kind_and_axis(self) -> RoleMotionConstraint:
+        if self.kind == "fixed":
+            if self.axis is not None:
+                raise ValueError("axis forbidden for fixed motion constraint")
+        else:
+            if self.axis is None:
+                raise ValueError(f"axis required for {self.kind} motion constraint")
+            norm = math.sqrt(sum(float(x) ** 2 for x in self.axis))
+            if abs(norm - 1.0) > 1e-6:
+                raise ValueError(f"axis must be a unit vector within 1e-6, norm is {norm}")
+        return self
+
+
+class RequiredSocketContract(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    socket_id: str
+    parent_role: str
+    placement: Literal["forward_end"]
+    forward_end_fraction: float = Field(..., gt=0.0, le=1.0)
+    rest_forward: tuple[float, float, float] | list[float] | None = None
+
+    @field_validator("socket_id", "parent_role")
+    @classmethod
+    def validate_identifier(cls, value: str, info: Any) -> str:
+        if not re.fullmatch(r"^[a-z][a-z0-9_]{0,63}$", value):
+            raise ValueError(f"{info.field_name} must be a lowercase identifier, got '{value}'")
+        return value
+
+    @field_validator("forward_end_fraction", mode="before")
+    @classmethod
+    def reject_bool_and_str_fraction(cls, value: Any) -> Any:
+        _reject_bool_and_string(value, "forward_end_fraction", "number")
+        if not math.isfinite(_as_number(value)):
+            raise ValueError("forward_end_fraction must be finite")
+        return value
+
+    @field_validator("rest_forward", mode="before")
+    @classmethod
+    def validate_rest_forward(cls, value: Any) -> Any:
+        if value is None:
+            return value
+        if not isinstance(value, (list, tuple)) or len(value) != 3:
+            raise ValueError("rest_forward must be a 3-element list or tuple")
+        for item in value:
+            _reject_bool_and_string(item, "rest_forward component", "number")
+            if not math.isfinite(_as_number(item)):
+                raise ValueError("rest_forward component must be finite")
+        norm = math.sqrt(sum(float(x) ** 2 for x in value))
+        if abs(norm - 1.0) > 1e-6:
+            raise ValueError(f"rest_forward must be a unit vector within 1e-6, norm is {norm}")
+        return [float(x) for x in value]
+
+
+class AssemblyContract(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    roles: list[str] = Field(..., min_length=1)
+    required_roles: list[str] = Field(..., min_length=1)
+    role_motion_constraints: dict[str, RoleMotionConstraint] = Field(default_factory=dict)
+    required_sockets: list[RequiredSocketContract] = Field(default_factory=list)
+    pivot_tolerance_m: float = Field(..., gt=0.0, le=1.0)
+    basis_tolerance_deg: float = Field(..., gt=0.0, le=90.0)
+    socket_position_tolerance_m: float = Field(..., gt=0.0, le=1.0)
+    socket_angle_tolerance_deg: float = Field(..., gt=0.0, le=90.0)
+
+    @field_validator(
+        "pivot_tolerance_m",
+        "basis_tolerance_deg",
+        "socket_position_tolerance_m",
+        "socket_angle_tolerance_deg",
+        mode="before",
+    )
+    @classmethod
+    def reject_bool_and_str_tolerances(cls, value: Any, info: Any) -> Any:
+        _reject_bool_and_string(value, info.field_name, "number")
+        if not math.isfinite(_as_number(value)):
+            raise ValueError(f"{info.field_name} must be finite")
+        return value
+
+    @field_validator("roles", "required_roles")
+    @classmethod
+    def validate_roles_identifiers(cls, value: list[str], info: Any) -> list[str]:
+        if len(value) != len(set(value)):
+            raise ValueError(f"{info.field_name} contains duplicate roles")
+        for item in value:
+            if not re.fullmatch(r"^[a-z][a-z0-9_]{0,63}$", item):
+                raise ValueError(
+                    f"{info.field_name} items must be lowercase identifiers, got '{item}'"
+                )
+        return value
+
+    @model_validator(mode="after")
+    def validate_assembly_contract(self) -> AssemblyContract:
+        roles_set = set(self.roles)
+        for req in self.required_roles:
+            if req not in roles_set:
+                raise ValueError(f"required_role '{req}' is not in defined roles vocabulary")
+
+        for r in self.role_motion_constraints:
+            if r not in roles_set:
+                raise ValueError(
+                    f"role_motion_constraint key '{r}' is not in defined roles vocabulary"
+                )
+
+        seen_sockets: set[str] = set()
+        for sock in self.required_sockets:
+            if sock.socket_id in seen_sockets:
+                raise ValueError(f"duplicate socket_id '{sock.socket_id}' in required_sockets")
+            seen_sockets.add(sock.socket_id)
+            if sock.parent_role not in roles_set:
+                raise ValueError(
+                    f"required_socket '{sock.socket_id}' parent_role '{sock.parent_role}' is not in defined roles vocabulary"
+                )
+
+        return self
+
+
+class ProfileDocumentV07(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    schema_version: Literal["asset-profile-0.7.0"]
+    profile_id: str = Field(..., min_length=2, max_length=40)
+    version: int = Field(..., ge=1, le=1000, strict=True)
+    categories: list[CATEGORY_V07_LITERAL] = Field(..., min_length=1)
+    review_views: list[str] = Field(..., min_length=1)
+    framing: FramingPolicy
+    dimension_rules: DimensionRules
+    processing: ProcessingPolicyV07
+    godot: GodotPolicy
+    runtime: RuntimePolicy
+    geometry_mode: Literal["single_mesh", "assembly"]
+    accepted_source_kinds: list[Literal["provider_generated", "local_operator_assembly"]] = Field(
+        ..., min_length=1
+    )
+    assembly: AssemblyContract | None = None
+
+    @field_validator("profile_id")
+    @classmethod
+    def identifier_is_safe(cls, value: str) -> str:
+        if not value.replace("_", "").isalnum() or not value[0].isalpha() or value != value.lower():
+            raise ValueError("profile_id must be a lowercase identifier")
+        return value
+
+    @field_validator("review_views")
+    @classmethod
+    def views_are_implemented(cls, value: list[str]) -> list[str]:
+        if len(value) != len(set(value)):
+            raise ValueError("review_views contains a duplicate")
+        unknown = [item for item in value if item not in PLACED_VIEWS]
+        if unknown:
+            raise ValueError(f"review view is not implemented: {unknown[0]}")
+        return value
+
+    @field_validator("categories")
+    @classmethod
+    def categories_unique(cls, value: list[CATEGORY_V07_LITERAL]) -> list[CATEGORY_V07_LITERAL]:
+        if len(value) != len(set(value)):
+            raise ValueError("categories contains duplicate values")
+        return value
+
+    @field_validator("accepted_source_kinds")
+    @classmethod
+    def source_kinds_unique(
+        cls, value: list[Literal["provider_generated", "local_operator_assembly"]]
+    ) -> list[Literal["provider_generated", "local_operator_assembly"]]:
+        if len(value) != len(set(value)):
+            raise ValueError("accepted_source_kinds contains duplicate values")
+        return value
+
+    @model_validator(mode="after")
+    def validate_geometry_mode_and_assembly(self) -> ProfileDocumentV07:
+        if self.geometry_mode == "single_mesh":
+            if self.accepted_source_kinds != ["provider_generated"]:
+                raise ValueError(
+                    "single_mesh requires accepted_source_kinds == ['provider_generated']"
+                )
+            if self.assembly is not None:
+                raise ValueError("single_mesh forbids assembly contract")
+        elif self.geometry_mode == "assembly":
+            if self.accepted_source_kinds != ["local_operator_assembly"]:
+                raise ValueError(
+                    "assembly requires accepted_source_kinds == ['local_operator_assembly']"
+                )
+            if self.assembly is None:
+                raise ValueError("assembly requires assembly contract to be defined")
+        return self
+
+
+def parse_profile_document_v07(content: str | dict[str, Any]) -> ProfileDocumentV07:
+    """Validate one V0.7 profile document. Unknown fields and unsafe values are rejected."""
+    if isinstance(content, str):
+        from gamefactory.core.domain.asset_contracts import UniqueKeyLoader
+
+        try:
+            parsed = yaml.load(content, Loader=UniqueKeyLoader)
+        except SpecInvalidError:
+            raise
+        except Exception as exc:
+            raise ProfileContractError(f"profile document is not valid YAML: {exc}") from exc
+    elif isinstance(content, dict):
+        parsed = content
+    else:
+        raise ProfileContractError(
+            f"profile document must be a mapping, got {type(content).__name__}"
+        )
+    if not isinstance(parsed, dict):
+        raise ProfileContractError("profile document must be a mapping")
+    try:
+        return ProfileDocumentV07.model_validate(parsed)
+    except Exception as exc:
+        raise ProfileContractError(f"profile document rejected: {exc}") from exc
+
+
+@dataclass(frozen=True)
+class AssetProfileV07:
+    document: ProfileDocumentV07
+
+    @property
+    def profile_id(self) -> str:
+        return self.document.profile_id
+
+    @property
+    def version(self) -> int:
+        return self.document.version
+
+    @property
+    def schema_version(self) -> str:
+        return self.document.schema_version
+
+    @property
+    def qualified(self) -> str:
+        return f"{self.profile_id}@{self.version}"
+
+    @property
+    def review_views(self) -> tuple[str, ...]:
+        return tuple(self.document.review_views)
+
+    @property
+    def framing(self) -> FramingPolicy:
+        return self.document.framing
+
+    @property
+    def geometry_mode(self) -> str:
+        return self.document.geometry_mode
+
+    @property
+    def accepted_source_kinds(self) -> tuple[str, ...]:
+        return tuple(self.document.accepted_source_kinds)
+
+    @property
+    def assembly(self) -> AssemblyContract | None:
+        return self.document.assembly
+
+    def check_specification(self, spec: AssetSpecificationV07) -> None:
+        """Reject V0.7 specification choices this profile does not implement."""
+        document = self.document
+        if spec.category not in document.categories:
+            raise ValueError(f"category {spec.category} is not supported by {self.qualified}")
+        if spec.profile != self.profile_id:
+            raise ValueError("specification profile does not match the bound profile")
+        if spec.profile_version != self.version:
+            raise ValueError(
+                f"specification profile_version {spec.profile_version} does not match {self.qualified}"
+            )
+        if self.geometry_mode == "assembly":
+            if spec.parts is None or len(spec.parts) == 0:
+                raise ValueError(f"assembly profile {self.qualified} requires parts to be defined")
+        elif self.geometry_mode == "single_mesh":
+            if spec.parts is not None:
+                raise ValueError(f"single_mesh profile {self.qualified} forbids parts")
+            if spec.sockets is not None:
+                raise ValueError(f"single_mesh profile {self.qualified} forbids sockets")
+
+        if spec.source_kind not in document.accepted_source_kinds:
+            raise ValueError(
+                f"source_kind '{spec.source_kind}' is not accepted by {self.qualified}"
+            )
+
+        if self.geometry_mode == "assembly" and document.assembly is not None:
+            assembly_contract = document.assembly
+            parts = spec.parts or []
+            declared_roles = {p.role for p in parts}
+
+            for p in parts:
+                if p.role not in assembly_contract.roles:
+                    raise ValueError(
+                        f"part '{p.part_id}' role '{p.role}' is not in profile role vocabulary: {assembly_contract.roles}"
+                    )
+
+            for req_role in assembly_contract.required_roles:
+                if req_role not in declared_roles:
+                    raise ValueError(
+                        f"required role '{req_role}' is missing from specification parts"
+                    )
+
+            for role, constraint in assembly_contract.role_motion_constraints.items():
+                for p in parts:
+                    if p.role == role:
+                        if p.pivot.motion.kind != constraint.kind:
+                            raise ValueError(
+                                f"part '{p.part_id}' (role '{role}') motion kind '{p.pivot.motion.kind}' "
+                                f"does not match required kind '{constraint.kind}'"
+                            )
+                        if constraint.axis is not None:
+                            if p.pivot.motion.axis is None:
+                                raise ValueError(
+                                    f"part '{p.part_id}' (role '{role}') is missing motion axis"
+                                )
+                            if not all(
+                                math.isclose(a, b, abs_tol=1e-6)
+                                for a, b in zip(p.pivot.motion.axis, constraint.axis, strict=True)
+                            ):
+                                raise ValueError(
+                                    f"part '{p.part_id}' (role '{role}') motion axis {p.pivot.motion.axis} "
+                                    f"does not match required axis {constraint.axis}"
+                                )
+
+            part_map = {p.part_id: p for p in parts}
+            socket_map = {s.socket_id: s for s in (spec.sockets or [])}
+            for req_sock in assembly_contract.required_sockets:
+                if req_sock.socket_id not in socket_map:
+                    raise ValueError(
+                        f"required socket '{req_sock.socket_id}' is missing from specification sockets"
+                    )
+                sock = socket_map[req_sock.socket_id]
+                parent_part = part_map.get(sock.parent_part)
+                if parent_part is None or parent_part.role != req_sock.parent_role:
+                    parent_role = parent_part.role if parent_part else None
+                    raise ValueError(
+                        f"socket '{sock.socket_id}' parent part '{sock.parent_part}' has role '{parent_role}', "
+                        f"expected required role '{req_sock.parent_role}'"
+                    )
+                if sock.placement != req_sock.placement:
+                    raise ValueError(
+                        f"socket '{sock.socket_id}' placement '{sock.placement}' does not match expected placement '{req_sock.placement}'"
+                    )
+
+        processing = document.processing
+        if spec.lod_policy not in processing.allowed_lod_policies:
+            raise ValueError(f"lod_policy {spec.lod_policy} is not allowed by {self.qualified}")
+        if spec.collider_policy not in processing.allowed_collider_policies:
+            raise ValueError(
+                f"collider_policy {spec.collider_policy} is not allowed by {self.qualified}"
+            )
+        if spec.origin_policy not in processing.allowed_origin_policies:
+            raise ValueError(
+                f"origin_policy {spec.origin_policy} is not allowed by {self.qualified}"
+            )
+
+        for axis_name, axis_value in (
+            ("width_m", spec.dimensions.width_m),
+            ("depth_m", spec.dimensions.depth_m),
+            ("height_m", spec.dimensions.height_m),
+        ):
+            if not document.dimension_rules.min_m <= axis_value <= document.dimension_rules.max_m:
+                raise ValueError(
+                    f"{axis_name} {axis_value} is outside {self.qualified} "
+                    f"{document.dimension_rules.min_m}-{document.dimension_rules.max_m} m"
+                )
+            if processing.snap_grid_m is not None and not _on_snap_grid(
+                axis_value, processing.snap_grid_m, processing.dimension_tolerance_m
+            ):
+                raise ValueError(
+                    f"{axis_name} {axis_value} is not a multiple of snap grid {processing.snap_grid_m}"
+                )
+
+        if spec.material_budget.max_materials > processing.max_materials:
+            raise ValueError(f"material budget exceeds {self.qualified}")
+        if spec.texture_budget.max_dimension > processing.max_texture_dimension:
+            raise ValueError(f"texture budget exceeds {self.qualified}")
+        if spec.geometry_budget.max_triangles_lod0 > processing.max_triangles_lod0:
+            raise ValueError(f"LOD0 triangle budget exceeds {self.qualified}")
+
+        if spec.collider.policy == "capsule":
+            if spec.collider.capsule is None:
+                raise ValueError(
+                    "capsule specification must be present for capsule collider policy"
+                )
+            cap = spec.collider.capsule
+            tol = processing.dimension_tolerance_m
+            if cap.height_m > spec.dimensions.height_m + tol:
+                raise ValueError(
+                    f"capsule height_m ({cap.height_m}) exceeds specification height ({spec.dimensions.height_m}) + tolerance ({tol})"
+                )
+            max_horiz = max(spec.dimensions.width_m, spec.dimensions.depth_m)
+            if 2 * cap.radius_m > max_horiz + tol:
+                raise ValueError(
+                    f"capsule diameter ({2 * cap.radius_m}) exceeds max horizontal bounds ({max_horiz}) + tolerance ({tol})"
+                )
+
+
 @dataclass(frozen=True)
 class ProfileRegistry:
     available: tuple[AssetProfile, ...]
-    unsupported: tuple[str, ...] = ()
+    unsupported: tuple[str, ...]
+    available_v07: tuple[AssetProfileV07, ...] = ()
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.available, tuple) or any(
+            not isinstance(p, AssetProfile) for p in self.available
+        ):
+            raise TypeError("available must be a tuple of AssetProfile instances")
+        if not isinstance(self.unsupported, tuple) or any(
+            not isinstance(u, str) for u in self.unsupported
+        ):
+            raise TypeError("unsupported must be a tuple of str identifiers")
+        if not isinstance(self.available_v07, tuple) or any(
+            not isinstance(p, AssetProfileV07) for p in self.available_v07
+        ):
+            raise TypeError("available_v07 must be a tuple of AssetProfileV07 instances")
+
+        all_qualified = [p.qualified for p in self.available] + [
+            p.qualified for p in self.available_v07
+        ]
+        if len(all_qualified) != len(set(all_qualified)):
+            raise ValueError("duplicate qualified profile id in available / available_v07")
+
+        unsupported_set = set(self.unsupported)
+        if len(self.unsupported) != len(unsupported_set):
+            raise ValueError("duplicate profile_id in unsupported")
+
+        for profile_id in [p.profile_id for p in self.available] + [
+            p.profile_id for p in self.available_v07
+        ]:
+            if profile_id in unsupported_set:
+                raise ValueError(f"profile '{profile_id}' cannot be both available and unsupported")
 
     def get(self, profile_id: str, version: int | None = None) -> AssetProfile:
         if profile_id in self.unsupported:
@@ -661,6 +900,14 @@ class ProfileRegistry:
             if profile.profile_id == profile_id and profile.version == wanted:
                 return profile
         raise ProfileContractError(f"profile {profile_id}@{wanted} is not registered")
+
+    def get_v07(self, profile_id: str, version: int) -> AssetProfileV07:
+        if profile_id in self.unsupported:
+            raise ProfileContractError(f"profile {profile_id} is UNSUPPORTED")
+        for profile in self.available_v07:
+            if profile.profile_id == profile_id and profile.version == version:
+                return profile
+        raise ProfileContractError(f"profile {profile_id}@{version} is not registered")
 
     def availability(self) -> list[dict[str, str]]:
         rows = [
@@ -672,6 +919,15 @@ class ProfileRegistry:
             }
             for profile in self.available
         ]
+        rows.extend(
+            {
+                "profile_id": profile.profile_id,
+                "qualified": profile.qualified,
+                "version": str(profile.version),
+                "status": "AVAILABLE",
+            }
+            for profile in self.available_v07
+        )
         rows.extend(
             {
                 "profile_id": profile_id,
@@ -699,6 +955,7 @@ def builtin_registry() -> ProfileRegistry:
             _load_builtin("modular_piece"),
         ),
         unsupported=UNSUPPORTED_PROFILE_IDS,
+        available_v07=(),
     )
 
 

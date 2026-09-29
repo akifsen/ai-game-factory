@@ -70,5 +70,6 @@ assembly:
       forward_end_fraction: 0.2
       rest_forward: [0.0, 0.0, -1.0]
   socket_angle_tolerance_deg: 5.0
+  socket_position_tolerance_m: 0.02
   pivot_tolerance_m: 0.01
   basis_tolerance_deg: 1.0
