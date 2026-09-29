@@ -16,7 +16,11 @@ from pathlib import Path
 from typing import IO, Any, NamedTuple, cast
 
 from gamefactory.core.domain.errors import TimeoutError, ToolExecutionError
-from gamefactory.core.execution.redaction import _SENSITIVE_ENV_SUBSTRINGS, redactor
+from gamefactory.core.execution.redaction import (
+    _SENSITIVE_ENV_SUBSTRINGS,
+    is_eligible_exact_secret,
+    redactor,
+)
 
 
 def utc_now_iso() -> str:
@@ -84,6 +88,9 @@ class CommandResult:
     cleanup_status: str = "completed"
     args: list[str] = field(default_factory=list)
     cwd: str = ""
+    # In-memory protocol data: raw unredacted stdout populated ONLY when request.structured_json_output is True.
+    # Must NOT appear in to_dict(), must not be logged, and must not be persisted.
+    protocol_stdout: str | None = field(default=None, repr=False)
 
     def to_dict(self) -> dict[str, Any]:
         """Return serializable dictionary representation of the command result."""
@@ -355,9 +362,16 @@ class ProcessRunner:
         secrets = [
             v
             for k, v in request.env_overrides.items()
-            if v and any(part in k.upper() for part in _SENSITIVE_ENV_SUBSTRINGS)
+            if is_eligible_exact_secret(v, explicit=True)
+            and any(part in k.upper() for part in _SENSITIVE_ENV_SUBSTRINGS)
         ]
-        secrets.extend(self._sensitive_argument_values(request.args))
+        secrets.extend(
+            [
+                v
+                for v in self._sensitive_argument_values(request.args)
+                if is_eligible_exact_secret(v, explicit=True)
+            ]
+        )
 
         def redact(value: str) -> str:
             return redactor.redact_text(value, secrets)
@@ -750,4 +764,5 @@ class ProcessRunner:
             cleanup_status=cleanup_status,
             args=redacted_args,
             cwd=redacted_cwd,
+            protocol_stdout=stdout_str if request.structured_json_output else None,
         )

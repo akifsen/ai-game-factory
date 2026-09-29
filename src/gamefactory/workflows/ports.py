@@ -4,6 +4,7 @@ from dataclasses import dataclass, field
 from typing import Any, Protocol
 
 from gamefactory.core.domain.models import CostClass
+from gamefactory.core.domain.paid_request import PaidRequestSnapshot
 
 
 @dataclass
@@ -12,6 +13,7 @@ class GenerationRequest:
     target_format: str = "glb"
     parameters: dict[str, Any] = field(default_factory=dict)
     operation_hash: str = ""
+    paid_request: PaidRequestSnapshot | None = None
 
 
 @dataclass
@@ -34,3 +36,11 @@ class AssetGenerationProvider(Protocol):
     def is_configured(self) -> bool: ...
 
     def generate(self, request: GenerationRequest) -> GenerationResponse: ...
+
+
+class PaidRequestAdapter(Protocol):
+    def resolve_paid_request(
+        self, binding: dict[str, Any], specification: dict[str, Any], cost: dict[str, Any]
+    ) -> dict[str, Any]: ...
+
+    def check_paid_request(self, snapshot_content: dict[str, Any]) -> None: ...

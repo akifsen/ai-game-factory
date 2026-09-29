@@ -2,7 +2,10 @@ name: CI
 
 on:
   push:
+    branches: [main]
   pull_request:
+    branches: [main]
+  workflow_dispatch:
 
 jobs:
   test:
@@ -13,8 +16,8 @@ jobs:
         python-version: ['3.11', '3.12']
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
       - name: Record Linux filesystem context
@@ -30,7 +33,7 @@ jobs:
           } | tee "$RUNNER_TEMP/linux-filesystem-context.txt"
       - name: Archive Linux filesystem context
         if: always() && runner.os == 'Linux'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: linux-filesystem-python-${{ matrix.python-version }}
           path: ${{ runner.temp }}/linux-filesystem-context.txt
@@ -52,8 +55,8 @@ jobs:
       GODOT_EXPECTED_VERSION: 4.7.2.stable.official.ed1daf0bf
       GODOT_ARCHIVE_SHA512: 9aa00f7a605200940bce3027a567b782f49bd8e940dd06ae9e987bd65aee1b1467edd56ed84fcdcbdd44354bf613bdbb4e5d2913e925850368e150c59ed54c65
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
       - name: Build wheel and install it into a clean virtual environment
@@ -150,7 +153,7 @@ jobs:
             2>&1 | tee "$evidence/logs/live-crash.log"
       - name: Archive selected real-engine closeout evidence
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: godot-real-evidence
           path: |
@@ -173,7 +176,7 @@ jobs:
       GODOT_ARCHIVE_SHA512: 9aa00f7a605200940bce3027a567b782f49bd8e940dd06ae9e987bd65aee1b1467edd56ed84fcdcbdd44354bf613bdbb4e5d2913e925850368e150c59ed54c65
       LIBGL_ALWAYS_SOFTWARE: "1"
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Install a local software OpenGL display
         shell: bash
         run: |
@@ -300,14 +303,14 @@ jobs:
             --output "$evidence/profile-fixtures.json"
       - name: Archive offline asset evidence
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: asset-production-offline-evidence
           path: .verification/ci-asset-production/**/*
           if-no-files-found: warn
       - name: Archive selected rendered evidence
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: godot-rendered-evidence
           path: |

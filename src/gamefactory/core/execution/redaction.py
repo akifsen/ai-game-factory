@@ -29,6 +29,50 @@ _SENSITIVE_ENV_SUBSTRINGS = (
     "CREDENTIAL",
 )
 
+_COMMON_SECRET_LITERALS = frozenset(
+    {"true", "false", "yes", "no", "on", "off", "null", "none", "enabled", "disabled"}
+)
+
+
+AMBIENT_SECRET_MIN_LENGTH = 8
+EXPLICIT_SECRET_MIN_LENGTH = 4
+
+
+def is_eligible_exact_secret(value: Any, *, explicit: bool = False) -> bool:
+    """Determine whether a string is eligible for exact-value secret replacement.
+
+    Rationale:
+    Ambient values (any environment variable whose NAME merely looks sensitive) need
+    at least 8 characters: that keeps the chance of a coincidental match inside a
+    64-hex digest, UUID or task id negligible, while real API keys and tokens are far
+    longer. Explicit, request-scoped secrets (credential env overrides and values of
+    credential flags such as ``--api-key``) are known credentials for that command,
+    so a lower floor of 4 still protects short passwords while single characters and
+    two-digit flags can never corrupt output. Common boolean, toggle, and null
+    literals are never eligible. Shorter values are still caught by the key-aware
+    regex patterns (e.g. "API_KEY=abc", "password: x", "Bearer x").
+    """
+    if not isinstance(value, str):
+        return False
+    stripped = value.strip()
+    minimum = EXPLICIT_SECRET_MIN_LENGTH if explicit else AMBIENT_SECRET_MIN_LENGTH
+    if len(stripped) < minimum:
+        return False
+    if stripped.lower() in _COMMON_SECRET_LITERALS:
+        return False
+    return True
+
+
+def _is_identity_key(key: Any) -> bool:
+    """Keep database identities and hashes byte-for-byte stable."""
+    normalized = str(key).strip().lower().replace("-", "_")
+    return normalized in {"id", "hash", "fingerprint"} or normalized.endswith(
+        ("_id", "_hash", "_fingerprint")
+    )
+
+
+is_identity_key = _is_identity_key
+
 
 class SecretRedactor:
     """Detects and redacts sensitive credentials from strings, arguments, and structures."""
@@ -37,7 +81,7 @@ class SecretRedactor:
         self.exact_secrets: set[str] = set()
         if extra_secrets:
             for s in extra_secrets:
-                if s:
+                if is_eligible_exact_secret(s, explicit=True):
                     self.exact_secrets.add(s)
 
     def redact_text(self, text: str, secrets: list[str] | set[str] | None = None) -> str:
@@ -50,9 +94,11 @@ class SecretRedactor:
         current_env_secrets = {
             value
             for key, value in os.environ.items()
-            if value and any(sub in key.upper() for sub in _SENSITIVE_ENV_SUBSTRINGS)
+            if any(sub in key.upper() for sub in _SENSITIVE_ENV_SUBSTRINGS)
+            and is_eligible_exact_secret(value)
         }
-        all_secrets = self.exact_secrets | current_env_secrets | set(secrets or ())
+        passed_secrets = {s for s in (secrets or ()) if is_eligible_exact_secret(s, explicit=True)}
+        all_secrets = self.exact_secrets | current_env_secrets | passed_secrets
         for secret in sorted((s for s in all_secrets if s), key=len, reverse=True):
             if secret in result:
                 result = result.replace(secret, "[REDACTED]")
@@ -81,7 +127,11 @@ class SecretRedactor:
             for k, v in data.items():
                 k_upper = str(k).upper()
                 if any(sub in k_upper for sub in _SENSITIVE_ENV_SUBSTRINGS):
-                    redacted_dict[k] = "[REDACTED]"
+                    # Presence flags (bool/None) are not credential values.
+                    if v is None or isinstance(v, bool):
+                        redacted_dict[k] = v
+                    else:
+                        redacted_dict[k] = "[REDACTED]"
                 else:
                     redacted_dict[k] = self.redact_data(v, secrets)
             return redacted_dict

@@ -29,7 +29,15 @@ MAX_CONCEPT_IMAGE_BYTES = 32 * 1024 * 1024
 MAX_CONCEPT_IMAGE_DIMENSION = 16_384
 MAX_CONCEPT_IMAGE_PIXELS = 50_000_000
 MAX_PROVENANCE_SIDECAR_BYTES = 1024 * 1024
-KNOWN_CONCEPT_PROVIDERS = frozenset({"diffusers_sdxl"})
+RECOGNIZED_CONCEPT_PROVENANCE_TYPES = frozenset(
+    {
+        "diffusers_sdxl",
+        "local_blender_render",
+        "local_operator_drawing",
+        "external_image",
+    }
+)
+KNOWN_CONCEPT_PROVIDERS = RECOGNIZED_CONCEPT_PROVENANCE_TYPES
 
 
 def _read_bounded(path: Path, max_bytes: int, label: str) -> bytes:
@@ -169,6 +177,8 @@ def ingest_concept_image(
     resolved_model = model_name or "unknown"
     resolved_provider = provider_name or "UNKNOWN"
     sidecar_hash: str | None = None
+    paid = False
+    source_script_sha256: str | None = None
 
     if sidecar_file is not None:
         sidecar_bytes = _read_bounded(
@@ -229,14 +239,31 @@ def ingest_concept_image(
             elif isinstance(recipe, dict) and isinstance(recipe.get("model_id"), str):
                 resolved_model = recipe["model_id"]
 
-        if not provider_name:
-            gen_info = sidecar_data.get("generation")
-            if isinstance(gen_info, dict):
+        gen_info = sidecar_data.get("generation")
+        if isinstance(gen_info, dict):
+            if not provider_name:
                 sidecar_provider = gen_info.get("provider")
                 if isinstance(sidecar_provider, str) and sidecar_provider.strip():
                     candidate_provider = sidecar_provider.strip().lower()
-                    if candidate_provider in KNOWN_CONCEPT_PROVIDERS:
+                    if candidate_provider in RECOGNIZED_CONCEPT_PROVENANCE_TYPES:
                         resolved_provider = candidate_provider
+
+            if "paid" in gen_info:
+                raw_paid = gen_info["paid"]
+                if not isinstance(raw_paid, bool):
+                    raise ValidationError(f"generation.paid in {sidecar_file} must be a boolean")
+                paid = raw_paid
+
+            if "source_script_sha256" in gen_info:
+                raw_script_sha = gen_info["source_script_sha256"]
+                if raw_script_sha is not None:
+                    if not isinstance(raw_script_sha, str) or not _HEX_64_REGEX.fullmatch(
+                        raw_script_sha
+                    ):
+                        raise ValidationError(
+                            f"generation.source_script_sha256 in {sidecar_file} must be a 64-character hex string"
+                        )
+                    source_script_sha256 = raw_script_sha.lower()
 
     if source_type == "local_generation" and (
         sidecar_file is None or generation_timestamp == "UNKNOWN" or resolved_provider == "UNKNOWN"
@@ -267,6 +294,10 @@ def ingest_concept_image(
     image_bytes = source_bytes
     artifact_hash = hashlib.sha256(image_bytes).hexdigest()
 
+    provenance_type = (
+        resolved_provider if resolved_provider in RECOGNIZED_CONCEPT_PROVENANCE_TYPES else "UNKNOWN"
+    )
+
     provenance = ConceptProvenance(
         provider=resolved_provider,
         model=resolved_model,
@@ -281,6 +312,9 @@ def ingest_concept_image(
         source_type=source_type,
         sidecar_path=str(sidecar_file) if sidecar_file else None,
         sidecar_hash=sidecar_hash,
+        provenance_type=provenance_type,
+        paid=paid,
+        source_script_sha256=source_script_sha256,
     )
     return target_artifact_path, provenance
 
@@ -375,6 +409,11 @@ class FakeImageGenerationProvider(ImageGenerationProvider):
             dimensions={"width": width, "height": height},
             cost_classification=self._cost_class.value,
             source_type="local_generation",
+            provenance_type=(
+                self._name if self._name in RECOGNIZED_CONCEPT_PROVENANCE_TYPES else "UNKNOWN"
+            ),
+            paid=False,
+            source_script_sha256=None,
         )
 
         return ConceptGenerationResponse(

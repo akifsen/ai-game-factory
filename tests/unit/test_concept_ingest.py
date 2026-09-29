@@ -260,3 +260,88 @@ def test_ingest_rejects_invalid_spec_fingerprint(tmp_path: Path) -> None:
     _write_png(src)
     with pytest.raises(ValidationError, match="Invalid asset_spec_hash"):
         ingest_concept_image(src, tmp_path / "target.png", "not_a_64_char_hex_hash")
+
+
+def test_pickup_concept_provenance_and_registry(tmp_path: Path) -> None:
+    # Real-world pickup case: sidecar declares local_blender_render and paid=false
+    src = tmp_path / "pickup.png"
+    image_bytes = _write_png(src)
+    sidecar = src.with_suffix(".json")
+    script_hash = "f" * 64
+    _write_sidecar(
+        sidecar,
+        image_bytes,
+        created_at=1700000000,
+        generation={
+            "provider": "local_blender_render",
+            "paid": False,
+            "source_script_sha256": script_hash,
+        },
+    )
+    target = tmp_path / "target.png"
+    _, provenance = ingest_concept_image(src, target, "a" * 64)
+
+    assert provenance.provider == "local_blender_render"
+    assert provenance.provenance_type == "local_blender_render"
+    assert provenance.paid is False
+    assert provenance.source_script_sha256 == script_hash
+
+    d = provenance.to_dict()
+    assert d["provenance_type"] == "local_blender_render"
+    assert d["paid"] is False
+    assert d["source_script_sha256"] == script_hash
+
+
+@pytest.mark.parametrize(
+    "prov_type",
+    [
+        "diffusers_sdxl",
+        "local_blender_render",
+        "local_operator_drawing",
+        "external_image",
+    ],
+)
+def test_all_recognized_concept_provenance_types(tmp_path: Path, prov_type: str) -> None:
+    src = tmp_path / f"{prov_type}.png"
+    image_bytes = _write_png(src)
+    sidecar = src.with_suffix(".json")
+    _write_sidecar(
+        sidecar,
+        image_bytes,
+        created_at=1700000000,
+        generation={"provider": prov_type, "paid": True},
+    )
+    _, provenance = ingest_concept_image(src, tmp_path / f"out_{prov_type}.png", "b" * 64)
+    assert provenance.provider == prov_type
+    assert provenance.provenance_type == prov_type
+    assert provenance.paid is True
+
+
+def test_concept_provenance_paid_must_be_bool(tmp_path: Path) -> None:
+    src = tmp_path / "test.png"
+    image_bytes = _write_png(src)
+    sidecar = src.with_suffix(".json")
+    _write_sidecar(
+        sidecar,
+        image_bytes,
+        created_at=1700000000,
+        generation={"provider": "diffusers_sdxl", "paid": "not_a_bool"},
+    )
+    with pytest.raises(ValidationError, match="generation.paid.*must be a boolean"):
+        ingest_concept_image(src, tmp_path / "out.png", "c" * 64)
+
+
+def test_concept_provenance_source_script_sha256_validation(tmp_path: Path) -> None:
+    src = tmp_path / "test_hash.png"
+    image_bytes = _write_png(src)
+    sidecar = src.with_suffix(".json")
+    _write_sidecar(
+        sidecar,
+        image_bytes,
+        created_at=1700000000,
+        generation={"provider": "diffusers_sdxl", "source_script_sha256": "invalid_hex"},
+    )
+    with pytest.raises(
+        ValidationError, match="generation.source_script_sha256.*must be a 64-character hex string"
+    ):
+        ingest_concept_image(src, tmp_path / "out.png", "d" * 64)

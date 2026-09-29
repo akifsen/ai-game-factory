@@ -30,6 +30,13 @@ _REQUIRED_V05 = (
     "approval_ids",
     "completed_at",
 )
+# V0.6 receipts additionally bind the approved paid request snapshot and the
+# production readiness report that preceded the paid approval.
+_REQUIRED_V06 = (
+    *_REQUIRED_V05,
+    "paid_request_snapshot_sha256",
+    "production_readiness_report_sha256",
+)
 
 
 def read_production_receipt(source: Path | dict[str, Any]) -> dict[str, Any]:
@@ -41,8 +48,9 @@ def read_production_receipt(source: Path | dict[str, Any]) -> dict[str, Any]:
     if not isinstance(payload, dict):
         raise ValidationError("production receipt must be a JSON object")
     schema = payload.get("schema_version")
-    if schema == "production-receipt-0.5.0":
-        missing = [key for key in _REQUIRED_V05 if key not in payload]
+    if schema in ("production-receipt-0.5.0", "production-receipt-0.6.0"):
+        required = _REQUIRED_V06 if schema == "production-receipt-0.6.0" else _REQUIRED_V05
+        missing = [key for key in required if key not in payload]
         if missing:
             raise ValidationError(f"production receipt is missing {missing[0]}")
         return dict(payload)

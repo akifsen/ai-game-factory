@@ -41,6 +41,9 @@ from gamefactory.core.approvals.operation_scope import build_operation_inputs
 from gamefactory.core.domain.asset_contracts import parse_asset_specification, spec_fingerprint
 from gamefactory.core.domain.errors import (
     ApprovalRequired,
+    PaidRequestIncompatibleError,
+    PaidRequestInvalidError,
+    PaidRequestRequiredError,
     ProviderFailedError,
     ProviderUnavailable,
     ProviderUncertainError,
@@ -52,12 +55,19 @@ from gamefactory.core.domain.models import (
     CostClass,
     generate_id,
 )
+from gamefactory.core.domain.paid_request import (
+    PAID_REQUEST_SCHEMA,
+    PaidRequestSnapshot,
+    check_image_to_3d_request_dict,
+    paid_request_sha256,
+)
 from gamefactory.core.execution.path_guard import PathGuard
 from gamefactory.core.execution.process_runner import CommandRequest, ProcessRunner
 from gamefactory.workflows.ports import (
     AssetGenerationProvider,
     GenerationRequest,
     GenerationResponse,
+    PaidRequestAdapter,
 )
 
 _VALID_HEX_64 = re.compile(r"^[0-9a-fA-F]{64}$")
@@ -65,6 +75,142 @@ _SAFE_TASK_ID_REGEX = re.compile(r"^[a-zA-Z0-9_\-]{1,128}$")
 _RECOGNIZED_TASK_STATES = frozenset(
     {"PENDING", "IN_PROGRESS", "SUCCEEDED", "FAILED", "EXPIRED", "CANCELED", "CANCELLED"}
 )
+
+MESHY_MAX_TARGET_POLYCOUNT: int = 15000
+
+MESHY_IMAGE_TO_3D_DEFAULTS: dict[str, Any] = {
+    "model_type": "smart-topology",
+    "should_texture": True,
+    "enable_pbr": True,
+    "texture_resolution": "2k",
+    "target_formats": ["glb"],
+    "image_enhancement": "omit",
+    "remove_lighting": "omit",
+    "pose_mode": "omit",
+    "texture_prompt": "omit",
+    "remesh": "omit",
+    "rig": False,
+    "animate": False,
+    "variants": 1,
+}
+"""Materially relevant default parameters for meshy-cli image-to-3d create.
+
+Known limitation: 'omit' fields are omitted from CLI arguments, meaning the
+provider-side defaults apply for those options.
+"""
+
+MESHY_ADAPTER_IDENTITY: dict[str, Any] = {
+    "id": "meshy-cli-image-to-3d",
+    "contract_version": 1,
+    "cli_package": "meshy-cli@0.4.0",
+    "output_schema": "v1",
+}
+
+
+def resolve_paid_request(
+    binding: dict[str, Any], specification: dict[str, Any], cost: dict[str, Any]
+) -> dict[str, Any]:
+    """Resolve full paid request snapshot content using Meshy adapter defaults and specification budget."""
+    raw_poly = None
+    if isinstance(specification, dict):
+        geom = specification.get("geometry_budget")
+        if isinstance(geom, dict):
+            raw_poly = geom.get("max_triangles_lod0")
+        if raw_poly is None:
+            raw_poly = specification.get(
+                "max_triangles_lod0", specification.get("target_polycount")
+            )
+    elif hasattr(specification, "geometry_budget"):
+        raw_poly = specification.geometry_budget.max_triangles_lod0
+
+    if raw_poly is None:
+        raw_poly = 10000
+
+    if isinstance(raw_poly, bool):
+        raise PaidRequestInvalidError("target_polycount cannot be a boolean")
+    try:
+        poly_int = int(raw_poly)
+    except (TypeError, ValueError) as exc:
+        raise PaidRequestInvalidError(f"target_polycount must be numeric: {raw_poly}") from exc
+
+    if poly_int < 100:
+        raise PaidRequestInvalidError(f"target_polycount must be >= 100, got {poly_int}")
+
+    target_polycount = min(poly_int, MESHY_MAX_TARGET_POLYCOUNT)
+
+    req_data = dict(MESHY_IMAGE_TO_3D_DEFAULTS)
+    req_data["target_polycount"] = target_polycount
+
+    content = {
+        "schema": PAID_REQUEST_SCHEMA,
+        "provider": "meshy",
+        "operation": "image-to-3d",
+        "adapter": dict(MESHY_ADAPTER_IDENTITY),
+        "binding": dict(binding),
+        "request": req_data,
+        "cost": dict(cost),
+    }
+    snapshot = PaidRequestSnapshot.from_content(content)
+    return snapshot.content
+
+
+def check_paid_request(snapshot_content: dict[str, Any]) -> None:
+    """Validate that the current Meshy adapter can faithfully execute the approved snapshot."""
+    if not isinstance(snapshot_content, dict):
+        raise PaidRequestIncompatibleError(
+            "Snapshot content must be a dictionary", provider="meshy"
+        )
+    if snapshot_content.get("schema") != PAID_REQUEST_SCHEMA:
+        raise PaidRequestIncompatibleError(
+            f"Unsupported schema version: '{snapshot_content.get('schema')}'; expected '{PAID_REQUEST_SCHEMA}'",
+            provider="meshy",
+        )
+    if snapshot_content.get("provider") != "meshy":
+        raise PaidRequestIncompatibleError(
+            f"Unsupported provider: '{snapshot_content.get('provider')}'; expected 'meshy'",
+            provider="meshy",
+        )
+    if snapshot_content.get("operation") != "image-to-3d":
+        raise PaidRequestIncompatibleError(
+            f"Unsupported operation: '{snapshot_content.get('operation')}'; expected 'image-to-3d'",
+            provider="meshy",
+        )
+    adapter = snapshot_content.get("adapter", {})
+    if not isinstance(adapter, dict) or adapter.get("id") != "meshy-cli-image-to-3d":
+        raise PaidRequestIncompatibleError(
+            f"Unsupported adapter id: '{adapter.get('id') if isinstance(adapter, dict) else None}'; expected 'meshy-cli-image-to-3d'",
+            provider="meshy",
+        )
+    if adapter.get("contract_version") not in {1}:
+        raise PaidRequestIncompatibleError(
+            f"Unsupported contract_version: {adapter.get('contract_version')}; expected 1",
+            provider="meshy",
+        )
+
+    req = snapshot_content.get("request", {})
+    check_image_to_3d_request_dict(req, provider_name="meshy")
+
+
+def build_create_args(snapshot_content: dict[str, Any]) -> list[str]:
+    """Pure function mapping approved snapshot content directly to meshy-cli create arguments."""
+    check_paid_request(snapshot_content)
+    req = snapshot_content["request"]
+    formats = req["target_formats"]
+    format_arg = formats[0] if isinstance(formats, list) else str(formats)
+    return [
+        "--model-type",
+        str(req["model_type"]),
+        "--target-polycount",
+        str(req["target_polycount"]),
+        "--should-texture",
+        "true" if req["should_texture"] else "false",
+        "--enable-pbr",
+        "true" if req["enable_pbr"] else "false",
+        "--texture-resolution",
+        str(req["texture_resolution"]),
+        "--target-formats",
+        format_arg,
+    ]
 
 
 def _validate_finite_nonnegative_cost(val: Any, name: str) -> float | None:
@@ -204,7 +350,8 @@ class MeshyCliRunner:
                     },
                 )
 
-            data = json.loads(res.stdout)
+            raw_output = res.protocol_stdout if res.protocol_stdout is not None else res.stdout
+            data = json.loads(raw_output)
             result = data.get("result", {})
             cli_info = result.get("cli", {})
             sources = result.get("credential_sources", {})
@@ -327,7 +474,8 @@ class MeshyCliRunner:
             )
 
         try:
-            data = json.loads(res.stdout)
+            raw_output = res.protocol_stdout if res.protocol_stdout is not None else res.stdout
+            data = json.loads(raw_output)
             result = data.get("result", {})
             task_info = result.get("task", {})
         except Exception as exc:
@@ -451,7 +599,8 @@ class MeshyCliRunner:
             )
 
         try:
-            data = json.loads(res.stdout)
+            raw_output = res.protocol_stdout if res.protocol_stdout is not None else res.stdout
+            data = json.loads(raw_output)
             downloads = data.get("result", {}).get("downloads")
         except Exception as exc:
             raise RawArtifactInvalidError(
@@ -620,7 +769,7 @@ class MeshyCliRunner:
         return resolved_file, actual_hash
 
 
-class MeshyAssetGenerationProvider(AssetGenerationProvider):
+class MeshyAssetGenerationProvider(AssetGenerationProvider, PaidRequestAdapter):
     """Production Meshy adapter wrapping CLI 0.4.0 with durable intent, recovery, and paid safety."""
 
     def __init__(
@@ -637,6 +786,14 @@ class MeshyAssetGenerationProvider(AssetGenerationProvider):
         self.intent_repo = intent_repo
         self.allow_paid_calls = allow_paid_calls
         self.invocation_count = 0
+
+    def resolve_paid_request(
+        self, binding: dict[str, Any], specification: dict[str, Any], cost: dict[str, Any]
+    ) -> dict[str, Any]:
+        return resolve_paid_request(binding, specification, cost)
+
+    def check_paid_request(self, snapshot_content: dict[str, Any]) -> None:
+        check_paid_request(snapshot_content)
 
     @property
     def name(self) -> str:
@@ -801,9 +958,46 @@ class MeshyAssetGenerationProvider(AssetGenerationProvider):
         task_id = str(params.get("task_id", "")).strip()
         approval_id = str(params.get("approval_id", "")).strip()
         concept_hash = str(params.get("concept_hash", "")).strip()
-        request_fingerprint = str(
-            request.operation_hash or params.get("request_fingerprint", "")
-        ).strip()
+
+        paid_request_snapshot = request.paid_request
+        paid_request_snapshot_hash: str | None = None
+        snapshot_content: dict[str, Any] | None = None
+
+        if paid_request_snapshot is not None:
+            snapshot_content = paid_request_snapshot.content
+            content_sha = paid_request_sha256(snapshot_content)
+            if paid_request_snapshot.sha256 != content_sha:
+                raise PaidRequestInvalidError(
+                    f"Snapshot sha256 '{paid_request_snapshot.sha256}' does not match recomputed sha256 '{content_sha}'"
+                )
+            param_snap_sha = params.get("paid_request_snapshot_sha256")
+            if param_snap_sha is not None and str(param_snap_sha) != paid_request_snapshot.sha256:
+                raise PaidRequestInvalidError(
+                    f"Snapshot sha256 '{paid_request_snapshot.sha256}' does not match parameter paid_request_snapshot_sha256 '{param_snap_sha}'"
+                )
+            snap_binding = snapshot_content.get("binding", {})
+            if snap_binding.get("asset_id") != asset_id:
+                raise PaidRequestInvalidError(
+                    f"Snapshot binding asset_id '{snap_binding.get('asset_id')}' does not match request asset_id '{asset_id}'"
+                )
+            if int(snap_binding.get("revision_number", 0)) != revision_number:
+                raise PaidRequestInvalidError(
+                    f"Snapshot binding revision_number '{snap_binding.get('revision_number')}' does not match request revision_number '{revision_number}'"
+                )
+            if str(snap_binding.get("concept_sha256", "")).lower() != concept_hash.lower():
+                raise PaidRequestInvalidError(
+                    f"Snapshot binding concept_sha256 '{snap_binding.get('concept_sha256')}' does not match request concept_hash '{concept_hash}'"
+                )
+
+            # Incompatible -> raise PaidRequestIncompatibleError with no intent created and no runner call
+            check_paid_request(snapshot_content)
+
+            request_fingerprint = paid_request_snapshot.sha256
+            paid_request_snapshot_hash = paid_request_snapshot.sha256
+        else:
+            request_fingerprint = str(
+                request.operation_hash or params.get("request_fingerprint", "")
+            ).strip()
 
         # Reject placeholder or missing identity values
         for label, val in [
@@ -885,7 +1079,6 @@ class MeshyAssetGenerationProvider(AssetGenerationProvider):
                 f"Unsafe target polycount {target_triangles}; minimum is 100 for smart-topology",
                 provider="meshy",
             )
-        smart_polycount = min(target_triangles, 15000)
 
         # Check for existing durable intent before performing any actions
         existing_intent: ProviderOperationIntent | None = self.intent_repo.get_by_task(task_id)
@@ -905,6 +1098,12 @@ class MeshyAssetGenerationProvider(AssetGenerationProvider):
                 approval_id,
                 request_fingerprint,
                 task_id,
+            )
+
+        if paid_request_snapshot is None:
+            raise PaidRequestRequiredError(
+                "A new paid submission requires an approved paid_request snapshot; none was provided",
+                details={"asset_id": asset_id, "task_id": task_id},
             )
 
         # Paid call guard: allow_paid_calls boolean alone must not impersonate human approval
@@ -992,6 +1191,13 @@ class MeshyAssetGenerationProvider(AssetGenerationProvider):
                 f"Asset revision concept_hash '{revision.concept_hash}' does not match request concept_hash '{concept_hash}'",
                 provider="meshy",
             )
+        if paid_request_snapshot is not None:
+            snap_binding = paid_request_snapshot.content.get("binding", {})
+            snap_spec_sha = str(snap_binding.get("specification_sha256", "")).lower()
+            if snap_spec_sha != str(revision.spec_hash).lower():
+                raise PaidRequestInvalidError(
+                    f"Snapshot binding specification_sha256 '{snap_spec_sha}' does not match revision spec_hash '{revision.spec_hash}'"
+                )
 
         # 4. Bind request spec / specification_hash
         task_spec = task.parameters.get("specification")
@@ -1093,7 +1299,7 @@ class MeshyAssetGenerationProvider(AssetGenerationProvider):
                         f"Request target_polycount ({r_poly}) does not match authoritative task polycount ({auth_poly})",
                         provider="meshy",
                     )
-            smart_polycount = min(auth_poly, 15000)
+            authoritative_poly_limit = auth_poly
         else:
             raw_poly = params.get("target_polycount", params.get("max_triangles_lod0", 10000))
             if isinstance(raw_poly, bool):
@@ -1108,7 +1314,18 @@ class MeshyAssetGenerationProvider(AssetGenerationProvider):
                 raise ProviderFailedError(
                     f"Unsafe target polycount {target_triangles}", provider="meshy"
                 )
-            smart_polycount = min(target_triangles, 15000)
+            authoritative_poly_limit = target_triangles
+
+        # The approved snapshot defines the submitted polycount; it may never exceed the
+        # authoritative specification budget (a safety invariant, not a provider default).
+        if snapshot_content is not None:
+            snapshot_poly = snapshot_content["request"]["target_polycount"]
+            if snapshot_poly > authoritative_poly_limit:
+                raise PaidRequestIncompatibleError(
+                    f"Approved snapshot target_polycount {snapshot_poly} exceeds the "
+                    f"authoritative specification budget {authoritative_poly_limit}",
+                    provider="meshy",
+                )
 
         # 6. Bind cost estimate and budget reservation
         auth_raw_cost = task.parameters.get("cost")
@@ -1200,12 +1417,44 @@ class MeshyAssetGenerationProvider(AssetGenerationProvider):
             )
 
         artifacts = artifact_repo.list_by_workflow(workflow_id)
-        for art in artifacts:
-            if (
-                art.artifact_type in ("asset-concept", "concept_spec")
-                or art.relative_path.endswith(f"{asset_id}.png")
-                or art.relative_path.endswith("concept.png")
-            ):
+        from gamefactory.adapters.persistence.repositories import ConceptVersionRepository
+
+        active_concept_row = ConceptVersionRepository(artifact_repo.db).active_for_workflow(
+            workflow_id
+        )
+        if active_concept_row is not None:
+            active_concept_art = artifact_repo.get(active_concept_row.artifact_id)
+            if active_concept_art is None:
+                raise ProviderFailedError(
+                    f"Active concept artifact '{active_concept_row.artifact_id}' is missing",
+                    provider="meshy",
+                )
+            if active_concept_art.content_hash.lower() != concept_hash.lower():
+                raise ProviderFailedError(
+                    f"Active concept artifact '{active_concept_art.id}' hash '{active_concept_art.content_hash}' does not match concept_hash '{concept_hash}'",
+                    provider="meshy",
+                )
+        else:
+            concept_arts = [
+                art
+                for art in artifacts
+                if (
+                    art.artifact_type in ("asset-concept", "concept_spec")
+                    or art.relative_path.endswith(f"{asset_id}.png")
+                    or art.relative_path.endswith("concept.png")
+                )
+            ]
+            if not concept_arts:
+                raise ProviderFailedError(
+                    f"No concept artifact found for workflow '{workflow_id}'",
+                    provider="meshy",
+                )
+            if len(concept_arts) > 1:
+                raise ProviderFailedError(
+                    f"Ambiguous concept artifacts found for workflow '{workflow_id}'",
+                    provider="meshy",
+                )
+            for art in concept_arts:
                 if art.content_hash.lower() != concept_hash.lower():
                     raise ProviderFailedError(
                         f"Workflow artifact '{art.id}' hash '{art.content_hash}' does not match concept_hash '{concept_hash}'",
@@ -1271,15 +1520,35 @@ class MeshyAssetGenerationProvider(AssetGenerationProvider):
                     "current_hash": current_hash,
                 },
             )
-        if request_fingerprint != current_hash:
-            raise ApprovalRequired(
-                f"Request fingerprint '{request_fingerprint}' does not match current authoritative operation hash '{current_hash}'",
-                approval_id=approval_id,
-                details={
-                    "request_fingerprint": request_fingerprint,
-                    "current_hash": current_hash,
-                },
-            )
+        if paid_request_snapshot is None:
+            if request_fingerprint != current_hash:
+                raise ApprovalRequired(
+                    f"Request fingerprint '{request_fingerprint}' does not match current authoritative operation hash '{current_hash}'",
+                    approval_id=approval_id,
+                    details={
+                        "request_fingerprint": request_fingerprint,
+                        "current_hash": current_hash,
+                    },
+                )
+        else:
+            if request.operation_hash and request.operation_hash != current_hash:
+                raise ApprovalRequired(
+                    f"Request fingerprint '{request.operation_hash}' does not match current authoritative operation hash '{current_hash}'",
+                    approval_id=approval_id,
+                    details={
+                        "request_fingerprint": request.operation_hash,
+                        "current_hash": current_hash,
+                    },
+                )
+            if request_fingerprint != paid_request_snapshot.sha256:
+                raise ApprovalRequired(
+                    f"Request fingerprint '{request_fingerprint}' does not match paid request snapshot hash '{paid_request_snapshot.sha256}'",
+                    approval_id=approval_id,
+                    details={
+                        "request_fingerprint": request_fingerprint,
+                        "snapshot_hash": paid_request_snapshot.sha256,
+                    },
+                )
 
         # Atomic claim (BEGIN IMMEDIATE) returning winner/existing intent
         intent_candidate = ProviderOperationIntent(
@@ -1297,6 +1566,7 @@ class MeshyAssetGenerationProvider(AssetGenerationProvider):
             actual_cost=None,
             cost_unit="credits",
             status="SUBMITTING",
+            paid_request_snapshot_hash=paid_request_snapshot_hash,
         )
 
         intent, claimed = self.intent_repo.claim_intent(intent_candidate)
@@ -1315,32 +1585,27 @@ class MeshyAssetGenerationProvider(AssetGenerationProvider):
         # Winner: perform submission via CLI runner
         self.invocation_count += 1
 
-        cmd = self.cli_runner.resolve_runner_cmd() + [
-            "image-to-3d",
-            "create",
-            "--image-url",
-            str(concept_file),
-            "--model-type",
-            "smart-topology",
-            "--target-polycount",
-            str(smart_polycount),
-            "--should-texture",
-            "true",
-            "--enable-pbr",
-            "true",
-            "--texture-resolution",
-            "2k",  # Strictly 2k textures per V0.4 budget, NEVER 4k
-            "--target-formats",
-            "glb",
-            "--async",
-            "--operation-id",
-            intent.id,  # Local journaling only
-            "--output-schema",
-            "v1",
-            "--format",
-            "json",
-            "--no-update-check",
-        ]
+        assert snapshot_content is not None
+        cmd = (
+            self.cli_runner.resolve_runner_cmd()
+            + [
+                "image-to-3d",
+                "create",
+                "--image-url",
+                str(concept_file),
+            ]
+            + build_create_args(snapshot_content)
+            + [
+                "--async",
+                "--operation-id",
+                intent.id,  # Local journaling only
+                "--output-schema",
+                "v1",
+                "--format",
+                "json",
+                "--no-update-check",
+            ]
+        )
 
         try:
             res = self.cli_runner.runner.run(
@@ -1373,7 +1638,8 @@ class MeshyAssetGenerationProvider(AssetGenerationProvider):
             )
 
         try:
-            data = json.loads(res.stdout)
+            raw_output = res.protocol_stdout if res.protocol_stdout is not None else res.stdout
+            data = json.loads(raw_output)
             result_obj = data.get("result", {})
             task_id_external = result_obj.get("submission", {}).get("task_id") or result_obj.get(
                 "task", {}

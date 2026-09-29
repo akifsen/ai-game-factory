@@ -26,6 +26,9 @@ class ConceptProvenance:
     source_type: str = "imported"  # "imported" or "local_generation"
     sidecar_path: str | None = None
     sidecar_hash: str | None = None
+    provenance_type: str = "UNKNOWN"
+    paid: bool = False
+    source_script_sha256: str | None = None
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)

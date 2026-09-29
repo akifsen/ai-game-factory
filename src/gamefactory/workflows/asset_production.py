@@ -14,7 +14,7 @@ import os
 import shutil
 import sys
 import time
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
@@ -27,8 +27,16 @@ from gamefactory.adapters.persistence.repositories import (
     ApprovalRepository,
     ArtifactRepository,
     AssetRevisionRepository,
+    AuditLogRepository,
+    ConceptVersionRecord,
+    ConceptVersionRepository,
+    CostLedgerRepository,
     EvidenceRepository,
     ExecutionRepository,
+    PaidRequestSnapshotRecord,
+    PaidRequestSnapshotRepository,
+    ProductionReadinessRecord,
+    ProductionReadinessRepository,
     ProviderInvocationRepository,
     ProviderOperationIntentRepository,
     QualityGateRepository,
@@ -42,10 +50,14 @@ from gamefactory.core.domain.asset_contracts import (
     spec_fingerprint,
 )
 from gamefactory.core.domain.errors import (
+    ApprovalRequired,
     ArtifactError,
     AssetValidationFailedError,
     DccFailedError,
     EngineImportFailedError,
+    PaidRequestIncompatibleError,
+    PaidRequestInvalidError,
+    ProductionReadinessFailedError,
     ProviderUncertainError,
     RawArtifactInvalidError,
     RuntimeValidationFailedError,
@@ -53,6 +65,8 @@ from gamefactory.core.domain.errors import (
     ValidationError,
 )
 from gamefactory.core.domain.models import (
+    Artifact,
+    AuditEvent,
     CostClass,
     Execution,
     ExecutionStatus,
@@ -62,8 +76,13 @@ from gamefactory.core.domain.models import (
     generate_id,
     utc_now_iso,
 )
+from gamefactory.core.domain.paid_request import (
+    PAID_REQUEST_SCHEMA,
+    PaidRequestSnapshot,
+)
 from gamefactory.core.execution.path_guard import PathGuard, assert_managed_directory
 from gamefactory.core.execution.process_runner import CommandRequest, ProcessRunner
+from gamefactory.workflows.accounting import CostAccounting
 from gamefactory.workflows.handlers import (
     HandlerOperation,
     HandlerRecovery,
@@ -72,6 +91,23 @@ from gamefactory.workflows.handlers import (
     TaskHandlerResult,
 )
 from gamefactory.workflows.ports import AssetGenerationProvider, GenerationRequest
+from gamefactory.workflows.production_readiness import (
+    READINESS_SCHEMA,
+    ReadinessContext,
+    ReadinessProbes,
+    build_readiness_report,
+)
+
+
+def is_v06_graph(task: Task | Any) -> bool:
+    """Detect whether a task belongs to a V0.6 workflow DAG."""
+    if hasattr(task, "parameters") and isinstance(task.parameters, dict):
+        return task.parameters.get("graph_version") == "0.6.0"
+    if isinstance(task, dict):
+        params = task.get("parameters", {})
+        if isinstance(params, dict):
+            return params.get("graph_version") == "0.6.0"
+    return False
 
 
 def _canonical_hash(value: Any) -> str:
@@ -158,6 +194,7 @@ def create_asset_production_workflow(
         status=WorkflowStatus.PENDING,
     )
     common = {
+        "graph_version": "0.6.0",
         "asset_id": specification.asset_id,
         "revision_number": revision_number,
         "specification": specification.model_dump(mode="json"),
@@ -170,6 +207,9 @@ def create_asset_production_workflow(
         "provider": provider_name,
         "provider_estimate": provider_estimate,
         "budget_reservation": budget_reservation,
+        # Informational only: the paid task alone carries "cost", the key the engine
+        # reserves budget for. Shared parameters must never reserve money.
+        "paid_reservation": float(reservation),
         "cost_unit": provider_cost_unit,
         "asset_dir": asset_dir,
         "profile_id": profile.profile_id,
@@ -177,11 +217,24 @@ def create_asset_production_workflow(
         "profile_qualified": profile.qualified,
         "profile_schema": profile.schema_version,
     }
-    prep, concept_review, generate, process, validate, runtime, final, finish = (
+    (
+        prep,
+        concept_review,
+        paid_request,
+        readiness,
+        generate,
+        process,
+        validate,
+        runtime,
+        final,
+        finish,
+    ) = (
         f"{wf_id}-{suffix}"
         for suffix in (
             "PREPARE",
             "CONCEPT-REVIEW",
+            "PAID-REQUEST",
+            "READINESS",
             "PAID-GENERATION",
             "PROCESS",
             "VALIDATE",
@@ -207,12 +260,30 @@ def create_asset_production_workflow(
             parameters=common,
         ),
         Task(
+            id=paid_request,
+            workflow_id=wf_id,
+            name="Resolve canonical paid request snapshot",
+            task_type="asset_paid_request_snapshot",
+            depends_on=[concept_review],
+            max_retries=10,
+            parameters=common,
+        ),
+        Task(
+            id=readiness,
+            workflow_id=wf_id,
+            name="Evaluate pre-spend production readiness",
+            task_type="asset_production_readiness",
+            depends_on=[paid_request],
+            max_retries=10,
+            parameters=common,
+        ),
+        Task(
             id=generate,
             workflow_id=wf_id,
             name="Approved Meshy image-to-3D generation",
             task_type="asset_paid_generation",
             cost_class=CostClass.PAID,
-            depends_on=[concept_review],
+            depends_on=[readiness],
             parameters={
                 **common,
                 "cost": float(reservation),
@@ -280,10 +351,32 @@ class AssetProductionHandlers:
     blender_path: str | None = None
     godot_path: str | None = None
     runner: ProcessRunner | None = None
+    ledger: CostLedgerRepository | None = None
+    accounting: CostAccounting | None = None
+    paid_snapshots: PaidRequestSnapshotRepository | None = None
+    readiness_reports: ProductionReadinessRepository | None = None
+    readiness_probes: ReadinessProbes | None = None
+    audit: AuditLogRepository | None = None
+    tasks: TaskRepository | None = None
+    concept_versions: ConceptVersionRepository | None = None
+    _snapshot_repo: PaidRequestSnapshotRepository = field(init=False, repr=False)
+    _readiness_repo: ProductionReadinessRepository = field(init=False, repr=False)
+    _audit_repo: AuditLogRepository = field(init=False, repr=False)
+    _task_repo: TaskRepository = field(init=False, repr=False)
+    _concept_version_repo: ConceptVersionRepository = field(init=False, repr=False)
 
     def __post_init__(self) -> None:
         self.root = self.root.resolve(strict=True)
         self.runner = self.runner or ProcessRunner(sanitize_output=True)
+        db = self.artifacts.db
+        if self.accounting is None:
+            ledger_repo = self.ledger or CostLedgerRepository(db)
+            self.accounting = CostAccounting(ledger_repo, AuditLogRepository(db))
+        self._snapshot_repo = self.paid_snapshots or PaidRequestSnapshotRepository(db)
+        self._readiness_repo = self.readiness_reports or ProductionReadinessRepository(db)
+        self._audit_repo = self.audit or AuditLogRepository(db)
+        self._task_repo = self.tasks or TaskRepository(db)
+        self._concept_version_repo = self.concept_versions or ConceptVersionRepository(db)
 
     def _path(self, task: Task, name: str) -> Path:
         relative = f"{task.parameters['asset_dir']}/{name}"
@@ -342,17 +435,70 @@ class AssetProductionHandlers:
             self._register(workflow, task, execution, "asset-concept", concept_path),
             self._register(workflow, task, execution, "asset-concept-provenance", provenance_path),
         ]
+        if is_v06_graph(task):
+            concept_hash = sha256_file(concept_path)
+            provenance_hash = sha256_file(provenance_path)
+            concept_record = ConceptVersionRecord(
+                id=generate_id("VER"),
+                workflow_id=workflow.id,
+                asset_id=task.parameters["asset_id"],
+                revision_number=int(task.parameters["revision_number"]),
+                version=1,
+                artifact_id=ids[1],
+                content_hash=concept_hash,
+                provenance_artifact_id=ids[2],
+                provenance_hash=provenance_hash,
+                provenance_type=provenance.provenance_type,
+                source_type=provenance.source_type,
+                status="ACTIVE",
+                actor="system",
+                reason="initial concept",
+            )
+            self._concept_version_repo.add(concept_record)
         return TaskHandlerResult(
             1, "Specification, concept, and provenance retained with immutable digests", ids
         )
 
     def concept_review_context(self, workflow: Workflow, task: Task) -> dict[str, Any]:
-        values = self._artifact_hashes(workflow.id)
+        if not is_v06_graph(task):
+            # Historical approvals were fingerprinted with this exact V0.5 shape;
+            # changing it would invalidate every pre-V0.6 concept approval.
+            values = self._artifact_hashes(workflow.id)
+            legacy_expected = {
+                key: values[key]
+                for key in ("asset-specification", "asset-concept", "asset-concept-provenance")
+            }
+            return {
+                "asset_id": task.parameters["asset_id"],
+                "revision": task.parameters["revision_number"],
+                "specification_hash": task.parameters["specification_hash"],
+                "artifacts": legacy_expected,
+                "style_constraints": task.parameters["specification"]["style_constraints"],
+                "profile_id": bound_profile_id(task),
+                "profile_version": bound_profile_version(task),
+                "profile_qualified": bound_profile_qualified(task),
+            }
+        concept = self._active_concept_artifact(workflow.id)
+        provenance = self._active_concept_provenance_artifact(workflow.id)
+        concept_version = self._active_concept_version(workflow.id)
+        spec_artifacts = [
+            a
+            for a in self.artifacts.list_by_workflow(workflow.id)
+            if a.artifact_type == "asset-specification"
+        ]
+        if not spec_artifacts:
+            raise ArtifactError("Asset specification artifact is missing")
+        spec_art = spec_artifacts[0]
+        self.artifact_manager.verify_artifact_integrity(spec_art)
         expected = {
-            key: values[key]
-            for key in ("asset-specification", "asset-concept", "asset-concept-provenance")
+            "asset-specification": spec_art.content_hash,
+            "asset-concept": concept.content_hash,
+            "asset-concept-provenance": provenance.content_hash,
         }
         return {
+            "concept_version": concept_version,
+            "concept_sha256": concept.content_hash,
+            "concept_provenance_sha256": provenance.content_hash,
             "asset_id": task.parameters["asset_id"],
             "revision": task.parameters["revision_number"],
             "specification_hash": task.parameters["specification_hash"],
@@ -363,18 +509,68 @@ class AssetProductionHandlers:
             "profile_qualified": bound_profile_qualified(task),
         }
 
-    def paid_review_context(self, workflow: Workflow, task: Task) -> dict[str, Any]:
-        concept = next(
-            (
-                a
-                for a in self.artifacts.list_by_workflow(workflow.id)
-                if a.artifact_type == "asset-concept"
-            ),
-            None,
-        )
-        if concept is None:
-            raise ArtifactError("Paid review cannot proceed without the approved concept artifact")
+    def _active_concept_version(self, workflow_id: str) -> int:
+        row = self._concept_version_repo.active_for_workflow(workflow_id)
+        if row is not None:
+            return int(row.version)
+        return 1
+
+    def _active_concept_artifact(self, workflow_id: str) -> Artifact:
+        row = self._concept_version_repo.active_for_workflow(workflow_id)
+        if row is not None:
+            concept = self.artifacts.get(row.artifact_id)
+            if concept is None:
+                raise ArtifactError(f"Active concept artifact '{row.artifact_id}' is missing")
+            self.artifact_manager.verify_artifact_integrity(concept)
+            if concept.content_hash != row.content_hash:
+                raise ArtifactError(
+                    f"Active concept artifact content_hash '{concept.content_hash}' does not match concept_version record '{row.content_hash}'"
+                )
+            return concept
+        concept_arts = [
+            a
+            for a in self.artifacts.list_by_workflow(workflow_id)
+            if a.artifact_type == "asset-concept"
+        ]
+        if not concept_arts:
+            raise ArtifactError("Active concept artifact is missing")
+        if len(concept_arts) > 1:
+            raise ArtifactError(f"Ambiguous concept artifacts found for workflow {workflow_id}")
+        concept = concept_arts[0]
         self.artifact_manager.verify_artifact_integrity(concept)
+        return concept
+
+    def _active_concept_provenance_artifact(self, workflow_id: str) -> Artifact:
+        row = self._concept_version_repo.active_for_workflow(workflow_id)
+        if row is not None and row.provenance_artifact_id:
+            prov = self.artifacts.get(row.provenance_artifact_id)
+            if prov is None:
+                raise ArtifactError(
+                    f"Active concept provenance artifact '{row.provenance_artifact_id}' is missing"
+                )
+            self.artifact_manager.verify_artifact_integrity(prov)
+            if row.provenance_hash and prov.content_hash != row.provenance_hash:
+                raise ArtifactError(
+                    f"Active concept provenance content_hash '{prov.content_hash}' does not match concept_version record '{row.provenance_hash}'"
+                )
+            return prov
+        prov_arts = [
+            a
+            for a in self.artifacts.list_by_workflow(workflow_id)
+            if a.artifact_type == "asset-concept-provenance"
+        ]
+        if not prov_arts:
+            raise ArtifactError("Active concept provenance artifact is missing")
+        if len(prov_arts) > 1:
+            raise ArtifactError(
+                f"Ambiguous concept provenance artifacts found for workflow {workflow_id}"
+            )
+        prov = prov_arts[0]
+        self.artifact_manager.verify_artifact_integrity(prov)
+        return prov
+
+    def paid_review_context(self, workflow: Workflow, task: Task) -> dict[str, Any]:
+        concept = self._active_concept_artifact(workflow.id)
         return {
             "provider": task.parameters["provider"],
             "operation": "image-to-3d",
@@ -414,7 +610,14 @@ class AssetProductionHandlers:
         )
         if approval is None:
             raise ArtifactError("Concept evidence is missing")
-        receipt = self._path(task, "concept-approval.json")
+        concept_version = self._active_concept_version(workflow.id)
+        attempt = execution.attempt_number
+        receipt = self._path(task, f"concept-approval-v{concept_version}-a{attempt}.json")
+        if receipt.exists():
+            relative = receipt.resolve(strict=True).relative_to(self.root).as_posix()
+            existing_artifacts = self.artifacts.list_by_workflow(workflow.id)
+            if any(a.relative_path == relative for a in existing_artifacts):
+                raise ArtifactError(f"Approval receipt file is already registered: {receipt.name}")
         receipt.write_text(
             json.dumps(
                 {
@@ -438,21 +641,312 @@ class AssetProductionHandlers:
             [artifact_id],
         )
 
+    def paid_request_snapshot(
+        self, workflow: Workflow, task: Task, execution: Execution
+    ) -> TaskHandlerResult:
+        concept_task = next(
+            (
+                t
+                for t in self._task_repo.list_by_workflow(workflow.id)
+                if t.task_type == "asset_concept_review"
+            ),
+            None,
+        )
+        concept_task_id = concept_task.id if concept_task else f"{workflow.id}-CONCEPT-REVIEW"
+        approval = next(
+            (
+                a
+                for a in self.approvals.list_by_workflow(workflow.id)
+                if a.task_id == concept_task_id
+                and a.approval_type == "concept_review"
+                and a.status.value == "APPROVED"
+            ),
+            None,
+        )
+        if approval is None:
+            raise ApprovalRequired(
+                f"Approved concept review approval for '{concept_task_id}' is required before paid request snapshot can be generated"
+            )
+
+        params = task.parameters
+        concept_art = self._active_concept_artifact(workflow.id)
+        concept_ver = self._active_concept_version(workflow.id)
+
+        binding = {
+            "asset_id": params["asset_id"],
+            "revision_number": int(params["revision_number"]),
+            "concept_version": concept_ver,
+            "concept_sha256": concept_art.content_hash,
+            "specification_sha256": params["specification_hash"],
+            "profile_id": bound_profile_id(task),
+            "profile_version": bound_profile_version(task),
+        }
+        cost = {
+            "estimate": params.get("provider_estimate"),
+            "reservation": float(params["paid_reservation"]),
+            "unit": params.get("cost_unit", "credits"),
+        }
+
+        if not hasattr(self.provider, "resolve_paid_request") or not callable(
+            getattr(self.provider, "resolve_paid_request", None)
+        ):
+            raise PaidRequestIncompatibleError(
+                f"Provider {getattr(self.provider, 'name', 'unknown')} does not implement resolve_paid_request",
+                provider=getattr(self.provider, "name", None),
+            )
+
+        content = self.provider.resolve_paid_request(binding, params["specification"], cost)
+        snapshot = PaidRequestSnapshot.from_content(content)
+
+        if not hasattr(self.provider, "check_paid_request") or not callable(
+            getattr(self.provider, "check_paid_request", None)
+        ):
+            raise PaidRequestIncompatibleError(
+                f"Provider {getattr(self.provider, 'name', 'unknown')} does not implement check_paid_request",
+                provider=getattr(self.provider, "name", None),
+            )
+        self.provider.check_paid_request(snapshot.content)
+
+        attempt = execution.attempt_number
+        filename = f"paid-request-snapshot-v{concept_ver}-a{attempt}.json"
+        snapshot_bytes = snapshot.canonical_json.encode("utf-8")
+        path = self._path(task, filename)
+        path.write_bytes(snapshot_bytes)
+
+        artifact_id = self._register(workflow, task, execution, "asset-paid-request-snapshot", path)
+        registered_art = self.artifacts.get(artifact_id)
+        assert registered_art is not None, "Failed to retrieve registered snapshot artifact"
+        assert registered_art.content_hash == snapshot.sha256, (
+            f"Artifact content hash {registered_art.content_hash} does not match snapshot sha256 {snapshot.sha256}"
+        )
+
+        active_rows = [
+            r for r in self._snapshot_repo.list_by_workflow(workflow.id) if r.status == "ACTIVE"
+        ]
+        if active_rows:
+            self._snapshot_repo.mark_superseded([r.id for r in active_rows])
+
+        snap_record = PaidRequestSnapshotRecord(
+            id=generate_id("SNAP"),
+            workflow_id=workflow.id,
+            task_id=task.id,
+            asset_id=params["asset_id"],
+            revision_number=int(params["revision_number"]),
+            concept_version=concept_ver,
+            schema_version=PAID_REQUEST_SCHEMA,
+            snapshot_sha256=snapshot.sha256,
+            canonical_json=snapshot.canonical_json,
+            status="ACTIVE",
+            artifact_id=artifact_id,
+            created_at=utc_now_iso(),
+        )
+        self._snapshot_repo.save(snap_record)
+
+        self._audit_repo.append(
+            AuditEvent(
+                id=generate_id("AUDIT"),
+                entity_type="Task",
+                entity_id=task.id,
+                action="PAID_REQUEST_SNAPSHOT_CREATED",
+                actor="AssetProductionHandlers",
+                details={
+                    "snapshot_sha256": snapshot.sha256,
+                    "concept_version": concept_ver,
+                    "provider": getattr(self.provider, "name", params.get("provider")),
+                    "operation": "image-to-3d",
+                },
+            )
+        )
+
+        return TaskHandlerResult(
+            1,
+            "Paid request snapshot created and verified",
+            [artifact_id],
+        )
+
+    def production_readiness(
+        self, workflow: Workflow, task: Task, execution: Execution
+    ) -> TaskHandlerResult:
+        if self.readiness_probes is None:
+            raise ProductionReadinessFailedError("no readiness probes configured")
+
+        active_snap_record = self._snapshot_repo.get_active_for_workflow(workflow.id)
+        if active_snap_record is None or not active_snap_record.artifact_id:
+            raise ArtifactError(
+                f"No active paid request snapshot record for workflow {workflow.id}"
+            )
+
+        art = self.artifacts.get(active_snap_record.artifact_id)
+        if art is None:
+            raise ArtifactError(
+                f"Active paid request snapshot artifact {active_snap_record.artifact_id} not found"
+            )
+        self.artifact_manager.verify_artifact_integrity(art)
+
+        snap_path = self.root / art.relative_path
+        snap_text = snap_path.read_text(encoding="utf-8")
+        snapshot = PaidRequestSnapshot.load_verified(snap_text, active_snap_record.snapshot_sha256)
+
+        params = task.parameters
+        spec = params.get("specification", {})
+        prof = bound_profile_id(task)
+        asset_dir_path = self._path(task, "").parent
+
+        ctx = ReadinessContext(
+            root=self.root,
+            asset_dir=asset_dir_path,
+            snapshot_content=snapshot.content,
+            snapshot_sha256=snapshot.sha256,
+            provider=self.provider,
+            blender_path=self.blender_path,
+            godot_path=self.godot_path,
+            specification=spec,
+            profile=prof,
+            snapshot=snapshot,
+        )
+
+        checks = self.readiness_probes.evaluate(ctx)
+        now = utc_now_iso()
+        report = build_readiness_report(ctx, checks, generated_at=now)
+        result = report["result"]
+
+        attempt = execution.attempt_number
+        report_json = json.dumps(report, sort_keys=True, indent=2) + "\n"
+        rep_file = self._path(task, f"production-readiness-a{attempt}.json")
+        rep_file.write_text(report_json, encoding="utf-8")
+
+        art_id = self._register(
+            workflow, task, execution, "asset-production-readiness-report", rep_file
+        )
+        saved_art = self.artifacts.get(art_id)
+        report_sha = (
+            saved_art.content_hash
+            if saved_art
+            else hashlib.sha256(report_json.encode("utf-8")).hexdigest()
+        )
+
+        active_prior = [
+            r for r in self._readiness_repo.list_by_workflow(workflow.id) if r.status == "ACTIVE"
+        ]
+        if active_prior:
+            self._readiness_repo.mark_superseded([r.id for r in active_prior])
+
+        rec = ProductionReadinessRecord(
+            id=generate_id("READINESS"),
+            workflow_id=workflow.id,
+            task_id=task.id,
+            snapshot_sha256=snapshot.sha256,
+            result=result,
+            schema_version=READINESS_SCHEMA,
+            report_json=report_json,
+            report_sha256=report_sha,
+            status="ACTIVE",
+            artifact_id=art_id,
+            created_at=now,
+        )
+        self._readiness_repo.save(rec)
+
+        self._audit_repo.append(
+            AuditEvent(
+                id=generate_id("AUDIT"),
+                entity_type="Task",
+                entity_id=task.id,
+                action="PRODUCTION_READINESS_EVALUATED",
+                actor="AssetProductionHandlers",
+                details={
+                    "result": result,
+                    "snapshot_sha256": snapshot.sha256,
+                    "report_sha256": report_sha,
+                    "checks_count": len(checks),
+                },
+            )
+        )
+
+        if result == "FAIL":
+            failing = [c.name for c in checks if c.status == "FAIL"]
+            raise ProductionReadinessFailedError(
+                f"Production readiness evaluation failed: {', '.join(failing)}",
+                details={"failing_checks": failing, "report_sha256": report_sha},
+            )
+
+        return TaskHandlerResult(1, "Production readiness evaluated: PASS", [art_id])
+
+    def bind_paid_request_parameters(self, workflow: Workflow, task: Task) -> dict[str, Any]:
+        params = dict(task.parameters)
+        if not is_v06_graph(task):
+            return params
+
+        active_snap = self._snapshot_repo.get_active_for_workflow(workflow.id)
+        active_readiness = self._readiness_repo.get_active_for_workflow(workflow.id)
+
+        if (
+            active_snap is not None
+            and active_readiness is not None
+            and active_readiness.result == "PASS"
+        ):
+            snap_content = json.loads(active_snap.canonical_json)
+            params["paid_request_snapshot_sha256"] = active_snap.snapshot_sha256
+            params["paid_request_snapshot"] = snap_content
+            params["production_readiness_report_sha256"] = active_readiness.report_sha256
+        else:
+            params.pop("paid_request_snapshot_sha256", None)
+            params.pop("paid_request_snapshot", None)
+            params.pop("production_readiness_report_sha256", None)
+
+        return params
+
+    def _recheck_before_submission(
+        self, workflow: Workflow, task: Task, snapshot: PaidRequestSnapshot
+    ) -> None:
+        failing: list[str]
+        if self.readiness_probes is None:
+            failing = ["readiness_probes_configured"]
+        else:
+            context = ReadinessContext(
+                root=self.root,
+                asset_dir=self._path(task, "readiness.probe").parent,
+                snapshot_content=snapshot.content,
+                snapshot_sha256=snapshot.sha256,
+                provider=self.provider,
+                blender_path=self.blender_path,
+                godot_path=self.godot_path,
+                specification=task.parameters.get("specification", {}),
+                profile=bound_profile_id(task),
+                snapshot=snapshot,
+            )
+            failing = [
+                check.name
+                for check in self.readiness_probes.recheck_critical(context)
+                if check.status != "PASS"
+            ]
+        if not failing:
+            return
+        self._audit_repo.append(
+            AuditEvent(
+                id=generate_id("AUDIT"),
+                entity_type="Task",
+                entity_id=task.id,
+                action="PRODUCTION_READINESS_RECHECK_FAILED",
+                actor="AssetProductionHandlers",
+                details={
+                    "workflow_id": workflow.id,
+                    "failing_checks": failing,
+                    "paid_request_snapshot_sha256": snapshot.sha256,
+                    "provider_submission": False,
+                },
+            )
+        )
+        raise ProductionReadinessFailedError(
+            "Critical readiness recheck failed before paid submission; no provider "
+            f"request was sent: {', '.join(failing)}",
+            details={"failing_checks": failing},
+        )
+
     def paid_generate(
         self, workflow: Workflow, task: Task, execution: Execution
     ) -> TaskHandlerResult:
         params = task.parameters
-        concept = next(
-            (
-                a
-                for a in self.artifacts.list_by_workflow(workflow.id)
-                if a.artifact_type == "asset-concept"
-            ),
-            None,
-        )
-        if concept is None:
-            raise ArtifactError("Approved concept artifact is missing")
-        self.artifact_manager.verify_artifact_integrity(concept)
+        concept = self._active_concept_artifact(workflow.id)
         approval_rows = self.approvals.list_by_workflow(workflow.id)
         approval = next(
             (
@@ -476,25 +970,80 @@ class AssetProductionHandlers:
         raw_path = self._path(task, f"raw-attempt-{execution.attempt_number}.glb")
         if raw_path.exists():
             raise RawArtifactInvalidError("Refusing to overwrite a raw GLB from an earlier attempt")
+
+        snapshot: PaidRequestSnapshot | None = None
+        if is_v06_graph(task):
+            snap_sha = params.get("paid_request_snapshot_sha256")
+            readiness_sha = params.get("production_readiness_report_sha256")
+            if not snap_sha or not readiness_sha:
+                raise PaidRequestInvalidError(
+                    "V0.6 paid generation requires paid_request_snapshot_sha256 and production_readiness_report_sha256 in task parameters"
+                )
+            active_snap_record = self._snapshot_repo.get_active_for_workflow(workflow.id)
+            if active_snap_record is None or active_snap_record.snapshot_sha256 != snap_sha:
+                raise PaidRequestInvalidError(
+                    f"Task parameters snapshot sha '{snap_sha}' does not match active snapshot row '{active_snap_record.snapshot_sha256 if active_snap_record else None}'"
+                )
+            if approval.paid_request_snapshot_hash != snap_sha:
+                raise PaidRequestInvalidError(
+                    f"Approval paid_request_snapshot_hash '{approval.paid_request_snapshot_hash}' does not match snapshot sha '{snap_sha}'"
+                )
+            if not active_snap_record.artifact_id:
+                raise PaidRequestInvalidError("Active snapshot row is missing artifact_id")
+            snap_artifact = self.artifacts.get(active_snap_record.artifact_id)
+            if snap_artifact is None:
+                raise PaidRequestInvalidError(
+                    f"Active snapshot artifact '{active_snap_record.artifact_id}' not found"
+                )
+            self.artifact_manager.verify_artifact_integrity(snap_artifact)
+            if snap_artifact.content_hash != snap_sha:
+                raise PaidRequestInvalidError(
+                    f"Snapshot artifact content_hash '{snap_artifact.content_hash}' does not match expected '{snap_sha}'"
+                )
+            snap_file = self.root / snap_artifact.relative_path
+            snap_text = snap_file.read_text(encoding="utf-8")
+            snapshot = PaidRequestSnapshot.load_verified(snap_text, snap_sha)
+            # Provider-agnostic: the approved request must describe the ACTIVE concept
+            # of this revision (an interrupted concept replacement can never be paid for).
+            binding = snapshot.content["binding"]
+            if (
+                binding.get("concept_sha256") != concept.content_hash
+                or binding.get("concept_version") != self._active_concept_version(workflow.id)
+                or binding.get("asset_id") != params["asset_id"]
+                or binding.get("revision_number") != int(params["revision_number"])
+                or binding.get("specification_sha256") != params["specification_hash"]
+            ):
+                raise PaidRequestInvalidError(
+                    "Approved paid request snapshot is not bound to the active concept "
+                    "version of this revision; no provider request was sent"
+                )
+            if self.intents.get_by_task(task.id) is None:
+                # A NEW paid submission is about to happen: recheck the critical
+                # prerequisites cheaply. Query-only recovery is never blocked here.
+                self._recheck_before_submission(workflow, task, snapshot)
+
         concept_path = self.root / concept.relative_path
+        request_params = {
+            **params,
+            "workflow_id": workflow.id,
+            "task_id": task.id,
+            "approval_id": approval.id,
+            "concept_hash": concept.content_hash,
+            "concept_image_path": str(concept_path),
+            "output_path": str(raw_path),
+            "cost": params.get("provider_estimate"),
+            "budget_reservation": params.get("budget_reservation"),
+            "max_triangles_lod0": params["specification"]["geometry_budget"]["max_triangles_lod0"],
+        }
+        if is_v06_graph(task) and params.get("paid_request_snapshot_sha256"):
+            request_params["paid_request_snapshot_sha256"] = params["paid_request_snapshot_sha256"]
+
         request = GenerationRequest(
             prompt=f"Image-to-3D {bound_profile_qualified(task)}: {params['asset_id']}",
             target_format="glb",
-            parameters={
-                **params,
-                "workflow_id": workflow.id,
-                "task_id": task.id,
-                "approval_id": approval.id,
-                "concept_hash": concept.content_hash,
-                "concept_image_path": str(concept_path),
-                "output_path": str(raw_path),
-                "cost": params.get("provider_estimate"),
-                "budget_reservation": params.get("budget_reservation"),
-                "max_triangles_lod0": params["specification"]["geometry_budget"][
-                    "max_triangles_lod0"
-                ],
-            },
+            parameters=request_params,
             operation_hash=approval.operation_hash,
+            paid_request=snapshot,
         )
 
         def account_known_cost(response_cost: object = None, *, settled: bool = False) -> None:
@@ -538,14 +1087,56 @@ class AssetProductionHandlers:
             execution.cost = max(0.0, cumulative_liability - previous_liability)
             execution.cost_unit = getattr(intent, "cost_unit", "credits")
 
+        def record_ledger_cost(response_cost: object = None, *, settled: bool = False) -> None:
+            if self.accounting is None:
+                return
+            intent = self.intents.get_by_task(task.id)
+            values = [
+                value
+                for value in (response_cost, getattr(intent, "actual_cost", None))
+                if value is not None
+                and not isinstance(value, bool)
+                and isinstance(value, (int, float))
+                and math.isfinite(float(value))
+                and float(value) >= 0
+            ]
+            actual = max(values) if values else None
+            if settled:
+                self.accounting.settle_terminal_success(
+                    task.id,
+                    actual,
+                    execution_id=execution.id,
+                    intent=intent,
+                    cost_unit=getattr(intent, "cost_unit", "credits"),
+                )
+            elif actual is not None:
+                self.accounting.handle_in_flight(
+                    task.id,
+                    actual,
+                    execution_id=execution.id,
+                    intent=intent,
+                    cost_unit=getattr(intent, "cost_unit", "credits"),
+                )
+
         try:
             response = self.provider.generate(request)
             account_known_cost(
                 response.details.get("actual_cost"),
                 settled=response.status == "SUCCESS",
             )
+            record_ledger_cost(
+                response.details.get("actual_cost"),
+                settled=response.status == "SUCCESS",
+            )
         except ProviderUncertainError as exc:
             account_known_cost()
+            if self.accounting is not None:
+                self.accounting.handle_failure(
+                    task.id,
+                    execution_id=execution.id,
+                    intent=self.intents.get_by_task(task.id),
+                    submission_uncertain=True,
+                )
             raise ProviderUncertainError(
                 str(exc),
                 task_id=task.id,
@@ -555,6 +1146,12 @@ class AssetProductionHandlers:
             ) from exc
         except Exception:
             account_known_cost()
+            if self.accounting is not None:
+                self.accounting.handle_failure(
+                    task.id,
+                    execution_id=execution.id,
+                    intent=self.intents.get_by_task(task.id),
+                )
             raise
         if response.status == "SUBMITTED":
             deadline = time.monotonic() + min(task.timeout_seconds, 300.0)
@@ -566,8 +1163,19 @@ class AssetProductionHandlers:
                         response.details.get("actual_cost"),
                         settled=response.status == "SUCCESS",
                     )
+                    record_ledger_cost(
+                        response.details.get("actual_cost"),
+                        settled=response.status == "SUCCESS",
+                    )
                 except ProviderUncertainError as exc:
                     account_known_cost()
+                    if self.accounting is not None:
+                        self.accounting.handle_failure(
+                            task.id,
+                            execution_id=execution.id,
+                            intent=self.intents.get_by_task(task.id),
+                            submission_uncertain=True,
+                        )
                     raise ProviderUncertainError(
                         str(exc),
                         task_id=task.id,
@@ -577,8 +1185,21 @@ class AssetProductionHandlers:
                     ) from exc
                 except Exception:
                     account_known_cost()
+                    if self.accounting is not None:
+                        self.accounting.handle_failure(
+                            task.id,
+                            execution_id=execution.id,
+                            intent=self.intents.get_by_task(task.id),
+                        )
                     raise
         if response.status != "SUCCESS":
+            if self.accounting is not None:
+                self.accounting.handle_failure(
+                    task.id,
+                    execution_id=execution.id,
+                    intent=self.intents.get_by_task(task.id),
+                    submission_uncertain=True,
+                )
             raise ProviderUncertainError(
                 "Provider operation has no confirmed downloadable terminal result; retry is forbidden",
                 task_id=task.id,
@@ -746,6 +1367,8 @@ class AssetProductionHandlers:
         hashes = self._artifact_hashes(workflow.id)
         artifact_list = self.artifacts.list_by_workflow(workflow.id)
         roles = {artifact.artifact_type: artifact.content_hash for artifact in artifact_list}
+        active_concept = self._active_concept_artifact(workflow.id)
+        roles["asset-concept"] = active_concept.content_hash
         required = (
             "asset-concept",
             "asset-processed-glb",
@@ -802,7 +1425,15 @@ class AssetProductionHandlers:
         )
         if approval is None:
             raise ArtifactError("Final visual approval is missing")
-        receipt = self._path(task, "final-approval.json")
+        attempt = execution.attempt_number
+        receipt = self._path(task, f"final-approval-a{attempt}.json")
+        if receipt.exists():
+            relative = receipt.resolve(strict=True).relative_to(self.root).as_posix()
+            existing_artifacts = self.artifacts.list_by_workflow(workflow.id)
+            if any(a.relative_path == relative for a in existing_artifacts):
+                raise ArtifactError(
+                    f"Final approval receipt file is already registered: {receipt.name}"
+                )
         receipt.write_text(
             json.dumps(
                 {
@@ -840,8 +1471,11 @@ def register_asset_production_handlers(
             operation=HandlerOperation.LOCAL_READ,
             mandatory_approval_type="concept_review",
             approval_context=handlers.concept_review_context,
+            changes_requested_blocks=is_v06_graph,
         ),
     )
+    registry.register("asset_paid_request_snapshot", handlers.paid_request_snapshot)
+    registry.register("asset_production_readiness", handlers.production_readiness)
     registry.register(
         "asset_paid_generation",
         handlers.paid_generate,
@@ -851,6 +1485,7 @@ def register_asset_production_handlers(
             safe_paid_recovery=True,
             recovery_check=handlers.recovery_check,
             mandatory_approval_type="paid_generation",
+            refresh_parameters=handlers.bind_paid_request_parameters,
         ),
     )
     registry.register(

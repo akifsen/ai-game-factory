@@ -178,6 +178,7 @@ class ApprovalRequest:
     requested_at: str = field(default_factory=utc_now_iso)
     decided_at: str | None = None
     artifact_ids: list[str] = field(default_factory=list)
+    paid_request_snapshot_hash: str | None = None
 
     def to_dict(self) -> dict[str, Any]:
         data = asdict(self)

@@ -11,6 +11,7 @@ from PIL import Image
 
 from gamefactory.adapters.fakes.fake_provider import FakeAssetGenerationProvider
 from gamefactory.adapters.fakes.glb_generator import create_box_glb
+from gamefactory.adapters.fakes.readiness import PassingReadinessProbes
 from gamefactory.adapters.persistence.database import Database
 from gamefactory.adapters.persistence.migrations import MigrationRunner
 from gamefactory.adapters.persistence.repositories import (
@@ -152,6 +153,7 @@ def _setup(
         engine.exec_repo,
         engine.artifact_mgr,
         fake,
+        readiness_probes=PassingReadinessProbes(),
     )
     if stub_downstream:
         _install_downstream_stubs(
@@ -577,6 +579,7 @@ def test_final_rejection_is_terminal_and_new_revision_opens_new_concept_gate(
         resumed_engine.exec_repo,
         resumed_engine.artifact_mgr,
         second_fake,
+        readiness_probes=PassingReadinessProbes(),
     )
     _install_downstream_stubs(
         second_handlers,
