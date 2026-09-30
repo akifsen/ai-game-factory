@@ -339,6 +339,41 @@ def test_capture_wrong_attempt_fails(tmp_path: Path) -> None:
     assert "wrong revision or attempt" in verify(root).stdout
 
 
+@pytest.mark.parametrize(
+    ("views", "expected_error"),
+    [
+        (["front", "front_typo"], "review_views are missing or unsupported"),
+        ([["front"]], "review_views are missing or unsupported"),
+        ([None], "review_views are missing or unsupported"),
+        (
+            [
+                "front",
+                "rear",
+                "left",
+                "right",
+                "side",
+                "three_quarter",
+                "three_quarter_front",
+                "three_quarter_rear",
+                "top",
+            ],
+            "bundle requires exactly one production_receipt entry",
+        ),
+    ],
+)
+def test_cold_verifier_rejects_unknown_view_and_accepts_full_view_vocabulary(
+    tmp_path: Path, views: list[object], expected_error: str
+) -> None:
+    root = tmp_path / "bundle"
+    manifest = make_bundle(root)
+    manifest["schema_version"] = "asset-evidence-0.5.0"
+    manifest["review_views"] = views
+    write_json(root / "manifest.json", manifest)
+    verify_bundle = runpy.run_path(str(SCRIPT))["verify_bundle"]
+    with pytest.raises(ValueError, match=expected_error):
+        verify_bundle(root)
+
+
 def test_failed_validation_report_cannot_be_rehashed_into_pass(tmp_path: Path) -> None:
     root = tmp_path / "bundle"
     manifest = make_bundle(root)

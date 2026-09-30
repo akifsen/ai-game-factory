@@ -106,3 +106,24 @@ concept-replacement and approval regressions after production integration.
 For a local assembly, assert zero paid approvals, reservations, intents and POSTs.
 Final real-provider production validation remains a separate human-controlled
 operation; offline product readiness does not require spending credits.
+
+## Semantic source trust boundary
+
+The continuation design review confirmed that a processed mesh's centroid or
+bounds cannot prove that an authored part's geometry was baked in the wrong
+frame: valid off-center parts can have the same measurements. V0.7 therefore
+uses `pivot.collapsed` for the provable nonzero-declaration/zero-observation case,
+with separate position, basis and motion-axis findings. It adds no geometric
+heuristic and performs no automatic re-pivoting or resizing.
+
+Human source review must bind the retained source hash and declared semantic
+contracts. Automated acceptance compares source, processed LOD0 and Godot
+geometry/transforms to prove preservation through the permitted front
+normalization. It does not infer artistic or physical correctness of the
+original authored pivot. A later independent landmark schema would be needed
+for that stronger claim; it is outside V0.7. Source review is never automatic.
+
+Role identifiers remain unique within an assembly, preserving Phase B behavior.
+Generic repeated-role cardinality is deferred; profiles may define distinct
+roles only for demonstrated requirements. All assembly dimensions must already
+conform to the bound specification tolerance.

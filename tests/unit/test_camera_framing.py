@@ -6,12 +6,16 @@ from typing import Any
 import pytest
 
 from gamefactory.core.domain.camera_framing import (
+    IMPLEMENTED_VIEWS,
+    PLACED_VIEWS,
+    VIEW_PLACEMENTS,
     BoundsAABB,
     CameraFrame,
     camera_basis,
     frame_camera,
     framing_geometry,
     reference_offset,
+    view_axis_label,
     view_direction,
     view_up,
 )
@@ -403,3 +407,74 @@ def test_horizontal_fit_safety_margin_across_cases() -> None:
         proj = project_camera_fractions(frame, bounds, vp)
         assert proj["inside_margin_4pct"] is True, f"Failed margin for {view} at {vp}"
         assert proj["all_in_front"] is True
+
+
+def test_all_nine_views_have_the_normative_vectors_up_and_labels() -> None:
+    diagonal_front = math.sqrt(2.0 + 0.65**2)
+    diagonal_rear = math.sqrt(2.0 + 0.65**2)
+    expected = {
+        "front": ((0, 0, -1), (0, 1, 0), "-Z"),
+        "rear": ((0, 0, 1), (0, 1, 0), "+Z"),
+        "left": ((-1, 0, 0), (0, 1, 0), "-X"),
+        "right": ((1, 0, 0), (0, 1, 0), "+X"),
+        "side": ((1, 0, 0), (0, 1, 0), "+X"),
+        "three_quarter": (
+            (1 / diagonal_front, 0.65 / diagonal_front, -1 / diagonal_front),
+            (0, 1, 0),
+            "+X-Z",
+        ),
+        "three_quarter_front": (
+            (1 / diagonal_front, 0.65 / diagonal_front, -1 / diagonal_front),
+            (0, 1, 0),
+            "+X-Z",
+        ),
+        "three_quarter_rear": (
+            (1 / diagonal_rear, 0.65 / diagonal_rear, 1 / diagonal_rear),
+            (0, 1, 0),
+            "+X+Z",
+        ),
+        "top": ((0, 1, 0), (0, 0, -1), "+Y"),
+    }
+    assert set(VIEW_PLACEMENTS) == PLACED_VIEWS == IMPLEMENTED_VIEWS == set(expected)
+    for view, (direction, up, label) in expected.items():
+        assert view_direction(view) == pytest.approx(direction)
+        assert view_up(view) == up
+        assert view_axis_label(view) == label
+
+
+def test_all_views_frame_wide_and_tall_bounds_in_landscape_and_portrait() -> None:
+    cases = (
+        (BoundsAABB(-2.0, -0.7, -0.25, 2.0, 0.7, 0.25), (1280, 720)),
+        (BoundsAABB(-0.25, -2.0, -0.25, 0.25, 2.0, 0.25), (720, 1280)),
+    )
+    for view in PLACED_VIEWS:
+        for bounds, viewport in cases:
+            frame = frame_camera(
+                bounds,
+                view,
+                fov_degrees=38,
+                target_screen_fraction=0.62,
+                viewport=viewport,
+            )
+            measured = project_camera_fractions(frame, bounds, viewport)
+            assert measured["all_in_front"] is True, (view, viewport)
+            assert measured["max_fraction"] == pytest.approx(0.62, abs=0.005), (view, viewport)
+            assert measured["inside_margin_4pct"] is True, (view, viewport)
+
+
+@pytest.mark.parametrize("view_function", [view_direction, view_up, view_axis_label])
+@pytest.mark.parametrize("unknown_view", ["front_typo", ["front"]])
+def test_unknown_camera_view_fails_explicitly(view_function, unknown_view) -> None:
+    with pytest.raises(ValueError, match="no camera placement"):
+        view_function(unknown_view)
+
+
+def test_unknown_camera_view_cannot_be_framed() -> None:
+    with pytest.raises(ValueError, match="no camera placement"):
+        frame_camera(
+            BoundsAABB(-0.5, -0.5, -0.5, 0.5, 0.5, 0.5),
+            "front_typo",
+            fov_degrees=38,
+            target_screen_fraction=0.62,
+            viewport=(1280, 720),
+        )

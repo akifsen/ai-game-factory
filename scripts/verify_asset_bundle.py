@@ -316,6 +316,7 @@ def verify_bundle(bundle: Path) -> dict[str, Any]:
         if (
             not isinstance(views, list)
             or not views
+            or any(not isinstance(view, str) for view in views)
             or len(views) != len(set(views))
             or any(view not in allowed_views for view in views)
         ):

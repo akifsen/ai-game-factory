@@ -46,6 +46,25 @@ func _run() -> void:
 			_fail("request missing " + key)
 			quit(1)
 			return
+	var requested: Array = ["front", "three_quarter", "side"]
+	if request.has("angles"):
+		if typeof(request.angles) != TYPE_ARRAY or request.angles.is_empty():
+			_fail("angles must be a non-empty list")
+			quit(1)
+			return
+		requested = request.angles
+	var seen_angles: Dictionary = {}
+	for angle in requested:
+		if not view_placement(str(angle)).is_empty():
+			if seen_angles.has(str(angle)):
+				_fail("duplicate capture angle " + str(angle))
+				quit(1)
+				return
+			seen_angles[str(angle)] = true
+			continue
+		_fail("unknown capture angle " + str(angle))
+		quit(1)
+		return
 	var packed := load(str(request.glb)) as PackedScene
 	if packed == null:
 		_fail("Godot could not import/load the processed GLB")
@@ -132,27 +151,8 @@ func _run() -> void:
 	var extent: float = max(global_bounds.size.x, max(global_bounds.size.y, global_bounds.size.z))
 	var center: Vector3 = global_bounds.get_center()
 	var scale_reference := _add_floor(global_bounds, extent)
-	var quarter := Vector3(1, 0.65, -1).normalized()
-	var angles := {
-		"front": Vector3(0, 0, -1),
-		"three_quarter": quarter,
-		"three_quarter_front": quarter,
-		"side": Vector3(1, 0, 0),
-		"top": Vector3(0, 1, 0),
-	}
-	var requested: Array = ["front", "three_quarter", "side"]
-	if request.has("angles"):
-		if typeof(request.angles) != TYPE_ARRAY or request.angles.is_empty():
-			_fail("angles must be a non-empty list")
-			_write_observation(false, global_bounds)
-			quit(1)
-			return
-		requested = request.angles
 	for angle in requested:
-		if not angles.has(angle):
-			_fail("unknown capture angle " + str(angle))
-			continue
-		var direction: Vector3 = angles[angle]
+		var direction: Vector3 = _view_direction_vector(str(angle))
 		_park_reference(scale_reference, global_bounds, direction, extent)
 		var geom := _framing_geometry(global_bounds, camera, str(angle), target_fraction)
 		var distance: float = geom["distance"]
@@ -160,7 +160,7 @@ func _run() -> void:
 		var e_r: float = geom["projected_right_half"]
 		var e_u: float = geom["projected_up_half"]
 		var e_f: float = geom["view_depth_half"]
-		var up_vector := Vector3.UP if str(angle) != "top" else Vector3(0, 0, -1)
+		var up_vector := _view_up_vector(str(angle))
 		camera.position = center + direction * distance
 		camera.look_at(center, up_vector)
 		await process_frame
@@ -230,19 +230,32 @@ func _hide_non_lod0(node: Node) -> void:
 	for child in node.get_children():
 		_hide_non_lod0(child)
 
+static func view_placement(angle: String) -> Dictionary:
+	match angle:
+		"front": return {"direction": Vector3(0, 0, -1), "up": Vector3.UP, "axis_label": "-Z"}
+		"rear": return {"direction": Vector3(0, 0, 1), "up": Vector3.UP, "axis_label": "+Z"}
+		"left": return {"direction": Vector3(-1, 0, 0), "up": Vector3.UP, "axis_label": "-X"}
+		"right", "side": return {"direction": Vector3(1, 0, 0), "up": Vector3.UP, "axis_label": "+X"}
+		"three_quarter", "three_quarter_front":
+			return {"direction": Vector3(1, 0.65, -1).normalized(), "up": Vector3.UP, "axis_label": "+X-Z"}
+		"three_quarter_rear":
+			return {"direction": Vector3(1, 0.65, 1).normalized(), "up": Vector3.UP, "axis_label": "+X+Z"}
+		"top": return {"direction": Vector3(0, 1, 0), "up": Vector3(0, 0, -1), "axis_label": "+Y"}
+	return {}
+
 func _view_direction_vector(angle: String) -> Vector3:
-	if angle == "side":
-		return Vector3(1, 0, 0)
-	elif angle == "top":
-		return Vector3(0, 1, 0)
-	elif angle == "front":
-		return Vector3(0, 0, -1)
-	return Vector3(1, 0.65, -1).normalized()
+	var placement := view_placement(angle)
+	if placement.is_empty():
+		_fail("unknown capture angle " + angle)
+		return Vector3.ZERO
+	return placement.direction
 
 func _view_up_vector(angle: String) -> Vector3:
-	if angle == "top":
-		return Vector3(0, 0, -1)
-	return Vector3.UP
+	var placement := view_placement(angle)
+	if placement.is_empty():
+		_fail("unknown capture angle " + angle)
+		return Vector3.ZERO
+	return placement.up
 
 func _framing_geometry(bounds: AABB, camera: Camera3D, angle: String, target_fraction: float) -> Dictionary:
 	var d := _view_direction_vector(angle)
@@ -361,13 +374,11 @@ func _measure_view_framing(camera: Camera3D, bounds: AABB, scale_reference: Mesh
 			var closest := camera.position + to_asset * along
 			if closest.distance_to(scale_reference.position) < 0.55:
 				reference_between = true
-	var axis := "+X-Z"
-	if angle == "side":
-		axis = "+X"
-	elif angle == "front":
-		axis = "-Z"
-	elif angle == "top":
-		axis = "+Y"
+	var placement := view_placement(angle)
+	if placement.is_empty():
+		_fail("unknown capture angle " + angle)
+		return {"ok": false, "reason": "unknown capture angle " + angle}
+	var axis: String = placement.axis_label
 	var reason := ""
 	if bounds.has_point(camera.position):
 		reason = "camera is inside asset geometry"

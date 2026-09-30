@@ -8,26 +8,35 @@ the framing policy carried in the capture request.
 from __future__ import annotations
 
 import math
+from collections.abc import Mapping
 from dataclasses import dataclass
+from types import MappingProxyType
 
-IMPLEMENTED_VIEWS = frozenset(
+
+@dataclass(frozen=True)
+class ViewPlacement:
+    direction: tuple[float, float, float]
+    up: tuple[float, float, float]
+    axis_label: str
+
+
+_WORLD_UP = (0.0, 1.0, 0.0)
+_TOP_UP = (0.0, 0.0, -1.0)
+VIEW_PLACEMENTS: Mapping[str, ViewPlacement] = MappingProxyType(
     {
-        "front",
-        "rear",
-        "left",
-        "right",
-        "side",
-        "three_quarter",
-        "three_quarter_front",
-        "three_quarter_rear",
-        "top",
+        "front": ViewPlacement((0.0, 0.0, -1.0), _WORLD_UP, "-Z"),
+        "rear": ViewPlacement((0.0, 0.0, 1.0), _WORLD_UP, "+Z"),
+        "left": ViewPlacement((-1.0, 0.0, 0.0), _WORLD_UP, "-X"),
+        "right": ViewPlacement((1.0, 0.0, 0.0), _WORLD_UP, "+X"),
+        "side": ViewPlacement((1.0, 0.0, 0.0), _WORLD_UP, "+X"),
+        "three_quarter": ViewPlacement((1.0, 0.65, -1.0), _WORLD_UP, "+X-Z"),
+        "three_quarter_front": ViewPlacement((1.0, 0.65, -1.0), _WORLD_UP, "+X-Z"),
+        "three_quarter_rear": ViewPlacement((1.0, 0.65, 1.0), _WORLD_UP, "+X+Z"),
+        "top": ViewPlacement((0.0, 1.0, 0.0), _TOP_UP, "+Y"),
     }
 )
-# Views with a placed camera in V0.5. The others are named so a profile cannot
-# request them silently; profile loading rejects any view outside this set.
-PLACED_VIEWS = frozenset({"front", "three_quarter", "three_quarter_front", "side", "top"})
-
-_THREE_QUARTER = (1.0, 0.65, -1.0)
+PLACED_VIEWS = frozenset(VIEW_PLACEMENTS)
+IMPLEMENTED_VIEWS = PLACED_VIEWS
 
 
 def _normalize(vector: tuple[float, float, float]) -> tuple[float, float, float]:
@@ -40,32 +49,22 @@ def _normalize(vector: tuple[float, float, float]) -> tuple[float, float, float]
 
 def view_direction(view: str) -> tuple[float, float, float]:
     """Unit vector from the asset center toward the camera."""
-    if view not in PLACED_VIEWS:
-        raise ValueError(f"view '{view}' has no V0.5 camera placement")
-    table = {
-        "front": (0.0, 0.0, -1.0),
-        "three_quarter": _THREE_QUARTER,
-        "three_quarter_front": _THREE_QUARTER,
-        "side": (1.0, 0.0, 0.0),
-        "top": (0.0, 1.0, 0.0),
-    }
-    return _normalize(table[view])
+    return _normalize(_view_placement(view).direction)
+
+
+def _view_placement(view: str) -> ViewPlacement:
+    try:
+        return VIEW_PLACEMENTS[view]
+    except (KeyError, TypeError) as exc:
+        raise ValueError(f"view '{view}' has no camera placement") from exc
 
 
 def view_up(view: str) -> tuple[float, float, float]:
-    if view == "top":
-        return (0.0, 0.0, -1.0)
-    return (0.0, 1.0, 0.0)
+    return _view_placement(view).up
 
 
 def view_axis_label(view: str) -> str:
-    return {
-        "front": "-Z",
-        "three_quarter": "+X-Z",
-        "three_quarter_front": "+X-Z",
-        "side": "+X",
-        "top": "+Y",
-    }[view]
+    return _view_placement(view).axis_label
 
 
 @dataclass(frozen=True)

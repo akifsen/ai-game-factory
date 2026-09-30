@@ -1709,9 +1709,10 @@ def run_asset_in_godot(
         )
     spec = parse_asset_specification(task.parameters["specification"])
     profile = spec.bound_profile()
-    capture_angles = angles or profile.review_views
+    capture_angles = profile.review_views if angles is None else angles
     if (
         not capture_angles
+        or any(not isinstance(angle, str) for angle in capture_angles)
         or len(capture_angles) != len(set(capture_angles))
         or any(angle not in PLACED_VIEWS for angle in capture_angles)
     ):

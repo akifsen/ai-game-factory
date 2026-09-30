@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted for V0.7 (Step 2 architecture decision). Not implemented.
+Accepted for V0.7 (Step 2 architecture decision). Normative review-view placement is implemented for the existing runtime path; source-front normalization and its audit trail remain pending.
 
 ## Context
 
@@ -55,3 +55,7 @@ Divergence that must be recorded: glTF 2.0 defines the asset front as **+Z**, an
 ## Consequences
 
 The convention becomes a recorded decision with evidence. Authors of Blender assemblies either face the model toward Blender +Y or declare `+Z`, and forgetting the declaration is a rejection, not a guess. The review view vocabulary becomes fully placed. A typo in a view id can no longer silently produce a three-quarter image.
+
+## Implementation status
+
+All nine review views now have explicit Python and Godot direction, up-vector, and axis-label entries. Python profile loading and capture-request validation use the complete placed-view set; the Godot harness rejects an unknown or duplicate angle before opening the asset, and cold bundle verification already validates the requested view set against its closed vocabulary. The `side` placement entry remains an explicit alias of `right`; its scale-reference checks and correction-capture behavior are unchanged. The accepted `source_front` registration, normalization, evidence, and cold transform-recomputation requirements remain unimplemented.

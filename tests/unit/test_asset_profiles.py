@@ -48,9 +48,18 @@ def test_profile_document_rejects_unknown_fields_and_bad_ranges() -> None:
     with pytest.raises(ProfileContractError):
         parse_profile_document(document)
     document = builtin_registry().get("static_prop").document.model_dump(mode="json")
-    document["review_views"] = ["front", "rear"]
+    document["review_views"] = ["front", "front_typo"]
     with pytest.raises(ProfileContractError):
         parse_profile_document(document)
+
+
+def test_profile_accepts_every_explicitly_placed_view() -> None:
+    from gamefactory.core.domain.camera_framing import PLACED_VIEWS
+
+    document = builtin_registry().get("static_prop").document.model_dump(mode="json")
+    document["review_views"] = sorted(PLACED_VIEWS)
+    profile = parse_profile_document(document)
+    assert set(profile.review_views) == PLACED_VIEWS
 
 
 def test_v04_crate_fingerprint_is_unchanged_and_binds_static_prop_v1() -> None:
