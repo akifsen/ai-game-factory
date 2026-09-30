@@ -89,8 +89,13 @@ def test_exact_bound_provider_character_contract_and_capsule_are_required(tmp_pa
     mismatched = _profile(profile_id="different_character_profile")
     with pytest.raises(ValidationError, match="specification-bound"):
         verify_godot_character(
-            spec, mismatched, tmp_path / "raw.glb", "0" * 64,
-            tmp_path / "processed.glb", "0" * 64, "exec-profile",
+            spec,
+            mismatched,
+            tmp_path / "raw.glb",
+            "0" * 64,
+            tmp_path / "processed.glb",
+            "0" * 64,
+            "exec-profile",
         )
     with pytest.raises(ValidationError, match="exact typed"):
         _validate_character_inputs(object(), profile)
@@ -117,13 +122,21 @@ def test_character_profile_must_match_static_capsule_runtime_contract_without_di
     runner = _NoCallRunner()
     with pytest.raises(ValidationError, match="provider_generated"):
         verify_godot_character(
-            spec, profile, "unused-raw.glb", "0" * 64,
-            "unused-processed.glb", "0" * 64, "exec-profile-contract", runner=runner,
+            spec,
+            profile,
+            "unused-raw.glb",
+            "0" * 64,
+            "unused-processed.glb",
+            "0" * 64,
+            "exec-profile-contract",
+            runner=runner,
         )
     assert runner.calls == 0
 
 
-def test_processed_glb_requires_exact_lods_identity_transforms_and_capsule_only(tmp_path: Path) -> None:
+def test_processed_glb_requires_exact_lods_identity_transforms_and_capsule_only(
+    tmp_path: Path,
+) -> None:
     profile = _character_profile()
     spec = _spec(profile)
     processed = _processed(tmp_path / "processed.glb", spec)
@@ -200,8 +213,15 @@ def test_hash_and_attempt_guards_prevent_engine_launch(tmp_path: Path, bad_field
     runner = _NoCallRunner()
     with pytest.raises(ValidationError):
         verify_godot_character(
-            spec, profile, source, raw_hash, processed, processed_hash,
-            "exec-invalid", attempt_number=attempt, runner=runner,
+            spec,
+            profile,
+            source,
+            raw_hash,
+            processed,
+            processed_hash,
+            "exec-invalid",
+            attempt_number=attempt,
+            runner=runner,
         )
     assert runner.calls == 0
 
@@ -213,10 +233,18 @@ def test_review_views_are_profile_declared_and_empty_or_duplicates_reject() -> N
 
     for invalid in ([], ["front", "front"], ["unknown"], [""]):
         with pytest.raises(ValidationError):
-            _validate_review_views(invalid)  # type: ignore[arg-type]
-    assert _validate_character_inputs(spec, profile)[2] == ["front", "rear", "left", "right", "three_quarter"]
+            _validate_review_views(invalid)
+    assert _validate_character_inputs(spec, profile)[2] == [
+        "front",
+        "rear",
+        "left",
+        "right",
+        "three_quarter",
+    ]
     all_views_profile = _with_views(profile, sorted(PLACED_VIEWS))
-    assert _validate_character_inputs(_spec(all_views_profile), all_views_profile)[2] == sorted(PLACED_VIEWS)
+    assert _validate_character_inputs(_spec(all_views_profile), all_views_profile)[2] == sorted(
+        PLACED_VIEWS
+    )
     unsupported_profile = _with_views(profile, ["front"])
     with pytest.raises(ValidationError, match="required coverage"):
         _validate_character_inputs(_spec(unsupported_profile), unsupported_profile)
@@ -252,7 +280,11 @@ def test_failed_observation_still_requires_exact_hash_and_attempt_bindings() -> 
         request=request,
         facts={},
     )
-    for key, tampered in (("request_digest", "0" * 64), ("attempt_number", True), ("revision", True)):
+    for key, tampered in (
+        ("request_digest", "0" * 64),
+        ("attempt_number", True),
+        ("revision", True),
+    ):
         changed = {**observation, key: tampered}
         with pytest.raises(ValidationError):
             _validate_observation(
@@ -264,3 +296,113 @@ def test_failed_observation_still_requires_exact_hash_and_attempt_bindings() -> 
                 facts={},
             )
 
+
+def test_promote_file_exclusively_protects_against_overwrite_and_foreign_replacement(
+    tmp_path: Path,
+) -> None:
+    from gamefactory.adapters.dcc.godot_character import _promote_file_exclusively
+
+    dest = tmp_path / "promoted.txt"
+    content = b"original content"
+    _promote_file_exclusively(dest, content, "test artifact")
+    assert dest.read_bytes() == content
+
+    # Attempting to promote when destination already exists refuses overwrite and does NOT delete
+    with pytest.raises(ValidationError, match="already exists; refusing overwrite"):
+        _promote_file_exclusively(dest, b"new content", "test artifact")
+    assert dest.read_bytes() == content
+
+    # Foreign replacement: pre-existing foreign file is preserved without delete
+    foreign = tmp_path / "foreign.txt"
+    foreign.write_bytes(b"foreign file preserved")
+    with pytest.raises(ValidationError, match="already exists; refusing overwrite"):
+        _promote_file_exclusively(foreign, b"different content", "foreign artifact")
+    assert foreign.read_bytes() == b"foreign file preserved"
+
+
+def test_retained_request_requires_safe_res_references() -> None:
+    from gamefactory.adapters.dcc.godot_character import _validate_retained_request
+
+    base_request: dict[str, Any] = {
+        "workflow_id": "wf",
+        "revision": 1,
+        "asset_id": "hero",
+        "execution_id": "exec",
+        "attempt_number": 1,
+        "raw_glb_sha256": "0" * 64,
+        "processed_glb_sha256": "0" * 64,
+        "harness_sha256": "0" * 64,
+        "profile_sha256": "0" * 64,
+        "specification_sha256": "0" * 64,
+        "request_digest": "0" * 64,
+        "glb": "res://character.glb",
+        "output_dir": "res://captures",
+        "observation_path": "res://runtime-observation.json",
+        "review_views": ["front"],
+        "spec": {"origin_policy": "bottom_center"},
+        "profile": {"profile_id": "p"},
+    }
+    _validate_retained_request(base_request)
+
+    # Output dir unsafe paths
+    for bad_out in [
+        "/etc/captures",
+        "C:/captures",
+        "user://captures",
+        "res://../captures",
+        "res://captures//extra",
+        "res://captures/sub/",
+        "res:///captures",
+        "res://captures:nested",
+        "res://captures.gd",
+        "res://captures.exe",
+        "res://captures\\sub",
+        "res://captures\0null",
+    ]:
+        bad_req = {**base_request, "output_dir": bad_out}
+        with pytest.raises(ValidationError):
+            _validate_retained_request(bad_req)
+
+    # Observation path unsafe paths
+    for bad_obs in [
+        "/etc/obs.json",
+        "C:/obs.json",
+        "user://obs.json",
+        "res://../obs.json",
+        "res://obs.txt",
+        "res://obs.gd.json",
+        "res://obs.exe",
+        "res://obs//file.json",
+        "res://obs:file.json",
+        "res://obs\\file.json",
+    ]:
+        bad_req = {**base_request, "observation_path": bad_obs}
+        with pytest.raises(ValidationError):
+            _validate_retained_request(bad_req)
+
+    # GLB unsafe paths
+    for bad_glb in [
+        "https://evil.com/char.glb",
+        "/tmp/char.glb",
+        "C:/char.glb",
+        "user://char.glb",
+        "res://../char.glb",
+        "res://char.glb.exe",
+        "res://char.json",
+    ]:
+        bad_req = {**base_request, "glb": bad_glb}
+        with pytest.raises(ValidationError):
+            _validate_retained_request(bad_req)
+
+
+def test_validate_request_portability_rejects_user_scheme_and_nul() -> None:
+    from gamefactory.adapters.dcc.godot_character import _validate_request_portability
+
+    with pytest.raises(ValidationError, match="Request must not contain"):
+        _validate_request_portability({"field": "user://payload"})
+    with pytest.raises(ValidationError, match="Request must not contain"):
+        _validate_request_portability({"field": "res://path\0null"})
+    with pytest.raises(ValidationError, match="Request must not contain"):
+        _validate_request_portability({"nested": [{"path": "/absolute/unix"}]})
+    with pytest.raises(ValidationError, match="credential"):
+        _validate_request_portability({"secret_key": "12345"})

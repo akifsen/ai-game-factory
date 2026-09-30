@@ -30,6 +30,10 @@ func _run() -> void:
 		_fail("arguments must include --request <json>")
 		quit(1)
 		return
+	if not _is_safe_path(request_path) or not request_path.ends_with(".json"):
+		_fail("runtime request path is invalid or unsafe: " + request_path)
+		quit(1)
+		return
 	var request_file := FileAccess.open(request_path, FileAccess.READ)
 	if request_file == null or request_file.get_length() > MAX_REQUEST_BYTES:
 		_fail("runtime request is missing or exceeds its size limit")
@@ -42,6 +46,23 @@ func _run() -> void:
 		_fail("runtime request must be a JSON object")
 		quit(1)
 		return
+
+	var obs_val: Variant = parsed.get("observation_path")
+	if not _is_safe_path(obs_val) or not str(obs_val).ends_with(".json"):
+		_fail("observation_path is invalid, unsafe, or does not end in .json: " + str(obs_val))
+		quit(1)
+		return
+	var out_dir_val: Variant = parsed.get("output_dir")
+	if not _is_safe_path(out_dir_val) or str(out_dir_val).ends_with(".json") or str(out_dir_val).ends_with(".glb") or str(out_dir_val).ends_with(".png"):
+		_fail("output_dir is invalid, unsafe, or has unsafe extension: " + str(out_dir_val))
+		quit(1)
+		return
+	var glb_val: Variant = parsed.get("glb")
+	if not _is_safe_path(glb_val) or not str(glb_val).ends_with(".glb"):
+		_fail("glb must be a safe res:// .glb path: " + str(glb_val))
+		quit(1)
+		return
+
 	request = parsed
 	for key in ["workflow_id", "revision", "asset_id", "execution_id", "attempt_number", "raw_glb_sha256", "processed_glb_sha256", "harness_sha256", "profile_sha256", "specification_sha256", "request_digest", "glb", "output_dir", "observation_path", "review_views", "spec", "profile"]:
 		if not request.has(key):
@@ -199,6 +220,12 @@ func _run() -> void:
 	var extent := maxf(bounds.size.x, maxf(bounds.size.y, bounds.size.z))
 	var scale_reference := _add_floor(bounds, extent)
 	var out_dir := str(request.output_dir)
+	var dir_err := DirAccess.make_dir_recursive_absolute(out_dir)
+	if dir_err != OK and dir_err != ERR_ALREADY_EXISTS:
+		_fail("could not create output directory: " + out_dir)
+		_write_observation(false)
+		quit(1)
+		return
 	for view in requested_views:
 		var direction := _view_direction_vector(view)
 		_park_reference(scale_reference, bounds, direction, extent)
@@ -221,6 +248,9 @@ func _run() -> void:
 			_fail(view + " camera framing failed: " + str(measured.get("reason", "")))
 			continue
 		var capture_path := out_dir.path_join(view + ".png")
+		if not _is_safe_path(capture_path) or not capture_path.ends_with(".png"):
+			_fail("capture path is unsafe for " + view)
+			continue
 		if image.save_png(capture_path) != OK:
 			_fail("could not save rendered review capture for " + view)
 		else:
@@ -290,8 +320,13 @@ func _character_bounds(node: Node) -> AABB:
 
 func _write_observation(passed: bool) -> void:
 	var path := str(request.get("observation_path", ""))
-	if path.is_empty():
+	if path.is_empty() or not _is_safe_path(path) or not path.ends_with(".json"):
 		return
+	var base_dir := path.get_base_dir()
+	if not base_dir.is_empty() and base_dir != "res://":
+		if not _is_safe_path(base_dir):
+			return
+		DirAccess.make_dir_recursive_absolute(base_dir)
 	var value := {
 		"schema_version": "character-runtime-observation-0.7.0",
 		"workflow_id": request.get("workflow_id", ""),
@@ -524,5 +559,36 @@ func _environment() -> WorldEnvironment:
 	light.rotation_degrees = Vector3(-35, -35, 0)
 	world_environment.add_child(light)
 	return world_environment
+
+static func _has_unsafe_extension(s: String) -> bool:
+	var lower := s.to_lower()
+	var unsafe_exts := [
+		".gd", ".godot", ".uid", ".tscn", ".scn", ".res", ".tres", ".import",
+		".exe", ".dll", ".so", ".dylib", ".sh", ".bat", ".cmd", ".ps1",
+		".py", ".vbs", ".bin", ".com", ".scr"
+	]
+	for ext in unsafe_exts:
+		if lower.ends_with(ext) or lower.contains(ext + "/") or lower.contains(ext + "."):
+			return true
+	return false
+
+static func _is_safe_path(p: Variant) -> bool:
+	if typeof(p) != TYPE_STRING:
+		return false
+	var s := str(p)
+	if s.is_empty() or s.to_utf8_buffer().has(0) or s.contains("\\") or s.contains("\r") or s.contains("\n"):
+		return false
+	if not s.begins_with("res://"):
+		return false
+	var sub := s.substr(6)
+	if sub.is_empty() or sub.begins_with("/") or sub.ends_with("/") or sub.contains(":") or sub.contains("//"):
+		return false
+	var parts := sub.split("/")
+	for part in parts:
+		if part == ".." or part == "." or part.is_empty():
+			return false
+	if _has_unsafe_extension(s):
+		return false
+	return true
 
 

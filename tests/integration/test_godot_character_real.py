@@ -58,7 +58,11 @@ def _profile() -> AssetProfileV07:
                     "max_texture_dimension": 4096,
                     "max_triangles_lod0": 20000,
                 },
-                "godot": {"body_kind": "static_body", "require_ray_hit": True, "require_area": False},
+                "godot": {
+                    "body_kind": "static_body",
+                    "require_ray_hit": True,
+                    "require_area": False,
+                },
                 "runtime": {"bounds_tolerance_ratio": 0.1, "bounds_tolerance_floor_m": 0.15},
                 "geometry_mode": "single_mesh",
                 "accepted_source_kinds": ["provider_generated"],
@@ -68,7 +72,7 @@ def _profile() -> AssetProfileV07:
     )
 
 
-def _spec(profile: AssetProfileV07, origin_policy: str):
+def _spec(profile: AssetProfileV07, origin_policy: str) -> Any:
     return parse_asset_specification_v07(
         {
             "schema_version": "0.7.0",
@@ -214,22 +218,42 @@ def test_real_godot_character_import_capsule_ray_and_rendered_capture(
         forged["view_framing"][view]["view_axis"] = "+Y"
         mutations.append(forged)
     for mutation in (
-        {"lods": {**deepcopy(result.observation["lods"]), f"SM_{spec.asset_id}_LOD0": {
-            **deepcopy(result.observation["lods"][f"SM_{spec.asset_id}_LOD0"]),
-            "local_position": [False, 0, 0],
-        }}},
-        {"lods": {**deepcopy(result.observation["lods"]), f"SM_{spec.asset_id}_LOD1": {
-            **deepcopy(result.observation["lods"][f"SM_{spec.asset_id}_LOD1"]),
-            "local_basis": [[1, True, 0], [0, 1, 0], [0, 0, 1]],
-        }}},
-        {"lods": {**deepcopy(result.observation["lods"]), f"SM_{spec.asset_id}_LOD0": {
-            **deepcopy(result.observation["lods"][f"SM_{spec.asset_id}_LOD0"]),
-            "local_scale": [1, 10**400, 1],
-        }}},
-        {"lods": {**deepcopy(result.observation["lods"]), f"SM_{spec.asset_id}_LOD0": {
-            **deepcopy(result.observation["lods"][f"SM_{spec.asset_id}_LOD0"]),
-            "surface_count": True,
-        }}},
+        {
+            "lods": {
+                **deepcopy(result.observation["lods"]),
+                f"SM_{spec.asset_id}_LOD0": {
+                    **deepcopy(result.observation["lods"][f"SM_{spec.asset_id}_LOD0"]),
+                    "local_position": [False, 0, 0],
+                },
+            }
+        },
+        {
+            "lods": {
+                **deepcopy(result.observation["lods"]),
+                f"SM_{spec.asset_id}_LOD1": {
+                    **deepcopy(result.observation["lods"][f"SM_{spec.asset_id}_LOD1"]),
+                    "local_basis": [[1, True, 0], [0, 1, 0], [0, 0, 1]],
+                },
+            }
+        },
+        {
+            "lods": {
+                **deepcopy(result.observation["lods"]),
+                f"SM_{spec.asset_id}_LOD0": {
+                    **deepcopy(result.observation["lods"][f"SM_{spec.asset_id}_LOD0"]),
+                    "local_scale": [1, 10**400, 1],
+                },
+            }
+        },
+        {
+            "lods": {
+                **deepcopy(result.observation["lods"]),
+                f"SM_{spec.asset_id}_LOD0": {
+                    **deepcopy(result.observation["lods"][f"SM_{spec.asset_id}_LOD0"]),
+                    "surface_count": True,
+                },
+            }
+        },
         {"collider": {**result.observation["collider"], "radius_m": False}},
         {"collider": {**result.observation["collider"], "center_y_m": 999}},
         {"collider": {**result.observation["collider"], "physics_ray_hit": False}},
@@ -242,8 +266,12 @@ def test_real_godot_character_import_capsule_ray_and_rendered_capture(
     for forged in mutations:
         with pytest.raises(ValidationError):
             _validate_observation(
-                forged, spec=spec, profile=profile, views=request["review_views"],
-                request=request, facts=facts,
+                forged,
+                spec=spec,
+                profile=profile,
+                views=request["review_views"],
+                request=request,
+                facts=facts,
             )
 
 
@@ -251,14 +279,16 @@ def test_strict_observation_json_rejects_nonfinite_and_unrepresentable_numbers()
     with pytest.raises(ValidationError, match="strict UTF-8 JSON|numeric value"):
         _strict_json(b'{"status":"PASS","value":1e999}', "observation")
     with pytest.raises(ValidationError, match="strict UTF-8 JSON|numeric value"):
-        _strict_json(b'{"status":"PASS","value":' + str(10**400).encode() + b'}', "observation")
+        _strict_json(b'{"status":"PASS","value":' + str(10**400).encode() + b"}", "observation")
 
 
 @pytest.mark.real_godot
 def test_real_blender_character_processing_composes_with_godot_runtime(
     tmp_path: Path, godot_executable: str
 ) -> None:
-    blender_executable = os.environ.get("GAMEFACTORY_TEST_BLENDER") or BlenderAdapter().find_candidate_executable()
+    blender_executable = (
+        os.environ.get("GAMEFACTORY_TEST_BLENDER") or BlenderAdapter().find_candidate_executable()
+    )
     if not blender_executable:
         pytest.skip("Set GAMEFACTORY_TEST_BLENDER or install Blender to run composition test")
     profile = _profile()
@@ -303,3 +333,122 @@ def test_real_blender_character_processing_composes_with_godot_runtime(
     assert runtime.raw_glb_sha256 == raw_hash
     assert runtime.processed_glb_sha256 == processed_result.processed_glb_sha256
     assert set(runtime.captures) == {"front", "rear", "left", "right", "three_quarter"}
+
+
+@pytest.mark.real_godot
+def test_real_godot_harness_rejects_unsafe_paths_without_outside_writes(
+    tmp_path: Path, godot_executable: str
+) -> None:
+    from gamefactory.adapters.dcc.godot_character import _harness_resource
+    from gamefactory.core.execution.process_runner import CommandRequest, ProcessRunner
+
+    stage = tmp_path / "stage"
+    stage.mkdir()
+    (stage / "project.godot").write_text(
+        'config_version=5\n\n[importer_defaults]\n\nscene={\n"nodes/use_name_suffixes": false,\n"nodes/use_node_type_suffixes": false\n}\n',
+        encoding="utf-8",
+    )
+    (stage / ".factory-character-harness.gd").write_bytes(_harness_resource())
+
+    outside_dir = tmp_path / "outside_probe"
+    outside_dir.mkdir()
+    outside_obs = outside_dir / "evil_observation.json"
+    outside_out = outside_dir / "evil_captures"
+
+    runner = ProcessRunner(sanitize_output=True)
+
+    # Probe 1: Request containing absolute fallback paths outside stage
+    malicious_payload = {
+        "schema_version": "character-runtime-request-0.7.0",
+        "workflow_id": "probe-workflow",
+        "revision": 1,
+        "asset_id": "test_asset",
+        "execution_id": "probe-exec",
+        "attempt_number": 1,
+        "raw_glb_sha256": "0" * 64,
+        "processed_glb_sha256": "0" * 64,
+        "harness_sha256": "0" * 64,
+        "profile_sha256": "0" * 64,
+        "specification_sha256": "0" * 64,
+        "request_digest": "0" * 64,
+        "glb": "res://character.glb",
+        "output_dir": str(outside_out.resolve()).replace("\\", "/"),
+        "observation_path": str(outside_obs.resolve()).replace("\\", "/"),
+        "review_views": ["front"],
+        "spec": {},
+        "profile": {},
+    }
+    request_file = stage / "runtime-request.json"
+    request_file.write_text(json.dumps(malicious_payload), encoding="utf-8")
+
+    res1 = runner.run(
+        CommandRequest(
+            args=[
+                godot_executable,
+                "--headless",
+                "--path",
+                str(stage),
+                "--script",
+                "res://.factory-character-harness.gd",
+                "--",
+                "--request",
+                "res://runtime-request.json",
+            ],
+            cwd=stage,
+            timeout_seconds=30.0,
+            minimal_env=True,
+        )
+    )
+    assert res1.exit_code != 0
+    assert not outside_obs.exists(), "Harness wrote observation outside stage!"
+    assert not outside_out.exists(), "Harness created output directory outside stage!"
+
+    # Probe 2: Traversal and user:// paths
+    traversal_obs = tmp_path / "traversal_obs.json"
+    forged_req2 = dict(malicious_payload)
+    forged_req2["observation_path"] = "res://../traversal_obs.json"
+    forged_req2["output_dir"] = "user://captures"
+    request_file.write_text(json.dumps(forged_req2), encoding="utf-8")
+
+    res2 = runner.run(
+        CommandRequest(
+            args=[
+                godot_executable,
+                "--headless",
+                "--path",
+                str(stage),
+                "--script",
+                "res://.factory-character-harness.gd",
+                "--",
+                "--request",
+                "res://runtime-request.json",
+            ],
+            cwd=stage,
+            timeout_seconds=30.0,
+            minimal_env=True,
+        )
+    )
+    assert res2.exit_code != 0
+    assert not traversal_obs.exists(), "Harness wrote observation via traversal outside stage!"
+
+    # Probe 3: Command-line request argument with non-res:// path
+    res3 = runner.run(
+        CommandRequest(
+            args=[
+                godot_executable,
+                "--headless",
+                "--path",
+                str(stage),
+                "--script",
+                "res://.factory-character-harness.gd",
+                "--",
+                "--request",
+                str(outside_obs.resolve()).replace("\\", "/"),
+            ],
+            cwd=stage,
+            timeout_seconds=30.0,
+            minimal_env=True,
+        )
+    )
+    assert res3.exit_code != 0
+    assert not outside_obs.exists()
