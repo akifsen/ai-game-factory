@@ -1,0 +1,1690 @@
+{
+  "_provenance": {
+    "captured_from_commit": "af0f379c6183adcfc9d08effa303662e06d7643a",
+    "note": "V0.6 behavior golden. Do not regenerate to make a failing test pass."
+  },
+  "availability": [
+    {
+      "profile_id": "static_prop",
+      "qualified": "static_prop@1",
+      "status": "AVAILABLE",
+      "version": "1"
+    },
+    {
+      "profile_id": "pickup",
+      "qualified": "pickup@1",
+      "status": "AVAILABLE",
+      "version": "1"
+    },
+    {
+      "profile_id": "modular_piece",
+      "qualified": "modular_piece@1",
+      "status": "AVAILABLE",
+      "version": "1"
+    },
+    {
+      "profile_id": "character",
+      "qualified": "character",
+      "status": "UNSUPPORTED",
+      "version": ""
+    },
+    {
+      "profile_id": "rigged_character",
+      "qualified": "rigged_character",
+      "status": "UNSUPPORTED",
+      "version": ""
+    },
+    {
+      "profile_id": "weapon",
+      "qualified": "weapon",
+      "status": "UNSUPPORTED",
+      "version": ""
+    },
+    {
+      "profile_id": "vehicle",
+      "qualified": "vehicle",
+      "status": "UNSUPPORTED",
+      "version": ""
+    },
+    {
+      "profile_id": "building",
+      "qualified": "building",
+      "status": "UNSUPPORTED",
+      "version": ""
+    },
+    {
+      "profile_id": "terrain",
+      "qualified": "terrain",
+      "status": "UNSUPPORTED",
+      "version": ""
+    },
+    {
+      "profile_id": "animation",
+      "qualified": "animation",
+      "status": "UNSUPPORTED",
+      "version": ""
+    },
+    {
+      "profile_id": "vfx",
+      "qualified": "vfx",
+      "status": "UNSUPPORTED",
+      "version": ""
+    },
+    {
+      "profile_id": "foliage",
+      "qualified": "foliage",
+      "status": "UNSUPPORTED",
+      "version": ""
+    }
+  ],
+  "paid_request_canonical": {
+    "fake": "{\"adapter\":{\"contract_version\":1,\"id\":\"fake-image-to-3d\"},\"binding\":{\"asset_id\":\"prop_energy_crate_01\",\"concept_sha256\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"concept_version\":1,\"profile_id\":\"static_prop\",\"profile_version\":1,\"revision_number\":1,\"specification_sha256\":\"42f1a38e28c7b95e36505e47318fb4ed116ca723a67d46c3e895e750ea99e432\"},\"cost\":{\"estimate\":20.0,\"reservation\":30.0,\"unit\":\"credits\"},\"operation\":\"image-to-3d\",\"provider\":\"fake\",\"request\":{\"animate\":false,\"enable_pbr\":true,\"image_enhancement\":\"omit\",\"model_type\":\"smart-topology\",\"pose_mode\":\"omit\",\"remesh\":\"omit\",\"remove_lighting\":\"omit\",\"rig\":false,\"should_texture\":true,\"target_formats\":[\"glb\"],\"target_polycount\":15000,\"texture_prompt\":\"omit\",\"texture_resolution\":\"2k\",\"variants\":1},\"schema\":\"paid-request-0.6.0\"}",
+    "meshy": "{\"adapter\":{\"cli_package\":\"meshy-cli@0.4.0\",\"contract_version\":1,\"id\":\"meshy-cli-image-to-3d\",\"output_schema\":\"v1\"},\"binding\":{\"asset_id\":\"prop_energy_crate_01\",\"concept_sha256\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"concept_version\":1,\"profile_id\":\"static_prop\",\"profile_version\":1,\"revision_number\":1,\"specification_sha256\":\"42f1a38e28c7b95e36505e47318fb4ed116ca723a67d46c3e895e750ea99e432\"},\"cost\":{\"estimate\":20.0,\"reservation\":30.0,\"unit\":\"credits\"},\"operation\":\"image-to-3d\",\"provider\":\"meshy\",\"request\":{\"animate\":false,\"enable_pbr\":true,\"image_enhancement\":\"omit\",\"model_type\":\"smart-topology\",\"pose_mode\":\"omit\",\"remesh\":\"omit\",\"remove_lighting\":\"omit\",\"rig\":false,\"should_texture\":true,\"target_formats\":[\"glb\"],\"target_polycount\":15000,\"texture_prompt\":\"omit\",\"texture_resolution\":\"2k\",\"variants\":1},\"schema\":\"paid-request-0.6.0\"}"
+  },
+  "profile_documents": {
+    "modular_piece@1": {
+      "categories": [
+        "modular"
+      ],
+      "dimension_rules": {
+        "max_m": 8.0,
+        "min_m": 0.1
+      },
+      "framing": {
+        "fov_degrees": 38.0,
+        "margin_fraction": 0.04,
+        "max_screen_fraction": 0.75,
+        "min_screen_fraction": 0.5,
+        "target_screen_fraction": 0.62
+      },
+      "godot": {
+        "body_kind": "static_body",
+        "require_area": false,
+        "require_ray_hit": true
+      },
+      "processing": {
+        "allowed_collider_policies": [
+          "box"
+        ],
+        "allowed_lod_policies": [
+          "lod0_only",
+          "lod0_lod1"
+        ],
+        "allowed_origin_policies": [
+          "bottom_center"
+        ],
+        "animation_forbidden": true,
+        "default_origin_policy": "bottom_center",
+        "dimension_tolerance_m": 0.002,
+        "lod0_required": true,
+        "lod1_required": false,
+        "max_materials": 4,
+        "max_texture_dimension": 2048,
+        "max_triangles_lod0": 30000,
+        "rig_forbidden": true,
+        "snap_grid_m": 0.25
+      },
+      "profile_id": "modular_piece",
+      "review_views": [
+        "front",
+        "side",
+        "three_quarter"
+      ],
+      "runtime": {
+        "bounds_tolerance_floor_m": 0.02,
+        "bounds_tolerance_ratio": 0.02
+      },
+      "schema_version": "asset-profile-0.5.0",
+      "version": 1
+    },
+    "pickup@1": {
+      "categories": [
+        "pickup"
+      ],
+      "dimension_rules": {
+        "max_m": 1.5,
+        "min_m": 0.05
+      },
+      "framing": {
+        "fov_degrees": 38.0,
+        "margin_fraction": 0.04,
+        "max_screen_fraction": 0.75,
+        "min_screen_fraction": 0.5,
+        "target_screen_fraction": 0.62
+      },
+      "godot": {
+        "body_kind": "area",
+        "require_area": true,
+        "require_ray_hit": false
+      },
+      "processing": {
+        "allowed_collider_policies": [
+          "box"
+        ],
+        "allowed_lod_policies": [
+          "lod0_only",
+          "lod0_lod1"
+        ],
+        "allowed_origin_policies": [
+          "center",
+          "bottom_center"
+        ],
+        "animation_forbidden": true,
+        "default_origin_policy": "center",
+        "dimension_tolerance_m": 0.01,
+        "lod0_required": true,
+        "lod1_required": false,
+        "max_materials": 2,
+        "max_texture_dimension": 2048,
+        "max_triangles_lod0": 20000,
+        "rig_forbidden": true,
+        "snap_grid_m": null
+      },
+      "profile_id": "pickup",
+      "review_views": [
+        "front",
+        "three_quarter",
+        "top"
+      ],
+      "runtime": {
+        "bounds_tolerance_floor_m": 0.05,
+        "bounds_tolerance_ratio": 0.15
+      },
+      "schema_version": "asset-profile-0.5.0",
+      "version": 1
+    },
+    "static_prop@1": {
+      "categories": [
+        "prop"
+      ],
+      "dimension_rules": {
+        "max_m": 100.0,
+        "min_m": 0.001
+      },
+      "framing": {
+        "fov_degrees": 38.0,
+        "margin_fraction": 0.04,
+        "max_screen_fraction": 0.75,
+        "min_screen_fraction": 0.55,
+        "target_screen_fraction": 0.65
+      },
+      "godot": {
+        "body_kind": "static_body",
+        "require_area": false,
+        "require_ray_hit": true
+      },
+      "processing": {
+        "allowed_collider_policies": [
+          "box"
+        ],
+        "allowed_lod_policies": [
+          "lod0_lod1"
+        ],
+        "allowed_origin_policies": [
+          "bottom_center",
+          "center"
+        ],
+        "animation_forbidden": true,
+        "default_origin_policy": "bottom_center",
+        "dimension_tolerance_m": 0.01,
+        "lod0_required": true,
+        "lod1_required": true,
+        "max_materials": 8,
+        "max_texture_dimension": 4096,
+        "max_triangles_lod0": 100000,
+        "rig_forbidden": true,
+        "snap_grid_m": null
+      },
+      "profile_id": "static_prop",
+      "review_views": [
+        "front",
+        "three_quarter",
+        "side"
+      ],
+      "runtime": {
+        "bounds_tolerance_floor_m": 0.15,
+        "bounds_tolerance_ratio": 0.2
+      },
+      "schema_version": "asset-profile-0.5.0",
+      "version": 1
+    }
+  },
+  "profile_outputs": {
+    "cell_050": {
+      "capture_request_profile": {
+        "body_kind": "area",
+        "framing": {
+          "fov_degrees": 38.0,
+          "margin_fraction": 0.04,
+          "max_screen_fraction": 0.75,
+          "min_screen_fraction": 0.5,
+          "target_screen_fraction": 0.62
+        },
+        "profile_id": "pickup",
+        "profile_version": 1,
+        "require_area": true,
+        "require_ray_hit": false,
+        "review_views": [
+          "front",
+          "three_quarter",
+          "top"
+        ],
+        "scene": {
+          "body_kind": "area",
+          "collision": "CollisionShape3D",
+          "physics": "Area3D",
+          "root": "Node3D",
+          "visual": "Visual"
+        }
+      },
+      "expected_mesh_names": [
+        "COL_pickup_energy_cell_01",
+        "SM_pickup_energy_cell_01_LOD0"
+      ],
+      "lod1_mesh_required": false,
+      "processing_contract": {
+        "animation_forbidden": true,
+        "asset_id": "pickup_energy_cell_01",
+        "collider_policy": "box",
+        "dimension_tolerance_m": 0.01,
+        "lod1_ratio": 0.4,
+        "lod1_required": false,
+        "lod_policy": "lod0_only",
+        "origin_policy": "center",
+        "profile_id": "pickup",
+        "profile_qualified": "pickup@1",
+        "profile_version": 1,
+        "rig_forbidden": true,
+        "schema_version": "asset-processing-contract-0.5.0",
+        "snap_grid_m": null,
+        "target_depth_m": 0.22,
+        "target_height_m": 0.48,
+        "target_width_m": 0.22
+      },
+      "qualified": "pickup@1",
+      "runtime_requirements": {
+        "bounds_tolerance_floor_m": 0.05,
+        "bounds_tolerance_ratio": 0.15,
+        "dimension_tolerance_m": 0.01,
+        "require_area": true,
+        "require_collision": true,
+        "require_mesh_visible": true,
+        "require_physics_body": false,
+        "require_ray_hit": false
+      },
+      "scene_contract": {
+        "body_kind": "area",
+        "collision": "CollisionShape3D",
+        "physics": "Area3D",
+        "root": "Node3D",
+        "visual": "Visual"
+      },
+      "scene_tscn": "[gd_scene load_steps=2 format=3]\n\n[ext_resource type=\"PackedScene\" path=\"res://assets/asset.glb\" id=\"1\"]\n\n[node name=\"Node3D\" type=\"Node3D\"]\n\n[node name=\"Visual\" parent=\".\" instance=ExtResource(\"1\")]\n\n[node name=\"Area3D\" type=\"Area3D\" parent=\".\"]\n\n[node name=\"CollisionShape3D\" type=\"CollisionShape3D\" parent=\"Area3D\"]\n"
+    },
+    "crate_040": {
+      "capture_request_profile": {
+        "body_kind": "static_body",
+        "framing": {
+          "fov_degrees": 38.0,
+          "margin_fraction": 0.04,
+          "max_screen_fraction": 0.75,
+          "min_screen_fraction": 0.55,
+          "target_screen_fraction": 0.65
+        },
+        "profile_id": "static_prop",
+        "profile_version": 1,
+        "require_area": false,
+        "require_ray_hit": true,
+        "review_views": [
+          "front",
+          "three_quarter",
+          "side"
+        ],
+        "scene": {
+          "body_kind": "static_body",
+          "collision": "CollisionShape3D",
+          "physics": "StaticBody3D",
+          "root": "Node3D",
+          "visual": "Visual"
+        }
+      },
+      "expected_mesh_names": [
+        "COL_prop_energy_crate_01",
+        "SM_prop_energy_crate_01_LOD0",
+        "SM_prop_energy_crate_01_LOD1"
+      ],
+      "lod1_mesh_required": true,
+      "processing_contract": {
+        "animation_forbidden": true,
+        "asset_id": "prop_energy_crate_01",
+        "collider_policy": "box",
+        "dimension_tolerance_m": 0.01,
+        "lod1_ratio": 0.5,
+        "lod1_required": true,
+        "lod_policy": "lod0_lod1",
+        "origin_policy": "bottom_center",
+        "profile_id": "static_prop",
+        "profile_qualified": "static_prop@1",
+        "profile_version": 1,
+        "rig_forbidden": true,
+        "schema_version": "asset-processing-contract-0.5.0",
+        "snap_grid_m": null,
+        "target_depth_m": 1.0,
+        "target_height_m": 1.0,
+        "target_width_m": 1.2
+      },
+      "qualified": "static_prop@1",
+      "runtime_requirements": {
+        "bounds_tolerance_floor_m": 0.15,
+        "bounds_tolerance_ratio": 0.2,
+        "dimension_tolerance_m": 0.01,
+        "require_area": false,
+        "require_collision": true,
+        "require_mesh_visible": true,
+        "require_physics_body": true,
+        "require_ray_hit": true
+      },
+      "scene_contract": {
+        "body_kind": "static_body",
+        "collision": "CollisionShape3D",
+        "physics": "StaticBody3D",
+        "root": "Node3D",
+        "visual": "Visual"
+      },
+      "scene_tscn": "[gd_scene load_steps=2 format=3]\n\n[ext_resource type=\"PackedScene\" path=\"res://assets/asset.glb\" id=\"1\"]\n\n[node name=\"Node3D\" type=\"Node3D\"]\n\n[node name=\"Visual\" parent=\".\" instance=ExtResource(\"1\")]\n\n[node name=\"StaticBody3D\" type=\"StaticBody3D\" parent=\".\"]\n\n[node name=\"CollisionShape3D\" type=\"CollisionShape3D\" parent=\"StaticBody3D\"]\n"
+    },
+    "min_050": {
+      "capture_request_profile": {
+        "body_kind": "static_body",
+        "framing": {
+          "fov_degrees": 38.0,
+          "margin_fraction": 0.04,
+          "max_screen_fraction": 0.75,
+          "min_screen_fraction": 0.55,
+          "target_screen_fraction": 0.65
+        },
+        "profile_id": "static_prop",
+        "profile_version": 1,
+        "require_area": false,
+        "require_ray_hit": true,
+        "review_views": [
+          "front",
+          "three_quarter",
+          "side"
+        ],
+        "scene": {
+          "body_kind": "static_body",
+          "collision": "CollisionShape3D",
+          "physics": "StaticBody3D",
+          "root": "Node3D",
+          "visual": "Visual"
+        }
+      },
+      "expected_mesh_names": [
+        "COL_golden_static_050",
+        "SM_golden_static_050_LOD0",
+        "SM_golden_static_050_LOD1"
+      ],
+      "lod1_mesh_required": true,
+      "processing_contract": {
+        "animation_forbidden": true,
+        "asset_id": "golden_static_050",
+        "collider_policy": "box",
+        "dimension_tolerance_m": 0.01,
+        "lod1_ratio": 0.5,
+        "lod1_required": true,
+        "lod_policy": "lod0_lod1",
+        "origin_policy": "center",
+        "profile_id": "static_prop",
+        "profile_qualified": "static_prop@1",
+        "profile_version": 1,
+        "rig_forbidden": true,
+        "schema_version": "asset-processing-contract-0.5.0",
+        "snap_grid_m": null,
+        "target_depth_m": 0.6,
+        "target_height_m": 1.4,
+        "target_width_m": 0.8
+      },
+      "qualified": "static_prop@1",
+      "runtime_requirements": {
+        "bounds_tolerance_floor_m": 0.15,
+        "bounds_tolerance_ratio": 0.2,
+        "dimension_tolerance_m": 0.01,
+        "require_area": false,
+        "require_collision": true,
+        "require_mesh_visible": true,
+        "require_physics_body": true,
+        "require_ray_hit": true
+      },
+      "scene_contract": {
+        "body_kind": "static_body",
+        "collision": "CollisionShape3D",
+        "physics": "StaticBody3D",
+        "root": "Node3D",
+        "visual": "Visual"
+      },
+      "scene_tscn": "[gd_scene load_steps=2 format=3]\n\n[ext_resource type=\"PackedScene\" path=\"res://assets/asset.glb\" id=\"1\"]\n\n[node name=\"Node3D\" type=\"Node3D\"]\n\n[node name=\"Visual\" parent=\".\" instance=ExtResource(\"1\")]\n\n[node name=\"StaticBody3D\" type=\"StaticBody3D\" parent=\".\"]\n\n[node name=\"CollisionShape3D\" type=\"CollisionShape3D\" parent=\"StaticBody3D\"]\n"
+    },
+    "wall_fixture_050": {
+      "capture_request_profile": {
+        "body_kind": "static_body",
+        "framing": {
+          "fov_degrees": 38.0,
+          "margin_fraction": 0.04,
+          "max_screen_fraction": 0.75,
+          "min_screen_fraction": 0.5,
+          "target_screen_fraction": 0.62
+        },
+        "profile_id": "modular_piece",
+        "profile_version": 1,
+        "require_area": false,
+        "require_ray_hit": true,
+        "review_views": [
+          "front",
+          "side",
+          "three_quarter"
+        ],
+        "scene": {
+          "body_kind": "static_body",
+          "collision": "CollisionShape3D",
+          "physics": "StaticBody3D",
+          "root": "Node3D",
+          "visual": "Visual"
+        }
+      },
+      "expected_mesh_names": [
+        "COL_wall_panel_test",
+        "SM_wall_panel_test_LOD0"
+      ],
+      "lod1_mesh_required": false,
+      "processing_contract": {
+        "animation_forbidden": true,
+        "asset_id": "wall_panel_test",
+        "collider_policy": "box",
+        "dimension_tolerance_m": 0.002,
+        "lod1_ratio": 0.5,
+        "lod1_required": false,
+        "lod_policy": "lod0_only",
+        "origin_policy": "bottom_center",
+        "profile_id": "modular_piece",
+        "profile_qualified": "modular_piece@1",
+        "profile_version": 1,
+        "rig_forbidden": true,
+        "schema_version": "asset-processing-contract-0.5.0",
+        "snap_grid_m": 0.25,
+        "target_depth_m": 0.25,
+        "target_height_m": 2.0,
+        "target_width_m": 1.0
+      },
+      "qualified": "modular_piece@1",
+      "runtime_requirements": {
+        "bounds_tolerance_floor_m": 0.02,
+        "bounds_tolerance_ratio": 0.02,
+        "dimension_tolerance_m": 0.002,
+        "require_area": false,
+        "require_collision": true,
+        "require_mesh_visible": true,
+        "require_physics_body": true,
+        "require_ray_hit": true
+      },
+      "scene_contract": {
+        "body_kind": "static_body",
+        "collision": "CollisionShape3D",
+        "physics": "StaticBody3D",
+        "root": "Node3D",
+        "visual": "Visual"
+      },
+      "scene_tscn": "[gd_scene load_steps=2 format=3]\n\n[ext_resource type=\"PackedScene\" path=\"res://assets/asset.glb\" id=\"1\"]\n\n[node name=\"Node3D\" type=\"Node3D\"]\n\n[node name=\"Visual\" parent=\".\" instance=ExtResource(\"1\")]\n\n[node name=\"StaticBody3D\" type=\"StaticBody3D\" parent=\".\"]\n\n[node name=\"CollisionShape3D\" type=\"CollisionShape3D\" parent=\"StaticBody3D\"]\n"
+    }
+  },
+  "spec_canonical": {
+    "cell_050": "{\"asset_id\":\"pickup_energy_cell_01\",\"category\":\"pickup\",\"collider_policy\":\"box\",\"dimensions\":{\"depth_m\":0.22,\"height_m\":0.48,\"width_m\":0.22},\"geometry_budget\":{\"lod_ratio\":0.4,\"max_triangles_lod0\":8000,\"max_triangles_lod1\":3000},\"intent\":\"Stylized sci-fi energy cell, a small collectible with a clear glowing core and a readable upright silhouette.\",\"lod_policy\":\"lod0_only\",\"material_budget\":{\"max_materials\":2},\"orientation\":{\"front\":\"-Z\",\"up\":\"+Y\"},\"origin_policy\":\"center\",\"profile\":\"pickup\",\"profile_version\":1,\"schema_version\":\"0.5.0\",\"style_constraints\":{\"detail_density\":\"low\",\"family\":\"stylized_scifi\",\"readability\":\"high\",\"silhouette\":\"upright_capsule\"},\"target_engine\":\"godot\",\"target_import_path\":\"assets/generated/pickup/pickup_energy_cell_01/\",\"texture_budget\":{\"max_dimension\":2048}}",
+    "crate_040": "{\"asset_id\":\"prop_energy_crate_01\",\"category\":\"prop\",\"collider_policy\":\"box\",\"dimensions\":{\"depth_m\":1.0,\"height_m\":1.0,\"width_m\":1.2},\"geometry_budget\":{\"lod_ratio\":0.5,\"max_triangles_lod0\":20000,\"max_triangles_lod1\":10000},\"intent\":\"Stylized Sci-Fi Energy Crate for in-game prop placement\",\"lod_policy\":\"lod0_lod1\",\"material_budget\":{\"max_materials\":2},\"orientation\":{\"front\":\"-Z\",\"up\":\"+Y\"},\"origin_policy\":\"bottom_center\",\"profile\":\"static_prop\",\"schema_version\":\"0.4.0\",\"style_constraints\":{\"detail_density\":\"medium\",\"family\":\"stylized_scifi\",\"readability\":\"high\",\"silhouette\":\"chunky\"},\"target_engine\":\"godot\",\"target_import_path\":\"assets/generated/props/prop_energy_crate_01/\",\"texture_budget\":{\"max_dimension\":2048}}",
+    "min_040": "{\"asset_id\":\"golden_minimal_040\",\"category\":\"prop\",\"collider_policy\":\"box\",\"dimensions\":{\"depth_m\":1.0,\"height_m\":1.0,\"width_m\":1.0},\"geometry_budget\":{\"lod_ratio\":0.5,\"max_triangles_lod0\":20000,\"max_triangles_lod1\":10000},\"intent\":\"Minimal historical static prop\",\"lod_policy\":\"lod0_lod1\",\"material_budget\":{\"max_materials\":2},\"orientation\":{\"front\":\"-Z\",\"up\":\"+Y\"},\"origin_policy\":\"bottom_center\",\"profile\":\"static_prop\",\"schema_version\":\"0.4.0\",\"style_constraints\":{\"detail_density\":\"medium\",\"family\":\"stylized_scifi\",\"readability\":\"high\",\"silhouette\":\"chunky\"},\"target_engine\":\"godot\",\"target_import_path\":\"assets/generated/props/golden_minimal_040/\",\"texture_budget\":{\"max_dimension\":2048}}",
+    "min_050": "{\"asset_id\":\"golden_static_050\",\"category\":\"prop\",\"collider_policy\":\"box\",\"dimensions\":{\"depth_m\":0.6,\"height_m\":1.4,\"width_m\":0.8},\"geometry_budget\":{\"lod_ratio\":0.5,\"max_triangles_lod0\":20000,\"max_triangles_lod1\":10000},\"intent\":\"Minimal 0.5.0 static prop\",\"lod_policy\":\"lod0_lod1\",\"material_budget\":{\"max_materials\":2},\"orientation\":{\"front\":\"-Z\",\"up\":\"+Y\"},\"origin_policy\":\"center\",\"profile\":\"static_prop\",\"profile_version\":1,\"schema_version\":\"0.5.0\",\"style_constraints\":{\"detail_density\":\"medium\",\"family\":\"stylized_scifi\",\"readability\":\"high\",\"silhouette\":\"chunky\"},\"target_engine\":\"godot\",\"target_import_path\":\"assets/generated/props/golden_static_050/\",\"texture_budget\":{\"max_dimension\":2048}}",
+    "pickup_fixture_050": "{\"asset_id\":\"energy_pickup_test\",\"category\":\"pickup\",\"collider_policy\":\"box\",\"dimensions\":{\"depth_m\":0.3,\"height_m\":0.4,\"width_m\":0.3},\"geometry_budget\":{\"lod_ratio\":0.5,\"max_triangles_lod0\":8000,\"max_triangles_lod1\":3000},\"intent\":\"TEST FIXTURE. Small stylized energy pickup used to exercise the pickup profile. Not a production Meshy asset.\",\"lod_policy\":\"lod0_only\",\"material_budget\":{\"max_materials\":2},\"orientation\":{\"front\":\"-Z\",\"up\":\"+Y\"},\"origin_policy\":\"center\",\"profile\":\"pickup\",\"profile_version\":1,\"schema_version\":\"0.5.0\",\"style_constraints\":{\"detail_density\":\"low\",\"family\":\"stylized_scifi\",\"readability\":\"high\",\"silhouette\":\"readable\"},\"target_engine\":\"godot\",\"target_import_path\":\"assets/generated/pickup/energy_pickup_test/\",\"texture_budget\":{\"max_dimension\":2048}}",
+    "wall_fixture_050": "{\"asset_id\":\"wall_panel_test\",\"category\":\"modular\",\"collider_policy\":\"box\",\"dimensions\":{\"depth_m\":0.25,\"height_m\":2.0,\"width_m\":1.0},\"geometry_budget\":{\"lod_ratio\":0.5,\"max_triangles_lod0\":12000,\"max_triangles_lod1\":4000},\"intent\":\"TEST FIXTURE. Modular wall panel used to exercise snap dimensions and origin. Not a production Meshy asset.\",\"lod_policy\":\"lod0_only\",\"material_budget\":{\"max_materials\":2},\"orientation\":{\"front\":\"-Z\",\"up\":\"+Y\"},\"origin_policy\":\"bottom_center\",\"profile\":\"modular_piece\",\"profile_version\":1,\"schema_version\":\"0.5.0\",\"style_constraints\":{\"detail_density\":\"low\",\"family\":\"stylized_scifi\",\"readability\":\"high\",\"silhouette\":\"planar\"},\"target_engine\":\"godot\",\"target_import_path\":\"assets/generated/modular/wall_panel_test/\",\"texture_budget\":{\"max_dimension\":2048}}"
+  },
+  "validator": {
+    "missing_file": {
+      "findings": [
+        {
+          "actual": "missing",
+          "expected": "regular GLB file",
+          "rule_id": "glb.exists",
+          "severity": "FAIL"
+        }
+      ],
+      "status": "FAIL",
+      "summary": "GLB validation failed: artifact missing"
+    },
+    "modular_valid": {
+      "findings": [
+        {
+          "actual": "parsed",
+          "expected": "GLB 2.0 with bounded embedded buffers",
+          "rule_id": "glb.parse",
+          "severity": "PASS"
+        },
+        {
+          "actual": "<sha256-of-artifact>",
+          "expected": "SHA-256 recorded",
+          "rule_id": "glb.hash",
+          "severity": "PASS"
+        },
+        {
+          "actual": "['SM_wall_panel_test_LOD0', 'COL_wall_panel_test']",
+          "expected": "unique mesh node names",
+          "rule_id": "nodes.unique",
+          "severity": "PASS"
+        },
+        {
+          "actual": "['SM_wall_panel_test_LOD0', 'COL_wall_panel_test']",
+          "expected": "exactly ['COL_wall_panel_test', 'SM_wall_panel_test_LOD0']",
+          "rule_id": "nodes.profile",
+          "severity": "PASS"
+        },
+        {
+          "actual": "24 triangles",
+          "expected": "nonempty triangle geometry",
+          "rule_id": "mesh.nonempty",
+          "severity": "PASS"
+        },
+        {
+          "actual": "present",
+          "expected": "LOD0 mesh geometry",
+          "rule_id": "lod0.present",
+          "severity": "PASS"
+        },
+        {
+          "actual": "missing",
+          "expected": "LOD1 optional",
+          "rule_id": "lod1.present",
+          "severity": "PASS"
+        },
+        {
+          "actual": "1 collider mesh(es)",
+          "expected": "axis-aligned box geometry matching visual bounds",
+          "rule_id": "collider.geometry",
+          "severity": "PASS"
+        },
+        {
+          "actual": "12",
+          "expected": "<= 12000",
+          "rule_id": "geometry.lod0_budget",
+          "severity": "PASS"
+        },
+        {
+          "actual": "0",
+          "expected": "<= 4000",
+          "rule_id": "geometry.lod1_budget",
+          "severity": "PASS"
+        },
+        {
+          "actual": "1",
+          "expected": "<= 2",
+          "rule_id": "materials.budget",
+          "severity": "PASS"
+        },
+        {
+          "actual": "0",
+          "expected": "<= 2048px",
+          "rule_id": "textures.dimension",
+          "severity": "PASS"
+        },
+        {
+          "actual": "[1.0, 2.0, 0.25]",
+          "expected": "X/Y/Z = [1.0, 2.0, 0.25]m \u00b1 0.002m",
+          "rule_id": "scale.bounds",
+          "severity": "PASS"
+        },
+        {
+          "actual": "min=[-0.5, 0.0, -0.125], max=[0.5, 2.0, 0.125]",
+          "expected": "bottom_center",
+          "rule_id": "origin.policy",
+          "severity": "PASS"
+        },
+        {
+          "actual": "[1.0, 2.0, 0.25]",
+          "expected": "module axes are multiples of 0.25 m and the origin is on the snap pivot",
+          "rule_id": "dimensions.snap",
+          "severity": "PASS"
+        },
+        {
+          "actual": "None",
+          "expected": "LOD1 bounds match LOD0 \u00b1 0.002m",
+          "rule_id": "lod1.bounds",
+          "severity": "PASS"
+        },
+        {
+          "actual": "identity",
+          "expected": "mesh nodes carry no residual transforms; +Y up/-Z front coordinates",
+          "rule_id": "orientation.identity",
+          "severity": "PASS"
+        }
+      ],
+      "status": "PASS",
+      "summary": "Passed with 0 failing rule(s)"
+    },
+    "modular_wrong_origin": {
+      "findings": [
+        {
+          "actual": "parsed",
+          "expected": "GLB 2.0 with bounded embedded buffers",
+          "rule_id": "glb.parse",
+          "severity": "PASS"
+        },
+        {
+          "actual": "<sha256-of-artifact>",
+          "expected": "SHA-256 recorded",
+          "rule_id": "glb.hash",
+          "severity": "PASS"
+        },
+        {
+          "actual": "['SM_wall_panel_test_LOD0', 'COL_wall_panel_test']",
+          "expected": "unique mesh node names",
+          "rule_id": "nodes.unique",
+          "severity": "PASS"
+        },
+        {
+          "actual": "['SM_wall_panel_test_LOD0', 'COL_wall_panel_test']",
+          "expected": "exactly ['COL_wall_panel_test', 'SM_wall_panel_test_LOD0']",
+          "rule_id": "nodes.profile",
+          "severity": "PASS"
+        },
+        {
+          "actual": "24 triangles",
+          "expected": "nonempty triangle geometry",
+          "rule_id": "mesh.nonempty",
+          "severity": "PASS"
+        },
+        {
+          "actual": "present",
+          "expected": "LOD0 mesh geometry",
+          "rule_id": "lod0.present",
+          "severity": "PASS"
+        },
+        {
+          "actual": "missing",
+          "expected": "LOD1 optional",
+          "rule_id": "lod1.present",
+          "severity": "PASS"
+        },
+        {
+          "actual": "1 collider mesh(es)",
+          "expected": "axis-aligned box geometry matching visual bounds",
+          "rule_id": "collider.geometry",
+          "severity": "PASS"
+        },
+        {
+          "actual": "12",
+          "expected": "<= 12000",
+          "rule_id": "geometry.lod0_budget",
+          "severity": "PASS"
+        },
+        {
+          "actual": "0",
+          "expected": "<= 4000",
+          "rule_id": "geometry.lod1_budget",
+          "severity": "PASS"
+        },
+        {
+          "actual": "1",
+          "expected": "<= 2",
+          "rule_id": "materials.budget",
+          "severity": "PASS"
+        },
+        {
+          "actual": "0",
+          "expected": "<= 2048px",
+          "rule_id": "textures.dimension",
+          "severity": "PASS"
+        },
+        {
+          "actual": "[1.0, 2.0, 0.25]",
+          "expected": "X/Y/Z = [1.0, 2.0, 0.25]m \u00b1 0.002m",
+          "rule_id": "scale.bounds",
+          "severity": "PASS"
+        },
+        {
+          "actual": "min=[-0.5, -1.0, -0.125], max=[0.5, 1.0, 0.125]",
+          "expected": "bottom_center",
+          "rule_id": "origin.policy",
+          "severity": "FAIL"
+        },
+        {
+          "actual": "[1.0, 2.0, 0.25]",
+          "expected": "module axes are multiples of 0.25 m and the origin is on the snap pivot",
+          "rule_id": "dimensions.snap",
+          "severity": "FAIL"
+        },
+        {
+          "actual": "None",
+          "expected": "LOD1 bounds match LOD0 \u00b1 0.002m",
+          "rule_id": "lod1.bounds",
+          "severity": "PASS"
+        },
+        {
+          "actual": "identity",
+          "expected": "mesh nodes carry no residual transforms; +Y up/-Z front coordinates",
+          "rule_id": "orientation.identity",
+          "severity": "PASS"
+        }
+      ],
+      "status": "FAIL",
+      "summary": "Failed with 2 failing rule(s)"
+    },
+    "pickup_missing_collider": {
+      "findings": [
+        {
+          "actual": "parsed",
+          "expected": "GLB 2.0 with bounded embedded buffers",
+          "rule_id": "glb.parse",
+          "severity": "PASS"
+        },
+        {
+          "actual": "<sha256-of-artifact>",
+          "expected": "SHA-256 recorded",
+          "rule_id": "glb.hash",
+          "severity": "PASS"
+        },
+        {
+          "actual": "['SM_energy_pickup_test_LOD0']",
+          "expected": "unique mesh node names",
+          "rule_id": "nodes.unique",
+          "severity": "PASS"
+        },
+        {
+          "actual": "['SM_energy_pickup_test_LOD0']",
+          "expected": "exactly ['COL_energy_pickup_test', 'SM_energy_pickup_test_LOD0']",
+          "rule_id": "nodes.profile",
+          "severity": "FAIL"
+        },
+        {
+          "actual": "12 triangles",
+          "expected": "nonempty triangle geometry",
+          "rule_id": "mesh.nonempty",
+          "severity": "PASS"
+        },
+        {
+          "actual": "present",
+          "expected": "LOD0 mesh geometry",
+          "rule_id": "lod0.present",
+          "severity": "PASS"
+        },
+        {
+          "actual": "missing",
+          "expected": "LOD1 optional",
+          "rule_id": "lod1.present",
+          "severity": "PASS"
+        },
+        {
+          "actual": "0 collider mesh(es)",
+          "expected": "axis-aligned box geometry matching visual bounds",
+          "rule_id": "collider.geometry",
+          "severity": "FAIL"
+        },
+        {
+          "actual": "12",
+          "expected": "<= 8000",
+          "rule_id": "geometry.lod0_budget",
+          "severity": "PASS"
+        },
+        {
+          "actual": "0",
+          "expected": "<= 3000",
+          "rule_id": "geometry.lod1_budget",
+          "severity": "PASS"
+        },
+        {
+          "actual": "1",
+          "expected": "<= 2",
+          "rule_id": "materials.budget",
+          "severity": "PASS"
+        },
+        {
+          "actual": "0",
+          "expected": "<= 2048px",
+          "rule_id": "textures.dimension",
+          "severity": "PASS"
+        },
+        {
+          "actual": "[0.30000001192092896, 0.4000000059604645, 0.30000001192092896]",
+          "expected": "X/Y/Z = [0.3, 0.4, 0.3]m \u00b1 0.01m",
+          "rule_id": "scale.bounds",
+          "severity": "PASS"
+        },
+        {
+          "actual": "min=[-0.15000000596046448, -0.20000000298023224, -0.15000000596046448], max=[0.15000000596046448, 0.20000000298023224, 0.15000000596046448]",
+          "expected": "center",
+          "rule_id": "origin.policy",
+          "severity": "PASS"
+        },
+        {
+          "actual": "None",
+          "expected": "LOD1 bounds match LOD0 \u00b1 0.01m",
+          "rule_id": "lod1.bounds",
+          "severity": "PASS"
+        },
+        {
+          "actual": "identity",
+          "expected": "mesh nodes carry no residual transforms; +Y up/-Z front coordinates",
+          "rule_id": "orientation.identity",
+          "severity": "PASS"
+        }
+      ],
+      "status": "FAIL",
+      "summary": "Failed with 2 failing rule(s)"
+    },
+    "pickup_valid": {
+      "findings": [
+        {
+          "actual": "parsed",
+          "expected": "GLB 2.0 with bounded embedded buffers",
+          "rule_id": "glb.parse",
+          "severity": "PASS"
+        },
+        {
+          "actual": "<sha256-of-artifact>",
+          "expected": "SHA-256 recorded",
+          "rule_id": "glb.hash",
+          "severity": "PASS"
+        },
+        {
+          "actual": "['SM_energy_pickup_test_LOD0', 'COL_energy_pickup_test']",
+          "expected": "unique mesh node names",
+          "rule_id": "nodes.unique",
+          "severity": "PASS"
+        },
+        {
+          "actual": "['SM_energy_pickup_test_LOD0', 'COL_energy_pickup_test']",
+          "expected": "exactly ['COL_energy_pickup_test', 'SM_energy_pickup_test_LOD0']",
+          "rule_id": "nodes.profile",
+          "severity": "PASS"
+        },
+        {
+          "actual": "24 triangles",
+          "expected": "nonempty triangle geometry",
+          "rule_id": "mesh.nonempty",
+          "severity": "PASS"
+        },
+        {
+          "actual": "present",
+          "expected": "LOD0 mesh geometry",
+          "rule_id": "lod0.present",
+          "severity": "PASS"
+        },
+        {
+          "actual": "missing",
+          "expected": "LOD1 optional",
+          "rule_id": "lod1.present",
+          "severity": "PASS"
+        },
+        {
+          "actual": "1 collider mesh(es)",
+          "expected": "axis-aligned box geometry matching visual bounds",
+          "rule_id": "collider.geometry",
+          "severity": "PASS"
+        },
+        {
+          "actual": "12",
+          "expected": "<= 8000",
+          "rule_id": "geometry.lod0_budget",
+          "severity": "PASS"
+        },
+        {
+          "actual": "0",
+          "expected": "<= 3000",
+          "rule_id": "geometry.lod1_budget",
+          "severity": "PASS"
+        },
+        {
+          "actual": "1",
+          "expected": "<= 2",
+          "rule_id": "materials.budget",
+          "severity": "PASS"
+        },
+        {
+          "actual": "0",
+          "expected": "<= 2048px",
+          "rule_id": "textures.dimension",
+          "severity": "PASS"
+        },
+        {
+          "actual": "[0.30000001192092896, 0.4000000059604645, 0.30000001192092896]",
+          "expected": "X/Y/Z = [0.3, 0.4, 0.3]m \u00b1 0.01m",
+          "rule_id": "scale.bounds",
+          "severity": "PASS"
+        },
+        {
+          "actual": "min=[-0.15000000596046448, -0.20000000298023224, -0.15000000596046448], max=[0.15000000596046448, 0.20000000298023224, 0.15000000596046448]",
+          "expected": "center",
+          "rule_id": "origin.policy",
+          "severity": "PASS"
+        },
+        {
+          "actual": "None",
+          "expected": "LOD1 bounds match LOD0 \u00b1 0.01m",
+          "rule_id": "lod1.bounds",
+          "severity": "PASS"
+        },
+        {
+          "actual": "identity",
+          "expected": "mesh nodes carry no residual transforms; +Y up/-Z front coordinates",
+          "rule_id": "orientation.identity",
+          "severity": "PASS"
+        }
+      ],
+      "status": "PASS",
+      "summary": "Passed with 0 failing rule(s)"
+    },
+    "pickup_wrong_scale": {
+      "findings": [
+        {
+          "actual": "parsed",
+          "expected": "GLB 2.0 with bounded embedded buffers",
+          "rule_id": "glb.parse",
+          "severity": "PASS"
+        },
+        {
+          "actual": "<sha256-of-artifact>",
+          "expected": "SHA-256 recorded",
+          "rule_id": "glb.hash",
+          "severity": "PASS"
+        },
+        {
+          "actual": "['SM_energy_pickup_test_LOD0', 'COL_energy_pickup_test']",
+          "expected": "unique mesh node names",
+          "rule_id": "nodes.unique",
+          "severity": "PASS"
+        },
+        {
+          "actual": "['SM_energy_pickup_test_LOD0', 'COL_energy_pickup_test']",
+          "expected": "exactly ['COL_energy_pickup_test', 'SM_energy_pickup_test_LOD0']",
+          "rule_id": "nodes.profile",
+          "severity": "PASS"
+        },
+        {
+          "actual": "24 triangles",
+          "expected": "nonempty triangle geometry",
+          "rule_id": "mesh.nonempty",
+          "severity": "PASS"
+        },
+        {
+          "actual": "present",
+          "expected": "LOD0 mesh geometry",
+          "rule_id": "lod0.present",
+          "severity": "PASS"
+        },
+        {
+          "actual": "missing",
+          "expected": "LOD1 optional",
+          "rule_id": "lod1.present",
+          "severity": "PASS"
+        },
+        {
+          "actual": "1 collider mesh(es)",
+          "expected": "axis-aligned box geometry matching visual bounds",
+          "rule_id": "collider.geometry",
+          "severity": "PASS"
+        },
+        {
+          "actual": "12",
+          "expected": "<= 8000",
+          "rule_id": "geometry.lod0_budget",
+          "severity": "PASS"
+        },
+        {
+          "actual": "0",
+          "expected": "<= 3000",
+          "rule_id": "geometry.lod1_budget",
+          "severity": "PASS"
+        },
+        {
+          "actual": "1",
+          "expected": "<= 2",
+          "rule_id": "materials.budget",
+          "severity": "PASS"
+        },
+        {
+          "actual": "0",
+          "expected": "<= 2048px",
+          "rule_id": "textures.dimension",
+          "severity": "PASS"
+        },
+        {
+          "actual": "[0.30000001192092896, 0.800000011920929, 0.30000001192092896]",
+          "expected": "X/Y/Z = [0.3, 0.4, 0.3]m \u00b1 0.01m",
+          "rule_id": "scale.bounds",
+          "severity": "FAIL"
+        },
+        {
+          "actual": "min=[-0.15000000596046448, -0.4000000059604645, -0.15000000596046448], max=[0.15000000596046448, 0.4000000059604645, 0.15000000596046448]",
+          "expected": "center",
+          "rule_id": "origin.policy",
+          "severity": "PASS"
+        },
+        {
+          "actual": "None",
+          "expected": "LOD1 bounds match LOD0 \u00b1 0.01m",
+          "rule_id": "lod1.bounds",
+          "severity": "PASS"
+        },
+        {
+          "actual": "identity",
+          "expected": "mesh nodes carry no residual transforms; +Y up/-Z front coordinates",
+          "rule_id": "orientation.identity",
+          "severity": "PASS"
+        }
+      ],
+      "status": "FAIL",
+      "summary": "Failed with 1 failing rule(s)"
+    },
+    "static_missing_collider": {
+      "findings": [
+        {
+          "actual": "parsed",
+          "expected": "GLB 2.0 with bounded embedded buffers",
+          "rule_id": "glb.parse",
+          "severity": "PASS"
+        },
+        {
+          "actual": "<sha256-of-artifact>",
+          "expected": "SHA-256 recorded",
+          "rule_id": "glb.hash",
+          "severity": "PASS"
+        },
+        {
+          "actual": "['SM_prop_energy_crate_01_LOD0', 'SM_prop_energy_crate_01_LOD1']",
+          "expected": "unique mesh node names",
+          "rule_id": "nodes.unique",
+          "severity": "PASS"
+        },
+        {
+          "actual": "['SM_prop_energy_crate_01_LOD0', 'SM_prop_energy_crate_01_LOD1']",
+          "expected": "exactly ['COL_prop_energy_crate_01', 'SM_prop_energy_crate_01_LOD0', 'SM_prop_energy_crate_01_LOD1']",
+          "rule_id": "nodes.profile",
+          "severity": "FAIL"
+        },
+        {
+          "actual": "20 triangles",
+          "expected": "nonempty triangle geometry",
+          "rule_id": "mesh.nonempty",
+          "severity": "PASS"
+        },
+        {
+          "actual": "present",
+          "expected": "LOD0 mesh geometry",
+          "rule_id": "lod0.present",
+          "severity": "PASS"
+        },
+        {
+          "actual": "present",
+          "expected": "LOD1 mesh geometry",
+          "rule_id": "lod1.present",
+          "severity": "PASS"
+        },
+        {
+          "actual": "0 collider mesh(es)",
+          "expected": "axis-aligned box geometry matching visual bounds",
+          "rule_id": "collider.geometry",
+          "severity": "FAIL"
+        },
+        {
+          "actual": "12",
+          "expected": "<= 20000",
+          "rule_id": "geometry.lod0_budget",
+          "severity": "PASS"
+        },
+        {
+          "actual": "8",
+          "expected": "<= 10000",
+          "rule_id": "geometry.lod1_budget",
+          "severity": "PASS"
+        },
+        {
+          "actual": "1",
+          "expected": "<= 2",
+          "rule_id": "materials.budget",
+          "severity": "PASS"
+        },
+        {
+          "actual": "0",
+          "expected": "<= 2048px",
+          "rule_id": "textures.dimension",
+          "severity": "PASS"
+        },
+        {
+          "actual": "[1.2000000476837158, 1.0, 1.0]",
+          "expected": "X/Y/Z = [1.2, 1.0, 1.0]m \u00b1 0.01m",
+          "rule_id": "scale.bounds",
+          "severity": "PASS"
+        },
+        {
+          "actual": "min=[-0.6000000238418579, 0.0, -0.5], max=[0.6000000238418579, 1.0, 0.5]",
+          "expected": "bottom_center",
+          "rule_id": "origin.policy",
+          "severity": "PASS"
+        },
+        {
+          "actual": "((-0.6000000238418579, 0.0, -0.5),)",
+          "expected": "LOD1 bounds match LOD0 \u00b1 0.01m",
+          "rule_id": "lod1.bounds",
+          "severity": "PASS"
+        },
+        {
+          "actual": "identity",
+          "expected": "mesh nodes carry no residual transforms; +Y up/-Z front coordinates",
+          "rule_id": "orientation.identity",
+          "severity": "PASS"
+        }
+      ],
+      "status": "FAIL",
+      "summary": "Failed with 2 failing rule(s)"
+    },
+    "static_missing_lod1": {
+      "findings": [
+        {
+          "actual": "parsed",
+          "expected": "GLB 2.0 with bounded embedded buffers",
+          "rule_id": "glb.parse",
+          "severity": "PASS"
+        },
+        {
+          "actual": "<sha256-of-artifact>",
+          "expected": "SHA-256 recorded",
+          "rule_id": "glb.hash",
+          "severity": "PASS"
+        },
+        {
+          "actual": "['SM_prop_energy_crate_01_LOD0', 'COL_prop_energy_crate_01']",
+          "expected": "unique mesh node names",
+          "rule_id": "nodes.unique",
+          "severity": "PASS"
+        },
+        {
+          "actual": "['SM_prop_energy_crate_01_LOD0', 'COL_prop_energy_crate_01']",
+          "expected": "exactly ['COL_prop_energy_crate_01', 'SM_prop_energy_crate_01_LOD0', 'SM_prop_energy_crate_01_LOD1']",
+          "rule_id": "nodes.profile",
+          "severity": "FAIL"
+        },
+        {
+          "actual": "24 triangles",
+          "expected": "nonempty triangle geometry",
+          "rule_id": "mesh.nonempty",
+          "severity": "PASS"
+        },
+        {
+          "actual": "present",
+          "expected": "LOD0 mesh geometry",
+          "rule_id": "lod0.present",
+          "severity": "PASS"
+        },
+        {
+          "actual": "missing",
+          "expected": "LOD1 mesh geometry",
+          "rule_id": "lod1.present",
+          "severity": "FAIL"
+        },
+        {
+          "actual": "1 collider mesh(es)",
+          "expected": "axis-aligned box geometry matching visual bounds",
+          "rule_id": "collider.geometry",
+          "severity": "PASS"
+        },
+        {
+          "actual": "12",
+          "expected": "<= 20000",
+          "rule_id": "geometry.lod0_budget",
+          "severity": "PASS"
+        },
+        {
+          "actual": "0",
+          "expected": "<= 10000",
+          "rule_id": "geometry.lod1_budget",
+          "severity": "PASS"
+        },
+        {
+          "actual": "1",
+          "expected": "<= 2",
+          "rule_id": "materials.budget",
+          "severity": "PASS"
+        },
+        {
+          "actual": "0",
+          "expected": "<= 2048px",
+          "rule_id": "textures.dimension",
+          "severity": "PASS"
+        },
+        {
+          "actual": "[1.2000000476837158, 1.0, 1.0]",
+          "expected": "X/Y/Z = [1.2, 1.0, 1.0]m \u00b1 0.01m",
+          "rule_id": "scale.bounds",
+          "severity": "PASS"
+        },
+        {
+          "actual": "min=[-0.6000000238418579, 0.0, -0.5], max=[0.6000000238418579, 1.0, 0.5]",
+          "expected": "bottom_center",
+          "rule_id": "origin.policy",
+          "severity": "PASS"
+        },
+        {
+          "actual": "None",
+          "expected": "LOD1 bounds match LOD0 \u00b1 0.01m",
+          "rule_id": "lod1.bounds",
+          "severity": "FAIL"
+        },
+        {
+          "actual": "identity",
+          "expected": "mesh nodes carry no residual transforms; +Y up/-Z front coordinates",
+          "rule_id": "orientation.identity",
+          "severity": "PASS"
+        }
+      ],
+      "status": "FAIL",
+      "summary": "Failed with 3 failing rule(s)"
+    },
+    "static_over_budget": {
+      "findings": [
+        {
+          "actual": "parsed",
+          "expected": "GLB 2.0 with bounded embedded buffers",
+          "rule_id": "glb.parse",
+          "severity": "PASS"
+        },
+        {
+          "actual": "<sha256-of-artifact>",
+          "expected": "SHA-256 recorded",
+          "rule_id": "glb.hash",
+          "severity": "PASS"
+        },
+        {
+          "actual": "['SM_prop_energy_crate_01_LOD0', 'SM_prop_energy_crate_01_LOD1', 'COL_prop_energy_crate_01']",
+          "expected": "unique mesh node names",
+          "rule_id": "nodes.unique",
+          "severity": "PASS"
+        },
+        {
+          "actual": "['SM_prop_energy_crate_01_LOD0', 'SM_prop_energy_crate_01_LOD1', 'COL_prop_energy_crate_01']",
+          "expected": "exactly ['COL_prop_energy_crate_01', 'SM_prop_energy_crate_01_LOD0', 'SM_prop_energy_crate_01_LOD1']",
+          "rule_id": "nodes.profile",
+          "severity": "PASS"
+        },
+        {
+          "actual": "56 triangles",
+          "expected": "nonempty triangle geometry",
+          "rule_id": "mesh.nonempty",
+          "severity": "PASS"
+        },
+        {
+          "actual": "present",
+          "expected": "LOD0 mesh geometry",
+          "rule_id": "lod0.present",
+          "severity": "PASS"
+        },
+        {
+          "actual": "present",
+          "expected": "LOD1 mesh geometry",
+          "rule_id": "lod1.present",
+          "severity": "PASS"
+        },
+        {
+          "actual": "1 collider mesh(es)",
+          "expected": "axis-aligned box geometry matching visual bounds",
+          "rule_id": "collider.geometry",
+          "severity": "PASS"
+        },
+        {
+          "actual": "36",
+          "expected": "<= 20000",
+          "rule_id": "geometry.lod0_budget",
+          "severity": "PASS"
+        },
+        {
+          "actual": "8",
+          "expected": "<= 10000",
+          "rule_id": "geometry.lod1_budget",
+          "severity": "PASS"
+        },
+        {
+          "actual": "3",
+          "expected": "<= 2",
+          "rule_id": "materials.budget",
+          "severity": "FAIL"
+        },
+        {
+          "actual": "4096",
+          "expected": "<= 2048px",
+          "rule_id": "textures.dimension",
+          "severity": "FAIL"
+        },
+        {
+          "actual": "[1.2000000476837158, 1.0, 1.0]",
+          "expected": "X/Y/Z = [1.2, 1.0, 1.0]m \u00b1 0.01m",
+          "rule_id": "scale.bounds",
+          "severity": "PASS"
+        },
+        {
+          "actual": "min=[-0.6000000238418579, 0.0, -0.5], max=[0.6000000238418579, 1.0, 0.5]",
+          "expected": "bottom_center",
+          "rule_id": "origin.policy",
+          "severity": "PASS"
+        },
+        {
+          "actual": "((-0.6000000238418579, 0.0, -0.5),)",
+          "expected": "LOD1 bounds match LOD0 \u00b1 0.01m",
+          "rule_id": "lod1.bounds",
+          "severity": "PASS"
+        },
+        {
+          "actual": "identity",
+          "expected": "mesh nodes carry no residual transforms; +Y up/-Z front coordinates",
+          "rule_id": "orientation.identity",
+          "severity": "PASS"
+        }
+      ],
+      "status": "FAIL",
+      "summary": "Failed with 2 failing rule(s)"
+    },
+    "static_rotated_lod0": {
+      "findings": [
+        {
+          "actual": "parsed",
+          "expected": "GLB 2.0 with bounded embedded buffers",
+          "rule_id": "glb.parse",
+          "severity": "PASS"
+        },
+        {
+          "actual": "<sha256-of-artifact>",
+          "expected": "SHA-256 recorded",
+          "rule_id": "glb.hash",
+          "severity": "PASS"
+        },
+        {
+          "actual": "['SM_prop_energy_crate_01_LOD0', 'SM_prop_energy_crate_01_LOD1', 'COL_prop_energy_crate_01']",
+          "expected": "unique mesh node names",
+          "rule_id": "nodes.unique",
+          "severity": "PASS"
+        },
+        {
+          "actual": "['SM_prop_energy_crate_01_LOD0', 'SM_prop_energy_crate_01_LOD1', 'COL_prop_energy_crate_01']",
+          "expected": "exactly ['COL_prop_energy_crate_01', 'SM_prop_energy_crate_01_LOD0', 'SM_prop_energy_crate_01_LOD1']",
+          "rule_id": "nodes.profile",
+          "severity": "PASS"
+        },
+        {
+          "actual": "32 triangles",
+          "expected": "nonempty triangle geometry",
+          "rule_id": "mesh.nonempty",
+          "severity": "PASS"
+        },
+        {
+          "actual": "present",
+          "expected": "LOD0 mesh geometry",
+          "rule_id": "lod0.present",
+          "severity": "PASS"
+        },
+        {
+          "actual": "present",
+          "expected": "LOD1 mesh geometry",
+          "rule_id": "lod1.present",
+          "severity": "PASS"
+        },
+        {
+          "actual": "1 collider mesh(es)",
+          "expected": "axis-aligned box geometry matching visual bounds",
+          "rule_id": "collider.geometry",
+          "severity": "PASS"
+        },
+        {
+          "actual": "12",
+          "expected": "<= 20000",
+          "rule_id": "geometry.lod0_budget",
+          "severity": "PASS"
+        },
+        {
+          "actual": "8",
+          "expected": "<= 10000",
+          "rule_id": "geometry.lod1_budget",
+          "severity": "PASS"
+        },
+        {
+          "actual": "1",
+          "expected": "<= 2",
+          "rule_id": "materials.budget",
+          "severity": "PASS"
+        },
+        {
+          "actual": "0",
+          "expected": "<= 2048px",
+          "rule_id": "textures.dimension",
+          "severity": "PASS"
+        },
+        {
+          "actual": "[1.2000000476837158, 1.0, 1.0]",
+          "expected": "X/Y/Z = [1.2, 1.0, 1.0]m \u00b1 0.01m",
+          "rule_id": "scale.bounds",
+          "severity": "PASS"
+        },
+        {
+          "actual": "min=[-0.6000000238418579, 0.0, -0.5], max=[0.6000000238418579, 1.0, 0.5]",
+          "expected": "bottom_center",
+          "rule_id": "origin.policy",
+          "severity": "PASS"
+        },
+        {
+          "actual": "((-0.6000000238418579, 0.0, -0.5),)",
+          "expected": "LOD1 bounds match LOD0 \u00b1 0.01m",
+          "rule_id": "lod1.bounds",
+          "severity": "PASS"
+        },
+        {
+          "actual": "non-identity transform",
+          "expected": "mesh nodes carry no residual transforms; +Y up/-Z front coordinates",
+          "rule_id": "orientation.identity",
+          "severity": "FAIL"
+        }
+      ],
+      "status": "FAIL",
+      "summary": "Failed with 1 failing rule(s)"
+    },
+    "static_truncated": {
+      "findings": [
+        {
+          "actual": "invalid GLB magic, version, or declared total length",
+          "expected": "supported safe profile GLB subset",
+          "rule_id": "glb.parse",
+          "severity": "FAIL"
+        }
+      ],
+      "status": "FAIL",
+      "summary": "Failed with 1 failing rule(s)"
+    },
+    "static_valid": {
+      "findings": [
+        {
+          "actual": "parsed",
+          "expected": "GLB 2.0 with bounded embedded buffers",
+          "rule_id": "glb.parse",
+          "severity": "PASS"
+        },
+        {
+          "actual": "<sha256-of-artifact>",
+          "expected": "SHA-256 recorded",
+          "rule_id": "glb.hash",
+          "severity": "PASS"
+        },
+        {
+          "actual": "['SM_prop_energy_crate_01_LOD0', 'SM_prop_energy_crate_01_LOD1', 'COL_prop_energy_crate_01']",
+          "expected": "unique mesh node names",
+          "rule_id": "nodes.unique",
+          "severity": "PASS"
+        },
+        {
+          "actual": "['SM_prop_energy_crate_01_LOD0', 'SM_prop_energy_crate_01_LOD1', 'COL_prop_energy_crate_01']",
+          "expected": "exactly ['COL_prop_energy_crate_01', 'SM_prop_energy_crate_01_LOD0', 'SM_prop_energy_crate_01_LOD1']",
+          "rule_id": "nodes.profile",
+          "severity": "PASS"
+        },
+        {
+          "actual": "32 triangles",
+          "expected": "nonempty triangle geometry",
+          "rule_id": "mesh.nonempty",
+          "severity": "PASS"
+        },
+        {
+          "actual": "present",
+          "expected": "LOD0 mesh geometry",
+          "rule_id": "lod0.present",
+          "severity": "PASS"
+        },
+        {
+          "actual": "present",
+          "expected": "LOD1 mesh geometry",
+          "rule_id": "lod1.present",
+          "severity": "PASS"
+        },
+        {
+          "actual": "1 collider mesh(es)",
+          "expected": "axis-aligned box geometry matching visual bounds",
+          "rule_id": "collider.geometry",
+          "severity": "PASS"
+        },
+        {
+          "actual": "12",
+          "expected": "<= 20000",
+          "rule_id": "geometry.lod0_budget",
+          "severity": "PASS"
+        },
+        {
+          "actual": "8",
+          "expected": "<= 10000",
+          "rule_id": "geometry.lod1_budget",
+          "severity": "PASS"
+        },
+        {
+          "actual": "1",
+          "expected": "<= 2",
+          "rule_id": "materials.budget",
+          "severity": "PASS"
+        },
+        {
+          "actual": "64",
+          "expected": "<= 2048px",
+          "rule_id": "textures.dimension",
+          "severity": "PASS"
+        },
+        {
+          "actual": "[1.2000000476837158, 1.0, 1.0]",
+          "expected": "X/Y/Z = [1.2, 1.0, 1.0]m \u00b1 0.01m",
+          "rule_id": "scale.bounds",
+          "severity": "PASS"
+        },
+        {
+          "actual": "min=[-0.6000000238418579, 0.0, -0.5], max=[0.6000000238418579, 1.0, 0.5]",
+          "expected": "bottom_center",
+          "rule_id": "origin.policy",
+          "severity": "PASS"
+        },
+        {
+          "actual": "((-0.6000000238418579, 0.0, -0.5),)",
+          "expected": "LOD1 bounds match LOD0 \u00b1 0.01m",
+          "rule_id": "lod1.bounds",
+          "severity": "PASS"
+        },
+        {
+          "actual": "identity",
+          "expected": "mesh nodes carry no residual transforms; +Y up/-Z front coordinates",
+          "rule_id": "orientation.identity",
+          "severity": "PASS"
+        }
+      ],
+      "status": "PASS",
+      "summary": "Passed with 0 failing rule(s)"
+    },
+    "static_wrong_mesh_names": {
+      "findings": [
+        {
+          "actual": "parsed",
+          "expected": "GLB 2.0 with bounded embedded buffers",
+          "rule_id": "glb.parse",
+          "severity": "PASS"
+        },
+        {
+          "actual": "<sha256-of-artifact>",
+          "expected": "SHA-256 recorded",
+          "rule_id": "glb.hash",
+          "severity": "PASS"
+        },
+        {
+          "actual": "['SM_wrong_LOD0', 'SM_wrong_LOD1', 'COL_prop_energy_crate_01']",
+          "expected": "unique mesh node names",
+          "rule_id": "nodes.unique",
+          "severity": "PASS"
+        },
+        {
+          "actual": "['SM_wrong_LOD0', 'SM_wrong_LOD1', 'COL_prop_energy_crate_01']",
+          "expected": "exactly ['COL_prop_energy_crate_01', 'SM_prop_energy_crate_01_LOD0', 'SM_prop_energy_crate_01_LOD1']",
+          "rule_id": "nodes.profile",
+          "severity": "FAIL"
+        },
+        {
+          "actual": "32 triangles",
+          "expected": "nonempty triangle geometry",
+          "rule_id": "mesh.nonempty",
+          "severity": "PASS"
+        },
+        {
+          "actual": "missing",
+          "expected": "LOD0 mesh geometry",
+          "rule_id": "lod0.present",
+          "severity": "FAIL"
+        },
+        {
+          "actual": "missing",
+          "expected": "LOD1 mesh geometry",
+          "rule_id": "lod1.present",
+          "severity": "FAIL"
+        },
+        {
+          "actual": "1 collider mesh(es)",
+          "expected": "axis-aligned box geometry matching visual bounds",
+          "rule_id": "collider.geometry",
+          "severity": "FAIL"
+        },
+        {
+          "actual": "0",
+          "expected": "<= 20000",
+          "rule_id": "geometry.lod0_budget",
+          "severity": "FAIL"
+        },
+        {
+          "actual": "0",
+          "expected": "<= 10000",
+          "rule_id": "geometry.lod1_budget",
+          "severity": "PASS"
+        },
+        {
+          "actual": "1",
+          "expected": "<= 2",
+          "rule_id": "materials.budget",
+          "severity": "PASS"
+        },
+        {
+          "actual": "0",
+          "expected": "<= 2048px",
+          "rule_id": "textures.dimension",
+          "severity": "PASS"
+        },
+        {
+          "actual": "no non-collider visual geometry",
+          "expected": "supported safe profile GLB subset",
+          "rule_id": "glb.parse",
+          "severity": "FAIL"
+        }
+      ],
+      "status": "FAIL",
+      "summary": "Failed with 6 failing rule(s)"
+    }
+  }
+}
