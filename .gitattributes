@@ -1,0 +1,2 @@
+# Evidence fixtures contain byte-pinned receipts and embedded script hashes.
+tests/fixtures/v07_local_assembly_evidence/** -text
