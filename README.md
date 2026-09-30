@@ -2,7 +2,7 @@
 
 AI Game Factory is local development tooling for coordinating bounded game-development workflows. It stores workflow state, task attempts, artifacts, evidence, approvals, and policy decisions locally. A managed game remains usable without the Factory installed.
 
-The package version is 0.6.0 (V0.6 production safety and recovery; see [V0.6 production safety](#v06-production-safety-and-recovery) and the [V0.6 completion report](docs/reports/v0.6-completion-report.md)). V0.4 added a gated production pipeline: concept ingestion and human review, separately approved Meshy CLI generation, deterministic Blender processing, decoded GLB validation, and staged Godot runtime/render evidence. V0.5 runs that same pipeline from an asset profile (`static_prop@1`, `pickup@1`, `modular_piece@1`) instead of crate-specific rules. Real paid generation and final visual approval remain explicit human checkpoints. See the [V0.5 completion report](docs/reports/v0.5-completion-report.md). V0.2 headless verification and V0.3 rendered capture remain available.
+The package version is 0.7.0 (V0.7 advanced asset profiles; see [V0.7 advanced asset profiles](#v07-advanced-asset-profiles) and the [V0.7 completion report](docs/reports/v0.7-completion-report.md)). V0.6 added production safety and recovery ([V0.6 section](#v06-production-safety-and-recovery), [V0.6 completion report](docs/reports/v0.6-completion-report.md)). V0.4 added a gated production pipeline: concept ingestion and human review, separately approved Meshy CLI generation, deterministic Blender processing, decoded GLB validation, and staged Godot runtime/render evidence. V0.5 runs that same pipeline from an asset profile (`static_prop@1`, `pickup@1`, `modular_piece@1`) instead of crate-specific rules. Real paid generation and final visual approval remain explicit human checkpoints. See the [V0.5 completion report](docs/reports/v0.5-completion-report.md). V0.2 headless verification and V0.3 rendered capture remain available.
 
 ## Install and run
 
@@ -80,7 +80,7 @@ Supply `--godot-path PATH` if detection cannot locate your executable. Configure
 `policies.require_approval_for_process_execution: true` to require approval before
 launch; use `approvals`, `approve` and `resume` as in the existing workflow. The
 approved source/scenario/executable/harness fingerprint is checked before dispatch.
-The package is 0.3.0. Project config schema stays 0.1.0. Headless scenarios stay on schema 0.2.0.
+Project config schema stays 0.1.0. Headless scenarios stay on schema 0.2.0 (these schemas were introduced in V0.2 and are unchanged by later releases).
 
 Godot runs a separate staged copy and writes observations without receiving the
 assertion expectations. Python validates current-attempt evidence and checks the
@@ -159,3 +159,33 @@ gamefactory recovery reclassify --execution EXEC --apply --actor NAME --reason T
 ```
 
 Mutating recovery and accounting commands are dry runs unless `--apply` is given with `--actor` and `--reason`. There is no force mode. A dry run writes no ledger entries, but like every command that opens the project database it first applies pending schema migrations; inspect a live V0.5.1 database read-only and dry-run on a Backup API copy as described in [accounting](docs/architecture/accounting.md#operator-procedure-for-a-live-database). Workflows created before V0.6 keep their task graph and evidence schema.
+
+## V0.7 advanced asset profiles
+
+V0.7 adds assets with named, movable parts and a character profile with a capsule collider. `gamefactory asset profiles` now lists:
+
+| Profile | Geometry | Source | Collider |
+|---|---|---|---|
+| `static_prop@1`, `pickup@1`, `modular_piece@1` | single mesh | provider | box (unchanged) |
+| `character@1` | single mesh | provider | capsule |
+| `vehicle@1`, `weapon@1`, `aircraft@1` | assembly | operator-authored | box |
+
+`rigged_character`, `building`, `terrain`, `animation`, `vfx` and `foliage` stay UNSUPPORTED.
+
+- **Assemblies are authored, not generated.** An operator supplies a GLB (Blender or script) with a `ROOT` → `PART_<id>` tree, declared pivots and sockets. `asset register-source` records its hash, `paid: false` and the required `source_front`; `asset assemble` runs prepare → normalize → validate → Godot → final review → evidence with no concept, provider or paid step. See [assembly production](docs/pipelines/assembly-production.md).
+- **Normalization, not guessing.** A `+Z` source (what Blender's glTF exporter produces) gets exactly one 180° turn about +Y at the root; a `-Z` source is kept byte-for-byte; nothing else is corrected.
+- **Validator composition.** Validation is composed from closed rule groups selected by capabilities, never by profile id (ADR 0018). The three historical profiles keep their exact V0.6 findings, pinned by golden tests.
+- **Godot articulation.** The runtime harness checks the imported part tree, pivots and sockets, moves every movable part about its declared pivot and asserts that nothing else moves.
+- **Every review view is placed** (`front`, `rear`, `left`, `right`, `side`, `three_quarter`, `three_quarter_front`, `three_quarter_rear`, `top`); an unknown view is an error, not a three-quarter fallback.
+- **Evidence 0.7.** `asset-evidence-0.7.0` bundles for assemblies carry the retained source, the registration and the normalization record; the stdlib verifier rejects paid or provider roles and recomputes the normalization from the source.
+- Assembly specifications never reach a provider request (rejected before any snapshot, approval or intent). Real Meshy calls during V0.7 development: 0.
+
+```bash
+gamefactory asset register-source --spec tank.spec.json --source tank.glb --source-front=+Z \
+  --authoring-tool blender --authoring-tool-version 4.0.2 --actor NAME --reason TEXT \
+  --output tank.registration.json
+gamefactory asset assemble --spec tank.spec.json --source tank.glb --registration tank.registration.json
+```
+
+Design: [advanced asset profiles](docs/architecture/advanced-asset-profiles.md), ADR 0013–0018. Plan and evidence: [V0.7 work plan](docs/work-plan-v0.7.md), [V0.7 completion report](docs/reports/v0.7-completion-report.md), [release notes](docs/releases/v0.7.0.md).
+

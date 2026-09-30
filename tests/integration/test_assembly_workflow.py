@@ -432,3 +432,71 @@ def test_real_godot_assembly_to_cold_verified_bundle(tmp_path: Path) -> None:
     manifest = json.loads((bundle / "manifest.json").read_text())
     assert manifest["paid"] is False
     assert len(manifest["review_views"]) == 7
+
+
+@pytest.mark.skipif(
+    not GODOT or not HAS_DISPLAY, reason="requires GAMEFACTORY_TEST_GODOT and a display"
+)
+def test_every_placed_view_renders_in_real_godot(tmp_path: Path) -> None:
+    """ADR 0014: every placed view, including the legacy side alias, has a real capture."""
+    import shutil
+
+    from gamefactory.core.domain.camera_framing import PLACED_VIEWS
+
+    assert GODOT is not None
+    spec = parse_asset_specification_v07(ag.assembly_spec(ag.VEHICLE_TANK))
+    profile = spec.bound_profile()
+    stage = tmp_path / "stage"
+    (stage / "assets").mkdir(parents=True)
+    (stage / "captures").mkdir()
+    (stage / "assets" / "asset.glb").write_bytes(ag.assembly_glb(ag.VEHICLE_TANK))
+    shutil.copyfile(
+        PROJECT / "src/gamefactory/resources/godot/asset_runtime_harness.gd",
+        stage / "asset_runtime_harness.gd",
+    )
+    (stage / "project.godot").write_text(
+        'config_version=5\n[application]\nconfig/name="Views"\n[display]\n'
+        "window/size/viewport_width=1280\nwindow/size/viewport_height=720\n[rendering]\n"
+        'renderer/rendering_method="gl_compatibility"\n'
+        'renderer/rendering_method.mobile="gl_compatibility"\n',
+        encoding="utf-8",
+    )
+    from gamefactory.workflows.asset_production import runtime_contract_v07
+
+    views = sorted(PLACED_VIEWS)
+    request = {
+        "workflow_id": "WF-VIEWS",
+        "revision": 1,
+        "asset_id": spec.asset_id,
+        "execution_id": "EXEC-VIEWS",
+        "attempt_number": 1,
+        "glb": "res://assets/asset.glb",
+        "processed_glb_sha256": "0" * 64,
+        "output_dir": str(stage / "captures"),
+        "observation_path": str(stage / "observation.json"),
+        "angles": views,
+        "profile": profile.capture_request_profile(spec),
+        "contract_v07": runtime_contract_v07(spec),
+    }
+    (stage / "request.json").write_text(json.dumps(request), encoding="utf-8")
+    for command in (
+        [GODOT, "--headless", "--path", str(stage), "--editor", "--import", "--quit"],
+        [
+            GODOT,
+            "--path",
+            str(stage),
+            "--script",
+            "res://asset_runtime_harness.gd",
+            "--",
+            "--request",
+            str(stage / "request.json"),
+        ],
+    ):
+        subprocess.run(command, capture_output=True, text=True, timeout=180, check=False)
+    observation = json.loads((stage / "observation.json").read_text(encoding="utf-8"))
+    assert observation["status"] == "PASS", observation["errors"]
+    assert sorted(p.stem for p in (stage / "captures").glob("*.png")) == views
+    from gamefactory.core.domain.camera_framing import view_axis_label
+
+    for view in views:
+        assert observation["view_framing"][view]["view_axis"] == view_axis_label(view)

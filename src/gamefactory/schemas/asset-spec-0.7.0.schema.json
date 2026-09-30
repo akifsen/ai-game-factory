@@ -1,0 +1,613 @@
+{
+  "$defs": {
+    "CapsuleSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "radius_m": {
+          "title": "Radius M",
+          "type": "number"
+        },
+        "height_m": {
+          "title": "Height M",
+          "type": "number"
+        }
+      },
+      "required": [
+        "radius_m",
+        "height_m"
+      ],
+      "title": "CapsuleSpec",
+      "type": "object"
+    },
+    "DimensionsConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "width_m": {
+          "description": "Width in meters (X axis)",
+          "maximum": 100.0,
+          "minimum": 0.001,
+          "title": "Width M",
+          "type": "number"
+        },
+        "depth_m": {
+          "description": "Depth in meters (Z axis)",
+          "maximum": 100.0,
+          "minimum": 0.001,
+          "title": "Depth M",
+          "type": "number"
+        },
+        "height_m": {
+          "description": "Height in meters (Y axis)",
+          "maximum": 100.0,
+          "minimum": 0.001,
+          "title": "Height M",
+          "type": "number"
+        }
+      },
+      "required": [
+        "width_m",
+        "depth_m",
+        "height_m"
+      ],
+      "title": "DimensionsConfig",
+      "type": "object"
+    },
+    "GeometryBudgetConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "max_triangles_lod0": {
+          "default": 20000,
+          "maximum": 100000,
+          "minimum": 100,
+          "title": "Max Triangles Lod0",
+          "type": "integer"
+        },
+        "max_triangles_lod1": {
+          "default": 10000,
+          "maximum": 50000,
+          "minimum": 50,
+          "title": "Max Triangles Lod1",
+          "type": "integer"
+        },
+        "lod_ratio": {
+          "default": 0.5,
+          "description": "LOD1 triangles to LOD0 ratio supported by the Blender processor (0.05-0.95)",
+          "maximum": 0.95,
+          "minimum": 0.05,
+          "title": "Lod Ratio",
+          "type": "number"
+        }
+      },
+      "title": "GeometryBudgetConfig",
+      "type": "object"
+    },
+    "MaterialBudgetConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "max_materials": {
+          "default": 2,
+          "maximum": 8,
+          "minimum": 1,
+          "title": "Max Materials",
+          "type": "integer"
+        }
+      },
+      "title": "MaterialBudgetConfig",
+      "type": "object"
+    },
+    "MotionLimits": {
+      "additionalProperties": false,
+      "properties": {
+        "lower": {
+          "title": "Lower",
+          "type": "number"
+        },
+        "upper": {
+          "title": "Upper",
+          "type": "number"
+        }
+      },
+      "required": [
+        "lower",
+        "upper"
+      ],
+      "title": "MotionLimits",
+      "type": "object"
+    },
+    "OrientationConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "up": {
+          "const": "+Y",
+          "default": "+Y",
+          "title": "Up",
+          "type": "string"
+        },
+        "front": {
+          "const": "-Z",
+          "default": "-Z",
+          "title": "Front",
+          "type": "string"
+        }
+      },
+      "title": "OrientationConfig",
+      "type": "object"
+    },
+    "PartMotionSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "enum": [
+            "fixed",
+            "revolute",
+            "prismatic"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "axis": {
+          "anyOf": [
+            {
+              "maxItems": 3,
+              "minItems": 3,
+              "prefixItems": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "type": "array"
+            },
+            {
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Axis"
+        },
+        "limits": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/MotionLimits"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "title": "PartMotionSpec",
+      "type": "object"
+    },
+    "PartPivotSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "position_m": {
+          "anyOf": [
+            {
+              "maxItems": 3,
+              "minItems": 3,
+              "prefixItems": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "type": "array"
+            },
+            {
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            }
+          ],
+          "title": "Position M"
+        },
+        "basis": {
+          "anyOf": [
+            {
+              "const": "identity",
+              "type": "string"
+            },
+            {
+              "maxItems": 4,
+              "minItems": 4,
+              "prefixItems": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "type": "array"
+            },
+            {
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            }
+          ],
+          "default": "identity",
+          "title": "Basis"
+        },
+        "motion": {
+          "$ref": "#/$defs/PartMotionSpec"
+        }
+      },
+      "required": [
+        "position_m",
+        "motion"
+      ],
+      "title": "PartPivotSpec",
+      "type": "object"
+    },
+    "PartSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "part_id": {
+          "title": "Part Id",
+          "type": "string"
+        },
+        "role": {
+          "title": "Role",
+          "type": "string"
+        },
+        "parent": {
+          "title": "Parent",
+          "type": "string"
+        },
+        "pivot": {
+          "$ref": "#/$defs/PartPivotSpec"
+        }
+      },
+      "required": [
+        "part_id",
+        "role",
+        "parent",
+        "pivot"
+      ],
+      "title": "PartSpec",
+      "type": "object"
+    },
+    "SocketSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "socket_id": {
+          "title": "Socket Id",
+          "type": "string"
+        },
+        "parent_part": {
+          "title": "Parent Part",
+          "type": "string"
+        },
+        "translation_m": {
+          "anyOf": [
+            {
+              "maxItems": 3,
+              "minItems": 3,
+              "prefixItems": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "type": "array"
+            },
+            {
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            }
+          ],
+          "title": "Translation M"
+        },
+        "rotation": {
+          "anyOf": [
+            {
+              "const": "identity",
+              "type": "string"
+            },
+            {
+              "maxItems": 4,
+              "minItems": 4,
+              "prefixItems": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "type": "array"
+            },
+            {
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            }
+          ],
+          "default": "identity",
+          "title": "Rotation"
+        },
+        "placement": {
+          "const": "forward_end",
+          "title": "Placement",
+          "type": "string"
+        }
+      },
+      "required": [
+        "socket_id",
+        "parent_part",
+        "translation_m",
+        "placement"
+      ],
+      "title": "SocketSpec",
+      "type": "object"
+    },
+    "SpecColliderConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "policy": {
+          "enum": [
+            "box",
+            "capsule"
+          ],
+          "title": "Policy",
+          "type": "string"
+        },
+        "capsule": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CapsuleSpec"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "policy"
+      ],
+      "title": "SpecColliderConfig",
+      "type": "object"
+    },
+    "StyleConstraintsConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "family": {
+          "default": "stylized_scifi",
+          "maxLength": 100,
+          "minLength": 1,
+          "title": "Family",
+          "type": "string"
+        },
+        "silhouette": {
+          "default": "chunky",
+          "maxLength": 100,
+          "minLength": 1,
+          "title": "Silhouette",
+          "type": "string"
+        },
+        "readability": {
+          "default": "high",
+          "maxLength": 100,
+          "minLength": 1,
+          "title": "Readability",
+          "type": "string"
+        },
+        "detail_density": {
+          "default": "medium",
+          "maxLength": 100,
+          "minLength": 1,
+          "title": "Detail Density",
+          "type": "string"
+        }
+      },
+      "title": "StyleConstraintsConfig",
+      "type": "object"
+    },
+    "TextureBudgetConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "max_dimension": {
+          "default": 2048,
+          "maximum": 4096,
+          "minimum": 256,
+          "title": "Max Dimension",
+          "type": "integer"
+        }
+      },
+      "title": "TextureBudgetConfig",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Strict asset-spec-0.7.0 document, a separate model from the historical schemas.\n\nIt binds only to asset-profile-0.7.0 registrations (ProfileRegistry.get_v07).\nsource_front is not part of the specification; it belongs to source registration.",
+  "properties": {
+    "schema_version": {
+      "const": "0.7.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "asset_id": {
+      "maxLength": 80,
+      "minLength": 2,
+      "title": "Asset Id",
+      "type": "string"
+    },
+    "category": {
+      "default": "prop",
+      "enum": [
+        "prop",
+        "pickup",
+        "modular",
+        "vehicle",
+        "weapon",
+        "aircraft",
+        "character"
+      ],
+      "title": "Category",
+      "type": "string"
+    },
+    "profile": {
+      "pattern": "^[a-z][a-z0-9_]{1,39}$",
+      "title": "Profile",
+      "type": "string"
+    },
+    "profile_version": {
+      "minimum": 1,
+      "title": "Profile Version",
+      "type": "integer"
+    },
+    "intent": {
+      "maxLength": 500,
+      "minLength": 1,
+      "title": "Intent",
+      "type": "string"
+    },
+    "source_kind": {
+      "enum": [
+        "provider_generated",
+        "local_operator_assembly"
+      ],
+      "title": "Source Kind",
+      "type": "string"
+    },
+    "dimensions": {
+      "$ref": "#/$defs/DimensionsConfig"
+    },
+    "orientation": {
+      "$ref": "#/$defs/OrientationConfig"
+    },
+    "origin_policy": {
+      "default": "bottom_center",
+      "enum": [
+        "bottom_center",
+        "center"
+      ],
+      "title": "Origin Policy",
+      "type": "string"
+    },
+    "geometry_budget": {
+      "$ref": "#/$defs/GeometryBudgetConfig"
+    },
+    "material_budget": {
+      "$ref": "#/$defs/MaterialBudgetConfig"
+    },
+    "texture_budget": {
+      "$ref": "#/$defs/TextureBudgetConfig"
+    },
+    "lod_policy": {
+      "default": "lod0_lod1",
+      "enum": [
+        "lod0_lod1",
+        "lod0_only"
+      ],
+      "title": "Lod Policy",
+      "type": "string"
+    },
+    "style_constraints": {
+      "$ref": "#/$defs/StyleConstraintsConfig"
+    },
+    "target_engine": {
+      "const": "godot",
+      "default": "godot",
+      "title": "Target Engine",
+      "type": "string"
+    },
+    "target_import_path": {
+      "default": "",
+      "title": "Target Import Path",
+      "type": "string"
+    },
+    "collider": {
+      "$ref": "#/$defs/SpecColliderConfig"
+    },
+    "parts": {
+      "anyOf": [
+        {
+          "items": {
+            "$ref": "#/$defs/PartSpec"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Parts"
+    },
+    "sockets": {
+      "anyOf": [
+        {
+          "items": {
+            "$ref": "#/$defs/SocketSpec"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Sockets"
+    }
+  },
+  "required": [
+    "schema_version",
+    "asset_id",
+    "profile",
+    "profile_version",
+    "intent",
+    "source_kind",
+    "dimensions",
+    "collider"
+  ],
+  "title": "AssetSpecificationV07",
+  "type": "object"
+}

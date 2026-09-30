@@ -97,3 +97,25 @@ yerine geçmez.
 - [Generalized production pipeline](pipelines/generalized-asset-production.md)
 - [ADR 0008: profile versus specification](adr/0008-asset-profile-versus-specification.md)
 - [V0.5 completion report](reports/v0.5-completion-report.md)
+
+## V0.6 — Production safety and recovery
+
+- [Work plan](work-plan-v0.6.md)
+- [Paid request snapshot](architecture/paid-request-snapshot.md), [production readiness](architecture/production-readiness.md), [accounting](architecture/accounting.md), [concept versioning](architecture/concept-versioning.md), [recovery](architecture/recovery.md)
+- ADR 0009–0012
+- [V0.6 completion report](reports/v0.6-completion-report.md)
+
+## V0.7 — Advanced asset profiles
+
+- [Work plan and step status](work-plan-v0.7.md)
+- [Advanced asset profiles (design, schemas, fixtures)](architecture/advanced-asset-profiles.md)
+- [Assembly production guide](pipelines/assembly-production.md)
+- [ADR 0013: parts, pivots and sockets](adr/0013-semantic-parts-pivots-and-sockets.md)
+- [ADR 0014: orientation and review views](adr/0014-normative-orientation.md)
+- [ADR 0015: collider policies](adr/0015-collider-policies-and-runtime-body-kinds.md)
+- [ADR 0016: assembly source and provenance](adr/0016-multi-part-source-and-provenance.md)
+- [ADR 0017: rigged_character deferral](adr/0017-rigged-character-deferral-and-skin-contract.md)
+- [ADR 0018: validator composition](adr/0018-validator-composition.md)
+- [V0.7 completion report](reports/v0.7-completion-report.md)
+- [v0.7.0 release notes](releases/v0.7.0.md)
+

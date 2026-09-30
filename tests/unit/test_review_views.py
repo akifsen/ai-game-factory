@@ -76,6 +76,10 @@ def test_harness_view_table_matches_python_and_has_no_fallback() -> None:
         norm = math.sqrt(sum(v * v for v in vec))
         assert tuple(v / norm for v in vec) == pytest.approx(cf.view_direction(name))
         assert label == cf.view_axis_label(name)
+    up = text.split("func _view_up_vector", 1)[1].split("\nfunc ", 1)[0]
+    assert 'if angle == "top":\n\t\treturn Vector3(0, 0, -1)' in up and "return Vector3.UP" in up
+    assert cf.view_up("top") == (0.0, 0.0, -1.0)
+    assert all(cf.view_up(v) == (0.0, 1.0, 0.0) for v in cf.PLACED_VIEWS if v != "top")
     body = text.split("func _view_direction_vector", 1)[1].split("\nfunc ", 1)[0]
     assert "_fail(" in body
     assert "0.65, -1).normalized()" not in body

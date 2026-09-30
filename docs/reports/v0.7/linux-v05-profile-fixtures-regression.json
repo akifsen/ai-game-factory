@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "status": "PASS",
+  "started_at": "2026-09-30T14:11:39.269494+00:00",
+  "label": "TEST FIXTURE",
+  "paid_meshy_calls": 0,
+  "fixtures": [
+    {
+      "asset_id": "energy_pickup_test",
+      "profile": "pickup@1",
+      "workflow_id": "WF-ASSET-b4dac864",
+      "bundle": "<workspace>",
+      "review_views": [
+        "front",
+        "three_quarter",
+        "top"
+      ],
+      "physics_node": "Area3D",
+      "fake_invocations": 1,
+      "cold_verifier": "PASS"
+    },
+    {
+      "asset_id": "wall_panel_test",
+      "profile": "modular_piece@1",
+      "workflow_id": "WF-ASSET-64617713",
+      "bundle": "<workspace>",
+      "review_views": [
+        "front",
+        "side",
+        "three_quarter"
+      ],
+      "physics_node": "StaticBody3D",
+      "fake_invocations": 1,
+      "cold_verifier": "PASS"
+    }
+  ],
+  "workspace": null,
+  "finished_at": "2026-09-30T14:12:11.523964+00:00"
+}

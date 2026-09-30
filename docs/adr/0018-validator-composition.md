@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted for V0.7 (Step 2 architecture decision). Not implemented.
+Accepted and implemented in V0.7.0.
 
 ## Context
 
@@ -42,3 +42,10 @@ The current emission order interleaves concerns. For example, `lod1.bounds` is e
 ## Consequences
 
 Adding a V0.7 rule means adding one group and one selection condition. Rule ordering becomes part of the evidence format. `vehicle@1`, `weapon@1` and `aircraft@1` share the `parts`, `pivot` and `sockets` groups without profile-specific code.
+
+## Implementation (V0.7.0)
+
+- `validate_glb` parses once and runs an ordered composition of pure rules. The closed registry is `core`, `single_mesh`, `parts`, `orientation`, `pivot`, `sockets`, `collider_box` and `collider_capsule`; a unit test pins the set and proves every rule belongs to exactly one group.
+- `select_composition` takes only typed capabilities (geometry mode, collider policy, declared sockets, source normalization); a test asserts its signature carries no profile id. The historical single-mesh box profiles use the fixed `LEGACY_COMPOSITION`, which interleaves core, single_mesh and collider_box exactly as V0.6 did; `tests/golden` and the V0.6 behavior goldens pass unchanged.
+- The `skin_internal` group was not implemented: ADR 0017 allows it but nothing in V0.7 needs it, and the set stays closed without it.
+- Validation reports for asset-spec-0.7.0 are `asset-validation-report-0.7.0` and record `rule_groups` and `composition`; the cold verifier checks them against the capabilities declared by the bundled specification.
