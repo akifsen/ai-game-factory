@@ -1725,6 +1725,20 @@ def _asset_approval_checkpoint(root: Path, db: Database, approval_id: str) -> di
         "budget_reservation": params.get("budget_reservation"),
         "resume_command": f'gamefactory --project "{root}" resume {approval.workflow_id}',
     }
+    if params.get("source_kind") == "local_operator_assembly":
+        # Operator assemblies never involve a provider, a concept or money.
+        checkpoint.update(
+            {
+                "provider": None,
+                "provider_status": "NOT_USED",
+                "operation": "local_operator_assembly",
+                "estimate": 0,
+                "budget_reservation": None,
+                "source_sha256": params.get("source_glb_hash"),
+                "source_front": params.get("source_front"),
+                "paid": False,
+            }
+        )
     if approval.approval_type == "paid_generation":
         snap_record = PaidRequestSnapshotRepository(db).get_active_for_workflow(
             approval.workflow_id
@@ -2046,6 +2060,22 @@ def _asset_inspect(db: Database, asset_id: str) -> dict[str, Any]:
         (task for task in tasks if task.status.value not in {"COMPLETED", "SKIPPED"}),
         None,
     )
+    if prepare.task_type == "asset_assembly_prepare":
+        params = prepare.parameters
+        return {
+            "asset_id": asset_id,
+            "revision": revision.revision_id,
+            "profile": profile.profile_id,
+            "profile_version": profile.qualified,
+            "workflow": workflow.id,
+            "workflow_status": workflow.status.value,
+            "current_gate": current.task_type if current is not None else workflow.status.value,
+            "source_kind": "local_operator_assembly",
+            "source_sha256": params.get("source_glb_hash"),
+            "source_front": params.get("source_front"),
+            "paid": False,
+            "concept_versions": [],
+        }
     cv_repo = ConceptVersionRepository(db)
     rows = cv_repo.list_for_revision(asset_id, revision.revision_number)
     if rows:
@@ -2097,6 +2127,11 @@ def _asset_inspect_text(payload: dict[str, Any]) -> str:
         f"Workflow: {payload['workflow']}",
         f"Current Gate: {payload['current_gate']}",
     ]
+    if payload.get("source_kind") == "local_operator_assembly":
+        lines.append(
+            f"Source: local_operator_assembly sha256={payload['source_sha256']} "
+            f"source_front={payload['source_front']} paid=false"
+        )
     if "concept_versions" in payload and payload["concept_versions"]:
         lines.append("Concept Versions:")
         for cv in payload["concept_versions"]:

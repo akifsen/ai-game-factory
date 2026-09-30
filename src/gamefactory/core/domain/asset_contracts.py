@@ -803,14 +803,24 @@ def parse_any_asset_specification(
 def is_assembly_specification(spec: Any) -> bool:
     """True when a specification cannot bind to a single-mesh provider request (ADR 0016)."""
     if isinstance(spec, dict):
+        # Decide from the declared fields alone: an assembly document that is also
+        # invalid in some other way must still never be treated as single-mesh.
         if spec.get("parts") or spec.get("sockets"):
+            return True
+        if spec.get("source_kind") == "local_operator_assembly":
             return True
         if spec.get("schema_version") != SPEC_SCHEMA_VERSION_V07:
             return False
+        from gamefactory.core.domain.asset_profiles import builtin_registry
+
         try:
-            spec = parse_asset_specification_v07(spec)
+            version = spec.get("profile_version")
+            if isinstance(version, bool) or not isinstance(version, int):
+                return False
+            profile = builtin_registry().get_v07(str(spec.get("profile")), version)
         except SpecInvalidError:
             return False
+        return profile.geometry_mode == "assembly"
     if not isinstance(spec, AssetSpecificationV07):
         return False
     return bool(spec.parts or spec.sockets or spec.source_kind == "local_operator_assembly") or (

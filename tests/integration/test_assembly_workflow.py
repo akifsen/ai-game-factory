@@ -278,17 +278,29 @@ def test_assembly_spec_is_rejected_by_the_provider_workflow_with_zero_intents(
 
 
 @pytest.mark.parametrize("adapter", ["meshy", "fake"])
-@pytest.mark.parametrize("variant", ["parts", "sockets_only", "assembly_source"])
+@pytest.mark.parametrize(
+    "variant", ["parts", "sockets_only", "assembly_source", "assembly_profile"]
+)
 def test_provider_adapters_refuse_assembly_specifications(adapter: str, variant: str) -> None:
     data = ag.assembly_spec(ag.WEAPON_RIFLE)
     if variant == "sockets_only":
         data = {"sockets": data["sockets"]}
     elif variant == "assembly_source":
-        data = {"schema_version": "0.7.0", **{k: v for k, v in data.items() if k != "parts"}}
-        data.pop("sockets", None)
-    binding = {"asset_id": "x", "revision_number": 1}
-    cost = {"estimate": None, "reservation": 0.0, "unit": "credits"}
-    with pytest.raises(PaidRequestInvalidError):
+        data = {k: v for k, v in data.items() if k not in {"parts", "sockets"}}
+    elif variant == "assembly_profile":
+        data = {k: v for k, v in data.items() if k not in {"parts", "sockets"}}
+        data["source_kind"] = "provider_generated"
+    binding = {
+        "asset_id": "weapon_rifle_test",
+        "revision_number": 1,
+        "concept_version": 1,
+        "concept_sha256": "0" * 64,
+        "specification_sha256": "1" * 64,
+        "profile_id": "weapon",
+        "profile_version": 1,
+    }
+    cost = {"estimate": 5.0, "reservation": 5.0, "unit": "credits"}
+    with pytest.raises(PaidRequestInvalidError, match="cannot bind to a provider request"):
         if adapter == "meshy":
             meshy_resolve(binding, data, cost)
         else:
