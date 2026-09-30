@@ -22,7 +22,9 @@ from gamefactory.workflows.provider_character_evidence import (
 from scripts.verify_asset_bundle import (
     _v07_bound_mesh_vertex_work,
     _v07_glb,
+    _v07_paid_execution_history,
     _v07_positions,
+    _v07_reserve_metadata_allowed,
     _v07_tris,
 )
 
@@ -78,6 +80,101 @@ def _binding() -> dict[str, Any]:
             ("front", "rear", "left", "right", "three_quarter"), digest
         ),
     }
+
+
+def _paid_history_intent(history: list[dict[str, Any]]) -> dict[str, Any]:
+    latest = history[-1]
+    return {
+        "task_id": "paid-task",
+        "provider": "fake_asset_gen",
+        "external_task_id": latest["external_op_id"],
+        "cost_unit": "provider_units",
+        "execution_id": latest["id"],
+        "attempt_number": latest["attempt_number"],
+        "paid_execution_provider": latest["provider"],
+        "paid_execution_external_id": latest["external_op_id"],
+        "paid_execution_status": latest["status"],
+        "paid_execution_cost": latest["cost"],
+        "paid_execution_history": history,
+    }
+
+
+def _paid_history_row(
+    execution_id: str, attempt_number: int, status: str, *, cost: float = 5.0
+) -> dict[str, Any]:
+    return {
+        "id": execution_id,
+        "attempt_number": attempt_number,
+        "status": status,
+        "task_id": "paid-task",
+        "workflow_id": "fixture-workflow",
+        "revision_number": 1,
+        "provider": "fake_asset_gen",
+        "external_op_id": f"external-{execution_id}" if status == "COMPLETED" else None,
+        "cost": cost,
+        "cost_unit": "provider_units",
+    }
+
+
+def test_paid_execution_history_accepts_query_only_recovery_and_nonzero_cost() -> None:
+    history = [
+        _paid_history_row("uncertain-1", 1, "UNCERTAIN"),
+        _paid_history_row("failed-2", 2, "FAILED"),
+        _paid_history_row("completed-3", 3, "COMPLETED", cost=5.0),
+    ]
+    assert _v07_paid_execution_history(_paid_history_intent(history), "fixture-workflow", 1) == {
+        "uncertain-1",
+        "failed-2",
+        "completed-3",
+    }
+
+
+@pytest.mark.parametrize(
+    ("metadata", "expected"),
+    [
+        ((None, None, None), True),
+        ((None, "uncertain-1", None), True),
+        ((None, "completed-3", None), True),
+        ((None, "foreign-execution", None), False),
+        (("intent-1", "uncertain-1", None), False),
+        ((None, "uncertain-1", "foreign-fingerprint"), False),
+        (("intent-1", "completed-3", "fingerprint-1"), False),
+    ],
+)
+def test_reserve_metadata_is_limited_to_null_or_known_preintent_lineage(
+    metadata: tuple[Any, Any, Any], expected: bool
+) -> None:
+    assert (
+        _v07_reserve_metadata_allowed(metadata, {"uncertain-1", "failed-2", "completed-3"})
+        is expected
+    )
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    [
+        lambda rows: rows[0].update(id=rows[-1]["id"]),
+        lambda rows: rows[0].update(attempt_number=2),
+        lambda rows: rows[0].update(task_id="foreign-task"),
+        lambda rows: rows[0].update(workflow_id="foreign-workflow"),
+        lambda rows: rows[0].update(revision_number=2),
+        lambda rows: rows[0].update(provider="foreign_provider"),
+        lambda rows: rows[0].update(external_op_id="foreign-external-operation"),
+        lambda rows: rows[-1].update(cost_unit="foreign_unit"),
+        lambda rows: rows.append(_paid_history_row("new-failed", 3, "FAILED")),
+        lambda rows: rows.__setitem__(0, _paid_history_row("prior-success", 1, "COMPLETED")),
+    ],
+)
+def test_paid_execution_history_rejects_incomplete_or_stale_lineage(
+    mutation: Any,
+) -> None:
+    history = [
+        _paid_history_row("uncertain-1", 1, "UNCERTAIN"),
+        _paid_history_row("completed-2", 2, "COMPLETED"),
+    ]
+    mutation(history)
+    with pytest.raises(ValueError, match="history"):
+        _v07_paid_execution_history(_paid_history_intent(history), "fixture-workflow", 1)
 
 
 def _receipt(kind: str) -> dict[str, Any]:

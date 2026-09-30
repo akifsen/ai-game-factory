@@ -48,7 +48,9 @@ from gamefactory.core.approvals.operation_scope import build_operation_inputs
 from gamefactory.core.domain.asset_contracts import AssetRevision
 from gamefactory.core.domain.errors import (
     PaidRequestIncompatibleError,
+    PaidRequestInvalidError,
     PaidRequestRequiredError,
+    ProviderUncertainError,
 )
 from gamefactory.core.domain.models import (
     Artifact,
@@ -538,3 +540,143 @@ def test_fake_provider_paid_request_adapter() -> None:
     assert res_legacy.status == "SUCCESS"
     # submitted_requests was not updated on legacy request
     assert len(fake_prov.submitted_requests) == 1
+
+
+def test_fake_provider_v07_cost_unit_is_pinned_for_new_and_resumed_intents(
+    tmp_path: Path,
+) -> None:
+    db = Database(tmp_path / "fake_v07_cost_unit.db")
+    MigrationRunner(db).apply_all()
+    ProjectRepository(db).save(Project("p-v07-fake", "Fake V0.7", "godot", str(tmp_path)))
+    WorkflowRepository(db).save(Workflow("workflow-v07", "p-v07-fake", "Fake V0.7 workflow"))
+    TaskRepository(db).save(
+        Task(
+            id="task-v07-fake-cost-unit",
+            workflow_id="workflow-v07",
+            name="Fake V0.7 generation",
+            task_type="asset_paid_generation",
+            cost_class=CostClass.PAID,
+            parameters={"asset_id": "character-v07", "revision_number": 1},
+        )
+    )
+    intent_repo = ProviderOperationIntentRepository(db)
+    cost = {"estimate": 5.0, "reservation": 5.0, "unit": "fake_credits"}
+    snapshot = PaidRequestSnapshot.from_content(
+        fake_resolve_paid_request(_sample_binding(), _sample_spec(), cost)
+    )
+    request = GenerationRequest(
+        prompt="A V0.7 character",
+        parameters={
+            "graph_version": "0.7.0",
+            "cost_unit": "fake_credits",
+            "task_id": "task-v07-fake-cost-unit",
+            "asset_id": "character-v07",
+            "workflow_id": "workflow-v07",
+            "approval_id": "approval-v07",
+            "revision_number": 1,
+            "concept_hash": "concept-hash-v07",
+        },
+        paid_request=snapshot,
+    )
+    provider = FakeAssetGenerationProvider(
+        intent_repo=intent_repo,
+        simulate_crash=True,
+    )
+
+    with pytest.raises(ProviderUncertainError):
+        provider.generate(request)
+    uncertain_intent = intent_repo.get_by_task("task-v07-fake-cost-unit")
+    assert uncertain_intent is not None
+    assert uncertain_intent.status == "SUBMITTED"
+    assert uncertain_intent.cost_unit == "fake_credits"
+
+    provider.simulate_crash = False
+    resumed = provider.generate(request)
+    assert resumed.status == "SUCCESS"
+    assert resumed.cost_unit == "fake_credits"
+    assert provider.invocation_count == 1
+    assert intent_repo.get_by_task("task-v07-fake-cost-unit").cost_unit == "fake_credits"
+
+    # A conflicting persisted unit is rejected without updating the immutable intent.
+    with db.transaction() as conn:
+        conn.execute(
+            "UPDATE provider_operation_intents SET cost_unit = 'credits' WHERE task_id = ?",
+            ("task-v07-fake-cost-unit",),
+        )
+    with pytest.raises(PaidRequestInvalidError, match="conflicting cost_unit"):
+        provider.generate(request)
+    assert intent_repo.get_by_task("task-v07-fake-cost-unit").cost_unit == "credits"
+    assert provider.invocation_count == 1
+
+
+def test_fake_provider_v07_rejects_cost_unit_drift_before_intent_or_invocation(
+    tmp_path: Path,
+) -> None:
+    db = Database(tmp_path / "fake_v07_cost_unit_drift.db")
+    MigrationRunner(db).apply_all()
+    intent_repo = ProviderOperationIntentRepository(db)
+    provider = FakeAssetGenerationProvider(intent_repo=intent_repo)
+    mismatched_snapshot = PaidRequestSnapshot.from_content(
+        fake_resolve_paid_request(
+            _sample_binding(),
+            _sample_spec(),
+            {"estimate": 5.0, "reservation": 5.0, "unit": "credits"},
+        )
+    )
+    request = GenerationRequest(
+        prompt="A V0.7 character",
+        parameters={
+            "graph_version": "0.7.0",
+            "cost_unit": "fake_credits",
+            "task_id": "task-v07-fake-cost-unit-drift",
+            "asset_id": "character-v07",
+            "workflow_id": "workflow-v07",
+            "approval_id": "approval-v07",
+            "revision_number": 1,
+            "concept_hash": "concept-hash-v07",
+        },
+        paid_request=mismatched_snapshot,
+    )
+
+    with pytest.raises(PaidRequestInvalidError, match="immutable paid-request snapshot"):
+        provider.generate(request)
+
+    assert provider.invocation_count == 0
+    assert intent_repo.get_by_task("task-v07-fake-cost-unit-drift") is None
+
+
+@pytest.mark.parametrize("configured_unit", [None, "", "   ", True, 17])
+def test_fake_provider_v07_rejects_missing_or_invalid_cost_unit_without_side_effects(
+    configured_unit: object,
+) -> None:
+    params: dict[str, Any] = {
+        "graph_version": "0.7.0",
+        "task_id": "task-invalid-v07-unit",
+    }
+    if configured_unit is not None:
+        params["cost_unit"] = configured_unit
+    provider = FakeAssetGenerationProvider()
+
+    with pytest.raises(PaidRequestInvalidError, match="non-empty configured cost_unit"):
+        provider.generate(GenerationRequest(prompt="Invalid V0.7 request", parameters=params))
+
+    assert provider.invocation_count == 0
+    assert provider.recorded_requests == []
+
+
+def test_fake_provider_v07_preserves_nondefault_declared_cost_unit() -> None:
+    cost = {"estimate": 2.0, "reservation": 2.0, "unit": "character_tokens"}
+    snapshot = PaidRequestSnapshot.from_content(
+        fake_resolve_paid_request(_sample_binding(), _sample_spec(), cost)
+    )
+    provider = FakeAssetGenerationProvider()
+    response = provider.generate(
+        GenerationRequest(
+            prompt="A V0.7 character",
+            parameters={"graph_version": "0.7.0", "cost_unit": "character_tokens"},
+            paid_request=snapshot,
+        )
+    )
+
+    assert response.status == "SUCCESS"
+    assert response.cost_unit == "character_tokens"

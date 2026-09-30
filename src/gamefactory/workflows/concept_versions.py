@@ -8,7 +8,12 @@ from pathlib import Path
 from typing import Any
 
 from gamefactory.adapters.engines.godot_staging import sha256_file
-from gamefactory.adapters.images.concept_ingest import ingest_concept_image, verify_png_image
+from gamefactory.adapters.images.concept_ingest import (
+    MAX_PROVENANCE_SIDECAR_BYTES,
+    _read_bounded,
+    ingest_concept_image,
+    verify_png_image,
+)
 from gamefactory.adapters.persistence.database import Database
 from gamefactory.adapters.persistence.repositories import (
     ApprovalRepository,
@@ -37,7 +42,7 @@ from gamefactory.core.domain.models import (
 )
 from gamefactory.core.execution.locks import ExecutionLock
 from gamefactory.core.execution.path_guard import PathGuard
-from gamefactory.workflows.asset_production import is_v06_graph
+from gamefactory.workflows.asset_production import is_immutable_paid_graph, is_v07_character_graph
 from gamefactory.workflows.engine import WorkflowEngine
 
 
@@ -131,7 +136,7 @@ def _replace_concept_locked(
 
     # Safety checks:
     # 1. Workflow is not a V0.6 asset graph (legacy -> refuse: new revision required)
-    if not is_v06_graph(concept_task) or not any(
+    if not is_immutable_paid_graph(concept_task) or not any(
         t.task_type == "asset_paid_request_snapshot" for t in tasks
     ):
         raise ValidationError(
@@ -221,6 +226,7 @@ def _replace_concept_locked(
         "asset_validate",
         "asset_godot",
         "asset_final_review",
+        "asset_v07_provider_evidence",
         "record_evidence",
     }
     for t in tasks:
@@ -246,11 +252,17 @@ def _replace_concept_locked(
     target_prov = guard.ensure_safe_parent(
         f"{asset_dir_rel}/concept-provenance-v{new_version}.json"
     )
+    v07_character = is_v07_character_graph(concept_task)
+    target_sidecar = guard.ensure_safe_parent(
+        f"{asset_dir_rel}/concept-provenance-source-v{new_version}.json"
+    )
 
     if target_png.exists():
         raise ValidationError(f"Destination concept file already exists: {target_png}")
     if target_prov.exists():
         raise ValidationError(f"Destination concept provenance file already exists: {target_prov}")
+    if v07_character and target_sidecar.exists():
+        raise ValidationError(f"Destination provenance sidecar already exists: {target_sidecar}")
 
     spec_hash = str(concept_task.parameters["specification_hash"])
 
@@ -289,6 +301,19 @@ def _replace_concept_locked(
             "dry_run": True,
         }
 
+    # Take a bounded V0.7 sidecar snapshot before ingest creates the managed PNG.
+    # Ingestion validates and hashes these same immutable bytes, which are
+    # retained with the managed replacement instead of rereading the source.
+    v07_sidecar_bytes = (
+        _read_bounded(
+            provenance_src,
+            MAX_PROVENANCE_SIDECAR_BYTES,
+            "Concept provenance sidecar",
+        )
+        if v07_character
+        else None
+    )
+
     # a) Validate and ingest the new PNG + provenance
     concept_path, provenance = ingest_concept_image(
         concept_src,
@@ -296,9 +321,20 @@ def _replace_concept_locked(
         spec_hash,
         sidecar_provenance_path=provenance_src,
         source_type=concept_source_type,
+        sidecar_provenance_bytes=v07_sidecar_bytes,
     )
+    provenance_document = provenance.to_dict()
+    if v07_character and provenance.sidecar_path is not None:
+        expected_sidecar_hash = provenance.sidecar_hash
+        assert v07_sidecar_bytes is not None and expected_sidecar_hash is not None
+        assert hashlib.sha256(v07_sidecar_bytes).hexdigest() == expected_sidecar_hash
+        with target_sidecar.open("xb") as stream:
+            stream.write(v07_sidecar_bytes)
+        if sha256_file(target_sidecar) != expected_sidecar_hash:
+            raise ValidationError("Managed concept provenance sidecar failed its hash check")
+        provenance_document["sidecar_path"] = target_sidecar.relative_to(project_root).as_posix()
     target_prov.write_text(
-        json.dumps(provenance.to_dict(), sort_keys=True, indent=2) + "\n",
+        json.dumps(provenance_document, sort_keys=True, indent=2) + "\n",
         encoding="utf-8",
     )
     new_concept_sha256 = sha256_file(target_png)

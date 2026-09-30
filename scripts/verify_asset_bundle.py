@@ -530,6 +530,91 @@ def _v07_same_int(value: Any, expected: Any) -> bool:
     return type(value) is int and type(expected) is int and value == expected
 
 
+def _v07_paid_execution_history(
+    intent: dict[str, Any], workflow_id: str, revision: Any
+) -> set[str]:
+    """Validate the complete paid-task execution lineage pinned by V0.7 evidence."""
+    history = intent.get("paid_execution_history")
+    row_keys = {
+        "id",
+        "attempt_number",
+        "status",
+        "task_id",
+        "workflow_id",
+        "revision_number",
+        "provider",
+        "external_op_id",
+        "cost",
+        "cost_unit",
+    }
+    statuses = {"UNCERTAIN", "FAILED", "COMPLETED"}
+    task_id = intent.get("task_id")
+    if not isinstance(history, list) or not history or not isinstance(task_id, str) or not task_id:
+        raise ValueError("Provider-character paid execution history is malformed")
+    execution_ids: set[str] = set()
+    completed_seen = False
+    for index, row in enumerate(history, start=1):
+        if not isinstance(row, dict) or set(row) != row_keys:
+            raise ValueError("Provider-character paid execution history row is malformed")
+        execution_id = row.get("id")
+        status = row.get("status")
+        provider = row.get("provider")
+        external_id = row.get("external_op_id")
+        cost = row.get("cost")
+        if (
+            not isinstance(execution_id, str)
+            or not execution_id
+            or execution_id in execution_ids
+            or type(row.get("attempt_number")) is not int
+            or row["attempt_number"] != index
+            or row.get("task_id") != task_id
+            or row.get("workflow_id") != workflow_id
+            or not _v07_same_int(row.get("revision_number"), revision)
+            or not isinstance(status, str)
+            or status not in statuses
+            or (provider is not None and (not isinstance(provider, str) or not provider))
+            or (external_id is not None and (not isinstance(external_id, str) or not external_id))
+            or (provider is not None and provider != intent.get("provider"))
+            or (external_id is not None and external_id != intent.get("external_task_id"))
+            or type(cost) not in {int, float}
+            or not math.isfinite(float(cast(int | float, cost)))
+            or float(cast(int | float, cost)) < 0
+            or not isinstance(row.get("cost_unit"), str)
+            or not row["cost_unit"]
+            or completed_seen
+        ):
+            raise ValueError(
+                "Provider-character paid execution history is incomplete or conflicting"
+            )
+        execution_ids.add(execution_id)
+        completed_seen = status == "COMPLETED"
+    latest = history[-1]
+    if (
+        latest.get("status") != "COMPLETED"
+        or latest.get("id") != intent.get("execution_id")
+        or latest.get("attempt_number") != intent.get("attempt_number")
+        or latest.get("provider") != intent.get("paid_execution_provider")
+        or latest.get("external_op_id") != intent.get("paid_execution_external_id")
+        or latest.get("status") != intent.get("paid_execution_status")
+        or latest.get("cost") != intent.get("paid_execution_cost")
+        or latest.get("cost_unit") != intent.get("cost_unit")
+    ):
+        raise ValueError("Provider-character paid execution history has a stale terminal row")
+    return execution_ids
+
+
+def _v07_reserve_metadata_allowed(
+    metadata: tuple[Any, Any, Any], paid_execution_ids: set[str]
+) -> bool:
+    """Accept only unbound reserves or exact pre-intent rows for known paid attempts."""
+    return metadata == (None, None, None) or (
+        metadata[0] is None
+        and metadata[2] is None
+        and isinstance(metadata[1], str)
+        and metadata[1] in paid_execution_ids
+    )
+
+
 def _v07_close_matrix3(value: Any, expected: Any, tolerance: float) -> bool:
     return (
         isinstance(value, list)
@@ -3352,6 +3437,7 @@ def _verify_v07_provider_character_bundle(root: Path, manifest: dict[str, Any]) 
         "paid_execution_provider",
         "paid_execution_status",
         "paid_execution_cost",
+        "paid_execution_history",
     }
     raw_row = roles["provider_generated_glb"][0]
     raw_hash = raw_row["sha256"]
@@ -3388,6 +3474,7 @@ def _verify_v07_provider_character_bundle(root: Path, manifest: dict[str, Any]) 
         raise ValueError(
             "Provider operation, paid approval, provider ID, or raw-byte pin is inconsistent"
         )
+    paid_execution_ids = _v07_paid_execution_history(intent, workflow_id, revision)
     cost = obj("cost_record")
     ledger_entries = cost.get("entries")
     ledger_account = cost.get("operation_account")
@@ -3471,10 +3558,7 @@ def _verify_v07_provider_character_bundle(root: Path, manifest: dict[str, Any]) 
             entry.get("request_fingerprint"),
         )
         if entry["entry_type"] == "RESERVE":
-            if metadata not in (
-                (None, None, None),
-                (intent.get("id"), intent.get("execution_id"), intent.get("request_fingerprint")),
-            ):
+            if not _v07_reserve_metadata_allowed(metadata, paid_execution_ids):
                 raise ValueError(
                     "Provider-character reservation metadata conflicts with its paid intent"
                 )

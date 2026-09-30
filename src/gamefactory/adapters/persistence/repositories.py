@@ -2263,6 +2263,17 @@ class ConceptVersionRepository:
         finally:
             conn.close()
 
+    def list_by_workflow(self, workflow_id: str) -> list[ConceptVersionRecord]:
+        conn = self.db.connect()
+        try:
+            rows = conn.execute(
+                "SELECT * FROM concept_versions WHERE workflow_id = ? ORDER BY revision_number, version;",
+                (workflow_id,),
+            ).fetchall()
+            return [self._row_to_record(row) for row in rows]
+        finally:
+            conn.close()
+
     def list_for_revision(self, asset_id: str, revision_number: int) -> list[ConceptVersionRecord]:
         conn = self.db.connect()
         try:

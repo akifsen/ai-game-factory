@@ -114,6 +114,7 @@ def ingest_concept_image(
     model_name: str | None = None,
     source_type: str = "imported",
     cost_classification: CostClass = CostClass.LOCAL,
+    sidecar_provenance_bytes: bytes | None = None,
 ) -> tuple[Path, ConceptProvenance]:
     """Ingest an existing concept PNG, verify its integrity, copy to target, and record honest provenance.
 
@@ -133,6 +134,11 @@ def ingest_concept_image(
 
     if source_type not in {"imported", "local_generation"}:
         raise ValidationError(f"Unsupported concept source_type: {source_type}")
+    if sidecar_provenance_bytes is not None and (
+        not isinstance(sidecar_provenance_bytes, bytes)
+        or len(sidecar_provenance_bytes) > MAX_PROVENANCE_SIDECAR_BYTES
+    ):
+        raise ValidationError("Provenance sidecar snapshot exceeds its bounded size")
 
     # Read a single bounded byte snapshot so verification, hash binding, and copy all
     # refer to identical bytes even if the source changes concurrently.
@@ -181,8 +187,12 @@ def ingest_concept_image(
     source_script_sha256: str | None = None
 
     if sidecar_file is not None:
-        sidecar_bytes = _read_bounded(
-            sidecar_file, MAX_PROVENANCE_SIDECAR_BYTES, "Provenance sidecar"
+        sidecar_bytes = (
+            sidecar_provenance_bytes
+            if sidecar_provenance_bytes is not None
+            else _read_bounded(
+                sidecar_file, MAX_PROVENANCE_SIDECAR_BYTES, "Provenance sidecar"
+            )
         )
         try:
             sidecar_data = json.loads(

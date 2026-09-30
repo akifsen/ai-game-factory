@@ -24,6 +24,7 @@ from typing import Any, cast
 
 from gamefactory.core.approvals.approval_service import compute_operation_hash
 from gamefactory.core.domain.errors import ArtifactError, ValidationError
+from gamefactory.core.execution.path_guard import PathGuard
 
 _SCHEMA = "asset-evidence-0.7.0"
 _ROLES = frozenset(
@@ -133,6 +134,15 @@ def _canonical(value: Any, *, pretty: bool = False) -> bytes:
         )
         + ("\n" if pretty else "")
     ).encode("utf-8")
+
+
+def _unique_object(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    result: dict[str, Any] = {}
+    for key, value in pairs:
+        if key in result:
+            raise ValueError(f"duplicate JSON key: {key}")
+        result[key] = value
+    return result
 
 
 def _relpath(value: str) -> str:
@@ -849,3 +859,279 @@ def export_current_provider_character_evidence(
         _live_snapshot_recheck=reselect,
         _expected_snapshot_fingerprint=expected_fingerprint,
     )
+
+
+def revalidate_current_provider_character_evidence_bundle(
+    handlers: Any, workflow: Any
+) -> dict[str, Any]:
+    """Read-only verify the latest completed task's engine-linked evidence bundle."""
+    from gamefactory.adapters.persistence.repositories import (
+        ArtifactRepository,
+        EvidenceRepository,
+        ExecutionRepository,
+        QualityGateRepository,
+        TaskRepository,
+        WorkflowRepository,
+    )
+    from gamefactory.core.domain.models import ExecutionStatus, TaskStatus, WorkflowStatus
+
+    db = handlers.artifacts.db
+    workflows = WorkflowRepository(db)
+    tasks_repo = TaskRepository(db)
+    executions = ExecutionRepository(db)
+    artifacts = ArtifactRepository(db)
+    evidences = EvidenceRepository(db)
+    gates = QualityGateRepository(db)
+
+    def current_records(workflow_id: str) -> tuple[Any, Any, Any]:
+        persisted_workflow = workflows.get(workflow_id)
+        if persisted_workflow is None or persisted_workflow.status != WorkflowStatus.COMPLETED:
+            raise ArtifactError("Provider-character revalidation requires a completed workflow")
+        evidence_tasks = [
+            item
+            for item in tasks_repo.list_by_workflow(workflow_id)
+            if item.task_type == "asset_v07_provider_evidence"
+        ]
+        if len(evidence_tasks) != 1 or evidence_tasks[0].status != TaskStatus.COMPLETED:
+            raise ArtifactError("Completed workflow has no unique completed provider-evidence task")
+        task = evidence_tasks[0]
+        execution = executions.get_latest_attempt(task.id)
+        if execution is None or execution.status != ExecutionStatus.COMPLETED:
+            raise ArtifactError("Latest provider-evidence execution is not COMPLETED")
+        return persisted_workflow, task, execution
+
+    workflow_id = getattr(workflow, "id", None)
+    if not isinstance(workflow_id, str) or not workflow_id:
+        raise ArtifactError("Provider-character revalidation workflow identity is invalid")
+
+    def current_publication(workflow_id: str, task_id: str, execution_id: str) -> tuple[Any, str]:
+        matching = [
+            item
+            for item in evidences.list_by_task(task_id)
+            if item.execution_id == execution_id
+            and item.evidence_type == "handler:asset_v07_provider_evidence"
+        ]
+        if len(matching) != 1:
+            raise ArtifactError(
+                "Latest completed provider-evidence execution has no unique engine evidence row"
+            )
+        evidence = matching[0]
+        raw_data = evidence.raw_data
+        if not isinstance(raw_data, dict) or not isinstance(raw_data.get("artifacts"), list):
+            raise ArtifactError("Engine provider-evidence record is malformed")
+        if len(raw_data["artifacts"]) != 1 or not isinstance(raw_data["artifacts"][0], dict):
+            raise ArtifactError("Engine provider-evidence row does not link one manifest artifact")
+        linked = raw_data["artifacts"][0]
+        if linked.get("status") != "VERIFIED" or not isinstance(linked.get("artifact_id"), str):
+            raise ArtifactError("Engine provider-evidence manifest was not verified")
+        manifest_artifact = artifacts.get(linked["artifact_id"])
+        if (
+            manifest_artifact is None
+            or manifest_artifact.workflow_id != workflow_id
+            or manifest_artifact.task_id != task_id
+            or manifest_artifact.artifact_type != "provider-character-evidence-manifest"
+            or manifest_artifact.producer != "cold_verified_provider_character_evidence"
+            or manifest_artifact.validation_state != "VERIFIED"
+            or type(manifest_artifact.file_size) is not int
+            or manifest_artifact.file_size < 0
+            or manifest_artifact.file_size > _DEFAULT_FILE_LIMIT
+        ):
+            raise ArtifactError("Engine evidence does not link the registered manifest artifact")
+        if (
+            linked.get("content_hash") != manifest_artifact.content_hash
+            or type(linked.get("file_size")) is not int
+            or linked.get("file_size") != manifest_artifact.file_size
+            or raw_data.get("gate_id") is None
+        ):
+            raise ArtifactError("Engine evidence manifest hash or gate binding is stale")
+        gate_rows = [item for item in gates.list_by_task(task_id) if item.id == raw_data["gate_id"]]
+        if (
+            len(gate_rows) != 1
+            or gate_rows[0].status.value != "PASSED"
+            or gate_rows[0].gate_type != "handler:asset_v07_provider_evidence"
+        ):
+            raise ArtifactError("Provider-character manifest has no current passing engine gate")
+        verified = handlers.artifact_manager.verify_artifact_integrity(manifest_artifact)
+        if (
+            verified.get("content_hash") != manifest_artifact.content_hash
+            or type(verified.get("file_size")) is not int
+            or verified.get("file_size") != manifest_artifact.file_size
+        ):
+            raise ArtifactError("Provider-character manifest persisted size differs from disk")
+        try:
+            binding = hashlib.sha256(
+                json.dumps(
+                    {
+                        "evidence": evidence.to_dict(),
+                        "gate": gate_rows[0].to_dict(),
+                        "artifact": manifest_artifact.to_dict(),
+                    },
+                    sort_keys=True,
+                    separators=(",", ":"),
+                    allow_nan=False,
+                ).encode("utf-8")
+            ).hexdigest()
+        except (TypeError, ValueError, RecursionError) as exc:
+            raise ArtifactError(
+                "Provider-character engine publication metadata is malformed"
+            ) from exc
+        return manifest_artifact, binding
+
+    persisted_workflow, task, execution = current_records(workflow_id)
+    manifest_artifact, publication_binding = current_publication(workflow_id, task.id, execution.id)
+    specification = task.parameters.get("specification")
+    revision = task.parameters.get("revision_number")
+    asset_id = specification.get("asset_id") if isinstance(specification, dict) else None
+    if type(revision) is not int or not isinstance(asset_id, str):
+        raise ArtifactError("Completed provider-character task revision is malformed")
+    expected_manifest_path = (
+        f".gamefactory/assets/{asset_id}/r{revision:03d}/provider-evidence/"
+        f"{execution.id}-a{execution.attempt_number}/manifest.json"
+    )
+    if manifest_artifact.relative_path != expected_manifest_path:
+        raise ArtifactError("Completed manifest is not owned by the latest evidence attempt")
+    handlers.artifact_manager.verify_artifact_integrity(manifest_artifact)
+    snapshot = handlers.current_provider_character_evidence_inputs(
+        persisted_workflow, task, execution
+    )
+    expected_fingerprint = _snapshot_fingerprint(snapshot)
+    manifest_path = PathGuard(handlers.root).resolve_safe_path(manifest_artifact.relative_path)
+    manifest_data = _read(ProviderCharacterEvidenceFile("bound_profile", path=manifest_path))
+    if len(manifest_data) != manifest_artifact.file_size:
+        raise ArtifactError("Provider-character manifest size differs from its persisted artifact")
+    try:
+        manifest = json.loads(
+            manifest_data.decode("utf-8"),
+            object_pairs_hook=_unique_object,
+            parse_constant=lambda value: (_ for _ in ()).throw(ValueError(value)),
+        )
+    except (UnicodeDecodeError, json.JSONDecodeError, ValueError) as exc:
+        raise ArtifactError("Provider-character manifest is not bounded valid JSON") from exc
+    if (
+        not isinstance(manifest, dict)
+        or manifest.get("schema_version") != _SCHEMA
+        or manifest.get("generation_mode") != "provider_generated_character"
+        or manifest.get("paid") is not True
+        or manifest.get("product_ready") is not True
+        or manifest.get("current_attempt_history") != snapshot["attempt_history"]
+    ):
+        raise ArtifactError("Provider-character manifest is malformed or not product-ready")
+    for key, expected in snapshot["binding"].items():
+        if manifest.get(key) != expected:
+            raise ArtifactError(f"Provider-character completed manifest binding changed: {key}")
+
+    rows = manifest.get("files")
+    if not isinstance(rows, list):
+        raise ArtifactError("Provider-character manifest file list is malformed")
+    manifest_rows: dict[tuple[str, str | None], dict[str, Any]] = {}
+    for row in rows:
+        if not isinstance(row, dict) or not isinstance(row.get("role"), str):
+            raise ArtifactError("Provider-character manifest role entry is malformed")
+        identity = (row["role"], row.get("view"))
+        if identity in manifest_rows:
+            raise ArtifactError("Provider-character manifest has duplicate role/view entries")
+        manifest_rows[identity] = row
+
+    expected_rows: dict[tuple[str, str | None], ProviderCharacterEvidenceFile] = {}
+    for item in snapshot["files"]:
+        identity = (item.role, item.view)
+        if identity in expected_rows:
+            raise ArtifactError("Current provider-character snapshot has duplicate roles")
+        expected_rows[identity] = item
+    expected_identities = set(expected_rows) | {(role, None) for role in _GENERATED}
+    if set(manifest_rows) != expected_identities:
+        raise ArtifactError("Provider-character manifest roles differ from the current snapshot")
+    for identity, source in expected_rows.items():
+        row = manifest_rows[identity]
+        raw = _read(source)
+        if (
+            row.get("sha256") != _sha(raw)
+            or row.get("size") != len(raw)
+            or row.get("artifact_id") != source.artifact_id
+            or row.get("source_relative_path") != source.source_relative_path
+        ):
+            raise ArtifactError(
+                f"Provider-character completed manifest role differs from current {source.role}"
+            )
+    for role, receipt_key in (
+        ("concept_approval", "concept_review_receipt"),
+        ("paid_approval", "paid_review_receipt"),
+        ("final_approval", "final_review_receipt"),
+    ):
+        row = manifest_rows[(role, None)]
+        if not isinstance(row.get("path"), str):
+            raise ArtifactError(f"Provider-character {role} path is malformed")
+        receipt_path = PathGuard(handlers.root).resolve_safe_path(
+            manifest_artifact.relative_path.rsplit("/", 1)[0] + "/" + _relpath(row["path"])
+        )
+        raw = _read(ProviderCharacterEvidenceFile("bound_profile", path=receipt_path))
+        try:
+            receipt = json.loads(
+                raw.decode("utf-8"),
+                object_pairs_hook=_unique_object,
+                parse_constant=lambda value: (_ for _ in ()).throw(ValueError(value)),
+            )
+        except (UnicodeDecodeError, json.JSONDecodeError, ValueError) as exc:
+            raise ArtifactError(f"Provider-character {role} receipt is malformed") from exc
+        if not isinstance(receipt, dict):
+            raise ArtifactError(f"Provider-character {role} receipt is malformed")
+        try:
+            receipt_matches = _canonical(receipt) == _canonical(snapshot[receipt_key])
+        except (TypeError, ValueError, RecursionError) as exc:
+            raise ArtifactError(f"Provider-character {role} receipt is not canonical JSON") from exc
+        if not receipt_matches:
+            differing_fields = sorted(
+                key
+                for key in set(receipt) | set(snapshot[receipt_key])
+                if receipt.get(key) != snapshot[receipt_key].get(key)
+            )
+            detail = ", ".join(differing_fields)
+            receipt_inputs = receipt.get("inputs")
+            current_inputs = snapshot[receipt_key].get("inputs")
+            if isinstance(receipt_inputs, dict) and isinstance(current_inputs, dict):
+                detail += (
+                    " (input fields: "
+                    + ", ".join(
+                        sorted(
+                            key
+                            for key in set(receipt_inputs) | set(current_inputs)
+                            if receipt_inputs.get(key) != current_inputs.get(key)
+                        )
+                    )
+                    + ")"
+                )
+            raise ArtifactError(
+                f"Provider-character {role} differs from the current human approval: "
+                f"fields {detail}"
+            )
+
+    result = _cold_gate(manifest_path.parent)
+
+    latest_workflow, latest_task, latest_execution = current_records(workflow_id)
+    if (
+        latest_task.id != task.id
+        or latest_execution.id != execution.id
+        or latest_execution.attempt_number != execution.attempt_number
+    ):
+        raise ArtifactError("Provider-character evidence attempt changed during cold revalidation")
+    latest_manifest_artifact, latest_publication_binding = current_publication(
+        workflow_id, latest_task.id, latest_execution.id
+    )
+    if (
+        latest_manifest_artifact.id != manifest_artifact.id
+        or latest_manifest_artifact.content_hash != manifest_artifact.content_hash
+        or latest_manifest_artifact.relative_path != manifest_artifact.relative_path
+        or latest_publication_binding != publication_binding
+    ):
+        raise ArtifactError("Provider-character manifest publication changed during revalidation")
+    latest_snapshot = handlers.current_provider_character_evidence_inputs(
+        latest_workflow, latest_task, latest_execution
+    )
+    if _snapshot_fingerprint(latest_snapshot) != expected_fingerprint:
+        raise ArtifactError("Provider-character live snapshot changed during cold revalidation")
+    return {
+        **result,
+        "evidence_manifest": latest_manifest_artifact.relative_path,
+        "evidence_manifest_sha256": latest_manifest_artifact.content_hash,
+        "evidence_manifest_artifact_id": latest_manifest_artifact.id,
+    }

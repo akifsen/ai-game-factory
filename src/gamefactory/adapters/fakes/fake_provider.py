@@ -220,6 +220,24 @@ class FakeAssetGenerationProvider(AssetGenerationProvider, PaidRequestAdapter):
     def generate(self, request: GenerationRequest) -> GenerationResponse:
         """Execute deterministic generation with invocation counting and failure simulation."""
         params = request.parameters
+        v07_cost_unit: str | None = None
+        if params.get("graph_version") == "0.7.0":
+            raw_cost_unit = params.get("cost_unit")
+            if not isinstance(raw_cost_unit, str) or not raw_cost_unit.strip():
+                raise PaidRequestInvalidError(
+                    "V0.7 fake-provider requests require a non-empty configured cost_unit"
+                )
+            v07_cost_unit = raw_cost_unit
+            if request.paid_request is not None:
+                content = request.paid_request.content
+                snapshot_cost = content.get("cost") if isinstance(content, dict) else None
+                snapshot_unit = (
+                    snapshot_cost.get("unit") if isinstance(snapshot_cost, dict) else None
+                )
+                if snapshot_unit != v07_cost_unit:
+                    raise PaidRequestInvalidError(
+                        "V0.7 fake-provider cost_unit must match the immutable paid-request snapshot"
+                    )
         paid_snap_hash: str | None = None
         if request.paid_request is not None:
             content = request.paid_request.content
@@ -248,6 +266,15 @@ class FakeAssetGenerationProvider(AssetGenerationProvider, PaidRequestAdapter):
             if existing_intent is None and task_id:
                 existing_intent = self.intent_repo.get_by_task(task_id)
 
+        if (
+            v07_cost_unit is not None
+            and existing_intent is not None
+            and existing_intent.cost_unit != v07_cost_unit
+        ):
+            raise PaidRequestInvalidError(
+                "Existing V0.7 fake-provider intent has a conflicting cost_unit"
+            )
+
         if existing_intent is not None:
             if (
                 existing_intent.status in {"SUCCEEDED", "SUBMITTED"}
@@ -269,7 +296,7 @@ class FakeAssetGenerationProvider(AssetGenerationProvider, PaidRequestAdapter):
                     status="SUCCESS",
                     output_path=str(downloaded) if downloaded else None,
                     cost=actual_cost if actual_cost is not None else 0.0,
-                    cost_unit="fake_credits",
+                    cost_unit=v07_cost_unit or "fake_credits",
                     details={
                         "resumed": True,
                         "task_id": existing_intent.external_task_id,
@@ -305,6 +332,7 @@ class FakeAssetGenerationProvider(AssetGenerationProvider, PaidRequestAdapter):
                 request_fingerprint=request_fingerprint,
                 approval_id=approval_id,
                 estimated_cost=5.0,
+                cost_unit=v07_cost_unit or "credits",
                 status="SUBMITTING",
                 paid_request_snapshot_hash=paid_snap_hash,
             )
@@ -379,7 +407,7 @@ class FakeAssetGenerationProvider(AssetGenerationProvider, PaidRequestAdapter):
             status="SUCCESS",
             output_path=str(output_file) if output_file else None,
             cost=cost_val if not self.report_unknown_cost else 0.0,
-            cost_unit="fake_credits",
+            cost_unit=v07_cost_unit or "fake_credits",
             details={
                 "prompt": request.prompt,
                 "triangles": 12,
