@@ -1331,6 +1331,43 @@ def test_main_default_uuid_run_id(tmp_path: Path, monkeypatch: pytest.MonkeyPatc
     assert summary["run_id"] == run_dir.name
 
 
+@pytest.mark.skipif(os.name != "posix", reason="POSIX virtualenv interpreter symlinks")
+def test_main_preserves_invoked_venv_python_symlink(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _mock_successful_main_preflight(monkeypatch, tmp_path)
+    bin_dir = tmp_path / "venv" / "bin"
+    bin_dir.mkdir(parents=True)
+    interpreter_link = bin_dir / "python"
+    interpreter_link.symlink_to(Path(sys.executable).resolve())
+    assert interpreter_link.is_symlink()
+    assert interpreter_link.absolute() != interpreter_link.resolve()
+
+    inspected: list[Path] = []
+    original_inspect = verifier.inspect_module_provenance
+
+    def record_interpreter_path(python_exe: Path, *args: Any, **kwargs: Any) -> dict[str, Any]:
+        inspected.append(python_exe)
+        return original_inspect(python_exe, *args, **kwargs)
+
+    monkeypatch.setattr(verifier, "inspect_module_provenance", record_interpreter_path)
+    evidence = tmp_path / "symlink-python-evidence"
+    result = verifier.main(
+        [
+            "--python",
+            str(interpreter_link),
+            "--evidence-dir",
+            str(evidence),
+            "--allow-skip",
+            "--suite",
+            "nonexistent_suite_id_to_skip_all",
+        ]
+    )
+
+    assert result == 0
+    assert inspected == [interpreter_link.absolute()]
+
+
 def test_main_run_id_collision_preserves_canary(tmp_path: Path) -> None:
     """Attempting to reuse an existing run ID directory fails closed without altering contents."""
     evidence_base = tmp_path / "collision_canary_base"

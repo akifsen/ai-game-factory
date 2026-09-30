@@ -1047,7 +1047,9 @@ def main(argv: list[str] | None = None) -> int:
 
     args = parser.parse_args(argv)
     repo_root = args.repo_root.resolve()
-    python_exe = args.python.resolve()
+    # Keep a venv's invoked executable path. POSIX venv/bin/python is often a
+    # symlink; resolving it can escape the venv and import a system install.
+    python_exe = args.python.absolute()
     base_evidence_dir = (
         args.evidence_dir if args.evidence_dir.is_absolute() else (repo_root / args.evidence_dir)
     ).resolve()

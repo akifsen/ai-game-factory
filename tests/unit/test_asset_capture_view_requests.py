@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -36,6 +37,8 @@ def test_capture_request_rejects_unknown_or_unhashable_angles_before_staging(
     root.mkdir()
     executable = root / "Godot.exe"
     executable.write_bytes(b"test placeholder")
+    if os.name == "posix":
+        executable.chmod(executable.stat().st_mode | 0o111)
     (root / "validation.json").write_text(json.dumps({"status": "PASS"}), encoding="utf-8")
     artifacts = _Artifacts(
         [
