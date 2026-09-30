@@ -1,0 +1,74 @@
+schema_version: "0.7.0"
+asset_id: weapon_fixture
+category: weapon
+profile: weapon
+profile_version: 1
+intent: >-
+  Locally authored compact field weapon with a fixed receiver and grip,
+  independently hinged barrel, translating bolt, muzzle and grip-contact frames.
+source_kind: local_operator_assembly
+dimensions:
+  width_m: 0.72
+  height_m: 0.62
+  depth_m: 1.75
+orientation:
+  up: "+Y"
+  front: "-Z"
+origin_policy: bottom_center
+geometry_budget:
+  max_triangles_lod0: 10000
+  max_triangles_lod1: 5000
+  lod_ratio: 0.5
+material_budget:
+  max_materials: 4
+texture_budget:
+  max_dimension: 2048
+collider:
+  policy: box
+lod_policy: lod0_lod1
+style_constraints:
+  family: stylized_scifi
+  silhouette: compact_precision_tool
+  detail_density: medium
+target_engine: godot
+target_import_path: assets/generated/weapons/field_weapon_test/
+parts:
+  - part_id: receiver
+    role: receiver
+    parent: root
+    pivot:
+      position_m: [-0.06, 0.33, 0.435]
+      basis: identity
+      motion: {kind: fixed}
+  - part_id: barrel
+    role: barrel
+    parent: receiver
+    pivot:
+      position_m: [0.0, 0.08, -0.43]
+      basis: identity
+      motion: {kind: fixed}
+  - part_id: grip
+    role: grip
+    parent: receiver
+    pivot:
+      position_m: [0.24, -0.17, 0.18]
+      basis: identity
+      motion: {kind: fixed}
+  - part_id: bolt
+    role: bolt
+    parent: receiver
+    pivot:
+      position_m: [0.0, 0.25, 0.08]
+      basis: identity
+      motion: {kind: prismatic, axis: [0.0, 0.0, 1.0]}
+sockets:
+  - socket_id: muzzle
+    parent_part: barrel
+    translation_m: [0.0, 0.0, -0.88]
+    rotation: identity
+    placement: forward_end
+  - socket_id: grip_contact
+    parent_part: grip
+    translation_m: [0.0, -0.16, -0.12]
+    rotation: [-0.7071067811865476, 0.0, 0.0, 0.7071067811865476]
+    placement: forward_end

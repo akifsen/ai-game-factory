@@ -990,8 +990,8 @@ def test_builtin_registry_contents_and_isolation() -> None:
     # No test ids present
     assert not any("test" in r["profile_id"] for r in availability)
 
-    # Historical profiles remain unchanged; the vehicle candidate resource is
-    # present but is deliberately not exposed by the builtin registry.
+    # Historical profiles remain unchanged; only the explicit V0.7 local
+    # assembly candidates are added as unadvertised resources.
     profile_dir = files("gamefactory").joinpath("resources/profiles")
     profile_filenames = {p.name for p in profile_dir.iterdir()}
     assert profile_filenames == {
@@ -999,6 +999,8 @@ def test_builtin_registry_contents_and_isolation() -> None:
         "pickup.yml",
         "modular_piece.yml",
         "vehicle.yml",
+        "weapon.yml",
+        "aircraft.yml",
     }
     with pytest.raises(ProfileContractError, match="profile vehicle is UNSUPPORTED"):
         reg.get_v07("vehicle", 1)
