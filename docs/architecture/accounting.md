@@ -130,6 +130,10 @@ gamefactory accounting reconcile --workflow WF-123 --task TASK-ID --apply   --ac
 > schema migrations first. On a schema-6 (V0.5.1) database even the default dry run
 > migrates it to the current schema. Do not use it as a "read-only inspection" of a
 > live database; follow the operator procedure below.
+>
+> `accounting ledger` and `recovery inspect` are read-only: they open the database with
+> SQLite `mode=ro`, never migrate it, and refuse a database whose schema is older than
+> the CLI instead of migrating it.
 
 ### Eligibility Invariants
 An operation is eligible for reconciliation if and only if:

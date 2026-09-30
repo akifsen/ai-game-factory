@@ -23,6 +23,7 @@ from gamefactory.adapters.dcc.blender_environment import (
     parse_blender_python_paths,
     run_blender_dependency_preflight,
 )
+from gamefactory.adapters.dcc.windows_paths import ensure_windows_output_paths
 from gamefactory.core.domain.asset_contracts import AssetSpecification, AssetSpecificationV07
 from gamefactory.core.domain.errors import DccFailedError
 from gamefactory.core.domain.models import utc_now_iso
@@ -326,6 +327,18 @@ class BlenderAssetProcessor:
                 raise ValueError(f"refusing to overwrite existing {label}: {target}")
             if target.suffix.casefold() != suffix:
                 raise ValueError(f"{label} must use the {suffix} extension")
+
+        # Deep workspaces can exceed the legacy Windows MAX_PATH inside Blender
+        # (V0.6 known limitation). Fail before launching it, with an actionable message.
+        ensure_windows_output_paths(
+            (
+                ("raw GLB", raw_glb),
+                ("processed GLB", processed_glb),
+                ("processing report", resolved_report),
+                ("processing contract", resolved_report.with_suffix(".contract.json")),
+                ("Blender diagnostics", resolved_report.with_suffix(".blender-diagnostics.txt")),
+            )
+        )
 
         # Structural, bounds-checked safety inspection occurs before the Blender process.
         source_facts = preflight_glb(raw_glb)

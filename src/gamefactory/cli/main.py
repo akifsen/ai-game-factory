@@ -585,6 +585,45 @@ def _inspect(db: Database, workflow_id: str) -> dict[str, Any]:
     }
 
 
+def _db_existing_readonly(root: Path) -> Database:
+    """Open initialized state for pure inspection: no migrations, no created files.
+
+    Opening through :func:`_db` migrates the schema, so an inspection of a live
+    database written by an older release would change it. Read-only inspection
+    therefore requires a database already at the current schema and refuses an
+    older one instead of silently migrating it.
+    """
+    from gamefactory.adapters.persistence.migrations import MIGRATIONS
+    from gamefactory.adapters.persistence.read_only_database import ReadOnlyDatabase
+
+    assert_managed_directory(root, ".gamefactory")
+    state = assert_managed_directory(root, ".gamefactory/state")
+    if not state.is_dir():
+        raise ConfigurationError(
+            f"Factory project is not initialized at {root}; run 'gamefactory init'."
+        )
+    db_path = PathGuard(root).resolve_safe_path(".gamefactory/state/factory.db")
+    if not db_path.is_file():
+        raise ConfigurationError(f"Factory database is missing: {db_path}")
+    db = ReadOnlyDatabase(db_path)
+    supported = max(version for version, _name, _fn in MIGRATIONS)
+    try:
+        with db.transaction() as conn:
+            applied = {
+                row[0] for row in conn.execute("SELECT version FROM schema_migrations").fetchall()
+            }
+    except sqlite3.OperationalError as exc:
+        raise ConfigurationError(f"Factory database has no migration history: {db_path}") from exc
+    current = max(applied, default=0)
+    if current != supported:
+        raise ConfigurationError(
+            f"Factory database schema is version {current}; this CLI reads version {supported}. "
+            "Inspection is read-only and will not migrate it. Back it up and follow the operator "
+            "procedure in docs/architecture/accounting.md, or run any mutating command to migrate."
+        )
+    return db
+
+
 def _accounting_ledger(db: Database, workflow_id: str) -> tuple[dict[str, Any], int, str | None]:
     wf = WorkflowRepository(db).get(workflow_id)
     if wf is None:
@@ -2237,7 +2276,10 @@ def _dispatch(args: argparse.Namespace) -> tuple[Any, int, str | None]:
         "recovery",
     }:
         # Explicit path overrides are passed through detection; no failed explicit path falls back.
-        db = _db(root)
+        read_only = (args.command == "recovery" and args.recovery_command == "inspect") or (
+            args.command == "accounting" and args.accounting_command == "ledger"
+        )
+        db = _db_existing_readonly(root) if read_only else _db(root)
         if args.command == "recovery":
             if args.recovery_command == "inspect":
                 return _recovery_inspect(root, db, args.workflow_id)
