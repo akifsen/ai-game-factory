@@ -12,14 +12,24 @@ import io
 import json
 import math
 import struct
-from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
 from PIL import Image
 
+from gamefactory.adapters.assets.validation_rules import (
+    Composition,
+    InvalidGLB,
+    MeshInfo,
+    NodeInfo,
+    NormalizationRecord,
+    ParsedGLB,
+    RuleInput,
+    select_composition,
+)
 from gamefactory.core.domain.asset_contracts import (
     AssetSpecification,
+    AssetSpecificationV07,
     AssetValidationResult,
     ValidationFinding,
 )
@@ -42,16 +52,8 @@ _MAX_TOTAL_TRIANGLES = 100_000
 _MAX_FILE_BYTES = 50 * 1024 * 1024
 
 
-class _InvalidGLB(ValueError):
-    pass
-
-
-@dataclass(frozen=True)
-class _MeshInfo:
-    name: str
-    triangle_count: int
-    material_ids: frozenset[int]
-    points: tuple[tuple[float, float, float], ...]
+_InvalidGLB = InvalidGLB
+_MeshInfo = MeshInfo
 
 
 def _read_glb(path: Path, max_bytes: int) -> tuple[dict[str, Any], bytes]:
@@ -350,6 +352,7 @@ def _inspect(
         mesh = meshes[mi]
         name = str(node.get("name") or mesh.get("name") or "")
         pts: list[tuple[float, float, float]] = []
+        local_pts: list[tuple[float, float, float]] = []
         tri_count = 0
         mats: set[int] = set()
         matrix = world_matrix(ni, set())
@@ -375,6 +378,7 @@ def _inspect(
             for position_index in sorted(set(ids)):
                 row = positions[position_index]
                 x, y, z = row
+                local_pts.append((float(x), float(y), float(z)))
                 p: tuple[float, float, float] = (
                     float(sum(matrix[0][c] * (x, y, z, 1)[c] for c in range(4))),
                     float(sum(matrix[1][c] * (x, y, z, 1)[c] for c in range(4))),
@@ -394,7 +398,7 @@ def _inspect(
                         raise _InvalidGLB(f"{attribute} count differs from POSITION count")
             if "targets" in primitive:
                 raise _InvalidGLB("morph targets are unsupported")
-        infos.append(_MeshInfo(name, tri_count, frozenset(mats), tuple(pts)))
+        infos.append(_MeshInfo(name, tri_count, frozenset(mats), tuple(pts), ni, tuple(local_pts)))
         all_points.extend(pts)
         total_triangles += tri_count
         if total_triangles > _MAX_TOTAL_TRIANGLES:
@@ -456,240 +460,146 @@ def preflight_glb(path: Path, *, max_file_size_bytes: int = _MAX_FILE_BYTES) -> 
     }
 
 
+def parse_glb(path: Path, *, max_file_size_bytes: int = _MAX_FILE_BYTES) -> ParsedGLB:
+    """Parse and inspect one GLB into the structure every rule group reads."""
+    doc, binary = _read_glb(path, max_file_size_bytes)
+    infos, points, material_ids, textures, tris, world_matrices = _inspect(doc, binary)
+    raw_nodes = doc.get("nodes", [])
+    parents: dict[int, int] = {}
+    for parent, node in enumerate(raw_nodes):
+        for child in node.get("children", []):
+            parents[child] = parent
+    local = [_node_matrix(node) for node in raw_nodes]
+    world: dict[int, list[list[float]]] = {}
+
+    def world_of(index: int, depth: int = 0) -> list[list[float]]:
+        if index in world:
+            return world[index]
+        if depth > 128:
+            raise _InvalidGLB("node hierarchy exceeds maximum depth 128")
+        value = (
+            local[index]
+            if index not in parents
+            else _mat_mul(world_of(parents[index], depth + 1), local[index])
+        )
+        world[index] = value
+        return value
+
+    nodes: list[NodeInfo] = []
+    for index, node in enumerate(raw_nodes):
+        extras = node.get("extras", {})
+        if not isinstance(extras, dict):
+            raise _InvalidGLB("node extras must be an object")
+        mesh = node.get("mesh")
+        nodes.append(
+            NodeInfo(
+                index=index,
+                name=str(node.get("name") or ""),
+                parent=parents.get(index),
+                children=tuple(node.get("children", [])),
+                mesh=mesh if isinstance(mesh, int) else None,
+                local=local[index],
+                world=world_of(index),
+                extras=extras,
+            )
+        )
+    scene = doc["scenes"][doc.get("scene", 0)]
+    return ParsedGLB(
+        document=doc,
+        binary=binary,
+        sha256=hashlib.sha256(path.read_bytes()).hexdigest(),
+        meshes=infos,
+        points=points,
+        material_ids=material_ids,
+        textures=textures,
+        triangles=tris,
+        world=world_matrices,
+        nodes=nodes,
+        scene_roots=tuple(scene.get("nodes", [])),
+    )
+
+
+def composition_for(spec: AssetSpecification | AssetSpecificationV07) -> Composition:
+    """Rule groups for a specification, derived from typed capabilities (ADR 0018)."""
+    if isinstance(spec, AssetSpecificationV07):
+        profile = spec.bound_profile()
+        return select_composition(
+            geometry_mode=profile.geometry_mode,
+            collider_policy=spec.collider.policy,
+            sockets_declared=bool(spec.sockets),
+            requires_normalization=spec.source_kind == "local_operator_assembly",
+        )
+    return select_composition(
+        geometry_mode="single_mesh",
+        collider_policy=spec.collider_policy,
+        sockets_declared=False,
+        requires_normalization=False,
+    )
+
+
+_PARSE_ERRORS = (OSError, _InvalidGLB, KeyError, TypeError, ValueError, IndexError, struct.error)
+
+
 def validate_glb(
-    path: Path, spec: AssetSpecification, *, max_file_size_bytes: int = _MAX_FILE_BYTES
+    path: Path,
+    spec: AssetSpecification | AssetSpecificationV07,
+    *,
+    max_file_size_bytes: int = _MAX_FILE_BYTES,
+    normalization: NormalizationRecord | None = None,
 ) -> AssetValidationResult:
-    """Validate a processed GLB against the specification's bound profile."""
-    profile = spec.bound_profile()
-    contract = profile.processing_contract(spec)
+    """Validate a processed GLB against the specification's bound profile.
+
+    The ordered rule composition comes from :func:`composition_for`. Single-mesh
+    box profiles keep the frozen V0.4-V0.6 finding order. ``normalization`` is the
+    ``source_front`` record (with the retained source parsed) for assemblies.
+    """
+    profile: Any
+    if isinstance(spec, AssetSpecificationV07):
+        profile = spec.bound_profile()
+        contract = profile.processing_contract(spec)
+    else:
+        profile = spec.bound_profile()
+        contract = profile.processing_contract(spec)
     artifact = str(path)
     findings: list[ValidationFinding] = []
-
-    def add(
-        rule: str, passed: bool, expected: str, actual: str, message: str, warning: bool = False
-    ) -> None:
-        severity = Severity.PASS if passed else Severity.WARNING if warning else Severity.FAIL
-        findings.append(ValidationFinding(rule, severity, expected, actual, artifact, message))
+    composition = composition_for(spec)
 
     if not path.is_file():
-        add("glb.exists", False, "regular GLB file", "missing", "Artifact does not exist")
+        findings.append(
+            ValidationFinding(
+                "glb.exists",
+                Severity.FAIL,
+                "regular GLB file",
+                "missing",
+                artifact,
+                "Artifact does not exist",
+            )
+        )
         return AssetValidationResult(
             Severity.FAIL, findings, "GLB validation failed: artifact missing"
         )
     try:
-        doc, binary = _read_glb(path, max_file_size_bytes)
-        infos, points, material_ids, textures, tris, world_matrices = _inspect(doc, binary)
-        add(
-            "glb.parse",
-            True,
-            "GLB 2.0 with bounded embedded buffers",
-            "parsed",
-            "GLB structure and accessors are valid",
+        parsed = parse_glb(path, max_file_size_bytes=max_file_size_bytes)
+        rule_input = RuleInput(
+            artifact=artifact,
+            parsed=parsed,
+            spec=spec,
+            contract=contract,
+            assembly=getattr(profile, "assembly", None),
+            normalization=normalization,
         )
-        digest = hashlib.sha256(path.read_bytes()).hexdigest()
-        add("glb.hash", True, "SHA-256 recorded", digest, "Artifact hash computed")
-        names = [info.name for info in infos]
-        unique_names = len(names) == len(set(names))
-        expected_names = profile.expected_mesh_names(spec)
-        expected_lod0 = f"SM_{spec.asset_id}_LOD0"
-        expected_lod1 = f"SM_{spec.asset_id}_LOD1"
-        expected_collider = f"COL_{spec.asset_id}"
-        add(
-            "nodes.unique",
-            unique_names,
-            "unique mesh node names",
-            str(names),
-            "Duplicate names are ambiguous during engine import",
-        )
-        add(
-            "nodes.profile",
-            set(names) == expected_names,
-            f"exactly {sorted(expected_names)}",
-            str(names),
-            "Unexpected or missing mesh nodes are rejected",
-        )
-        by_name = {info.name: info for info in infos}
-        lod0 = by_name.get(expected_lod0)
-        lod1 = by_name.get(expected_lod1)
-        colliders = [by_name[expected_collider]] if expected_collider in by_name else []
-        add(
-            "mesh.nonempty",
-            bool(points) and tris > 0,
-            "nonempty triangle geometry",
-            f"{tris} triangles",
-            "Actual POSITION and index data decoded",
-        )
-        add(
-            "lod0.present",
-            lod0 is not None and lod0.triangle_count > 0,
-            "LOD0 mesh geometry",
-            "present" if lod0 else "missing",
-            "LOD0 node must reference nonempty triangles",
-        )
-        lod1_required = bool(contract["lod1_required"])
-        add(
-            "lod1.present",
-            (lod1 is not None and lod1.triangle_count > 0) or not lod1_required,
-            "LOD1 mesh geometry" if lod1_required else "LOD1 optional",
-            "present" if lod1 else "missing",
-            "LOD1 is required by the profile contract"
-            if lod1_required
-            else "LOD1 is optional for this profile",
-        )
-        visual_points = list(lod0.points) if lod0 else []
-        visual_mins = (
-            [min(p[i] for p in visual_points) for i in range(3)] if visual_points else [0.0] * 3
-        )
-        visual_maxs = (
-            [max(p[i] for p in visual_points) for i in range(3)] if visual_points else [0.0] * 3
-        )
-        collider_shape_ok = bool(colliders) and all(
-            c.triangle_count == 12
-            and len({tuple(round(v, 6) for v in p) for p in c.points}) == 8
-            and abs(
-                (max(p[0] for p in c.points) - min(p[0] for p in c.points))
-                * (max(p[1] for p in c.points) - min(p[1] for p in c.points))
-                * (max(p[2] for p in c.points) - min(p[2] for p in c.points))
+        for rule in composition.rules:
+            findings.extend(rule(rule_input))
+    except _PARSE_ERRORS as exc:
+        findings.append(
+            ValidationFinding(
+                "glb.parse",
+                Severity.FAIL,
+                "supported safe profile GLB subset",
+                str(exc),
+                artifact,
+                "GLB could not be safely validated",
             )
-            > 1e-9
-            and all(
-                abs(min(p[i] for p in c.points) - visual_mins[i]) <= 0.01
-                and abs(max(p[i] for p in c.points) - visual_maxs[i]) <= 0.01
-                for i in range(3)
-            )
-            for c in colliders
-        )
-        add(
-            "collider.geometry",
-            collider_shape_ok,
-            "axis-aligned box geometry matching visual bounds",
-            f"{len(colliders)} collider mesh(es)",
-            "Collider decoded vertices and triangles are checked against visual bounds",
-        )
-        add(
-            "geometry.lod0_budget",
-            lod0 is not None and lod0.triangle_count <= spec.geometry_budget.max_triangles_lod0,
-            f"<= {spec.geometry_budget.max_triangles_lod0}",
-            str(lod0.triangle_count if lod0 else 0),
-            "LOD0 triangle budget",
-        )
-        add(
-            "geometry.lod1_budget",
-            lod1 is None or lod1.triangle_count <= spec.geometry_budget.max_triangles_lod1,
-            f"<= {spec.geometry_budget.max_triangles_lod1}",
-            str(lod1.triangle_count if lod1 else 0),
-            "LOD1 triangle budget",
-        )
-        material_count = len(doc.get("materials", []))
-        add(
-            "materials.budget",
-            material_count <= spec.material_budget.max_materials,
-            f"<= {spec.material_budget.max_materials}",
-            str(material_count),
-            "Declared material count in GLB",
-        )
-        texture_max = max((max(w, h) for w, h in textures), default=0)
-        add(
-            "textures.dimension",
-            texture_max <= spec.texture_budget.max_dimension,
-            f"<= {spec.texture_budget.max_dimension}px",
-            str(texture_max),
-            "Embedded texture dimensions decoded from image bytes",
-        )
-        # Bounds include visual meshes only; collider is independently checked above.
-        if not visual_points:
-            raise _InvalidGLB("no non-collider visual geometry")
-        mins = [min(p[i] for p in visual_points) for i in range(3)]
-        maxs = [max(p[i] for p in visual_points) for i in range(3)]
-        actual = [maxs[i] - mins[i] for i in range(3)]
-        target = [spec.dimensions.width_m, spec.dimensions.height_m, spec.dimensions.depth_m]
-        tolerance = float(contract["dimension_tolerance_m"])
-        bounds_ok = all(abs(a - t) <= tolerance for a, t in zip(actual, target, strict=True))
-        add(
-            "scale.bounds",
-            bounds_ok,
-            f"X/Y/Z = {target}m ± {tolerance}m",
-            str(actual),
-            "Dimensions measured from transformed decoded vertices",
-        )
-        origin_ok = (
-            abs((mins[0] + maxs[0]) / 2) <= tolerance and abs((mins[2] + maxs[2]) / 2) <= tolerance
-        )
-        if spec.origin_policy == "bottom_center":
-            origin_ok = origin_ok and abs(mins[1]) <= tolerance
-        elif spec.origin_policy == "center":
-            origin_ok = origin_ok and abs((mins[1] + maxs[1]) / 2) <= tolerance
-        add(
-            "origin.policy",
-            origin_ok,
-            spec.origin_policy,
-            f"min={mins}, max={maxs}",
-            "Origin evaluated from transformed geometry",
-        )
-        snap_grid = contract.get("snap_grid_m")
-        if snap_grid:
-            snap_ok = all(
-                abs((value / float(snap_grid)) - round(value / float(snap_grid))) * float(snap_grid)
-                <= tolerance
-                for value in actual
-            )
-            add(
-                "dimensions.snap",
-                snap_ok and origin_ok,
-                f"module axes are multiples of {snap_grid} m and the origin is on the snap pivot",
-                str(actual),
-                "Modular dimensions and origin must land on the profile snap grid",
-            )
-        lod1_points = lod1.points if lod1 else ()
-        if not lod1_required and not lod1_points:
-            lod_bounds_match = True
-        else:
-            lod_bounds_match = bool(lod0 and lod1_points) and all(
-                abs(min(point[index] for point in lod1_points) - mins[index]) <= tolerance
-                and abs(max(point[index] for point in lod1_points) - maxs[index]) <= tolerance
-                for index in range(3)
-            )
-        add(
-            "lod1.bounds",
-            lod_bounds_match,
-            f"LOD1 bounds match LOD0 ± {tolerance}m",
-            str(lod1 and lod1.points[:1]),
-            "LOD1 geometry must preserve the visual envelope",
-        )
-        identity = True
-        for node_index, node in enumerate(doc.get("nodes", [])):
-            if "mesh" not in node:
-                continue
-            node_name = str(node.get("name") or "")
-            if node_name.startswith("COL_"):
-                continue
-            expected_matrix = [
-                [1.0, 0.0, 0.0, 0.0],
-                [0.0, 1.0, 0.0, 0.0],
-                [0.0, 0.0, 1.0, 0.0],
-                [0.0, 0.0, 0.0, 1.0],
-            ]
-            identity = identity and all(
-                abs(world_matrices[node_index][r][c] - expected_matrix[r][c]) <= 1e-5
-                for r in range(4)
-                for c in range(4)
-            )
-        add(
-            "orientation.identity",
-            identity,
-            "mesh nodes carry no residual transforms; +Y up/-Z front coordinates",
-            "identity" if identity else "non-identity transform",
-            "Coordinate convention is checked through node transforms and world-space bounds",
-        )
-        if material_ids and max(material_ids) >= len(doc.get("materials", [])):
-            raise _InvalidGLB("primitive references nonexistent material")
-    except (OSError, _InvalidGLB, KeyError, TypeError, ValueError, IndexError, struct.error) as exc:
-        add(
-            "glb.parse",
-            False,
-            "supported safe profile GLB subset",
-            str(exc),
-            "GLB could not be safely validated",
         )
     status = (
         Severity.FAIL
