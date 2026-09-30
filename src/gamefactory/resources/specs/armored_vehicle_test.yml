@@ -1,0 +1,68 @@
+schema_version: "0.7.0"
+asset_id: armored_vehicle_test
+category: vehicle
+profile: vehicle
+profile_version: 1
+intent: >-
+  Authored armored vehicle test assembly with a fixed hull, yawing turret,
+  elevating barrel, and forward muzzle socket.
+source_kind: local_operator_assembly
+dimensions:
+  width_m: 2.8
+  height_m: 1.175
+  depth_m: 3.82
+orientation:
+  up: "+Y"
+  front: "-Z"
+origin_policy: bottom_center
+geometry_budget:
+  max_triangles_lod0: 10000
+  max_triangles_lod1: 5000
+  lod_ratio: 0.5
+material_budget:
+  max_materials: 4
+texture_budget:
+  max_dimension: 2048
+collider:
+  policy: box
+lod_policy: lod0_lod1
+style_constraints:
+  family: stylized_scifi
+  silhouette: armored
+  readability: high
+  detail_density: medium
+target_engine: godot
+target_import_path: assets/generated/vehicles/armored_vehicle_test/
+parts:
+  - part_id: hull
+    role: hull
+    parent: root
+    pivot:
+      position_m: [0.0, 0.45, 0.21]
+      basis: identity
+      motion:
+        kind: fixed
+  - part_id: turret
+    role: turret
+    parent: hull
+    pivot:
+      position_m: [0.0, 0.45, 0.1]
+      basis: identity
+      motion:
+        kind: revolute
+        axis: [0.0, 1.0, 0.0]
+  - part_id: barrel
+    role: barrel
+    parent: turret
+    pivot:
+      position_m: [0.0, 0.0, -0.82]
+      basis: identity
+      motion:
+        kind: revolute
+        axis: [1.0, 0.0, 0.0]
+sockets:
+  - socket_id: muzzle
+    parent_part: barrel
+    translation_m: [0.0, 0.0, -1.4]
+    rotation: identity
+    placement: forward_end

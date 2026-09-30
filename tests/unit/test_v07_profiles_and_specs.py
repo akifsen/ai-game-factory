@@ -990,10 +990,18 @@ def test_builtin_registry_contents_and_isolation() -> None:
     # No test ids present
     assert not any("test" in r["profile_id"] for r in availability)
 
-    # Package resources only contains the 3 historical profiles
+    # Historical profiles remain unchanged; the vehicle candidate resource is
+    # present but is deliberately not exposed by the builtin registry.
     profile_dir = files("gamefactory").joinpath("resources/profiles")
     profile_filenames = {p.name for p in profile_dir.iterdir()}
-    assert profile_filenames == {"static_prop.yml", "pickup.yml", "modular_piece.yml"}
+    assert profile_filenames == {
+        "static_prop.yml",
+        "pickup.yml",
+        "modular_piece.yml",
+        "vehicle.yml",
+    }
+    with pytest.raises(ProfileContractError, match="profile vehicle is UNSUPPORTED"):
+        reg.get_v07("vehicle", 1)
 
     # Registry is frozen
     with pytest.raises(dataclasses.FrozenInstanceError):
