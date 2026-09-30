@@ -1364,8 +1364,11 @@ def test_main_preserves_invoked_venv_python_symlink(
         ]
     )
 
-    assert result == 0
+    assert result == 1
     assert inspected == [interpreter_link.absolute()]
+    summary = json.loads((_find_sole_run_dir(evidence) / "results.json").read_text())
+    assert summary["status"] == "FAIL"
+    assert summary["release_gate"] is False
 
 
 def test_main_run_id_collision_preserves_canary(tmp_path: Path) -> None:
