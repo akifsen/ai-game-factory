@@ -82,9 +82,11 @@ gamefactory --project . assembly export tank-assembly-r001
 
 The command reports a usable evidence manifest only after the separate cold
 export verification completes successfully. Repeating `assembly export` after
-the workflow has completed is read-only: it rechecks the latest successful
-processing, validation, runtime, and evidence attempts; current human approval
-fingerprints and pinned project artifacts; and the existing bundle with both
-cold verifiers. It does not rerun tasks or replace the bundle. Any changed or
-missing project artifact, approval, attempt, manifest, or bundle file makes the
+the workflow has completed is read-only: it checks the latest processing,
+validation, runtime and evidence attempts across all statuses and requires each
+to be completed. It rechecks current human approval fingerprints and pinned
+project artifacts, then verifies the existing bundle with the packaged cold
+verifier and the checkout copy when available. It does not rerun tasks or
+replace the bundle. Any changed or missing project artifact, approval, attempt,
+manifest, or bundle file makes the
 revalidation fail. Approval records are never created automatically.

@@ -127,3 +127,59 @@ Role identifiers remain unique within an assembly, preserving Phase B behavior.
 Generic repeated-role cardinality is deferred; profiles may define distinct
 roles only for demonstrated requirements. All assembly dimensions must already
 conform to the bound specification tolerance.
+
+The first source slice is standalone bounded ingestion and verification, with
+no database or workflow mutation. The later workflow bridge reuses the existing
+write-once revision raw hash and artifact records: source version equals asset
+revision, and changed source requires a new workflow/revision. The assembly
+graph includes an explicit human `source_review` gate and omits every paid task.
+Replay of malformed persisted tasks must also be rejected before paid snapshot,
+approval, intent, reservation or provider side effects. Filesystem and SQLite
+operations are not one transaction; retry must accept only identical pinned
+source/provenance records and reject ambiguity or overwrite.
+
+## Continuation checkpoint: verified slices and open integration gates
+
+Local checkpoints: `308d1d1` legacy validation composition, `796ddf7` camera
+placements, `dccb395` retained authored source, `e5fdaa2` geometry preservation,
+`d13dacd` Blender assembly processing, and `94ede3a` paid-stage rejection.
+These are independently verified slices, not a V0.7 release designation.
+
+The local assembly workflow, atomic attempt publication and portable evidence
+have passed independent review. Fresh real Blender/Godot runs reach COMPLETED
+only after explicit fixture concept, source and final approvals and a portable
+cold-verifier PASS. All five paid/accounting tables remain empty. Completed CLI
+re-export is read-only and rejects changed bundle captures, current project
+artifacts, newer failed attempts and changed approvals. Cold verification now
+recomputes actual LOD/material/embedded-texture budgets and accepts a fully
+rebound textured bundle. Byte-pinned fixtures retain exact bytes on Windows Git
+checkouts through a scoped `.gitattributes` rule.
+
+Additional local checkpoints: `108b153` atomic assembly graph, `9504568`
+standalone character Blender processing, `50bcb18` static capsule Godot runtime,
+`05b58df` closed vehicle candidate and `4a77bb3` local assembly evidence.
+Independent verification includes 95 exporter/CLI/workflow tests, 236 runtime,
+profile and frozen-golden tests, a fresh full assembly workflow, and a fresh Git
+checkout cold-verifier PASS. These results approve bounded slices, not the
+complete V0.7 release.
+
+The legacy catalog remains frozen; an explicit independent V0.7 registry and
+`asset profiles --contract-version 0.7.0` catalog are initially closed. Vehicle
+has passed two isolated installed-wheel CLI journeys with matching semantic
+model/capture hashes and read-only tamper rejection. Closed weapon and aircraft
+candidates (`7c7336a`) passed 221 independent unit/frozen-golden tests and two
+fresh real Blender/Godot human-gated workflows through 29-file cold evidence,
+with zero rows in all five paid/accounting tables. Their public activation and
+final installed-wheel acceptance remain open.
+The provider-character bridge is undergoing security and current-attempt
+revisions. Its evidence task remains fail-closed until a separate provider
+evidence branch binds the current paid snapshot, readiness, approvals, provider
+intent, raw output, processing, runtime and terminal settled accounting.
+UNKNOWN-cost reservations keep their historical behavior; the new V0.7
+provider evidence gate must refuse completion while liability remains unresolved.
+
+Registry availability remains closed until each advertised path passes
+installed-wheel, real DCC, human-gate and evidence acceptance. Final verification
+also requires semantic agreement between fresh runs, complete regression checks
+and the supported Windows/Linux CI matrix. No remote CI success for these local
+commits is claimed; permission to push and run remote CI is still pending.
