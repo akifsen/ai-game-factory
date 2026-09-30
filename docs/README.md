@@ -97,3 +97,12 @@ yerine geçmez.
 - [Generalized production pipeline](pipelines/generalized-asset-production.md)
 - [ADR 0008: profile versus specification](adr/0008-asset-profile-versus-specification.md)
 - [V0.5 completion report](reports/v0.5-completion-report.md)
+
+## V0.7 — Release candidate
+
+- [Delivery plan and product-readiness gates](work-plan-v0.7.md)
+- [Public candidate profile catalog](v0.7-profile-catalog.md)
+- [Local assembly operator guide](operator-local-assembly-cli.md)
+- [Provider character operator guide](operator-v07-character-cli.md)
+- [Windows installed-wheel acceptance and open release gates](reports/v0.7-rc-acceptance.md)
+- [Acceptance fingerprints and test groups](reports/v0.7-rc-acceptance.json)

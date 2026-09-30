@@ -3,6 +3,13 @@
 This is the active continuation plan for the accepted ADR 0013–0018 architecture.
 It does not advertise unimplemented profiles as available.
 
+The current package is `0.7.0rc1`. Its four public candidate profiles have passed
+the Windows installed-wheel gate: ten groups, 58 tests, no skips. The final full
+source run passed 1,647 tests with 15 explicitly reported platform/environment
+skips. See the [RC acceptance report](reports/v0.7-rc-acceptance.md) for pinned
+package identity and actual verification. Linux CI and the final cross-platform
+release decision remain open; this is not a product-ready declaration.
+
 ## Verified starting point
 
 The September 30, 2026 local audit started at `68e32e9`. Tracked files were clean;
@@ -83,11 +90,11 @@ sufficient evidence; a displaced pivot or socket must fail its own rule.
 
 The first advanced production profile is vehicle. Weapon, aircraft and character
 each require their own complete acceptance fixture before availability changes.
-Character uses the accepted static/area runtime body contract and capsule policy;
+Character uses the accepted static-body, ray-query runtime contract and capsule policy;
 this milestone does not add gameplay CharacterBody3D or rigging support.
 
-The current workflow/exporter/cold verifier only implement the historical
-provider path. Local-source evidence needs a mutually exclusive role set and
+At the starting audit, the workflow/exporter/cold verifier only implemented the
+historical provider path. Local-source evidence needs a mutually exclusive role set and
 must never fabricate provider, paid approval or cost receipts. Parts-declaring
 inputs must be rejected before any paid snapshot or provider intent is created.
 
