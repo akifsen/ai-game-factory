@@ -1,14 +1,56 @@
 name: CI
 
+# CI cost policy
+# - Pull requests run only the quick job (Ubuntu, Python 3.11: tests, lint, types).
+# - The full set (Windows/Ubuntu x 3.11/3.12, real Godot, real Blender) runs on
+#   pushes to main, on manual dispatch, and on a pull request labelled `full-ci`.
+# - A newer commit on the same pull request cancels the older run.
+# - Markdown-only changes do not start CI; reports, JSON evidence and code do.
 on:
   push:
     branches: [main]
+    paths-ignore: ['**/*.md']
   pull_request:
     branches: [main]
+    types: [opened, synchronize, reopened, labeled]
+    paths-ignore: ['**/*.md']
   workflow_dispatch:
 
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  PIP_DISABLE_PIP_VERSION_CHECK: "1"
+
 jobs:
+  quick:
+    # Fast pull request feedback. Skipped when the full set runs instead.
+    if: >-
+      github.event_name == 'pull_request'
+      && !contains(github.event.pull_request.labels.*.name, 'full-ci')
+      && (github.event.action != 'labeled' || github.event.label.name == 'full-ci')
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+          cache: pip
+          cache-dependency-path: pyproject.toml
+      - run: python -m pip install -e ".[dev]"
+      - run: ruff check src tests
+      - run: ruff format --check src tests
+      - run: mypy src/gamefactory
+      - run: python -m pytest -ra -p no:cacheprovider
+
   test:
+    if: >-
+      github.event_name != 'pull_request'
+      || (contains(github.event.pull_request.labels.*.name, 'full-ci')
+          && (github.event.action != 'labeled' || github.event.label.name == 'full-ci'))
+    timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
@@ -20,6 +62,8 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
+          cache: pip
+          cache-dependency-path: pyproject.toml
       - name: Record Linux filesystem context
         if: runner.os == 'Linux'
         shell: bash
@@ -38,7 +82,6 @@ jobs:
           name: linux-filesystem-python-${{ matrix.python-version }}
           path: ${{ runner.temp }}/linux-filesystem-context.txt
           if-no-files-found: warn
-      - run: python -m pip install --upgrade pip
       - run: python -m pip install -e ".[dev]"
       - run: python -m pytest -ra -p no:cacheprovider
       - run: ruff check src tests
@@ -46,6 +89,10 @@ jobs:
       - run: mypy src/gamefactory
 
   godot-real:
+    if: >-
+      github.event_name != 'pull_request'
+      || (contains(github.event.pull_request.labels.*.name, 'full-ci')
+          && (github.event.action != 'labeled' || github.event.label.name == 'full-ci'))
     runs-on: ubuntu-latest
     timeout-minutes: 15
     # Official Godot release metadata, pinned and reviewed with this source:
@@ -59,6 +106,8 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
+          cache: pip
+          cache-dependency-path: pyproject.toml
       - name: Build wheel and install it into a clean virtual environment
         shell: bash
         run: |
@@ -73,12 +122,23 @@ jobs:
           sha256sum "$wheel" > "$RUNNER_TEMP/gamefactory-wheel.sha256"
           "$venv_python" -m pip install --upgrade pip
           "$venv_python" -m pip install "${wheel}[dev]"
+      - name: Restore pinned Godot archive
+        uses: actions/cache@v5
+        with:
+          path: ~/.cache/gamefactory-godot
+          key: godot-${{ env.GODOT_VERSION }}-${{ env.GODOT_ARCHIVE_SHA512 }}
       - name: Download and verify pinned official Godot
         shell: bash
         run: |
           set -euo pipefail
           archive="Godot_v${GODOT_VERSION}_linux.x86_64.zip"
-          curl --fail --location --retry 3 "https://github.com/godotengine/godot-builds/releases/download/${GODOT_VERSION}/${archive}" --output "$RUNNER_TEMP/$archive"
+          cache_dir="$HOME/.cache/gamefactory-godot"
+          mkdir -p "$cache_dir"
+          if [ ! -f "$cache_dir/$archive" ]; then
+            curl --fail --location --retry 3 "https://github.com/godotengine/godot-builds/releases/download/${GODOT_VERSION}/${archive}" --output "$cache_dir/$archive"
+          fi
+          # The cached archive is verified against the pinned digest on every run.
+          cp "$cache_dir/$archive" "$RUNNER_TEMP/$archive"
           printf '%s  %s\n' "$GODOT_ARCHIVE_SHA512" "$RUNNER_TEMP/$archive" | sha512sum --check --strict
           unzip "$RUNNER_TEMP/$archive" -d "$RUNNER_TEMP/godot"
           chmod +x "$RUNNER_TEMP/godot/Godot_v${GODOT_VERSION}_linux.x86_64"
@@ -168,6 +228,10 @@ jobs:
           if-no-files-found: warn
 
   godot-rendered:
+    if: >-
+      github.event_name != 'pull_request'
+      || (contains(github.event.pull_request.labels.*.name, 'full-ci')
+          && (github.event.action != 'labeled' || github.event.label.name == 'full-ci'))
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
@@ -197,12 +261,23 @@ jobs:
           test -n "$wheel"
           sha256sum "$wheel" > "$RUNNER_TEMP/gamefactory-wheel.sha256"
           "$venv_python" -m pip install "$wheel"
+      - name: Restore pinned Godot archive
+        uses: actions/cache@v5
+        with:
+          path: ~/.cache/gamefactory-godot
+          key: godot-${{ env.GODOT_VERSION }}-${{ env.GODOT_ARCHIVE_SHA512 }}
       - name: Download and verify pinned official Godot
         shell: bash
         run: |
           set -euo pipefail
           archive="Godot_v${GODOT_VERSION}_linux.x86_64.zip"
-          curl --fail --location --retry 3 "https://github.com/godotengine/godot-builds/releases/download/${GODOT_VERSION}/${archive}" --output "$RUNNER_TEMP/$archive"
+          cache_dir="$HOME/.cache/gamefactory-godot"
+          mkdir -p "$cache_dir"
+          if [ ! -f "$cache_dir/$archive" ]; then
+            curl --fail --location --retry 3 "https://github.com/godotengine/godot-builds/releases/download/${GODOT_VERSION}/${archive}" --output "$cache_dir/$archive"
+          fi
+          # The cached archive is verified against the pinned digest on every run.
+          cp "$cache_dir/$archive" "$RUNNER_TEMP/$archive"
           printf '%s  %s\n' "$GODOT_ARCHIVE_SHA512" "$RUNNER_TEMP/$archive" | sha512sum --check --strict
           unzip "$RUNNER_TEMP/$archive" -d "$RUNNER_TEMP/godot"
           chmod +x "$RUNNER_TEMP/godot/Godot_v${GODOT_VERSION}_linux.x86_64"
