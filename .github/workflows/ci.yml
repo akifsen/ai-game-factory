@@ -301,6 +301,20 @@ jobs:
             --godot "$GAMEFACTORY_TEST_GODOT" \
             --workspace "$RUNNER_TEMP/profile-fixture-workspace" \
             --output "$evidence/profile-fixtures.json"
+      - name: Verify V0.7 assemblies and character capsule with real Blender and Godot
+        shell: bash
+        run: |
+          set -euo pipefail
+          evidence="$GITHUB_WORKSPACE/.verification/ci-asset-production"
+          mkdir -p "$evidence" "$RUNNER_TEMP/v07-acceptance-workspace"
+          xvfb-run -a --server-args="-screen 0 1600x1200x24" \
+            "$RUNNER_TEMP/gamefactory-venv/bin/python" \
+            "$GITHUB_WORKSPACE/scripts/verify_v07_acceptance.py" \
+            --cli "$RUNNER_TEMP/gamefactory-venv/bin/gamefactory" \
+            --blender "$(command -v blender)" \
+            --godot "$GAMEFACTORY_TEST_GODOT" \
+            --workspace "$RUNNER_TEMP/v07-acceptance-workspace" \
+            --output "$evidence/v07-acceptance.json"
       - name: Archive offline asset evidence
         if: always()
         uses: actions/upload-artifact@v6

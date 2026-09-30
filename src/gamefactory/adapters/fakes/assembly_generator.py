@@ -651,3 +651,40 @@ class GLBEdit:
 def rotate_about_y(degrees: float) -> list[float]:
     half = math.radians(degrees) / 2
     return [0.0, math.sin(half), 0.0, math.cos(half)]
+
+
+def blender_design(design: AssemblyDesign) -> dict[str, Any]:
+    """Authoring data for scripts/blender_author_assembly.py (canonical glTF frame).
+
+    The collider box is given in the +Z-facing source frame, because the
+    operator models the whole asset facing Blender's front view.
+    """
+    design = centered_design(design)
+    mins, maxs = rest_bounds(design.parts)
+    return {
+        "asset_id": design.asset_id,
+        "parts": [
+            {
+                "part_id": p.part_id,
+                "parent": p.parent,
+                "position": [float(v) for v in p.position],
+                "box_min": [float(v) for v in p.box_min],
+                "box_max": [float(v) for v in p.box_max],
+                "motion": p.motion,
+                "axis": [float(v) for v in p.axis] if p.axis else None,
+            }
+            for p in design.parts
+        ],
+        "sockets": [
+            {
+                "socket_id": s.socket_id,
+                "parent_part": s.parent_part,
+                "translation": [float(v) for v in s.translation],
+            }
+            for s in design.sockets
+        ],
+        "collider": {
+            "min": [-maxs[0], mins[1], -maxs[2]],
+            "max": [-mins[0], maxs[1], -mins[2]],
+        },
+    }

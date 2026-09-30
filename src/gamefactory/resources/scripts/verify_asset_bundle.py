@@ -806,8 +806,12 @@ def _check_v07_single_mesh(
             not isinstance(observed, dict)
             or not isinstance(capsule, dict)
             or capsule.get("ok") is not True
-            or observed.get("radius_m") != declared.get("radius_m")
-            or observed.get("height_m") != declared.get("height_m")
+            or not all(
+                isinstance(observed.get(key), (int, float))
+                and isinstance(declared.get(key), (int, float))
+                and abs(float(observed[key]) - float(declared[key])) <= 1e-6
+                for key in ("radius_m", "height_m")
+            )
         ):
             raise ValueError("runtime capsule does not match the declared contract")
 

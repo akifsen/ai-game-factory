@@ -217,7 +217,10 @@ def build_parser() -> argparse.ArgumentParser:
         "--source-front",
         required=True,
         choices=("-Z", "+Z"),
-        help="front axis of the source file; +Z is what Blender's glTF export produces",
+        help=(
+            "front axis of the source file, written as --source-front=-Z or "
+            "--source-front=+Z; +Z is what Blender's glTF export produces"
+        ),
     )
     asset_register.add_argument("--authoring-tool", required=True, help="e.g. blender")
     asset_register.add_argument("--authoring-tool-version", required=True, help="e.g. 4.0.2")
