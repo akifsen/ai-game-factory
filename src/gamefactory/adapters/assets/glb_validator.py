@@ -460,6 +460,8 @@ def validate_glb(
     path: Path, spec: AssetSpecification, *, max_file_size_bytes: int = _MAX_FILE_BYTES
 ) -> AssetValidationResult:
     """Validate a processed GLB against the specification's bound profile."""
+    if not isinstance(spec, AssetSpecification):
+        raise TypeError("validate_glb supports only V0.4/V0.5 legacy specifications")
     profile = spec.bound_profile()
     contract = profile.processing_contract(spec)
     artifact = str(path)
@@ -477,8 +479,23 @@ def validate_glb(
             Severity.FAIL, findings, "GLB validation failed: artifact missing"
         )
     try:
+        from gamefactory.adapters.assets.validation_context import build_validation_context
+
         doc, binary = _read_glb(path, max_file_size_bytes)
-        infos, points, material_ids, textures, tris, world_matrices = _inspect(doc, binary)
+        decoded = _inspect(doc, binary)
+        context = build_validation_context(path, doc, binary, decoded, spec, profile, contract)
+        from gamefactory.adapters.assets.validation_rules import (
+            Capability,
+            evaluate_ordered_rules,
+            select_rule_groups,
+        )
+
+        # The existing V0.6 contract represents one named visual mesh set and
+        # a box collider. Capabilities come from contract fields, never profile IDs.
+        capabilities = frozenset({Capability.LEGACY_SINGLE_MESH})
+        if spec.collider_policy == "box":
+            capabilities = capabilities | frozenset({Capability.BOX_COLLIDER})
+        selected_groups = select_rule_groups(capabilities)
         add(
             "glb.parse",
             True,
@@ -488,201 +505,7 @@ def validate_glb(
         )
         digest = hashlib.sha256(path.read_bytes()).hexdigest()
         add("glb.hash", True, "SHA-256 recorded", digest, "Artifact hash computed")
-        names = [info.name for info in infos]
-        unique_names = len(names) == len(set(names))
-        expected_names = profile.expected_mesh_names(spec)
-        expected_lod0 = f"SM_{spec.asset_id}_LOD0"
-        expected_lod1 = f"SM_{spec.asset_id}_LOD1"
-        expected_collider = f"COL_{spec.asset_id}"
-        add(
-            "nodes.unique",
-            unique_names,
-            "unique mesh node names",
-            str(names),
-            "Duplicate names are ambiguous during engine import",
-        )
-        add(
-            "nodes.profile",
-            set(names) == expected_names,
-            f"exactly {sorted(expected_names)}",
-            str(names),
-            "Unexpected or missing mesh nodes are rejected",
-        )
-        by_name = {info.name: info for info in infos}
-        lod0 = by_name.get(expected_lod0)
-        lod1 = by_name.get(expected_lod1)
-        colliders = [by_name[expected_collider]] if expected_collider in by_name else []
-        add(
-            "mesh.nonempty",
-            bool(points) and tris > 0,
-            "nonempty triangle geometry",
-            f"{tris} triangles",
-            "Actual POSITION and index data decoded",
-        )
-        add(
-            "lod0.present",
-            lod0 is not None and lod0.triangle_count > 0,
-            "LOD0 mesh geometry",
-            "present" if lod0 else "missing",
-            "LOD0 node must reference nonempty triangles",
-        )
-        lod1_required = bool(contract["lod1_required"])
-        add(
-            "lod1.present",
-            (lod1 is not None and lod1.triangle_count > 0) or not lod1_required,
-            "LOD1 mesh geometry" if lod1_required else "LOD1 optional",
-            "present" if lod1 else "missing",
-            "LOD1 is required by the profile contract"
-            if lod1_required
-            else "LOD1 is optional for this profile",
-        )
-        visual_points = list(lod0.points) if lod0 else []
-        visual_mins = (
-            [min(p[i] for p in visual_points) for i in range(3)] if visual_points else [0.0] * 3
-        )
-        visual_maxs = (
-            [max(p[i] for p in visual_points) for i in range(3)] if visual_points else [0.0] * 3
-        )
-        collider_shape_ok = bool(colliders) and all(
-            c.triangle_count == 12
-            and len({tuple(round(v, 6) for v in p) for p in c.points}) == 8
-            and abs(
-                (max(p[0] for p in c.points) - min(p[0] for p in c.points))
-                * (max(p[1] for p in c.points) - min(p[1] for p in c.points))
-                * (max(p[2] for p in c.points) - min(p[2] for p in c.points))
-            )
-            > 1e-9
-            and all(
-                abs(min(p[i] for p in c.points) - visual_mins[i]) <= 0.01
-                and abs(max(p[i] for p in c.points) - visual_maxs[i]) <= 0.01
-                for i in range(3)
-            )
-            for c in colliders
-        )
-        add(
-            "collider.geometry",
-            collider_shape_ok,
-            "axis-aligned box geometry matching visual bounds",
-            f"{len(colliders)} collider mesh(es)",
-            "Collider decoded vertices and triangles are checked against visual bounds",
-        )
-        add(
-            "geometry.lod0_budget",
-            lod0 is not None and lod0.triangle_count <= spec.geometry_budget.max_triangles_lod0,
-            f"<= {spec.geometry_budget.max_triangles_lod0}",
-            str(lod0.triangle_count if lod0 else 0),
-            "LOD0 triangle budget",
-        )
-        add(
-            "geometry.lod1_budget",
-            lod1 is None or lod1.triangle_count <= spec.geometry_budget.max_triangles_lod1,
-            f"<= {spec.geometry_budget.max_triangles_lod1}",
-            str(lod1.triangle_count if lod1 else 0),
-            "LOD1 triangle budget",
-        )
-        material_count = len(doc.get("materials", []))
-        add(
-            "materials.budget",
-            material_count <= spec.material_budget.max_materials,
-            f"<= {spec.material_budget.max_materials}",
-            str(material_count),
-            "Declared material count in GLB",
-        )
-        texture_max = max((max(w, h) for w, h in textures), default=0)
-        add(
-            "textures.dimension",
-            texture_max <= spec.texture_budget.max_dimension,
-            f"<= {spec.texture_budget.max_dimension}px",
-            str(texture_max),
-            "Embedded texture dimensions decoded from image bytes",
-        )
-        # Bounds include visual meshes only; collider is independently checked above.
-        if not visual_points:
-            raise _InvalidGLB("no non-collider visual geometry")
-        mins = [min(p[i] for p in visual_points) for i in range(3)]
-        maxs = [max(p[i] for p in visual_points) for i in range(3)]
-        actual = [maxs[i] - mins[i] for i in range(3)]
-        target = [spec.dimensions.width_m, spec.dimensions.height_m, spec.dimensions.depth_m]
-        tolerance = float(contract["dimension_tolerance_m"])
-        bounds_ok = all(abs(a - t) <= tolerance for a, t in zip(actual, target, strict=True))
-        add(
-            "scale.bounds",
-            bounds_ok,
-            f"X/Y/Z = {target}m ± {tolerance}m",
-            str(actual),
-            "Dimensions measured from transformed decoded vertices",
-        )
-        origin_ok = (
-            abs((mins[0] + maxs[0]) / 2) <= tolerance and abs((mins[2] + maxs[2]) / 2) <= tolerance
-        )
-        if spec.origin_policy == "bottom_center":
-            origin_ok = origin_ok and abs(mins[1]) <= tolerance
-        elif spec.origin_policy == "center":
-            origin_ok = origin_ok and abs((mins[1] + maxs[1]) / 2) <= tolerance
-        add(
-            "origin.policy",
-            origin_ok,
-            spec.origin_policy,
-            f"min={mins}, max={maxs}",
-            "Origin evaluated from transformed geometry",
-        )
-        snap_grid = contract.get("snap_grid_m")
-        if snap_grid:
-            snap_ok = all(
-                abs((value / float(snap_grid)) - round(value / float(snap_grid))) * float(snap_grid)
-                <= tolerance
-                for value in actual
-            )
-            add(
-                "dimensions.snap",
-                snap_ok and origin_ok,
-                f"module axes are multiples of {snap_grid} m and the origin is on the snap pivot",
-                str(actual),
-                "Modular dimensions and origin must land on the profile snap grid",
-            )
-        lod1_points = lod1.points if lod1 else ()
-        if not lod1_required and not lod1_points:
-            lod_bounds_match = True
-        else:
-            lod_bounds_match = bool(lod0 and lod1_points) and all(
-                abs(min(point[index] for point in lod1_points) - mins[index]) <= tolerance
-                and abs(max(point[index] for point in lod1_points) - maxs[index]) <= tolerance
-                for index in range(3)
-            )
-        add(
-            "lod1.bounds",
-            lod_bounds_match,
-            f"LOD1 bounds match LOD0 ± {tolerance}m",
-            str(lod1 and lod1.points[:1]),
-            "LOD1 geometry must preserve the visual envelope",
-        )
-        identity = True
-        for node_index, node in enumerate(doc.get("nodes", [])):
-            if "mesh" not in node:
-                continue
-            node_name = str(node.get("name") or "")
-            if node_name.startswith("COL_"):
-                continue
-            expected_matrix = [
-                [1.0, 0.0, 0.0, 0.0],
-                [0.0, 1.0, 0.0, 0.0],
-                [0.0, 0.0, 1.0, 0.0],
-                [0.0, 0.0, 0.0, 1.0],
-            ]
-            identity = identity and all(
-                abs(world_matrices[node_index][r][c] - expected_matrix[r][c]) <= 1e-5
-                for r in range(4)
-                for c in range(4)
-            )
-        add(
-            "orientation.identity",
-            identity,
-            "mesh nodes carry no residual transforms; +Y up/-Z front coordinates",
-            "identity" if identity else "non-identity transform",
-            "Coordinate convention is checked through node transforms and world-space bounds",
-        )
-        if material_ids and max(material_ids) >= len(doc.get("materials", [])):
-            raise _InvalidGLB("primitive references nonexistent material")
+        evaluate_ordered_rules(context, selected_groups, add)
     except (OSError, _InvalidGLB, KeyError, TypeError, ValueError, IndexError, struct.error) as exc:
         add(
             "glb.parse",

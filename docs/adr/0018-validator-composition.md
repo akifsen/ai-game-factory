@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted for V0.7 (Step 2 architecture decision). Not implemented.
+Accepted for V0.7 (Step 2 architecture decision). The V0.6 legacy path has been modularized; V0.7 composition remains pending.
 
 ## Context
 
@@ -42,3 +42,7 @@ The current emission order interleaves concerns. For example, `lod1.bounds` is e
 ## Consequences
 
 Adding a V0.7 rule means adding one group and one selection condition. Rule ordering becomes part of the evidence format. `vehicle@1`, `weapon@1` and `aircraft@1` share the `parts`, `pivot` and `sockets` groups without profile-specific code.
+
+## Implementation status
+
+The legacy validator now uses a frozen decoded context and an executable ordered rule plan: `mesh_structure`, `collider_box`, `budgets`, `dimensions_origin_snap`, `lod_bounds`, and `orientation`. Parse and hash findings remain in the facade so their historical timing and order are preserved. The plan is selected through typed capabilities and rejects unknown groups or an empty selection. This does not implement V0.7 parts, source orientation, pivots, sockets, capsules, skin-internal checks, evidence composition, or runtime/cold-verifier integration; those obligations remain open.

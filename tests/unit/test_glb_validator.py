@@ -5,7 +5,16 @@ import struct
 from pathlib import Path
 from typing import Any
 
+import pytest
+
 from gamefactory.adapters.assets.glb_validator import validate_glb
+from gamefactory.adapters.assets.validation_rules import (
+    ORDERED_GROUPS,
+    Capability,
+    RuleGroup,
+    require_implemented_groups,
+    select_rule_groups,
+)
 from gamefactory.adapters.fakes.glb_generator import create_box_glb
 from gamefactory.core.domain.asset_contracts import parse_asset_specification
 
@@ -47,6 +56,62 @@ def _good(path: Path) -> None:
         include_texture=True,
         output_path=path,
     )
+
+
+def test_rule_composition_is_closed_and_capability_selected() -> None:
+    selected = select_rule_groups(
+        frozenset({Capability.LEGACY_SINGLE_MESH, Capability.BOX_COLLIDER})
+    )
+    assert selected == tuple(item.group for item in ORDERED_GROUPS)
+    assert select_rule_groups(frozenset({Capability.BOX_COLLIDER})) == (RuleGroup.COLLIDER_BOX,)
+    # The selector accepts only capabilities, so profile IDs cannot influence the plan.
+    assert (
+        select_rule_groups(frozenset({Capability.LEGACY_SINGLE_MESH, Capability.BOX_COLLIDER}))
+        == selected
+    )
+    for capabilities in (frozenset({"future_profile_shortcut"}),):
+        try:
+            select_rule_groups(capabilities)  # type: ignore[arg-type]
+        except ValueError as exc:
+            assert "unknown validation capabilities" in str(exc)
+        else:
+            raise AssertionError("unknown capabilities must be rejected")
+    for groups in ((), ("future_group",), select_rule_groups(frozenset())):
+        try:
+            require_implemented_groups(groups)  # type: ignore[arg-type]
+        except ValueError as exc:
+            assert "validation" in str(exc)
+        else:
+            raise AssertionError("empty and unknown group plans must be rejected")
+    for groups in ((selected[0], selected[0]), (selected[1], selected[0], *selected[2:])):
+        with pytest.raises(ValueError, match="duplicates|canonical order"):
+            require_implemented_groups(groups)
+
+
+def test_v07_specification_is_rejected_by_legacy_glb_facade(tmp_path: Path) -> None:
+    from gamefactory.core.domain.asset_contracts import AssetSpecificationV07
+
+    with pytest.raises(TypeError, match="only V0.4/V0.5"):
+        validate_glb(tmp_path / "unused.glb", AssetSpecificationV07.model_construct())  # type: ignore[arg-type]
+
+
+def test_validator_inspects_the_glb_once(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    import gamefactory.adapters.assets.glb_validator as validator
+
+    path = tmp_path / "asset.glb"
+    _good(path)
+    original = validator._inspect
+    calls = 0
+
+    def counted(document, binary):
+        nonlocal calls
+        calls += 1
+        return original(document, binary)
+
+    monkeypatch.setattr(validator, "_inspect", counted)
+    result = validator.validate_glb(path, _spec())
+    assert result.status.value == "PASS"
+    assert calls == 1
 
 
 def test_validator_passes_real_geometry_textured_fixture(tmp_path: Path) -> None:
