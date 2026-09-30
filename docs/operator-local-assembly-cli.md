@@ -6,11 +6,18 @@ do not call an asset provider. The `assembly create` parser deliberately has no
 provider or paid-generation options.
 
 The V0.7 specification must bind to a V0.7 assembly profile already available
-in the built-in profile registry. At present the public registry has no
-available V0.7 assembly profile, so `assembly ingest` and `assembly create`
-will stop before retaining files or allocating workflow state until one is
-accepted into that registry. Tests can inject a private fixture registry; this
-does not enable custom profile activation for operators.
+in the built-in profile registry. The public V0.7 catalog provides `vehicle@1`,
+`weapon@1`, and `aircraft@1` for local assembly workflows. It also lists the
+separate `character@1` provider-generated candidate; that profile is not an
+assembly profile and cannot be used with `assembly create`. Check availability
+with `gamefactory asset profiles --contract-version 0.7.0`. Operators cannot
+activate custom profile files through these commands. Installed-package and
+platform release checks remain separate from source-checkout acceptance.
+
+On Windows, use a short project directory. Planned Blender paths, including
+generated staging filenames, must fit within 259 UTF-16 code units. An overlong
+plan is rejected before Blender starts or output directories are created; the
+error asks you to shorten the project, workflow, or asset path.
 
 ## Retain and verify a source
 

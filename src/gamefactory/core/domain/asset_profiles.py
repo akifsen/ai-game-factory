@@ -39,19 +39,17 @@ UNSUPPORTED_PROFILE_IDS = (
     "foliage",
 )
 
-# V0.7 intentionally has its own catalog and unsupported vocabulary. Candidate
-# profiles remain unavailable until their complete release gates are approved.
+# V0.7 intentionally has its own explicit catalog and unsupported vocabulary.
+# Only these explicit candidate profiles are available; no automatic discovery is performed.
+_BUILTIN_V07_PROFILE_IDS = ("vehicle", "weapon", "aircraft", "character")
+
 UNSUPPORTED_PROFILE_IDS_V07 = (
-    "character",
     "rigged_character",
-    "weapon",
-    "aircraft",
     "building",
     "terrain",
     "animation",
     "vfx",
     "foliage",
-    "vehicle",
 )
 
 
@@ -981,11 +979,11 @@ def builtin_registry() -> ProfileRegistry:
 
 
 def builtin_v07_registry() -> ProfileRegistry:
-    """Return the independent, currently closed V0.7 profile catalog."""
+    """Return the explicit V0.7 catalog; V0.5 remains an independent registry."""
     return ProfileRegistry(
         available=(),
         unsupported=UNSUPPORTED_PROFILE_IDS_V07,
-        available_v07=(),
+        available_v07=tuple(_load_builtin_v07(name) for name in _BUILTIN_V07_PROFILE_IDS),
     )
 
 

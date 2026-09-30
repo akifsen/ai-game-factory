@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import copy
 import hashlib
+import importlib.util
 import json
 import shutil
 import struct
@@ -35,7 +36,17 @@ from gamefactory.workflows.provider_character_evidence import (
     _cold_gate,
     revalidate_current_provider_character_evidence_bundle,
 )
-from tests.integration.test_v07_character_paid_workflow import _approve, _setup
+
+_SIBLING_PATH = Path(__file__).resolve().parent / "test_v07_character_paid_workflow.py"
+_sibling_spec = importlib.util.spec_from_file_location(
+    "test_v07_character_paid_workflow", _SIBLING_PATH
+)
+if _sibling_spec is None or _sibling_spec.loader is None:
+    raise ImportError(f"Cannot load sibling test module from {_SIBLING_PATH}")
+_sibling_module = importlib.util.module_from_spec(_sibling_spec)
+_sibling_spec.loader.exec_module(_sibling_module)
+_approve = _sibling_module._approve
+_setup = _sibling_module._setup
 
 
 def _add_uv1_alias(glb: bytes) -> bytes:

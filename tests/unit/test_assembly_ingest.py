@@ -765,7 +765,10 @@ def test_reject_excessive_accessor_count(tmp_path: Path) -> None:
     _write_glb(source_glb, doc, binary)
     spec = _spec()
 
-    with pytest.raises(ValidationError, match="accessor count is invalid or exceeds safety limit"):
+    with pytest.raises(
+        ValidationError,
+        match="expanded POSITION elements across reachable primitive instances exceed safety limit",
+    ):
         preflight_assembly_glb(source_glb.read_bytes(), spec)
 
 

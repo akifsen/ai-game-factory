@@ -17,6 +17,8 @@ from __future__ import annotations
 
 import copy
 import dataclasses
+import hashlib
+import json
 from importlib.resources import files
 from pathlib import Path
 from typing import Any
@@ -40,6 +42,7 @@ from gamefactory.core.domain.asset_contracts import (
 )
 from gamefactory.core.domain.asset_profiles import (
     UNSUPPORTED_PROFILE_IDS,
+    UNSUPPORTED_PROFILE_IDS_V07,
     AssetProfile,
     AssetProfileV07,
     ProcessingPolicy,
@@ -48,6 +51,7 @@ from gamefactory.core.domain.asset_profiles import (
     ProfileDocumentV07,
     ProfileRegistry,
     builtin_registry,
+    builtin_v07_registry,
     parse_profile_document,
     parse_profile_document_v07,
 )
@@ -227,6 +231,7 @@ def test_040_spec_profile_version_null_behavior_pinned() -> None:
     assert spec.profile_version is None
 
     # Non-null values are strictly rejected
+    bad_val: Any
     for bad_val in (1, 2, [], {}, "1"):
         with pytest.raises(SpecInvalidError):
             parse_asset_specification(dict(MINIMAL_040, profile_version=bad_val))
@@ -766,7 +771,7 @@ def test_v07_spec_collider_block_rules() -> None:
 
     # Bool values rejected
     with pytest.raises(ValueError, match="got boolean"):
-        CapsuleSpec(radius_m=True, height_m=1.0)  # type: ignore[arg-type]
+        CapsuleSpec(radius_m=True, height_m=1.0)
 
 
 # ==============================================================================
@@ -933,11 +938,18 @@ def test_v07_spec_against_builtin_registry_fails(
     with pytest.raises(SpecInvalidError, match="static_prop@1 is not registered"):
         parse_asset_specification_v07(prop_07)
 
-    # Spec naming an UNSUPPORTED profile id (e.g. vehicle against builtin)
-    veh_builtin = copy.deepcopy(valid_vehicle_spec_dict)
-    veh_builtin["profile"] = "vehicle"
-    with pytest.raises(SpecInvalidError, match="profile vehicle is UNSUPPORTED"):
-        parse_asset_specification_v07(veh_builtin)
+    # Spec naming an UNSUPPORTED profile id (e.g. rigged_character) against public catalog fails
+    unsupported_spec = copy.deepcopy(valid_character_spec_dict)
+    unsupported_spec["profile"] = "rigged_character"
+    with pytest.raises(SpecInvalidError, match="profile rigged_character is UNSUPPORTED"):
+        parse_asset_specification_v07(unsupported_spec)
+
+    # Negative version against public catalog fails
+    bad_version_spec = copy.deepcopy(valid_character_spec_dict)
+    bad_version_spec["profile"] = "character"
+    bad_version_spec["profile_version"] = 2
+    with pytest.raises(SpecInvalidError, match="character@2 is not registered"):
+        parse_asset_specification_v07(bad_version_spec)
 
 
 def test_v07_spec_cannot_bind_v05_profile_even_if_in_available(
@@ -990,8 +1002,8 @@ def test_builtin_registry_contents_and_isolation() -> None:
     # No test ids present
     assert not any("test" in r["profile_id"] for r in availability)
 
-    # Historical profiles remain unchanged; only the explicit V0.7 local
-    # assembly candidates are added as unadvertised resources.
+    # Historical profiles remain unchanged; V0.7 assembly resources live in
+    # their own explicit registry.
     profile_dir = files("gamefactory").joinpath("resources/profiles")
     profile_filenames = {p.name for p in profile_dir.iterdir()}
     assert profile_filenames == {
@@ -1001,9 +1013,52 @@ def test_builtin_registry_contents_and_isolation() -> None:
         "vehicle.yml",
         "weapon.yml",
         "aircraft.yml",
+        "character.yml",
     }
     with pytest.raises(ProfileContractError, match="profile vehicle is UNSUPPORTED"):
         reg.get_v07("vehicle", 1)
+
+    v07_reg = builtin_v07_registry()
+    assert tuple(profile.qualified for profile in v07_reg.available_v07) == (
+        "vehicle@1",
+        "weapon@1",
+        "aircraft@1",
+        "character@1",
+    )
+    assert v07_reg.unsupported == UNSUPPORTED_PROFILE_IDS_V07
+    assert v07_reg.availability()[0:4] == [
+        {
+            "profile_id": "vehicle",
+            "qualified": "vehicle@1",
+            "version": "1",
+            "status": "AVAILABLE",
+        },
+        {
+            "profile_id": "weapon",
+            "qualified": "weapon@1",
+            "version": "1",
+            "status": "AVAILABLE",
+        },
+        {
+            "profile_id": "aircraft",
+            "qualified": "aircraft@1",
+            "version": "1",
+            "status": "AVAILABLE",
+        },
+        {
+            "profile_id": "character",
+            "qualified": "character@1",
+            "version": "1",
+            "status": "AVAILABLE",
+        },
+    ]
+    assert all(row["status"] == "UNSUPPORTED" for row in v07_reg.availability()[4:])
+    assert "character" not in {row["profile_id"] for row in v07_reg.availability()[4:]}
+    assert "rigged_character" in {row["profile_id"] for row in v07_reg.availability()[4:]}
+    with pytest.raises(ProfileContractError, match="profile rigged_character is UNSUPPORTED"):
+        v07_reg.get_v07("rigged_character", 1)
+    with pytest.raises(ProfileContractError, match="profile character@2 is not registered"):
+        v07_reg.get_v07("character", 2)
 
     # Registry is frozen
     with pytest.raises(dataclasses.FrozenInstanceError):
@@ -1116,7 +1171,7 @@ def test_wrong_type_context_registry_rejected(
     valid_vehicle_spec_dict: dict[str, Any],
 ) -> None:
     with pytest.raises(SpecInvalidError, match="registry must be an instance of ProfileRegistry"):
-        parse_asset_specification_v07(valid_vehicle_spec_dict, registry="bad_registry")
+        parse_asset_specification_v07(valid_vehicle_spec_dict, registry="bad_registry")  # type: ignore[arg-type]
 
     with pytest.raises(
         ValidationError, match="profile_registry must be an instance of ProfileRegistry"
@@ -1221,3 +1276,32 @@ def test_v07_unbound_instance_has_no_bound_profile(
     unbound = AssetSpecificationV07.model_construct(**dict(spec))
     with pytest.raises(SpecInvalidError, match="not validated against a registry"):
         unbound.bound_profile()
+
+
+def test_packaged_character_spec_binds_canonical_profile_hash() -> None:
+    spec_path = Path(str(files("gamefactory").joinpath("resources/specs/character_test.yml")))
+    assert spec_path.is_file()
+    spec = parse_asset_specification_v07(spec_path)
+    bound = spec.bound_profile()
+    assert bound.qualified == "character@1"
+    assert bound.profile_id == "character"
+    assert bound.version == 1
+    assert bound.geometry_mode == "single_mesh"
+    assert bound.accepted_source_kinds == ("provider_generated",)
+    assert bound.document.godot.body_kind == "static_body"
+    assert bound.document.godot.require_ray_hit is True
+    assert bound.document.processing.lod0_required is True
+    assert bound.document.processing.lod1_required is True
+    assert bound.document.processing.rig_forbidden is True
+    assert bound.document.processing.animation_forbidden is True
+    assert bound.document.processing.allowed_collider_policies == ["capsule"]
+    assert len(bound.review_views) == 9
+
+    raw = json.dumps(
+        bound.document.model_dump(mode="json"),
+        sort_keys=True,
+        separators=(",", ":"),
+        allow_nan=False,
+    )
+    canonical_hash = hashlib.sha256(raw.encode("utf-8")).hexdigest()
+    assert canonical_hash == "135c1530395daff86a15dde55433eb017d193d0d729d40c6b4d9fdb6a0e1ed61"

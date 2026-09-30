@@ -21,6 +21,7 @@ from gamefactory.adapters.external.meshy_cli import MeshyAssetGenerationProvider
 from gamefactory.adapters.fakes.fake_provider import FakeAssetGenerationProvider
 from gamefactory.adapters.persistence.database import Database
 from gamefactory.adapters.persistence.migrations import MigrationRunner
+from gamefactory.adapters.persistence.read_only_database import ReadOnlyDatabase
 from gamefactory.adapters.persistence.repositories import (
     ApprovalRepository,
     ArtifactRepository,
@@ -212,6 +213,11 @@ def build_parser() -> argparse.ArgumentParser:
         "create", help="create a gated profile-driven asset production workflow"
     )
     _add_asset_create_arguments(asset_create_alias)
+    asset_export = asset_commands.add_parser(
+        "export", help="export current provider-character evidence when its gate is enabled"
+    )
+    _add_common(asset_export, nested=True)
+    asset_export.add_argument("workflow_id")
 
     assembly = commands.add_parser(
         "assembly", help="ingest, authenticate, or create a local authored V0.7 assembly"
@@ -223,7 +229,9 @@ def build_parser() -> argparse.ArgumentParser:
     _add_common(assembly_ingest, nested=True)
     assembly_ingest.add_argument("--spec", required=True, help="typed V0.7 assembly specification")
     assembly_ingest.add_argument("--source", required=True, help="project-relative source GLB")
-    assembly_ingest.add_argument("--package", required=True, help="new project-relative package directory")
+    assembly_ingest.add_argument(
+        "--package", required=True, help="new project-relative package directory"
+    )
     assembly_ingest.add_argument("--actor", required=True)
     assembly_ingest.add_argument("--reason", required=True)
     assembly_ingest.add_argument("--authoring-tool", required=True)
@@ -236,7 +244,9 @@ def build_parser() -> argparse.ArgumentParser:
     )
     _add_common(assembly_verify, nested=True)
     assembly_verify.add_argument("--spec", required=True)
-    assembly_verify.add_argument("--package", required=True, help="project-relative retained package")
+    assembly_verify.add_argument(
+        "--package", required=True, help="project-relative retained package"
+    )
     assembly_verify.add_argument("--expected-provenance-sha256", required=True)
 
     assembly_create = assembly_commands.add_parser(
@@ -244,11 +254,15 @@ def build_parser() -> argparse.ArgumentParser:
     )
     _add_common(assembly_create, nested=True)
     assembly_create.add_argument("--spec", required=True)
-    assembly_create.add_argument("--package", required=True, help="project-relative authenticated package")
+    assembly_create.add_argument(
+        "--package", required=True, help="project-relative authenticated package"
+    )
     assembly_create.add_argument("--expected-provenance-sha256", required=True)
     assembly_create.add_argument("--concept", required=True, help="project-relative concept PNG")
     assembly_create.add_argument("--concept-provenance", required=True)
-    assembly_create.add_argument("--workflow-id", help="stable ID for an exact idempotent create retry")
+    assembly_create.add_argument(
+        "--workflow-id", help="stable ID for an exact idempotent create retry"
+    )
 
     assembly_export = assembly_commands.add_parser(
         "export", help="advance a local assembly or revalidate its completed evidence bundle"
@@ -379,6 +393,23 @@ def _db(root: Path) -> Database:
     db = Database(db_path)
     MigrationRunner(db).apply_all()
     return db
+
+
+def _db_existing_readonly(root: Path) -> Database:
+    """Open initialized state for queries without running migrations or creating files."""
+    assert_managed_directory(root, ".gamefactory")
+    state = assert_managed_directory(root, ".gamefactory/state")
+    if not state.is_dir():
+        raise ConfigurationError(
+            f"Factory project is not initialized at {root}; run 'gamefactory init'."
+        )
+    db_path = PathGuard(root).resolve_safe_path(".gamefactory/state/factory.db")
+    if not db_path.is_file():
+        raise ConfigurationError(f"Factory database is missing: {db_path}")
+    try:
+        return ReadOnlyDatabase(db_path)
+    except FileNotFoundError as exc:
+        raise ConfigurationError(f"Factory database is missing: {db_path}") from exc
 
 
 def _load_runtime(root: Path, godot_path: str | None, blender_path: str | None) -> tuple[Any, Any]:
@@ -1329,6 +1360,8 @@ def _recovery_reclassify(
 def _report(root: Path, db: Database, workflow_id: str) -> tuple[dict[str, Any], int, str]:
     """Point at the static review snapshot. This command does not approve anything."""
     workflow = WorkflowRepository(db).get(workflow_id)
+    if _workflow_has_v07_character_graph(db, workflow_id):
+        return _provider_character_evidence_report(root, db, workflow_id, workflow)
     if workflow is not None and workflow.name.startswith("Asset production:"):
         from gamefactory.workflows.asset_evidence import export_asset_evidence_bundle
 
@@ -1373,6 +1406,148 @@ def _report(root: Path, db: Database, workflow_id: str) -> tuple[dict[str, Any],
         "note": "The HTML file is a snapshot and does not itself grant approval.",
     }
     return payload, EXIT_SUCCESS, f"Review page: {path}"
+
+
+def _workflow_has_v07_character_graph(db: Database, workflow_id: str) -> bool:
+    """Detect V0.7 character identity before any legacy report filesystem action."""
+    tasks = TaskRepository(db).list_by_workflow(workflow_id)
+    for task in tasks:
+        parameters = task.parameters
+        specification = parameters.get("specification")
+        if (
+            task.task_type == "asset_v07_provider_evidence"
+            or parameters.get("graph_version") == "0.7.0"
+            or (
+                isinstance(specification, dict)
+                and specification.get("schema_version") == "0.7.0"
+                and specification.get("category") == "character"
+                and specification.get("source_kind") == "provider_generated"
+            )
+        ):
+            return True
+    return False
+
+
+def _provider_character_evidence_report(
+    root: Path, db: Database, workflow_id: str, workflow: Any | None = None
+) -> tuple[dict[str, Any], int, str]:
+    """Revalidate completed V0.7 evidence without advancing or mutating the workflow."""
+    workflow = workflow or WorkflowRepository(db).get(workflow_id)
+    if workflow is None:
+        raise ConfigurationError(f"Workflow not found: {workflow_id}")
+
+    if workflow.status.value != "COMPLETED":
+        pending = ApprovalRepository(db).list_pending(workflow_id)
+        tasks = TaskRepository(db).list_by_workflow(workflow_id)
+        blocked = next((task for task in tasks if task.status == TaskStatus.BLOCKED), None)
+        current_gate = None
+        if pending:
+            approval = pending[0]
+            current_gate = {
+                "approval_id": approval.id,
+                "approval_type": approval.approval_type,
+                "task_id": approval.task_id,
+            }
+            next_action = (
+                f"Approve {approval.id} ({approval.approval_type}) if appropriate, then "
+                f"resume {workflow_id}; export did not advance the workflow."
+            )
+        elif blocked is not None:
+            current_gate = {"task_id": blocked.id, "task_type": blocked.task_type}
+            next_action = (
+                f"Inspect task {blocked.id} and its artifacts, then use the existing recovery "
+                f"policy; export did not execute tasks."
+            )
+        else:
+            next_action = (
+                f"Workflow is {workflow.status.value}; inspect its current tasks before asking "
+                "for another export."
+            )
+        payload = {
+            "workflow_id": workflow_id,
+            "status": workflow.status.value,
+            "current_gate": current_gate,
+            "evidence_verification": "NOT_RUN_INCOMPLETE_WORKFLOW",
+            "workflow_mutated": False,
+        }
+        code = (
+            EXIT_APPROVAL_BLOCKED if workflow.status.value == "BLOCKED" else EXIT_WORKFLOW_FAILURE
+        )
+        return payload, code, next_action
+
+    provider_name = _asset_provider_for_workflow(db, workflow_id)
+    if provider_name not in {"fake", "meshy"}:
+        raise ValidationError(
+            "Completed V0.7 character workflow has no supported persisted provider identity"
+        )
+    engine = _engine(root, db, asset_provider_name=provider_name)
+    evidence_handler = engine.handler_registry.get("asset_v07_provider_evidence")
+    handlers = getattr(evidence_handler, "__self__", None)
+    if handlers is None or not callable(
+        getattr(handlers, "current_provider_character_evidence_inputs", None)
+    ):
+        raise ValidationError(
+            "The registered provider-character handler does not expose current evidence inputs"
+        )
+
+    from gamefactory.workflows.provider_character_evidence import (
+        revalidate_current_provider_character_evidence_bundle,
+    )
+
+    verification = revalidate_current_provider_character_evidence_bundle(handlers, workflow)
+    if (
+        not isinstance(verification, dict)
+        or verification.get("status") != "PASS"
+        or verification.get("product_ready") is not True
+    ):
+        raise ValidationError("Current provider-character evidence did not pass cold revalidation")
+    relative_manifest = verification.get("evidence_manifest")
+    manifest_sha256 = verification.get("evidence_manifest_sha256")
+    manifest_artifact_id = verification.get("evidence_manifest_artifact_id")
+    if (
+        not isinstance(relative_manifest, str)
+        or not relative_manifest
+        or not isinstance(manifest_sha256, str)
+        or len(manifest_sha256) != 64
+        or not isinstance(manifest_artifact_id, str)
+        or not manifest_artifact_id
+    ):
+        raise ValidationError(
+            "Current provider-character evidence returned incomplete manifest bindings"
+        )
+    try:
+        if len(bytes.fromhex(manifest_sha256)) != 32:
+            raise ValueError("manifest digest is not a SHA-256 value")
+        manifest_path = PathGuard(root).resolve_safe_path(relative_manifest).resolve(strict=True)
+        manifest_path.relative_to(root.resolve(strict=True))
+        review_path = (
+            PathGuard(root)
+            .resolve_safe_path((Path(relative_manifest).parent / "index.html").as_posix())
+            .resolve(strict=True)
+        )
+        review_path.relative_to(root.resolve(strict=True))
+    except (OSError, ValueError) as exc:
+        raise ValidationError(
+            "Revalidated provider-character review paths are unsafe or missing"
+        ) from exc
+
+    payload = {
+        "workflow_id": workflow_id,
+        "status": "COMPLETED",
+        "evidence_manifest": str(manifest_path),
+        "evidence_manifest_relative_path": relative_manifest,
+        "evidence_manifest_sha256": manifest_sha256,
+        "evidence_manifest_artifact_id": manifest_artifact_id,
+        "review_html": str(review_path),
+        "evidence_verification": verification,
+        "verification_as_of": utc_now_iso(),
+        "workflow_mutated": False,
+    }
+    return (
+        payload,
+        EXIT_SUCCESS,
+        f"Current provider-character evidence revalidated read-only as of {payload['verification_as_of']}",
+    )
 
 
 def _run_workflow(
@@ -1427,13 +1602,21 @@ def _run_workflow(
 
 
 def _create_asset_workflow(
-    root: Path, db: Database, args: argparse.Namespace
+    root: Path,
+    db: Database,
+    args: argparse.Namespace,
+    *,
+    specification: Any | None = None,
+    profile_registry: Any | None = None,
 ) -> tuple[dict[str, Any], int, str]:
     cfg = ConfigLoader.load_config(root)
     spec_path = Path(args.spec).expanduser()
     if not spec_path.is_absolute():
         spec_path = root / spec_path
-    specification = parse_asset_specification(spec_path.resolve(strict=True))
+    if specification is None:
+        specification = _parse_cli_asset_specification(
+            spec_path.resolve(strict=True), registry=profile_registry
+        )
     concept = Path(args.concept).expanduser()
     if not concept.is_absolute():
         concept = root / concept
@@ -1515,6 +1698,13 @@ def _create_asset_workflow(
     engine = _engine(
         root, db, args.godot_path, args.blender_path, asset_provider_name=args.provider
     )
+    from gamefactory.core.domain.asset_contracts import AssetSpecificationV07
+
+    provider_cost_unit = (
+        "fake_credits"
+        if isinstance(specification, AssetSpecificationV07) and args.provider == "fake"
+        else "credits"
+    )
     workflow, tasks = create_asset_production_workflow(
         cfg.project.id,
         root,
@@ -1523,9 +1713,11 @@ def _create_asset_workflow(
         provenance,
         provider_name=args.provider,
         provider_estimate=estimate,
+        provider_cost_unit=provider_cost_unit,
         budget_reservation=reservation,
         concept_source_type=args.concept_source_type,
         revision_repository=AssetRevisionRepository(db),
+        profile_registry=profile_registry,
     )
     _register_asset_graph_if_needed(engine, workflow, tasks)
     result = engine.run_workflow(workflow.id)
@@ -1573,7 +1765,59 @@ def _create_asset_workflow(
     return payload, _result_code(result), message
 
 
-def _register_asset_graph_if_needed(engine: WorkflowEngine, workflow: Any, tasks: list[Task]) -> None:
+def _parse_cli_asset_specification(
+    path: Path | dict[str, Any], *, registry: Any | None = None
+) -> Any:
+    """Parse only the declared schema version; V0.7 never falls through to legacy."""
+    from gamefactory.core.domain.asset_contracts import (
+        _load_spec_data,
+        parse_asset_specification_v07,
+    )
+    from gamefactory.core.domain.asset_profiles import builtin_v07_registry
+
+    try:
+        data = _load_spec_data(path)
+        version = data.get("schema_version")
+        if version == "0.7.0":
+            if data.get("source_kind") == "local_operator_assembly":
+                raise ValidationError(
+                    "Local assembly specifications must use 'assembly create'; "
+                    "the paid asset pipeline does not accept assemblies"
+                )
+            v07_registry = builtin_v07_registry() if registry is None else registry
+            spec = parse_asset_specification_v07(data, registry=v07_registry)
+            profile = spec.bound_profile()
+            if (
+                spec.category != "character"
+                or spec.source_kind != "provider_generated"
+                or spec.parts is not None
+                or spec.sockets is not None
+                or profile.geometry_mode != "single_mesh"
+            ):
+                raise ValidationError(
+                    "asset create supports only the typed provider-generated V0.7 character flow; "
+                    "local assemblies must use 'assembly create'"
+                )
+            return spec
+        if version not in {"0.4.0", "0.5.0"}:
+            raise ValidationError(f"Unsupported asset specification schema_version: {version!r}")
+        return parse_asset_specification(data)
+    except FactoryError:
+        raise
+    except Exception as exc:
+        raise ValidationError(f"Asset specification is invalid or unavailable: {exc}") from exc
+
+
+def _asset_workflow_is_v07_character(db: Database, workflow_id: str) -> bool:
+    from gamefactory.workflows.asset_production import is_v07_character_graph
+
+    tasks = TaskRepository(db).list_by_workflow(workflow_id)
+    return bool(tasks) and all(is_v07_character_graph(task) for task in tasks)
+
+
+def _register_asset_graph_if_needed(
+    engine: WorkflowEngine, workflow: Any, tasks: list[Task]
+) -> None:
     """Register legacy graphs; V0.7 graph creation already committed atomically."""
     if not tasks:
         raise ValidationError("Asset workflow creator returned an empty task graph")
@@ -1946,7 +2190,7 @@ def _asset_inspect(db: Database, asset_id: str) -> dict[str, Any]:
     prepare = next((task for task in tasks if task.task_type == "asset_prepare"), None)
     if prepare is None:
         raise ConfigurationError(f"Asset {asset_id} has no specification task")
-    specification = parse_asset_specification(prepare.parameters["specification"])
+    specification = _parse_cli_asset_specification(prepare.parameters["specification"])
     profile = specification.bound_profile()
     current = next(
         (task for task in tasks if task.status.value not in {"COMPLETED", "SKIPPED"}),
@@ -2125,11 +2369,15 @@ def _assembly_binding(root: Path, spec_arg: str) -> tuple[Any, Any, Path]:
     except Exception as exc:
         if isinstance(exc, FactoryError):
             raise
-        raise ValidationError(f"Could not bind V0.7 specification to a built-in available profile: {exc}") from exc
+        raise ValidationError(
+            f"Could not bind V0.7 specification to a built-in available profile: {exc}"
+        ) from exc
     if type(spec) is not AssetSpecificationV07 or type(profile) is not AssetProfileV07:
         raise ValidationError("Assembly CLI requires an exact typed V0.7 specification and profile")
     if spec.source_kind != "local_operator_assembly":
-        raise ValidationError("Local assembly CLI accepts only source_kind 'local_operator_assembly'")
+        raise ValidationError(
+            "Local assembly CLI accepts only source_kind 'local_operator_assembly'"
+        )
     if profile.geometry_mode != "assembly" or spec.bound_profile() != profile:
         raise ValidationError("Specification must bind to the exact available assembly profile")
     profile.check_specification(spec)
@@ -2181,7 +2429,11 @@ def _assembly_ingest(root: Path, args: argparse.Namespace) -> tuple[dict[str, An
         "spec_fingerprint": result.spec_fingerprint,
         "paid_provider_invocations": 0,
     }
-    return payload, EXIT_SUCCESS, f"Local assembly source retained at {payload['source_package']}; pin provenance SHA-256 {result.retained_provenance_sha256}."
+    return (
+        payload,
+        EXIT_SUCCESS,
+        f"Local assembly source retained at {payload['source_package']}; pin provenance SHA-256 {result.retained_provenance_sha256}.",
+    )
 
 
 def _assembly_verify(root: Path, args: argparse.Namespace) -> tuple[dict[str, Any], int, str]:
@@ -2205,7 +2457,11 @@ def _assembly_verify(root: Path, args: argparse.Namespace) -> tuple[dict[str, An
         "provenance_sha256": result.retained_provenance_sha256,
         "spec_fingerprint": result.spec_fingerprint,
     }
-    return payload, EXIT_SUCCESS, f"Authenticated local assembly package {package_relative} ({result.retained_glb_sha256})."
+    return (
+        payload,
+        EXIT_SUCCESS,
+        f"Authenticated local assembly package {package_relative} ({result.retained_glb_sha256}).",
+    )
 
 
 def _preflight_local_assembly_create(root: Path, args: argparse.Namespace) -> dict[str, Any]:
@@ -2356,10 +2612,14 @@ def _rehydrate_local_assembly(
     if workflow is None or len(tasks) != len(_ASSEMBLY_TASK_TYPES):
         raise ValidationError("Local assembly workflow or exact persisted task graph is missing")
     if tuple(task.task_type for task in tasks) != _ASSEMBLY_TASK_TYPES:
-        raise ValidationError("Persisted local assembly task graph differs from its immutable definition")
+        raise ValidationError(
+            "Persisted local assembly task graph differs from its immutable definition"
+        )
     params = tasks[0].parameters
     if any(task.parameters != params for task in tasks):
-        raise ValidationError("Persisted local assembly task parameters conflict across the task graph")
+        raise ValidationError(
+            "Persisted local assembly task parameters conflict across the task graph"
+        )
     if params.get("workflow_id") != workflow_id or workflow.project_id != cfg.project.id:
         raise ValidationError("Persisted local assembly workflow identity is inconsistent")
     registry = _assembly_profile_registry()
@@ -2372,7 +2632,9 @@ def _rehydrate_local_assembly(
     except Exception as exc:
         if isinstance(exc, FactoryError):
             raise
-        raise ValidationError(f"Persisted local assembly specification/profile cannot be rehydrated: {exc}") from exc
+        raise ValidationError(
+            f"Persisted local assembly specification/profile cannot be rehydrated: {exc}"
+        ) from exc
     if (
         type(spec) is not AssetSpecificationV07
         or type(profile) is not AssetProfileV07
@@ -2382,11 +2644,14 @@ def _rehydrate_local_assembly(
         or profile.profile_id != params.get("profile_id")
         or type(params.get("profile_version")) is not int
         or profile.version != params.get("profile_version")
-        or _json_hash(profile.document.model_dump(mode="json")) != params.get("profile_document_sha256")
+        or _json_hash(profile.document.model_dump(mode="json"))
+        != params.get("profile_document_sha256")
         or type(params.get("source_version")) is not int
         or params.get("source_version", 0) < 1
     ):
-        raise ValidationError("Persisted local assembly profile, specification, or revision binding was tampered")
+        raise ValidationError(
+            "Persisted local assembly profile, specification, or revision binding was tampered"
+        )
 
     def pinned_path(key: str, label: str) -> tuple[Path, str]:
         value = params.get(key)
@@ -2404,20 +2669,37 @@ def _rehydrate_local_assembly(
     prepare = tasks[0]
     input_roles = {
         "assembly-source-glb": (f"{package_relative}/source.glb", params.get("source_glb_sha256")),
-        "assembly-source-provenance": (f"{package_relative}/source_provenance.json", params.get("source_provenance_sha256")),
-        "assembly-source-publication-marker": (f"{package_relative}/publication_marker.json", params.get("source_publication_marker_sha256")),
+        "assembly-source-provenance": (
+            f"{package_relative}/source_provenance.json",
+            params.get("source_provenance_sha256"),
+        ),
+        "assembly-source-publication-marker": (
+            f"{package_relative}/publication_marker.json",
+            params.get("source_publication_marker_sha256"),
+        ),
         "asset-concept": (concept_relative, params.get("concept_image_sha256")),
-        "asset-concept-provenance": (concept_provenance_relative, params.get("concept_provenance_sha256")),
+        "asset-concept-provenance": (
+            concept_provenance_relative,
+            params.get("concept_provenance_sha256"),
+        ),
     }
-    rows = [a for a in ArtifactRepository(db).list_by_workflow(workflow_id) if a.task_id == prepare.id and a.artifact_type in input_roles]
-    if prepare.status == TaskStatus.COMPLETED and {a.artifact_type for a in rows} != set(input_roles):
+    rows = [
+        a
+        for a in ArtifactRepository(db).list_by_workflow(workflow_id)
+        if a.task_id == prepare.id and a.artifact_type in input_roles
+    ]
+    if prepare.status == TaskStatus.COMPLETED and {a.artifact_type for a in rows} != set(
+        input_roles
+    ):
         raise ValidationError("Completed assembly prepare task is missing durable input artifacts")
     if len({a.artifact_type for a in rows}) != len(rows):
         raise ValidationError("Persisted assembly input artifact roles are duplicated")
     for row in rows:
         expected_path, expected_hash = input_roles[row.artifact_type]
         if row.relative_path != expected_path or row.content_hash != expected_hash:
-            raise ValidationError("Persisted assembly input artifact no longer matches its immutable pin")
+            raise ValidationError(
+                "Persisted assembly input artifact no longer matches its immutable pin"
+            )
         engine.artifact_mgr.verify_artifact_integrity(row)
 
     create_local_assembly_workflow(
@@ -2459,6 +2741,14 @@ def _dispatch(args: argparse.Namespace) -> tuple[Any, int, str | None]:
             + (" (already initialized)" if payload["already_initialized"] else ""),
         )
     assembly_prepared: dict[str, Any] | None = None
+    asset_specification: Any | None = None
+    if args.command == "asset-create" or (
+        args.command == "asset" and args.asset_command == "create"
+    ):
+        spec_path = Path(args.spec).expanduser()
+        if not spec_path.is_absolute():
+            spec_path = root / spec_path
+        asset_specification = _parse_cli_asset_specification(spec_path.resolve(strict=True))
     if args.command == "assembly":
         if args.assembly_command == "ingest":
             return _assembly_ingest(root, args)
@@ -2486,7 +2776,19 @@ def _dispatch(args: argparse.Namespace) -> tuple[Any, int, str | None]:
         "recovery",
     }:
         # Explicit path overrides are passed through detection; no failed explicit path falls back.
-        db = _db(root)
+        if args.command == "asset" and args.asset_command == "export":
+            db = _db_existing_readonly(root)
+        elif args.command == "report":
+            db = _db_existing_readonly(root)
+            try:
+                has_v07_character_graph = _workflow_has_v07_character_graph(db, args.workflow)
+            except sqlite3.DatabaseError:
+                has_v07_character_graph = False
+            if not has_v07_character_graph:
+                # Keep the established migration path for all legacy report formats.
+                db = _db(root)
+        else:
+            db = _db(root)
         if args.command == "assembly":
             if args.assembly_command == "create":
                 assert assembly_prepared is not None
@@ -2502,7 +2804,10 @@ def _dispatch(args: argparse.Namespace) -> tuple[Any, int, str | None]:
                     godot_path=args.godot_path,
                     blender_path=args.blender_path,
                 )
-                if persisted_workflow is not None and persisted_workflow.status.value == "COMPLETED":
+                if (
+                    persisted_workflow is not None
+                    and persisted_workflow.status.value == "COMPLETED"
+                ):
                     from gamefactory.workflows.assembly_production import (
                         verify_completed_local_assembly_evidence,
                     )
@@ -2523,9 +2828,17 @@ def _dispatch(args: argparse.Namespace) -> tuple[Any, int, str | None]:
                     result = WorkflowExecutionResult(
                         workflow_id=args.workflow_id,
                         status=persisted_workflow.status,
-                        completed_tasks=[task.id for task in completed_tasks if task.status == TaskStatus.COMPLETED],
-                        failed_tasks=[task.id for task in completed_tasks if task.status == TaskStatus.FAILED],
-                        blocked_tasks=[task.id for task in completed_tasks if task.status == TaskStatus.BLOCKED],
+                        completed_tasks=[
+                            task.id
+                            for task in completed_tasks
+                            if task.status == TaskStatus.COMPLETED
+                        ],
+                        failed_tasks=[
+                            task.id for task in completed_tasks if task.status == TaskStatus.FAILED
+                        ],
+                        blocked_tasks=[
+                            task.id for task in completed_tasks if task.status == TaskStatus.BLOCKED
+                        ],
                     )
                     payload = _result_payload(result)
                     payload["evidence_manifest"] = str(root / manifests[0].relative_path)
@@ -2568,7 +2881,14 @@ def _dispatch(args: argparse.Namespace) -> tuple[Any, int, str | None]:
         if args.command == "asset-create" or (
             args.command == "asset" and args.asset_command == "create"
         ):
-            return _create_asset_workflow(root, db, args)
+            return _create_asset_workflow(root, db, args, specification=asset_specification)
+        if args.command == "asset" and args.asset_command == "export":
+            if not _asset_workflow_is_v07_character(db, args.workflow_id):
+                raise ValidationError(
+                    "Workflow is not a V0.7 provider-generated character workflow"
+                )
+            workflow = WorkflowRepository(db).get(args.workflow_id)
+            return _provider_character_evidence_report(root, db, args.workflow_id, workflow)
         if args.command == "asset" and args.asset_command == "inspect":
             payload = _asset_inspect(db, args.asset_id)
             return payload, EXIT_SUCCESS, _asset_inspect_text(payload)

@@ -81,8 +81,8 @@ def test_vehicle_profile_and_spec_bind_only_in_private_candidate_registry() -> N
     builtin = builtin_registry()
     with pytest.raises(ProfileContractError, match="vehicle is UNSUPPORTED"):
         builtin.get_v07("vehicle", 1)
-    with pytest.raises(SpecInvalidError, match="vehicle is UNSUPPORTED"):
-        parse_asset_specification_v07(_candidate_spec_data())
+    public_spec = parse_asset_specification_v07(_candidate_spec_data())
+    assert public_spec.bound_profile().qualified == "vehicle@1"
 
 
 @pytest.mark.parametrize(

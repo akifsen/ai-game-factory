@@ -101,8 +101,8 @@ def test_weapon_aircraft_candidates_are_private_and_typed(
     registry = builtin_registry()
     with pytest.raises(ProfileContractError):
         registry.get_v07(name, 1)
-    with pytest.raises(SpecInvalidError):
-        parse_asset_specification_v07(raw_spec)
+    public_spec = parse_asset_specification_v07(raw_spec)
+    assert public_spec.bound_profile().qualified == f"{name}@1"
     assert builtin_registry().available_v07 == ()
 
 

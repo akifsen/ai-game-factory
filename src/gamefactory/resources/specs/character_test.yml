@@ -1,0 +1,37 @@
+schema_version: "0.7.0"
+asset_id: character_fixture
+category: character
+profile: character
+profile_version: 1
+intent: >-
+  Provider-generated static review character model with capsule collision,
+  no rig, no skin, and no animation.
+source_kind: provider_generated
+dimensions:
+  width_m: 0.6
+  depth_m: 0.5
+  height_m: 1.8
+orientation:
+  up: "+Y"
+  front: "-Z"
+origin_policy: bottom_center
+geometry_budget:
+  max_triangles_lod0: 20000
+  max_triangles_lod1: 10000
+  lod_ratio: 0.5
+material_budget:
+  max_materials: 4
+texture_budget:
+  max_dimension: 2048
+collider:
+  policy: capsule
+  capsule:
+    radius_m: 0.3
+    height_m: 1.8
+lod_policy: lod0_lod1
+style_constraints:
+  family: stylized_scifi
+  silhouette: biped_hero
+  detail_density: medium
+target_engine: godot
+target_import_path: assets/generated/characters/character_test/
