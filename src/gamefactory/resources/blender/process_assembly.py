@@ -43,8 +43,16 @@ def _world_bounds(obj: Any) -> tuple[tuple[float, float, float], tuple[float, fl
     if not points:
         return None
     return (
-        tuple(min(float(point[axis]) for point in points) for axis in range(3)),
-        tuple(max(float(point[axis]) for point in points) for axis in range(3)),
+        (
+            min(float(point[0]) for point in points),
+            min(float(point[1]) for point in points),
+            min(float(point[2]) for point in points),
+        ),
+        (
+            max(float(point[0]) for point in points),
+            max(float(point[1]) for point in points),
+            max(float(point[2]) for point in points),
+        ),
     )
 
 
@@ -543,6 +551,13 @@ def main() -> None:
         lod1_triangles: int | None = None
 
         if lod1_required:
+            if (
+                not isinstance(max_triangles_lod1, int)
+                or isinstance(max_triangles_lod1, bool)
+                or max_triangles_lod1 <= 0
+            ):
+                raise ValueError("required LOD1 needs a positive max_triangles_lod1 budget")
+            lod1_budget = max_triangles_lod1
             lod1 = lod0.copy()
             lod1.data = lod0.data.copy()
             lod1.name = f"SM_{asset_id}_{pid}_LOD1"
@@ -569,7 +584,7 @@ def main() -> None:
                 _require_lod1_fallback_budget(
                     pid,
                     lod0_triangles,
-                    max_triangles_lod1,
+                    lod1_budget,
                     already_used=lod1_triangles_total,
                 )
                 discarded_mesh = lod1.data
@@ -580,16 +595,15 @@ def main() -> None:
                 bpy.context.view_layer.update()
 
             lod1_triangles = sum(max(1, len(poly.vertices) - 2) for poly in lod1.data.polygons)
-            if lod1_triangles > max_triangles_lod1:
+            if lod1_triangles > lod1_budget:
                 raise RuntimeError(
-                    f"LOD1 '{pid}' has {lod1_triangles} triangles, exceeding budget "
-                    f"{max_triangles_lod1}"
+                    f"LOD1 '{pid}' has {lod1_triangles} triangles, exceeding budget {lod1_budget}"
                 )
             lod1_triangles_total += lod1_triangles
-            if lod1_triangles_total > max_triangles_lod1:
+            if lod1_triangles_total > lod1_budget:
                 raise RuntimeError(
                     f"Aggregate LOD1 has {lod1_triangles_total} triangles, exceeding "
-                    f"budget {max_triangles_lod1}"
+                    f"budget {lod1_budget}"
                 )
             if not _bounds_match(
                 _world_bounds(lod0),

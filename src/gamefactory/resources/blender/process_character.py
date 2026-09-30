@@ -390,7 +390,8 @@ def main() -> None:
         report_bytes, report_identity = _write_report(report_path, report)
         succeeded = True
     finally:
-        _unlink_owned(stage_path, stage_identity)
+        if stage_path is not None:
+            _unlink_owned(stage_path, stage_identity)
         if not succeeded:
             _unlink_owned(output, output_identity)
             _unlink_owned(report_path, report_identity)
