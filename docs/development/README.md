@@ -33,3 +33,11 @@ It launches fresh Factory CLI processes and real Godot processes. The included
 `examples/godot-verification` project remains an ordinary standalone Godot game.
 The dedicated CI job pins a release and verifies archive SHA-512 before execution.
 A local Linux mypy target does not establish Linux runtime acceptance.
+
+## CI cost policy
+
+- A pull request runs one quick job: Ubuntu, Python 3.11, with tests, ruff and mypy.
+- The full set runs on pushes to `main`, on manual dispatch, and on any pull request labelled `full-ci`. It covers Windows and Ubuntu with Python 3.11 and 3.12, plus real Godot and Blender acceptance. Add the label to PRs that touch process handling, Windows paths, the Godot harness or Blender processing.
+- A newer commit on the same pull request cancels the older run. Runs on `main` are never cancelled.
+- Changes that touch only Markdown files do not start CI.
+- pip downloads and the pinned Godot archive are cached. The archive is still checked against its SHA-512 on every run.
