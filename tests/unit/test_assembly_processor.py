@@ -529,6 +529,57 @@ def test_contract_cleanup_preserves_foreign_replacement_or_mutation(
     assert contract.read_bytes() == expected
 
 
+def test_overlong_windows_plan_fails_before_preflight_runner_or_output_mkdir(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from gamefactory.adapters.dcc import assembly_processor
+    from gamefactory.adapters.dcc.windows_paths import ensure_windows_output_paths
+
+    profile = _create_assembly_profile()
+    spec = _create_assembly_spec(profile)
+    package = _setup_ingested_package(tmp_path, spec)
+    runner = _FailingAssemblyRunner()
+    processor = AssemblyProcessor(
+        blender_executable="blender.exe", runner=runner, dependency_preflight=True
+    )
+    original_check = ensure_windows_output_paths
+    monkeypatch.setattr(
+        assembly_processor,
+        "ensure_windows_output_paths",
+        lambda paths: original_check(paths, windows=True),
+    )
+    monkeypatch.setattr(
+        assembly_processor,
+        "run_blender_dependency_preflight",
+        lambda **_kwargs: pytest.fail("path rejection must precede dependency preflight"),
+    )
+    report_name = f"{spec.asset_id}_blender_assembly_report.json"
+    long_parent = tmp_path
+    while len(str(long_parent / report_name).encode("utf-16-le")) // 2 < 235:
+        current = len(str(long_parent / report_name).encode("utf-16-le")) // 2
+        component_length = min(40, 235 - current - 1)
+        long_parent = long_parent / ("w" * component_length)
+    planned_report = long_parent / report_name
+    staged_report = planned_report.with_name(f".{planned_report.stem}.{'0' * 32}.stage.json")
+    diagnostics = planned_report.with_suffix(".blender-diagnostics.txt")
+    staged_output = (long_parent / "out.glb").with_name(f".out.{'0' * 8}.stage.glb")
+    assert len(str(planned_report).encode("utf-16-le")) // 2 == 235
+    assert len(str(diagnostics).encode("utf-16-le")) // 2 <= 259
+    assert len(str(staged_output).encode("utf-16-le")) // 2 <= 259
+    assert len(str(staged_report).encode("utf-16-le")) // 2 > 259
+
+    with pytest.raises(ValidationError, match="staged processing report.*Shorten"):
+        processor.process_assembly(
+            package,
+            spec,
+            expected_provenance_sha256=package.retained_provenance_sha256,
+            processed_glb_path=long_parent / "out.glb",
+        )
+
+    assert runner.calls == 0
+    assert not long_parent.exists()
+
+
 def test_outside_blender_proof_oracle_catches_shape_and_equal_aabb_tamper(tmp_path: Path) -> None:
     """Equal AABB is NOT sufficient: modifying internal vertex coordinates must be rejected."""
     profile = _create_assembly_profile()

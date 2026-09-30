@@ -242,6 +242,58 @@ def _processor(runner: Any) -> CharacterProcessor:
     )
 
 
+def test_overlong_windows_character_plan_fails_before_preflight_runner_or_output_mkdir(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from gamefactory.adapters.dcc import character_processor
+    from gamefactory.adapters.dcc.windows_paths import ensure_windows_output_paths
+
+    profile = _profile()
+    spec = _spec(profile)
+    source = tmp_path / "source.glb"
+    _source(source)
+    runner = _NoCallRunner()
+    processor = _processor(runner)
+    processor.dependency_preflight = True
+    original_check = ensure_windows_output_paths
+    monkeypatch.setattr(
+        character_processor,
+        "ensure_windows_output_paths",
+        lambda paths: original_check(paths, windows=True),
+    )
+    monkeypatch.setattr(
+        character_processor,
+        "run_blender_dependency_preflight",
+        lambda **_kwargs: pytest.fail("path rejection must precede dependency preflight"),
+    )
+    report_name = f"{spec.asset_id}_character_report.json"
+    long_parent = tmp_path
+    while len(str(long_parent / report_name).encode("utf-16-le")) // 2 < 235:
+        current = len(str(long_parent / report_name).encode("utf-16-le")) // 2
+        component_length = min(40, 235 - current - 1)
+        long_parent = long_parent / ("c" * component_length)
+    planned_report = long_parent / report_name
+    staged_report = planned_report.with_name(f".{planned_report.stem}.{'0' * 32}.stage.json")
+    staged_output = (long_parent / "out.glb").with_name(f".out.{'0' * 32}.stage.glb")
+    contract = (long_parent / "out.glb").with_name(f".out.{'0' * 32}.contract.json")
+    assert len(str(planned_report).encode("utf-16-le")) // 2 == 235
+    assert len(str(staged_output).encode("utf-16-le")) // 2 <= 259
+    assert len(str(contract).encode("utf-16-le")) // 2 <= 259
+    assert len(str(staged_report).encode("utf-16-le")) // 2 > 259
+
+    with pytest.raises(ValidationError, match="staged character report.*Shorten"):
+        processor.process_character(
+            source,
+            spec,
+            profile,
+            expected_raw_glb_sha256=hashlib.sha256(source.read_bytes()).hexdigest(),
+            processed_glb_path=long_parent / "out.glb",
+        )
+
+    assert runner.calls == 0
+    assert not long_parent.exists()
+
+
 @pytest.mark.parametrize(
     "forbidden", ["skins", "animations", "extensionsUsed", "joints", "weights"]
 )

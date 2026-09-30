@@ -51,6 +51,7 @@ from gamefactory.adapters.dcc.blender_environment import (
     parse_blender_python_paths,
     run_blender_dependency_preflight,
 )
+from gamefactory.adapters.dcc.windows_paths import ensure_windows_output_paths
 from gamefactory.core.domain.assembly_source import AssemblyIngestResult
 from gamefactory.core.domain.asset_contracts import AssetSpecificationV07
 from gamefactory.core.domain.asset_profiles import AssetProfileV07
@@ -842,6 +843,24 @@ class AssemblyProcessor:
             if target.suffix.casefold() != suffix:
                 raise ValueError(f"{label} must use the {suffix} extension")
 
+        contract_path = resolved_report.with_suffix(".contract.json")
+        diagnostics_path = resolved_report.with_suffix(".blender-diagnostics.txt")
+        script_file = self.get_script_path()
+        staged_output = processed_glb.with_name(f".{processed_glb.stem}.{'0' * 8}.stage.glb")
+        staged_report = resolved_report.with_name(f".{resolved_report.stem}.{'0' * 32}.stage.json")
+        ensure_windows_output_paths(
+            (
+                ("retained source GLB", retained_glb),
+                ("Blender assembly script", script_file),
+                ("processed GLB", processed_glb),
+                ("processing report", resolved_report),
+                ("processing contract", contract_path),
+                ("Blender diagnostics", diagnostics_path),
+                ("staged processed GLB", staged_output),
+                ("staged processing report", staged_report),
+            )
+        )
+
         ratio = spec.geometry_budget.lod_ratio if lod1_ratio is None else lod1_ratio
         if not 0.05 <= ratio <= 0.95:
             raise ValueError("lod1_ratio must be between 0.05 and 0.95")
@@ -868,14 +887,12 @@ class AssemblyProcessor:
                     )
                 self._cached_preflight = preflight
 
-        script_file = self.get_script_path()
         script_bytes = script_file.read_bytes()
         script_hash = hashlib.sha256(script_bytes).hexdigest()
 
         # 5. Contract serialization
         processed_glb.parent.mkdir(parents=True, exist_ok=True)
         resolved_report.parent.mkdir(parents=True, exist_ok=True)
-        contract_path = resolved_report.with_suffix(".contract.json")
         if contract_path.exists() or contract_path.is_symlink():
             raise ValueError(f"refusing to overwrite existing processing contract: {contract_path}")
 
@@ -935,7 +952,6 @@ class AssemblyProcessor:
 
             res = self.runner.run(req)
 
-            diagnostics_path = resolved_report.with_suffix(".blender-diagnostics.txt")
             if res.exit_code != 0:
                 raise _blender_failure(
                     f"Blender assembly processing failed with exit code {res.exit_code}",

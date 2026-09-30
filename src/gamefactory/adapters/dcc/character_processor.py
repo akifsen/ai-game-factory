@@ -36,6 +36,7 @@ from gamefactory.adapters.dcc.blender_environment import (
     parse_blender_python_paths,
     run_blender_dependency_preflight,
 )
+from gamefactory.adapters.dcc.windows_paths import ensure_windows_output_paths
 from gamefactory.core.domain.asset_contracts import AssetSpecificationV07
 from gamefactory.core.domain.asset_profiles import AssetProfileV07
 from gamefactory.core.domain.errors import DccFailedError, ValidationError
@@ -637,15 +638,24 @@ class CharacterProcessor:
         ):
             raise ValidationError("Character capsule collider does not fit the declared dimensions")
 
-        output.parent.mkdir(parents=True, exist_ok=True)
-        report.parent.mkdir(parents=True, exist_ok=True)
         attempt = uuid.uuid4().hex
         staged_output = output.with_name(f".{output.stem}.{attempt}.stage.glb")
         staged_report = report.with_name(f".{report.stem}.{attempt}.stage.json")
         contract_path = output.with_name(f".{output.stem}.{attempt}.contract.json")
+        script_path = self.get_script_path()
+        ensure_windows_output_paths(
+            (
+                ("raw character GLB", raw_path),
+                ("Blender character script", script_path),
+                ("processed character GLB", output),
+                ("character processing report", report),
+                ("character contract", contract_path),
+                ("staged character GLB", staged_output),
+                ("staged character report", staged_report),
+            )
+        )
         spec_sha = _canonical_hash(spec.model_dump(mode="json"))
         profile_sha = _canonical_hash(profile.document.model_dump(mode="json"))
-        script_path = self.get_script_path()
         script_bytes = script_path.read_bytes()
         script_sha = hashlib.sha256(script_bytes).hexdigest()
         contract = {
@@ -670,6 +680,8 @@ class CharacterProcessor:
             "capsule": capsule.model_dump(mode="json"),
         }
         contract_bytes = _bounded_json_bytes(contract, "character contract")
+        output.parent.mkdir(parents=True, exist_ok=True)
+        report.parent.mkdir(parents=True, exist_ok=True)
         output_identity = report_identity = contract_identity = None
         published_output_identity = published_report_identity = None
         publication_complete = False
