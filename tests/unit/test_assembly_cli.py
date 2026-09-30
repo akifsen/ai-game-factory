@@ -99,6 +99,7 @@ def test_paid_provider_flags_are_rejected_before_database_or_provider_constructi
     assert _table_count(db, "provider_operation_intents") == 0
     assert _table_count(db, "cost_ledger") == 0
 
+
 def test_public_cli_rejects_unavailable_v07_profile_before_mutation(
     tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
@@ -256,7 +257,10 @@ def test_ingest_verify_create_and_human_gates_rehydrate_in_fresh_cli_engines(
     approvals = ApprovalRepository(db).list_by_workflow("cli-assembly-fixed-id")
     assert len(approvals) == 2
     assert {item.approval_type for item in approvals} == {"concept_review", "source_review"}
-    assert next(item for item in approvals if item.approval_type == "source_review").status.value == "PENDING"
+    assert (
+        next(item for item in approvals if item.approval_type == "source_review").status.value
+        == "PENDING"
+    )
     code, export_gate = _invoke(
         capsys,
         "--project",

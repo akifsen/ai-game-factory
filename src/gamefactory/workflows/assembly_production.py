@@ -572,9 +572,7 @@ class AssemblyProductionHandlers:
                 workflow,
                 task,
                 "assembly-source-publication-marker",
-                (package.package_dir / "publication_marker.json")
-                .relative_to(self.root)
-                .as_posix(),
+                (package.package_dir / "publication_marker.json").relative_to(self.root).as_posix(),
                 execution=execution,
             ),
         }
@@ -587,7 +585,9 @@ class AssemblyProductionHandlers:
         }
         for role, parameter in pinned_hashes.items():
             if rows[role].content_hash != task.parameters.get(parameter):
-                raise ArtifactError(f"Assembly input {role} no longer matches its creation-time pin")
+                raise ArtifactError(
+                    f"Assembly input {role} no longer matches its creation-time pin"
+                )
         if len({item.id for item in rows.values()}) != len(rows):
             raise ArtifactError("Assembly input roles must resolve to unique artifact rows")
         return rows
@@ -1254,9 +1254,7 @@ class AssemblyProductionHandlers:
             "concept_review_receipt": concept_receipt,
         }
 
-    def _evidence_attempt(
-        self, workflow: Workflow, task: Task, execution: Execution
-    ) -> None:
+    def _evidence_attempt(self, workflow: Workflow, task: Task, execution: Execution) -> None:
         """Fence evidence selection to the current running or completed attempt."""
         latest = self.executions.get_latest_attempt(task.id)
         current_task = self.tasks.get(task.id)
@@ -1272,7 +1270,9 @@ class AssemblyProductionHandlers:
             or current_task is None
             or current_task.workflow_id != workflow.id
         ):
-            raise ArtifactError("Assembly evidence attempt is not the current running or completed attempt")
+            raise ArtifactError(
+                "Assembly evidence attempt is not the current running or completed attempt"
+            )
 
     def verify_completed_evidence_bundle(
         self,
@@ -1403,7 +1403,9 @@ class AssemblyProductionHandlers:
                     source.expected_sha256 is not None
                     and hashlib.sha256(raw).hexdigest() != source.expected_sha256
                 ):
-                    raise ArtifactError("Current project evidence changed during completed revalidation")
+                    raise ArtifactError(
+                        "Current project evidence changed during completed revalidation"
+                    )
         final_snapshot = self.current_evidence_inputs(workflow, task, execution)
 
         def snapshot_identity(value: dict[str, Any]) -> tuple[Any, ...]:

@@ -190,9 +190,7 @@ def ingest_concept_image(
         sidecar_bytes = (
             sidecar_provenance_bytes
             if sidecar_provenance_bytes is not None
-            else _read_bounded(
-                sidecar_file, MAX_PROVENANCE_SIDECAR_BYTES, "Provenance sidecar"
-            )
+            else _read_bounded(sidecar_file, MAX_PROVENANCE_SIDECAR_BYTES, "Provenance sidecar")
         )
         try:
             sidecar_data = json.loads(

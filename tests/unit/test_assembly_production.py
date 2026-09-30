@@ -290,9 +290,12 @@ def test_atomic_graph_registration_rolls_back_workflow_revision_and_audit(
     assert AssetRevisionRepository(db).list_by_workflow(workflow_id) == []
     assert case["engine"].task_repo.list_by_workflow(workflow_id) == []
     with db.connect() as conn:
-        assert conn.execute(
-            "SELECT COUNT(*) FROM audit_events WHERE entity_id = ?", (workflow_id,)
-        ).fetchone()[0] == 0
+        assert (
+            conn.execute(
+                "SELECT COUNT(*) FROM audit_events WHERE entity_id = ?", (workflow_id,)
+            ).fetchone()[0]
+            == 0
+        )
         conn.execute("DROP TRIGGER fail_assembly_graph_task")
         conn.commit()
 
@@ -312,11 +315,14 @@ def test_atomic_graph_registration_rolls_back_workflow_revision_and_audit(
     assert case["engine"].wf_repo.get(workflow_id) is not None
     assert len(case["engine"].task_repo.list_by_workflow(workflow_id)) == 8
     with db.connect() as conn:
-        assert conn.execute(
-            "SELECT COUNT(*) FROM audit_events WHERE entity_type='Workflow' "
-            "AND entity_id = ? AND action='REGISTERED'",
-            (workflow_id,),
-        ).fetchone()[0] == 1
+        assert (
+            conn.execute(
+                "SELECT COUNT(*) FROM audit_events WHERE entity_type='Workflow' "
+                "AND entity_id = ? AND action='REGISTERED'",
+                (workflow_id,),
+            ).fetchone()[0]
+            == 1
+        )
 
 
 def test_creation_time_concept_provenance_pin_cannot_be_silently_replaced(
@@ -523,7 +529,15 @@ def test_runtime_metadata_retention_uses_distinct_files_from_adapter_outputs(
     workflow = case["workflow"]
     task = next(t for t in case["tasks"] if t.task_type.endswith("godot"))
     handlers = _ASSEMBLY_ROUTERS[case["engine"].handler_registry].by_workflow[workflow.id]
-    attempt_dir = case["root"] / ".gamefactory" / "assets" / "test_assembly_tank" / "r001" / "runtime" / "fixture-a1"
+    attempt_dir = (
+        case["root"]
+        / ".gamefactory"
+        / "assets"
+        / "test_assembly_tank"
+        / "r001"
+        / "runtime"
+        / "fixture-a1"
+    )
     attempt_dir.mkdir(parents=True)
     adapter_outputs = {
         "runtime-request.json": b'{"source":"adapter"}',

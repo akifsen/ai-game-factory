@@ -48,9 +48,7 @@ SOURCE_HASH = "b" * 64
 def db(tmp_path: Path) -> Database:
     database = Database(tmp_path / "assembly.sqlite3")
     MigrationRunner(database).apply_all()
-    ProjectRepository(database).save(
-        Project("project-1", "Test project", "godot", str(tmp_path))
-    )
+    ProjectRepository(database).save(Project("project-1", "Test project", "godot", str(tmp_path)))
     return database
 
 

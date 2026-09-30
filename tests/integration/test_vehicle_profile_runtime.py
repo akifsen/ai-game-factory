@@ -53,14 +53,14 @@ def _load_profile_spec() -> tuple[AssetProfileV07, AssetSpecificationV07]:
     profile = AssetProfileV07(parse_profile_document_v07(profile_path.read_text(encoding="utf-8")))
     unsupported = tuple(item for item in UNSUPPORTED_PROFILE_IDS if item != profile.profile_id)
     registry = ProfileRegistry(available=(), unsupported=unsupported, available_v07=(profile,))
-    spec_data = yaml.safe_load(files("gamefactory").joinpath(SPEC_RESOURCE).read_text(encoding="utf-8"))
+    spec_data = yaml.safe_load(
+        files("gamefactory").joinpath(SPEC_RESOURCE).read_text(encoding="utf-8")
+    )
     spec = parse_asset_specification_v07(spec_data, registry=registry)
     return profile, spec
 
 
-def _append_buffer(
-    data: bytes, target: int, binary: bytearray, views: list[dict[str, Any]]
-) -> int:
+def _append_buffer(data: bytes, target: int, binary: bytearray, views: list[dict[str, Any]]) -> int:
     binary.extend(b"\0" * ((-len(binary)) % 4))
     offset = len(binary)
     binary.extend(data)
@@ -81,9 +81,42 @@ def _write_box_assembly(path: Path, asset_id: str) -> None:
         (-0.5, 0.5, 0.5),
     )
     triangle_indices = (
-        0, 1, 2, 0, 2, 3, 4, 6, 5, 4, 7, 6,
-        0, 4, 5, 0, 5, 1, 2, 6, 7, 2, 7, 3,
-        0, 3, 7, 0, 7, 4, 1, 5, 6, 1, 6, 2,
+        0,
+        1,
+        2,
+        0,
+        2,
+        3,
+        4,
+        6,
+        5,
+        4,
+        7,
+        6,
+        0,
+        4,
+        5,
+        0,
+        5,
+        1,
+        2,
+        6,
+        7,
+        2,
+        7,
+        3,
+        0,
+        3,
+        7,
+        0,
+        7,
+        4,
+        1,
+        5,
+        6,
+        1,
+        6,
+        2,
     )
     binary = bytearray()
     views: list[dict[str, Any]] = []
@@ -125,7 +158,11 @@ def _write_box_assembly(path: Path, asset_id: str) -> None:
             {
                 "name": f"{asset_id}_{name}_mesh",
                 "primitives": [
-                    {"attributes": {"POSITION": position_accessor}, "indices": index_accessor, "material": 0}
+                    {
+                        "attributes": {"POSITION": position_accessor},
+                        "indices": index_accessor,
+                        "material": 0,
+                    }
                 ],
             }
         )
@@ -310,7 +347,10 @@ def test_vehicle_candidate_real_blender_and_godot_acceptance_with_semantic_negat
     negative_mutations = {
         "wrong_axis": ("pivot.axis.barrel", lambda doc: _wrong_axis(doc)),
         "wrong_parent": ("part.parent.barrel", lambda doc: _wrong_parent(doc)),
-        "muzzle_orientation": ("socket.orientation.muzzle", lambda doc: _wrong_muzzle_orientation(doc)),
+        "muzzle_orientation": (
+            "socket.orientation.muzzle",
+            lambda doc: _wrong_muzzle_orientation(doc),
+        ),
         "muzzle_behind": ("socket.position.muzzle", lambda doc: _move_muzzle_behind(doc)),
     }
     for name, (rule_id, mutate) in negative_mutations.items():
@@ -325,9 +365,7 @@ def test_vehicle_candidate_real_blender_and_godot_acceptance_with_semantic_negat
         )
         assert not bad_result.passed, name
         failed_rule_ids = {
-            finding.rule_id
-            for finding in bad_result.findings
-            if finding.severity.value == "FAIL"
+            finding.rule_id for finding in bad_result.findings if finding.severity.value == "FAIL"
         }
         assert rule_id in failed_rule_ids, name
 

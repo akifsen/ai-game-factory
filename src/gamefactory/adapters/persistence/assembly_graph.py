@@ -279,7 +279,9 @@ class AssemblyGraphRepository:
         try:
             spec_json = _canonical_json(spec)
         except (TypeError, ValueError) as exc:
-            raise ValidationError("Assembly graph V0.7 specification is not canonical JSON") from exc
+            raise ValidationError(
+                "Assembly graph V0.7 specification is not canonical JSON"
+            ) from exc
         spec_hash = hashlib.sha256(spec_json.encode("utf-8")).hexdigest()
         if (
             parameters.get("graph_version") != _GRAPH_VERSION
@@ -300,7 +302,9 @@ class AssemblyGraphRepository:
             or spec.get("profile_version") != revision.profile_version
             or spec_hash != revision.spec_hash
         ):
-            raise ValidationError("Assembly graph task parameters do not bind its assigned revision")
+            raise ValidationError(
+                "Assembly graph task parameters do not bind its assigned revision"
+            )
 
     @staticmethod
     def _insert_tasks(conn: sqlite3.Connection, tasks: list[Task]) -> None:
@@ -377,7 +381,9 @@ class AssemblyGraphRepository:
             not self._same_immutable_task(saved, expected)
             for saved, expected in zip(saved_tasks, expected_tasks, strict=True)
         ):
-            raise ValidationError("Existing assembly workflow differs from the complete canonical graph")
+            raise ValidationError(
+                "Existing assembly workflow differs from the complete canonical graph"
+            )
         registered = conn.execute(
             "SELECT details_json FROM audit_events WHERE entity_type='Workflow' AND entity_id=? "
             "AND action='REGISTERED'",
@@ -389,9 +395,7 @@ class AssemblyGraphRepository:
             details = json.loads(registered[0]["details_json"])
         except (TypeError, json.JSONDecodeError) as exc:
             raise ValidationError("Existing assembly registration audit is malformed") from exc
-        if _canonical_json(details) != _canonical_json(
-            {"task_count": len(_ASSEMBLY_STAGES)}
-        ):
+        if _canonical_json(details) != _canonical_json({"task_count": len(_ASSEMBLY_STAGES)}):
             raise ValidationError("Existing assembly registration audit does not match its graph")
         return revision, saved_tasks
 
@@ -422,7 +426,9 @@ class AssemblyGraphRepository:
             (workflow_id,),
         ).fetchone()
         if revision is not None or task is not None or audit is not None:
-            raise ValidationError("Workflow ID has orphaned graph state; refusing to reconstruct it")
+            raise ValidationError(
+                "Workflow ID has orphaned graph state; refusing to reconstruct it"
+            )
 
     @staticmethod
     def _row_to_revision(row: sqlite3.Row) -> AssetRevision:
