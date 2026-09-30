@@ -17,7 +17,7 @@ import yaml
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from gamefactory.core.domain.asset_contracts import _as_number, _reject_bool_and_string
-from gamefactory.core.domain.camera_framing import PLACED_VIEWS
+from gamefactory.core.domain.camera_framing import LEGACY_PROFILE_VIEWS, PLACED_VIEWS
 from gamefactory.core.domain.errors import SpecInvalidError
 
 if TYPE_CHECKING:
@@ -183,7 +183,7 @@ class ProfileDocument(BaseModel):
     def views_are_implemented(cls, value: list[str]) -> list[str]:
         if len(value) != len(set(value)):
             raise ValueError("review_views contains a duplicate")
-        unknown = [item for item in value if item not in PLACED_VIEWS]
+        unknown = [item for item in value if item not in LEGACY_PROFILE_VIEWS]
         if unknown:
             raise ValueError(f"review view is not implemented: {unknown[0]}")
         return value

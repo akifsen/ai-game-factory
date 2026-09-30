@@ -15,6 +15,19 @@ var collision_shape_present := false
 var side_framing := {}
 var view_framing := {}
 var request_has_profile := false
+## ADR 0014: every named review view has one placement. Unknown views fail;
+## there is no fallback. The asset faces -Z with +Y up, so its right is +X.
+const VIEW_TABLE := {
+	"front": [Vector3(0, 0, -1), "-Z"],
+	"rear": [Vector3(0, 0, 1), "+Z"],
+	"left": [Vector3(-1, 0, 0), "-X"],
+	"right": [Vector3(1, 0, 0), "+X"],
+	"side": [Vector3(1, 0, 0), "+X"],
+	"three_quarter": [Vector3(1, 0.65, -1), "+X-Z"],
+	"three_quarter_front": [Vector3(1, 0.65, -1), "+X-Z"],
+	"three_quarter_rear": [Vector3(1, 0.65, 1), "+X+Z"],
+	"top": [Vector3(0, 1, 0), "+Y"],
+}
 
 func _initialize() -> void:
 	call_deferred("_run")
@@ -132,14 +145,6 @@ func _run() -> void:
 	var extent: float = max(global_bounds.size.x, max(global_bounds.size.y, global_bounds.size.z))
 	var center: Vector3 = global_bounds.get_center()
 	var scale_reference := _add_floor(global_bounds, extent)
-	var quarter := Vector3(1, 0.65, -1).normalized()
-	var angles := {
-		"front": Vector3(0, 0, -1),
-		"three_quarter": quarter,
-		"three_quarter_front": quarter,
-		"side": Vector3(1, 0, 0),
-		"top": Vector3(0, 1, 0),
-	}
 	var requested: Array = ["front", "three_quarter", "side"]
 	if request.has("angles"):
 		if typeof(request.angles) != TYPE_ARRAY or request.angles.is_empty():
@@ -149,10 +154,10 @@ func _run() -> void:
 			return
 		requested = request.angles
 	for angle in requested:
-		if not angles.has(angle):
+		if not VIEW_TABLE.has(str(angle)):
 			_fail("unknown capture angle " + str(angle))
 			continue
-		var direction: Vector3 = angles[angle]
+		var direction: Vector3 = _view_direction_vector(str(angle))
 		_park_reference(scale_reference, global_bounds, direction, extent)
 		var geom := _framing_geometry(global_bounds, camera, str(angle), target_fraction)
 		var distance: float = geom["distance"]
@@ -231,13 +236,18 @@ func _hide_non_lod0(node: Node) -> void:
 		_hide_non_lod0(child)
 
 func _view_direction_vector(angle: String) -> Vector3:
-	if angle == "side":
-		return Vector3(1, 0, 0)
-	elif angle == "top":
-		return Vector3(0, 1, 0)
-	elif angle == "front":
-		return Vector3(0, 0, -1)
-	return Vector3(1, 0.65, -1).normalized()
+	if not VIEW_TABLE.has(angle):
+		_fail("view has no camera placement: " + angle)
+		return Vector3.ZERO
+	var entry: Array = VIEW_TABLE[angle]
+	return (entry[0] as Vector3).normalized()
+
+func _view_axis_label(angle: String) -> String:
+	if not VIEW_TABLE.has(angle):
+		_fail("view has no camera placement: " + angle)
+		return ""
+	var entry: Array = VIEW_TABLE[angle]
+	return str(entry[1])
 
 func _view_up_vector(angle: String) -> Vector3:
 	if angle == "top":
@@ -361,13 +371,7 @@ func _measure_view_framing(camera: Camera3D, bounds: AABB, scale_reference: Mesh
 			var closest := camera.position + to_asset * along
 			if closest.distance_to(scale_reference.position) < 0.55:
 				reference_between = true
-	var axis := "+X-Z"
-	if angle == "side":
-		axis = "+X"
-	elif angle == "front":
-		axis = "-Z"
-	elif angle == "top":
-		axis = "+Y"
+	var axis := _view_axis_label(angle)
 	var reason := ""
 	if bounds.has_point(camera.position):
 		reason = "camera is inside asset geometry"

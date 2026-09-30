@@ -1624,6 +1624,18 @@ def validate_view_framing(
         )
     if view == "side" and framing.get("view_axis") != "+X":
         raise RuntimeValidationFailedError("side capture is not a principal-side view")
+    from gamefactory.core.domain.camera_framing import view_axis_label
+
+    try:
+        expected_axis = view_axis_label(view)
+    except ValueError as exc:
+        raise RuntimeValidationFailedError(
+            f"view.unplaced: {view} has no camera placement"
+        ) from exc
+    if "view_axis" in framing and framing.get("view_axis") != expected_axis:
+        raise RuntimeValidationFailedError(
+            f"{view} capture axis {framing.get('view_axis')!r} is not the placed {expected_axis}"
+        )
 
 
 def validate_side_framing(framing: Any) -> None:
@@ -1715,7 +1727,9 @@ def run_asset_in_godot(
         or len(capture_angles) != len(set(capture_angles))
         or any(angle not in PLACED_VIEWS for angle in capture_angles)
     ):
-        raise ValidationError("Asset capture angles are not an implemented review view set")
+        raise ValidationError(
+            "view.unplaced: asset capture angles are not an implemented review view set"
+        )
     scratch = assert_managed_directory(root, ".gamefactory/scratch")
     relative_stage = f".gamefactory/scratch/asset-{workflow.id}-{execution.id}"
     stage = PathGuard(root).resolve_safe_path(relative_stage)
