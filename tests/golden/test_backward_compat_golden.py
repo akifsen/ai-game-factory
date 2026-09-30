@@ -12,6 +12,7 @@ To regenerate goldens (never run during automated test suite):
 
 from __future__ import annotations
 
+import hashlib
 import json
 from pathlib import Path
 from typing import Any
@@ -42,6 +43,34 @@ GOLDEN_FILE = Path(__file__).parent / "golden_data.json"
 def golden_data() -> dict[str, Any]:
     assert GOLDEN_FILE.is_file(), f"Golden file not found: {GOLDEN_FILE}"
     return json.loads(GOLDEN_FILE.read_text(encoding="utf-8"))
+
+
+_HASH_PLACEHOLDER = "<SHA256-OF-ARTIFACT>"
+
+
+def _mask_artifact_hash(findings: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Mask the ``glb.hash`` value; everything else, including order, is compared."""
+    return [
+        {**f, "actual": _HASH_PLACEHOLDER} if f["rule_id"] == "glb.hash" else f for f in findings
+    ]
+
+
+def _assert_matches_golden(result: Any, glb_path: Path, expected: dict[str, Any]) -> None:
+    """Compare validator output with the frozen golden.
+
+    The fixture GLBs embed a PNG texture encoded by Pillow, whose zlib output is
+    not byte-stable across platforms and library builds. The ``glb.hash`` value is
+    therefore checked against the SHA-256 of the file actually validated, and then
+    masked. Rule ids, severities, messages, expected/actual values and their order
+    are still compared exactly.
+    """
+    normalized = normalize_validation_result(result)
+    hashes = [f for f in normalized["findings"] if f["rule_id"] == "glb.hash"]
+    for finding in hashes:
+        assert finding["actual"] == hashlib.sha256(glb_path.read_bytes()).hexdigest()
+    assert normalized["status"] == expected["status"]
+    assert normalized["summary"] == expected["summary"]
+    assert _mask_artifact_hash(normalized["findings"]) == _mask_artifact_hash(expected["findings"])
 
 
 # --- Helper functions to create GLB test fixtures matching generate_goldens.py ---
@@ -414,12 +443,9 @@ def test_static_prop_glb_validation_golden(
     )
     glb_path = _create_static_prop_fixture(case_name, tmp_path, spec)
     result = validate_glb(glb_path, spec)
-    normalized = normalize_validation_result(result)
-    expected = golden_data["glb_validation"]["static_prop"][case_name]
-
-    assert normalized["status"] == expected["status"]
-    assert normalized["summary"] == expected["summary"]
-    assert normalized["findings"] == expected["findings"]
+    _assert_matches_golden(
+        result, glb_path, golden_data["glb_validation"]["static_prop"][case_name]
+    )
 
 
 @pytest.mark.parametrize("case_name", PICKUP_CASES)
@@ -431,12 +457,7 @@ def test_pickup_glb_validation_golden(
     )
     glb_path = _create_pickup_fixture(case_name, tmp_path, spec)
     result = validate_glb(glb_path, spec)
-    normalized = normalize_validation_result(result)
-    expected = golden_data["glb_validation"]["pickup"][case_name]
-
-    assert normalized["status"] == expected["status"]
-    assert normalized["summary"] == expected["summary"]
-    assert normalized["findings"] == expected["findings"]
+    _assert_matches_golden(result, glb_path, golden_data["glb_validation"]["pickup"][case_name])
 
 
 @pytest.mark.parametrize("case_name", MODULAR_CASES)
@@ -446,12 +467,9 @@ def test_modular_piece_glb_validation_golden(
     spec = parse_asset_specification(Path("src/gamefactory/resources/fixtures/wall_panel_test.yml"))
     glb_path = _create_modular_fixture(case_name, tmp_path, spec)
     result = validate_glb(glb_path, spec)
-    normalized = normalize_validation_result(result)
-    expected = golden_data["glb_validation"]["modular_piece"][case_name]
-
-    assert normalized["status"] == expected["status"]
-    assert normalized["summary"] == expected["summary"]
-    assert normalized["findings"] == expected["findings"]
+    _assert_matches_golden(
+        result, glb_path, golden_data["glb_validation"]["modular_piece"][case_name]
+    )
 
 
 @pytest.mark.parametrize(
