@@ -12,14 +12,16 @@ from __future__ import annotations
 import hashlib
 import json
 import math
+import os
 import re
+import stat
 import struct
 import sys
 import zlib
 from collections import Counter
 from html.parser import HTMLParser
 from pathlib import Path, PurePosixPath
-from typing import Any
+from typing import Any, cast
 
 _SHA256 = re.compile(r"^[0-9a-f]{64}$")
 _SINGLE_ROLES = {
@@ -544,7 +546,7 @@ def _v07_close_matrix3(value: Any, expected: Any, tolerance: float) -> bool:
 def _v07_expected_view(
     view: str,
 ) -> tuple[tuple[float, float, float], tuple[float, float, float], str]:
-    placements = {
+    placements: dict[str, tuple[tuple[float, float, float], tuple[float, float, float], str]] = {
         "front": ((0.0, 0.0, -1.0), (0.0, 1.0, 0.0), "-Z"),
         "rear": ((0.0, 0.0, 1.0), (0.0, 1.0, 0.0), "+Z"),
         "left": ((-1.0, 0.0, 0.0), (0.0, 1.0, 0.0), "-X"),
@@ -561,11 +563,20 @@ def _v07_expected_view(
 
     def normalize(vector: tuple[float, float, float]) -> tuple[float, float, float]:
         length = math.sqrt(sum(component * component for component in vector))
-        return tuple(component / length for component in vector)  # type: ignore[return-value]
+        return (vector[0] / length, vector[1] / length, vector[2] / length)
 
-    direction = normalize(tuple(-component for component in normalize(placement)))
+    normalized_placement = normalize(placement)
+    direction = normalize(
+        (-normalized_placement[0], -normalized_placement[1], -normalized_placement[2])
+    )
     up_projection = sum(requested_up[i] * direction[i] for i in range(3))
-    up = normalize(tuple(requested_up[i] - up_projection * direction[i] for i in range(3)))
+    up = normalize(
+        (
+            requested_up[0] - up_projection * direction[0],
+            requested_up[1] - up_projection * direction[1],
+            requested_up[2] - up_projection * direction[2],
+        )
+    )
     return direction, up, axis
 
 
@@ -580,6 +591,8 @@ def _v07_matrix_point(
 
 def _v07_glb(
     raw: bytes,
+    *,
+    allow_unnamed_duplicate_nodes: bool = False,
 ) -> tuple[dict[str, Any], bytes, dict[str, int], dict[int, int], dict[int, list[list[float]]]]:
     if len(raw) < 20 or len(raw) > _MAX_FILE_BYTES:
         raise ValueError("V0.7 GLB size is invalid")
@@ -664,13 +677,18 @@ def _v07_glb(
     parents: dict[int, int] = {}
     local: list[list[list[float]]] = []
     for index, node in enumerate(nodes):
-        if (
-            not isinstance(node, dict)
-            or not isinstance(node.get("name"), str)
-            or node["name"] in node_by_name
-        ):
+        if not isinstance(node, dict):
+            raise ValueError("V0.7 GLB node is malformed")
+        node_name = node.get("name")
+        if allow_unnamed_duplicate_nodes:
+            # Raw character identity is geometric and node-index based; names
+            # may be missing, duplicated, or collide with any fallback label.
+            node_name = f"__provider_raw_node_{index}"
+        elif not isinstance(node_name, str) or node_name in node_by_name:
             raise ValueError("V0.7 GLB nodes need unique names")
-        node_by_name[node["name"]] = index
+        if node_name in node_by_name:
+            raise ValueError("V0.7 GLB nodes need unique names")
+        node_by_name[node_name] = index
         local.append(_v07_matrix(node))
         _v07_parts(node)
         children = node.get("children", [])
@@ -840,13 +858,14 @@ def _v07_glb(
                     or type(info.get("index")) is not int
                     or not 0 <= info["index"] < len(textures)
                     or type(texcoord) is not int
-                    or texcoord != 0
+                    or texcoord < 0
                     or not isinstance(attrs, dict)
-                    or "TEXCOORD_0" not in attrs
+                    or f"TEXCOORD_{texcoord}" not in attrs
                 ):
                     raise ValueError("V0.7 GLB material texture reference is invalid")
-    if referenced_accessors != set(range(len(accessors))) or referenced_views != set(
-        range(len(views))
+    if not allow_unnamed_duplicate_nodes and (
+        referenced_accessors != set(range(len(accessors)))
+        or referenced_views != set(range(len(views)))
     ):
         raise ValueError("V0.7 GLB contains unreferenced accessors or bufferViews")
     return document, binary, node_by_name, parents, world
@@ -862,8 +881,13 @@ def _unique_json(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
 
 
 def _v07_positions(
-    document: dict[str, Any], binary: bytes, mesh_index: int
-) -> list[list[tuple[float, float, float]]]:
+    document: dict[str, Any],
+    binary: bytes,
+    mesh_index: int,
+    *,
+    decoded_meshes: dict[int, list[list[tuple[tuple[float, float, float], ...]]]] | None = None,
+    validated_attribute_accessors: set[int] | None = None,
+) -> list[list[tuple[tuple[float, float, float], ...]]]:
     meshes, accessors, views = (
         document.get("meshes"),
         document.get("accessors"),
@@ -876,10 +900,12 @@ def _v07_positions(
         or not 0 <= mesh_index < len(meshes)
     ):
         raise ValueError("V0.7 GLB mesh or accessor table is invalid")
+    if decoded_meshes is not None and mesh_index in decoded_meshes:
+        return decoded_meshes[mesh_index]
     mesh = meshes[mesh_index]
     if not isinstance(mesh, dict) or not isinstance(mesh.get("primitives"), list):
         raise ValueError("V0.7 GLB mesh is malformed")
-    result: list[list[tuple[float, float, float]]] = []
+    result: list[list[tuple[tuple[float, float, float], ...]]] = []
     work = 0
     for primitive in mesh["primitives"]:
         if (
@@ -891,8 +917,13 @@ def _v07_positions(
         attrs = primitive.get("attributes")
         if not isinstance(attrs, dict) or not isinstance(attrs.get("POSITION"), int):
             raise ValueError("V0.7 GLB primitive lacks POSITION")
-        if set(attrs) - {"POSITION", "NORMAL", "TANGENT", "TEXCOORD_0", "COLOR_0"}:
-            raise ValueError("V0.7 GLB primitive has unsupported vertex attributes")
+        for semantic in attrs:
+            if semantic in {"POSITION", "NORMAL", "TANGENT"}:
+                continue
+            if not isinstance(semantic, str) or not re.fullmatch(
+                r"(?:TEXCOORD|COLOR)_(?:0|[1-9][0-9]*)", semantic
+            ):
+                raise ValueError("V0.7 GLB primitive has unsupported vertex attributes")
         ai = attrs["POSITION"]
         if type(ai) is not int or not 0 <= ai < len(accessors):
             raise ValueError("V0.7 GLB position accessor is invalid")
@@ -929,29 +960,38 @@ def _v07_positions(
         points = [struct.unpack_from("<3f", binary, start + i * stride) for i in range(count)]
         if any(not math.isfinite(v) for p in points for v in p):
             raise ValueError("V0.7 GLB position is non-finite")
-        attribute_shape = {"NORMAL": "VEC3", "TANGENT": "VEC4", "TEXCOORD_0": "VEC2"}
+        attribute_shape = {"NORMAL": "VEC3", "TANGENT": "VEC4"}
         for semantic, attribute_index in attrs.items():
             if semantic == "POSITION":
                 continue
             if type(attribute_index) is not int or not 0 <= attribute_index < len(accessors):
                 raise ValueError("V0.7 GLB vertex attribute accessor index is invalid")
-            expected_type = attribute_shape.get(semantic)
-            if semantic == "COLOR_0":
-                candidate = accessors[attribute_index]
-                expected_type = (
-                    candidate.get("type")
-                    if isinstance(candidate, dict) and candidate.get("type") in {"VEC3", "VEC4"}
-                    else None
-                )
             attribute = accessors[attribute_index]
-            components = {"SCALAR": 1, "VEC2": 2, "VEC3": 3, "VEC4": 4}.get(
-                attribute.get("type") if isinstance(attribute, dict) else None
+            accessor_type = attribute.get("type") if isinstance(attribute, dict) else None
+            expected_type = attribute_shape.get(semantic)
+            if semantic.startswith("TEXCOORD_"):
+                expected_type = "VEC2"
+            elif semantic.startswith("COLOR_"):
+                expected_type = accessor_type if accessor_type in {"VEC3", "VEC4"} else None
+            components = (
+                {"SCALAR": 1, "VEC2": 2, "VEC3": 3, "VEC4": 4}.get(accessor_type)
+                if isinstance(accessor_type, str)
+                else None
             )
             av = attribute.get("bufferView") if isinstance(attribute, dict) else None
+            component_type = attribute.get("componentType") if isinstance(attribute, dict) else None
+            normalized = attribute.get("normalized", False) if isinstance(attribute, dict) else None
+            integer_color_or_uv = semantic.startswith(
+                ("TEXCOORD_", "COLOR_")
+            ) and component_type in {5121, 5123}
+            valid_component = component_type == 5126 or integer_color_or_uv and normalized is True
             if (
                 not isinstance(attribute, dict)
                 or attribute.get("type") != expected_type
-                or attribute.get("componentType") != 5126
+                or not valid_component
+                or type(normalized) is not bool
+                or (component_type == 5126 and normalized)
+                or type(attribute.get("count")) is not int
                 or attribute.get("count") != count
                 or "sparse" in attribute
                 or type(av) is not int
@@ -959,27 +999,70 @@ def _v07_positions(
                 or components is None
             ):
                 raise ValueError("V0.7 GLB vertex attribute accessor is unsupported")
+            if type(component_type) is not int or component_type not in {5121, 5123, 5126}:
+                raise ValueError("V0.7 GLB vertex attribute component type is unsupported")
             attribute_view = views[av]
             if not isinstance(attribute_view, dict) or attribute_view.get("buffer") != 0:
                 raise ValueError("V0.7 GLB attribute accessor requires embedded buffer 0")
-            component_bytes = components * 4
-            attribute_stride = attribute_view.get("byteStride", component_bytes)
-            attribute_start = attribute_view.get("byteOffset", 0) + attribute.get("byteOffset", 0)
-            attribute_end = attribute_view.get("byteOffset", 0) + attribute_view.get(
-                "byteLength", -1
+            component_bytes, code = {5121: (1, "B"), 5123: (2, "H"), 5126: (4, "f")}[component_type]
+            element_bytes = components * component_bytes
+            attribute_stride = attribute_view.get("byteStride", element_bytes)
+            view_start = attribute_view.get("byteOffset", 0)
+            view_length = attribute_view.get("byteLength", -1)
+            accessor_offset = attribute.get("byteOffset", 0)
+            attribute_start = (
+                view_start + accessor_offset
+                if type(view_start) is int and type(accessor_offset) is int
+                else -1
+            )
+            attribute_end = (
+                view_start + view_length
+                if type(view_start) is int and type(view_length) is int
+                else -1
             )
             if (
                 any(
                     type(value) is not int
-                    for value in (attribute_stride, attribute_start, attribute_end)
+                    for value in (
+                        attribute_stride,
+                        view_start,
+                        view_length,
+                        accessor_offset,
+                        attribute_start,
+                        attribute_end,
+                    )
                 )
-                or attribute_stride < component_bytes
-                or attribute_start < attribute_view.get("byteOffset", 0)
-                or attribute_start + (count - 1) * attribute_stride + component_bytes
-                > attribute_end
+                or view_start < 0
+                or view_length <= 0
+                or accessor_offset < 0
+                or attribute_stride < element_bytes
+                or (
+                    "byteStride" in attribute_view
+                    and (
+                        attribute_stride < 4 or attribute_stride > 252 or attribute_stride % 4 != 0
+                    )
+                )
+                or attribute_start % component_bytes
+                or attribute_start < view_start
+                or attribute_start + (count - 1) * attribute_stride + element_bytes > attribute_end
                 or attribute_end > len(binary)
             ):
                 raise ValueError("V0.7 GLB vertex attribute accessor is out of bounds")
+            if component_type == 5126 and (
+                validated_attribute_accessors is None
+                or attribute_index not in validated_attribute_accessors
+            ):
+                fmt = "<" + code * components
+                if any(
+                    not math.isfinite(value)
+                    for index in range(count)
+                    for value in struct.unpack_from(
+                        fmt, binary, attribute_start + index * attribute_stride
+                    )
+                ):
+                    raise ValueError("V0.7 GLB vertex attribute contains non-finite values")
+                if validated_attribute_accessors is not None:
+                    validated_attribute_accessors.add(attribute_index)
         if "indices" in primitive:
             ii = primitive["indices"]
             if type(ii) is not int or not 0 <= ii < len(accessors):
@@ -1026,9 +1109,127 @@ def _v07_positions(
         if work > 100_000:
             raise ValueError("V0.7 GLB triangle safety limit exceeded")
         result.append(
-            [tuple(points[i] for i in indices[j : j + 3]) for j in range(0, len(indices), 3)]
+            [
+                (
+                    (points[indices[j]][0], points[indices[j]][1], points[indices[j]][2]),
+                    (
+                        points[indices[j + 1]][0],
+                        points[indices[j + 1]][1],
+                        points[indices[j + 1]][2],
+                    ),
+                    (
+                        points[indices[j + 2]][0],
+                        points[indices[j + 2]][1],
+                        points[indices[j + 2]][2],
+                    ),
+                )
+                for j in range(0, len(indices), 3)
+            ]
         )
+    if decoded_meshes is not None:
+        decoded_meshes[mesh_index] = result
     return result
+
+
+_V07_MAX_DECODED_VERTEX_REFERENCES = 1_000_000
+_V07_MAX_DECODED_ATTRIBUTE_COMPONENTS = 16_000_000
+
+
+def _v07_bound_mesh_vertex_work(document: dict[str, Any], node_indices: list[int]) -> int:
+    """Bound total POSITION decoding before any per-node vertex allocations."""
+    nodes = document.get("nodes")
+    meshes = document.get("meshes")
+    accessors = document.get("accessors")
+    if (
+        not isinstance(nodes, list)
+        or not isinstance(meshes, list)
+        or not isinstance(accessors, list)
+    ):
+        raise ValueError("V0.7 GLB mesh work tables are malformed")
+    total = 0
+    unique_attribute_accessors: set[int] = set()
+    attribute_checked_meshes: set[int] = set()
+    for node_index in node_indices:
+        if type(node_index) is not int or not 0 <= node_index < len(nodes):
+            raise ValueError("V0.7 GLB mesh node index is invalid")
+        node = nodes[node_index]
+        mesh_index = node.get("mesh") if isinstance(node, dict) else None
+        if type(mesh_index) is not int or not 0 <= mesh_index < len(meshes):
+            raise ValueError("V0.7 GLB mesh reference is invalid")
+        mesh = meshes[mesh_index]
+        primitives = mesh.get("primitives") if isinstance(mesh, dict) else None
+        if not isinstance(primitives, list) or not primitives:
+            raise ValueError("V0.7 GLB mesh primitive table is invalid")
+        if mesh_index not in attribute_checked_meshes:
+            for mesh_primitive in primitives:
+                mesh_attributes = (
+                    mesh_primitive.get("attributes") if isinstance(mesh_primitive, dict) else None
+                )
+                if not isinstance(mesh_attributes, dict):
+                    raise ValueError("V0.7 GLB vertex attribute table is malformed")
+                position_index = mesh_attributes.get("POSITION")
+                if type(position_index) is not int or not 0 <= position_index < len(accessors):
+                    raise ValueError("V0.7 GLB POSITION accessor reference is invalid")
+                position_accessor = accessors[position_index]
+                position_count = (
+                    position_accessor.get("count") if isinstance(position_accessor, dict) else None
+                )
+                if (
+                    type(position_count) is not int
+                    or not 1 <= position_count <= _V07_MAX_DECODED_VERTEX_REFERENCES
+                ):
+                    raise ValueError("V0.7 GLB POSITION accessor count is invalid")
+                for semantic, attribute_index in mesh_attributes.items():
+                    if semantic == "POSITION":
+                        continue
+                    if type(attribute_index) is not int or not 0 <= attribute_index < len(
+                        accessors
+                    ):
+                        raise ValueError("V0.7 GLB vertex attribute accessor index is invalid")
+                    attribute_accessor = accessors[attribute_index]
+                    attribute_count = (
+                        attribute_accessor.get("count")
+                        if isinstance(attribute_accessor, dict)
+                        else None
+                    )
+                    if (
+                        type(attribute_count) is not int
+                        or not 1 <= attribute_count <= _V07_MAX_DECODED_VERTEX_REFERENCES
+                        or attribute_count != position_count
+                    ):
+                        raise ValueError(
+                            "V0.7 GLB vertex attribute accessor count must match POSITION"
+                        )
+                    unique_attribute_accessors.add(attribute_index)
+            attribute_checked_meshes.add(mesh_index)
+        for primitive in primitives:
+            attributes = primitive.get("attributes") if isinstance(primitive, dict) else None
+            accessor_index = attributes.get("POSITION") if isinstance(attributes, dict) else None
+            if type(accessor_index) is not int or not 0 <= accessor_index < len(accessors):
+                raise ValueError("V0.7 GLB POSITION accessor reference is invalid")
+            accessor = accessors[accessor_index]
+            count = accessor.get("count") if isinstance(accessor, dict) else None
+            if type(count) is not int or not 1 <= count <= _V07_MAX_DECODED_VERTEX_REFERENCES:
+                raise ValueError("V0.7 GLB POSITION accessor count is invalid")
+            total += count
+            if total > _V07_MAX_DECODED_VERTEX_REFERENCES:
+                raise ValueError("V0.7 GLB aggregate decoded vertex work exceeds its safety bound")
+    attribute_components = 0
+    for accessor_index in unique_attribute_accessors:
+        accessor = accessors[accessor_index]
+        accessor_type = accessor.get("type") if isinstance(accessor, dict) else None
+        count = accessor.get("count") if isinstance(accessor, dict) else None
+        width = (
+            {"SCALAR": 1, "VEC2": 2, "VEC3": 3, "VEC4": 4}.get(accessor_type)
+            if isinstance(accessor_type, str)
+            else None
+        )
+        if type(count) is not int or count <= 0 or width is None:
+            raise ValueError("V0.7 GLB vertex attribute accessor count or type is invalid")
+        attribute_components += count * width
+        if attribute_components > _V07_MAX_DECODED_ATTRIBUTE_COMPONENTS:
+            raise ValueError("V0.7 GLB aggregate decoded attribute work exceeds its safety bound")
+    return total
 
 
 def _v07_tris(
@@ -1037,24 +1238,39 @@ def _v07_tris(
     nodes: dict[str, int],
     world: dict[int, list[list[float]]],
     suffix: str,
+    *,
+    selected_names: set[str] | None = None,
+    decoded_meshes: dict[int, list[list[tuple[tuple[float, float, float], ...]]]] | None = None,
+    validated_attribute_accessors: set[int] | None = None,
 ) -> dict[str, list[tuple[tuple[float, float, float], ...]]]:
     result: dict[str, list[tuple[tuple[float, float, float], ...]]] = {}
+    if decoded_meshes is None:
+        decoded_meshes = {}
+    if validated_attribute_accessors is None:
+        validated_attribute_accessors = set()
     gltf_nodes = document["nodes"]
     for name, ni in nodes.items():
-        if not name.endswith(suffix):
+        if name not in selected_names if selected_names is not None else not name.endswith(suffix):
             continue
         node = gltf_nodes[ni]
         if "mesh" not in node:
             raise ValueError(f"V0.7 GLB {name} is not a mesh node")
-        primitives = _v07_positions(document, binary, node["mesh"])
-        triangles = []
+        primitives = _v07_positions(
+            document,
+            binary,
+            node["mesh"],
+            decoded_meshes=decoded_meshes,
+            validated_attribute_accessors=validated_attribute_accessors,
+        )
+        triangles: list[tuple[tuple[float, float, float], ...]] = []
         matrix = world[ni]
         for primitive in primitives:
             for tri in primitive:
-                points = []
+                points: list[tuple[float, float, float]] = []
                 for p in tri:
-                    v = [sum(matrix[r][c] * (*p, 1.0)[c] for c in range(4)) for r in range(4)]
-                    points.append(tuple(v[k] for k in range(3)))
+                    homogeneous = (p[0], p[1], p[2], 1.0)
+                    v = [sum(matrix[r][c] * homogeneous[c] for c in range(4)) for r in range(4)]
+                    points.append((v[0], v[1], v[2]))
                 triangles.append(tuple(points))
         result[name] = triangles
     return result
@@ -1067,16 +1283,23 @@ def _v07_enforce_core_budgets(
     world: dict[int, list[list[float]]],
     specification: dict[str, Any],
     profile: dict[str, Any],
+    *,
+    decoded_meshes: dict[int, list[list[tuple[tuple[float, float, float], ...]]]] | None = None,
+    validated_attribute_accessors: set[int] | None = None,
 ) -> None:
-    geometry = specification.get("geometry_budget")
-    material_budget = specification.get("material_budget")
-    texture_budget = specification.get("texture_budget")
-    profile_processing = profile.get("processing")
+    geometry_value = specification.get("geometry_budget")
+    material_value = specification.get("material_budget")
+    texture_value = specification.get("texture_budget")
+    processing_value = profile.get("processing")
     if not all(
         isinstance(value, dict)
-        for value in (geometry, material_budget, texture_budget, profile_processing)
+        for value in (geometry_value, material_value, texture_value, processing_value)
     ):
         raise ValueError("V0.7 specification/profile budgets are malformed")
+    geometry = cast(dict[str, Any], geometry_value)
+    material_budget = cast(dict[str, Any], material_value)
+    texture_budget = cast(dict[str, Any], texture_value)
+    profile_processing = cast(dict[str, Any], processing_value)
 
     def positive_int(value: Any) -> bool:
         return type(value) is int and value > 0
@@ -1086,28 +1309,60 @@ def _v07_enforce_core_budgets(
         (material_budget.get("max_materials"), profile_processing.get("max_materials")),
         (texture_budget.get("max_dimension"), profile_processing.get("max_texture_dimension")),
     )
+    lod0_budget = geometry.get("max_triangles_lod0")
+    lod1_budget = geometry.get("max_triangles_lod1")
+    if any(not positive_int(value) or not positive_int(cap) for value, cap in caps):
+        raise ValueError("V0.7 specification budgets exceed or malformed against profile caps")
+    typed_caps = cast(tuple[tuple[int, int], ...], caps)
     if (
-        any(not positive_int(value) or not positive_int(cap) or value > cap for value, cap in caps)
-        or not positive_int(geometry.get("max_triangles_lod1"))
-        or geometry["max_triangles_lod1"] >= geometry["max_triangles_lod0"]
+        any(value > cap for value, cap in typed_caps)
+        or not positive_int(lod0_budget)
+        or not positive_int(lod1_budget)
+        or type(lod0_budget) is not int
+        or type(lod1_budget) is not int
+        or lod1_budget >= lod0_budget
     ):
         raise ValueError("V0.7 specification budgets exceed or malformed against profile caps")
+    assert type(lod0_budget) is int and type(lod1_budget) is int
 
-    lod0 = _v07_tris(document, binary, nodes, world, "_LOD0")
-    lod1 = _v07_tris(document, binary, nodes, world, "_LOD1")
+    lod0 = _v07_tris(
+        document,
+        binary,
+        nodes,
+        world,
+        "_LOD0",
+        decoded_meshes=decoded_meshes,
+        validated_attribute_accessors=validated_attribute_accessors,
+    )
+    lod1 = _v07_tris(
+        document,
+        binary,
+        nodes,
+        world,
+        "_LOD1",
+        decoded_meshes=decoded_meshes,
+        validated_attribute_accessors=validated_attribute_accessors,
+    )
     lod0_count = sum(len(triangles) for triangles in lod0.values())
     lod1_count = sum(len(triangles) for triangles in lod1.values())
-    if lod0_count > geometry["max_triangles_lod0"]:
+    if lod0_count > lod0_budget:
         raise ValueError("V0.7 processed LOD0 exceeds specification triangle budget")
-    if lod1_count > geometry["max_triangles_lod1"]:
+    if lod1_count > lod1_budget:
         raise ValueError("V0.7 processed LOD1 exceeds specification triangle budget")
 
     materials = document.get("materials", [])
-    if not isinstance(materials, list) or len(materials) > material_budget["max_materials"]:
+    max_materials = material_budget.get("max_materials")
+    if not isinstance(materials, list) or type(max_materials) is not int or max_materials < 1:
+        raise ValueError("V0.7 processed material budget is malformed")
+    if len(materials) > max_materials:
         raise ValueError("V0.7 processed material count exceeds specification budget")
     images = document.get("images", [])
     views = document.get("bufferViews", [])
     maximum = 0
+    max_texture_dimension = texture_budget.get("max_dimension")
+    if not positive_int(max_texture_dimension):
+        raise ValueError("V0.7 texture dimension budget is malformed")
+    max_texture_dimension = cast(int, max_texture_dimension)
     for image in images:
         view = views[image["bufferView"]]
         start = view.get("byteOffset", 0)
@@ -1116,7 +1371,7 @@ def _v07_enforce_core_budgets(
             _png_dimensions(data) if image["mimeType"] == "image/png" else _jpeg_dimensions(data)
         )
         maximum = max(maximum, *dimensions)
-    if maximum > texture_budget["max_dimension"]:
+    if maximum > max_texture_dimension:
         raise ValueError("V0.7 processed embedded texture exceeds specification dimension budget")
 
 
@@ -1211,8 +1466,57 @@ def _v07_bounds(
     if not points:
         raise ValueError("V0.7 visual geometry contains no triangles")
     return (
-        tuple(min(point[axis] for point in points) for axis in range(3)),
-        tuple(max(point[axis] for point in points) for axis in range(3)),
+        (
+            min(point[0] for point in points),
+            min(point[1] for point in points),
+            min(point[2] for point in points),
+        ),
+        (
+            max(point[0] for point in points),
+            max(point[1] for point in points),
+            max(point[2] for point in points),
+        ),
+    )
+
+
+def _v07_num_close(value: Any, expected: Any, tolerance: float = 1e-4) -> bool:
+    if type(value) not in {int, float} or type(expected) not in {int, float}:
+        return False
+    try:
+        actual_float, expected_float = float(value), float(expected)
+    except (OverflowError, TypeError, ValueError):
+        return False
+    return (
+        math.isfinite(actual_float)
+        and math.isfinite(expected_float)
+        and abs(actual_float - expected_float) <= tolerance
+    )
+
+
+def _v07_vec_close(value: Any, expected: Any, tolerance: float = 1e-4) -> bool:
+    if (
+        not isinstance(value, (list, tuple))
+        or not isinstance(expected, (list, tuple))
+        or len(value) != 3
+        or len(expected) != 3
+    ):
+        return False
+    return all(
+        _v07_num_close(actual, target, tolerance)
+        for actual, target in zip(value, expected, strict=True)
+    )
+
+
+def _v07_matrix3_close(value: Any, expected: Any, tolerance: float = 1e-4) -> bool:
+    if (
+        not isinstance(value, list)
+        or not isinstance(expected, list)
+        or len(value) != 3
+        or len(expected) != 3
+    ):
+        return False
+    return all(
+        _v07_vec_close(row, target, tolerance) for row, target in zip(value, expected, strict=True)
     )
 
 
@@ -1278,7 +1582,7 @@ def _v07_check_box(
         area = math.sqrt(sum(v * v for v in cross)) / 2
         if area <= geom_tol * geom_tol:
             return False
-        face_triangles.setdefault(face, []).append(tuple(corner_ids))
+        face_triangles.setdefault(face, []).append((corner_ids[0], corner_ids[1], corner_ids[2]))
         face_areas[face] = face_areas.get(face, 0.0) + area
     for axis in range(3):
         other_axes = [index for index in range(3) if index != axis]
@@ -1315,6 +1619,8 @@ def _v07_check_box(
 
 
 def _verify_v07_bundle(root: Path, manifest: dict[str, Any]) -> dict[str, Any]:
+    if manifest.get("generation_mode") == "provider_generated_character":
+        return _verify_v07_provider_character_bundle(root, manifest)
     allowed_manifest_keys = {
         "schema_version",
         "workflow_id",
@@ -1517,7 +1823,7 @@ def _verify_v07_bundle(root: Path, manifest: dict[str, Any]) -> dict[str, Any]:
             raw = stream.read(row["size"] + 1)
         if len(raw) != row["size"] or _sha256(raw) != row["sha256"]:
             raise ValueError("V0.7 evidence role changed during semantic verification")
-        return raw
+        return cast(bytes, raw)
 
     def role_object(row: dict[str, Any]) -> dict[str, Any]:
         role = row["role"]
@@ -1605,18 +1911,20 @@ def _verify_v07_bundle(root: Path, manifest: dict[str, Any]) -> dict[str, Any]:
     assembly_tolerance = profile.get("assembly")
     if not isinstance(assembly_tolerance, dict):
         raise ValueError("V0.7 assembly profile tolerances are missing")
-    pivot_tolerance = assembly_tolerance.get("pivot_tolerance_m")
-    basis_tolerance = assembly_tolerance.get("basis_tolerance_deg")
-    socket_position_tolerance = assembly_tolerance.get("socket_position_tolerance_m")
-    socket_angle_tolerance = assembly_tolerance.get("socket_angle_tolerance_deg")
-    for value in (
-        pivot_tolerance,
-        basis_tolerance,
-        socket_position_tolerance,
-        socket_angle_tolerance,
-    ):
-        if type(value) not in {int, float} or not math.isfinite(value) or value <= 0:
+
+    def tolerance_value(key: str) -> float:
+        raw_value = assembly_tolerance.get(key)
+        if type(raw_value) not in {int, float}:
             raise ValueError("V0.7 assembly profile tolerance is invalid")
+        value = cast(int | float, raw_value)
+        if not math.isfinite(float(value)) or value <= 0:
+            raise ValueError("V0.7 assembly profile tolerance is invalid")
+        return float(value)
+
+    pivot_tolerance = tolerance_value("pivot_tolerance_m")
+    basis_tolerance = tolerance_value("basis_tolerance_deg")
+    socket_position_tolerance = tolerance_value("socket_position_tolerance_m")
+    socket_angle_tolerance = tolerance_value("socket_angle_tolerance_deg")
     if source_prov.get("source_front") not in {"+Z", "-Z"} or source_prov.get(
         "source_front"
     ) != manifest.get("source_front"):
@@ -1932,27 +2240,34 @@ def _verify_v07_bundle(root: Path, manifest: dict[str, Any]) -> dict[str, Any]:
         [triangle for triangles in processed_tris.values() for triangle in triangles]
     )
     dimensions = spec.get("dimensions")
+    if not isinstance(dimensions, dict):
+        raise ValueError("V0.7 typed dimensions are malformed")
     expected_size = [
         dimensions.get("width_m"),
         dimensions.get("height_m"),
         dimensions.get("depth_m"),
     ]
     actual_size = [lod0_max[i] - lod0_min[i] for i in range(3)]
-    dim_tolerance = profile.get("processing", {}).get("dimension_tolerance_m")
-    if (
-        not isinstance(dim_tolerance, (int, float))
-        or isinstance(dim_tolerance, bool)
-        or not math.isfinite(dim_tolerance)
-        or dim_tolerance <= 0
-        or any(
-            type(expected) not in {int, float}
-            or isinstance(expected, bool)
-            or not math.isfinite(expected)
-            or abs(actual - expected) > dim_tolerance
-            for actual, expected in zip(actual_size, expected_size, strict=True)
+    dim_tolerance_raw = profile.get("processing", {}).get("dimension_tolerance_m")
+    if type(dim_tolerance_raw) not in {int, float}:
+        raise ValueError("V0.7 dimension tolerance is malformed")
+    dim_tolerance_value = float(cast(int | float, dim_tolerance_raw))
+    expected_dimensions: list[float] = []
+    for expected_component in expected_size:
+        if type(expected_component) not in {int, float} or isinstance(expected_component, bool):
+            raise ValueError("V0.7 typed dimensions are malformed")
+        expected_dimensions.append(float(cast(int | float, expected_component)))
+    dimensions_are_valid = (
+        math.isfinite(dim_tolerance_value)
+        and dim_tolerance_value > 0
+        and all(
+            math.isfinite(expected) and abs(actual - expected) <= dim_tolerance_value
+            for actual, expected in zip(actual_size, expected_dimensions, strict=True)
         )
-    ):
+    )
+    if not dimensions_are_valid:
         raise ValueError("V0.7 actual processed LOD0 bounds differ from declared dimensions")
+    dim_tolerance = dim_tolerance_value
     if lod1_required:
         processed_lod1 = _v07_tris(pdoc, pbin, pnodes, pworld, "_LOD1")
         if set(processed_lod1) != {f"SM_{asset_id}_{part['part_id']}_LOD1" for part in parts}:
@@ -2095,14 +2410,17 @@ def _verify_v07_bundle(root: Path, manifest: dict[str, Any]) -> dict[str, Any]:
         history = histories[stage]
         if not isinstance(history, list) or not history:
             raise ValueError(f"V0.7 {stage} execution history is empty")
-        numbers = [item.get("attempt_number") for item in history if isinstance(item, dict)]
-        if (
-            len(numbers) != len(history)
-            or any(type(number) is not int or number < 1 for number in numbers)
-            or numbers != sorted(set(numbers))
-        ):
+        if any(not isinstance(item, dict) for item in history):
+            raise ValueError(f"V0.7 {stage} execution history contains a malformed attempt")
+        raw_numbers = [cast(dict[str, Any], item).get("attempt_number") for item in history]
+        if any(type(number) is not int or number < 1 for number in raw_numbers):
+            raise ValueError(f"V0.7 {stage} execution history is malformed")
+        numbers = [cast(int, number) for number in raw_numbers]
+        if numbers != sorted(set(numbers)):
             raise ValueError(f"V0.7 {stage} execution history is malformed")
         latest = history[-1]
+        if not isinstance(expected_id, str) or type(expected_number) is not int:
+            raise ValueError(f"V0.7 {stage} expected attempt binding is malformed")
         if (
             latest.get("id") != expected_id
             or not _v07_same_int(latest.get("attempt_number"), expected_number)
@@ -2120,6 +2438,8 @@ def _verify_v07_bundle(root: Path, manifest: dict[str, Any]) -> dict[str, Any]:
         source_path = one(role).get("source_relative_path")
         if (
             not isinstance(source_path, str)
+            or not isinstance(attempt_id, str)
+            or type(attempt_number) is not int
             or attempt_id not in source_path
             or f"-a{attempt_number}" not in source_path
         ):
@@ -2128,6 +2448,8 @@ def _verify_v07_bundle(root: Path, manifest: dict[str, Any]) -> dict[str, Any]:
         source_path = capture.get("source_relative_path")
         if (
             not isinstance(source_path, str)
+            or not isinstance(execution, str)
+            or type(attempt) is not int
             or execution not in source_path
             or f"-a{attempt}" not in source_path
         ):
@@ -2330,7 +2652,10 @@ def _verify_v07_bundle(root: Path, manifest: dict[str, Any]) -> dict[str, Any]:
             or receipt.get("status") != "APPROVED"
         ):
             raise ValueError(f"V0.7 human {kind} receipt is incomplete/stale")
-        fingerprint = _approval_hash(receipt.get("task_id"), kind, receipt.get("inputs"))
+        receipt_task_id = receipt.get("task_id")
+        if not isinstance(receipt_task_id, str) or not receipt_task_id:
+            raise ValueError(f"V0.7 human {kind} receipt has no task ID")
+        fingerprint = _approval_hash(receipt_task_id, kind, receipt.get("inputs"))
         if (
             receipt.get("operation_hash") != fingerprint
             or receipt.get("fingerprint") != fingerprint
@@ -2458,6 +2783,1788 @@ def _verify_v07_bundle(root: Path, manifest: dict[str, Any]) -> dict[str, Any]:
         "capture_origin_authenticated": False,
         "currentness": "as_of_export_snapshot",
         "limitation": "A self-contained bundle verifies internal consistency only; source semantics remain a human review boundary, while human identity, execution origin, capture origin, and changes after export require an external trust anchor.",
+    }
+
+
+def _verify_v07_provider_character_bundle(root: Path, manifest: dict[str, Any]) -> dict[str, Any]:
+    """Verify a provider-generated single-mesh character evidence snapshot.
+
+    This is a consistency verifier. Receipts and named actors are not identity
+    credentials, and the package cannot authenticate remote provider/runtime
+    execution or capture origin.
+    """
+    allowed_manifest = {
+        "schema_version",
+        "workflow_id",
+        "revision",
+        "source_version",
+        "asset_id",
+        "generation_mode",
+        "paid",
+        "product_ready",
+        "spec_sha256",
+        "profile_id",
+        "profile_version",
+        "profile_document_sha256",
+        "review_views",
+        "concept_sha256",
+        "concept_provenance_sha256",
+        "concept_approval_sha256",
+        "paid_approval_sha256",
+        "paid_request_snapshot_sha256",
+        "production_readiness_report_sha256",
+        "provider_operation_sha256",
+        "cost_record_sha256",
+        "raw_glb_sha256",
+        "cost_ledger_row_count",
+        "cost_ledger_slice_sha256",
+        "processed_glb_sha256",
+        "processing_execution_id",
+        "processing_attempt_number",
+        "processing_report_sha256",
+        "processing_script_sha256",
+        "validation_execution_id",
+        "validation_attempt_number",
+        "validation_sha256",
+        "runtime_execution_id",
+        "runtime_attempt_number",
+        "runtime_request_digest",
+        "runtime_observation_sha256",
+        "runtime_harness_sha256",
+        "capture_sha256",
+        "current_attempt_history",
+        "files",
+        "final_review",
+        "human_reviews",
+    }
+    if set(manifest) - allowed_manifest:
+        raise ValueError("Provider-character manifest contains unknown fields")
+    if (
+        manifest.get("generation_mode") != "provider_generated_character"
+        or manifest.get("paid") is not True
+        or manifest.get("product_ready") is not True
+    ):
+        raise ValueError(
+            "Provider-character evidence must represent a paid, cold-verified snapshot"
+        )
+    workflow_id, revision, asset_id = (
+        manifest.get("workflow_id"),
+        manifest.get("revision"),
+        manifest.get("asset_id"),
+    )
+    if (
+        not isinstance(workflow_id, str)
+        or not workflow_id
+        or type(revision) is not int
+        or revision < 1
+        or not _v07_same_int(manifest.get("source_version"), revision)
+        or not isinstance(asset_id, str)
+        or not asset_id
+    ):
+        raise ValueError("Provider-character workflow identity is invalid")
+
+    files = manifest.get("files")
+    if not isinstance(files, list) or not files or len(files) > _MAX_FILES:
+        raise ValueError("Provider-character file list is invalid")
+    allowed_roles = {
+        "specification",
+        "concept",
+        "concept_provenance",
+        "concept_approval",
+        "paid_approval",
+        "paid_request_snapshot",
+        "production_readiness_report",
+        "provider_operation",
+        "cost_record",
+        "provider_generated_glb",
+        "processed_glb",
+        "processing_report",
+        "processing_script",
+        "validation",
+        "runtime_request",
+        "runtime_observation",
+        "runtime_harness",
+        "runtime_capture",
+        "final_approval",
+        "production_receipt",
+        "review_html",
+        "bound_profile",
+    }
+    single_roles = allowed_roles - {"runtime_capture"}
+    roles: dict[str, list[dict[str, Any]]] = {}
+    seen_paths: set[str] = set()
+    seen_artifacts: set[str] = set()
+    total = 0
+
+    def read_evidence_file(
+        path: Path, *, limit: int, expected_size: int, expected_digest: str
+    ) -> bytes:
+        if limit < 0 or expected_size < 0 or expected_size > limit:
+            raise ValueError("Provider-character role exceeds its bounded file size")
+        before = path.lstat()
+        if (
+            not stat.S_ISREG(before.st_mode)
+            or _linked(path)
+            or getattr(before, "st_nlink", 1) != 1
+            or before.st_size != expected_size
+        ):
+            raise ValueError("Provider-character file is not an unchanged bounded regular file")
+        cursor = path.parent
+        while cursor != root:
+            if _linked(cursor):
+                raise ValueError("Provider-character file path contains a link or junction")
+            cursor = cursor.parent
+        flags = os.O_RDONLY | getattr(os, "O_BINARY", 0) | getattr(os, "O_NOFOLLOW", 0)
+        fd = os.open(path, flags)
+        try:
+            opened = os.fstat(fd)
+            if not stat.S_ISREG(opened.st_mode) or (
+                opened.st_dev,
+                opened.st_ino,
+                opened.st_size,
+            ) != (before.st_dev, before.st_ino, before.st_size):
+                raise ValueError("Provider-character file changed while it was opened")
+            with os.fdopen(fd, "rb", closefd=False) as stream:
+                raw = stream.read(limit + 1)
+            after = os.fstat(fd)
+            after_path = path.lstat()
+            cursor = path.parent
+            while cursor != root:
+                if _linked(cursor):
+                    raise ValueError("Provider-character file path changed to a link or junction")
+                cursor = cursor.parent
+            if (
+                (after.st_dev, after.st_ino, after.st_size)
+                != (opened.st_dev, opened.st_ino, opened.st_size)
+                or (after_path.st_dev, after_path.st_ino, after_path.st_size)
+                != (before.st_dev, before.st_ino, before.st_size)
+                or len(raw) != expected_size
+                or _sha256(raw) != expected_digest
+            ):
+                raise ValueError("Provider-character file changed during bounded verification")
+            return raw
+        finally:
+            os.close(fd)
+
+    for row in files:
+        if not isinstance(row, dict) or set(row) - {
+            "role",
+            "path",
+            "sha256",
+            "size",
+            "view",
+            "artifact_id",
+            "source_relative_path",
+        }:
+            raise ValueError("Provider-character file row is malformed")
+        role, path = row.get("role"), _path(row.get("path"))
+        if role not in allowed_roles or path in seen_paths:
+            raise ValueError("Provider-character bundle has an unknown role or duplicate path")
+        digest, size = row.get("sha256"), row.get("size")
+        role_limit = (
+            50 * 1024 * 1024
+            if role in {"provider_generated_glb", "processed_glb"}
+            else 25_000_000
+            if role in {"concept", "runtime_capture"}
+            else 4_000_000
+            if role in {"processing_script", "runtime_harness"}
+            else 1_000_000
+        )
+        if (
+            not isinstance(digest, str)
+            or not _SHA256.fullmatch(digest)
+            or type(size) is not int
+            or size < 0
+            or size > role_limit
+        ):
+            raise ValueError("Provider-character role digest or size is invalid")
+        total += size
+        if total > _MAX_BUNDLE_BYTES:
+            raise ValueError("Provider-character bundle exceeds the total size limit")
+        target = root.joinpath(*PurePosixPath(path).parts)
+        cursor = target
+        while cursor != root:
+            if _linked(cursor):
+                raise ValueError("Provider-character path contains a link or junction")
+            cursor = cursor.parent
+        if not target.is_file():
+            raise ValueError(f"Provider-character file is missing: {path}")
+        read_evidence_file(target, limit=role_limit, expected_size=size, expected_digest=digest)
+        aid = row.get("artifact_id")
+        if aid is not None:
+            if (
+                not isinstance(aid, str)
+                or not aid
+                or aid in seen_artifacts
+                or not isinstance(row.get("source_relative_path"), str)
+            ):
+                raise ValueError("Provider-character artifact ID is invalid or repeated")
+            seen_artifacts.add(aid)
+        source_relative_path = row.get("source_relative_path")
+        if source_relative_path is not None:
+            _path(source_relative_path)
+        elif aid is not None:
+            raise ValueError("Provider-character artifact source path is missing")
+        if role == "runtime_capture" and row.get("view") not in _V07_VIEWS:
+            raise ValueError("Provider-character capture view is unknown")
+        if role != "runtime_capture" and row.get("view") is not None:
+            raise ValueError("Only runtime captures may name a view")
+        roles.setdefault(role, []).append(row)
+        seen_paths.add(path)
+    required = allowed_roles - {"runtime_capture"}
+    if required - set(roles) or any(len(roles.get(role, [])) != 1 for role in single_roles):
+        raise ValueError("Provider-character evidence is missing or duplicates a required role")
+    views = manifest.get("review_views")
+    captures = roles.get("runtime_capture", [])
+    if (
+        not isinstance(views, list)
+        or len(views) not in (5, 9)
+        or len(set(views)) != len(views)
+        or any(view not in _V07_VIEWS for view in views)
+        or {row.get("view") for row in captures} != set(views)
+        or len(captures) != len(views)
+    ):
+        raise ValueError("Provider-character captures do not match the profile review views")
+    history = manifest.get("current_attempt_history")
+    expected_history = {
+        "process": (
+            manifest.get("processing_execution_id"),
+            manifest.get("processing_attempt_number"),
+        ),
+        "validate": (
+            manifest.get("validation_execution_id"),
+            manifest.get("validation_attempt_number"),
+        ),
+        "godot": (manifest.get("runtime_execution_id"), manifest.get("runtime_attempt_number")),
+    }
+    if not isinstance(history, dict) or set(history) != set(expected_history):
+        raise ValueError("Provider-character stage attempt history is incomplete")
+    for stage, (execution_id, attempt_number) in expected_history.items():
+        attempts = history[stage]
+        if not isinstance(attempts, list) or not attempts or len(attempts) > 256:
+            raise ValueError(f"Provider-character {stage} attempt history is invalid")
+        numbers = []
+        ids = set()
+        for attempt in attempts:
+            if (
+                not isinstance(attempt, dict)
+                or set(attempt) != {"id", "attempt_number", "status"}
+                or not isinstance(attempt.get("id"), str)
+                or not attempt["id"]
+                or attempt["id"] in ids
+                or type(attempt.get("attempt_number")) is not int
+                or attempt["attempt_number"] < 1
+                or attempt.get("status") not in {"COMPLETED", "FAILED", "UNCERTAIN", "RUNNING"}
+            ):
+                raise ValueError(f"Provider-character {stage} attempt row is malformed")
+            numbers.append(attempt["attempt_number"])
+            ids.add(attempt["id"])
+        latest = attempts[-1]
+        if (
+            numbers != sorted(set(numbers))
+            or latest["id"] != execution_id
+            or latest["attempt_number"] != attempt_number
+            or latest["status"] != "COMPLETED"
+            or any(row["status"] == "RUNNING" for row in attempts)
+        ):
+            raise ValueError(f"Provider-character {stage} latest attempt is stale or incomplete")
+    disk_paths: set[str] = set()
+    for disk_path in root.rglob("*"):
+        if _linked(disk_path):
+            raise ValueError("Provider-character bundle contains a link or junction")
+        if disk_path.is_file():
+            disk_paths.add(disk_path.relative_to(root).as_posix())
+    if disk_paths - {"manifest.json", "verify_asset_bundle.py"} != seen_paths:
+        raise ValueError("Provider-character bundle contains unlisted or missing files")
+
+    def payload(role: str) -> bytes:
+        row = roles[role][0]
+        path = root.joinpath(*PurePosixPath(row["path"]).parts)
+        role_limit = (
+            50 * 1024 * 1024
+            if role in {"provider_generated_glb", "processed_glb"}
+            else 25_000_000
+            if role in {"concept", "runtime_capture"}
+            else 4_000_000
+            if role in {"processing_script", "runtime_harness"}
+            else 1_000_000
+        )
+        return read_evidence_file(
+            path, limit=role_limit, expected_size=row["size"], expected_digest=row["sha256"]
+        )
+
+    if roles["review_html"][0]["path"] != "index.html":
+        raise ValueError("Provider-character review page must be root index.html")
+    try:
+        html_text = payload("review_html").decode("utf-8")
+    except UnicodeDecodeError as exc:
+        raise ValueError("Provider-character review HTML must be UTF-8") from exc
+    html_parser = _References()
+    html_parser.feed(html_text)
+    expected_html_paths = {
+        row["path"] for row in files if row["role"] not in {"review_html", "production_receipt"}
+    }
+    if html_parser.paths != expected_html_paths:
+        raise ValueError("Provider-character review HTML links do not match bundled evidence")
+
+    def obj(role: str) -> dict[str, Any]:
+        raw = payload(role)
+        if len(raw) > _MAX_JSON_BYTES:
+            raise ValueError(f"Provider-character JSON role exceeds limit: {role}")
+
+        def reject_constant(token: str) -> None:
+            raise ValueError(f"non-finite JSON value: {token}")
+
+        def finite_float(token: str) -> float:
+            value = float(token)
+            if not math.isfinite(value):
+                raise ValueError("JSON number is outside finite range")
+            return value
+
+        value = json.loads(
+            raw.decode("utf-8"),
+            object_pairs_hook=_unique_json,
+            parse_constant=reject_constant,
+            parse_float=finite_float,
+        )
+        if not isinstance(value, dict):
+            raise ValueError(f"Provider-character role must be a JSON object: {role}")
+        return value
+
+    def reject_secrets_paths_urls(value: Any, breadcrumb: str = "$", role: str = "") -> None:
+        if isinstance(value, dict):
+            for key, child in value.items():
+                normalized = key.lower()
+                if any(
+                    marker in normalized
+                    for marker in (
+                        "api_key",
+                        "secret",
+                        "token",
+                        "password",
+                        "credential",
+                        "authorization",
+                    )
+                ):
+                    raise ValueError(
+                        f"Provider-character {role} contains a credential-like field at {breadcrumb}.{key}"
+                    )
+                reject_secrets_paths_urls(child, f"{breadcrumb}.{key}", role)
+        elif isinstance(value, list):
+            for index, child in enumerate(value):
+                reject_secrets_paths_urls(child, f"{breadcrumb}[{index}]", role)
+        elif isinstance(value, str):
+            if (
+                re.search(r"(?i)https?://|wss?://", value)
+                or re.match(r"(?i)^[a-z]:[\\/]", value)
+                or value.startswith(("\\\\", "//", "/"))
+            ):
+                raise ValueError(
+                    f"Provider-character {role} contains an absolute path or URL at {breadcrumb}"
+                )
+
+    for role in allowed_roles - {
+        "review_html",
+        "concept",
+        "runtime_capture",
+        "provider_generated_glb",
+        "processed_glb",
+        "processing_script",
+        "runtime_harness",
+    }:
+        reject_secrets_paths_urls(obj(role), role=role)
+
+    spec, profile = obj("specification"), obj("bound_profile")
+    if (
+        spec.get("schema_version") != "0.7.0"
+        or spec.get("asset_id") != asset_id
+        or spec.get("source_kind") != "provider_generated"
+        or spec.get("category") != "character"
+        or spec.get("profile") != manifest.get("profile_id")
+        or not _v07_same_int(spec.get("profile_version"), manifest.get("profile_version"))
+        or spec.get("parts") is not None
+        or spec.get("sockets") is not None
+        or not isinstance(spec.get("collider"), dict)
+        or spec.get("collider", {}).get("policy") != "capsule"
+    ):
+        raise ValueError(
+            "Provider-character specification exceeds the trusted single-mesh capsule contract"
+        )
+    spec_hash = _spec_fingerprint(spec)
+    profile_hash = _spec_fingerprint(profile)
+    if (
+        manifest.get("spec_sha256") != spec_hash
+        or manifest.get("profile_document_sha256") != profile_hash
+        or profile.get("schema_version") != "asset-profile-0.7.0"
+        or profile.get("profile_id") != manifest.get("profile_id")
+        or not _v07_same_int(profile.get("version"), manifest.get("profile_version"))
+        or profile.get("geometry_mode") != "single_mesh"
+        or profile.get("accepted_source_kinds") != ["provider_generated"]
+        or set(profile.get("review_views", [])) != set(views)
+        or not {"front", "rear", "left", "right", "three_quarter"} <= set(views)
+    ):
+        raise ValueError("Provider-character profile binding is invalid")
+    if _sha256(payload("concept")) != manifest.get("concept_sha256"):
+        raise ValueError("Provider-character concept hash differs")
+    _png_dimensions(payload("concept"))
+    concept_prov = obj("concept_provenance")
+    if (
+        concept_prov.get("artifact_hash") != manifest.get("concept_sha256")
+        or concept_prov.get("asset_spec_hash") != spec_hash
+    ):
+        raise ValueError("Provider-character concept provenance does not bind the concept")
+
+    snapshot = obj("paid_request_snapshot")
+    snap_bytes = json.dumps(
+        snapshot, sort_keys=True, separators=(",", ":"), allow_nan=False
+    ).encode()
+    snapshot_hash = _sha256(snap_bytes)
+    snapshot_binding = snapshot.get("binding")
+    if (
+        snapshot_hash != manifest.get("paid_request_snapshot_sha256")
+        or set(snapshot)
+        != {"schema", "provider", "operation", "adapter", "binding", "request", "cost"}
+        or snapshot.get("schema") != "paid-request-0.6.0"
+        or not isinstance(snapshot_binding, dict)
+        or set(snapshot_binding)
+        != {
+            "asset_id",
+            "revision_number",
+            "concept_version",
+            "concept_sha256",
+            "specification_sha256",
+            "profile_id",
+            "profile_version",
+        }
+        or snapshot_binding.get("asset_id") != asset_id
+        or not _v07_same_int(snapshot_binding.get("revision_number"), revision)
+        or snapshot_binding.get("concept_sha256") != manifest.get("concept_sha256")
+        or snapshot_binding.get("specification_sha256") != spec_hash
+        or snapshot_binding.get("profile_id") != manifest.get("profile_id")
+        or not _v07_same_int(
+            snapshot_binding.get("profile_version"), manifest.get("profile_version")
+        )
+        or not isinstance(snapshot.get("provider"), str)
+        or not snapshot.get("provider")
+        or not isinstance(snapshot.get("operation"), str)
+        or not snapshot.get("operation")
+        or not isinstance(snapshot.get("adapter"), dict)
+        or not isinstance(snapshot.get("request"), dict)
+        or not isinstance(snapshot.get("cost"), dict)
+    ):
+        raise ValueError("Provider-character paid-request snapshot is invalid or stale")
+    readiness = obj("production_readiness_report")
+    readiness_checks = readiness.get("checks")
+    check_names = {
+        "provider_available",
+        "blender_available",
+        "godot_available",
+        "workspace_writable",
+        "profile_supported",
+    }
+    required_checksets = {
+        frozenset(check_names),
+        frozenset(
+            check_names
+            | {
+                "profile_review_views_implemented",
+                "profile_runtime_validations_implemented",
+            }
+        ),
+        frozenset(
+            {
+                "provider_adapter_available",
+                "provider_credential_configured",
+                "blender_configured",
+                "blender_executable",
+                "blender_launch_version",
+                "blender_version_supported",
+                "blender_python_dependencies",
+                "godot_configured",
+                "godot_executable",
+                "godot_launch_version",
+                "godot_version_supported",
+                "workspace_writable",
+                "scratch_creatable",
+                "free_space",
+                "profile_supported",
+                "profile_review_views_implemented",
+                "profile_runtime_validations_implemented",
+            }
+        ),
+    }
+    observed_names = (
+        [check.get("name") for check in readiness_checks]
+        if isinstance(readiness_checks, list)
+        and all(isinstance(check, dict) for check in readiness_checks)
+        else []
+    )
+    if (
+        readiness.get("schema") != "production-readiness-0.6.0"
+        or readiness.get("result") != "PASS"
+        or readiness.get("asset_id") != asset_id
+        or not _v07_same_int(readiness.get("revision_number"), revision)
+        or readiness.get("profile_id") != manifest.get("profile_id")
+        or not _v07_same_int(readiness.get("profile_version"), manifest.get("profile_version"))
+        or readiness.get("paid_request_snapshot_sha256") != snapshot_hash
+        or not isinstance(readiness_checks, list)
+        or frozenset(observed_names) not in required_checksets
+        or len(observed_names) != len(set(observed_names))
+        or any(
+            not isinstance(check, dict)
+            or set(check) != {"name", "category", "status", "critical", "detail", "observed"}
+            or check.get("status") != "PASS"
+            or check.get("critical") is not True
+            or not isinstance(check.get("category"), str)
+            or not check["category"]
+            or not isinstance(check.get("detail"), str)
+            or not check["detail"]
+            or not isinstance(check.get("observed"), dict)
+            for check in readiness_checks
+        )
+    ):
+        raise ValueError("Provider-character readiness report is not current PASS")
+    approval = obj("paid_approval")
+    intent = obj("provider_operation")
+    intent_keys = {
+        "id",
+        "workflow_id",
+        "task_id",
+        "asset_id",
+        "revision_number",
+        "provider",
+        "operation",
+        "concept_hash",
+        "request_fingerprint",
+        "approval_id",
+        "estimated_cost",
+        "actual_cost",
+        "cost_unit",
+        "external_task_id",
+        "status",
+        "created_at",
+        "updated_at",
+        "paid_request_snapshot_hash",
+        "raw_glb_sha256",
+        "execution_id",
+        "attempt_number",
+        "paid_execution_external_id",
+        "paid_execution_provider",
+        "paid_execution_status",
+        "paid_execution_cost",
+    }
+    raw_row = roles["provider_generated_glb"][0]
+    raw_hash = raw_row["sha256"]
+    if (
+        set(intent) != intent_keys
+        or intent.get("status") != "SUCCEEDED"
+        or intent.get("workflow_id") != workflow_id
+        or not isinstance(intent.get("external_task_id"), str)
+        or not intent.get("external_task_id")
+        or intent.get("asset_id") != asset_id
+        or not _v07_same_int(intent.get("revision_number"), revision)
+        or intent.get("paid_execution_provider") != intent.get("provider")
+        or intent.get("operation") != snapshot.get("operation")
+        or intent.get("concept_hash") != manifest.get("concept_sha256")
+        or intent.get("request_fingerprint") != snapshot_hash
+        or intent.get("paid_request_snapshot_hash") != snapshot_hash
+        or intent.get("raw_glb_sha256") != raw_hash
+        or approval.get("status") != "APPROVED"
+        or approval.get(
+            "paid_request_snapshot_hash",
+            approval.get("inputs", {}).get("paid_request_snapshot_sha256"),
+        )
+        != snapshot_hash
+        or intent.get("approval_id") != approval.get("id")
+        or intent.get("task_id") != approval.get("task_id")
+        or not isinstance(intent.get("execution_id"), str)
+        or not intent.get("execution_id")
+        or not isinstance(intent.get("paid_execution_external_id"), str)
+        or intent.get("paid_execution_external_id") != intent.get("external_task_id")
+        or intent.get("paid_execution_status") != "COMPLETED"
+        or type(intent.get("attempt_number")) is not int
+        or intent["attempt_number"] < 1
+    ):
+        raise ValueError(
+            "Provider operation, paid approval, provider ID, or raw-byte pin is inconsistent"
+        )
+    cost = obj("cost_record")
+    ledger_entries = cost.get("entries")
+    ledger_account = cost.get("operation_account")
+    ledger_schema = {
+        "id",
+        "project_id",
+        "workflow_id",
+        "task_id",
+        "execution_id",
+        "intent_id",
+        "request_fingerprint",
+        "entry_type",
+        "amount",
+        "cost_unit",
+        "reason",
+        "source",
+        "actor",
+        "created_at",
+    }
+    if (
+        set(cost) != {"schema_version", "entries", "operation_account", "row_count", "slice_sha256"}
+        or cost.get("schema_version") != "provider-character-cost-record-0.7.0"
+        or not isinstance(ledger_entries, list)
+        or not ledger_entries
+        or type(manifest.get("cost_ledger_row_count")) is not int
+        or len(ledger_entries) != manifest["cost_ledger_row_count"]
+        or cost.get("row_count") != manifest.get("cost_ledger_row_count")
+        or cost.get("slice_sha256") != manifest.get("cost_ledger_slice_sha256")
+        or _sha256(
+            json.dumps(
+                ledger_entries, sort_keys=True, separators=(",", ":"), allow_nan=False
+            ).encode()
+        )
+        != manifest.get("cost_ledger_slice_sha256")
+        or not isinstance(ledger_account, dict)
+    ):
+        raise ValueError("Provider-character cost ledger slice is malformed or stale")
+    operation_task = intent.get("task_id")
+    project_ids: set[str] = set()
+    row_ids: set[str] = set()
+    reserves = releases = settled = 0.0
+    settle_rows = []
+    for entry in ledger_entries:
+        amount = entry.get("amount") if isinstance(entry, dict) else None
+        if (
+            not isinstance(entry, dict)
+            or set(entry) != ledger_schema
+            or not isinstance(entry.get("id"), str)
+            or not entry["id"]
+            or entry["id"] in row_ids
+            or not isinstance(entry.get("project_id"), str)
+            or not entry["project_id"]
+            or entry.get("workflow_id") != workflow_id
+            or entry.get("task_id") != operation_task
+            or entry.get("cost_unit") != intent.get("cost_unit")
+            or not isinstance(entry.get("reason"), str)
+            or not entry["reason"]
+            or not isinstance(entry.get("source"), str)
+            or not entry["source"]
+            or not isinstance(entry.get("actor"), str)
+            or not entry["actor"]
+            or not isinstance(entry.get("created_at"), str)
+            or not entry["created_at"]
+            or type(amount) not in {int, float}
+            or not isinstance(entry.get("entry_type"), str)
+            or entry["entry_type"] not in {"RESERVE", "SETTLE", "RELEASE"}
+        ):
+            raise ValueError(
+                "Provider-character ledger contains malformed, conflicting, or adjusted rows"
+            )
+        if type(amount) not in {int, float}:
+            raise ValueError("Provider-character ledger amount is not numeric")
+        amount_value = float(cast(int | float, amount))
+        if not math.isfinite(amount_value):
+            raise ValueError("Provider-character ledger amount is non-finite")
+        row_ids.add(entry["id"])
+        project_ids.add(entry["project_id"])
+        metadata = (
+            entry.get("intent_id"),
+            entry.get("execution_id"),
+            entry.get("request_fingerprint"),
+        )
+        if entry["entry_type"] == "RESERVE":
+            if metadata not in (
+                (None, None, None),
+                (intent.get("id"), intent.get("execution_id"), intent.get("request_fingerprint")),
+            ):
+                raise ValueError(
+                    "Provider-character reservation metadata conflicts with its paid intent"
+                )
+            if amount_value < 0:
+                raise ValueError("Provider-character reservation amount cannot be negative")
+            reserves += amount_value
+        else:
+            if metadata != (
+                intent.get("id"),
+                intent.get("execution_id"),
+                intent.get("request_fingerprint"),
+            ):
+                raise ValueError(
+                    "Provider-character terminal ledger row is not pinned to the paid execution"
+                )
+            if amount_value < 0:
+                raise ValueError("Provider-character terminal ledger amount cannot be negative")
+            if entry["entry_type"] == "RELEASE":
+                releases += amount_value
+            else:
+                settled += amount_value
+                settle_rows.append(entry)
+    if len(project_ids) != 1 or len(settle_rows) != 1:
+        raise ValueError(
+            "Provider-character paid operation must have exactly one settlement and project"
+        )
+    actual = intent.get("actual_cost")
+    paid_execution_cost = intent.get("paid_execution_cost")
+    if type(actual) not in {int, float} or type(paid_execution_cost) not in {int, float}:
+        raise ValueError("Provider-character settled amount is not numeric")
+    actual_value = float(cast(int | float, actual))
+    paid_execution_cost_value = float(cast(int | float, paid_execution_cost))
+    if (
+        not math.isfinite(actual_value)
+        or actual_value < 0
+        or not math.isfinite(paid_execution_cost_value)
+        or paid_execution_cost_value != actual_value
+        or settle_rows[0]["amount"] != actual_value
+    ):
+        raise ValueError(
+            "Provider-character settled amount differs from the terminal provider actual"
+        )
+    actual = actual_value
+    account_keys = {
+        "task_id",
+        "project_id",
+        "workflow_id",
+        "reserved_total",
+        "released_total",
+        "settled_total",
+        "adjustments",
+        "held",
+        "settled",
+        "net",
+        "cost_unit",
+    }
+    account_values = (
+        "reserved_total",
+        "released_total",
+        "settled_total",
+        "adjustments",
+        "held",
+        "net",
+    )
+    if (
+        set(ledger_account) != account_keys
+        or ledger_account.get("task_id") != operation_task
+        or ledger_account.get("project_id") not in project_ids
+        or ledger_account.get("workflow_id") != workflow_id
+        or ledger_account.get("cost_unit") != intent.get("cost_unit")
+        or ledger_account.get("settled") is not True
+        or any(
+            type(ledger_account.get(key)) not in {int, float}
+            or not math.isfinite(float(ledger_account[key]))
+            for key in account_values
+        )
+    ):
+        raise ValueError("Provider-character paid operation account is malformed or unsettled")
+
+    def account_close(key: str, value: float) -> bool:
+        return math.isclose(float(ledger_account[key]), value, rel_tol=1e-12, abs_tol=1e-9)
+
+    held = reserves - releases
+    net = held + settled
+    if (
+        held < -1e-9
+        or not account_close("reserved_total", reserves)
+        or not account_close("released_total", releases)
+        or not account_close("settled_total", settled)
+        or not account_close("adjustments", 0.0)
+        or not account_close("held", held)
+        or not account_close("net", net)
+        or not math.isclose(held, 0.0, abs_tol=1e-9)
+        or not math.isclose(net, float(actual), rel_tol=1e-12, abs_tol=1e-9)
+    ):
+        raise ValueError("Provider-character paid ledger arithmetic is inconsistent or still held")
+    receipts: dict[str, dict[str, Any]] = {}
+    receipt_kinds = (
+        ("concept_approval", "concept_review"),
+        ("paid_approval", "paid_generation"),
+        ("final_approval", "final_visual_review"),
+    )
+    for role, key in receipt_kinds:
+        receipt = obj(role)
+        if (
+            set(receipt)
+            != {
+                "id",
+                "workflow_id",
+                "revision",
+                "task_id",
+                "approval_type",
+                "status",
+                "inputs",
+                "operation_hash",
+                "fingerprint",
+                "paid_request_snapshot_hash",
+                "concept_sha256",
+                "actor",
+                "reason",
+                "comment",
+                "decided_at",
+            }
+            or receipt.get("status") != "APPROVED"
+            or receipt.get("workflow_id") != workflow_id
+            or receipt.get("approval_type") != key
+            or not _v07_same_int(receipt.get("revision"), revision)
+            or not isinstance(receipt.get("id"), str)
+            or not receipt["id"]
+            or not isinstance(receipt.get("task_id"), str)
+            or not receipt["task_id"]
+            or not isinstance(receipt.get("inputs"), dict)
+            or not isinstance(receipt.get("actor"), str)
+            or not receipt["actor"].strip()
+            or not isinstance(receipt.get("reason"), str)
+            or not receipt["reason"].strip()
+            or not isinstance(receipt.get("decided_at"), str)
+            or not receipt["decided_at"]
+        ):
+            raise ValueError(f"Provider-character {role} is not approved for this workflow")
+        task_id_value = receipt.get("task_id")
+        if not isinstance(task_id_value, str) or not task_id_value:
+            raise ValueError(f"Provider-character {key} receipt has no task ID")
+        op_hash = _approval_hash(task_id_value, key, receipt["inputs"])
+        if op_hash != receipt.get("operation_hash") or op_hash != receipt.get("fingerprint"):
+            raise ValueError(f"Provider-character {role} operation hash is invalid")
+        receipts[role] = receipt
+    concept_context = (
+        receipts["concept_approval"]["inputs"].get("scope", {}).get("handler_context", {})
+    )
+    paid_inputs = receipts["paid_approval"]["inputs"]
+    paid_scope = paid_inputs.get("scope", {}) if isinstance(paid_inputs, dict) else {}
+    paid_parameters = paid_inputs.get("parameters", {}) if isinstance(paid_inputs, dict) else {}
+    paid_scope_artifacts = paid_scope.get("artifacts") if isinstance(paid_scope, dict) else None
+    concept_artifacts = (
+        concept_context.get("artifacts") if isinstance(concept_context, dict) else None
+    )
+    if not isinstance(concept_context, dict):
+        raise ValueError("Provider-character concept approval has no handler context")
+    if not isinstance(concept_artifacts, dict):
+        raise ValueError("Provider-character concept approval has no artifact hash map")
+    if not isinstance(paid_parameters, dict) or not isinstance(paid_scope, dict):
+        raise ValueError("Provider-character paid approval scope or parameters are malformed")
+    if not isinstance(paid_scope_artifacts, list) or any(
+        not isinstance(pair, list)
+        or len(pair) != 2
+        or not all(isinstance(value, str) for value in pair)
+        for pair in paid_scope_artifacts
+    ):
+        raise ValueError("Provider-character paid approval artifact pins are malformed")
+    concept_expected = {
+        "asset_id": asset_id,
+        "revision": revision,
+        "concept_sha256": manifest.get("concept_sha256"),
+        "concept_provenance_sha256": roles["concept_provenance"][0]["sha256"],
+        "specification_hash": spec_hash,
+        "profile_id": manifest.get("profile_id"),
+        "profile_qualified": f"{manifest.get('profile_id')}@{manifest.get('profile_version')}",
+        "profile_version": manifest.get("profile_version"),
+    }
+    concept_mismatches = [
+        key
+        for key, value in concept_expected.items()
+        if (
+            not _v07_same_int(concept_context.get(key), value)
+            if key in {"revision", "profile_version"}
+            else concept_context.get(key) != value
+        )
+    ]
+    concept_mismatches.extend(
+        key
+        for key, value in {
+            "asset-specification": roles["specification"][0]["sha256"],
+            "asset-concept": manifest.get("concept_sha256"),
+            "asset-concept-provenance": roles["concept_provenance"][0]["sha256"],
+            "asset-profile-v07": roles["bound_profile"][0]["sha256"],
+        }.items()
+        if concept_artifacts.get(key) != value
+    )
+    paid_expected = {
+        "asset_id": asset_id,
+        "provider": snapshot.get("provider"),
+        "specification_hash": spec_hash,
+        "profile_document_hash": profile_hash,
+        "profile_id": manifest.get("profile_id"),
+        "graph_version": "0.7.0",
+        "source_kind": "provider_generated",
+        "category": "character",
+        "collider_policy": "capsule",
+    }
+    paid_mismatches = [
+        key for key, value in paid_expected.items() if paid_parameters.get(key) != value
+    ]
+    if not _v07_same_int(paid_parameters.get("revision_number"), revision):
+        paid_mismatches.append("revision_number")
+    if not _v07_same_int(paid_parameters.get("profile_version"), manifest.get("profile_version")):
+        paid_mismatches.append("profile_version")
+    paid_mismatches.extend(
+        key
+        for key, value in {
+            "workflow_id": workflow_id,
+            "task_type": "asset_paid_generation",
+        }.items()
+        if paid_scope.get(key) != value
+    )
+    paid_scope_provider = paid_scope.get("provider")
+    if paid_scope_provider is not None:
+        paid_mismatches.append("scope.provider")
+    if (
+        not isinstance(snapshot.get("provider"), str)
+        or not snapshot.get("provider")
+        or snapshot.get("operation") != intent.get("operation")
+    ):
+        paid_mismatches.append("snapshot operation/provider alias")
+    if concept_mismatches or paid_mismatches:
+        raise ValueError(
+            "Provider-character concept or paid approval is stale or weakly bound: "
+            f"concept={sorted(concept_mismatches)}, paid={sorted(paid_mismatches)}"
+        )
+    paid_approved_hashes = {pair[1] for pair in paid_scope_artifacts}
+    required_paid_hashes = {
+        roles["specification"][0]["sha256"],
+        manifest.get("concept_sha256"),
+        roles["concept_provenance"][0]["sha256"],
+        roles["bound_profile"][0]["sha256"],
+        roles["paid_request_snapshot"][0]["sha256"],
+        roles["production_readiness_report"][0]["sha256"],
+    }
+    missing_paid_hashes = required_paid_hashes - paid_approved_hashes
+    if missing_paid_hashes:
+        raise ValueError(
+            "Provider-character paid approval did not include current prerequisite artifacts: "
+            + ",".join(sorted(str(value) for value in missing_paid_hashes))
+        )
+    processed_hash = roles["processed_glb"][0]["sha256"]
+    final_inputs = obj("final_approval").get("inputs", {})
+    final_context = final_inputs.get("scope", {}).get("handler_context", {})
+    final_artifacts = final_context.get("artifacts") if isinstance(final_context, dict) else None
+    expected_final_artifacts = {
+        "asset-concept": manifest.get("concept_sha256"),
+        "asset-processed-glb": processed_hash,
+        "asset-validation-report": roles["validation"][0]["sha256"],
+        "asset-runtime-observation": roles["runtime_observation"][0]["sha256"],
+        "asset-runtime-capture": sorted(manifest.get("capture_sha256", {}).values())[0],
+        "asset-profile-v07": roles["bound_profile"][0]["sha256"],
+        "asset-runtime-request": roles["runtime_request"][0]["sha256"],
+        "asset-runtime-harness": roles["runtime_harness"][0]["sha256"],
+    }
+    if (
+        not isinstance(final_context, dict)
+        or final_context.get("workflow_id") != workflow_id
+        or not _v07_same_int(final_context.get("revision"), revision)
+        or final_context.get("specification_hash") != spec_hash
+        or final_context.get("profile_id") != manifest.get("profile_id")
+        or not _v07_same_int(final_context.get("profile_version"), manifest.get("profile_version"))
+        or final_context.get("profile_qualified")
+        != f"{manifest.get('profile_id')}@{manifest.get('profile_version')}"
+        or final_context.get("runtime_request_digest") != manifest.get("runtime_request_digest")
+        or final_context.get("graph_version") != "0.7.0"
+        or final_context.get("all_artifacts_verified") is not True
+        or final_context.get("runtime_capture_hashes")
+        != sorted(manifest.get("capture_sha256", {}).values())
+        or not isinstance(final_artifacts, dict)
+        or any(final_artifacts.get(key) != value for key, value in expected_final_artifacts.items())
+    ):
+        raise ValueError(
+            "Provider-character final approval is bound to stale runtime/output evidence"
+        )
+    if (
+        manifest.get("final_review", {}).get("decision") != "APPROVED"
+        or manifest.get("final_review", {}).get("fingerprint")
+        != receipts["final_approval"]["fingerprint"]
+        or manifest.get("human_reviews")
+        != {
+            "concept_review": receipts["concept_approval"]["operation_hash"],
+            "paid_generation": receipts["paid_approval"]["operation_hash"],
+            "final_visual_review": receipts["final_approval"]["operation_hash"],
+        }
+    ):
+        raise ValueError("Provider-character manifest does not bind all human operation hashes")
+    pinned_roles = {
+        "concept_provenance_sha256": "concept_provenance",
+        "concept_approval_sha256": "concept_approval",
+        "paid_approval_sha256": "paid_approval",
+        "paid_request_snapshot_sha256": "paid_request_snapshot",
+        "production_readiness_report_sha256": "production_readiness_report",
+        "provider_operation_sha256": "provider_operation",
+        "cost_record_sha256": "cost_record",
+    }
+    if (
+        manifest.get("raw_glb_sha256") != raw_hash
+        or manifest.get("processed_glb_sha256") != processed_hash
+        or any(manifest.get(key) != roles[role][0]["sha256"] for key, role in pinned_roles.items())
+    ):
+        raise ValueError("Provider-character manifest raw or processed pin mismatch")
+    for role, key in (
+        ("processing_report", "processing_report_sha256"),
+        ("validation", "validation_sha256"),
+        ("runtime_observation", "runtime_observation_sha256"),
+        ("runtime_harness", "runtime_harness_sha256"),
+        ("processing_script", "processing_script_sha256"),
+    ):
+        if manifest.get(key) != roles[role][0]["sha256"]:
+            raise ValueError(f"Provider-character current artifact hash mismatch: {role}")
+    runtime_request = obj("runtime_request")
+    observation = obj("runtime_observation")
+    unsigned_runtime_request = dict(runtime_request)
+    runtime_request_digest = unsigned_runtime_request.pop("request_digest", None)
+    calculated_runtime_request_digest = _sha256(
+        json.dumps(
+            unsigned_runtime_request, sort_keys=True, separators=(",", ":"), allow_nan=False
+        ).encode()
+    )
+    if (
+        runtime_request.get("raw_glb_sha256") != raw_hash
+        or runtime_request.get("processed_glb_sha256") != processed_hash
+        or runtime_request.get("harness_sha256") != roles["runtime_harness"][0]["sha256"]
+        or runtime_request.get("specification_sha256") != spec_hash
+        or runtime_request.get("profile_sha256") != profile_hash
+        or runtime_request.get("workflow_id") != workflow_id
+        or not _v07_same_int(runtime_request.get("revision"), revision)
+        or runtime_request.get("execution_id") != manifest.get("runtime_execution_id")
+        or not _v07_same_int(
+            runtime_request.get("attempt_number"), manifest.get("runtime_attempt_number")
+        )
+        or runtime_request_digest != manifest.get("runtime_request_digest")
+        or calculated_runtime_request_digest != manifest.get("runtime_request_digest")
+        or observation.get("execution_id") != manifest.get("runtime_execution_id")
+        or not _v07_same_int(
+            observation.get("attempt_number"), manifest.get("runtime_attempt_number")
+        )
+        or observation.get("specification_sha256") != spec_hash
+        or observation.get("profile_sha256") != profile_hash
+        or observation.get("harness_sha256") != roles["runtime_harness"][0]["sha256"]
+        or observation.get("request_digest") != manifest.get("runtime_request_digest")
+        or observation.get("status") != "PASS"
+    ):
+        raise ValueError(
+            "Provider-character Godot request and observation are not current and bound"
+        )
+
+    # Validate source and processed payloads, single-mesh policy, aggregate budget,
+    # material references, embedded texture dimensions, and capsule metadata.
+    raw_doc, raw_bin, raw_nodes, raw_parents, raw_world = _v07_glb(
+        payload("provider_generated_glb"), allow_unnamed_duplicate_nodes=True
+    )
+    proc_doc, proc_bin, proc_nodes, proc_parents, proc_world = _v07_glb(payload("processed_glb"))
+    raw_mesh_node_names: set[str] = set()
+    for label, doc, _nodes, _parents in (
+        ("raw", raw_doc, raw_nodes, raw_parents),
+        ("processed", proc_doc, proc_nodes, proc_parents),
+    ):
+        meshes = doc.get("meshes", [])
+        if (
+            not isinstance(meshes, list)
+            or not meshes
+            or len(meshes) > (10_000 if label == "raw" else 2)
+            or any(not isinstance(mesh, dict) for mesh in meshes)
+        ):
+            raise ValueError(f"Provider-character {label} mesh table is empty or exceeds its bound")
+        mesh_nodes = [node for node in doc["nodes"] if isinstance(node, dict) and "mesh" in node]
+        if (
+            not mesh_nodes
+            or any(type(node.get("mesh")) is not int for node in mesh_nodes)
+            or {node["mesh"] for node in mesh_nodes} != set(range(len(meshes)))
+            or (label == "processed" and len(mesh_nodes) != len(meshes))
+        ):
+            raise ValueError(f"Provider-character {label} mesh-node inventory is incomplete")
+        mesh_node_indices = [
+            index
+            for index, node in enumerate(doc["nodes"])
+            if isinstance(node, dict) and "mesh" in node
+        ]
+        _v07_bound_mesh_vertex_work(doc, mesh_node_indices)
+        forbidden_names = [
+            node.get("name", "")
+            for node in doc["nodes"]
+            if isinstance(node.get("name", ""), str)
+            and re.search(r"(^|_)(COL|PART|SOCKET)(_|$)", node.get("name", ""))
+        ]
+        if forbidden_names or doc.get("skins") or doc.get("animations"):
+            raise ValueError(f"Provider-character {label} contains assembly or rigging nodes")
+        if any(
+            node.get("name", "").startswith(("PART_", "SOCKET_", "COL_"))
+            for node in doc["nodes"]
+            if isinstance(node, dict)
+        ):
+            raise ValueError(f"Provider-character {label} includes assembly semantics")
+        if label == "raw":
+            raw_mesh_node_names = {
+                name for name, node_index in raw_nodes.items() if "mesh" in doc["nodes"][node_index]
+            }
+        elif (
+            {node.get("name") for node in mesh_nodes}
+            != {
+                node.get("name")
+                for node in mesh_nodes
+                if node.get("name", "").endswith(("LOD0", "LOD1"))
+            }
+            or len(mesh_nodes) != 2
+            or {"LOD0" if node.get("name", "").endswith("LOD0") else "LOD1" for node in mesh_nodes}
+            != {"LOD0", "LOD1"}
+        ):
+            raise ValueError(
+                "Processed provider character must contain exactly one LOD0 and one LOD1 node"
+            )
+    budgets = spec.get("geometry_budget", {})
+    max_tri0 = budgets.get("max_triangles_lod0")
+    max_tri1 = budgets.get("max_triangles_lod1")
+    max_materials = spec.get("material_budget", {}).get("max_materials")
+    max_texture = spec.get("texture_budget", {}).get("max_dimension")
+    caps = profile.get("processing", {})
+    if (
+        type(max_tri0) is not int
+        or max_tri0 <= 0
+        or type(max_tri1) is not int
+        or max_tri1 <= 0
+        or max_tri1 >= max_tri0
+        or type(max_materials) is not int
+        or max_materials <= 0
+        or type(max_texture) is not int
+        or max_texture <= 0
+        or type(caps.get("max_triangles_lod0")) is not int
+        or type(caps.get("max_materials")) is not int
+        or type(caps.get("max_texture_dimension")) is not int
+        or max_tri0 > caps["max_triangles_lod0"]
+        or max_materials > caps["max_materials"]
+        or max_texture > caps["max_texture_dimension"]
+    ):
+        raise ValueError("Provider-character specification budgets are invalid")
+    profile_godot = profile.get("godot", {})
+    if (
+        not isinstance(profile_godot, dict)
+        or profile_godot.get("body_kind") != "static_body"
+        or profile_godot.get("require_ray_hit") is not True
+        or profile_godot.get("require_area") is not False
+        or caps.get("rig_forbidden") is not True
+        or caps.get("animation_forbidden") is not True
+        or spec.get("origin_policy") not in caps.get("allowed_origin_policies", [])
+    ):
+        raise ValueError(
+            "Provider-character profile runtime or processing contract is not static/unrigged"
+        )
+    dims, collider = spec.get("dimensions", {}), spec.get("collider", {}).get("capsule", {})
+    radius, capsule_height = collider.get("radius_m"), collider.get("height_m")
+    tolerance = caps.get("dimension_tolerance_m")
+    if (
+        not isinstance(dims, dict)
+        or any(
+            type(dims.get(key)) not in {int, float}
+            or not math.isfinite(dims[key])
+            or dims[key] <= 0
+            for key in ("width_m", "depth_m", "height_m")
+        )
+        or type(radius) not in {int, float}
+        or not math.isfinite(radius)
+        or radius <= 0
+        or type(capsule_height) not in {int, float}
+        or not math.isfinite(capsule_height)
+        or capsule_height <= 2 * radius
+        or type(tolerance) not in {int, float}
+        or not math.isfinite(tolerance)
+        or tolerance <= 0
+        or capsule_height > dims["height_m"] + tolerance
+        or 2 * radius > max(dims["width_m"], dims["depth_m"]) + tolerance
+    ):
+        raise ValueError("Provider-character spec dimensions or capsule collider are inconsistent")
+    processed_texture_max = 0
+    raw_decoded_meshes: dict[int, list[list[tuple[tuple[float, float, float], ...]]]] = {}
+    processed_decoded_meshes: dict[int, list[list[tuple[tuple[float, float, float], ...]]]] = {}
+    raw_validated_attribute_accessors: set[int] = set()
+    processed_validated_attribute_accessors: set[int] = set()
+    for doc, binary, nodes, world, label in (
+        (raw_doc, raw_bin, raw_nodes, raw_world, "raw"),
+        (proc_doc, proc_bin, proc_nodes, proc_world, "processed"),
+    ):
+        lod_counts = {"LOD0": 0, "LOD1": 0}
+        mesh_nodes = [node for node in doc["nodes"] if isinstance(node, dict) and "mesh" in node]
+        seen_mesh_lods: set[str] = set()
+        for node in mesh_nodes:
+            name = node.get("name", "")
+            if label == "raw":
+                lod = "LOD0"
+            else:
+                if not (name.endswith("LOD0") or name.endswith("LOD1")):
+                    raise ValueError("Processed character mesh nodes must use canonical LOD names")
+                lod = "LOD1" if name.endswith("LOD1") else "LOD0"
+            if label == "processed" and lod in seen_mesh_lods:
+                raise ValueError(f"Provider-character {label} has duplicate {lod} geometry")
+            seen_mesh_lods.add(lod)
+            decoded_meshes = raw_decoded_meshes if label == "raw" else processed_decoded_meshes
+            validated_attributes = (
+                raw_validated_attribute_accessors
+                if label == "raw"
+                else processed_validated_attribute_accessors
+            )
+            primitives = _v07_positions(
+                doc,
+                binary,
+                node["mesh"],
+                decoded_meshes=decoded_meshes,
+                validated_attribute_accessors=validated_attributes,
+            )
+            lod_counts[lod] += sum(len(triangles) for triangles in primitives)
+        if (
+            lod_counts["LOD0"] <= 0
+            or lod_counts["LOD0"] > max_tri0
+            or lod_counts["LOD1"] > max_tri1
+        ):
+            raise ValueError(f"Provider-character {label} aggregate LOD triangle budget exceeded")
+        if label == "processed" and (
+            "LOD1" not in seen_mesh_lods
+            or caps.get("lod1_required") is True
+            and "LOD1" not in seen_mesh_lods
+        ):
+            raise ValueError(
+                "Processed character must contain its canonical LOD0 and LOD1 surfaces"
+            )
+        materials = doc.get("materials", [])
+        if not isinstance(materials, list) or len(materials) > max_materials:
+            raise ValueError(f"Provider-character {label} material budget exceeded")
+        referenced = {
+            primitive.get("material", 0)
+            for mesh in doc.get("meshes", [])
+            for primitive in mesh.get("primitives", [])
+        }
+        if any(
+            type(index) is not int or index < 0 or index >= max(1, len(materials))
+            for index in referenced
+        ):
+            raise ValueError(f"Provider-character {label} primitive material reference is invalid")
+        images = doc.get("images", [])
+        textures = doc.get("textures", [])
+        buffer_views = doc.get("bufferViews", [])
+        if (
+            not isinstance(images, list)
+            or not isinstance(textures, list)
+            or not isinstance(buffer_views, list)
+        ):
+            raise ValueError("Provider-character image, texture, or buffer-view tables are invalid")
+        max_seen_texture = 0
+        for texture in textures:
+            source_index = texture.get("source") if isinstance(texture, dict) else None
+            if type(source_index) is not int or not 0 <= source_index < len(images):
+                raise ValueError("Provider-character texture references an invalid embedded image")
+        for material in materials:
+            if not isinstance(material, dict):
+                raise ValueError("Provider-character material row is malformed")
+            slots = [
+                material.get("normalTexture"),
+                material.get("occlusionTexture"),
+                material.get("emissiveTexture"),
+            ]
+            pbr = material.get("pbrMetallicRoughness", {})
+            if isinstance(pbr, dict):
+                slots.extend((pbr.get("baseColorTexture"), pbr.get("metallicRoughnessTexture")))
+            for slot in slots:
+                if slot is not None and (
+                    not isinstance(slot, dict)
+                    or type(slot.get("index")) is not int
+                    or not 0 <= slot["index"] < len(textures)
+                ):
+                    raise ValueError("Provider-character material texture slot is invalid")
+        for image in images:
+            if (
+                not isinstance(image, dict)
+                or "bufferView" not in image
+                or image.get("mimeType") not in {"image/png", "image/jpeg"}
+            ):
+                raise ValueError(
+                    "Provider-character images must be embedded PNG or JPEG bufferViews"
+                )
+            view_index = image["bufferView"]
+            if (
+                type(view_index) is not int
+                or not 0 <= view_index < len(buffer_views)
+                or not isinstance(buffer_views[view_index], dict)
+            ):
+                raise ValueError("Provider-character embedded image view is invalid")
+            view = buffer_views[view_index]
+            off, length = view.get("byteOffset", 0), view.get("byteLength")
+            if (
+                type(off) is not int
+                or type(length) is not int
+                or off < 0
+                or length <= 0
+                or off + length > len(binary)
+            ):
+                raise ValueError("Provider-character embedded image bounds are invalid")
+            blob = binary[off : off + length]
+            dimensions = (
+                _png_dimensions(blob)
+                if image["mimeType"] == "image/png"
+                else _jpeg_dimensions(blob)
+            )
+            max_seen_texture = max(max_seen_texture, *dimensions)
+        if label == "processed":
+            processed_texture_max = max_seen_texture
+        if max_seen_texture > max_texture:
+            raise ValueError(
+                f"Provider-character {label} embedded texture exceeds its dimension budget"
+            )
+        if label == "processed":
+            _v07_enforce_core_budgets(
+                doc,
+                binary,
+                nodes,
+                world,
+                spec,
+                profile,
+                decoded_meshes=processed_decoded_meshes,
+                validated_attribute_accessors=processed_validated_attribute_accessors,
+            )
+    raw_lod0 = _v07_tris(
+        raw_doc,
+        raw_bin,
+        raw_nodes,
+        raw_world,
+        "",
+        selected_names=raw_mesh_node_names,
+        decoded_meshes=raw_decoded_meshes,
+        validated_attribute_accessors=raw_validated_attribute_accessors,
+    )
+    processed_lod0 = _v07_tris(
+        proc_doc,
+        proc_bin,
+        proc_nodes,
+        proc_world,
+        "LOD0",
+        decoded_meshes=processed_decoded_meshes,
+        validated_attribute_accessors=processed_validated_attribute_accessors,
+    )
+    if not raw_lod0 or len(processed_lod0) != 1:
+        raise ValueError(
+            "Provider-character raw and processed inventories lack complete visual LOD0 geometry"
+        )
+    source_triangles = [triangle for values in raw_lod0.values() for triangle in values]
+    processed_triangles = [triangle for values in processed_lod0.values() for triangle in values]
+    source_min, source_max = _v07_bounds(source_triangles)
+    processed_min, processed_max = _v07_bounds(processed_triangles)
+    source_size = [source_max[i] - source_min[i] for i in range(3)]
+    processed_size = [processed_max[i] - processed_min[i] for i in range(3)]
+    target_height = dims["height_m"]
+    if source_size[1] <= 0:
+        raise ValueError("Provider-character source mesh has zero height")
+    scale = target_height / source_size[1]
+    tolerance = max(1e-5, target_height * 1e-5)
+    if (
+        not math.isfinite(scale)
+        or scale <= 0
+        or any(abs(processed_size[i] - source_size[i] * scale) > tolerance for i in range(3))
+        or any(
+            abs(processed_size[i] - dims[dim_key]) > max(caps["dimension_tolerance_m"], tolerance)
+            for i, dim_key in enumerate(("width_m", "height_m", "depth_m"))
+        )
+    ):
+        raise ValueError(
+            "Provider-character raw-to-processed transform is not a bounded uniform height fit"
+        )
+    if (
+        abs((processed_min[0] + processed_max[0]) / 2) > caps["dimension_tolerance_m"]
+        or abs((processed_min[2] + processed_max[2]) / 2) > caps["dimension_tolerance_m"]
+        or (
+            spec.get("origin_policy") == "bottom_center"
+            and abs(processed_min[1]) > caps["dimension_tolerance_m"]
+        )
+        or (
+            spec.get("origin_policy") == "center"
+            and abs((processed_min[1] + processed_max[1]) / 2) > caps["dimension_tolerance_m"]
+        )
+    ):
+        raise ValueError("Provider-character processed LOD0 origin differs from specification")
+    if caps.get("lod1_required") is True or spec.get("lod_policy") == "lod0_lod1":
+        processed_lod1 = _v07_tris(
+            proc_doc,
+            proc_bin,
+            proc_nodes,
+            proc_world,
+            "LOD1",
+            decoded_meshes=processed_decoded_meshes,
+            validated_attribute_accessors=processed_validated_attribute_accessors,
+        )
+        if (
+            set(processed_lod1) != {name for name in proc_nodes if name.endswith("LOD1")}
+            or len(processed_lod1) != 1
+        ):
+            raise ValueError("Provider-character processed LOD1 inventory is incomplete")
+        lod1_min, lod1_max = _v07_bounds(next(iter(processed_lod1.values())))
+        if any(
+            abs(lod1_min[i] - processed_min[i]) > caps["dimension_tolerance_m"]
+            or abs(lod1_max[i] - processed_max[i]) > caps["dimension_tolerance_m"]
+            for i in range(3)
+        ):
+            raise ValueError("Provider-character decoded LOD1 bounds differ from LOD0")
+    if spec.get("origin_policy") == "bottom_center":
+        translation = tuple(
+            (processed_min[i] + processed_max[i]) / 2 - (source_min[i] + source_max[i]) / 2 * scale
+            if i != 1
+            else processed_min[i] - source_min[i] * scale
+            for i in range(3)
+        )
+    else:
+        translation = tuple(
+            (processed_min[i] + processed_max[i]) / 2 - (source_min[i] + source_max[i]) / 2 * scale
+            for i in range(3)
+        )
+    fitted_source = [
+        tuple(
+            tuple(point[axis] * scale + translation[axis] for axis in range(3))
+            for point in triangle
+        )
+        for triangle in source_triangles
+    ]
+    if not _v07_compare_triangles(fitted_source, processed_triangles, tolerance):
+        raise ValueError(
+            "Provider-character raw-to-processed oriented triangle geometry was not uniformly preserved"
+        )
+    processing_report = obj("processing_report")
+    raw_metrics = processing_report.get("raw_metrics")
+    processed_metrics = processing_report.get("processed_metrics")
+    transform = processing_report.get("transform")
+    if (
+        processing_report.get("contract_version") != "character-processing-0.7.0"
+        or processing_report.get("status") != "SUCCESS"
+        or processing_report.get("exit_code") != 0
+        or processing_report.get("asset_id") != asset_id
+        or processing_report.get("source_sha256") != raw_hash
+        or processing_report.get("output_sha256") != processed_hash
+        or processing_report.get("spec_sha256") != spec_hash
+        or processing_report.get("profile_sha256") != profile_hash
+        or processing_report.get("profile_id") != manifest.get("profile_id")
+        or not _v07_same_int(
+            processing_report.get("profile_version"), manifest.get("profile_version")
+        )
+        or processing_report.get("script_sha256") != roles["processing_script"][0]["sha256"]
+        or not isinstance(raw_metrics, dict)
+        or not isinstance(processed_metrics, dict)
+        or not isinstance(transform, dict)
+    ):
+        raise ValueError(
+            "Provider-character Blender processing report is stale or contradicts current pins"
+        )
+    raw_dimensions_blender = (source_size[0], source_size[2], source_size[1])
+    raw_min_blender = (source_min[0], source_min[2], source_min[1])
+    raw_max_blender = (source_max[0], source_max[2], source_max[1])
+    if (
+        not _v07_vec_close(
+            raw_metrics.get("dimensions"), raw_dimensions_blender, caps["dimension_tolerance_m"]
+        )
+        or not _v07_vec_close(
+            raw_metrics.get("bounds_min"), raw_min_blender, caps["dimension_tolerance_m"]
+        )
+        or not _v07_vec_close(
+            raw_metrics.get("bounds_max"), raw_max_blender, caps["dimension_tolerance_m"]
+        )
+        or not _v07_num_close(raw_metrics.get("lod0_triangles"), len(source_triangles), 0)
+        or not _v07_num_close(raw_metrics.get("mesh_objects"), len(raw_mesh_node_names), 0)
+        or not _v07_num_close(raw_metrics.get("materials"), len(raw_doc.get("materials", [])), 0)
+    ):
+        raise ValueError(
+            "Provider-character Blender raw metrics differ from decoded provider geometry"
+        )
+    lod0_triangle_count = sum(len(values) for values in processed_lod0.values())
+    processed_lod1_for_report = _v07_tris(
+        proc_doc,
+        proc_bin,
+        proc_nodes,
+        proc_world,
+        "LOD1",
+        decoded_meshes=processed_decoded_meshes,
+        validated_attribute_accessors=processed_validated_attribute_accessors,
+    )
+    lod1_triangle_count = sum(len(values) for values in processed_lod1_for_report.values())
+    if (
+        not _v07_vec_close(
+            processed_metrics.get("dimensions"), processed_size, caps["dimension_tolerance_m"]
+        )
+        or not _v07_vec_close(
+            processed_metrics.get("bounds_min"), processed_min, caps["dimension_tolerance_m"]
+        )
+        or not _v07_vec_close(
+            processed_metrics.get("bounds_max"), processed_max, caps["dimension_tolerance_m"]
+        )
+        or not _v07_num_close(processed_metrics.get("lod0_triangles"), lod0_triangle_count, 0)
+        or not _v07_num_close(processed_metrics.get("lod1_triangles"), lod1_triangle_count, 0)
+        or not _v07_num_close(
+            processed_metrics.get("materials"), len(proc_doc.get("materials", [])), 0
+        )
+        or not _v07_num_close(
+            processed_metrics.get("texture_max_dimension"), processed_texture_max, 0
+        )
+        or processed_metrics.get("mesh_nodes")
+        != sorted(name for name in proc_nodes if name.endswith(("LOD0", "LOD1")))
+        or not _v07_num_close(
+            processed_metrics.get("lod1_actual_triangle_ratio"),
+            lod1_triangle_count / max(1, lod0_triangle_count),
+            1e-4,
+        )
+    ):
+        raise ValueError("Provider-character Blender processed metrics differ from decoded GLB")
+    report_capsule = processing_report.get("runtime_collider")
+    if (
+        not isinstance(report_capsule, dict)
+        or report_capsule.get("policy") != "capsule"
+        or not _v07_num_close(report_capsule.get("radius_m"), radius, 1e-5)
+        or not _v07_num_close(report_capsule.get("height_m"), capsule_height, 1e-5)
+        or transform.get("origin_policy") != spec.get("origin_policy")
+        or transform.get("scale_mode") != "uniform_height_fit"
+        or not _v07_num_close(transform.get("uniform_scale"), scale, 1e-5)
+        or not _v07_vec_close(transform.get("translation_gltf_m"), translation, 1e-5)
+    ):
+        raise ValueError(
+            "Provider-character Blender transform or capsule report differs from decoded geometry"
+        )
+    collider = spec.get("collider", {}).get("capsule", {})
+    if not collider or not isinstance(collider, dict):
+        raise ValueError("Provider-character capsule dimensions are missing")
+    validation = obj("validation")
+    validation_findings = validation.get("findings")
+    required_validation_rules = {
+        "glb.parse",
+        "geometry.nonempty",
+        "nodes.unique",
+        "materials.budget",
+        "textures.dimension",
+        "geometry.lod0_budget",
+        "geometry.lod1_budget",
+        "collider.capsule.shape",
+        "collider.capsule.fit",
+        "mesh.single",
+        "dimensions.bounds",
+        "origin.policy",
+        "lod1.present",
+        "lod1.bounds",
+        "mesh.set",
+        "orientation.identity",
+    }
+    observed_validation_rules = (
+        {finding.get("rule_id") for finding in validation_findings if isinstance(finding, dict)}
+        if isinstance(validation_findings, list)
+        else set()
+    )
+    if (
+        validation.get("schema_version") != "asset-validation-report-0.7.0"
+        or validation.get("passed") is not True
+        or not isinstance(validation_findings, list)
+        or any(
+            not isinstance(finding, dict) or finding.get("passed") is not True
+            for finding in validation_findings
+        )
+        or not required_validation_rules <= observed_validation_rules
+    ):
+        raise ValueError("Provider-character semantic validation did not pass")
+    # Match the standalone character adapter's dictionary-shaped observation.
+    lod_rows = observation.get("lods")
+    collider_row = observation.get("collider")
+    if (
+        observation.get("schema_version") != "character-runtime-observation-0.7.0"
+        or observation.get("workflow_id") != workflow_id
+        or observation.get("asset_id") != asset_id
+        or not _v07_same_int(observation.get("revision"), revision)
+        or observation.get("execution_id") != manifest.get("runtime_execution_id")
+        or not _v07_same_int(
+            observation.get("attempt_number"), manifest.get("runtime_attempt_number")
+        )
+        or observation.get("raw_glb_sha256") != raw_hash
+        or observation.get("processed_glb_sha256") != processed_hash
+        or observation.get("harness_sha256") != roles["runtime_harness"][0]["sha256"]
+        or observation.get("specification_sha256") != spec_hash
+        or observation.get("profile_sha256") != profile_hash
+        or observation.get("request_digest") != manifest.get("runtime_request_digest")
+        or observation.get("status") != "PASS"
+        or observation.get("errors") != []
+        or not isinstance(lod_rows, dict)
+        or not isinstance(collider_row, dict)
+        or collider_row.get("body_kind") != "StaticBody3D"
+        or collider_row.get("shape_class") != "CapsuleShape3D"
+        or collider_row.get("physics_ray_hit") is not True
+        or not isinstance(observation.get("view_framing"), dict)
+        or not isinstance(observation.get("captures"), dict)
+    ):
+        raise ValueError(
+            "Provider-character Godot capsule, static-body, LOD, or request result is incomplete"
+        )
+    processed_nodes = [
+        node for node in proc_doc["nodes"] if isinstance(node, dict) and "mesh" in node
+    ]
+    expected_lod_names = {node["name"] for node in processed_nodes}
+    if set(lod_rows) != expected_lod_names:
+        raise ValueError("Provider-character Godot LOD inventory differs from processed GLB nodes")
+    for node in processed_nodes:
+        name = node["name"]
+        lod = lod_rows[name]
+        mesh = proc_doc["meshes"][node["mesh"]]
+        position, basis, node_scale = _v07_parts(node)
+        expected_visible = name.endswith("LOD0")
+        if (
+            not isinstance(lod, dict)
+            or set(lod)
+            != {
+                "mesh_present",
+                "surface_count",
+                "visible",
+                "local_position",
+                "local_basis",
+                "local_scale",
+            }
+            or lod.get("mesh_present") is not True
+            or type(lod.get("surface_count")) is not int
+            or lod.get("surface_count") != len(mesh.get("primitives", []))
+            or lod.get("visible") is not expected_visible
+            or not _v07_vec_close(lod.get("local_position"), position, 1e-4)
+            or not _v07_vec_close(lod.get("local_scale"), node_scale, 1e-4)
+            or not _v07_matrix3_close(lod.get("local_basis"), basis, 1e-4)
+        ):
+            raise ValueError(
+                "Provider-character Godot LOD transform, surface count, or visibility is invalid"
+            )
+    expected_capsule = spec["collider"]["capsule"]
+    expected_center_y = (
+        expected_capsule["height_m"] / 2 if spec.get("origin_policy") == "bottom_center" else 0.0
+    )
+    if (
+        set(collider_row)
+        != {"body_kind", "shape_class", "radius_m", "height_m", "center_y_m", "physics_ray_hit"}
+        or not _v07_num_close(collider_row.get("radius_m"), expected_capsule.get("radius_m"), 1e-4)
+        or not _v07_num_close(collider_row.get("height_m"), expected_capsule.get("height_m"), 1e-4)
+        or not _v07_num_close(collider_row.get("center_y_m"), expected_center_y, 1e-4)
+    ):
+        raise ValueError(
+            "Provider-character Godot capsule dimensions or ray probe differ from specification"
+        )
+    framing = observation.get("view_framing")
+    captures_observed = observation.get("captures")
+    if (
+        not isinstance(framing, dict)
+        or set(framing) != set(views)
+        or not isinstance(captures_observed, dict)
+        or set(captures_observed) != set(views)
+    ):
+        raise ValueError("Provider-character Godot review-view framing evidence is incomplete")
+    capture_hashes = {row["view"]: row["sha256"] for row in captures}
+    framing_policy = profile.get("framing", {})
+    camera_views = {
+        "front": ((0.0, 0.0, -1.0), (0.0, 1.0, 0.0), "-Z"),
+        "rear": ((0.0, 0.0, 1.0), (0.0, 1.0, 0.0), "+Z"),
+        "left": ((-1.0, 0.0, 0.0), (0.0, 1.0, 0.0), "-X"),
+        "right": ((1.0, 0.0, 0.0), (0.0, 1.0, 0.0), "+X"),
+        "side": ((1.0, 0.0, 0.0), (0.0, 1.0, 0.0), "+X"),
+        "three_quarter": ((1.0, 0.65, -1.0), (0.0, 1.0, 0.0), "+X-Z"),
+        "three_quarter_front": ((1.0, 0.65, -1.0), (0.0, 1.0, 0.0), "+X-Z"),
+        "three_quarter_rear": ((1.0, 0.65, 1.0), (0.0, 1.0, 0.0), "+X+Z"),
+        "top": ((0.0, 1.0, 0.0), (0.0, 0.0, -1.0), "+Y"),
+    }
+
+    def capture_payload(row: dict[str, Any]) -> bytes:
+        path = root.joinpath(*PurePosixPath(row["path"]).parts)
+        return read_evidence_file(
+            path, limit=25_000_000, expected_size=row["size"], expected_digest=row["sha256"]
+        )
+
+    for view in views:
+        result = framing[view]
+        direction, requested_up, axis = camera_views[view]
+        direction_length = math.sqrt(sum(value * value for value in direction))
+        camera_forward = tuple(-value / direction_length for value in direction)
+        projection = sum(requested_up[index] * camera_forward[index] for index in range(3))
+        projected_up = tuple(
+            requested_up[index] - projection * camera_forward[index] for index in range(3)
+        )
+        up_length = math.sqrt(sum(value * value for value in projected_up))
+        expected_up = tuple(value / up_length for value in projected_up)
+        min_fraction = framing_policy.get("min_screen_fraction")
+        max_fraction = framing_policy.get("max_screen_fraction")
+        ratio = result.get("height_ratio") if isinstance(result, dict) else None
+        if (
+            type(ratio) not in {int, float}
+            or isinstance(ratio, bool)
+            or type(min_fraction) not in {int, float}
+            or isinstance(min_fraction, bool)
+            or type(max_fraction) not in {int, float}
+            or isinstance(max_fraction, bool)
+        ):
+            raise ValueError(f"Provider-character Godot framing ratio is malformed for {view}")
+        ratio_value = float(cast(int | float, ratio))
+        min_fraction_value = float(cast(int | float, min_fraction))
+        max_fraction_value = float(cast(int | float, max_fraction))
+        capture = captures_observed[view]
+        capture_row = next(row for row in captures if row["view"] == view)
+        capture_bytes = capture_payload(capture_row)
+        dimensions = _png_dimensions(capture_bytes)
+        if (
+            not isinstance(result, dict)
+            or result.get("ok") is not True
+            or result.get("inside_viewport") is not True
+            or result.get("margin_ok") is not True
+            or result.get("view_axis") != axis
+            or not _v07_vec_close(result.get("camera_direction"), camera_forward, 1e-4)
+            or not _v07_vec_close(result.get("camera_up"), expected_up, 1e-4)
+            or not math.isfinite(ratio_value)
+            or not math.isfinite(min_fraction_value)
+            or not math.isfinite(max_fraction_value)
+            or not min_fraction_value <= ratio_value <= max_fraction_value
+            or not isinstance(capture, dict)
+            or set(capture) != {"sha256"}
+            or capture.get("sha256") != capture_hashes[view]
+            or dimensions != (1280, 720)
+        ):
+            raise ValueError(f"Provider-character Godot framing failed for {view}")
+    receipt = obj("production_receipt")
+    if (
+        receipt.get("status") != "PASS"
+        or receipt.get("generation_mode") != "provider_generated_character"
+        or receipt.get("paid") is not True
+        or receipt.get("workflow_id") != workflow_id
+        or not _v07_same_int(receipt.get("revision"), revision)
+    ):
+        raise ValueError("Provider-character production receipt is not a current PASS")
+    receipt_rows = {
+        f"{item['role']}:{item.get('view', '')}": item["sha256"]
+        for item in files
+        if item["role"] not in {"review_html", "production_receipt"}
+    }
+    expected_receipt_binding = {
+        key: value
+        for key, value in manifest.items()
+        if key not in {"product_ready", "files", "final_review", "human_reviews"}
+    }
+    if (
+        receipt.get("role_sha256") != receipt_rows
+        or receipt.get("binding") != expected_receipt_binding
+        or receipt.get("human_reviews")
+        != {
+            "concept_review": {
+                "operation_hash": receipts["concept_approval"]["operation_hash"],
+                "status": "APPROVED",
+            },
+            "paid_generation": {
+                "operation_hash": receipts["paid_approval"]["operation_hash"],
+                "status": "APPROVED",
+            },
+            "final_visual_review": {
+                "operation_hash": receipts["final_approval"]["operation_hash"],
+                "status": "APPROVED",
+            },
+        }
+        or manifest.get("human_reviews")
+        != {
+            "concept_review": receipts["concept_approval"]["operation_hash"],
+            "paid_generation": receipts["paid_approval"]["operation_hash"],
+            "final_visual_review": receipts["final_approval"]["operation_hash"],
+        }
+    ):
+        raise ValueError(
+            "Provider-character production receipt does not bind current role hashes and reviews"
+        )
+    return {
+        "status": "PASS",
+        "schema_version": "asset-evidence-0.7.0",
+        "workflow_id": workflow_id,
+        "revision": revision,
+        "verified_files": len(files),
+        "product_ready": True,
+        "paid": True,
+        "human_identity_authenticated": False,
+        "provider_execution_authenticated": False,
+        "runtime_origin_authenticated": False,
+        "capture_origin_authenticated": False,
+        "currentness": "as_of_export_snapshot",
+        "limitation": "The bundle establishes internal consistency only; human identity, provider execution, runtime execution, capture origin, and post-export changes require external trust anchors.",
     }
 
 
