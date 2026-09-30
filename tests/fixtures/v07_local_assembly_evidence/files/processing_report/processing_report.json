@@ -1,0 +1,70 @@
+{
+  "assembly_bounds": {
+    "dimensions": [
+      1.0000005960464478,
+      1.7624359130859375,
+      1.5526284575462341
+    ],
+    "max": [
+      0.5000002980232239,
+      0.8812179565429688,
+      0.7763142585754395
+    ],
+    "min": [
+      -0.5000002980232239,
+      -0.8812179565429688,
+      -0.7763141989707947
+    ]
+  },
+  "asset_id": "test_blender_tank",
+  "blender_version": "5.2.1 LTS",
+  "collider": {
+    "bounds_max": [
+      0.5000002980232239,
+      0.8812179565429688,
+      0.7763142585754395
+    ],
+    "bounds_min": [
+      -0.5000002980232239,
+      -0.8812179565429688,
+      -0.7763141989707947
+    ],
+    "name": "COL_test_blender_tank",
+    "parent": "ROOT"
+  },
+  "duration_seconds": 0.5809151001740247,
+  "exit_code": 0,
+  "normalization": {
+    "applied": true,
+    "root_rotation_xyzw": [
+      0.0,
+      1.0,
+      0.0,
+      0.0
+    ],
+    "source_front": "+Z"
+  },
+  "output_glb_sha256": "313e32c540820a6405c3a60bf66e2d9523eb9c6cf64baeb8d4cdac2cf25727c9",
+  "per_part_metrics": {
+    "barrel": {
+      "lod0_triangles": 12,
+      "lod1_triangles": 12
+    },
+    "hull": {
+      "lod0_triangles": 12,
+      "lod1_triangles": 12
+    },
+    "turret": {
+      "lod0_triangles": 12,
+      "lod1_triangles": 12
+    }
+  },
+  "processing_script_sha256": "abd0c43f572524ec3c4a81dd880c71b14ef7a46d24fcfb65da2db00543df0d42",
+  "profile_id": "test_assembly_integration_profile",
+  "profile_version": 1,
+  "provenance_sha256": "99f03c8c0ec88ae3919b6ebee08a6f4815b463f4844cd77f924615d98407fc14",
+  "schema_version": "0.7.0",
+  "source_glb_sha256": "2977b5a2c13b154bd1e22c30438ff1b34853f1cffd40b788bc6137943c2d3574",
+  "spec_fingerprint": "88d3c16dd9a0428af03692e28e78a42669b85e60debf52dce71380528d6be7e8",
+  "status": "SUCCESS"
+}

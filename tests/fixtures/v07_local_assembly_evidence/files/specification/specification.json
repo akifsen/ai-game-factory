@@ -1,0 +1,130 @@
+{
+  "asset_id": "test_blender_tank",
+  "category": "vehicle",
+  "collider": {
+    "capsule": null,
+    "policy": "box"
+  },
+  "dimensions": {
+    "depth_m": 1.5526279441628827,
+    "height_m": 1.762435565298214,
+    "width_m": 1.0
+  },
+  "geometry_budget": {
+    "lod_ratio": 0.5,
+    "max_triangles_lod0": 10000,
+    "max_triangles_lod1": 5000
+  },
+  "intent": "blender assembly integration test",
+  "lod_policy": "lod0_lod1",
+  "material_budget": {
+    "max_materials": 4
+  },
+  "orientation": {
+    "front": "-Z",
+    "up": "+Y"
+  },
+  "origin_policy": "center",
+  "parts": [
+    {
+      "parent": "root",
+      "part_id": "hull",
+      "pivot": {
+        "basis": [
+          0.25881904510252074,
+          0.0,
+          0.0,
+          0.9659258262890683
+        ],
+        "motion": {
+          "axis": null,
+          "kind": "fixed",
+          "limits": null
+        },
+        "position_m": [
+          -0.0,
+          -0.19820508075688775,
+          -0.09330127018922191
+        ]
+      },
+      "role": "hull"
+    },
+    {
+      "parent": "hull",
+      "part_id": "turret",
+      "pivot": {
+        "basis": "identity",
+        "motion": {
+          "axis": [
+            0.0,
+            1.0,
+            0.0
+          ],
+          "kind": "revolute",
+          "limits": null
+        },
+        "position_m": [
+          0.0,
+          0.2,
+          0.1
+        ]
+      },
+      "role": "turret"
+    },
+    {
+      "parent": "turret",
+      "part_id": "barrel",
+      "pivot": {
+        "basis": "identity",
+        "motion": {
+          "axis": [
+            1.0,
+            0.0,
+            0.0
+          ],
+          "kind": "revolute",
+          "limits": null
+        },
+        "position_m": [
+          0.0,
+          0.2,
+          -0.2
+        ]
+      },
+      "role": "barrel"
+    }
+  ],
+  "profile": "test_assembly_integration_profile",
+  "profile_version": 1,
+  "schema_version": "0.7.0",
+  "sockets": [
+    {
+      "parent_part": "barrel",
+      "placement": "forward_end",
+      "rotation": [
+        -0.25881904510252074,
+        0.0,
+        0.0,
+        0.9659258262890683
+      ],
+      "socket_id": "muzzle",
+      "translation_m": [
+        0.0,
+        0.0,
+        -0.49
+      ]
+    }
+  ],
+  "source_kind": "local_operator_assembly",
+  "style_constraints": {
+    "detail_density": "medium",
+    "family": "stylized_scifi",
+    "readability": "high",
+    "silhouette": "chunky"
+  },
+  "target_engine": "godot",
+  "target_import_path": "assets/generated/vehicle/test_blender_tank/",
+  "texture_budget": {
+    "max_dimension": 2048
+  }
+}

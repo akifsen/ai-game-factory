@@ -1,0 +1,208 @@
+{
+  "actor": "test-fixture-human-operator",
+  "approval_type": "concept_review",
+  "comment": "EXPLICIT TEST FIXTURE approval only; no production asset approval",
+  "fingerprint": "45b7e94416f40d69927b2eafc7f56fd701d19e08edebd5b215502e934a28bee4",
+  "inputs": {
+    "parameters": {
+      "asset_id": "test_blender_tank",
+      "concept_image": "concept.png",
+      "concept_image_sha256": "2862fb05eeceabfa91387b67826bab1ec3e4f64f5969e574fbaca0ca321565d5",
+      "concept_provenance": "concept-provenance.json",
+      "concept_provenance_sha256": "fbae060c8fc9d536753839573268f82a85725f59dd1bbb2841264e166e46a4f6",
+      "graph_version": "0.7.0-local-assembly",
+      "profile_document_sha256": "f1b3e14cb7780a7a7c8371cdc917cb5886cd3ba4ca65e4942525f4841682ef42",
+      "profile_id": "test_assembly_integration_profile",
+      "profile_version": 1,
+      "source_glb_sha256": "2977b5a2c13b154bd1e22c30438ff1b34853f1cffd40b788bc6137943c2d3574",
+      "source_package": "sources/fixture",
+      "source_provenance_sha256": "99f03c8c0ec88ae3919b6ebee08a6f4815b463f4844cd77f924615d98407fc14",
+      "source_publication_marker_sha256": "fb45318cbafbb1d9f85e8b670878e59605df6bd77c4e11e6f4f31c04b1bac03f",
+      "source_version": 1,
+      "specification": {
+        "asset_id": "test_blender_tank",
+        "category": "vehicle",
+        "collider": {
+          "capsule": null,
+          "policy": "box"
+        },
+        "dimensions": {
+          "depth_m": 1.5526279441628827,
+          "height_m": 1.762435565298214,
+          "width_m": 1.0
+        },
+        "geometry_budget": {
+          "lod_ratio": 0.5,
+          "max_triangles_lod0": 10000,
+          "max_triangles_lod1": 5000
+        },
+        "intent": "blender assembly integration test",
+        "lod_policy": "lod0_lod1",
+        "material_budget": {
+          "max_materials": 4
+        },
+        "orientation": {
+          "front": "-Z",
+          "up": "+Y"
+        },
+        "origin_policy": "center",
+        "parts": [
+          {
+            "parent": "root",
+            "part_id": "hull",
+            "pivot": {
+              "basis": [
+                0.25881904510252074,
+                0.0,
+                0.0,
+                0.9659258262890683
+              ],
+              "motion": {
+                "axis": null,
+                "kind": "fixed",
+                "limits": null
+              },
+              "position_m": [
+                -0.0,
+                -0.19820508075688775,
+                -0.09330127018922191
+              ]
+            },
+            "role": "hull"
+          },
+          {
+            "parent": "hull",
+            "part_id": "turret",
+            "pivot": {
+              "basis": "identity",
+              "motion": {
+                "axis": [
+                  0.0,
+                  1.0,
+                  0.0
+                ],
+                "kind": "revolute",
+                "limits": null
+              },
+              "position_m": [
+                0.0,
+                0.2,
+                0.1
+              ]
+            },
+            "role": "turret"
+          },
+          {
+            "parent": "turret",
+            "part_id": "barrel",
+            "pivot": {
+              "basis": "identity",
+              "motion": {
+                "axis": [
+                  1.0,
+                  0.0,
+                  0.0
+                ],
+                "kind": "revolute",
+                "limits": null
+              },
+              "position_m": [
+                0.0,
+                0.2,
+                -0.2
+              ]
+            },
+            "role": "barrel"
+          }
+        ],
+        "profile": "test_assembly_integration_profile",
+        "profile_version": 1,
+        "schema_version": "0.7.0",
+        "sockets": [
+          {
+            "parent_part": "barrel",
+            "placement": "forward_end",
+            "rotation": [
+              -0.25881904510252074,
+              0.0,
+              0.0,
+              0.9659258262890683
+            ],
+            "socket_id": "muzzle",
+            "translation_m": [
+              0.0,
+              0.0,
+              -0.49
+            ]
+          }
+        ],
+        "source_kind": "local_operator_assembly",
+        "style_constraints": {
+          "detail_density": "medium",
+          "family": "stylized_scifi",
+          "readability": "high",
+          "silhouette": "chunky"
+        },
+        "target_engine": "godot",
+        "target_import_path": "assets/generated/vehicle/test_blender_tank/",
+        "texture_budget": {
+          "max_dimension": 2048
+        }
+      },
+      "specification_sha256": "88d3c16dd9a0428af03692e28e78a42669b85e60debf52dce71380528d6be7e8",
+      "workflow_id": "root-fixture-assembly"
+    },
+    "scope": {
+      "artifacts": [
+        [
+          "ART-25cc9814",
+          "9f66bdeec324cd1ef9ff4f9775d98e066a599cf8c7259e3e5315313c3af47f58"
+        ],
+        [
+          "ART-315caa20",
+          "2862fb05eeceabfa91387b67826bab1ec3e4f64f5969e574fbaca0ca321565d5"
+        ],
+        [
+          "ART-66651461",
+          "fb45318cbafbb1d9f85e8b670878e59605df6bd77c4e11e6f4f31c04b1bac03f"
+        ],
+        [
+          "ART-bb80502a",
+          "99f03c8c0ec88ae3919b6ebee08a6f4815b463f4844cd77f924615d98407fc14"
+        ],
+        [
+          "ART-e0b1c820",
+          "fbae060c8fc9d536753839573268f82a85725f59dd1bbb2841264e166e46a4f6"
+        ],
+        [
+          "ART-f76e95ee",
+          "2977b5a2c13b154bd1e22c30438ff1b34853f1cffd40b788bc6137943c2d3574"
+        ]
+      ],
+      "cost_class": "LOCAL",
+      "estimated_cost": 0.0,
+      "handler_context": {
+        "asset_id": "test_blender_tank",
+        "concept_image_sha256": "2862fb05eeceabfa91387b67826bab1ec3e4f64f5969e574fbaca0ca321565d5",
+        "concept_provenance_sha256": "fbae060c8fc9d536753839573268f82a85725f59dd1bbb2841264e166e46a4f6",
+        "profile_document_sha256": "f1b3e14cb7780a7a7c8371cdc917cb5886cd3ba4ca65e4942525f4841682ef42",
+        "profile_id": "test_assembly_integration_profile",
+        "profile_version": 1,
+        "source_version": 1,
+        "spec_sha256": "88d3c16dd9a0428af03692e28e78a42669b85e60debf52dce71380528d6be7e8",
+        "stage": "concept_review",
+        "workflow_id": "root-fixture-assembly"
+      },
+      "provider": null,
+      "task_type": "asset_v07_assembly_concept_review",
+      "workflow_id": "root-fixture-assembly"
+    }
+  },
+  "operation_hash": "45b7e94416f40d69927b2eafc7f56fd701d19e08edebd5b215502e934a28bee4",
+  "revision": 1,
+  "schema_version": "production-receipt-0.7.0",
+  "source_version": 1,
+  "status": "APPROVED",
+  "task_id": "root-fixture-assembly-CONCEPT_REVIEW",
+  "workflow_id": "root-fixture-assembly"
+}

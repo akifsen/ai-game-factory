@@ -435,6 +435,37 @@ def test_png_decoder_rejects_large_inflate_after_small_ihdr() -> None:
         decoder(raw)
 
 
+def test_png_decoder_checks_chunk_order_and_accepts_palette_images() -> None:
+    def chunk(kind: bytes, payload: bytes) -> bytes:
+        return (
+            struct.pack(">I", len(payload))
+            + kind
+            + payload
+            + struct.pack(">I", zlib.crc32(kind + payload) & 0xFFFFFFFF)
+        )
+
+    decoder = runpy.run_path(str(SCRIPT))["_png_dimensions"]
+    header = struct.pack(">IIBBBBB", 1, 1, 8, 3, 0, 0, 0)
+    palette = b"\x00\xff\x00"
+    valid_palette = (
+        b"\x89PNG\r\n\x1a\n"
+        + chunk(b"IHDR", header)
+        + chunk(b"PLTE", palette)
+        + chunk(b"IDAT", zlib.compress(b"\x00\x00"))
+        + chunk(b"IEND", b"")
+    )
+    assert decoder(valid_palette) == (1, 1)
+
+    invalid_order = (
+        b"\x89PNG\r\n\x1a\n"
+        + chunk(b"IDAT", zlib.compress(b"\x00\x00"))
+        + chunk(b"IHDR", header)
+        + chunk(b"IEND", b"")
+    )
+    with pytest.raises(ValueError, match="IHDR must be first"):
+        decoder(invalid_order)
+
+
 def _side_correction(processed_sha: str, execution_id: str = "EXEC-SIDE", attempt: int = 2) -> dict:
     return {
         "workflow_id": "WF-1",

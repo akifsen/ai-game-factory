@@ -1,0 +1,141 @@
+{
+  "asset_id": "test_blender_tank",
+  "binding": {
+    "asset_id": "test_blender_tank",
+    "capture_sha256": {
+      "front": "ac97846aa8cc57f116ace7121a601161e86deca1a01e473fbd80624dd7e4d2ab",
+      "left": "368c73a9f2514c1ba2fb7ada763c18a109782e077b482d2b3b326c3fcf7689ee",
+      "rear": "82587c617c96791e0d2a04050029ec72a47b748392f6ed29511400e99ffad89e",
+      "right": "673af128ad9b6c48ce0319bf2cd353b29b60626b9c9d6a095c73f3b75eb24548",
+      "side": "673af128ad9b6c48ce0319bf2cd353b29b60626b9c9d6a095c73f3b75eb24548",
+      "three_quarter": "82d394cadc19e0347424f458f59163db03175e29afcae00625f517f8ffa86702",
+      "three_quarter_front": "82d394cadc19e0347424f458f59163db03175e29afcae00625f517f8ffa86702",
+      "three_quarter_rear": "8a5498b3d76b26ef035d2d76fcecc91b933c2cbda73cd97f454a8a019609f943",
+      "top": "f16ed3e01e96ac4ae66ee562d3a3b4f391d15fab109fa26f32d45b7480fa88b1"
+    },
+    "current_attempt_history": {
+      "godot": [
+        {
+          "attempt_number": 1,
+          "id": "EXEC-4804af34",
+          "status": "COMPLETED"
+        }
+      ],
+      "process": [
+        {
+          "attempt_number": 1,
+          "id": "EXEC-b26924f3",
+          "status": "COMPLETED"
+        }
+      ],
+      "validate": [
+        {
+          "attempt_number": 1,
+          "id": "EXEC-9debb60a",
+          "status": "COMPLETED"
+        }
+      ]
+    },
+    "generation_mode": "local_operator_assembly",
+    "normalization_applied": true,
+    "paid": false,
+    "process_report_sha256": "9a23ed94c107f0cbcf06d538115cea9dfa6a7a0f9a86264950d2026f1d4dd008",
+    "processed_glb_sha256": "313e32c540820a6405c3a60bf66e2d9523eb9c6cf64baeb8d4cdac2cf25727c9",
+    "processing_attempt_number": 1,
+    "processing_execution_id": "EXEC-b26924f3",
+    "processing_report_sha256": "9a23ed94c107f0cbcf06d538115cea9dfa6a7a0f9a86264950d2026f1d4dd008",
+    "processing_script_sha256": "abd0c43f572524ec3c4a81dd880c71b14ef7a46d24fcfb65da2db00543df0d42",
+    "product_ready": false,
+    "profile_document_sha256": "f1b3e14cb7780a7a7c8371cdc917cb5886cd3ba4ca65e4942525f4841682ef42",
+    "profile_id": "test_assembly_integration_profile",
+    "profile_version": 1,
+    "review_views": [
+      "front",
+      "rear",
+      "left",
+      "right",
+      "side",
+      "three_quarter",
+      "three_quarter_front",
+      "three_quarter_rear",
+      "top"
+    ],
+    "revision": 1,
+    "runtime_attempt_number": 1,
+    "runtime_execution_id": "EXEC-4804af34",
+    "runtime_harness_sha256": "5679f59f1211504c0bd413f240f91a07708de4c8d61648c9e43821f7103da6e8",
+    "runtime_index_sha256": "c97c6e07168981084fb4f71de7f14c182e3ed7fca9fb661815c74ae5a5a60c8d",
+    "runtime_observation_sha256": "f44940445849c0466af75f9baaa933ebe16509b6c43c5fca5ba4691e9c51ae44",
+    "runtime_profile_sha256": "f1b3e14cb7780a7a7c8371cdc917cb5886cd3ba4ca65e4942525f4841682ef42",
+    "runtime_request_digest": "c563984ae4a9e959475fd7e183ee11ae893286cf10a89010d56b9108c3444ce1",
+    "runtime_specification_sha256": "88d3c16dd9a0428af03692e28e78a42669b85e60debf52dce71380528d6be7e8",
+    "schema_version": "asset-evidence-0.7.0",
+    "selected_rule_groups": [
+      "core",
+      "parts",
+      "orientation_source_front",
+      "pivot",
+      "sockets",
+      "collider_box"
+    ],
+    "source_front": "+Z",
+    "source_glb_sha256": "2977b5a2c13b154bd1e22c30438ff1b34853f1cffd40b788bc6137943c2d3574",
+    "source_provenance_sha256": "99f03c8c0ec88ae3919b6ebee08a6f4815b463f4844cd77f924615d98407fc14",
+    "source_version": 1,
+    "spec_sha256": "88d3c16dd9a0428af03692e28e78a42669b85e60debf52dce71380528d6be7e8",
+    "validation_attempt_number": 1,
+    "validation_execution_id": "EXEC-9debb60a",
+    "validation_sha256": "53fda98ef433579722617ba21ef19e659a4da0af8a322c807cd4bf755775bd24",
+    "workflow_id": "root-fixture-assembly"
+  },
+  "generation_mode": "local_operator_assembly",
+  "human_reviews": {
+    "concept_review": {
+      "operation_hash": "45b7e94416f40d69927b2eafc7f56fd701d19e08edebd5b215502e934a28bee4",
+      "status": "APPROVED"
+    },
+    "final_visual_review": {
+      "operation_hash": "6b20a79681b61ab2be2e19ed32473e4b11f8efa7c6fe0d34de82f14ece8b1d32",
+      "status": "APPROVED"
+    },
+    "source_review": {
+      "operation_hash": "5f43c5e50d801188ca7bac9647b75008045f96e3fb60ebdf814794052b3d2a28",
+      "status": "APPROVED"
+    }
+  },
+  "paid": false,
+  "revision": 1,
+  "role_sha256": {
+    "bound_profile:": "f1b3e14cb7780a7a7c8371cdc917cb5886cd3ba4ca65e4942525f4841682ef42",
+    "concept:": "2862fb05eeceabfa91387b67826bab1ec3e4f64f5969e574fbaca0ca321565d5",
+    "concept_approval:": "a4d196fd5c982aed91951ad0e37c9dfec22e848aebc12f39589ec21ded6c0a5f",
+    "concept_provenance:": "fbae060c8fc9d536753839573268f82a85725f59dd1bbb2841264e166e46a4f6",
+    "final_approval:": "523fea5571073fca9ef601b255b03e3fa485b757a983785ad2421d3dee500d65",
+    "processed_glb:": "313e32c540820a6405c3a60bf66e2d9523eb9c6cf64baeb8d4cdac2cf25727c9",
+    "processing_report:": "9a23ed94c107f0cbcf06d538115cea9dfa6a7a0f9a86264950d2026f1d4dd008",
+    "processing_script:": "abd0c43f572524ec3c4a81dd880c71b14ef7a46d24fcfb65da2db00543df0d42",
+    "raw_glb:": "2977b5a2c13b154bd1e22c30438ff1b34853f1cffd40b788bc6137943c2d3574",
+    "runtime_capture:front": "ac97846aa8cc57f116ace7121a601161e86deca1a01e473fbd80624dd7e4d2ab",
+    "runtime_capture:left": "368c73a9f2514c1ba2fb7ada763c18a109782e077b482d2b3b326c3fcf7689ee",
+    "runtime_capture:rear": "82587c617c96791e0d2a04050029ec72a47b748392f6ed29511400e99ffad89e",
+    "runtime_capture:right": "673af128ad9b6c48ce0319bf2cd353b29b60626b9c9d6a095c73f3b75eb24548",
+    "runtime_capture:side": "673af128ad9b6c48ce0319bf2cd353b29b60626b9c9d6a095c73f3b75eb24548",
+    "runtime_capture:three_quarter": "82d394cadc19e0347424f458f59163db03175e29afcae00625f517f8ffa86702",
+    "runtime_capture:three_quarter_front": "82d394cadc19e0347424f458f59163db03175e29afcae00625f517f8ffa86702",
+    "runtime_capture:three_quarter_rear": "8a5498b3d76b26ef035d2d76fcecc91b933c2cbda73cd97f454a8a019609f943",
+    "runtime_capture:top": "f16ed3e01e96ac4ae66ee562d3a3b4f391d15fab109fa26f32d45b7480fa88b1",
+    "runtime_harness:": "5679f59f1211504c0bd413f240f91a07708de4c8d61648c9e43821f7103da6e8",
+    "runtime_index:": "c97c6e07168981084fb4f71de7f14c182e3ed7fca9fb661815c74ae5a5a60c8d",
+    "runtime_observation:": "f44940445849c0466af75f9baaa933ebe16509b6c43c5fca5ba4691e9c51ae44",
+    "runtime_request:": "378dd628f6cd26ee71176396fc5b2588f4a26a1db0fc2f01476ec6efd9190284",
+    "source_approval:": "5223ed121aba461de54fd7ffd8752721db7c2c8c465396dc3bafb5d30d7366a1",
+    "source_provenance:": "99f03c8c0ec88ae3919b6ebee08a6f4815b463f4844cd77f924615d98407fc14",
+    "source_publication_marker:": "fb45318cbafbb1d9f85e8b670878e59605df6bd77c4e11e6f4f31c04b1bac03f",
+    "specification:": "9f66bdeec324cd1ef9ff4f9775d98e066a599cf8c7259e3e5315313c3af47f58",
+    "validation:": "53fda98ef433579722617ba21ef19e659a4da0af8a322c807cd4bf755775bd24"
+  },
+  "schema_version": "production-receipt-0.7.0",
+  "source_version": 1,
+  "status": "PASS",
+  "workflow_id": "root-fixture-assembly"
+}

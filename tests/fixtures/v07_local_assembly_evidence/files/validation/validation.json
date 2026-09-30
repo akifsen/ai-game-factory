@@ -1,0 +1,502 @@
+{
+  "evaluated_at": "2026-09-30T03:56:06.963912+00:00",
+  "findings": [
+    {
+      "actual": "parsed",
+      "artifact": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\assembly-workflow-root-real-r6\\project\\.gamefactory\\assets\\test_blender_tank\\r001\\process\\EXEC-b26924f3-a1\\processed.glb",
+      "expected": "bounded supported GLB 2.0",
+      "message": "Actual accessor data decoded",
+      "rule_id": "glb.parse",
+      "severity": "PASS"
+    },
+    {
+      "actual": "84",
+      "artifact": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\assembly-workflow-root-real-r6\\project\\.gamefactory\\assets\\test_blender_tank\\r001\\process\\EXEC-b26924f3-a1\\processed.glb",
+      "expected": "nonempty triangles",
+      "message": "Decoded positions and indices",
+      "rule_id": "geometry.nonempty",
+      "severity": "PASS"
+    },
+    {
+      "actual": "['COL_test_blender_tank', 'SM_test_blender_tank_barrel_LOD0', 'SM_test_blender_tank_barrel_LOD1', 'SOCKET_muzzle', 'PART_barrel', 'SM_test_blender_tank_turret_LOD0', 'SM_test_blender_tank_turret_LOD1', 'PART_turret', 'SM_test_blender_tank_hull_LOD0', 'SM_test_blender_tank_hull_LOD1', 'PART_hull', 'ROOT']",
+      "artifact": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\assembly-workflow-root-real-r6\\project\\.gamefactory\\assets\\test_blender_tank\\r001\\process\\EXEC-b26924f3-a1\\processed.glb",
+      "expected": "unique named nodes",
+      "message": "Duplicate names make importer resolution ambiguous",
+      "rule_id": "nodes.unique",
+      "severity": "PASS"
+    },
+    {
+      "actual": "1",
+      "artifact": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\assembly-workflow-root-real-r6\\project\\.gamefactory\\assets\\test_blender_tank\\r001\\process\\EXEC-b26924f3-a1\\processed.glb",
+      "expected": "4",
+      "message": "Material budget and references",
+      "rule_id": "materials.budget",
+      "severity": "PASS"
+    },
+    {
+      "actual": "0",
+      "artifact": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\assembly-workflow-root-real-r6\\project\\.gamefactory\\assets\\test_blender_tank\\r001\\process\\EXEC-b26924f3-a1\\processed.glb",
+      "expected": "2048",
+      "message": "Embedded texture dimensions",
+      "rule_id": "textures.dimension",
+      "severity": "PASS"
+    },
+    {
+      "actual": "36",
+      "artifact": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\assembly-workflow-root-real-r6\\project\\.gamefactory\\assets\\test_blender_tank\\r001\\process\\EXEC-b26924f3-a1\\processed.glb",
+      "expected": "10000",
+      "message": "LOD0 triangle budget",
+      "rule_id": "geometry.lod0_budget",
+      "severity": "PASS"
+    },
+    {
+      "actual": "36",
+      "artifact": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\assembly-workflow-root-real-r6\\project\\.gamefactory\\assets\\test_blender_tank\\r001\\process\\EXEC-b26924f3-a1\\processed.glb",
+      "expected": "5000",
+      "message": "LOD1 triangle budget",
+      "rule_id": "geometry.lod1_budget",
+      "severity": "PASS"
+    },
+    {
+      "actual": "1",
+      "artifact": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\assembly-workflow-root-real-r6\\project\\.gamefactory\\assets\\test_blender_tank\\r001\\process\\EXEC-b26924f3-a1\\processed.glb",
+      "expected": "one identity ROOT node",
+      "message": "Assembly root is explicit and identity",
+      "rule_id": "root.structure",
+      "severity": "PASS"
+    },
+    {
+      "actual": "((11,), [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11])",
+      "artifact": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\assembly-workflow-root-real-r6\\project\\.gamefactory\\assets\\test_blender_tank\\r001\\process\\EXEC-b26924f3-a1\\processed.glb",
+      "expected": "active scene contains only ROOT and all nodes are reachable",
+      "message": "Assembly hierarchy must be fully reachable from its sole active ROOT",
+      "rule_id": "scene.assembly_root",
+      "severity": "PASS"
+    },
+    {
+      "actual": "['PART_barrel', 'PART_hull', 'PART_turret']",
+      "artifact": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\assembly-workflow-root-real-r6\\project\\.gamefactory\\assets\\test_blender_tank\\r001\\process\\EXEC-b26924f3-a1\\processed.glb",
+      "expected": "['PART_barrel', 'PART_hull', 'PART_turret']",
+      "message": "Every declared part has a PART node",
+      "rule_id": "part.missing",
+      "severity": "PASS"
+    },
+    {
+      "actual": "['PART_barrel', 'PART_hull', 'PART_turret']",
+      "artifact": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\assembly-workflow-root-real-r6\\project\\.gamefactory\\assets\\test_blender_tank\\r001\\process\\EXEC-b26924f3-a1\\processed.glb",
+      "expected": "['PART_barrel', 'PART_hull', 'PART_turret']",
+      "message": "No undeclared PART nodes",
+      "rule_id": "part.unexpected",
+      "severity": "PASS"
+    },
+    {
+      "actual": "11",
+      "artifact": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\assembly-workflow-root-real-r6\\project\\.gamefactory\\assets\\test_blender_tank\\r001\\process\\EXEC-b26924f3-a1\\processed.glb",
+      "expected": "11",
+      "message": "PART node parent matches declared topology",
+      "rule_id": "part.parent.hull",
+      "severity": "PASS"
+    },
+    {
+      "actual": "present",
+      "artifact": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\assembly-workflow-root-real-r6\\project\\.gamefactory\\assets\\test_blender_tank\\r001\\process\\EXEC-b26924f3-a1\\processed.glb",
+      "expected": "required named direct mesh",
+      "message": "LOD meshes are named per part",
+      "rule_id": "part.mesh.hull.lod0",
+      "severity": "PASS"
+    },
+    {
+      "actual": "10",
+      "artifact": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\assembly-workflow-root-real-r6\\project\\.gamefactory\\assets\\test_blender_tank\\r001\\process\\EXEC-b26924f3-a1\\processed.glb",
+      "expected": "PART_hull",
+      "message": "LOD mesh is a direct identity child of its PART node",
+      "rule_id": "part.mesh_parent.hull.lod0",
+      "severity": "PASS"
+    },
+    {
+      "actual": "present",
+      "artifact": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\assembly-workflow-root-real-r6\\project\\.gamefactory\\assets\\test_blender_tank\\r001\\process\\EXEC-b26924f3-a1\\processed.glb",
+      "expected": "required named direct mesh",
+      "message": "LOD meshes are named per part",
+      "rule_id": "part.mesh.hull.lod1",
+      "severity": "PASS"
+    },
+    {
+      "actual": "10",
+      "artifact": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\assembly-workflow-root-real-r6\\project\\.gamefactory\\assets\\test_blender_tank\\r001\\process\\EXEC-b26924f3-a1\\processed.glb",
+      "expected": "PART_hull",
+      "message": "LOD mesh is a direct identity child of its PART node",
+      "rule_id": "part.mesh_parent.hull.lod1",
+      "severity": "PASS"
+    },
+    {
+      "actual": "(1.0, 1.3660254474651945, 1.3660254474651945)",
+      "artifact": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\assembly-workflow-root-real-r6\\project\\.gamefactory\\assets\\test_blender_tank\\r001\\process\\EXEC-b26924f3-a1\\processed.glb",
+      "expected": "nondegenerate actual LOD0 vertex bounds",
+      "message": "Per-part bounds use decoded transformed vertices",
+      "rule_id": "part.bounds.hull",
+      "severity": "PASS"
+    },
+    {
+      "actual": "((-0.5, -0.8812178073412246, -0.7763139976149863), (0.5, 0.48480764012396993, 0.5897114498502082))",
+      "artifact": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\assembly-workflow-root-real-r6\\project\\.gamefactory\\assets\\test_blender_tank\\r001\\process\\EXEC-b26924f3-a1\\processed.glb",
+      "expected": "((-0.5, -0.8812178073412246, -0.7763139976149863), (0.5, 0.48480764012396993, 0.5897114498502082))",
+      "message": "Each part LOD preserves its own actual bounds",
+      "rule_id": "lod.bounds.hull",
+      "severity": "PASS"
+    },
+    {
+      "actual": "10",
+      "artifact": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\assembly-workflow-root-real-r6\\project\\.gamefactory\\assets\\test_blender_tank\\r001\\process\\EXEC-b26924f3-a1\\processed.glb",
+      "expected": "10",
+      "message": "PART node parent matches declared topology",
+      "rule_id": "part.parent.turret",
+      "severity": "PASS"
+    },
+    {
+      "actual": "present",
+      "artifact": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\assembly-workflow-root-real-r6\\project\\.gamefactory\\assets\\test_blender_tank\\r001\\process\\EXEC-b26924f3-a1\\processed.glb",
+      "expected": "required named direct mesh",
+      "message": "LOD meshes are named per part",
+      "rule_id": "part.mesh.turret.lod0",
+      "severity": "PASS"
+    },
+    {
+      "actual": "7",
+      "artifact": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\assembly-workflow-root-real-r6\\project\\.gamefactory\\assets\\test_blender_tank\\r001\\process\\EXEC-b26924f3-a1\\processed.glb",
+      "expected": "PART_turret",
+      "message": "LOD mesh is a direct identity child of its PART node",
+      "rule_id": "part.mesh_parent.turret.lod0",
+      "severity": "PASS"
+    },
+    {
+      "actual": "present",
+      "artifact": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\assembly-workflow-root-real-r6\\project\\.gamefactory\\assets\\test_blender_tank\\r001\\process\\EXEC-b26924f3-a1\\processed.glb",
+      "expected": "required named direct mesh",
+      "message": "LOD meshes are named per part",
+      "rule_id": "part.mesh.turret.lod1",
+      "severity": "PASS"
+    },
+    {
+      "actual": "7",
+      "artifact": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\assembly-workflow-root-real-r6\\project\\.gamefactory\\assets\\test_blender_tank\\r001\\process\\EXEC-b26924f3-a1\\processed.glb",
+      "expected": "PART_turret",
+      "message": "LOD mesh is a direct identity child of its PART node",
+      "rule_id": "part.mesh_parent.turret.lod1",
+      "severity": "PASS"
+    },
+    {
+      "actual": "(1.0, 1.3660254474651945, 1.3660254474651945)",
+      "artifact": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\assembly-workflow-root-real-r6\\project\\.gamefactory\\assets\\test_blender_tank\\r001\\process\\EXEC-b26924f3-a1\\processed.glb",
+      "expected": "nondegenerate actual LOD0 vertex bounds",
+      "message": "Per-part bounds use decoded transformed vertices",
+      "rule_id": "part.bounds.turret",
+      "severity": "PASS"
+    },
+    {
+      "actual": "((-0.5, -0.7580127561967187, -0.5897114536558661), (0.5, 0.6080126912684758, 0.7763139938093284))",
+      "artifact": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\assembly-workflow-root-real-r6\\project\\.gamefactory\\assets\\test_blender_tank\\r001\\process\\EXEC-b26924f3-a1\\processed.glb",
+      "expected": "((-0.5, -0.7580127561967187, -0.5897114536558661), (0.5, 0.6080126912684758, 0.7763139938093284))",
+      "message": "Each part LOD preserves its own actual bounds",
+      "rule_id": "lod.bounds.turret",
+      "severity": "PASS"
+    },
+    {
+      "actual": "7",
+      "artifact": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\assembly-workflow-root-real-r6\\project\\.gamefactory\\assets\\test_blender_tank\\r001\\process\\EXEC-b26924f3-a1\\processed.glb",
+      "expected": "7",
+      "message": "PART node parent matches declared topology",
+      "rule_id": "part.parent.barrel",
+      "severity": "PASS"
+    },
+    {
+      "actual": "present",
+      "artifact": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\assembly-workflow-root-real-r6\\project\\.gamefactory\\assets\\test_blender_tank\\r001\\process\\EXEC-b26924f3-a1\\processed.glb",
+      "expected": "required named direct mesh",
+      "message": "LOD meshes are named per part",
+      "rule_id": "part.mesh.barrel.lod0",
+      "severity": "PASS"
+    },
+    {
+      "actual": "4",
+      "artifact": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\assembly-workflow-root-real-r6\\project\\.gamefactory\\assets\\test_blender_tank\\r001\\process\\EXEC-b26924f3-a1\\processed.glb",
+      "expected": "PART_barrel",
+      "message": "LOD mesh is a direct identity child of its PART node",
+      "rule_id": "part.mesh_parent.barrel.lod0",
+      "severity": "PASS"
+    },
+    {
+      "actual": "present",
+      "artifact": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\assembly-workflow-root-real-r6\\project\\.gamefactory\\assets\\test_blender_tank\\r001\\process\\EXEC-b26924f3-a1\\processed.glb",
+      "expected": "required named direct mesh",
+      "message": "LOD meshes are named per part",
+      "rule_id": "part.mesh.barrel.lod1",
+      "severity": "PASS"
+    },
+    {
+      "actual": "4",
+      "artifact": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\assembly-workflow-root-real-r6\\project\\.gamefactory\\assets\\test_blender_tank\\r001\\process\\EXEC-b26924f3-a1\\processed.glb",
+      "expected": "PART_barrel",
+      "message": "LOD mesh is a direct identity child of its PART node",
+      "rule_id": "part.mesh_parent.barrel.lod1",
+      "severity": "PASS"
+    },
+    {
+      "actual": "(1.0, 1.3660254474651945, 1.3660254474651945)",
+      "artifact": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\assembly-workflow-root-real-r6\\project\\.gamefactory\\assets\\test_blender_tank\\r001\\process\\EXEC-b26924f3-a1\\processed.glb",
+      "expected": "nondegenerate actual LOD0 vertex bounds",
+      "message": "Per-part bounds use decoded transformed vertices",
+      "rule_id": "part.bounds.barrel",
+      "severity": "PASS"
+    },
+    {
+      "actual": "((-0.5, -0.48480767008318887, -0.6629164899950429), (0.5, 0.8812177773820056, 0.7031089574701516))",
+      "artifact": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\assembly-workflow-root-real-r6\\project\\.gamefactory\\assets\\test_blender_tank\\r001\\process\\EXEC-b26924f3-a1\\processed.glb",
+      "expected": "((-0.5, -0.48480767008318887, -0.6629164899950429), (0.5, 0.8812177773820056, 0.7031089574701516))",
+      "message": "Each part LOD preserves its own actual bounds",
+      "rule_id": "lod.bounds.barrel",
+      "severity": "PASS"
+    },
+    {
+      "actual": "['COL_test_blender_tank', 'SM_test_blender_tank_barrel_LOD0', 'SM_test_blender_tank_barrel_LOD1', 'SM_test_blender_tank_hull_LOD0', 'SM_test_blender_tank_hull_LOD1', 'SM_test_blender_tank_turret_LOD0', 'SM_test_blender_tank_turret_LOD1']",
+      "artifact": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\assembly-workflow-root-real-r6\\project\\.gamefactory\\assets\\test_blender_tank\\r001\\process\\EXEC-b26924f3-a1\\processed.glb",
+      "expected": "['COL_test_blender_tank', 'SM_test_blender_tank_barrel_LOD0', 'SM_test_blender_tank_barrel_LOD1', 'SM_test_blender_tank_hull_LOD0', 'SM_test_blender_tank_hull_LOD1', 'SM_test_blender_tank_turret_LOD0', 'SM_test_blender_tank_turret_LOD1']",
+      "message": "No extra, unnamed or foreign meshes are accepted",
+      "rule_id": "mesh.set",
+      "severity": "PASS"
+    },
+    {
+      "actual": "['COL_test_blender_tank', 'PART_barrel', 'PART_hull', 'PART_turret', 'ROOT', 'SM_test_blender_tank_barrel_LOD0', 'SM_test_blender_tank_barrel_LOD1', 'SM_test_blender_tank_hull_LOD0', 'SM_test_blender_tank_hull_LOD1', 'SM_test_blender_tank_turret_LOD0', 'SM_test_blender_tank_turret_LOD1', 'SOCKET_muzzle']",
+      "artifact": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\assembly-workflow-root-real-r6\\project\\.gamefactory\\assets\\test_blender_tank\\r001\\process\\EXEC-b26924f3-a1\\processed.glb",
+      "expected": "['COL_test_blender_tank', 'PART_barrel', 'PART_hull', 'PART_turret', 'ROOT', 'SM_test_blender_tank_barrel_LOD0', 'SM_test_blender_tank_barrel_LOD1', 'SM_test_blender_tank_hull_LOD0', 'SM_test_blender_tank_hull_LOD1', 'SM_test_blender_tank_turret_LOD0', 'SM_test_blender_tank_turret_LOD1', 'SOCKET_muzzle']",
+      "message": "Only declared parts, meshes, sockets and colliders are allowed",
+      "rule_id": "nodes.assembly_set",
+      "severity": "PASS"
+    },
+    {
+      "actual": "['SM_test_blender_tank_barrel_LOD0', 'SM_test_blender_tank_barrel_LOD1', 'SM_test_blender_tank_hull_LOD0', 'SM_test_blender_tank_hull_LOD1', 'SM_test_blender_tank_turret_LOD0', 'SM_test_blender_tank_turret_LOD1']",
+      "artifact": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\assembly-workflow-root-real-r6\\project\\.gamefactory\\assets\\test_blender_tank\\r001\\process\\EXEC-b26924f3-a1\\processed.glb",
+      "expected": "['SM_test_blender_tank_barrel_LOD0', 'SM_test_blender_tank_barrel_LOD1', 'SM_test_blender_tank_hull_LOD0', 'SM_test_blender_tank_hull_LOD1', 'SM_test_blender_tank_turret_LOD0', 'SM_test_blender_tank_turret_LOD1']",
+      "message": "Assembly has exactly declared per-part LOD meshes",
+      "rule_id": "part.mesh_set",
+      "severity": "PASS"
+    },
+    {
+      "actual": "(1.0, 1.7624355847232303, 1.5526279914243148)",
+      "artifact": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\assembly-workflow-root-real-r6\\project\\.gamefactory\\assets\\test_blender_tank\\r001\\process\\EXEC-b26924f3-a1\\processed.glb",
+      "expected": "(1.0, 1.762435565298214, 1.5526279441628827)",
+      "message": "Assembly bounds measured from decoded vertices; no scaling is applied",
+      "rule_id": "dimensions.bounds",
+      "severity": "PASS"
+    },
+    {
+      "actual": "((-0.5, -0.8812178073412246, -0.7763139976149863), (0.5, 0.8812177773820056, 0.7763139938093284))",
+      "artifact": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\assembly-workflow-root-real-r6\\project\\.gamefactory\\assets\\test_blender_tank\\r001\\process\\EXEC-b26924f3-a1\\processed.glb",
+      "expected": "center",
+      "message": "Assembly root rest bounds honor origin policy",
+      "rule_id": "origin.policy",
+      "severity": "PASS"
+    },
+    {
+      "actual": "VerifiedSourceNormalization(source_sha256='2977b5a2c13b154bd1e22c30438ff1b34853f1cffd40b788bc6137943c2d3574', processed_sha256='313e32c540820a6405c3a60bf66e2d9523eb9c6cf64baeb8d4cdac2cf25727c9', source_front='+Z', normalization_applied=True, root_rotation_xyzw=(0.0, 1.0, 0.0, 0.0), source_glb_bytes=b'glTF\\x02\\x00\\x00\\x00t\\x07\\x00\\x00p\\x06\\x00\\x00JSON{\"asset\":{\"version\":\"2.0\",\"generator\":\"AI Game Factory Asset Generator\"},\"scenes\":[{\"nodes\":[0]}],\"nodes\":[{\"name\":\"ROOT\",\"children\":[1]},{\"name\":\"PART_hull\",\"translation\":[0.0,-0.19820508075688775,0.09330127018922191],\"rotation\":[0.0,0.9659258262890683,-0.25881904510252074,-0.0],\"extras\":{\"gf_motion\":\"fixed\"},\"children\":[2,3]},{\"name\":\"SM_test_blender_tank_hull_LOD0\",\"mesh\":0},{\"name\":\"PART_turret\",\"translation\":[0,0.2,0.1],\"extras\":{\"gf_motion\":\"revolute\",\"gf_axis\":[0,1,0]},\"children\":[4,5]},{\"name\":\"SM_test_blender_tank_turret_LOD0\",\"mesh\":0},{\"name\":\"PART_barrel\",\"translation\":[0,0.2,-0.2],\"extras\":{\"gf_motion\":\"revolute\",\"gf_axis\":[1,0,0]},\"children\":[6,7]},{\"name\":\"SM_test_blender_tank_barrel_LOD0\",\"mesh\":0},{\"name\":\"SOCKET_muzzle\",\"translation\":[0.0,0.0,-0.49],\"rotation\":[-0.25881904510252074,0,0,0.9659258262890683]}],\"meshes\":[{\"name\":\"shared_geometry_LOD0\",\"primitives\":[{\"attributes\":{\"POSITION\":0,\"TEXCOORD_0\":1},\"indices\":2,\"material\":0}]}],\"materials\":[{\"name\":\"M_Material_1\",\"pbrMetallicRoughness\":{\"baseColorFactor\":[0.3,0.5,0.8,1.0],\"metallicFactor\":0.1,\"roughnessFactor\":0.8}}],\"accessors\":[{\"bufferView\":0,\"byteOffset\":0,\"componentType\":5126,\"count\":8,\"type\":\"VEC3\",\"min\":[-0.5,-0.5,-0.5],\"max\":[0.5,0.5,0.5]},{\"bufferView\":1,\"byteOffset\":0,\"componentType\":5126,\"count\":8,\"type\":\"VEC2\"},{\"bufferView\":2,\"byteOffset\":0,\"componentType\":5123,\"count\":36,\"type\":\"SCALAR\",\"min\":[0],\"max\":[7]}],\"bufferViews\":[{\"buffer\":0,\"byteOffset\":0,\"byteLength\":96,\"target\":34962},{\"buffer\":0,\"byteOffset\":96,\"byteLength\":64,\"target\":34962},{\"buffer\":0,\"byteOffset\":160,\"byteLength\":72,\"target\":34963}],\"buffers\":[{\"byteLength\":232}]}   \\xe8\\x00\\x00\\x00BIN\\x00\\x00\\x00\\x00\\xbf\\x00\\x00\\x00\\xbf\\x00\\x00\\x00\\xbf\\x00\\x00\\x00?\\x00\\x00\\x00\\xbf\\x00\\x00\\x00\\xbf\\x00\\x00\\x00?\\x00\\x00\\x00\\xbf\\x00\\x00\\x00?\\x00\\x00\\x00\\xbf\\x00\\x00\\x00\\xbf\\x00\\x00\\x00?\\x00\\x00\\x00\\xbf\\x00\\x00\\x00?\\x00\\x00\\x00\\xbf\\x00\\x00\\x00?\\x00\\x00\\x00?\\x00\\x00\\x00\\xbf\\x00\\x00\\x00?\\x00\\x00\\x00?\\x00\\x00\\x00?\\x00\\x00\\x00\\xbf\\x00\\x00\\x00?\\x00\\x00\\x00?\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x80?\\x00\\x00\\x00\\x00\\x00\\x00\\x80?\\x00\\x00\\x80?\\x00\\x00\\x00\\x00\\x00\\x00\\x80?\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x80?\\x00\\x00\\x00\\x00\\x00\\x00\\x80?\\x00\\x00\\x80?\\x00\\x00\\x00\\x00\\x00\\x00\\x80?\\x00\\x00\\x01\\x00\\x02\\x00\\x00\\x00\\x02\\x00\\x03\\x00\\x04\\x00\\x06\\x00\\x05\\x00\\x04\\x00\\x07\\x00\\x06\\x00\\x00\\x00\\x04\\x00\\x05\\x00\\x00\\x00\\x05\\x00\\x01\\x00\\x02\\x00\\x06\\x00\\x07\\x00\\x02\\x00\\x07\\x00\\x03\\x00\\x00\\x00\\x03\\x00\\x07\\x00\\x00\\x00\\x07\\x00\\x04\\x00\\x01\\x00\\x05\\x00\\x06\\x00\\x01\\x00\\x06\\x00\\x02\\x00')",
+      "artifact": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\assembly-workflow-root-real-r6\\project\\.gamefactory\\assets\\test_blender_tank\\r001\\process\\EXEC-b26924f3-a1\\processed.glb",
+      "expected": "verified retained source bytes and one allowed normalization",
+      "message": "Source orientation cannot be inferred from the processed GLB",
+      "rule_id": "orientation.source_front",
+      "severity": "PASS"
+    },
+    {
+      "actual": "((1.0, 1.0, 1.0), (1.0, 0.9999999999999999, 0.9999999999999999))",
+      "artifact": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\assembly-workflow-root-real-r6\\project\\.gamefactory\\assets\\test_blender_tank\\r001\\process\\EXEC-b26924f3-a1\\processed.glb",
+      "expected": "uniform positive scale",
+      "message": "Part node scale must be uniform, positive and nonzero",
+      "rule_id": "part.scale.hull",
+      "severity": "PASS"
+    },
+    {
+      "actual": "(0.0, -0.19820508360862732, -0.09330127388238907)",
+      "artifact": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\assembly-workflow-root-real-r6\\project\\.gamefactory\\assets\\test_blender_tank\\r001\\process\\EXEC-b26924f3-a1\\processed.glb",
+      "expected": "declared nonzero pivot retained",
+      "message": "A declared nonzero pivot cannot collapse to its parent origin",
+      "rule_id": "pivot.collapsed.hull",
+      "severity": "PASS"
+    },
+    {
+      "actual": "(0.0, -0.19820508360862732, -0.09330127388238907)",
+      "artifact": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\assembly-workflow-root-real-r6\\project\\.gamefactory\\assets\\test_blender_tank\\r001\\process\\EXEC-b26924f3-a1\\processed.glb",
+      "expected": "(-0.0, -0.19820508075688775, -0.09330127018922191)",
+      "message": "Local part translation matches declared pivot",
+      "rule_id": "pivot.position.hull",
+      "severity": "PASS"
+    },
+    {
+      "actual": "local basis",
+      "artifact": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\assembly-workflow-root-real-r6\\project\\.gamefactory\\assets\\test_blender_tank\\r001\\process\\EXEC-b26924f3-a1\\processed.glb",
+      "expected": "[0.25881904510252074, 0.0, 0.0, 0.9659258262890683]",
+      "message": "Part rotation matches declared pivot basis",
+      "rule_id": "pivot.orientation.hull",
+      "severity": "PASS"
+    },
+    {
+      "actual": "{'gf_motion': 'fixed'}",
+      "artifact": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\assembly-workflow-root-real-r6\\project\\.gamefactory\\assets\\test_blender_tank\\r001\\process\\EXEC-b26924f3-a1\\processed.glb",
+      "expected": "fixed:None",
+      "message": "Motion kind and axis match typed specification and GLB extras",
+      "rule_id": "pivot.axis.hull",
+      "severity": "PASS"
+    },
+    {
+      "actual": "((1.0, 1.0, 1.0), (1.0, 1.0, 1.0))",
+      "artifact": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\assembly-workflow-root-real-r6\\project\\.gamefactory\\assets\\test_blender_tank\\r001\\process\\EXEC-b26924f3-a1\\processed.glb",
+      "expected": "uniform positive scale",
+      "message": "Part node scale must be uniform, positive and nonzero",
+      "rule_id": "part.scale.turret",
+      "severity": "PASS"
+    },
+    {
+      "actual": "(0.0, 0.19999998807907104, 0.09999999403953552)",
+      "artifact": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\assembly-workflow-root-real-r6\\project\\.gamefactory\\assets\\test_blender_tank\\r001\\process\\EXEC-b26924f3-a1\\processed.glb",
+      "expected": "declared nonzero pivot retained",
+      "message": "A declared nonzero pivot cannot collapse to its parent origin",
+      "rule_id": "pivot.collapsed.turret",
+      "severity": "PASS"
+    },
+    {
+      "actual": "(0.0, 0.19999998807907104, 0.09999999403953552)",
+      "artifact": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\assembly-workflow-root-real-r6\\project\\.gamefactory\\assets\\test_blender_tank\\r001\\process\\EXEC-b26924f3-a1\\processed.glb",
+      "expected": "(0.0, 0.2, 0.1)",
+      "message": "Local part translation matches declared pivot",
+      "rule_id": "pivot.position.turret",
+      "severity": "PASS"
+    },
+    {
+      "actual": "local basis",
+      "artifact": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\assembly-workflow-root-real-r6\\project\\.gamefactory\\assets\\test_blender_tank\\r001\\process\\EXEC-b26924f3-a1\\processed.glb",
+      "expected": "identity",
+      "message": "Part rotation matches declared pivot basis",
+      "rule_id": "pivot.orientation.turret",
+      "severity": "PASS"
+    },
+    {
+      "actual": "{'gf_motion': 'revolute', 'gf_axis': [0.0, 1.0, 0.0]}",
+      "artifact": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\assembly-workflow-root-real-r6\\project\\.gamefactory\\assets\\test_blender_tank\\r001\\process\\EXEC-b26924f3-a1\\processed.glb",
+      "expected": "revolute:[0.0, 1.0, 0.0]",
+      "message": "Motion kind and axis match typed specification and GLB extras",
+      "rule_id": "pivot.axis.turret",
+      "severity": "PASS"
+    },
+    {
+      "actual": "((1.0, 1.0, 1.0), (1.0, 1.0, 1.0))",
+      "artifact": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\assembly-workflow-root-real-r6\\project\\.gamefactory\\assets\\test_blender_tank\\r001\\process\\EXEC-b26924f3-a1\\processed.glb",
+      "expected": "uniform positive scale",
+      "message": "Part node scale must be uniform, positive and nonzero",
+      "rule_id": "part.scale.barrel",
+      "severity": "PASS"
+    },
+    {
+      "actual": "(0.0, 0.20000000298023224, -0.19999998807907104)",
+      "artifact": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\assembly-workflow-root-real-r6\\project\\.gamefactory\\assets\\test_blender_tank\\r001\\process\\EXEC-b26924f3-a1\\processed.glb",
+      "expected": "declared nonzero pivot retained",
+      "message": "A declared nonzero pivot cannot collapse to its parent origin",
+      "rule_id": "pivot.collapsed.barrel",
+      "severity": "PASS"
+    },
+    {
+      "actual": "(0.0, 0.20000000298023224, -0.19999998807907104)",
+      "artifact": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\assembly-workflow-root-real-r6\\project\\.gamefactory\\assets\\test_blender_tank\\r001\\process\\EXEC-b26924f3-a1\\processed.glb",
+      "expected": "(0.0, 0.2, -0.2)",
+      "message": "Local part translation matches declared pivot",
+      "rule_id": "pivot.position.barrel",
+      "severity": "PASS"
+    },
+    {
+      "actual": "local basis",
+      "artifact": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\assembly-workflow-root-real-r6\\project\\.gamefactory\\assets\\test_blender_tank\\r001\\process\\EXEC-b26924f3-a1\\processed.glb",
+      "expected": "identity",
+      "message": "Part rotation matches declared pivot basis",
+      "rule_id": "pivot.orientation.barrel",
+      "severity": "PASS"
+    },
+    {
+      "actual": "{'gf_motion': 'revolute', 'gf_axis': [1.0, 0.0, 0.0]}",
+      "artifact": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\assembly-workflow-root-real-r6\\project\\.gamefactory\\assets\\test_blender_tank\\r001\\process\\EXEC-b26924f3-a1\\processed.glb",
+      "expected": "revolute:[1.0, 0.0, 0.0]",
+      "message": "Motion kind and axis match typed specification and GLB extras",
+      "rule_id": "pivot.axis.barrel",
+      "severity": "PASS"
+    },
+    {
+      "actual": "present",
+      "artifact": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\assembly-workflow-root-real-r6\\project\\.gamefactory\\assets\\test_blender_tank\\r001\\process\\EXEC-b26924f3-a1\\processed.glb",
+      "expected": "SOCKET_muzzle",
+      "message": "Declared socket node exists",
+      "rule_id": "socket.missing.muzzle",
+      "severity": "PASS"
+    },
+    {
+      "actual": "{'name': 'SOCKET_muzzle', 'rotation': [-0.2588191032409668, 0, 0, 0.9659258127212524], 'translation': [0, 0, -0.4899999797344208]}",
+      "artifact": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\assembly-workflow-root-real-r6\\project\\.gamefactory\\assets\\test_blender_tank\\r001\\process\\EXEC-b26924f3-a1\\processed.glb",
+      "expected": "meshless leaf with identity scale",
+      "message": "Socket must be a meshless leaf",
+      "rule_id": "socket.structure.muzzle",
+      "severity": "PASS"
+    },
+    {
+      "actual": "4",
+      "artifact": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\assembly-workflow-root-real-r6\\project\\.gamefactory\\assets\\test_blender_tank\\r001\\process\\EXEC-b26924f3-a1\\processed.glb",
+      "expected": "4",
+      "message": "Socket parent matches declaration",
+      "rule_id": "socket.parent.muzzle",
+      "severity": "PASS"
+    },
+    {
+      "actual": "(0.0, 0.0, -0.4899999797344208)",
+      "artifact": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\assembly-workflow-root-real-r6\\project\\.gamefactory\\assets\\test_blender_tank\\r001\\process\\EXEC-b26924f3-a1\\processed.glb",
+      "expected": "[0.0, 0.0, -0.49]",
+      "message": "Socket local translation matches declaration and placement contract",
+      "rule_id": "socket.position.muzzle",
+      "severity": "PASS"
+    },
+    {
+      "actual": "local basis",
+      "artifact": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\assembly-workflow-root-real-r6\\project\\.gamefactory\\assets\\test_blender_tank\\r001\\process\\EXEC-b26924f3-a1\\processed.glb",
+      "expected": "[-0.25881904510252074, 0, 0, 0.9659258262890683]",
+      "message": "Socket basis and asserted rest forward",
+      "rule_id": "socket.orientation.muzzle",
+      "severity": "PASS"
+    },
+    {
+      "actual": "['muzzle']",
+      "artifact": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\assembly-workflow-root-real-r6\\project\\.gamefactory\\assets\\test_blender_tank\\r001\\process\\EXEC-b26924f3-a1\\processed.glb",
+      "expected": "['muzzle']",
+      "message": "No undeclared socket nodes",
+      "rule_id": "socket.unexpected",
+      "severity": "PASS"
+    },
+    {
+      "actual": "(11, True)",
+      "artifact": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\assembly-workflow-root-real-r6\\project\\.gamefactory\\assets\\test_blender_tank\\r001\\process\\EXEC-b26924f3-a1\\processed.glb",
+      "expected": "11",
+      "message": "Root box is an identity child of ROOT",
+      "rule_id": "collider.parent",
+      "severity": "PASS"
+    },
+    {
+      "actual": "valid",
+      "artifact": "C:\\Users\\lenovo\\devel\\ai-game-factory\\.verification\\assembly-workflow-root-real-r6\\project\\.gamefactory\\assets\\test_blender_tank\\r001\\process\\EXEC-b26924f3-a1\\processed.glb",
+      "expected": "root rest box enclosing assembly bounds",
+      "message": "Assembly collider must match actual rest bounds",
+      "rule_id": "collider.box",
+      "severity": "PASS"
+    }
+  ],
+  "passed": true,
+  "preservation_passed": true,
+  "processed_glb_sha256": "313e32c540820a6405c3a60bf66e2d9523eb9c6cf64baeb8d4cdac2cf25727c9",
+  "profile_document_sha256": "f1b3e14cb7780a7a7c8371cdc917cb5886cd3ba4ca65e4942525f4841682ef42",
+  "profile_id": "test_assembly_integration_profile",
+  "profile_version": 1,
+  "source_glb_sha256": "2977b5a2c13b154bd1e22c30438ff1b34853f1cffd40b788bc6137943c2d3574",
+  "status": "PASS",
+  "summary": "Passed V0.7 geometry validation with 0 failing rule(s)"
+}

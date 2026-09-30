@@ -1,0 +1,665 @@
+{
+	"articulation_results": [
+		{
+			"ancestors_siblings_unchanged": true,
+			"axis_world_ok": true,
+			"descendant_moved": true,
+			"descendants_rigid_ok": true,
+			"motion_applied": true,
+			"motion_kind": "revolute",
+			"part_id": "turret",
+			"pivot_world_ok": true,
+			"restored_ok": true
+		},
+		{
+			"ancestors_siblings_unchanged": true,
+			"axis_world_ok": true,
+			"descendant_moved": true,
+			"descendants_rigid_ok": true,
+			"motion_applied": true,
+			"motion_kind": "revolute",
+			"part_id": "barrel",
+			"pivot_world_ok": true,
+			"restored_ok": true
+		}
+	],
+	"asset_id": "test_blender_tank",
+	"attempt_number": 1,
+	"captures": {
+		"front": {
+			"sha256": "ac97846aa8cc57f116ace7121a601161e86deca1a01e473fbd80624dd7e4d2ab"
+		},
+		"left": {
+			"sha256": "368c73a9f2514c1ba2fb7ada763c18a109782e077b482d2b3b326c3fcf7689ee"
+		},
+		"rear": {
+			"sha256": "82587c617c96791e0d2a04050029ec72a47b748392f6ed29511400e99ffad89e"
+		},
+		"right": {
+			"sha256": "673af128ad9b6c48ce0319bf2cd353b29b60626b9c9d6a095c73f3b75eb24548"
+		},
+		"side": {
+			"sha256": "673af128ad9b6c48ce0319bf2cd353b29b60626b9c9d6a095c73f3b75eb24548"
+		},
+		"three_quarter": {
+			"sha256": "82d394cadc19e0347424f458f59163db03175e29afcae00625f517f8ffa86702"
+		},
+		"three_quarter_front": {
+			"sha256": "82d394cadc19e0347424f458f59163db03175e29afcae00625f517f8ffa86702"
+		},
+		"three_quarter_rear": {
+			"sha256": "8a5498b3d76b26ef035d2d76fcecc91b933c2cbda73cd97f454a8a019609f943"
+		},
+		"top": {
+			"sha256": "f16ed3e01e96ac4ae66ee562d3a3b4f391d15fab109fa26f32d45b7480fa88b1"
+		}
+	},
+	"collider": {
+		"body_kind": "static_body",
+		"bounds": {
+			"position": [
+				-0.500000298023224,
+				-0.881217956542969,
+				-0.776314198970795
+			],
+			"size": [
+				1.00000059604645,
+				1.76243591308594,
+				1.55262851715088
+			]
+		},
+		"physics_ray_hit": true,
+		"shape": "box"
+	},
+	"errors": [],
+	"execution_id": "EXEC-4804af34",
+	"harness_sha256": "5679f59f1211504c0bd413f240f91a07708de4c8d61648c9e43821f7103da6e8",
+	"import_tree": {
+		"children": [
+			{
+				"children": [
+					{
+						"children": [],
+						"class": "MeshInstance3D",
+						"name": "COL_test_blender_tank",
+						"position": [
+							0.0,
+							0.0,
+							0.0
+						]
+					},
+					{
+						"children": [
+							{
+								"children": [
+									{
+										"children": [
+											{
+												"children": [],
+												"class": "MeshInstance3D",
+												"name": "SM_test_blender_tank_barrel_LOD0",
+												"position": [
+													0.0,
+													0.0,
+													0.0
+												]
+											},
+											{
+												"children": [],
+												"class": "MeshInstance3D",
+												"name": "SM_test_blender_tank_barrel_LOD1",
+												"position": [
+													0.0,
+													0.0,
+													0.0
+												]
+											},
+											{
+												"children": [],
+												"class": "Node3D",
+												"name": "SOCKET_muzzle",
+												"position": [
+													0.0,
+													0.0,
+													-0.489999979734421
+												]
+											}
+										],
+										"class": "Node3D",
+										"extras": {
+											"gf_axis": [
+												1.0,
+												0.0,
+												0.0
+											],
+											"gf_motion": "revolute"
+										},
+										"name": "PART_barrel",
+										"position": [
+											0.0,
+											0.200000002980232,
+											-0.199999988079071
+										]
+									},
+									{
+										"children": [],
+										"class": "MeshInstance3D",
+										"name": "SM_test_blender_tank_turret_LOD0",
+										"position": [
+											0.0,
+											0.0,
+											0.0
+										]
+									},
+									{
+										"children": [],
+										"class": "MeshInstance3D",
+										"name": "SM_test_blender_tank_turret_LOD1",
+										"position": [
+											0.0,
+											0.0,
+											0.0
+										]
+									}
+								],
+								"class": "Node3D",
+								"extras": {
+									"gf_axis": [
+										0.0,
+										1.0,
+										0.0
+									],
+									"gf_motion": "revolute"
+								},
+								"name": "PART_turret",
+								"position": [
+									0.0,
+									0.199999988079071,
+									0.0999999940395355
+								]
+							},
+							{
+								"children": [],
+								"class": "MeshInstance3D",
+								"name": "SM_test_blender_tank_hull_LOD0",
+								"position": [
+									0.0,
+									0.0,
+									0.0
+								]
+							},
+							{
+								"children": [],
+								"class": "MeshInstance3D",
+								"name": "SM_test_blender_tank_hull_LOD1",
+								"position": [
+									0.0,
+									0.0,
+									0.0
+								]
+							}
+						],
+						"class": "Node3D",
+						"extras": {
+							"gf_motion": "fixed"
+						},
+						"name": "PART_hull",
+						"position": [
+							0.0,
+							-0.198205083608627,
+							-0.0933012738823891
+						]
+					}
+				],
+				"class": "Node3D",
+				"name": "ROOT",
+				"position": [
+					0.0,
+					0.0,
+					0.0
+				]
+			}
+		],
+		"class": "Node3D",
+		"name": "asset",
+		"position": [
+			0.0,
+			0.0,
+			0.0
+		]
+	},
+	"parts_verified": [
+		{
+			"gf_axis": [],
+			"local_basis": [
+				[
+					1.0,
+					0.0,
+					0.0
+				],
+				[
+					0.0,
+					0.866025328636169,
+					-0.50000011920929
+				],
+				[
+					0.0,
+					0.50000011920929,
+					0.866025328636169
+				]
+			],
+			"local_position": [
+				0.0,
+				-0.198205083608627,
+				-0.0933012738823891
+			],
+			"local_scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"lod0_present": true,
+			"lod1_present": true,
+			"motion_kind": "fixed",
+			"node_name": "PART_hull",
+			"parent": "root",
+			"part_id": "hull"
+		},
+		{
+			"gf_axis": [
+				0.0,
+				1.0,
+				0.0
+			],
+			"local_basis": [
+				[
+					1.0,
+					0.0,
+					0.0
+				],
+				[
+					0.0,
+					1.0,
+					0.0
+				],
+				[
+					0.0,
+					0.0,
+					1.0
+				]
+			],
+			"local_position": [
+				0.0,
+				0.199999988079071,
+				0.0999999940395355
+			],
+			"local_scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"lod0_present": true,
+			"lod1_present": true,
+			"motion_kind": "revolute",
+			"node_name": "PART_turret",
+			"parent": "hull",
+			"part_id": "turret"
+		},
+		{
+			"gf_axis": [
+				1.0,
+				0.0,
+				0.0
+			],
+			"local_basis": [
+				[
+					1.0,
+					0.0,
+					0.0
+				],
+				[
+					0.0,
+					1.0,
+					0.0
+				],
+				[
+					0.0,
+					0.0,
+					1.0
+				]
+			],
+			"local_position": [
+				0.0,
+				0.200000002980232,
+				-0.199999988079071
+			],
+			"local_scale": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"lod0_present": true,
+			"lod1_present": true,
+			"motion_kind": "revolute",
+			"node_name": "PART_barrel",
+			"parent": "turret",
+			"part_id": "barrel"
+		}
+	],
+	"processed_glb_sha256": "313e32c540820a6405c3a60bf66e2d9523eb9c6cf64baeb8d4cdac2cf25727c9",
+	"profile_id": "test_assembly_integration_profile",
+	"profile_sha256": "f1b3e14cb7780a7a7c8371cdc917cb5886cd3ba4ca65e4942525f4841682ef42",
+	"profile_version": 1,
+	"request_digest": "c563984ae4a9e959475fd7e183ee11ae893286cf10a89010d56b9108c3444ce1",
+	"restoration_verified": true,
+	"revision": 1,
+	"schema_version": "assembly-runtime-observation-0.7.0",
+	"semantic_root": {
+		"name": "ROOT",
+		"transform": {
+			"basis": [
+				[
+					1.0,
+					0.0,
+					0.0
+				],
+				[
+					0.0,
+					1.0,
+					0.0
+				],
+				[
+					0.0,
+					0.0,
+					1.0
+				]
+			],
+			"origin": [
+				0.0,
+				0.0,
+				0.0
+			]
+		}
+	},
+	"sockets_verified": [
+		{
+			"local_basis": [
+				[
+					1.0,
+					0.0,
+					0.0
+				],
+				[
+					0.0,
+					0.866025328636169,
+					0.50000011920929
+				],
+				[
+					0.0,
+					-0.50000011920929,
+					0.866025328636169
+				]
+			],
+			"local_position": [
+				0.0,
+				0.0,
+				-0.489999979734421
+			],
+			"marker_created": true,
+			"parent_part": "barrel",
+			"socket_id": "muzzle",
+			"world_basis": [
+				[
+					1.0,
+					0.0,
+					0.0
+				],
+				[
+					0.0,
+					1.0,
+					0.0
+				],
+				[
+					0.0,
+					0.0,
+					1.0
+				]
+			],
+			"world_position": [
+				0.0,
+				0.443205088376999,
+				-0.404256165027618
+			]
+		}
+	],
+	"specification_sha256": "88d3c16dd9a0428af03692e28e78a42669b85e60debf52dce71380528d6be7e8",
+	"status": "PASS",
+	"view_framing": {
+		"front": {
+			"camera_direction": [
+				0.0000000874227765734759,
+				0.0,
+				1.0
+			],
+			"camera_distance": 4.71360953181458,
+			"camera_up": [
+				0.0,
+				1.0,
+				0.0
+			],
+			"center_offset_ratio": 0.0000000834465026855469,
+			"correction_applied": false,
+			"height_ratio": 0.65,
+			"horizontally_centered": true,
+			"initial_height_ratio": 0.65,
+			"inside_viewport": true,
+			"margin_fraction": 0.04,
+			"margin_ok": true,
+			"ok": true,
+			"reason": "",
+			"reference_between_camera_and_asset": false,
+			"view_axis": "-Z"
+		},
+		"left": {
+			"camera_direction": [
+				1.0,
+				0.0,
+				0.0000000437113882867379
+			],
+			"camera_distance": 4.43729551165772,
+			"camera_up": [
+				0.0,
+				1.0,
+				0.0
+			],
+			"center_offset_ratio": 0.0000000357627868652344,
+			"correction_applied": false,
+			"height_ratio": 0.65,
+			"horizontally_centered": true,
+			"initial_height_ratio": 0.65,
+			"inside_viewport": true,
+			"margin_fraction": 0.04,
+			"margin_ok": true,
+			"ok": true,
+			"reason": "",
+			"reference_between_camera_and_asset": false,
+			"view_axis": "-X"
+		},
+		"rear": {
+			"camera_direction": [
+				0.0,
+				0.0,
+				-1.0
+			],
+			"camera_distance": 4.71360953181458,
+			"camera_up": [
+				0.0,
+				1.0,
+				0.0
+			],
+			"center_offset_ratio": 0.0,
+			"correction_applied": false,
+			"height_ratio": 0.65,
+			"horizontally_centered": true,
+			"initial_height_ratio": 0.65,
+			"inside_viewport": true,
+			"margin_fraction": 0.04,
+			"margin_ok": true,
+			"ok": true,
+			"reason": "",
+			"reference_between_camera_and_asset": false,
+			"view_axis": "+Z"
+		},
+		"right": {
+			"camera_direction": [
+				-1.0,
+				0.0,
+				0.0000000437113882867379
+			],
+			"camera_distance": 4.43729551165772,
+			"camera_up": [
+				0.0,
+				1.0,
+				0.0
+			],
+			"center_offset_ratio": 0.0000000238418579101563,
+			"correction_applied": false,
+			"height_ratio": 0.65,
+			"horizontally_centered": true,
+			"initial_height_ratio": 0.65,
+			"inside_viewport": true,
+			"margin_fraction": 0.04,
+			"margin_ok": true,
+			"ok": true,
+			"reason": "",
+			"reference_between_camera_and_asset": false,
+			"view_axis": "+X"
+		},
+		"side": {
+			"camera_direction": [
+				-1.0,
+				0.0,
+				0.0000000437113882867379
+			],
+			"camera_distance": 4.43729551165772,
+			"camera_up": [
+				0.0,
+				1.0,
+				0.0
+			],
+			"center_offset_ratio": 0.0000000238418579101563,
+			"correction_applied": false,
+			"height_ratio": 0.65,
+			"horizontally_centered": true,
+			"initial_height_ratio": 0.65,
+			"inside_viewport": true,
+			"margin_fraction": 0.04,
+			"margin_ok": true,
+			"ok": true,
+			"reason": "",
+			"reference_between_camera_and_asset": false,
+			"view_axis": "+X"
+		},
+		"three_quarter": {
+			"camera_direction": [
+				-0.642492592334747,
+				-0.417620092630386,
+				0.642492592334747
+			],
+			"camera_distance": 5.30004828420701,
+			"camera_up": [
+				-0.295302003622055,
+				0.908621728420258,
+				0.295302003622055
+			],
+			"center_offset_ratio": 0.00538697242736816,
+			"correction_applied": false,
+			"height_ratio": 0.65,
+			"horizontally_centered": true,
+			"initial_height_ratio": 0.65,
+			"inside_viewport": true,
+			"margin_fraction": 0.04,
+			"margin_ok": true,
+			"ok": true,
+			"reason": "",
+			"reference_between_camera_and_asset": false,
+			"view_axis": "+X-Z"
+		},
+		"three_quarter_front": {
+			"camera_direction": [
+				-0.642492592334747,
+				-0.417620092630386,
+				0.642492592334747
+			],
+			"camera_distance": 5.30004828420701,
+			"camera_up": [
+				-0.295302003622055,
+				0.908621728420258,
+				0.295302003622055
+			],
+			"center_offset_ratio": 0.00538697242736816,
+			"correction_applied": false,
+			"height_ratio": 0.65,
+			"horizontally_centered": true,
+			"initial_height_ratio": 0.65,
+			"inside_viewport": true,
+			"margin_fraction": 0.04,
+			"margin_ok": true,
+			"ok": true,
+			"reason": "",
+			"reference_between_camera_and_asset": false,
+			"view_axis": "+X-Z"
+		},
+		"three_quarter_rear": {
+			"camera_direction": [
+				-0.642492592334747,
+				-0.417620092630386,
+				-0.642492592334747
+			],
+			"camera_distance": 5.30004828420701,
+			"camera_up": [
+				-0.295302003622055,
+				0.908621728420258,
+				-0.295302003622055
+			],
+			"center_offset_ratio": 0.00538697242736816,
+			"correction_applied": false,
+			"height_ratio": 0.65,
+			"horizontally_centered": true,
+			"initial_height_ratio": 0.65,
+			"inside_viewport": true,
+			"margin_fraction": 0.04,
+			"margin_ok": true,
+			"ok": true,
+			"reason": "",
+			"reference_between_camera_and_asset": false,
+			"view_axis": "+X+Z"
+		},
+		"top": {
+			"camera_direction": [
+				0.0,
+				-1.0,
+				0.0000000437113882867379
+			],
+			"camera_distance": 4.34980175171178,
+			"camera_up": [
+				0.0,
+				-0.0000000437113882867379,
+				-1.0
+			],
+			"center_offset_ratio": 0.0,
+			"correction_applied": false,
+			"height_ratio": 0.65000008477105,
+			"horizontally_centered": true,
+			"initial_height_ratio": 0.65000008477105,
+			"inside_viewport": true,
+			"margin_fraction": 0.04,
+			"margin_ok": true,
+			"ok": true,
+			"reason": "",
+			"reference_between_camera_and_asset": false,
+			"view_axis": "+Y"
+		}
+	},
+	"workflow_id": "root-fixture-assembly"
+}

@@ -1,0 +1,326 @@
+{
+  "asset_id": "test_blender_tank",
+  "capture_sha256": {
+    "front": "ac97846aa8cc57f116ace7121a601161e86deca1a01e473fbd80624dd7e4d2ab",
+    "left": "368c73a9f2514c1ba2fb7ada763c18a109782e077b482d2b3b326c3fcf7689ee",
+    "rear": "82587c617c96791e0d2a04050029ec72a47b748392f6ed29511400e99ffad89e",
+    "right": "673af128ad9b6c48ce0319bf2cd353b29b60626b9c9d6a095c73f3b75eb24548",
+    "side": "673af128ad9b6c48ce0319bf2cd353b29b60626b9c9d6a095c73f3b75eb24548",
+    "three_quarter": "82d394cadc19e0347424f458f59163db03175e29afcae00625f517f8ffa86702",
+    "three_quarter_front": "82d394cadc19e0347424f458f59163db03175e29afcae00625f517f8ffa86702",
+    "three_quarter_rear": "8a5498b3d76b26ef035d2d76fcecc91b933c2cbda73cd97f454a8a019609f943",
+    "top": "f16ed3e01e96ac4ae66ee562d3a3b4f391d15fab109fa26f32d45b7480fa88b1"
+  },
+  "current_attempt_history": {
+    "godot": [
+      {
+        "attempt_number": 1,
+        "id": "EXEC-4804af34",
+        "status": "COMPLETED"
+      }
+    ],
+    "process": [
+      {
+        "attempt_number": 1,
+        "id": "EXEC-b26924f3",
+        "status": "COMPLETED"
+      }
+    ],
+    "validate": [
+      {
+        "attempt_number": 1,
+        "id": "EXEC-9debb60a",
+        "status": "COMPLETED"
+      }
+    ]
+  },
+  "files": [
+    {
+      "path": "files/bound_profile/bound_profile.json",
+      "role": "bound_profile",
+      "sha256": "f1b3e14cb7780a7a7c8371cdc917cb5886cd3ba4ca65e4942525f4841682ef42",
+      "size": 1449
+    },
+    {
+      "artifact_id": "ART-315caa20",
+      "path": "files/concept/concept.png",
+      "role": "concept",
+      "sha256": "2862fb05eeceabfa91387b67826bab1ec3e4f64f5969e574fbaca0ca321565d5",
+      "size": 117,
+      "source_relative_path": "concept.png"
+    },
+    {
+      "artifact_id": "ART-e0b1c820",
+      "path": "files/concept_provenance/concept_provenance.json",
+      "role": "concept_provenance",
+      "sha256": "fbae060c8fc9d536753839573268f82a85725f59dd1bbb2841264e166e46a4f6",
+      "size": 56,
+      "source_relative_path": "concept-provenance.json"
+    },
+    {
+      "artifact_id": "ART-3021e01e",
+      "path": "files/processed_glb/processed_glb.glb",
+      "role": "processed_glb",
+      "sha256": "313e32c540820a6405c3a60bf66e2d9523eb9c6cf64baeb8d4cdac2cf25727c9",
+      "size": 4616,
+      "source_relative_path": ".gamefactory/assets/test_blender_tank/r001/process/EXEC-b26924f3-a1/processed.glb"
+    },
+    {
+      "artifact_id": "ART-671ed6c8",
+      "path": "files/processing_report/processing_report.json",
+      "role": "processing_report",
+      "sha256": "9a23ed94c107f0cbcf06d538115cea9dfa6a7a0f9a86264950d2026f1d4dd008",
+      "size": 1749,
+      "source_relative_path": ".gamefactory/assets/test_blender_tank/r001/process/EXEC-b26924f3-a1/blender-report.json"
+    },
+    {
+      "path": "files/processing_script/processing_script.py",
+      "role": "processing_script",
+      "sha256": "abd0c43f572524ec3c4a81dd880c71b14ef7a46d24fcfb65da2db00543df0d42",
+      "size": 30324
+    },
+    {
+      "artifact_id": "ART-f76e95ee",
+      "path": "files/raw_glb/raw_glb.glb",
+      "role": "raw_glb",
+      "sha256": "2977b5a2c13b154bd1e22c30438ff1b34853f1cffd40b788bc6137943c2d3574",
+      "size": 1908,
+      "source_relative_path": "sources/fixture/source.glb"
+    },
+    {
+      "artifact_id": "ART-78b2cb6f",
+      "path": "files/runtime_capture/front.png",
+      "role": "runtime_capture",
+      "sha256": "ac97846aa8cc57f116ace7121a601161e86deca1a01e473fbd80624dd7e4d2ab",
+      "size": 21611,
+      "source_relative_path": ".gamefactory/assets/test_blender_tank/r001/review/EXEC-4804af34-a1/front.png",
+      "view": "front"
+    },
+    {
+      "artifact_id": "ART-a19ed495",
+      "path": "files/runtime_capture/left.png",
+      "role": "runtime_capture",
+      "sha256": "368c73a9f2514c1ba2fb7ada763c18a109782e077b482d2b3b326c3fcf7689ee",
+      "size": 30237,
+      "source_relative_path": ".gamefactory/assets/test_blender_tank/r001/review/EXEC-4804af34-a1/left.png",
+      "view": "left"
+    },
+    {
+      "artifact_id": "ART-412d6780",
+      "path": "files/runtime_capture/rear.png",
+      "role": "runtime_capture",
+      "sha256": "82587c617c96791e0d2a04050029ec72a47b748392f6ed29511400e99ffad89e",
+      "size": 16555,
+      "source_relative_path": ".gamefactory/assets/test_blender_tank/r001/review/EXEC-4804af34-a1/rear.png",
+      "view": "rear"
+    },
+    {
+      "artifact_id": "ART-b0de5c81",
+      "path": "files/runtime_capture/right.png",
+      "role": "runtime_capture",
+      "sha256": "673af128ad9b6c48ce0319bf2cd353b29b60626b9c9d6a095c73f3b75eb24548",
+      "size": 25244,
+      "source_relative_path": ".gamefactory/assets/test_blender_tank/r001/review/EXEC-4804af34-a1/right.png",
+      "view": "right"
+    },
+    {
+      "artifact_id": "ART-a9207887",
+      "path": "files/runtime_capture/side.png",
+      "role": "runtime_capture",
+      "sha256": "673af128ad9b6c48ce0319bf2cd353b29b60626b9c9d6a095c73f3b75eb24548",
+      "size": 25244,
+      "source_relative_path": ".gamefactory/assets/test_blender_tank/r001/review/EXEC-4804af34-a1/side.png",
+      "view": "side"
+    },
+    {
+      "artifact_id": "ART-46da4d35",
+      "path": "files/runtime_capture/three_quarter.png",
+      "role": "runtime_capture",
+      "sha256": "82d394cadc19e0347424f458f59163db03175e29afcae00625f517f8ffa86702",
+      "size": 13500,
+      "source_relative_path": ".gamefactory/assets/test_blender_tank/r001/review/EXEC-4804af34-a1/three_quarter.png",
+      "view": "three_quarter"
+    },
+    {
+      "artifact_id": "ART-b45872be",
+      "path": "files/runtime_capture/three_quarter_front.png",
+      "role": "runtime_capture",
+      "sha256": "82d394cadc19e0347424f458f59163db03175e29afcae00625f517f8ffa86702",
+      "size": 13500,
+      "source_relative_path": ".gamefactory/assets/test_blender_tank/r001/review/EXEC-4804af34-a1/three_quarter_front.png",
+      "view": "three_quarter_front"
+    },
+    {
+      "artifact_id": "ART-f25ccf7f",
+      "path": "files/runtime_capture/three_quarter_rear.png",
+      "role": "runtime_capture",
+      "sha256": "8a5498b3d76b26ef035d2d76fcecc91b933c2cbda73cd97f454a8a019609f943",
+      "size": 20857,
+      "source_relative_path": ".gamefactory/assets/test_blender_tank/r001/review/EXEC-4804af34-a1/three_quarter_rear.png",
+      "view": "three_quarter_rear"
+    },
+    {
+      "artifact_id": "ART-f18588fb",
+      "path": "files/runtime_capture/top.png",
+      "role": "runtime_capture",
+      "sha256": "f16ed3e01e96ac4ae66ee562d3a3b4f391d15fab109fa26f32d45b7480fa88b1",
+      "size": 13155,
+      "source_relative_path": ".gamefactory/assets/test_blender_tank/r001/review/EXEC-4804af34-a1/top.png",
+      "view": "top"
+    },
+    {
+      "artifact_id": "ART-c4eefa08",
+      "path": "files/runtime_harness/runtime_harness.gd",
+      "role": "runtime_harness",
+      "sha256": "5679f59f1211504c0bd413f240f91a07708de4c8d61648c9e43821f7103da6e8",
+      "size": 42463,
+      "source_relative_path": ".gamefactory/assets/test_blender_tank/r001/runtime/EXEC-4804af34-a1/retained/asset_runtime_harness_v07.gd"
+    },
+    {
+      "artifact_id": "ART-359f48b8",
+      "path": "files/runtime_index/runtime_index.json",
+      "role": "runtime_index",
+      "sha256": "c97c6e07168981084fb4f71de7f14c182e3ed7fca9fb661815c74ae5a5a60c8d",
+      "size": 18748,
+      "source_relative_path": ".gamefactory/assets/test_blender_tank/r001/runtime/EXEC-4804af34-a1/runtime-index.json"
+    },
+    {
+      "artifact_id": "ART-a1e1cd9b",
+      "path": "files/runtime_observation/runtime_observation.json",
+      "role": "runtime_observation",
+      "sha256": "f44940445849c0466af75f9baaa933ebe16509b6c43c5fca5ba4691e9c51ae44",
+      "size": 13085,
+      "source_relative_path": ".gamefactory/assets/test_blender_tank/r001/runtime/EXEC-4804af34-a1/retained/runtime-observation.json"
+    },
+    {
+      "artifact_id": "ART-a4401eea",
+      "path": "files/runtime_request/runtime_request.json",
+      "role": "runtime_request",
+      "sha256": "378dd628f6cd26ee71176396fc5b2588f4a26a1db0fc2f01476ec6efd9190284",
+      "size": 2542,
+      "source_relative_path": ".gamefactory/assets/test_blender_tank/r001/runtime/EXEC-4804af34-a1/retained/runtime-request.json"
+    },
+    {
+      "artifact_id": "ART-bb80502a",
+      "path": "files/source_provenance/source_provenance.json",
+      "role": "source_provenance",
+      "sha256": "99f03c8c0ec88ae3919b6ebee08a6f4815b463f4844cd77f924615d98407fc14",
+      "size": 1367,
+      "source_relative_path": "sources/fixture/source_provenance.json"
+    },
+    {
+      "artifact_id": "ART-66651461",
+      "path": "files/source_publication_marker/source_publication_marker.json",
+      "role": "source_publication_marker",
+      "sha256": "fb45318cbafbb1d9f85e8b670878e59605df6bd77c4e11e6f4f31c04b1bac03f",
+      "size": 448,
+      "source_relative_path": "sources/fixture/publication_marker.json"
+    },
+    {
+      "artifact_id": "ART-25cc9814",
+      "path": "files/specification/specification.json",
+      "role": "specification",
+      "sha256": "9f66bdeec324cd1ef9ff4f9775d98e066a599cf8c7259e3e5315313c3af47f58",
+      "size": 2572,
+      "source_relative_path": ".gamefactory/assets/test_blender_tank/r001/specification.json"
+    },
+    {
+      "artifact_id": "ART-5e014217",
+      "path": "files/validation/validation.json",
+      "role": "validation",
+      "sha256": "53fda98ef433579722617ba21ef19e659a4da0af8a322c807cd4bf755775bd24",
+      "size": 32751,
+      "source_relative_path": ".gamefactory/assets/test_blender_tank/r001/validation/EXEC-9debb60a-a1.json"
+    },
+    {
+      "path": "files/concept_approval/concept_approval.json",
+      "role": "concept_approval",
+      "sha256": "a4d196fd5c982aed91951ad0e37c9dfec22e848aebc12f39589ec21ded6c0a5f",
+      "size": 6699
+    },
+    {
+      "path": "files/source_approval/source_approval.json",
+      "role": "source_approval",
+      "sha256": "5223ed121aba461de54fd7ffd8752721db7c2c8c465396dc3bafb5d30d7366a1",
+      "size": 7197
+    },
+    {
+      "path": "files/final_approval/final_approval.json",
+      "role": "final_approval",
+      "sha256": "523fea5571073fca9ef601b255b03e3fa485b757a983785ad2421d3dee500d65",
+      "size": 10550
+    },
+    {
+      "path": "files/production_receipt.json",
+      "role": "production_receipt",
+      "sha256": "525579fb2a0fc8d3105d9d7585f8216e39f4028adb01a0b999aa7c914dfbf8be",
+      "size": 7067
+    },
+    {
+      "path": "index.html",
+      "role": "review_html",
+      "sha256": "dccb40ad18b6353348d47472afc3219645fb00ff503d0466b722e6862e4b6a75",
+      "size": 4583
+    }
+  ],
+  "final_review": {
+    "decision": "APPROVED",
+    "fingerprint": "6b20a79681b61ab2be2e19ed32473e4b11f8efa7c6fe0d34de82f14ece8b1d32"
+  },
+  "generation_mode": "local_operator_assembly",
+  "human_reviews": {
+    "concept_review": "45b7e94416f40d69927b2eafc7f56fd701d19e08edebd5b215502e934a28bee4",
+    "final_visual_review": "6b20a79681b61ab2be2e19ed32473e4b11f8efa7c6fe0d34de82f14ece8b1d32",
+    "source_review": "5f43c5e50d801188ca7bac9647b75008045f96e3fb60ebdf814794052b3d2a28"
+  },
+  "normalization_applied": true,
+  "paid": false,
+  "process_report_sha256": "9a23ed94c107f0cbcf06d538115cea9dfa6a7a0f9a86264950d2026f1d4dd008",
+  "processed_glb_sha256": "313e32c540820a6405c3a60bf66e2d9523eb9c6cf64baeb8d4cdac2cf25727c9",
+  "processing_attempt_number": 1,
+  "processing_execution_id": "EXEC-b26924f3",
+  "processing_report_sha256": "9a23ed94c107f0cbcf06d538115cea9dfa6a7a0f9a86264950d2026f1d4dd008",
+  "processing_script_sha256": "abd0c43f572524ec3c4a81dd880c71b14ef7a46d24fcfb65da2db00543df0d42",
+  "product_ready": true,
+  "profile_document_sha256": "f1b3e14cb7780a7a7c8371cdc917cb5886cd3ba4ca65e4942525f4841682ef42",
+  "profile_id": "test_assembly_integration_profile",
+  "profile_version": 1,
+  "review_views": [
+    "front",
+    "rear",
+    "left",
+    "right",
+    "side",
+    "three_quarter",
+    "three_quarter_front",
+    "three_quarter_rear",
+    "top"
+  ],
+  "revision": 1,
+  "runtime_attempt_number": 1,
+  "runtime_execution_id": "EXEC-4804af34",
+  "runtime_harness_sha256": "5679f59f1211504c0bd413f240f91a07708de4c8d61648c9e43821f7103da6e8",
+  "runtime_index_sha256": "c97c6e07168981084fb4f71de7f14c182e3ed7fca9fb661815c74ae5a5a60c8d",
+  "runtime_observation_sha256": "f44940445849c0466af75f9baaa933ebe16509b6c43c5fca5ba4691e9c51ae44",
+  "runtime_profile_sha256": "f1b3e14cb7780a7a7c8371cdc917cb5886cd3ba4ca65e4942525f4841682ef42",
+  "runtime_request_digest": "c563984ae4a9e959475fd7e183ee11ae893286cf10a89010d56b9108c3444ce1",
+  "runtime_specification_sha256": "88d3c16dd9a0428af03692e28e78a42669b85e60debf52dce71380528d6be7e8",
+  "schema_version": "asset-evidence-0.7.0",
+  "selected_rule_groups": [
+    "core",
+    "parts",
+    "orientation_source_front",
+    "pivot",
+    "sockets",
+    "collider_box"
+  ],
+  "source_front": "+Z",
+  "source_glb_sha256": "2977b5a2c13b154bd1e22c30438ff1b34853f1cffd40b788bc6137943c2d3574",
+  "source_provenance_sha256": "99f03c8c0ec88ae3919b6ebee08a6f4815b463f4844cd77f924615d98407fc14",
+  "source_version": 1,
+  "spec_sha256": "88d3c16dd9a0428af03692e28e78a42669b85e60debf52dce71380528d6be7e8",
+  "validation_attempt_number": 1,
+  "validation_execution_id": "EXEC-9debb60a",
+  "validation_sha256": "53fda98ef433579722617ba21ef19e659a4da0af8a322c807cd4bf755775bd24",
+  "workflow_id": "root-fixture-assembly"
+}
