@@ -705,6 +705,38 @@ class ExecutionRepository:
                 details={**event.details, "execution_id": execution.id},
             )
         with self.db.transaction() as conn:
+            # A worker can outlive an operator or recovery process that starts a
+            # newer attempt. A task-status CAS alone lets that stale worker
+            # finalize the replacement attempt's task state, so bind the update
+            # to the persisted task owner and unique latest execution as well.
+            persisted_task = conn.execute(
+                "SELECT workflow_id, status FROM tasks WHERE id = ?", (task.id,)
+            ).fetchone()
+            persisted_execution = conn.execute(
+                "SELECT task_id, attempt_number, status FROM executions WHERE id = ?",
+                (execution.id,),
+            ).fetchone()
+            latest_execution = conn.execute(
+                "SELECT id, attempt_number FROM executions WHERE task_id = ? "
+                "ORDER BY attempt_number DESC LIMIT 1",
+                (task.id,),
+            ).fetchone()
+            if (
+                persisted_task is None
+                or persisted_task["workflow_id"] != task.workflow_id
+                or persisted_task["status"] != TaskStatus.RUNNING.value
+                or execution.task_id != task.id
+                or persisted_execution is None
+                or persisted_execution["task_id"] != task.id
+                or persisted_execution["attempt_number"] != execution.attempt_number
+                or persisted_execution["status"] != ExecutionStatus.RUNNING.value
+                or latest_execution is None
+                or latest_execution["id"] != execution.id
+                or latest_execution["attempt_number"] != execution.attempt_number
+            ):
+                raise ValueError(
+                    f"Execution {execution.id} no longer owns the latest running task attempt"
+                )
             changed_attempt = conn.execute(
                 "UPDATE executions SET status=?, completed_at=?, external_op_id=?, error_message=?, exit_code=?, stdout=?, stderr=?, cost=?, estimated_cost=?, cost_unit=?, provider=?, retryable=? WHERE id=? AND status=?",
                 (
