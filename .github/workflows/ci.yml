@@ -169,7 +169,7 @@ jobs:
 
   godot-rendered:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     env:
       GODOT_VERSION: 4.7.2-stable
       GODOT_EXPECTED_VERSION: 4.7.2.stable.official.ed1daf0bf
@@ -193,10 +193,13 @@ jobs:
           "$venv_python" -m pip install build
           mkdir -p "$RUNNER_TEMP/wheelhouse"
           "$venv_python" -m build --wheel --outdir "$RUNNER_TEMP/wheelhouse"
-          wheel="$(find "$RUNNER_TEMP/wheelhouse" -maxdepth 1 -name 'gamefactory-*.whl' -print -quit)"
-          test -n "$wheel"
+          wheels=("$RUNNER_TEMP/wheelhouse"/gamefactory-*.whl)
+          test "${#wheels[@]}" -eq 1
+          wheel="$(readlink -f "${wheels[0]}")"
+          test -f "$wheel"
+          echo "GAMEFACTORY_BUILT_WHEEL=$wheel" >> "$GITHUB_ENV"
           sha256sum "$wheel" > "$RUNNER_TEMP/gamefactory-wheel.sha256"
-          "$venv_python" -m pip install "$wheel"
+          "$venv_python" -m pip install "${wheel}[dev]"
       - name: Download and verify pinned official Godot
         shell: bash
         run: |
@@ -301,6 +304,44 @@ jobs:
             --godot "$GAMEFACTORY_TEST_GODOT" \
             --workspace "$RUNNER_TEMP/profile-fixture-workspace" \
             --output "$evidence/profile-fixtures.json"
+      - name: Verify installed-wheel V0.7 acceptance offline with real Blender and Godot
+        shell: bash
+        working-directory: ${{ runner.temp }}
+        env:
+          GAMEFACTORY_TEST_GODOT: ${{ env.GAMEFACTORY_TEST_GODOT }}
+          GAMEFACTORY_GODOT_PATH: ${{ env.GAMEFACTORY_TEST_GODOT }}
+          GAMEFACTORY_TEST_BLENDER: /usr/bin/blender
+          GAMEFACTORY_BLENDER_PATH: /usr/bin/blender
+          GAMEFACTORY_BLENDER_PYTHONPATH: ${{ env.GAMEFACTORY_BLENDER_PYTHONPATH }}
+          LIBGL_ALWAYS_SOFTWARE: "1"
+          GODOT_EXPECTED_VERSION: ${{ env.GODOT_EXPECTED_VERSION }}
+        run: |
+          set -euo pipefail
+          evidence="$GITHUB_WORKSPACE/.verification/ci-v07-installed"
+          mkdir -p "$evidence"
+          python="$RUNNER_TEMP/gamefactory-venv/bin/python"
+          wheel="$GAMEFACTORY_BUILT_WHEEL"
+          test -f "$wheel"
+          wheel_sha="$RUNNER_TEMP/gamefactory-wheel.sha256"
+          test -f "$wheel_sha"
+          xvfb-run -a --server-args="-screen 0 1600x1200x24" \
+            "$python" -I "$GITHUB_WORKSPACE/scripts/verify_v07_installed_acceptance.py" \
+              --python "$python" \
+              --repo-root "$GITHUB_WORKSPACE" \
+              --blender "/usr/bin/blender" \
+              --godot "$GAMEFACTORY_TEST_GODOT" \
+              --expected-godot-version "$GODOT_EXPECTED_VERSION" \
+              --blender-pythonpath "$GAMEFACTORY_BLENDER_PYTHONPATH" \
+              --wheel "$wheel" \
+              --wheel-hash "$wheel_sha" \
+              --evidence-dir "$evidence"
+      - name: Archive installed-wheel V0.7 evidence
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: v07-installed-offline-evidence
+          path: .verification/ci-v07-installed/**/*
+          if-no-files-found: warn
       - name: Archive offline asset evidence
         if: always()
         uses: actions/upload-artifact@v6
