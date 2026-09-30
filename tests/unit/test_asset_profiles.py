@@ -19,12 +19,14 @@ CRATE = Path("src/gamefactory/resources/specs/prop_energy_crate_01.yml")
 CRATE_FINGERPRINT = "42f1a38e28c7b95e36505e47318fb4ed116ca723a67d46c3e895e750ea99e432"
 
 
-def test_builtin_registry_lists_three_available_profiles_and_unsupported_ids() -> None:
+def test_builtin_registry_lists_available_profiles_and_unsupported_ids() -> None:
     rows = {row["profile_id"]: row["status"] for row in builtin_registry().availability()}
     assert rows["static_prop"] == "AVAILABLE"
     assert rows["pickup"] == "AVAILABLE"
     assert rows["modular_piece"] == "AVAILABLE"
-    assert rows["character"] == "UNSUPPORTED"
+    for implemented in ("character", "vehicle", "weapon", "aircraft"):
+        assert rows[implemented] == "AVAILABLE"
+    assert rows["rigged_character"] == "UNSUPPORTED"
     assert "future" not in " ".join(rows.values()).lower()
     assert builtin_registry().get("static_prop").qualified == "static_prop@1"
     assert builtin_registry().get("pickup", 1).qualified == "pickup@1"
@@ -33,6 +35,11 @@ def test_builtin_registry_lists_three_available_profiles_and_unsupported_ids() -
 
 def test_unsupported_and_unknown_versions_are_rejected() -> None:
     with pytest.raises(ProfileContractError, match="UNSUPPORTED"):
+        builtin_registry().get("rigged_character")
+    with pytest.raises(ProfileContractError, match="UNSUPPORTED"):
+        builtin_registry().get_v07("rigged_character", 1)
+    # V0.7 profiles never bind a historical specification.
+    with pytest.raises(ProfileContractError, match="not registered"):
         builtin_registry().get("character")
     with pytest.raises(ProfileContractError, match="not registered"):
         builtin_registry().get("static_prop", 9)

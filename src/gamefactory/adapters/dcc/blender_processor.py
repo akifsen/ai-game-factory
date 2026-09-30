@@ -23,7 +23,7 @@ from gamefactory.adapters.dcc.blender_environment import (
     parse_blender_python_paths,
     run_blender_dependency_preflight,
 )
-from gamefactory.core.domain.asset_contracts import AssetSpecification
+from gamefactory.core.domain.asset_contracts import AssetSpecification, AssetSpecificationV07
 from gamefactory.core.domain.errors import DccFailedError
 from gamefactory.core.domain.models import utc_now_iso
 from gamefactory.core.execution.process_runner import CommandRequest, CommandResult, ProcessRunner
@@ -270,7 +270,7 @@ class BlenderAssetProcessor:
         self,
         raw_glb_path: Path,
         processed_glb_path: Path,
-        spec: AssetSpecification,
+        spec: AssetSpecification | AssetSpecificationV07,
         report_path: Path | None = None,
         timeout_seconds: float = 60.0,
         lod1_ratio: float | None = None,
@@ -283,11 +283,21 @@ class BlenderAssetProcessor:
         if raw_glb.suffix.casefold() != ".glb":
             raise ValueError("raw input must use the .glb extension")
 
-        profile = spec.bound_profile()
-        contract = profile.processing_contract(spec)
+        profile: Any
+        if isinstance(spec, AssetSpecificationV07):
+            profile = spec.bound_profile()
+            if profile.geometry_mode != "single_mesh":
+                raise ValueError(
+                    "Blender processing is single-mesh only; assemblies are normalized "
+                    "without a Blender round trip (ADR 0016)"
+                )
+            contract = profile.processing_contract(spec)
+        else:
+            profile = spec.bound_profile()
+            contract = profile.processing_contract(spec)
         if spec.orientation.up != "+Y" or spec.orientation.front != "-Z":
             raise ValueError("Blender processing supports only +Y up and -Z front")
-        if contract["collider_policy"] != "box":
+        if contract["collider_policy"] not in {"box", "capsule"}:
             raise ValueError(
                 f"Unsupported collider_policy for {profile.qualified}: {contract['collider_policy']}"
             )

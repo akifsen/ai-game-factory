@@ -1,0 +1,412 @@
+{
+  "checks": {
+    "aircraft": {
+      "authoring_tool": [
+        "gamefactory-fixture",
+        "0.7.0"
+      ],
+      "cold_verification": {
+        "final_review_decision": "APPROVED",
+        "review_fingerprint": "11919e10d987cd9cf79b764e6c3d55056d03a7df1c31f85cf068495702ddb7b8",
+        "revision": 1,
+        "source_front": "+Z",
+        "source_kind": "local_operator_assembly",
+        "status": "PASS",
+        "verified_files": 18,
+        "workflow_id": "WF-ASSET-81106fd3"
+      },
+      "final_approval_id": "APP-14335b7f",
+      "profile": "aircraft@1",
+      "provider_intents": 0,
+      "review_views": [
+        "front",
+        "rear",
+        "left",
+        "right",
+        "three_quarter",
+        "three_quarter_rear",
+        "top"
+      ],
+      "rule_groups": [
+        "core",
+        "parts",
+        "orientation",
+        "pivot",
+        "collider_box"
+      ],
+      "source_front": "+Z",
+      "workflow_id": "WF-ASSET-81106fd3"
+    },
+    "assembly_provider_binding_rejected": {
+      "provider_intents": 0,
+      "workflows_created": 0
+    },
+    "character_capsule": {
+      "cold_verification": {
+        "final_review_decision": "APPROVED",
+        "review_fingerprint": "a31cd01be2a1edc72b8569bc9c92cc4e7ccf2d7061f7dc738b8dd6aadb37d0c4",
+        "revision": 1,
+        "status": "PASS",
+        "verified_files": 22,
+        "workflow_id": "WF-ASSET-ca3e71af"
+      },
+      "provider": "fake",
+      "review_views": [
+        "front",
+        "rear",
+        "left",
+        "right",
+        "three_quarter"
+      ],
+      "rule_groups": [
+        "core",
+        "single_mesh",
+        "collider_capsule"
+      ],
+      "workflow_id": "WF-ASSET-ca3e71af"
+    },
+    "collapsed_pivot_rejected": {
+      "failing_rules": [
+        "pivot.collapsed",
+        "pivot.position",
+        "socket.position"
+      ],
+      "status": "FAILED",
+      "workflow_id": "WF-ASSET-f7c7653d"
+    },
+    "profiles": {
+      "aircraft@1": "AVAILABLE",
+      "animation": "UNSUPPORTED",
+      "building": "UNSUPPORTED",
+      "character@1": "AVAILABLE",
+      "foliage": "UNSUPPORTED",
+      "modular_piece@1": "AVAILABLE",
+      "pickup@1": "AVAILABLE",
+      "rigged_character": "UNSUPPORTED",
+      "static_prop@1": "AVAILABLE",
+      "terrain": "UNSUPPORTED",
+      "vehicle@1": "AVAILABLE",
+      "vfx": "UNSUPPORTED",
+      "weapon@1": "AVAILABLE"
+    },
+    "vehicle_blender_authored": {
+      "authoring_tool": [
+        "blender",
+        "4.0.2"
+      ],
+      "cold_verification": {
+        "final_review_decision": "APPROVED",
+        "review_fingerprint": "c375e5d265bfa019e00590252560756859d66887db1dbbb377d9e7cf787e3295",
+        "revision": 1,
+        "source_front": "+Z",
+        "source_kind": "local_operator_assembly",
+        "status": "PASS",
+        "verified_files": 18,
+        "workflow_id": "WF-ASSET-39505c5f"
+      },
+      "final_approval_id": "APP-b8bd62c1",
+      "profile": "vehicle@1",
+      "provider_intents": 0,
+      "review_views": [
+        "front",
+        "rear",
+        "left",
+        "right",
+        "three_quarter",
+        "three_quarter_rear",
+        "top"
+      ],
+      "rule_groups": [
+        "core",
+        "parts",
+        "orientation",
+        "pivot",
+        "sockets",
+        "collider_box"
+      ],
+      "source_front": "+Z",
+      "workflow_id": "WF-ASSET-39505c5f"
+    },
+    "weapon": {
+      "authoring_tool": [
+        "gamefactory-fixture",
+        "0.7.0"
+      ],
+      "cold_verification": {
+        "final_review_decision": "APPROVED",
+        "review_fingerprint": "a979e24b4d8a67ea808a0f720b4f9b21a8432cd9e8bf43700c69c3ad2b096164",
+        "revision": 1,
+        "source_front": "-Z",
+        "source_kind": "local_operator_assembly",
+        "status": "PASS",
+        "verified_files": 16,
+        "workflow_id": "WF-ASSET-536aacc4"
+      },
+      "final_approval_id": "APP-3e2e2c16",
+      "profile": "weapon@1",
+      "provider_intents": 0,
+      "review_views": [
+        "front",
+        "left",
+        "right",
+        "three_quarter",
+        "top"
+      ],
+      "rule_groups": [
+        "core",
+        "parts",
+        "orientation",
+        "pivot",
+        "sockets",
+        "collider_box"
+      ],
+      "source_front": "-Z",
+      "workflow_id": "WF-ASSET-536aacc4"
+    }
+  },
+  "commands": [
+    {
+      "command": [
+        "init"
+      ],
+      "exit": 0
+    },
+    {
+      "command": [
+        "asset",
+        "profiles"
+      ],
+      "exit": 0
+    },
+    {
+      "command": [
+        "asset",
+        "register-source"
+      ],
+      "exit": 0
+    },
+    {
+      "command": [
+        "asset",
+        "assemble"
+      ],
+      "exit": 3
+    },
+    {
+      "command": [
+        "approvals",
+        "--workflow"
+      ],
+      "exit": 0
+    },
+    {
+      "command": [
+        "approve",
+        "APP-b8bd62c1"
+      ],
+      "exit": 0
+    },
+    {
+      "command": [
+        "resume",
+        "WF-ASSET-39505c5f"
+      ],
+      "exit": 0
+    },
+    {
+      "command": [
+        "report",
+        "--workflow"
+      ],
+      "exit": 0
+    },
+    {
+      "command": [
+        "asset",
+        "register-source"
+      ],
+      "exit": 0
+    },
+    {
+      "command": [
+        "asset",
+        "assemble"
+      ],
+      "exit": 3
+    },
+    {
+      "command": [
+        "approvals",
+        "--workflow"
+      ],
+      "exit": 0
+    },
+    {
+      "command": [
+        "approve",
+        "APP-3e2e2c16"
+      ],
+      "exit": 0
+    },
+    {
+      "command": [
+        "resume",
+        "WF-ASSET-536aacc4"
+      ],
+      "exit": 0
+    },
+    {
+      "command": [
+        "report",
+        "--workflow"
+      ],
+      "exit": 0
+    },
+    {
+      "command": [
+        "asset",
+        "register-source"
+      ],
+      "exit": 0
+    },
+    {
+      "command": [
+        "asset",
+        "assemble"
+      ],
+      "exit": 3
+    },
+    {
+      "command": [
+        "approvals",
+        "--workflow"
+      ],
+      "exit": 0
+    },
+    {
+      "command": [
+        "approve",
+        "APP-14335b7f"
+      ],
+      "exit": 0
+    },
+    {
+      "command": [
+        "resume",
+        "WF-ASSET-81106fd3"
+      ],
+      "exit": 0
+    },
+    {
+      "command": [
+        "report",
+        "--workflow"
+      ],
+      "exit": 0
+    },
+    {
+      "command": [
+        "asset",
+        "assemble"
+      ],
+      "exit": 2
+    },
+    {
+      "command": [
+        "asset",
+        "create"
+      ],
+      "exit": 1
+    },
+    {
+      "command": [
+        "asset",
+        "create"
+      ],
+      "exit": 3
+    },
+    {
+      "command": [
+        "approvals",
+        "--workflow"
+      ],
+      "exit": 0
+    },
+    {
+      "command": [
+        "approve",
+        "APP-e7d2d682"
+      ],
+      "exit": 0
+    },
+    {
+      "command": [
+        "resume",
+        "WF-ASSET-ca3e71af"
+      ],
+      "exit": 3
+    },
+    {
+      "command": [
+        "approvals",
+        "--workflow"
+      ],
+      "exit": 0
+    },
+    {
+      "command": [
+        "approve",
+        "APP-52651db1"
+      ],
+      "exit": 0
+    },
+    {
+      "command": [
+        "resume",
+        "WF-ASSET-ca3e71af"
+      ],
+      "exit": 3
+    },
+    {
+      "command": [
+        "approvals",
+        "--workflow"
+      ],
+      "exit": 0
+    },
+    {
+      "command": [
+        "approve",
+        "APP-2420401b"
+      ],
+      "exit": 0
+    },
+    {
+      "command": [
+        "resume",
+        "WF-ASSET-ca3e71af"
+      ],
+      "exit": 0
+    },
+    {
+      "command": [
+        "report",
+        "--workflow"
+      ],
+      "exit": 0
+    }
+  ],
+  "environment": {
+    "display": ":99",
+    "python": "3.11.15"
+  },
+  "finished_at": "2026-09-30T14:11:08.984605+00:00",
+  "invariants": {
+    "assembly_provider_intents": 0,
+    "real_meshy_calls": 0
+  },
+  "schema_version": "v07-acceptance-1",
+  "started_at": "2026-09-30T14:10:26.914617+00:00",
+  "status": "PASS",
+  "workspace": "<workspace>/gamefactory-v07-res02aor"
+}

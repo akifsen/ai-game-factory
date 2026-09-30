@@ -1,0 +1,200 @@
+{
+  "$defs": {
+    "AuthoringTool": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "maxLength": 80,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "version": {
+          "maxLength": 80,
+          "minLength": 1,
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "version"
+      ],
+      "title": "AuthoringTool",
+      "type": "object"
+    },
+    "DerivedFrom": {
+      "additionalProperties": false,
+      "description": "Provenance only. The factory never resolves or loads these references.",
+      "properties": {
+        "part_id": {
+          "title": "Part Id",
+          "type": "string"
+        },
+        "source_artifact_sha256": {
+          "title": "Source Artifact Sha256",
+          "type": "string"
+        },
+        "source_asset_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source Asset Id"
+        },
+        "source_revision": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source Revision"
+        }
+      },
+      "required": [
+        "part_id",
+        "source_artifact_sha256"
+      ],
+      "title": "DerivedFrom",
+      "type": "object"
+    },
+    "PartMapEntry": {
+      "additionalProperties": false,
+      "properties": {
+        "part_id": {
+          "title": "Part Id",
+          "type": "string"
+        },
+        "role": {
+          "title": "Role",
+          "type": "string"
+        },
+        "parent": {
+          "title": "Parent",
+          "type": "string"
+        }
+      },
+      "required": [
+        "part_id",
+        "role",
+        "parent"
+      ],
+      "title": "PartMapEntry",
+      "type": "object"
+    },
+    "SocketMapEntry": {
+      "additionalProperties": false,
+      "properties": {
+        "socket_id": {
+          "title": "Socket Id",
+          "type": "string"
+        },
+        "parent_part": {
+          "title": "Parent Part",
+          "type": "string"
+        }
+      },
+      "required": [
+        "socket_id",
+        "parent_part"
+      ],
+      "title": "SocketMapEntry",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "asset-source-registration-0.7.0",
+      "default": "asset-source-registration-0.7.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "source_provenance_type": {
+      "const": "local_operator_assembly",
+      "title": "Source Provenance Type",
+      "type": "string"
+    },
+    "paid": {
+      "title": "Paid",
+      "type": "boolean"
+    },
+    "artifact_sha256": {
+      "title": "Artifact Sha256",
+      "type": "string"
+    },
+    "artifact_bytes": {
+      "exclusiveMinimum": 0,
+      "title": "Artifact Bytes",
+      "type": "integer"
+    },
+    "authoring_tool": {
+      "$ref": "#/$defs/AuthoringTool"
+    },
+    "source_front": {
+      "enum": [
+        "-Z",
+        "+Z"
+      ],
+      "title": "Source Front",
+      "type": "string"
+    },
+    "part_map": {
+      "items": {
+        "$ref": "#/$defs/PartMapEntry"
+      },
+      "minItems": 1,
+      "title": "Part Map",
+      "type": "array"
+    },
+    "socket_map": {
+      "items": {
+        "$ref": "#/$defs/SocketMapEntry"
+      },
+      "title": "Socket Map",
+      "type": "array"
+    },
+    "derived_from": {
+      "items": {
+        "$ref": "#/$defs/DerivedFrom"
+      },
+      "title": "Derived From",
+      "type": "array"
+    },
+    "actor": {
+      "maxLength": 120,
+      "minLength": 1,
+      "title": "Actor",
+      "type": "string"
+    },
+    "reason": {
+      "maxLength": 1000,
+      "minLength": 1,
+      "title": "Reason",
+      "type": "string"
+    }
+  },
+  "required": [
+    "source_provenance_type",
+    "paid",
+    "artifact_sha256",
+    "artifact_bytes",
+    "authoring_tool",
+    "source_front",
+    "part_map",
+    "actor",
+    "reason"
+  ],
+  "title": "AssemblySourceRegistration",
+  "type": "object"
+}

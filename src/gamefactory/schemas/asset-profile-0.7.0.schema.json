@@ -1,0 +1,512 @@
+{
+  "$defs": {
+    "AssemblyContract": {
+      "additionalProperties": false,
+      "properties": {
+        "roles": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Roles",
+          "type": "array"
+        },
+        "required_roles": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Required Roles",
+          "type": "array"
+        },
+        "role_motion_constraints": {
+          "additionalProperties": {
+            "$ref": "#/$defs/RoleMotionConstraint"
+          },
+          "title": "Role Motion Constraints",
+          "type": "object"
+        },
+        "required_sockets": {
+          "items": {
+            "$ref": "#/$defs/RequiredSocketContract"
+          },
+          "title": "Required Sockets",
+          "type": "array"
+        },
+        "pivot_tolerance_m": {
+          "exclusiveMinimum": 0.0,
+          "maximum": 1.0,
+          "title": "Pivot Tolerance M",
+          "type": "number"
+        },
+        "basis_tolerance_deg": {
+          "exclusiveMinimum": 0.0,
+          "maximum": 90.0,
+          "title": "Basis Tolerance Deg",
+          "type": "number"
+        },
+        "socket_position_tolerance_m": {
+          "exclusiveMinimum": 0.0,
+          "maximum": 1.0,
+          "title": "Socket Position Tolerance M",
+          "type": "number"
+        },
+        "socket_angle_tolerance_deg": {
+          "exclusiveMinimum": 0.0,
+          "maximum": 90.0,
+          "title": "Socket Angle Tolerance Deg",
+          "type": "number"
+        }
+      },
+      "required": [
+        "roles",
+        "required_roles",
+        "pivot_tolerance_m",
+        "basis_tolerance_deg",
+        "socket_position_tolerance_m",
+        "socket_angle_tolerance_deg"
+      ],
+      "title": "AssemblyContract",
+      "type": "object"
+    },
+    "DimensionRules": {
+      "additionalProperties": false,
+      "properties": {
+        "min_m": {
+          "exclusiveMinimum": 0.0,
+          "maximum": 100.0,
+          "title": "Min M",
+          "type": "number"
+        },
+        "max_m": {
+          "exclusiveMinimum": 0.0,
+          "maximum": 100.0,
+          "title": "Max M",
+          "type": "number"
+        }
+      },
+      "required": [
+        "min_m",
+        "max_m"
+      ],
+      "title": "DimensionRules",
+      "type": "object"
+    },
+    "FramingPolicy": {
+      "additionalProperties": false,
+      "properties": {
+        "min_screen_fraction": {
+          "exclusiveMaximum": 1.0,
+          "exclusiveMinimum": 0.0,
+          "title": "Min Screen Fraction",
+          "type": "number"
+        },
+        "max_screen_fraction": {
+          "exclusiveMaximum": 1.0,
+          "exclusiveMinimum": 0.0,
+          "title": "Max Screen Fraction",
+          "type": "number"
+        },
+        "target_screen_fraction": {
+          "exclusiveMaximum": 1.0,
+          "exclusiveMinimum": 0.0,
+          "title": "Target Screen Fraction",
+          "type": "number"
+        },
+        "margin_fraction": {
+          "maximum": 0.2,
+          "minimum": 0.0,
+          "title": "Margin Fraction",
+          "type": "number"
+        },
+        "fov_degrees": {
+          "maximum": 120.0,
+          "minimum": 1.0,
+          "title": "Fov Degrees",
+          "type": "number"
+        }
+      },
+      "required": [
+        "min_screen_fraction",
+        "max_screen_fraction",
+        "target_screen_fraction",
+        "margin_fraction",
+        "fov_degrees"
+      ],
+      "title": "FramingPolicy",
+      "type": "object"
+    },
+    "GodotPolicy": {
+      "additionalProperties": false,
+      "properties": {
+        "body_kind": {
+          "title": "Body Kind",
+          "type": "string"
+        },
+        "require_ray_hit": {
+          "title": "Require Ray Hit",
+          "type": "boolean"
+        },
+        "require_area": {
+          "title": "Require Area",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "body_kind",
+        "require_ray_hit",
+        "require_area"
+      ],
+      "title": "GodotPolicy",
+      "type": "object"
+    },
+    "ProcessingPolicyV07": {
+      "additionalProperties": false,
+      "properties": {
+        "lod0_required": {
+          "title": "Lod0 Required",
+          "type": "boolean"
+        },
+        "lod1_required": {
+          "title": "Lod1 Required",
+          "type": "boolean"
+        },
+        "allowed_lod_policies": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Allowed Lod Policies",
+          "type": "array"
+        },
+        "allowed_collider_policies": {
+          "items": {
+            "enum": [
+              "box",
+              "capsule"
+            ],
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Allowed Collider Policies",
+          "type": "array"
+        },
+        "allowed_origin_policies": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Allowed Origin Policies",
+          "type": "array"
+        },
+        "default_origin_policy": {
+          "title": "Default Origin Policy",
+          "type": "string"
+        },
+        "dimension_tolerance_m": {
+          "exclusiveMinimum": 0.0,
+          "maximum": 1.0,
+          "title": "Dimension Tolerance M",
+          "type": "number"
+        },
+        "snap_grid_m": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Snap Grid M"
+        },
+        "rig_forbidden": {
+          "title": "Rig Forbidden",
+          "type": "boolean"
+        },
+        "animation_forbidden": {
+          "title": "Animation Forbidden",
+          "type": "boolean"
+        },
+        "max_materials": {
+          "maximum": 8,
+          "minimum": 1,
+          "title": "Max Materials",
+          "type": "integer"
+        },
+        "max_texture_dimension": {
+          "maximum": 4096,
+          "minimum": 256,
+          "title": "Max Texture Dimension",
+          "type": "integer"
+        },
+        "max_triangles_lod0": {
+          "maximum": 100000,
+          "minimum": 100,
+          "title": "Max Triangles Lod0",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "lod0_required",
+        "lod1_required",
+        "allowed_lod_policies",
+        "allowed_collider_policies",
+        "allowed_origin_policies",
+        "default_origin_policy",
+        "dimension_tolerance_m",
+        "rig_forbidden",
+        "animation_forbidden",
+        "max_materials",
+        "max_texture_dimension",
+        "max_triangles_lod0"
+      ],
+      "title": "ProcessingPolicyV07",
+      "type": "object"
+    },
+    "RequiredSocketContract": {
+      "additionalProperties": false,
+      "properties": {
+        "socket_id": {
+          "title": "Socket Id",
+          "type": "string"
+        },
+        "parent_role": {
+          "title": "Parent Role",
+          "type": "string"
+        },
+        "placement": {
+          "const": "forward_end",
+          "title": "Placement",
+          "type": "string"
+        },
+        "forward_end_fraction": {
+          "exclusiveMinimum": 0.0,
+          "maximum": 1.0,
+          "title": "Forward End Fraction",
+          "type": "number"
+        },
+        "rest_forward": {
+          "anyOf": [
+            {
+              "maxItems": 3,
+              "minItems": 3,
+              "prefixItems": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "type": "array"
+            },
+            {
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Rest Forward"
+        }
+      },
+      "required": [
+        "socket_id",
+        "parent_role",
+        "placement",
+        "forward_end_fraction"
+      ],
+      "title": "RequiredSocketContract",
+      "type": "object"
+    },
+    "RoleMotionConstraint": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "enum": [
+            "fixed",
+            "revolute",
+            "prismatic"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "axis": {
+          "anyOf": [
+            {
+              "maxItems": 3,
+              "minItems": 3,
+              "prefixItems": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "type": "array"
+            },
+            {
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Axis"
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "title": "RoleMotionConstraint",
+      "type": "object"
+    },
+    "RuntimePolicy": {
+      "additionalProperties": false,
+      "properties": {
+        "bounds_tolerance_ratio": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Bounds Tolerance Ratio",
+          "type": "number"
+        },
+        "bounds_tolerance_floor_m": {
+          "maximum": 10.0,
+          "minimum": 0.0,
+          "title": "Bounds Tolerance Floor M",
+          "type": "number"
+        }
+      },
+      "required": [
+        "bounds_tolerance_ratio",
+        "bounds_tolerance_floor_m"
+      ],
+      "title": "RuntimePolicy",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "asset-profile-0.7.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "profile_id": {
+      "maxLength": 40,
+      "minLength": 2,
+      "title": "Profile Id",
+      "type": "string"
+    },
+    "version": {
+      "maximum": 1000,
+      "minimum": 1,
+      "title": "Version",
+      "type": "integer"
+    },
+    "categories": {
+      "items": {
+        "enum": [
+          "prop",
+          "pickup",
+          "modular",
+          "vehicle",
+          "weapon",
+          "aircraft",
+          "character"
+        ],
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Categories",
+      "type": "array"
+    },
+    "review_views": {
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Review Views",
+      "type": "array"
+    },
+    "framing": {
+      "$ref": "#/$defs/FramingPolicy"
+    },
+    "dimension_rules": {
+      "$ref": "#/$defs/DimensionRules"
+    },
+    "processing": {
+      "$ref": "#/$defs/ProcessingPolicyV07"
+    },
+    "godot": {
+      "$ref": "#/$defs/GodotPolicy"
+    },
+    "runtime": {
+      "$ref": "#/$defs/RuntimePolicy"
+    },
+    "geometry_mode": {
+      "enum": [
+        "single_mesh",
+        "assembly"
+      ],
+      "title": "Geometry Mode",
+      "type": "string"
+    },
+    "accepted_source_kinds": {
+      "items": {
+        "enum": [
+          "provider_generated",
+          "local_operator_assembly"
+        ],
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Accepted Source Kinds",
+      "type": "array"
+    },
+    "assembly": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/AssemblyContract"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    }
+  },
+  "required": [
+    "schema_version",
+    "profile_id",
+    "version",
+    "categories",
+    "review_views",
+    "framing",
+    "dimension_rules",
+    "processing",
+    "godot",
+    "runtime",
+    "geometry_mode",
+    "accepted_source_kinds"
+  ],
+  "title": "ProfileDocumentV07",
+  "type": "object"
+}

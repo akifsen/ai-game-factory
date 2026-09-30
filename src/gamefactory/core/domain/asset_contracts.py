@@ -788,6 +788,46 @@ def parse_asset_specification_v07(
         ) from exc
 
 
+def parse_any_asset_specification(
+    content: str | dict[str, Any] | Path,
+    *,
+    registry: ProfileRegistry | None = None,
+) -> AssetSpecification | AssetSpecificationV07:
+    """Parse a historical (0.4.0/0.5.0) or asset-spec-0.7.0 document by its schema_version."""
+    data = _load_spec_data(content)
+    if data.get("schema_version") == SPEC_SCHEMA_VERSION_V07:
+        return parse_asset_specification_v07(data, registry=registry)
+    return parse_asset_specification(data)
+
+
+def is_assembly_specification(spec: Any) -> bool:
+    """True when a specification cannot bind to a single-mesh provider request (ADR 0016)."""
+    if isinstance(spec, dict):
+        # Decide from the declared fields alone: an assembly document that is also
+        # invalid in some other way must still never be treated as single-mesh.
+        if spec.get("parts") or spec.get("sockets"):
+            return True
+        if spec.get("source_kind") == "local_operator_assembly":
+            return True
+        if spec.get("schema_version") != SPEC_SCHEMA_VERSION_V07:
+            return False
+        from gamefactory.core.domain.asset_profiles import builtin_registry
+
+        try:
+            version = spec.get("profile_version")
+            if isinstance(version, bool) or not isinstance(version, int):
+                return False
+            profile = builtin_registry().get_v07(str(spec.get("profile")), version)
+        except SpecInvalidError:
+            return False
+        return profile.geometry_mode == "assembly"
+    if not isinstance(spec, AssetSpecificationV07):
+        return False
+    return bool(spec.parts or spec.sockets or spec.source_kind == "local_operator_assembly") or (
+        spec.bound_profile().geometry_mode == "assembly"
+    )
+
+
 def spec_fingerprint(spec: AssetSpecification | AssetSpecificationV07) -> str:
     """Compute deterministic SHA-256 fingerprint for a normalized asset specification."""
     normalized = spec.model_dump(mode="json")

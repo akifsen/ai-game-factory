@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted for V0.7 (Step 2 architecture decision). Not implemented. Schema detail: `docs/architecture/advanced-asset-profiles.md`.
+Accepted and implemented in V0.7.0. Schema detail: `docs/architecture/advanced-asset-profiles.md`.
 
 ## Context
 
@@ -66,3 +66,10 @@ A V0.7 spike exported a Blender assembly hull → turret → barrel → muzzle a
 ## Consequences
 
 The scene contract grows from a single `Visual` mesh to a `Visual` subtree that mirrors the part tree. `orientation.identity` does not apply to assemblies, so ADR 0018 selects it only for the single-mesh geometry mode. Single-mesh profiles (`static_prop@1`, `pickup@1`, `modular_piece@1`, `character@1`) declare no parts and keep today's contract. Only operator-authored assemblies can carry parts (ADR 0016).
+
+## Implementation (V0.7.0)
+
+- The `parts`, `pivot` and `sockets` rule groups live in `src/gamefactory/adapters/assets/validation_rules.py`. Every rule id listed in the architecture document is emitted by exactly one rule.
+- Three rule ids were added so that a tree defect never hides behind another finding: `part.root` (exactly one identity `ROOT` as the only scene root), `part.mesh` (the `SM_<asset>_<part>_LOD0/1` meshes sit directly under their part with identity transforms) and `socket.placement` (the `forward_end` rule measured along the socket forward in the parent part's frame, using the profile's `forward_end_fraction`). Assemblies also report `nodes.unique` over every node, not only mesh nodes.
+- `pivot.collapsed` fails when a part's declared pivot is off its parent origin but the `PART_` node sits at the parent origin, which is exactly the spike result. `pivot.position`, `pivot.orientation` and `pivot.axis` are reported independently; the negative fixtures prove that a wrong basis fails only `pivot.orientation` and a wrong axis fails only `pivot.axis`.
+- The Godot harness re-checks the imported tree, pivots and sockets, replaces each socket with a `Marker3D` carrying the same transform, and articulates every movable part (revolute: 15 degrees about the declared axis; prismatic: 0.05 m along it). It asserts that the pivot stays fixed or moves along the axis, that descendants and sockets follow rigidly, that every other node is unchanged, and that the rest pose is restored. Python re-checks the observation and never trusts its status alone.

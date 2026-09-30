@@ -4,4 +4,4 @@ Provides deterministic orchestration, state machines, policies, approvals,
 evidence-based gates, and developer-time tooling for game development.
 """
 
-__version__ = "0.6.0"
+__version__ = "0.7.0"

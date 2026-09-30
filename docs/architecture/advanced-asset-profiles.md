@@ -1,6 +1,6 @@
 # Advanced asset profiles (V0.7 design)
 
-Status: **architecture accepted (Step 2). Not implemented.** Decisions: ADR 0013–0018.
+Status: **implemented in V0.7.0.** Decisions: ADR 0013–0018. Each ADR ends with an "Implementation (V0.7.0)" section that records what was built and where the implementation deviates from this design. Operator guide: [assembly production](../pipelines/assembly-production.md).
 
 ## Accepted decisions
 
@@ -37,9 +37,9 @@ Geometry mode (capability)            single_mesh | assembly
 | `weapon@1` | assembly | local_operator_assembly | as vehicle | V0.7 target |
 | `aircraft@1` | assembly | local_operator_assembly | as vehicle | V0.7 target |
 
-`UNSUPPORTED_PROFILE_IDS` currently holds `character`, `rigged_character`, `weapon`, `vehicle`, `building`, `terrain`, `animation`, `vfx` and `foliage`. `character`, `weapon` and `vehicle` leave the list only in the step that implements them. `aircraft` is not listed today and stays unbindable until implemented. `building`, `terrain`, `animation`, `vfx`, `foliage` and `rigged_character` stay UNSUPPORTED, and the list is not replaced by a generic `assembly`.
+In V0.7.0 `UNSUPPORTED_PROFILE_IDS` holds `rigged_character`, `building`, `terrain`, `animation`, `vfx` and `foliage`. `character`, `weapon` and `vehicle` left the list in the step that implemented them, and `aircraft` became bindable when it was implemented. The list is not replaced by a generic `assembly`.
 
-Proposed review views, which are profile data and final at implementation:
+Review views as implemented (profile data in `src/gamefactory/resources/profiles/`):
 
 - `vehicle@1`, `aircraft@1`: front, rear, left, right, three_quarter, three_quarter_rear, top
 - `weapon@1`: front, left, right, three_quarter, top
@@ -162,6 +162,8 @@ Articulation check: for each non-fixed part, apply a test displacement about the
 
 ## Rule ids introduced
 
+V0.7.0 also emits `part.root`, `part.mesh` and `socket.placement` (see ADR 0013), and assemblies report `nodes.unique` over every node. `view.unplaced` is not a GLB finding: it is the error raised wherever an unknown view would otherwise be used.
+
 `part.missing`, `part.unexpected`, `part.parent`, `part.scale`, `pivot.collapsed`, `pivot.position`, `pivot.orientation`, `pivot.axis`, `socket.missing`, `socket.structure`, `socket.parent`, `socket.position`, `socket.orientation`, `orientation.source_front`, `collider.capsule.shape`, `collider.capsule.fit`, `view.unplaced`.
 
 ## Required fixtures
@@ -198,6 +200,8 @@ The golden test requires the V0.4–V0.6 fixtures to produce identical ordered f
 
 ## Implementation order
 
+All steps are complete in V0.7.0 (work plan and evidence: [work plan](../work-plan-v0.7.md), [completion report](../reports/v0.7-completion-report.md)).
+
 1. Dual-version profile and spec foundations
 2. Backward-compatibility golden tests
 3. Validator modularization, with zero intended behavior change
@@ -218,4 +222,13 @@ The golden test requires the V0.4–V0.6 fixtures to produce identical ordered f
 18. V0.4–V0.6 compatibility audit
 19. Release-candidate validation
 
-These invariants hold throughout: real Meshy calls = 0, paid submissions = 0, credits = 0, production DB mutations = 0, production artifact mutations = 0.
+These invariants held throughout: real Meshy calls = 0, paid submissions = 0, credits = 0, production DB mutations = 0, production artifact mutations = 0. (The fake provider used by `character@1` acceptance is local and unpaid.)
+
+## Built-in profile data (V0.7.0)
+
+| Profile | Roles (required) | Motion constraints | Required sockets | Tolerances |
+|---|---|---|---|---|
+| `vehicle@1` | hull, turret, barrel (all) | hull fixed; turret revolute +Y; barrel revolute +X | `muzzle` on barrel, forward_end 0.1, rest forward −Z | pivot 5 mm, basis 0.5°, socket 10 mm / 2° |
+| `weapon@1` | receiver, barrel, magazine, slide (receiver, barrel) | receiver, barrel, magazine fixed; slide prismatic +Z | `muzzle` on barrel, forward_end 0.1, rest forward −Z | pivot 2 mm, basis 0.5°, socket 5 mm / 2° |
+| `aircraft@1` | fuselage, propeller, rudder, elevator, aileron_left, aileron_right (fuselage) | fuselage fixed; propeller revolute +Z; rudder +Y; elevator and ailerons +X | none | pivot 5 mm, basis 0.5°, socket 10 mm / 2° |
+| `character@1` | single mesh | — | — | capsule collider only, bottom_center origin |

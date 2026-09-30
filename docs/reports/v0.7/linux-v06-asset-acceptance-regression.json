@@ -1,0 +1,562 @@
+{
+  "asset_id": "prop_acceptance_crate_01",
+  "bundle": "<workspace>",
+  "bundle_files": [
+    {
+      "path": "evidence/specification.json",
+      "role": "specification",
+      "sha256": "6a6f6c719b5a197e218cc1505eed3638aa76b361180827da567948ffc8dbe11e",
+      "size": 908
+    },
+    {
+      "path": "evidence/concept.png",
+      "role": "concept",
+      "sha256": "4fa5f7087e84dcc81412c75791613d3ecfd6e3d32fba8c2a4087b14c7c199882",
+      "size": 899
+    },
+    {
+      "path": "evidence/concept_provenance.json",
+      "role": "concept_provenance",
+      "sha256": "07d6ccf5af672027624e3a57dcfb14fcdf6b280058f86189da1195c7e00d4ef8",
+      "size": 915
+    },
+    {
+      "path": "evidence/raw_glb.glb",
+      "role": "raw_glb",
+      "sha256": "f91a1cf6e91d85f8dc3f54a40221b940fcd0f5d3017e63535bc2b021f8d9be83",
+      "size": 1604
+    },
+    {
+      "path": "evidence/processed_glb.glb",
+      "role": "processed_glb",
+      "sha256": "36f9fda9854212ede022fe50b0cb5b0ad266bc72a473ed13c3d11711d7d4baaf",
+      "size": 5468
+    },
+    {
+      "path": "evidence/processing_report.json",
+      "role": "processing_report",
+      "sha256": "ad8331d235dec6f7616234c295621908aea9180f7779e8d4743f5a8338f752b9",
+      "size": 2024
+    },
+    {
+      "path": "evidence/validation.json",
+      "role": "validation",
+      "sha256": "9aed4c235aec4287b4c1992c8d9e3b048887abdbf1459418966e9d31fc9a68a0",
+      "size": 6670
+    },
+    {
+      "path": "evidence/runtime_observation.json",
+      "role": "runtime_observation",
+      "sha256": "3d082d55ba2c221e4e531e0ee7047b3dc43f391f4532533cf2e8febf7b8bb2ed",
+      "size": 2858
+    },
+    {
+      "path": "evidence/paid_request_snapshot.json",
+      "role": "paid_request_snapshot",
+      "sha256": "60ebeaf531f7a19d2d99224f5fcf9e0eae9832a966e8714a5b87204fb76de508",
+      "size": 812
+    },
+    {
+      "path": "evidence/production_readiness_report.json",
+      "role": "production_readiness_report",
+      "sha256": "0f1f493949d9e706864f426d068eedcb545c2e0e0e4365361ef25c330aaeae2d",
+      "size": 5438
+    },
+    {
+      "angle": "front",
+      "asset_id": "prop_acceptance_crate_01",
+      "attempt_number": 1,
+      "execution_id": "EXEC-57bd1024",
+      "path": "captures/front.png",
+      "processed_glb_sha256": "36f9fda9854212ede022fe50b0cb5b0ad266bc72a473ed13c3d11711d7d4baaf",
+      "revision": 1,
+      "role": "runtime_capture",
+      "sha256": "96e51d3819480c93c40c7fe43af787b6f9e01eac2fe39623a9f4bcc5012377e5",
+      "size": 15111,
+      "workflow_id": "WF-ASSET-1fc7416e"
+    },
+    {
+      "angle": "three_quarter",
+      "asset_id": "prop_acceptance_crate_01",
+      "attempt_number": 1,
+      "execution_id": "EXEC-57bd1024",
+      "path": "captures/three_quarter.png",
+      "processed_glb_sha256": "36f9fda9854212ede022fe50b0cb5b0ad266bc72a473ed13c3d11711d7d4baaf",
+      "revision": 1,
+      "role": "runtime_capture",
+      "sha256": "1721c957b45a9ee532e6ba2b04d2f71078d0c9033b8215cfffd4f3cc1b5a9e82",
+      "size": 16921,
+      "workflow_id": "WF-ASSET-1fc7416e"
+    },
+    {
+      "angle": "side",
+      "asset_id": "prop_acceptance_crate_01",
+      "attempt_number": 1,
+      "execution_id": "EXEC-57bd1024",
+      "path": "captures/side.png",
+      "processed_glb_sha256": "36f9fda9854212ede022fe50b0cb5b0ad266bc72a473ed13c3d11711d7d4baaf",
+      "revision": 1,
+      "role": "runtime_capture",
+      "sha256": "52e121a0382c515a59e3e046a2449bec32a1af612791919dfacbd746597ab85e",
+      "size": 16432,
+      "workflow_id": "WF-ASSET-1fc7416e"
+    },
+    {
+      "path": "evidence/concept_approval.json",
+      "role": "concept_approval",
+      "sha256": "dba19dd810138a8c3a9e07c275ac1a14eee385d01b4b39c167b641a5d0dab9c1",
+      "size": 4432
+    },
+    {
+      "path": "evidence/paid_approval.json",
+      "role": "paid_approval",
+      "sha256": "cecb4b5ec1d6d5e48faa8a0b93abae6949d83974f96b5e0814457c9b09faa659",
+      "size": 5357
+    },
+    {
+      "path": "evidence/final_approval.json",
+      "role": "final_approval",
+      "sha256": "7e00430f1dfe6cfd3716a016189892b0b3b6194588900b3cc278b49a258cf0b4",
+      "size": 6157
+    },
+    {
+      "path": "evidence/provider-operation.json",
+      "role": "provider_operation",
+      "sha256": "5fb12ad6ac786ebc3a12d1580809d26932d90509d0c573e9e2e5aec2390e418d",
+      "size": 540
+    },
+    {
+      "path": "evidence/cost-record.json",
+      "role": "cost_record",
+      "sha256": "63c970b831c8faa182d885fc7e12ac9b678c0cec4dc3683e3d7df57fec5d84c5",
+      "size": 90
+    },
+    {
+      "path": "evidence/production-receipt.json",
+      "role": "production_receipt",
+      "sha256": "d9e8c615e43d59fea0ca75419b50b70b2eec4849267f820ab598790950c6f0f5",
+      "size": 1625
+    },
+    {
+      "path": "index.html",
+      "role": "review_html",
+      "sha256": "d91c556bbc84653926c02014a6dac82d9814cd278471a36626618884e08daef1",
+      "size": 18309
+    }
+  ],
+  "bundle_manifest_sha256": "3ab3af80a507d706fe328b294f35464c2958403026db5f3c2b0d7ee4a9d80fcf",
+  "checks": {
+    "cold_bundle_verification": {
+      "final_review_decision": "APPROVED",
+      "review_fingerprint": "409e9645b02c59a91fa4c39d0b13e7463faef1def26c976b135a7881b9eb37a1",
+      "revision": 1,
+      "status": "PASS",
+      "verified_files": 20,
+      "workflow_id": "WF-ASSET-1fc7416e"
+    },
+    "completed_resume_is_idempotent": "PASS",
+    "concept_approval_gate": "PASS",
+    "concept_iteration": {
+      "new_concept_sha256": "4fa5f7087e84dcc81412c75791613d3ecfd6e3d32fba8c2a4087b14c7c199882",
+      "new_version": 2,
+      "old_version": 1
+    },
+    "final_test_only_visual_gate": "PASS",
+    "paid_fake_generation": "PASS",
+    "paid_request_snapshot_bound": "PASS",
+    "project_initialized": {
+      "already_initialized": false,
+      "discovery_file": "<workspace>/gamefactory-asset-acceptance-qdp9jt55/project/.gamefactory/discovery.json",
+      "exports": false,
+      "git": false,
+      "godot_project": true,
+      "main_scene": "res://Main.tscn",
+      "project_id": "factory-minimal-fixture",
+      "project_name": "Factory Minimal Fixture",
+      "project_root": "<workspace>/gamefactory-asset-acceptance-qdp9jt55/project",
+      "scenes": 1,
+      "scripts": 1,
+      "test_files": 0
+    },
+    "provider_operation_record": {
+      "actual_cost": 5.0,
+      "concept_sha256": "4fa5f7087e84dcc81412c75791613d3ecfd6e3d32fba8c2a4087b14c7c199882",
+      "external_task_id": "FAKE-OP-b085bfb807ef62ac",
+      "operation": "image-to-3d",
+      "paid_request_snapshot_sha256": "60ebeaf531f7a19d2d99224f5fcf9e0eae9832a966e8714a5b87204fb76de508",
+      "provider": "fake",
+      "request_fingerprint": "60ebeaf531f7a19d2d99224f5fcf9e0eae9832a966e8714a5b87204fb76de508",
+      "revision": 1,
+      "status": "SUCCEEDED",
+      "task_id": "WF-ASSET-1fc7416e-PAID-GENERATION",
+      "workflow_id": "WF-ASSET-1fc7416e"
+    },
+    "source_project_files_unchanged": true,
+    "tampered_bundle_rejected": {
+      "exit_code": 1,
+      "mutation": "one byte changed in a copied processed GLB",
+      "stderr": "",
+      "stdout": "{\"status\": \"FAIL\", \"error\": \"bundle size or SHA-256 mismatch: evidence/processed_glb.glb\"}"
+    }
+  },
+  "commands": [
+    {
+      "argv": [
+        "<venv>/bin/gamefactory",
+        "--json",
+        "--project",
+        "<workspace>/gamefactory-asset-acceptance-qdp9jt55/project",
+        "--godot-path",
+        "<tools>/Godot_v4.7.2-stable_linux.x86_64",
+        "--blender-path",
+        "/usr/bin/blender",
+        "init"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "<venv>/bin/gamefactory",
+        "--json",
+        "--project",
+        "<workspace>/gamefactory-asset-acceptance-qdp9jt55/project",
+        "--godot-path",
+        "<tools>/Godot_v4.7.2-stable_linux.x86_64",
+        "--blender-path",
+        "/usr/bin/blender",
+        "asset-create",
+        "--spec",
+        "<workspace>/gamefactory-asset-acceptance-qdp9jt55/asset-spec.json",
+        "--concept",
+        "<workspace>/gamefactory-asset-acceptance-qdp9jt55/project/.acceptance-inputs/concept.png",
+        "--provenance",
+        "<workspace>/gamefactory-asset-acceptance-qdp9jt55/project/.acceptance-inputs/concept-provenance.json",
+        "--concept-source-type",
+        "imported",
+        "--provider",
+        "fake",
+        "--budget-reservation",
+        "5"
+      ],
+      "exit_code": 3
+    },
+    {
+      "argv": [
+        "<venv>/bin/gamefactory",
+        "--json",
+        "--project",
+        "<workspace>/gamefactory-asset-acceptance-qdp9jt55/project",
+        "--godot-path",
+        "<tools>/Godot_v4.7.2-stable_linux.x86_64",
+        "--blender-path",
+        "/usr/bin/blender",
+        "request-changes",
+        "APP-5f9e0c41",
+        "--actor",
+        "TEST-ONLY-ACCEPTANCE",
+        "--comment",
+        "TEST ONLY: request a revised concept to exercise in-revision iteration."
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "<venv>/bin/gamefactory",
+        "--json",
+        "--project",
+        "<workspace>/gamefactory-asset-acceptance-qdp9jt55/project",
+        "--godot-path",
+        "<tools>/Godot_v4.7.2-stable_linux.x86_64",
+        "--blender-path",
+        "/usr/bin/blender",
+        "resume",
+        "WF-ASSET-1fc7416e"
+      ],
+      "exit_code": 3
+    },
+    {
+      "argv": [
+        "<venv>/bin/gamefactory",
+        "--json",
+        "--project",
+        "<workspace>/gamefactory-asset-acceptance-qdp9jt55/project",
+        "--godot-path",
+        "<tools>/Godot_v4.7.2-stable_linux.x86_64",
+        "--blender-path",
+        "/usr/bin/blender",
+        "asset",
+        "concept",
+        "replace",
+        "--workflow",
+        "WF-ASSET-1fc7416e",
+        "--concept",
+        "<workspace>/gamefactory-asset-acceptance-qdp9jt55/project/.acceptance-inputs/concept-v2.png",
+        "--provenance",
+        "<workspace>/gamefactory-asset-acceptance-qdp9jt55/project/.acceptance-inputs/concept-v2-provenance.json",
+        "--actor",
+        "TEST-ONLY-ACCEPTANCE",
+        "--reason",
+        "TEST ONLY: revised concept for in-revision iteration acceptance."
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "<venv>/bin/gamefactory",
+        "--json",
+        "--project",
+        "<workspace>/gamefactory-asset-acceptance-qdp9jt55/project",
+        "--godot-path",
+        "<tools>/Godot_v4.7.2-stable_linux.x86_64",
+        "--blender-path",
+        "/usr/bin/blender",
+        "approvals",
+        "--workflow",
+        "WF-ASSET-1fc7416e"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "<venv>/bin/gamefactory",
+        "--json",
+        "--project",
+        "<workspace>/gamefactory-asset-acceptance-qdp9jt55/project",
+        "--godot-path",
+        "<tools>/Godot_v4.7.2-stable_linux.x86_64",
+        "--blender-path",
+        "/usr/bin/blender",
+        "approve",
+        "APP-6435c372",
+        "--actor",
+        "TEST-ONLY-ACCEPTANCE",
+        "--comment",
+        "TEST ONLY: deterministic offline acceptance decision for concept_review; not a production human approval."
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "<venv>/bin/gamefactory",
+        "--json",
+        "--project",
+        "<workspace>/gamefactory-asset-acceptance-qdp9jt55/project",
+        "--godot-path",
+        "<tools>/Godot_v4.7.2-stable_linux.x86_64",
+        "--blender-path",
+        "/usr/bin/blender",
+        "resume",
+        "WF-ASSET-1fc7416e"
+      ],
+      "exit_code": 3
+    },
+    {
+      "argv": [
+        "<venv>/bin/gamefactory",
+        "--json",
+        "--project",
+        "<workspace>/gamefactory-asset-acceptance-qdp9jt55/project",
+        "--godot-path",
+        "<tools>/Godot_v4.7.2-stable_linux.x86_64",
+        "--blender-path",
+        "/usr/bin/blender",
+        "inspect",
+        "WF-ASSET-1fc7416e"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "<venv>/bin/gamefactory",
+        "--json",
+        "--project",
+        "<workspace>/gamefactory-asset-acceptance-qdp9jt55/project",
+        "--godot-path",
+        "<tools>/Godot_v4.7.2-stable_linux.x86_64",
+        "--blender-path",
+        "/usr/bin/blender",
+        "approvals",
+        "--workflow",
+        "WF-ASSET-1fc7416e"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "<venv>/bin/gamefactory",
+        "--json",
+        "--project",
+        "<workspace>/gamefactory-asset-acceptance-qdp9jt55/project",
+        "--godot-path",
+        "<tools>/Godot_v4.7.2-stable_linux.x86_64",
+        "--blender-path",
+        "/usr/bin/blender",
+        "approve",
+        "APP-c2e4e28a",
+        "--actor",
+        "TEST-ONLY-ACCEPTANCE",
+        "--comment",
+        "TEST ONLY: deterministic offline acceptance decision for paid_generation; not a production human approval."
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "<venv>/bin/gamefactory",
+        "--json",
+        "--project",
+        "<workspace>/gamefactory-asset-acceptance-qdp9jt55/project",
+        "--godot-path",
+        "<tools>/Godot_v4.7.2-stable_linux.x86_64",
+        "--blender-path",
+        "/usr/bin/blender",
+        "resume",
+        "WF-ASSET-1fc7416e"
+      ],
+      "exit_code": 3
+    },
+    {
+      "argv": [
+        "<venv>/bin/gamefactory",
+        "--json",
+        "--project",
+        "<workspace>/gamefactory-asset-acceptance-qdp9jt55/project",
+        "--godot-path",
+        "<tools>/Godot_v4.7.2-stable_linux.x86_64",
+        "--blender-path",
+        "/usr/bin/blender",
+        "inspect",
+        "WF-ASSET-1fc7416e"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "<venv>/bin/gamefactory",
+        "--json",
+        "--project",
+        "<workspace>/gamefactory-asset-acceptance-qdp9jt55/project",
+        "--godot-path",
+        "<tools>/Godot_v4.7.2-stable_linux.x86_64",
+        "--blender-path",
+        "/usr/bin/blender",
+        "approvals",
+        "--workflow",
+        "WF-ASSET-1fc7416e"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "<venv>/bin/gamefactory",
+        "--json",
+        "--project",
+        "<workspace>/gamefactory-asset-acceptance-qdp9jt55/project",
+        "--godot-path",
+        "<tools>/Godot_v4.7.2-stable_linux.x86_64",
+        "--blender-path",
+        "/usr/bin/blender",
+        "approve",
+        "APP-3dcde669",
+        "--actor",
+        "TEST-ONLY-ACCEPTANCE",
+        "--comment",
+        "TEST ONLY: deterministic offline acceptance decision for final_visual_review; not a production human approval."
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "<venv>/bin/gamefactory",
+        "--json",
+        "--project",
+        "<workspace>/gamefactory-asset-acceptance-qdp9jt55/project",
+        "--godot-path",
+        "<tools>/Godot_v4.7.2-stable_linux.x86_64",
+        "--blender-path",
+        "/usr/bin/blender",
+        "resume",
+        "WF-ASSET-1fc7416e"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "<venv>/bin/gamefactory",
+        "--json",
+        "--project",
+        "<workspace>/gamefactory-asset-acceptance-qdp9jt55/project",
+        "--godot-path",
+        "<tools>/Godot_v4.7.2-stable_linux.x86_64",
+        "--blender-path",
+        "/usr/bin/blender",
+        "resume",
+        "WF-ASSET-1fc7416e"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "<venv>/bin/gamefactory",
+        "--json",
+        "--project",
+        "<workspace>/gamefactory-asset-acceptance-qdp9jt55/project",
+        "--godot-path",
+        "<tools>/Godot_v4.7.2-stable_linux.x86_64",
+        "--blender-path",
+        "/usr/bin/blender",
+        "inspect",
+        "WF-ASSET-1fc7416e"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "<venv>/bin/gamefactory",
+        "--json",
+        "--project",
+        "<workspace>/gamefactory-asset-acceptance-qdp9jt55/project",
+        "--godot-path",
+        "<tools>/Godot_v4.7.2-stable_linux.x86_64",
+        "--blender-path",
+        "/usr/bin/blender",
+        "report",
+        "--workflow",
+        "WF-ASSET-1fc7416e"
+      ],
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "<venv>/bin/python",
+        "-I",
+        "<workspace>",
+        "<workspace>"
+      ],
+      "exit_code": 0
+    }
+  ],
+  "concept_sha256": "30329b6163561da25974b95a03e98de51232d4e62364e6883dd0b6cca10cd3ca",
+  "finished_at": "2026-09-30T14:11:39.106409+00:00",
+  "note": "Command stdout/stderr trimmed for the repository; status and checks are unchanged.",
+  "paid_provider": "fake",
+  "paid_provider_invocations": 1,
+  "schema_version": 1,
+  "source_kind": "scripted synthetic concept fixture; no SDXL or external image provider claim",
+  "started_at": "2026-09-30T14:11:19.732431+00:00",
+  "status": "PASS",
+  "tools": {
+    "blender": {
+      "blender_python_paths": "/usr/lib/python3/dist-packages",
+      "path": "/usr/bin/blender",
+      "version": "Blender 4.0.2"
+    },
+    "cli": "<venv>/bin/gamefactory",
+    "godot": {
+      "path": "<tools>/Godot_v4.7.2-stable_linux.x86_64",
+      "version": "4.7.2.stable.official.ed1daf0bf"
+    },
+    "python": "<venv>/bin/python"
+  },
+  "workflow_id": "WF-ASSET-1fc7416e"
+}

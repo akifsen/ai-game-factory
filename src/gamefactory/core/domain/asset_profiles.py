@@ -17,7 +17,7 @@ import yaml
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from gamefactory.core.domain.asset_contracts import _as_number, _reject_bool_and_string
-from gamefactory.core.domain.camera_framing import PLACED_VIEWS
+from gamefactory.core.domain.camera_framing import LEGACY_PROFILE_VIEWS, PLACED_VIEWS
 from gamefactory.core.domain.errors import SpecInvalidError
 
 if TYPE_CHECKING:
@@ -26,12 +26,14 @@ if TYPE_CHECKING:
 PROFILE_SCHEMA_VERSION = "asset-profile-0.5.0"
 PROFILE_SCHEMA_VERSION_V07 = "asset-profile-0.7.0"
 PROCESSING_CONTRACT_VERSION = "asset-processing-contract-0.5.0"
+PROCESSING_CONTRACT_VERSION_V07 = "asset-processing-contract-0.7.0"
+CANONICAL_FRAME = {"up": "+Y", "front": "-Z", "handedness": "right", "units": "m"}
 
+# V0.7 implements character@1, weapon@1, vehicle@1 and aircraft@1; they left this
+# list in the step that implemented them. rigged_character stays UNSUPPORTED
+# (ADR 0017) and nothing here is replaced by a generic "assembly" profile.
 UNSUPPORTED_PROFILE_IDS = (
-    "character",
     "rigged_character",
-    "weapon",
-    "vehicle",
     "building",
     "terrain",
     "animation",
@@ -181,7 +183,7 @@ class ProfileDocument(BaseModel):
     def views_are_implemented(cls, value: list[str]) -> list[str]:
         if len(value) != len(set(value)):
             raise ValueError("review_views contains a duplicate")
-        unknown = [item for item in value if item not in PLACED_VIEWS]
+        unknown = [item for item in value if item not in LEGACY_PROFILE_VIEWS]
         if unknown:
             raise ValueError(f"review view is not implemented: {unknown[0]}")
         return value
@@ -855,6 +857,187 @@ class AssetProfileV07:
                     f"capsule diameter ({2 * cap.radius_m}) exceeds max horizontal bounds ({max_horiz}) + tolerance ({tol})"
                 )
 
+    # --- contracts --------------------------------------------------------------
+
+    def lod1_mesh_required(self, spec: AssetSpecificationV07) -> bool:
+        return bool(self.document.processing.lod1_required or spec.lod_policy == "lod0_lod1")
+
+    def expected_mesh_names(self, spec: AssetSpecificationV07) -> set[str]:
+        """Mesh node names of a single-mesh result (assemblies use the part tree)."""
+        if self.geometry_mode == "assembly":
+            names = {f"SM_{spec.asset_id}_{p.part_id}_LOD0" for p in spec.parts or []}
+            if self.lod1_mesh_required(spec):
+                names |= {f"SM_{spec.asset_id}_{p.part_id}_LOD1" for p in spec.parts or []}
+        else:
+            names = {f"SM_{spec.asset_id}_LOD0"}
+            if self.lod1_mesh_required(spec):
+                names.add(f"SM_{spec.asset_id}_LOD1")
+        if spec.collider.policy == "box":
+            names.add(f"COL_{spec.asset_id}")
+        return names
+
+    def _hierarchy(self, spec: AssetSpecificationV07) -> list[dict[str, Any]]:
+        from gamefactory.core.domain.transforms import spec_quat
+
+        lod1 = self.lod1_mesh_required(spec)
+        rows = []
+        for part in spec.parts or []:
+            meshes = [f"SM_{spec.asset_id}_{part.part_id}_LOD0"]
+            if lod1:
+                meshes.append(f"SM_{spec.asset_id}_{part.part_id}_LOD1")
+            motion = part.pivot.motion
+            rows.append(
+                {
+                    "part_id": part.part_id,
+                    "role": part.role,
+                    "parent": part.parent,
+                    "node": f"PART_{part.part_id}",
+                    "parent_node": "ROOT" if part.parent == "root" else f"PART_{part.parent}",
+                    "meshes": meshes,
+                    "pivot": {
+                        "position_m": [float(v) for v in part.pivot.position_m],
+                        "basis_quaternion_xyzw": list(spec_quat(part.pivot.basis)),
+                        "motion": motion.kind,
+                        "axis": [float(v) for v in motion.axis] if motion.axis else None,
+                        "limits": (
+                            {"lower": motion.limits.lower, "upper": motion.limits.upper}
+                            if motion.limits
+                            else None
+                        ),
+                    },
+                }
+            )
+        return rows
+
+    def _sockets(self, spec: AssetSpecificationV07) -> list[dict[str, Any]]:
+        from gamefactory.core.domain.transforms import spec_quat
+
+        required = {
+            r.socket_id: r for r in (self.assembly.required_sockets if self.assembly else [])
+        }
+        rows = []
+        for socket in spec.sockets or []:
+            rule = required.get(socket.socket_id)
+            rows.append(
+                {
+                    "socket_id": socket.socket_id,
+                    "node": f"SOCKET_{socket.socket_id}",
+                    "parent_part": socket.parent_part,
+                    "parent_node": f"PART_{socket.parent_part}",
+                    "translation_m": [float(v) for v in socket.translation_m],
+                    "rotation_quaternion_xyzw": list(spec_quat(socket.rotation)),
+                    "forward_local": [0.0, 0.0, -1.0],
+                    "placement": socket.placement,
+                    "forward_end_fraction": rule.forward_end_fraction if rule else None,
+                    "rest_forward": list(rule.rest_forward) if rule and rule.rest_forward else None,
+                }
+            )
+        return rows
+
+    def processing_contract(self, spec: AssetSpecificationV07) -> dict[str, Any]:
+        processing = self.document.processing
+        capsule = spec.collider.capsule
+        contract: dict[str, Any] = {
+            "schema_version": PROCESSING_CONTRACT_VERSION_V07,
+            "profile_id": self.profile_id,
+            "profile_version": self.version,
+            "profile_qualified": self.qualified,
+            "asset_id": spec.asset_id,
+            "geometry_mode": self.geometry_mode,
+            "source_kind": spec.source_kind,
+            "canonical_frame": dict(CANONICAL_FRAME),
+            "target_width_m": spec.dimensions.width_m,
+            "target_depth_m": spec.dimensions.depth_m,
+            "target_height_m": spec.dimensions.height_m,
+            "origin_policy": spec.origin_policy,
+            "lod_policy": spec.lod_policy,
+            "lod1_required": self.lod1_mesh_required(spec),
+            "lod1_ratio": spec.geometry_budget.lod_ratio,
+            "collider_policy": spec.collider.policy,
+            "capsule": (
+                {"radius_m": capsule.radius_m, "height_m": capsule.height_m, "axis": "+Y"}
+                if capsule
+                else None
+            ),
+            "dimension_tolerance_m": processing.dimension_tolerance_m,
+            "snap_grid_m": processing.snap_grid_m,
+            "rig_forbidden": processing.rig_forbidden,
+            "animation_forbidden": processing.animation_forbidden,
+        }
+        if self.geometry_mode == "assembly" and self.assembly is not None:
+            assembly = self.assembly
+            contract["root_node"] = "ROOT"
+            contract["hierarchy"] = self._hierarchy(spec)
+            contract["sockets"] = self._sockets(spec)
+            contract["tolerances"] = {
+                "pivot_m": assembly.pivot_tolerance_m,
+                "basis_deg": assembly.basis_tolerance_deg,
+                "socket_m": assembly.socket_position_tolerance_m,
+                "socket_deg": assembly.socket_angle_tolerance_deg,
+            }
+            contract["source_front_values"] = ["-Z", "+Z"]
+        return contract
+
+    def scene_contract(self, spec: AssetSpecificationV07 | None = None) -> dict[str, Any]:
+        body = "StaticBody3D" if self.document.godot.body_kind == "static_body" else "Area3D"
+        policy = spec.collider.policy if spec is not None else "box"
+        return {
+            "root": "Node3D",
+            "visual": "Visual",
+            "physics": body,
+            "collision": "CollisionShape3D",
+            "body_kind": self.document.godot.body_kind,
+            "shape": "CapsuleShape3D" if policy == "capsule" else "BoxShape3D",
+            "geometry_mode": self.geometry_mode,
+        }
+
+    def runtime_requirements(self, spec: AssetSpecificationV07 | None = None) -> dict[str, Any]:
+        godot = self.document.godot
+        runtime = self.document.runtime
+        requirements: dict[str, Any] = {
+            "require_mesh_visible": True,
+            "require_collision": True,
+            "require_physics_body": godot.body_kind == "static_body",
+            "require_area": godot.require_area,
+            "require_ray_hit": godot.require_ray_hit,
+            "bounds_tolerance_ratio": runtime.bounds_tolerance_ratio,
+            "bounds_tolerance_floor_m": runtime.bounds_tolerance_floor_m,
+            "dimension_tolerance_m": self.document.processing.dimension_tolerance_m,
+            "geometry_mode": self.geometry_mode,
+        }
+        if spec is not None:
+            capsule = spec.collider.capsule
+            requirements["collider_policy"] = spec.collider.policy
+            requirements["capsule"] = (
+                {"radius_m": capsule.radius_m, "height_m": capsule.height_m} if capsule else None
+            )
+            if self.geometry_mode == "assembly":
+                requirements["hierarchy"] = self._hierarchy(spec)
+                requirements["sockets"] = self._sockets(spec)
+                if self.assembly is not None:
+                    requirements["pivot_tolerance_m"] = self.assembly.pivot_tolerance_m
+                    requirements["socket_tolerance_m"] = self.assembly.socket_position_tolerance_m
+        return requirements
+
+    def capture_request_profile(self, spec: AssetSpecificationV07 | None = None) -> dict[str, Any]:
+        framing = self.framing
+        return {
+            "profile_id": self.profile_id,
+            "profile_version": self.version,
+            "body_kind": self.document.godot.body_kind,
+            "require_ray_hit": self.document.godot.require_ray_hit,
+            "require_area": self.document.godot.require_area,
+            "review_views": list(self.review_views),
+            "framing": {
+                "min_screen_fraction": framing.min_screen_fraction,
+                "max_screen_fraction": framing.max_screen_fraction,
+                "target_screen_fraction": framing.target_screen_fraction,
+                "margin_fraction": framing.margin_fraction,
+                "fov_degrees": framing.fov_degrees,
+            },
+            "scene": self.scene_contract(spec),
+        }
+
 
 @dataclass(frozen=True)
 class ProfileRegistry:
@@ -946,16 +1129,27 @@ def _load_builtin(name: str) -> AssetProfile:
     return AssetProfile(parse_profile_document(text))
 
 
+def _load_builtin_v07(name: str) -> AssetProfileV07:
+    resource = files("gamefactory").joinpath(f"resources/profiles/{name}.yml")
+    text = resource.read_text(encoding="utf-8")
+    return AssetProfileV07(parse_profile_document_v07(text))
+
+
+BUILTIN_V05_PROFILES = ("static_prop", "pickup", "modular_piece")
+BUILTIN_V07_PROFILES = ("vehicle", "weapon", "aircraft", "character")
+
+
 def builtin_registry() -> ProfileRegistry:
-    """Return the explicit V0.5 registry. The object has no mutating API."""
+    """Return the explicit built-in registry. The object has no mutating API.
+
+    The three asset-profile-0.5.0 profiles bind historical specifications through
+    ``get``; the asset-profile-0.7.0 profiles bind asset-spec-0.7.0 through
+    ``get_v07`` only.
+    """
     return ProfileRegistry(
-        available=(
-            _load_builtin("static_prop"),
-            _load_builtin("pickup"),
-            _load_builtin("modular_piece"),
-        ),
+        available=tuple(_load_builtin(name) for name in BUILTIN_V05_PROFILES),
         unsupported=UNSUPPORTED_PROFILE_IDS,
-        available_v07=(),
+        available_v07=tuple(_load_builtin_v07(name) for name in BUILTIN_V07_PROFILES),
     )
 
 
@@ -966,6 +1160,22 @@ def render_scene_contract(
     physics = str(contract["physics"])
     if physics not in {"StaticBody3D", "Area3D"}:
         raise ProfileContractError(f"scene contract physics node is unsupported: {physics}")
+    shape = contract.get("shape")
+    if shape not in (None, "BoxShape3D", "CapsuleShape3D"):
+        raise ProfileContractError(f"scene contract collision shape is unsupported: {shape}")
+    if shape == "CapsuleShape3D":
+        # The capsule is built from the declared contract values by the runtime
+        # harness; the wrapper records the node tree and shape class only.
+        return (
+            "[gd_scene load_steps=3 format=3]\n\n"
+            f'[ext_resource type="PackedScene" path="{glb_resource}" id="1"]\n\n'
+            '[sub_resource type="CapsuleShape3D" id="capsule"]\n\n'
+            f'[node name="{contract["root"]}" type="Node3D"]\n\n'
+            f'[node name="{contract["visual"]}" parent="." instance=ExtResource("1")]\n\n'
+            f'[node name="{physics}" type="{physics}" parent="."]\n\n'
+            f'[node name="{contract["collision"]}" type="CollisionShape3D" parent="{physics}"]\n'
+            'shape = SubResource("capsule")\n'
+        )
     return (
         "[gd_scene load_steps=2 format=3]\n\n"
         f'[ext_resource type="PackedScene" path="{glb_resource}" id="1"]\n\n'

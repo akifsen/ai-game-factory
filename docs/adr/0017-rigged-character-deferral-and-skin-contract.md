@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted for V0.7 (Step 2 architecture decision). The deferral takes effect in V0.7. The skin contract is recorded for a later milestone and is **not implemented** as a production capability.
+Accepted for V0.7 (Step 2 architecture decision). The deferral is in effect in V0.7.0. The skin contract is recorded for a later milestone and is **not implemented** as a production capability.
 
 ## Context
 
@@ -29,3 +29,8 @@ A V0.7 spike built a 12-bone skinned humanoid in Blender and imported it into Go
 ## Consequences
 
 Characters in V0.7 are static review models (`character@1`, ADR 0015). The spike result is kept as design input and is not presented as a capability.
+
+## Implementation (V0.7.0)
+
+- `rigged_character` stays in `UNSUPPORTED_PROFILE_IDS`; `get` and `get_v07` refuse it, and a production specification that selects it is rejected. `character@1` rejects `skins`, `animations`, `JOINTS_0` and `WEIGHTS_0` (negative fixtures cover a skinned and an animated GLB).
+- The optional internal `skin_internal` validator group and its spike fixture were not added; no V0.7 behavior depends on them.

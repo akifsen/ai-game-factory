@@ -102,6 +102,9 @@ class FakeAssetGenerationProvider(AssetGenerationProvider, PaidRequestAdapter):
     def resolve_paid_request(
         self, binding: dict[str, Any], specification: dict[str, Any], cost: dict[str, Any]
     ) -> dict[str, Any]:
+        from gamefactory.core.domain.paid_request import ensure_single_mesh_specification
+
+        ensure_single_mesh_specification(specification)
         raw_poly = None
         if isinstance(specification, dict):
             geom = specification.get("geometry_budget")

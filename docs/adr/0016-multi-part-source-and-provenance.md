@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted for V0.7 (Step 2 architecture decision). Not implemented.
+Accepted and implemented in V0.7.0, with the processing deviation recorded below.
 
 ## Context
 
@@ -38,3 +38,12 @@ Meshy image-to-3D returns one mesh. Automatically segmenting that mesh into sema
 ## Consequences
 
 A revision gains a source kind. `asset-evidence-0.7.0` carries a `source_provenance` role, plus the retained source GLB, in place of `provider_operation`, `cost_record` and `paid_approval` for assemblies. The cold verifier accepts exactly one of the two role sets, never a mixture, and rejects `paid: true` for `local_operator_assembly`. Reusing earlier Factory meshes is possible by copying them into the assembly, and that reuse is auditable through `derived_from`.
+
+## Implementation (V0.7.0)
+
+- The registration is `asset-source-registration-0.7.0` (`core/domain/assembly_source.py`, JSON Schema in `src/gamefactory/schemas/`). `source_front` has no default; `paid` must be `false`; the part and socket maps must equal the specification; `derived_from` is validated as data and never resolved. `gamefactory asset register-source` drafts it from the specification.
+- `gamefactory asset assemble` creates the graph `PREPARE -> PROCESS -> VALIDATE -> GODOT -> FINAL-REVIEW -> EVIDENCE` (graph version `0.7.0`). There is no concept review, paid request, readiness check or paid approval, and a refusing provider occupies the provider slot. The revision records the source hash as its raw hash and has no concept hash.
+- Assemblies are rejected before any snapshot, approval or intent in four places: workflow creation on the provider path, the paid-request snapshot handler, and both provider adapters (Meshy and fake).
+- **Deviation from item 7: no Blender round trip for assemblies.** Processing is a deterministic, transform-only normalization in Python. The V0.7 spike showed that a Blender import/export collapsed every pivot while the hierarchy imported cleanly, so re-exporting operator assemblies through Blender would reintroduce the very defect ADR 0013 guards against. Blender remains the declared authoring tool: the real acceptance authors a vehicle in Blender, exports it with the default glTF exporter (a +Z source) and runs it through the factory. Per-part LOD generation is therefore not performed; an assembly that needs LOD1 must carry `SM_<asset>_<part>_LOD1` from the operator, and `part.mesh` checks it.
+- The final approval context binds the source GLB, the registration, the processing report and the other evidence hashes instead of a concept. `production-receipt-0.7.0` records `source_kind: local_operator_assembly`, `paid: false` and `paid_provider_invocations: 0` (the field is `source_kind` rather than `generation`).
+- `asset-evidence-0.7.0` bundles for assemblies carry `source_glb`, `source_provenance` and `normalization` roles. The cold verifier rejects any concept, paid, provider, cost or raw role (mixed role set), rejects `paid: true`, and recomputes the normalization from the retained source.

@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted for V0.7 (Step 2 architecture decision). Not implemented.
+Accepted and implemented in V0.7.0.
 
 ## Context
 
@@ -38,3 +38,9 @@ V0.5 implements one collider policy (`box`) and two body kinds (`static_body`, `
 ## Consequences
 
 `ProcessingPolicy` accepts `capsule`. `collider_policy: capsule` and the `collider` block exist only in `asset-spec-0.7.0`. Existing profiles and specifications are unchanged. Gameplay bodies and per-part colliders remain later work.
+
+## Implementation (V0.7.0)
+
+- `collider_capsule` emits `collider.capsule.shape` (structural rules, and no `COL_` mesh in the GLB) and `collider.capsule.fit`. The fit check is applied both to the specification bounds and to the measured visual bounds, so a GLB narrower than its specification cannot pass with a capsule that only fits the numbers on paper.
+- Blender processing exports no collider mesh for a capsule profile. The Godot harness builds `CapsuleShape3D` from the declared values on +Y, centered at half height for `bottom_center`, and reports declared and observed values; Python and the cold verifier compare them within 1e-6, because Godot stores them as 32-bit floats.
+- `character@1` is the only built-in capsule profile; `box` remains the only policy of the historical profiles, and no other policy is advertised.

@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted for V0.7 (Step 2 architecture decision). Not implemented.
+Accepted and implemented in V0.7.0.
 
 ## Context
 
@@ -55,3 +55,11 @@ Divergence that must be recorded: glTF 2.0 defines the asset front as **+Z**, an
 ## Consequences
 
 The convention becomes a recorded decision with evidence. Authors of Blender assemblies either face the model toward Blender +Y or declare `+Z`, and forgetting the declaration is a rejection, not a guess. The review view vocabulary becomes fully placed. A typo in a view id can no longer silently produce a three-quarter image.
+
+## Implementation (V0.7.0)
+
+- Python (`camera_framing.py`) and the Godot harness each hold one view table with direction and axis label. `rear`, `left`, `right` and `three_quarter_rear` are placed. The three-quarter fallback is gone: an unknown view fails with `view.unplaced` at profile load (asset-profile-0.7.0), at capture-request build, in the harness and in cold verification of 0.7.0 bundles. A parity test compares the two tables (direction, axis label and up vector), and an opt-in real-Godot test captures all nine placed views, including `side` and `three_quarter_front`.
+- `asset-profile-0.5.0` is frozen, so its documents keep the V0.5 view vocabulary; the full set is open to `asset-profile-0.7.0`.
+- `source_front` normalization is implemented in `adapters/assets/assembly_processor.py`: a `-Z` source is retained byte-for-byte, a `+Z` source gets exactly the 180 degree +Y rotation baked into the root-level children so `ROOT` stays identity, and a non-identity source `ROOT` is rejected rather than corrected. `orientation.source_front` and the cold verifier both recompute the relation from the retained source.
+- Framing for asset-runtime-observation-0.7.0 measures `fill_ratio`, the dominant screen extent (height or width), which is what the distance solver targets. Measuring height alone made elongated assets such as vehicles seen from the side unframeable. Historical observations keep measuring `height_ratio`.
+- A +Z source registered as `-Z` is not detectable from transforms alone, by design; where a profile declares a socket rest forward (vehicle@1, weapon@1), `socket.orientation` catches it.

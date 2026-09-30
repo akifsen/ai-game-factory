@@ -23,11 +23,27 @@ IMPLEMENTED_VIEWS = frozenset(
         "top",
     }
 )
-# Views with a placed camera in V0.5. The others are named so a profile cannot
-# request them silently; profile loading rejects any view outside this set.
-PLACED_VIEWS = frozenset({"front", "three_quarter", "three_quarter_front", "side", "top"})
+# Every named view has a camera placement (ADR 0014). The asset faces -Z with
+# +Y up, so its right side is +X. ``side`` is the legacy alias of ``right``.
+PLACED_VIEWS = IMPLEMENTED_VIEWS
+# asset-profile-0.5.0 is frozen: its documents keep the V0.5 view vocabulary.
+LEGACY_PROFILE_VIEWS = frozenset({"front", "three_quarter", "three_quarter_front", "side", "top"})
 
 _THREE_QUARTER = (1.0, 0.65, -1.0)
+_THREE_QUARTER_REAR = (1.0, 0.65, 1.0)
+
+# Unit-vector sources from the asset center toward the camera, and axis labels.
+_VIEW_TABLE: dict[str, tuple[tuple[float, float, float], str]] = {
+    "front": ((0.0, 0.0, -1.0), "-Z"),
+    "rear": ((0.0, 0.0, 1.0), "+Z"),
+    "left": ((-1.0, 0.0, 0.0), "-X"),
+    "right": ((1.0, 0.0, 0.0), "+X"),
+    "side": ((1.0, 0.0, 0.0), "+X"),
+    "three_quarter": (_THREE_QUARTER, "+X-Z"),
+    "three_quarter_front": (_THREE_QUARTER, "+X-Z"),
+    "three_quarter_rear": (_THREE_QUARTER_REAR, "+X+Z"),
+    "top": ((0.0, 1.0, 0.0), "+Y"),
+}
 
 
 def _normalize(vector: tuple[float, float, float]) -> tuple[float, float, float]:
@@ -40,32 +56,23 @@ def _normalize(vector: tuple[float, float, float]) -> tuple[float, float, float]
 
 def view_direction(view: str) -> tuple[float, float, float]:
     """Unit vector from the asset center toward the camera."""
-    if view not in PLACED_VIEWS:
-        raise ValueError(f"view '{view}' has no V0.5 camera placement")
-    table = {
-        "front": (0.0, 0.0, -1.0),
-        "three_quarter": _THREE_QUARTER,
-        "three_quarter_front": _THREE_QUARTER,
-        "side": (1.0, 0.0, 0.0),
-        "top": (0.0, 1.0, 0.0),
-    }
-    return _normalize(table[view])
+    if view not in PLACED_VIEWS or view not in _VIEW_TABLE:
+        raise ValueError(f"view '{view}' has no camera placement")
+    return _normalize(_VIEW_TABLE[view][0])
 
 
 def view_up(view: str) -> tuple[float, float, float]:
+    if view not in _VIEW_TABLE:
+        raise ValueError(f"view '{view}' has no camera placement")
     if view == "top":
         return (0.0, 0.0, -1.0)
     return (0.0, 1.0, 0.0)
 
 
 def view_axis_label(view: str) -> str:
-    return {
-        "front": "-Z",
-        "three_quarter": "+X-Z",
-        "three_quarter_front": "+X-Z",
-        "side": "+X",
-        "top": "+Y",
-    }[view]
+    if view not in _VIEW_TABLE:
+        raise ValueError(f"view '{view}' has no camera placement")
+    return _VIEW_TABLE[view][1]
 
 
 @dataclass(frozen=True)
