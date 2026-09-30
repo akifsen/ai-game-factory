@@ -29,11 +29,11 @@ PROCESSING_CONTRACT_VERSION = "asset-processing-contract-0.5.0"
 PROCESSING_CONTRACT_VERSION_V07 = "asset-processing-contract-0.7.0"
 CANONICAL_FRAME = {"up": "+Y", "front": "-Z", "handedness": "right", "units": "m"}
 
+# V0.7 implements character@1, weapon@1, vehicle@1 and aircraft@1; they left this
+# list in the step that implemented them. rigged_character stays UNSUPPORTED
+# (ADR 0017) and nothing here is replaced by a generic "assembly" profile.
 UNSUPPORTED_PROFILE_IDS = (
-    "character",
     "rigged_character",
-    "weapon",
-    "vehicle",
     "building",
     "terrain",
     "animation",
@@ -1129,16 +1129,27 @@ def _load_builtin(name: str) -> AssetProfile:
     return AssetProfile(parse_profile_document(text))
 
 
+def _load_builtin_v07(name: str) -> AssetProfileV07:
+    resource = files("gamefactory").joinpath(f"resources/profiles/{name}.yml")
+    text = resource.read_text(encoding="utf-8")
+    return AssetProfileV07(parse_profile_document_v07(text))
+
+
+BUILTIN_V05_PROFILES = ("static_prop", "pickup", "modular_piece")
+BUILTIN_V07_PROFILES = ("vehicle", "weapon", "aircraft", "character")
+
+
 def builtin_registry() -> ProfileRegistry:
-    """Return the explicit V0.5 registry. The object has no mutating API."""
+    """Return the explicit built-in registry. The object has no mutating API.
+
+    The three asset-profile-0.5.0 profiles bind historical specifications through
+    ``get``; the asset-profile-0.7.0 profiles bind asset-spec-0.7.0 through
+    ``get_v07`` only.
+    """
     return ProfileRegistry(
-        available=(
-            _load_builtin("static_prop"),
-            _load_builtin("pickup"),
-            _load_builtin("modular_piece"),
-        ),
+        available=tuple(_load_builtin(name) for name in BUILTIN_V05_PROFILES),
         unsupported=UNSUPPORTED_PROFILE_IDS,
-        available_v07=(),
+        available_v07=tuple(_load_builtin_v07(name) for name in BUILTIN_V07_PROFILES),
     )
 
 

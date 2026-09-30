@@ -933,11 +933,11 @@ def test_v07_spec_against_builtin_registry_fails(
     with pytest.raises(SpecInvalidError, match="static_prop@1 is not registered"):
         parse_asset_specification_v07(prop_07)
 
-    # Spec naming an UNSUPPORTED profile id (e.g. vehicle against builtin)
-    veh_builtin = copy.deepcopy(valid_vehicle_spec_dict)
-    veh_builtin["profile"] = "vehicle"
-    with pytest.raises(SpecInvalidError, match="profile vehicle is UNSUPPORTED"):
-        parse_asset_specification_v07(veh_builtin)
+    # Spec naming an UNSUPPORTED profile id against builtin
+    rigged = copy.deepcopy(valid_character_spec_dict)
+    rigged["profile"] = "rigged_character"
+    with pytest.raises(SpecInvalidError, match="profile rigged_character is UNSUPPORTED"):
+        parse_asset_specification_v07(rigged)
 
 
 def test_v07_spec_cannot_bind_v05_profile_even_if_in_available(
@@ -980,20 +980,38 @@ def test_builtin_registry_contents_and_isolation() -> None:
         "static_prop@1",
         "pickup@1",
         "modular_piece@1",
+        "vehicle@1",
+        "weapon@1",
+        "aircraft@1",
+        "character@1",
     ]
     assert tuple(r["profile_id"] for r in unsupported_rows) == UNSUPPORTED_PROFILE_IDS
-    assert "aircraft" not in [r["profile_id"] for r in unsupported_rows]
+    assert "rigged_character" in UNSUPPORTED_PROFILE_IDS
+    for implemented in ("aircraft", "vehicle", "weapon", "character"):
+        assert implemented not in [r["profile_id"] for r in unsupported_rows]
 
-    # available_v07 is empty
-    assert reg.available_v07 == ()
+    assert [p.qualified for p in reg.available_v07] == [
+        "vehicle@1",
+        "weapon@1",
+        "aircraft@1",
+        "character@1",
+    ]
 
     # No test ids present
     assert not any("test" in r["profile_id"] for r in availability)
 
-    # Package resources only contains the 3 historical profiles
+    # Package resources contain the 3 historical and the 4 V0.7 profiles
     profile_dir = files("gamefactory").joinpath("resources/profiles")
     profile_filenames = {p.name for p in profile_dir.iterdir()}
-    assert profile_filenames == {"static_prop.yml", "pickup.yml", "modular_piece.yml"}
+    assert profile_filenames == {
+        "static_prop.yml",
+        "pickup.yml",
+        "modular_piece.yml",
+        "vehicle.yml",
+        "weapon.yml",
+        "aircraft.yml",
+        "character.yml",
+    }
 
     # Registry is frozen
     with pytest.raises(dataclasses.FrozenInstanceError):
@@ -1010,7 +1028,7 @@ def test_builtin_registry_contents_and_isolation() -> None:
         ),
     )
     assert len(test_reg.available_v07) == 1
-    assert len(builtin_registry().available_v07) == 0
+    assert len(builtin_registry().available_v07) == 4
 
 
 def test_registry_post_init_validation(

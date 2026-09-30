@@ -183,10 +183,31 @@ def test_paid_request_binding_digest_matches_v06(provider: str, resolve: Any) ->
 # --------------------------------------------------------------------------
 
 
+V07_IMPLEMENTED = ("vehicle", "weapon", "aircraft", "character")
+
+
 def test_builtin_registry_availability_is_frozen() -> None:
-    assert builtin_registry().availability() == GOLDEN["availability"]
-    available = [row["qualified"] for row in GOLDEN["availability"] if row["status"] == "AVAILABLE"]
+    """V0.6 rows are unchanged; V0.7 only appends its profiles and retires their ids.
+
+    The golden stays the V0.6 record. The documented V0.7 transition is: the
+    historical AVAILABLE rows keep their values and order, the implemented ids
+    leave the UNSUPPORTED rows, and the V0.7 rows follow the historical ones.
+    """
+    golden = GOLDEN["availability"]
+    available = [row["qualified"] for row in golden if row["status"] == "AVAILABLE"]
     assert available == ["static_prop@1", "pickup@1", "modular_piece@1"]
+    current = builtin_registry().availability()
+    historical = [row for row in golden if row["status"] == "AVAILABLE"]
+    assert current[: len(historical)] == historical
+    v07 = [row for row in current if row["profile_id"] in V07_IMPLEMENTED]
+    assert [row["qualified"] for row in v07] == [f"{pid}@1" for pid in V07_IMPLEMENTED]
+    assert all(row["status"] == "AVAILABLE" for row in v07)
+    retired = [
+        row
+        for row in golden
+        if row["status"] == "UNSUPPORTED" and row["profile_id"] not in V07_IMPLEMENTED
+    ]
+    assert current == historical + v07 + retired
 
 
 @pytest.mark.parametrize("qualified", sorted(PROFILE_PATHS))

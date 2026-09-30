@@ -1,0 +1,84 @@
+schema_version: asset-profile-0.7.0
+profile_id: aircraft
+version: 1
+categories:
+  - aircraft
+review_views:
+  - front
+  - rear
+  - left
+  - right
+  - three_quarter
+  - three_quarter_rear
+  - top
+framing:
+  min_screen_fraction: 0.55
+  max_screen_fraction: 0.75
+  target_screen_fraction: 0.65
+  margin_fraction: 0.04
+  fov_degrees: 38
+dimension_rules:
+  min_m: 0.5
+  max_m: 80.0
+processing:
+  lod0_required: true
+  lod1_required: false
+  allowed_lod_policies:
+    - lod0_only
+    - lod0_lod1
+  allowed_collider_policies:
+    - box
+  allowed_origin_policies:
+    - bottom_center
+    - center
+  default_origin_policy: bottom_center
+  dimension_tolerance_m: 0.02
+  snap_grid_m: null
+  rig_forbidden: true
+  animation_forbidden: true
+  max_materials: 8
+  max_texture_dimension: 4096
+  max_triangles_lod0: 100000
+godot:
+  body_kind: static_body
+  require_ray_hit: true
+  require_area: false
+runtime:
+  bounds_tolerance_ratio: 0.2
+  bounds_tolerance_floor_m: 0.15
+geometry_mode: assembly
+accepted_source_kinds:
+  - local_operator_assembly
+assembly:
+  roles:
+    - fuselage
+    - propeller
+    - rudder
+    - elevator
+    - aileron_left
+    - aileron_right
+  required_roles:
+    - fuselage
+  role_motion_constraints:
+    fuselage:
+      kind: fixed
+    propeller:
+      kind: revolute
+      axis: [0.0, 0.0, 1.0]
+    rudder:
+      kind: revolute
+      axis: [0.0, 1.0, 0.0]
+    elevator:
+      kind: revolute
+      axis: [1.0, 0.0, 0.0]
+    aileron_left:
+      kind: revolute
+      axis: [1.0, 0.0, 0.0]
+    aileron_right:
+      kind: revolute
+      axis: [1.0, 0.0, 0.0]
+  required_sockets: []
+  pivot_tolerance_m: 0.005
+  basis_tolerance_deg: 0.5
+  socket_position_tolerance_m: 0.01
+  socket_angle_tolerance_deg: 2.0

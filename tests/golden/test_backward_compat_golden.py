@@ -550,6 +550,12 @@ def test_registry_availability_and_parsed_profiles_golden(
     expected = golden_data["registry"]
     reg = builtin_registry()
 
-    assert reg.availability() == expected["availability"]
+    # Documented V0.7 transition (see tests/unit/test_v06_behavior_goldens.py):
+    # historical rows unchanged, implemented ids retired from UNSUPPORTED.
+    implemented = {p.profile_id for p in reg.available_v07}
+    assert implemented == {"vehicle", "weapon", "aircraft", "character"}
+    current = [row for row in reg.availability() if row["profile_id"] not in implemented]
+    frozen = [row for row in expected["availability"] if row["profile_id"] not in implemented]
+    assert current == frozen
     for prof in reg.available:
         assert prof.document.model_dump(mode="json") == expected["parsed_profiles"][prof.profile_id]
