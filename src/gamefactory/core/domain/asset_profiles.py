@@ -1160,6 +1160,22 @@ def render_scene_contract(
     physics = str(contract["physics"])
     if physics not in {"StaticBody3D", "Area3D"}:
         raise ProfileContractError(f"scene contract physics node is unsupported: {physics}")
+    shape = contract.get("shape")
+    if shape not in (None, "BoxShape3D", "CapsuleShape3D"):
+        raise ProfileContractError(f"scene contract collision shape is unsupported: {shape}")
+    if shape == "CapsuleShape3D":
+        # The capsule is built from the declared contract values by the runtime
+        # harness; the wrapper records the node tree and shape class only.
+        return (
+            "[gd_scene load_steps=3 format=3]\n\n"
+            f'[ext_resource type="PackedScene" path="{glb_resource}" id="1"]\n\n'
+            '[sub_resource type="CapsuleShape3D" id="capsule"]\n\n'
+            f'[node name="{contract["root"]}" type="Node3D"]\n\n'
+            f'[node name="{contract["visual"]}" parent="." instance=ExtResource("1")]\n\n'
+            f'[node name="{physics}" type="{physics}" parent="."]\n\n'
+            f'[node name="{contract["collision"]}" type="CollisionShape3D" parent="{physics}"]\n'
+            'shape = SubResource("capsule")\n'
+        )
     return (
         "[gd_scene load_steps=2 format=3]\n\n"
         f'[ext_resource type="PackedScene" path="{glb_resource}" id="1"]\n\n'

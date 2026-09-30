@@ -439,7 +439,7 @@ class DefaultReadinessProbes:
         return checks
 
     def profile_checks(self, specification: Any) -> list[ReadinessCheck]:
-        from gamefactory.core.domain.asset_contracts import parse_asset_specification
+        from gamefactory.core.domain.asset_contracts import parse_any_asset_specification
         from gamefactory.core.domain.asset_profiles import builtin_registry
         from gamefactory.core.domain.camera_framing import PLACED_VIEWS
 
@@ -449,7 +449,7 @@ class DefaultReadinessProbes:
             "profile_runtime_validations_implemented",
         )
         try:
-            profile = parse_asset_specification(specification).bound_profile()
+            profile = parse_any_asset_specification(specification).bound_profile()
         except Exception as exc:
             return [
                 _check(

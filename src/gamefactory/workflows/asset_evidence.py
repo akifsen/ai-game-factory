@@ -40,6 +40,10 @@ def export_asset_evidence_bundle(
     if workflow is None or not workflow.name.startswith("Asset production:"):
         raise ValidationError("Asset evidence export requires an asset-production workflow")
     tasks = TaskRepository(db).list_by_workflow(workflow_id)
+    if any(t.task_type == "asset_assembly_prepare" for t in tasks):
+        from gamefactory.workflows.assembly_evidence import export_assembly_evidence_bundle
+
+        return export_assembly_evidence_bundle(project, db, workflow_id, output_dir)
     prepare = next((t for t in tasks if t.task_type == "asset_prepare"), None)
     if prepare is None:
         raise ArtifactError("Asset specification task is missing")
@@ -109,13 +113,13 @@ def export_asset_evidence_bundle(
         "attempt_number": runtime_execution.attempt_number,
         "processed_glb_sha256": selected["processed_glb"].content_hash,
     }
-    from gamefactory.core.domain.asset_contracts import parse_asset_specification
+    from gamefactory.core.domain.asset_contracts import parse_any_asset_specification
     from gamefactory.workflows.asset_production import (
         capture_belongs_to_execution,
         select_review_captures,
     )
 
-    specification = parse_asset_specification(prepare.parameters["specification"])
+    specification = parse_any_asset_specification(prepare.parameters["specification"])
     profile = specification.bound_profile()
     review_views = profile.review_views
     captures = select_review_captures(
@@ -469,9 +473,17 @@ def export_asset_evidence_bundle(
             for role, (approval, _) in receipt_data.items()
         ],
     )
+    from gamefactory.core.domain.asset_contracts import AssetSpecificationV07
+
+    v07_spec = specification if isinstance(specification, AssetSpecificationV07) else None
+    is_v07 = v07_spec is not None
     production_receipt: dict[str, Any] = {
         "schema_version": (
-            "production-receipt-0.6.0" if v06_evidence is not None else "production-receipt-0.5.0"
+            "production-receipt-0.7.0"
+            if is_v07
+            else "production-receipt-0.6.0"
+            if v06_evidence is not None
+            else "production-receipt-0.5.0"
         ),
         "asset_id": asset_id,
         "revision": revision_number,
@@ -499,6 +511,10 @@ def export_asset_evidence_bundle(
     if v06_evidence is not None:
         production_receipt["paid_request_snapshot_sha256"] = v06_evidence["snapshot_sha256"]
         production_receipt["production_readiness_report_sha256"] = v06_evidence["readiness_sha256"]
+    if is_v07:
+        production_receipt["source_kind"] = "provider_generated"
+        production_receipt["geometry_mode"] = profile.geometry_mode
+        production_receipt["collider_policy"] = v07_spec.collider.policy if v07_spec else None
     receipt_bytes = _write_json(output / "evidence/production-receipt.json", production_receipt)
     entries.append(
         {
@@ -541,18 +557,36 @@ def export_asset_evidence_bundle(
     )
     manifest = {
         "schema_version": (
-            "asset-evidence-0.6.0" if v06_evidence is not None else "asset-evidence-0.5.0"
+            "asset-evidence-0.7.0"
+            if is_v07
+            else "asset-evidence-0.6.0"
+            if v06_evidence is not None
+            else "asset-evidence-0.5.0"
         ),
         **binding,
         "profile_id": profile.profile_id,
         "profile_version": profile.version,
         "profile_qualified": profile.qualified,
         "review_views": list(review_views),
-        "runtime_requirements": profile.runtime_requirements(),
+        "runtime_requirements": (
+            profile.runtime_requirements(v07_spec) if v07_spec else profile.runtime_requirements()
+        ),
         "specification_fingerprint": prepare.parameters["specification_hash"],
         "final_review": {"decision": final.status.value, "fingerprint": final.operation_hash},
         "files": entries,
     }
+    if is_v07:
+        manifest.update(
+            {
+                "profile_schema": profile.schema_version,
+                "source_kind": "provider_generated",
+                "geometry_mode": profile.geometry_mode,
+                "validator": {
+                    "composition": validation_payload.get("composition"),
+                    "rule_groups": validation_payload.get("rule_groups"),
+                },
+            }
+        )
     _write_json(output / "manifest.json", manifest)
     verifier = Path(__file__).parents[1] / "resources" / "scripts" / "verify_asset_bundle.py"
     shutil.copyfile(verifier, output / "verify_asset_bundle.py")

@@ -121,6 +121,22 @@ def _validate_types_and_secrets(val: Any, key_name: str | None = None) -> None:
         )
 
 
+def ensure_single_mesh_specification(specification: Any) -> None:
+    """Reject assembly specifications before any snapshot, approval or intent (ADR 0016).
+
+    paid-request-0.6.0 is frozen and single-mesh only; a specification that
+    declares parts or sockets, uses the local_operator_assembly source kind or
+    binds an assembly profile never reaches it.
+    """
+    from gamefactory.core.domain.asset_contracts import is_assembly_specification
+
+    if is_assembly_specification(specification):
+        raise PaidRequestInvalidError(
+            "Assembly specifications cannot bind to a provider request; the V0.7 provider "
+            "path is single-mesh only"
+        )
+
+
 def validate_paid_request(snapshot: dict[str, Any]) -> None:
     """Strictly validate a paid request snapshot dictionary against PAID_REQUEST_SCHEMA."""
     if not isinstance(snapshot, dict):

@@ -46,7 +46,9 @@ from gamefactory.adapters.persistence.repositories import (
 from gamefactory.core.artifacts.artifact_manager import ArtifactManager
 from gamefactory.core.domain.asset_contracts import (
     AssetSpecification,
-    parse_asset_specification,
+    AssetSpecificationV07,
+    is_assembly_specification,
+    parse_any_asset_specification,
     spec_fingerprint,
 )
 from gamefactory.core.domain.errors import (
@@ -83,6 +85,12 @@ from gamefactory.core.domain.paid_request import (
 from gamefactory.core.execution.path_guard import PathGuard, assert_managed_directory
 from gamefactory.core.execution.process_runner import CommandRequest, ProcessRunner
 from gamefactory.workflows.accounting import CostAccounting
+from gamefactory.workflows.assembly_production import (
+    assembly_prepare,
+    assembly_process,
+    is_assembly_graph,
+    normalization_for_validation,
+)
 from gamefactory.workflows.handlers import (
     HandlerOperation,
     HandlerRecovery,
@@ -118,7 +126,7 @@ def _canonical_hash(value: Any) -> str:
 def create_asset_production_workflow(
     project_id: str,
     project_root: Path | str,
-    specification: AssetSpecification,
+    specification: AssetSpecification | AssetSpecificationV07,
     concept_image: Path | str,
     concept_provenance: Path | str,
     *,
@@ -131,6 +139,11 @@ def create_asset_production_workflow(
     revision_repository: AssetRevisionRepository | None = None,
 ) -> tuple[Workflow, list[Task]]:
     """Create an asset DAG after validating inputs; no provider is contacted here."""
+    if is_assembly_specification(specification):
+        raise PaidRequestInvalidError(
+            "Assembly specifications (parts, sockets or local_operator_assembly) cannot bind "
+            "to a provider request; register the operator source with 'asset assemble'"
+        )
     project_path = Path(project_root).resolve(strict=True)
     concept = Path(concept_image).resolve(strict=True)
     provenance = Path(concept_provenance).resolve(strict=True)
@@ -393,7 +406,7 @@ class AssetProductionHandlers:
         return artifact.id
 
     def prepare(self, workflow: Workflow, task: Task, execution: Execution) -> TaskHandlerResult:
-        spec = parse_asset_specification(task.parameters["specification"])
+        spec = parse_any_asset_specification(task.parameters["specification"])
         if spec_fingerprint(spec) != task.parameters["specification_hash"]:
             raise ValidationError("Asset specification fingerprint changed")
         bound = spec.bound_profile()
@@ -644,6 +657,9 @@ class AssetProductionHandlers:
     def paid_request_snapshot(
         self, workflow: Workflow, task: Task, execution: Execution
     ) -> TaskHandlerResult:
+        from gamefactory.core.domain.paid_request import ensure_single_mesh_specification
+
+        ensure_single_mesh_specification(task.parameters["specification"])
         concept_task = next(
             (
                 t
@@ -1261,7 +1277,7 @@ class AssetProductionHandlers:
         return isinstance(remote, dict) and bool(remote.get("status"))
 
     def process(self, workflow: Workflow, task: Task, execution: Execution) -> TaskHandlerResult:
-        spec = parse_asset_specification(task.parameters["specification"])
+        spec = parse_any_asset_specification(task.parameters["specification"])
         raw_artifact = next(
             (
                 a
@@ -1305,7 +1321,7 @@ class AssetProductionHandlers:
     def validate(self, workflow: Workflow, task: Task, execution: Execution) -> TaskHandlerResult:
         from gamefactory.adapters.assets.glb_validator import validate_glb
 
-        spec = parse_asset_specification(task.parameters["specification"])
+        spec = parse_any_asset_specification(task.parameters["specification"])
         artifact = next(
             (
                 a
@@ -1318,10 +1334,25 @@ class AssetProductionHandlers:
             raise ArtifactError("Processed GLB is missing")
         path = self.root / artifact.relative_path
         self.artifact_manager.verify_artifact_integrity(artifact)
-        result = validate_glb(path, spec)
+        normalization = None
+        if is_assembly_graph(task):
+            normalization = normalization_for_validation(self, workflow.id)
+        result = validate_glb(path, spec, normalization=normalization)
+        report_payload = result.to_dict()
+        if isinstance(spec, AssetSpecificationV07):
+            from gamefactory.adapters.assets.glb_validator import composition_for
+
+            # asset-validation-report-0.7.0: the derived rule groups are recorded
+            # so a verifier can see which contracts were applied.
+            composition = composition_for(spec)
+            report_payload["schema_version"] = "asset-validation-report-0.7.0"
+            report_payload["rule_groups"] = list(composition.groups)
+            report_payload["composition"] = composition.name
+            if normalization is not None:
+                report_payload["normalization"] = normalization.as_dict()
         report = self._path(task, f"validation-attempt-{execution.attempt_number}.json")
         report.write_text(
-            json.dumps(result.to_dict(), sort_keys=True, indent=2) + "\n", encoding="utf-8"
+            json.dumps(report_payload, sort_keys=True, indent=2) + "\n", encoding="utf-8"
         )
         report_id = self._register(workflow, task, execution, "asset-validation-report", report)
         revision = self.revisions.get(spec.asset_id, int(task.parameters["revision_number"]))
@@ -1367,15 +1398,29 @@ class AssetProductionHandlers:
         hashes = self._artifact_hashes(workflow.id)
         artifact_list = self.artifacts.list_by_workflow(workflow.id)
         roles = {artifact.artifact_type: artifact.content_hash for artifact in artifact_list}
-        active_concept = self._active_concept_artifact(workflow.id)
-        roles["asset-concept"] = active_concept.content_hash
-        required = (
-            "asset-concept",
-            "asset-processed-glb",
-            "asset-validation-report",
-            "asset-runtime-observation",
-            "asset-runtime-capture",
-        )
+        required: tuple[str, ...]
+        if is_assembly_graph(task):
+            # Operator assemblies have no concept; the retained source and its
+            # registration are what the reviewer approves the result against.
+            required = (
+                "asset-source-glb",
+                "asset-source-registration",
+                "asset-processed-glb",
+                "asset-processing-report",
+                "asset-validation-report",
+                "asset-runtime-observation",
+                "asset-runtime-capture",
+            )
+        else:
+            active_concept = self._active_concept_artifact(workflow.id)
+            roles["asset-concept"] = active_concept.content_hash
+            required = (
+                "asset-concept",
+                "asset-processed-glb",
+                "asset-validation-report",
+                "asset-runtime-observation",
+                "asset-runtime-capture",
+            )
         if any(role not in roles for role in required):
             raise ArtifactError(
                 "Final review cannot open: required concept, processing, validation, or runtime evidence is missing"
@@ -1393,7 +1438,7 @@ class AssetProductionHandlers:
                 if artifact.artifact_type == "asset-runtime-capture"
             ],
             str(observation.get("execution_id", "")),
-            parse_asset_specification(task.parameters["specification"])
+            parse_any_asset_specification(task.parameters["specification"])
             .bound_profile()
             .review_views,
         )
@@ -1465,6 +1510,14 @@ def register_asset_production_handlers(
     """Register the domain stages; engine metadata owns approval/recovery semantics."""
     registry.register("asset_prepare", handlers.prepare)
     registry.register(
+        "asset_assembly_prepare",
+        lambda workflow, task, execution: assembly_prepare(handlers, workflow, task, execution),
+    )
+    registry.register(
+        "asset_assembly_process",
+        lambda workflow, task, execution: assembly_process(handlers, workflow, task, execution),
+    )
+    registry.register(
         "asset_concept_review",
         handlers.review_concept,
         TaskHandlerMetadata(
@@ -1517,17 +1570,17 @@ def register_asset_production_handlers(
 
 
 def bound_profile_id(task: Task) -> str:
-    spec = parse_asset_specification(task.parameters["specification"])
+    spec = parse_any_asset_specification(task.parameters["specification"])
     return str(spec.bound_profile().profile_id)
 
 
 def bound_profile_version(task: Task) -> int:
-    spec = parse_asset_specification(task.parameters["specification"])
+    spec = parse_any_asset_specification(task.parameters["specification"])
     return int(spec.bound_profile().version)
 
 
 def bound_profile_qualified(task: Task) -> str:
-    spec = parse_asset_specification(task.parameters["specification"])
+    spec = parse_any_asset_specification(task.parameters["specification"])
     return str(spec.bound_profile().qualified)
 
 
@@ -1597,11 +1650,16 @@ def validate_view_framing(
     view: str,
     minimum: float,
     maximum: float,
+    ratio_key: str = "height_ratio",
 ) -> None:
-    """Reject a capture whose projected bounds miss the profile framing contract."""
+    """Reject a capture whose projected bounds miss the profile framing contract.
+
+    Historical observations measure the height fraction. asset-runtime-observation-0.7.0
+    measures ``fill_ratio``, the dominant screen extent the distance solver targets.
+    """
     if not isinstance(framing, dict):
         raise RuntimeValidationFailedError(f"{view} capture has no framing measurement")
-    height = framing.get("height_ratio")
+    height = framing.get(ratio_key)
     if (
         isinstance(height, bool)
         or not isinstance(height, (int, float))
@@ -1641,6 +1699,94 @@ def validate_view_framing(
 def validate_side_framing(framing: Any) -> None:
     """Reject a side capture outside the static_prop viewport contract."""
     validate_view_framing(framing, view="side", minimum=SIDE_HEIGHT_MIN, maximum=SIDE_HEIGHT_MAX)
+
+
+OBSERVATION_SCHEMA_V07 = "asset-runtime-observation-0.7.0"
+
+
+def runtime_contract_v07(spec: AssetSpecificationV07) -> dict[str, Any]:
+    """The contract block the Godot harness checks for asset-spec-0.7.0 assets."""
+    profile = spec.bound_profile()
+    contract = profile.processing_contract(spec)
+    block: dict[str, Any] = {
+        "geometry_mode": profile.geometry_mode,
+        "collider_policy": spec.collider.policy,
+        "capsule": contract["capsule"],
+        "origin_policy": spec.origin_policy,
+        "dimension_tolerance_m": contract["dimension_tolerance_m"],
+        "hierarchy": contract.get("hierarchy", []),
+        "sockets": contract.get("sockets", []),
+    }
+    if profile.assembly is not None:
+        block["pivot_tolerance_m"] = profile.assembly.pivot_tolerance_m
+        block["basis_tolerance_deg"] = profile.assembly.basis_tolerance_deg
+        block["socket_tolerance_m"] = profile.assembly.socket_position_tolerance_m
+        block["socket_angle_tolerance_deg"] = profile.assembly.socket_angle_tolerance_deg
+    return block
+
+
+def validate_observation_v07(observation: dict[str, Any], spec: AssetSpecificationV07) -> None:
+    """Independently check the 0.7 parts of a Godot observation; never trust its status alone."""
+    profile = spec.bound_profile()
+    if observation.get("schema_version") != OBSERVATION_SCHEMA_V07:
+        raise RuntimeValidationFailedError(
+            "Godot observation is not asset-runtime-observation-0.7.0"
+        )
+    if observation.get("geometry_mode") != profile.geometry_mode:
+        raise RuntimeValidationFailedError(
+            "Godot observation geometry mode differs from the profile"
+        )
+    if observation.get("collider_policy") != spec.collider.policy:
+        raise RuntimeValidationFailedError(
+            "Godot observation collider policy differs from the spec"
+        )
+    expected_shape = "CapsuleShape3D" if spec.collider.policy == "capsule" else "BoxShape3D"
+    if observation.get("collision_shape_class") != expected_shape:
+        raise RuntimeValidationFailedError(f"Godot collision shape is not {expected_shape}")
+    if spec.collider.policy == "capsule":
+        capsule = observation.get("capsule")
+        declared = spec.collider.capsule
+        if (
+            not isinstance(capsule, dict)
+            or capsule.get("ok") is not True
+            or declared is None
+            or abs(float(capsule.get("observed", {}).get("radius_m", -1)) - declared.radius_m)
+            > 1e-6
+            or abs(float(capsule.get("observed", {}).get("height_m", -1)) - declared.height_m)
+            > 1e-6
+        ):
+            raise RuntimeValidationFailedError("Godot capsule does not match the declared contract")
+    if profile.geometry_mode != "assembly":
+        return
+    hierarchy = observation.get("hierarchy")
+    parts = spec.parts or []
+    if not isinstance(hierarchy, dict) or hierarchy.get("ok") is not True:
+        raise RuntimeValidationFailedError("Godot part hierarchy does not match the declared tree")
+    observed_parts = {row.get("part_id"): row for row in hierarchy.get("parts", [])}
+    if set(observed_parts) != {p.part_id for p in parts} or not all(
+        row.get("ok") is True for row in observed_parts.values()
+    ):
+        raise RuntimeValidationFailedError("Godot did not confirm every declared part and pivot")
+    observed_sockets = {row.get("socket_id"): row for row in hierarchy.get("sockets", [])}
+    if set(observed_sockets) != {s.socket_id for s in spec.sockets or []} or not all(
+        row.get("ok") is True and row.get("node_class") == "Marker3D"
+        for row in observed_sockets.values()
+    ):
+        raise RuntimeValidationFailedError("Godot did not confirm every declared socket")
+    moving = {p.part_id: p.pivot.motion.kind for p in parts if p.pivot.motion.kind != "fixed"}
+    articulation = observation.get("articulation")
+    if not isinstance(articulation, list):
+        raise RuntimeValidationFailedError("Godot observation has no articulation results")
+    tested = {row.get("part_id"): row for row in articulation if isinstance(row, dict)}
+    if set(tested) != set(moving):
+        raise RuntimeValidationFailedError("Godot articulation did not cover every movable part")
+    for part_id, kind in moving.items():
+        row = tested[part_id]
+        if row.get("motion") != kind or not all(
+            row.get(key) is True
+            for key in ("moved", "pivot_ok", "descendants_rigid", "others_unchanged", "restored")
+        ):
+            raise RuntimeValidationFailedError(f"Godot articulation failed for part {part_id}")
 
 
 def run_asset_in_godot(
@@ -1719,8 +1865,9 @@ def run_asset_in_godot(
         raise ValidationError(
             "Godot stage is blocked because the independent asset validator did not pass"
         )
-    spec = parse_asset_specification(task.parameters["specification"])
-    profile = spec.bound_profile()
+    spec = parse_any_asset_specification(task.parameters["specification"])
+    profile: Any = spec.bound_profile()
+    is_v07 = isinstance(spec, AssetSpecificationV07)
     capture_angles = angles or profile.review_views
     if (
         not capture_angles
@@ -1760,10 +1907,14 @@ def run_asset_in_godot(
         "output_dir": str(capture_dir),
         "observation_path": str(observation_path),
         "angles": list(capture_angles),
-        "profile": profile.capture_request_profile(),
+        "profile": profile.capture_request_profile(spec)
+        if is_v07
+        else profile.capture_request_profile(),
     }
+    if isinstance(spec, AssetSpecificationV07):
+        request["contract_v07"] = runtime_contract_v07(spec)
     (stage / "asset_wrapper.tscn").write_text(
-        render_scene_contract(profile.scene_contract()),
+        render_scene_contract(profile.scene_contract(spec) if is_v07 else profile.scene_contract()),
         encoding="utf-8",
     )
     request_path = stage / "request.json"
@@ -1849,7 +2000,9 @@ def run_asset_in_godot(
         raise RuntimeValidationFailedError(
             "Godot runtime observation is bound to a different workflow, revision, or GLB"
         )
-    requirements = profile.runtime_requirements()
+    requirements = profile.runtime_requirements(spec) if is_v07 else profile.runtime_requirements()
+    if isinstance(spec, AssetSpecificationV07):
+        validate_observation_v07(observation, spec)
     if (
         observation.get("status") != "PASS"
         or not observation.get("mesh_visible")
@@ -1895,6 +2048,7 @@ def run_asset_in_godot(
             view=angle,
             minimum=framing_policy.min_screen_fraction,
             maximum=framing_policy.max_screen_fraction,
+            ratio_key="fill_ratio" if is_v07 else "height_ratio",
         )
     output_ids: list[str] = []
     observation_relative = observation_path.relative_to(root).as_posix()

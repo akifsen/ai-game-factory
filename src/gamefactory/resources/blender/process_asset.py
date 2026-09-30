@@ -93,8 +93,11 @@ def main() -> None:
         raise ValueError("processing contract requires LOD1")
     if args.lod_policy not in {"lod0_lod1", "lod0_only"}:
         raise ValueError("unsupported lod policy")
-    if contract and contract.get("collider_policy", "box") != "box":
-        raise ValueError("this processor implements only a box collider")
+    collider_policy = contract.get("collider_policy", "box") if contract else "box"
+    if collider_policy not in {"box", "capsule"}:
+        raise ValueError("this processor implements box and capsule colliders only")
+    if contract and contract.get("geometry_mode", "single_mesh") != "single_mesh":
+        raise ValueError("this processor handles single-mesh assets only")
     raw_hash = hashlib.sha256(source.read_bytes()).hexdigest()
     import bpy  # type: ignore[import-not-found]
     from mathutils import Vector  # type: ignore[import-not-found]
@@ -174,15 +177,19 @@ def main() -> None:
         lod1_triangles = sum(max(1, len(poly.vertices) - 2) for poly in lod1.data.polygons)
 
     low, high = bounds([lod0])
-    bpy.ops.mesh.primitive_cube_add(
-        size=1.0, location=((low.x + high.x) / 2, (low.y + high.y) / 2, (low.z + high.z) / 2)
-    )
-    collider = bpy.context.object
-    collider.name = f"COL_{args.asset_id}"
-    collider.dimensions = high - low
-    bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
-    collider_triangles = sum(max(1, len(poly.vertices) - 2) for poly in collider.data.polygons)
-    selected_objects = [lod0, collider] if lod1 is None else [lod0, lod1, collider]
+    collider = None
+    collider_triangles = None
+    if collider_policy == "box":
+        bpy.ops.mesh.primitive_cube_add(
+            size=1.0, location=((low.x + high.x) / 2, (low.y + high.y) / 2, (low.z + high.z) / 2)
+        )
+        collider = bpy.context.object
+        collider.name = f"COL_{args.asset_id}"
+        collider.dimensions = high - low
+        bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
+        collider_triangles = sum(max(1, len(poly.vertices) - 2) for poly in collider.data.polygons)
+    # A capsule collider carries no mesh; Godot builds CapsuleShape3D from the contract.
+    selected_objects = [obj for obj in (lod0, lod1, collider) if obj is not None]
     for obj in bpy.context.scene.objects:
         obj.select_set(obj in selected_objects)
     bpy.context.view_layer.objects.active = lod0

@@ -15,6 +15,16 @@ var collision_shape_present := false
 var side_framing := {}
 var view_framing := {}
 var request_has_profile := false
+## asset-runtime-observation-0.7.0 state (present only when the request carries
+## contract_v07; historical requests keep the 0.4.0/0.5.0 behavior unchanged).
+var contract_v07: Dictionary = {}
+var geometry_mode := "single_mesh"
+var collider_policy := "box"
+var visuals: Array[MeshInstance3D] = []
+var hierarchy_report := {}
+var articulation_report: Array = []
+var capsule_report := {}
+var collision_shape_class := ""
 ## ADR 0014: every named review view has one placement. Unknown views fail;
 ## there is no fallback. The asset faces -Z with +Y up, so its right is +X.
 const VIEW_TABLE := {
@@ -76,12 +86,39 @@ func _run() -> void:
 	asset_root.name = "AssetUnderTest"
 	world_root.add_child(asset_root)
 	asset_root.add_child(imported)
-	visual = _find_mesh(imported, "SM_" + str(request.asset_id) + "_LOD0")
-	collider_proxy = _find_mesh(imported, "COL_" + str(request.asset_id))
-	if visual == null or visual.mesh == null or visual.mesh.get_surface_count() == 0:
-		_fail("LOD0 visible mesh with geometry is missing")
-	if collider_proxy == null or collider_proxy.mesh == null or collider_proxy.mesh.get_surface_count() == 0:
-		_fail("collider proxy mesh with geometry is missing")
+	if request.has("contract_v07") and typeof(request.contract_v07) == TYPE_DICTIONARY:
+		contract_v07 = request.contract_v07
+		geometry_mode = str(contract_v07.get("geometry_mode", "single_mesh"))
+		collider_policy = str(contract_v07.get("collider_policy", "box"))
+	if contract_v07.is_empty():
+		visual = _find_mesh(imported, "SM_" + str(request.asset_id) + "_LOD0")
+		collider_proxy = _find_mesh(imported, "COL_" + str(request.asset_id))
+		if visual == null or visual.mesh == null or visual.mesh.get_surface_count() == 0:
+			_fail("LOD0 visible mesh with geometry is missing")
+		if collider_proxy == null or collider_proxy.mesh == null or collider_proxy.mesh.get_surface_count() == 0:
+			_fail("collider proxy mesh with geometry is missing")
+		if visual != null:
+			visuals.append(visual)
+	else:
+		for mesh_name in _lod0_names():
+			var found := _find_mesh(imported, mesh_name)
+			if found == null or found.mesh == null or found.mesh.get_surface_count() == 0:
+				_fail("LOD0 visible mesh with geometry is missing: " + mesh_name)
+			else:
+				visuals.append(found)
+		if not visuals.is_empty():
+			visual = visuals[0]
+		collider_proxy = _find_mesh(imported, "COL_" + str(request.asset_id))
+		if collider_policy == "box":
+			if collider_proxy == null or collider_proxy.mesh == null or collider_proxy.mesh.get_surface_count() == 0:
+				_fail("collider proxy mesh with geometry is missing")
+		elif collider_policy == "capsule":
+			if collider_proxy != null:
+				_fail("capsule assets must not carry a collider mesh")
+		else:
+			_fail("unsupported collider policy " + collider_policy)
+		if geometry_mode == "assembly":
+			_verify_hierarchy(imported)
 	if not failures.is_empty():
 		_write_observation(false, AABB())
 		quit(1)
@@ -116,23 +153,42 @@ func _run() -> void:
 	var shape := CollisionShape3D.new()
 	shape.name = "CollisionShape3D"
 	var vertices := PackedVector3Array()
-	for surface in range(collider_proxy.mesh.get_surface_count()):
-		var arrays := collider_proxy.mesh.surface_get_arrays(surface)
-		var points: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
-		for point in points:
-			vertices.append(asset_root.global_transform.affine_inverse() * collider_proxy.global_transform * point)
-	var convex := ConvexPolygonShape3D.new()
-	convex.points = vertices
-	shape.shape = convex
+	if collider_policy == "capsule":
+		var declared: Dictionary = contract_v07.get("capsule", {}) if typeof(contract_v07.get("capsule", {})) == TYPE_DICTIONARY else {}
+		var capsule := CapsuleShape3D.new()
+		capsule.radius = float(declared.get("radius_m", 0.0))
+		capsule.height = float(declared.get("height_m", 0.0))
+		shape.shape = capsule
+		var origin_policy := str(contract_v07.get("origin_policy", "bottom_center"))
+		shape.position = Vector3(0, capsule.height * 0.5, 0) if origin_policy == "bottom_center" else Vector3.ZERO
+		collision_shape_class = "CapsuleShape3D"
+	else:
+		for surface in range(collider_proxy.mesh.get_surface_count()):
+			var arrays := collider_proxy.mesh.surface_get_arrays(surface)
+			var points: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+			for point in points:
+				vertices.append(asset_root.global_transform.affine_inverse() * collider_proxy.global_transform * point)
+		var convex := ConvexPolygonShape3D.new()
+		convex.points = vertices
+		shape.shape = convex
+		collision_shape_class = "BoxShape3D"
 	body.add_child(shape)
 	asset_root.add_child(body)
 	collision_shape_present = true
 	var bounds := visual.mesh.get_aabb()
 	var global_bounds := visual.global_transform * bounds
+	for index in range(1, visuals.size()):
+		global_bounds = global_bounds.merge(visuals[index].global_transform * visuals[index].mesh.get_aabb())
 	if not global_bounds.size.is_finite() or global_bounds.size.x <= 0 or global_bounds.size.y <= 0 or global_bounds.size.z <= 0:
 		_fail("runtime mesh bounds are invalid")
-	if body.get_child_count() != 1 or shape.shape == null or vertices.size() < 4:
+	if collider_policy == "capsule":
+		_check_capsule(shape, global_bounds)
+		if body.get_child_count() != 1 or shape.shape == null:
+			_fail("runtime physics body/collision shape is invalid")
+	elif body.get_child_count() != 1 or shape.shape == null or vertices.size() < 4:
 		_fail("runtime physics body/collision shape is invalid")
+	if geometry_mode == "assembly" and failures.is_empty():
+		_articulate(imported)
 	if not failures.is_empty():
 		_write_observation(false, global_bounds)
 		quit(1)
@@ -175,6 +231,10 @@ func _run() -> void:
 		var correction_applied := false
 		if viewport.y > 0.0 and fitted.size.y > 0.0:
 			initial_height_ratio = fitted.size.y / viewport.y
+			if not contract_v07.is_empty() and viewport.x > 0.0:
+				# asset-runtime-observation-0.7.0 frames the dominant screen extent,
+				# as the distance solver does, so elongated assets are not overfilled.
+				initial_height_ratio = maxf(initial_height_ratio, fitted.size.x / viewport.x)
 			if initial_height_ratio < min_fraction or initial_height_ratio > max_fraction:
 				var near := maxf(distance - e_f, 0.001)
 				distance = maxf(e_f + 0.01, e_f + near * initial_height_ratio / target_fraction)
@@ -228,12 +288,221 @@ func _find_mesh(node: Node, expected_name: String) -> MeshInstance3D:
 			return found
 	return null
 
+func _lod0_names() -> Array[String]:
+	var names: Array[String] = []
+	if geometry_mode == "assembly":
+		for entry in contract_v07.get("hierarchy", []):
+			names.append("SM_" + str(request.asset_id) + "_" + str(entry.get("part_id", "")) + "_LOD0")
+	else:
+		names.append("SM_" + str(request.asset_id) + "_LOD0")
+	return names
+
 func _hide_non_lod0(node: Node) -> void:
 	if node is MeshInstance3D:
 		var mesh_node := node as MeshInstance3D
-		mesh_node.visible = mesh_node.name == "SM_" + str(request.asset_id) + "_LOD0"
+		if contract_v07.is_empty():
+			mesh_node.visible = mesh_node.name == "SM_" + str(request.asset_id) + "_LOD0"
+		else:
+			mesh_node.visible = _lod0_names().has(str(mesh_node.name))
 	for child in node.get_children():
 		_hide_non_lod0(child)
+
+func _find_node(node: Node, expected_name: String) -> Node:
+	if str(node.name) == expected_name:
+		return node
+	for child in node.get_children():
+		var found := _find_node(child, expected_name)
+		if found != null:
+			return found
+	return null
+
+func _vec3(value: Variant) -> Vector3:
+	if typeof(value) != TYPE_ARRAY or (value as Array).size() != 3:
+		return Vector3.ZERO
+	var items: Array = value
+	return Vector3(float(items[0]), float(items[1]), float(items[2]))
+
+func _quat(value: Variant) -> Quaternion:
+	if typeof(value) != TYPE_ARRAY or (value as Array).size() != 4:
+		return Quaternion.IDENTITY
+	var items: Array = value
+	return Quaternion(float(items[0]), float(items[1]), float(items[2]), float(items[3])).normalized()
+
+func _descendants(node: Node) -> Array[Node3D]:
+	var result: Array[Node3D] = []
+	for child in node.get_children():
+		if child is Node3D:
+			result.append(child as Node3D)
+		result.append_array(_descendants(child))
+	return result
+
+## ADR 0013: the imported PART_ tree must equal the declared hierarchy, pivots
+## and sockets. Sockets are replaced by Marker3D nodes with the same transform.
+func _verify_hierarchy(imported: Node) -> void:
+	var pivot_tol := float(contract_v07.get("pivot_tolerance_m", 0.005))
+	var basis_tol := float(contract_v07.get("basis_tolerance_deg", 0.5))
+	var socket_tol := float(contract_v07.get("socket_tolerance_m", 0.01))
+	var socket_deg := float(contract_v07.get("socket_angle_tolerance_deg", 2.0))
+	var root_node := _find_node(imported, "ROOT") as Node3D
+	var ok := root_node != null
+	if root_node == null:
+		_fail("assembly ROOT node is missing after import")
+	var parts: Array = []
+	for entry in contract_v07.get("hierarchy", []):
+		var node_name := str(entry.get("node", ""))
+		var node := _find_node(imported, node_name) as Node3D
+		var pivot: Dictionary = entry.get("pivot", {})
+		var row := {"part_id": str(entry.get("part_id", "")), "node": node_name, "present": node != null}
+		if node == null:
+			ok = false
+			_fail("assembly part node is missing after import: " + node_name)
+			parts.append(row)
+			continue
+		var parent_name := str(node.get_parent().name) if node.get_parent() != null else ""
+		var declared_position := _vec3(pivot.get("position_m", []))
+		var declared_basis := _quat(pivot.get("basis_quaternion_xyzw", []))
+		var angle := rad_to_deg(node.basis.orthonormalized().get_rotation_quaternion().angle_to(declared_basis))
+		row["parent"] = parent_name
+		row["parent_ok"] = parent_name == str(entry.get("parent_node", ""))
+		row["position"] = [node.position.x, node.position.y, node.position.z]
+		row["position_ok"] = node.position.distance_to(declared_position) <= pivot_tol
+		row["basis_angle_deg"] = angle
+		row["basis_ok"] = angle <= basis_tol
+		var meshes_ok := true
+		for mesh_name in entry.get("meshes", []):
+			var mesh_child := node.get_node_or_null(NodePath(str(mesh_name)))
+			if mesh_child == null or not (mesh_child is MeshInstance3D):
+				meshes_ok = false
+		row["meshes_ok"] = meshes_ok
+		var part_ok: bool = row["parent_ok"] and row["position_ok"] and row["basis_ok"] and meshes_ok
+		row["ok"] = part_ok
+		if not part_ok:
+			ok = false
+			_fail("assembly part does not match its declared pivot/tree: " + node_name)
+		parts.append(row)
+	var sockets: Array = []
+	for entry in contract_v07.get("sockets", []):
+		var node_name := str(entry.get("node", ""))
+		var node := _find_node(imported, node_name) as Node3D
+		var row := {"socket_id": str(entry.get("socket_id", "")), "node": node_name, "present": node != null}
+		if node == null:
+			ok = false
+			_fail("socket node is missing after import: " + node_name)
+			sockets.append(row)
+			continue
+		var parent := node.get_parent()
+		var parent_name := str(parent.name) if parent != null else ""
+		var declared := _vec3(entry.get("translation_m", []))
+		var forward := -node.global_transform.basis.z.normalized()
+		var rest_forward := _vec3(entry.get("rest_forward", [])) if entry.get("rest_forward") != null else forward
+		var forward_angle := rad_to_deg(forward.angle_to(rest_forward.normalized())) if rest_forward.length() > 0.0 else 0.0
+		row["parent"] = parent_name
+		row["parent_ok"] = parent_name == str(entry.get("parent_node", ""))
+		row["position_ok"] = node.position.distance_to(declared) <= socket_tol
+		row["children"] = node.get_child_count()
+		row["forward_world"] = [forward.x, forward.y, forward.z]
+		row["forward_angle_deg"] = forward_angle
+		row["forward_ok"] = forward_angle <= socket_deg
+		var socket_ok: bool = row["parent_ok"] and row["position_ok"] and row["forward_ok"] and node.get_child_count() == 0 and not (node is MeshInstance3D)
+		row["ok"] = socket_ok
+		if not socket_ok:
+			ok = false
+			_fail("socket does not match its declared frame: " + node_name)
+		var marker := Marker3D.new()
+		marker.name = node_name
+		marker.transform = node.transform
+		parent.remove_child(node)
+		node.free()
+		parent.add_child(marker)
+		row["node_class"] = marker.get_class()
+		sockets.append(row)
+	hierarchy_report = {"ok": ok and failures.is_empty(), "root_present": root_node != null, "parts": parts, "sockets": sockets}
+
+## Move every non-fixed part about its declared pivot/axis, assert the pivot
+## stays put (revolute) or moves along the axis (prismatic), that descendants and
+## sockets follow rigidly and that everything else is untouched, then restore.
+func _articulate(imported: Node) -> void:
+	var root_node := _find_node(imported, "ROOT") as Node3D
+	if root_node == null:
+		return
+	var everything: Array[Node3D] = [root_node]
+	everything.append_array(_descendants(root_node))
+	for entry in contract_v07.get("hierarchy", []):
+		var pivot: Dictionary = entry.get("pivot", {})
+		var motion := str(pivot.get("motion", "fixed"))
+		if motion == "fixed":
+			continue
+		var node := _find_node(imported, str(entry.get("node", ""))) as Node3D
+		if node == null:
+			continue
+		var axis := _vec3(pivot.get("axis", [])).normalized()
+		var before := {}
+		for item in everything:
+			before[item] = item.global_transform
+		var moving: Array[Node3D] = [node]
+		moving.append_array(_descendants(node))
+		var relative := {}
+		for item in moving:
+			relative[item] = node.global_transform.affine_inverse() * item.global_transform
+		var rest := node.transform
+		var pivot_before := node.global_position
+		var expected_pivot := pivot_before
+		if motion == "revolute":
+			node.basis = node.basis * Basis(axis, deg_to_rad(15.0))
+		else:
+			var parent_basis := (node.get_parent() as Node3D).global_transform.basis
+			expected_pivot = pivot_before + parent_basis * (rest.basis * (axis * 0.05))
+			node.position += rest.basis * (axis * 0.05)
+		var moved := not node.global_transform.is_equal_approx(before[node])
+		var pivot_ok := node.global_position.distance_to(expected_pivot) <= 0.0001
+		var rigid := true
+		for item in moving:
+			if not (node.global_transform.affine_inverse() * item.global_transform).is_equal_approx(relative[item]):
+				rigid = false
+		var others := true
+		for item in everything:
+			if moving.has(item):
+				continue
+			if not item.global_transform.is_equal_approx(before[item]):
+				others = false
+		node.transform = rest
+		var restored := node.global_transform.is_equal_approx(before[node])
+		var row_ok := moved and pivot_ok and rigid and others and restored
+		articulation_report.append({
+			"part_id": str(entry.get("part_id", "")),
+			"motion": motion,
+			"axis": [axis.x, axis.y, axis.z],
+			"moved": moved,
+			"pivot_ok": pivot_ok,
+			"descendants_rigid": rigid,
+			"others_unchanged": others,
+			"restored": restored,
+			"ok": row_ok,
+		})
+		if not row_ok:
+			_fail("articulation check failed for " + str(entry.get("node", "")))
+
+func _check_capsule(shape: CollisionShape3D, global_bounds: AABB) -> void:
+	var capsule := shape.shape as CapsuleShape3D
+	var declared: Dictionary = contract_v07.get("capsule", {}) if typeof(contract_v07.get("capsule", {})) == TYPE_DICTIONARY else {}
+	var tol := float(contract_v07.get("dimension_tolerance_m", 0.02))
+	var radius := float(declared.get("radius_m", 0.0))
+	var height := float(declared.get("height_m", 0.0))
+	var matches := capsule != null and absf(capsule.radius - radius) <= 1e-6 and absf(capsule.height - height) <= 1e-6
+	var fits := height <= global_bounds.size.y + tol and 2.0 * radius <= maxf(global_bounds.size.x, global_bounds.size.z) + tol
+	capsule_report = {
+		"declared": {"radius_m": radius, "height_m": height},
+		"observed": {"radius_m": capsule.radius if capsule != null else 0.0, "height_m": capsule.height if capsule != null else 0.0},
+		"axis": "+Y",
+		"center": [shape.position.x, shape.position.y, shape.position.z],
+		"shape_ok": matches,
+		"fit_ok": fits,
+		"ok": matches and fits,
+	}
+	if not matches:
+		_fail("capsule shape differs from the declared contract")
+	if not fits:
+		_fail("capsule does not fit the runtime mesh bounds")
 
 func _view_direction_vector(angle: String) -> Vector3:
 	if not VIEW_TABLE.has(angle):
@@ -355,6 +624,8 @@ func _measure_view_framing(camera: Camera3D, bounds: AABB, scale_reference: Mesh
 	var max_y := rect.position.y + rect.size.y
 	var inside := rect.position.x >= margin_x and rect.position.y >= margin_y and max_x <= viewport.x - margin_x and max_y <= viewport.y - margin_y
 	var height_ratio := rect.size.y / viewport.y
+	var fill_ratio := maxf(height_ratio, rect.size.x / viewport.x)
+	var framed_ratio := height_ratio if contract_v07.is_empty() else fill_ratio
 	var center_x := rect.position.x + rect.size.x * 0.5
 	var center_offset := absf(center_x - viewport.x * 0.5) / viewport.x
 	var centered := center_offset <= 0.08
@@ -377,8 +648,8 @@ func _measure_view_framing(camera: Camera3D, bounds: AABB, scale_reference: Mesh
 		reason = "camera is inside asset geometry"
 	elif not inside:
 		reason = "asset bounds are outside the viewport safety margin"
-	elif height_ratio < min_fraction or height_ratio > max_fraction:
-		reason = "asset height fraction is outside the profile framing range"
+	elif framed_ratio < min_fraction or framed_ratio > max_fraction:
+		reason = "asset height fraction is outside the profile framing range" if contract_v07.is_empty() else "asset screen fill is outside the profile framing range"
 	elif not centered:
 		reason = "asset is not horizontally centered"
 	elif reference_between:
@@ -390,6 +661,7 @@ func _measure_view_framing(camera: Camera3D, bounds: AABB, scale_reference: Mesh
 		"margin_ok": inside,
 		"margin_fraction": margin_fraction,
 		"height_ratio": height_ratio,
+		"fill_ratio": fill_ratio,
 		"horizontally_centered": centered,
 		"center_offset_ratio": center_offset,
 		"reference_between_camera_and_asset": reference_between,
@@ -434,8 +706,11 @@ func _environment() -> WorldEnvironment:
 	return world_environment
 
 func _write_observation(passed: bool, bounds: AABB) -> void:
+	var schema := "asset-runtime-observation-0.5.0" if request_has_profile else "asset-runtime-observation-0.4.0"
+	if not contract_v07.is_empty():
+		schema = "asset-runtime-observation-0.7.0"
 	var observation := {
-		"schema_version": "asset-runtime-observation-0.5.0" if request_has_profile else "asset-runtime-observation-0.4.0",
+		"schema_version": schema,
 		"workflow_id": request.get("workflow_id", ""),
 		"revision": int(request.get("revision", 0)),
 		"asset_id": request.get("asset_id", ""),
@@ -454,6 +729,19 @@ func _write_observation(passed: bool, bounds: AABB) -> void:
 		"collider_proxy_name": collider_proxy.name if collider_proxy != null else "",
 		"errors": failures,
 	}
+	if not contract_v07.is_empty():
+		var names: Array = []
+		for item in visuals:
+			names.append(str(item.name))
+		observation["geometry_mode"] = geometry_mode
+		observation["collider_policy"] = collider_policy
+		observation["collision_shape_class"] = collision_shape_class
+		observation["mesh_names"] = names
+		if geometry_mode == "assembly":
+			observation["hierarchy"] = hierarchy_report
+			observation["articulation"] = articulation_report
+		if collider_policy == "capsule":
+			observation["capsule"] = capsule_report
 	if not view_framing.is_empty():
 		observation["view_framing"] = view_framing
 	if not side_framing.is_empty():

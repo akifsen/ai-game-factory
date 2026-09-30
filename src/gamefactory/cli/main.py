@@ -57,7 +57,7 @@ from gamefactory.core.accounting.ledger import (
     signed_amount,
 )
 from gamefactory.core.approvals.approval_service import ApprovalService
-from gamefactory.core.domain.asset_contracts import parse_asset_specification, spec_fingerprint
+from gamefactory.core.domain.asset_contracts import parse_any_asset_specification, spec_fingerprint
 from gamefactory.core.domain.errors import (
     ConfigurationError,
     FactoryError,
@@ -206,6 +206,35 @@ def build_parser() -> argparse.ArgumentParser:
         "create", help="create a gated profile-driven asset production workflow"
     )
     _add_asset_create_arguments(asset_create_alias)
+    asset_register = asset_commands.add_parser(
+        "register-source",
+        help="write the source registration for an operator-authored assembly GLB",
+    )
+    _add_common(asset_register, nested=True)
+    asset_register.add_argument("--spec", required=True, help="asset-spec-0.7.0 file")
+    asset_register.add_argument("--source", required=True, help="operator-authored GLB")
+    asset_register.add_argument(
+        "--source-front",
+        required=True,
+        choices=("-Z", "+Z"),
+        help="front axis of the source file; +Z is what Blender's glTF export produces",
+    )
+    asset_register.add_argument("--authoring-tool", required=True, help="e.g. blender")
+    asset_register.add_argument("--authoring-tool-version", required=True, help="e.g. 4.0.2")
+    asset_register.add_argument("--actor", required=True, help="registering operator")
+    asset_register.add_argument("--reason", required=True, help="why this source is registered")
+    asset_register.add_argument("--output", required=True, help="registration JSON to write")
+    asset_assemble = asset_commands.add_parser(
+        "assemble",
+        help="create a V0.7 assembly workflow from a registered operator source (no provider)",
+    )
+    _add_common(asset_assemble, nested=True)
+    asset_assemble.add_argument("--spec", required=True, help="asset-spec-0.7.0 file")
+    asset_assemble.add_argument("--source", required=True, help="operator-authored GLB")
+    asset_assemble.add_argument("--registration", required=True, help="source registration")
+    asset_assemble.add_argument(
+        "--dry-run", action="store_true", help="validate inputs without creating a workflow"
+    )
     asset_inspect = asset_commands.add_parser("inspect", help="show one asset revision")
     _add_common(asset_inspect, nested=True)
     asset_inspect.add_argument("asset_id")
@@ -1384,7 +1413,7 @@ def _create_asset_workflow(
     spec_path = Path(args.spec).expanduser()
     if not spec_path.is_absolute():
         spec_path = root / spec_path
-    specification = parse_asset_specification(spec_path.resolve(strict=True))
+    specification = parse_any_asset_specification(spec_path.resolve(strict=True))
     concept = Path(args.concept).expanduser()
     if not concept.is_absolute():
         concept = root / concept
@@ -1524,8 +1553,118 @@ def _create_asset_workflow(
     return payload, _result_code(result), message
 
 
+def _cli_path(root: Path, value: str) -> Path:
+    path = Path(value).expanduser()
+    return path if path.is_absolute() else root / path
+
+
+def _load_v07_spec(root: Path, value: str) -> Any:
+    from gamefactory.core.domain.asset_contracts import AssetSpecificationV07
+
+    specification = parse_any_asset_specification(_cli_path(root, value).resolve(strict=True))
+    if not isinstance(specification, AssetSpecificationV07):
+        raise ConfigurationError("Assembly commands require an asset-spec-0.7.0 specification")
+    return specification
+
+
+def _register_assembly_source(root: Path, args: argparse.Namespace) -> tuple[Any, int, str]:
+    from gamefactory.workflows.assembly_production import build_source_registration
+
+    specification = _load_v07_spec(root, args.spec)
+    source = _cli_path(root, args.source).resolve(strict=True)
+    registration = build_source_registration(
+        specification,
+        source,
+        source_front=args.source_front,
+        authoring_tool=args.authoring_tool,
+        authoring_tool_version=args.authoring_tool_version,
+        actor=args.actor,
+        reason=args.reason,
+    )
+    output = _cli_path(root, args.output)
+    if output.exists():
+        raise ConfigurationError(f"Refusing to overwrite existing registration: {output}")
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(json.dumps(registration, sort_keys=True, indent=2) + "\n", encoding="utf-8")
+    return (
+        {"registration": str(output), **registration},
+        EXIT_SUCCESS,
+        f"Source registration written: {output} (source_front={args.source_front}, "
+        f"sha256={registration['artifact_sha256']})",
+    )
+
+
+def _create_assembly_workflow(
+    root: Path, db: Database, args: argparse.Namespace
+) -> tuple[dict[str, Any], int, str]:
+    from gamefactory.core.domain.assembly_source import parse_source_registration
+    from gamefactory.workflows.assembly_production import create_assembly_workflow
+
+    cfg = ConfigLoader.load_config(root)
+    specification = _load_v07_spec(root, args.spec)
+    source = _cli_path(root, args.source).resolve(strict=True)
+    registration = _cli_path(root, args.registration).resolve(strict=True)
+    profile = specification.bound_profile()
+    if args.dry_run:
+        record = parse_source_registration(registration)
+        record.check_against_spec(specification)
+        record.check_artifact(source.read_bytes())
+        payload = {
+            "dry_run": True,
+            "asset_id": specification.asset_id,
+            "profile": profile.qualified,
+            "geometry_mode": profile.geometry_mode,
+            "source_kind": specification.source_kind,
+            "source_front": record.source_front,
+            "normalization": "180 deg about +Y at the root"
+            if record.source_front == "+Z"
+            else "none",
+            "specification_hash": spec_fingerprint(specification),
+            "source_sha256": record.artifact_sha256,
+            "required_approvals": ["final_visual_review"],
+            "paid_provider_invocations": 0,
+            "workflow_state_mutated": False,
+        }
+        return payload, EXIT_SUCCESS, "Dry run passed; no workflow state was created."
+    engine = _engine(root, db, args.godot_path, args.blender_path, asset_provider_name="local")
+    workflow, tasks = create_assembly_workflow(
+        cfg.project.id,
+        root,
+        specification,
+        source,
+        registration,
+        revision_repository=AssetRevisionRepository(db),
+    )
+    engine.register_workflow(workflow, tasks, allow_existing_empty_placeholder=True)
+    result = engine.run_workflow(workflow.id)
+    payload = _result_payload(result)
+    payload.update(
+        {
+            "asset_id": specification.asset_id,
+            "revision": tasks[0].parameters["revision_number"],
+            "profile": profile.profile_id,
+            "profile_version": profile.qualified,
+            "source_kind": specification.source_kind,
+            "source_front": tasks[0].parameters["source_front"],
+            "paid_provider_invocations": 0,
+        }
+    )
+    message = (
+        f"Asset workflow {workflow.id} is {result.status.value}; "
+        f"asset={specification.asset_id} revision=r{tasks[0].parameters['revision_number']:03d} "
+        f"profile={profile.qualified} source=local_operator_assembly"
+    )
+    if result.pending_approval_id:
+        message += f"; final_visual_review ID={result.pending_approval_id}"
+    if result.error_message:
+        message += f"; {result.error_message}"
+    return payload, _result_code(result), message
+
+
 def _asset_provider_for_workflow(db: Database, workflow_id: str) -> str | None:
     tasks = TaskRepository(db).list_by_workflow(workflow_id)
+    if any(task.task_type == "asset_assembly_prepare" for task in tasks):
+        return "local"
     for task in tasks:
         if task.task_type == "asset_paid_generation":
             value = task.parameters.get("provider")
@@ -1681,6 +1820,10 @@ def _engine(
         asset_provider = FakeAssetGenerationProvider(
             name="fake", cost_class=CostClass.PAID, intent_repo=intent_repo
         )
+    elif asset_provider_name == "local":
+        from gamefactory.workflows.assembly_production import LocalAssemblyNoProvider
+
+        asset_provider = LocalAssemblyNoProvider()
     else:
         asset_provider = FakeAssetGenerationProvider()
     engine = WorkflowEngine(
@@ -1872,7 +2015,9 @@ def _profile_catalog_text(rows: list[dict[str, str]]) -> str:
     lines = ["Asset Profiles", ""]
     for row in rows:
         if row["status"] == "AVAILABLE":
-            lines.append(f"{row['profile_id']:<18} AVAILABLE")
+            lines.append(
+                f"{row['profile_id']:<18} AVAILABLE {row.get('geometry_mode', '')}".rstrip()
+            )
         else:
             lines.append(f"{row['profile_id']:<18} UNSUPPORTED")
     return "\n".join(lines)
@@ -1886,10 +2031,13 @@ def _asset_inspect(db: Database, asset_id: str) -> dict[str, Any]:
     if workflow is None:
         raise ConfigurationError(f"Workflow for asset {asset_id} is missing")
     tasks = TaskRepository(db).list_by_workflow(revision.workflow_id)
-    prepare = next((task for task in tasks if task.task_type == "asset_prepare"), None)
+    prepare = next(
+        (task for task in tasks if task.task_type in {"asset_prepare", "asset_assembly_prepare"}),
+        None,
+    )
     if prepare is None:
         raise ConfigurationError(f"Asset {asset_id} has no specification task")
-    specification = parse_asset_specification(prepare.parameters["specification"])
+    specification = parse_any_asset_specification(prepare.parameters["specification"])
     profile = specification.bound_profile()
     current = next(
         (task for task in tasks if task.status.value not in {"COMPLETED", "SKIPPED"}),
@@ -2013,10 +2161,17 @@ def _dispatch(args: argparse.Namespace) -> tuple[Any, int, str | None]:
     if args.command == "doctor":
         payload, code = _doctor(root, args.godot_path, args.blender_path)
         return payload, code, _doctor_text(payload)
+    if args.command == "asset" and args.asset_command == "register-source":
+        return _register_assembly_source(root, args)
     if args.command == "asset" and args.asset_command == "profiles":
         from gamefactory.core.domain.asset_profiles import builtin_registry
 
-        rows = builtin_registry().availability()
+        registry = builtin_registry()
+        rows = registry.availability()
+        modes = {p.qualified: p.geometry_mode for p in registry.available_v07}
+        for row in rows:
+            if row["qualified"] in modes:
+                row["geometry_mode"] = modes[row["qualified"]]
         return {"asset_profiles": rows}, EXIT_SUCCESS, _profile_catalog_text(rows)
     if args.command == "init":
         payload = _init(root, args)
@@ -2059,6 +2214,8 @@ def _dispatch(args: argparse.Namespace) -> tuple[Any, int, str | None]:
             args.command == "asset" and args.asset_command == "create"
         ):
             return _create_asset_workflow(root, db, args)
+        if args.command == "asset" and args.asset_command == "assemble":
+            return _create_assembly_workflow(root, db, args)
         if args.command == "asset" and args.asset_command == "inspect":
             payload = _asset_inspect(db, args.asset_id)
             return payload, EXIT_SUCCESS, _asset_inspect_text(payload)

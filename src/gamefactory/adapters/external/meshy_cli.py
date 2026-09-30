@@ -38,7 +38,7 @@ from gamefactory.adapters.persistence.repositories import (
 )
 from gamefactory.core.approvals.approval_service import compute_operation_hash
 from gamefactory.core.approvals.operation_scope import build_operation_inputs
-from gamefactory.core.domain.asset_contracts import parse_asset_specification, spec_fingerprint
+from gamefactory.core.domain.asset_contracts import parse_any_asset_specification, spec_fingerprint
 from gamefactory.core.domain.errors import (
     ApprovalRequired,
     PaidRequestIncompatibleError,
@@ -111,6 +111,9 @@ def resolve_paid_request(
     binding: dict[str, Any], specification: dict[str, Any], cost: dict[str, Any]
 ) -> dict[str, Any]:
     """Resolve full paid request snapshot content using Meshy adapter defaults and specification budget."""
+    from gamefactory.core.domain.paid_request import ensure_single_mesh_specification
+
+    ensure_single_mesh_specification(specification)
     raw_poly = None
     if isinstance(specification, dict):
         geom = specification.get("geometry_budget")
@@ -1040,7 +1043,7 @@ class MeshyAssetGenerationProvider(AssetGenerationProvider, PaidRequestAdapter):
             if not isinstance(request_spec, dict):
                 raise ProviderFailedError("Task specification must be an object", provider="meshy")
             try:
-                parsed_spec = parse_asset_specification(request_spec)
+                parsed_spec = parse_any_asset_specification(request_spec)
             except Exception as exc:
                 raise ProviderFailedError(
                     "Task specification is invalid", provider="meshy"
@@ -1207,7 +1210,7 @@ class MeshyAssetGenerationProvider(AssetGenerationProvider, PaidRequestAdapter):
                     "Authoritative task specification must be an object", provider="meshy"
                 )
             try:
-                authoritative_spec = parse_asset_specification(task_spec)
+                authoritative_spec = parse_any_asset_specification(task_spec)
             except Exception as exc:
                 raise ProviderFailedError(
                     "Authoritative task specification is invalid", provider="meshy"
@@ -1222,7 +1225,7 @@ class MeshyAssetGenerationProvider(AssetGenerationProvider, PaidRequestAdapter):
                 )
             if (
                 request_spec is not None
-                and spec_fingerprint(parse_asset_specification(request_spec))
+                and spec_fingerprint(parse_any_asset_specification(request_spec))
                 != authoritative_spec_hash
             ):
                 raise ProviderFailedError(
