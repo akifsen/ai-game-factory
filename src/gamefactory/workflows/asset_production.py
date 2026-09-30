@@ -46,6 +46,7 @@ from gamefactory.adapters.persistence.repositories import (
 from gamefactory.core.artifacts.artifact_manager import ArtifactManager
 from gamefactory.core.domain.asset_contracts import (
     AssetSpecification,
+    AssetSpecificationV07,
     parse_asset_specification,
     spec_fingerprint,
 )
@@ -115,10 +116,359 @@ def _canonical_hash(value: Any) -> str:
     return hashlib.sha256(raw.encode("utf-8")).hexdigest()
 
 
+def _inspect_spec_or_params(target: Any) -> dict[str, Any]:
+    """Collect paid-pipeline disqualifiers from every serialized spec layer.
+
+    Task parameters are persisted input and may contain both task-level aliases
+    and a nested ``specification``.  Inspect all of them: selecting only the
+    first truthy alias lets a conflicting outer value hide an assembly spec.
+    """
+    result: dict[str, Any] = {
+        "schema_versions": set(),
+        "source_kinds": set(),
+        "profile_ids": set(),
+        "profile_versions": set(),
+        "profile_qualified": set(),
+        "profile_schemas": set(),
+        "geometry_modes": set(),
+        "has_parts": False,
+        "has_sockets": False,
+        "has_assembly_contract": False,
+        "malformed_specification": False,
+    }
+    # The routine accepts decoded JSON and typed specs, but it can also be
+    # called with direct Python values in tests or internal APIs. Bound the
+    # walk and reject aliases/cycles so malformed input cannot hang a paid
+    # dispatch check.
+    candidates: list[tuple[Any, int]] = [(target, 0)]
+    visited: set[int] = set()
+    traversed = 0
+    while candidates:
+        candidate, depth = candidates.pop()
+        traversed += 1
+        if traversed > 32 or depth > 8:
+            result["malformed_specification"] = True
+            break
+        if candidate is None:
+            continue
+        if isinstance(candidate, str):
+            if len(candidate) > 1_048_576:
+                result["malformed_specification"] = True
+                continue
+            try:
+                parsed = json.loads(candidate)
+            except (json.JSONDecodeError, TypeError, RecursionError):
+                result["malformed_specification"] = True
+                continue
+            if isinstance(parsed, dict):
+                candidates.append((parsed, depth + 1))
+            else:
+                result["malformed_specification"] = True
+            continue
+        if isinstance(candidate, dict):
+            if id(candidate) in visited:
+                result["malformed_specification"] = True
+                continue
+            visited.add(id(candidate))
+            for key in (
+                "schema_version",
+                "source_kind",
+                "profile",
+                "profile_id",
+                "profile_version",
+                "profile_qualified",
+                "profile_schema",
+                "geometry_mode",
+                "profile_geometry_mode",
+            ):
+                value = candidate.get(key)
+                if value is not None:
+                    destination = {
+                        "schema_version": "schema_versions",
+                        "source_kind": "source_kinds",
+                        "profile": "profile_ids",
+                        "profile_id": "profile_ids",
+                        "profile_version": "profile_versions",
+                        "profile_qualified": "profile_qualified",
+                        "profile_schema": "profile_schemas",
+                        "geometry_mode": "geometry_modes",
+                        "profile_geometry_mode": "geometry_modes",
+                    }[key]
+                    if key == "profile_version":
+                        if isinstance(value, bool) or not isinstance(value, int):
+                            result["malformed_specification"] = True
+                        else:
+                            result[destination].add(str(value))
+                    elif key == "profile_qualified":
+                        if not isinstance(value, str) or "@" not in value:
+                            result["malformed_specification"] = True
+                        else:
+                            qualified_id, separator, qualified_version = value.rpartition("@")
+                            if not separator or not qualified_id or not qualified_version.isdigit():
+                                result["malformed_specification"] = True
+                            else:
+                                # This is the actual legacy alias emitted by
+                                # Profile.qualified (profile_id@integer-version).
+                                result["profile_ids"].add(qualified_id)
+                                result["profile_versions"].add(qualified_version)
+                    else:
+                        if not isinstance(value, str):
+                            result["malformed_specification"] = True
+                        else:
+                            result[destination].add(value)
+            # A present empty payload is still suspicious persisted assembly
+            # metadata; ``parts: null`` and ``sockets: null`` are normal model
+            # defaults for provider-generated V0.7 specs.
+            result["has_parts"] |= "parts" in candidate and candidate["parts"] is not None
+            result["has_sockets"] |= "sockets" in candidate and candidate["sockets"] is not None
+            result["has_assembly_contract"] |= (
+                "assembly" in candidate and candidate["assembly"] is not None
+            )
+            if "specification" in candidate:
+                nested_spec = candidate["specification"]
+                if nested_spec is None:
+                    result["malformed_specification"] = True
+                elif not isinstance(nested_spec, (dict, str)):
+                    nested_dump = getattr(nested_spec, "model_dump", None)
+                    if not callable(nested_dump):
+                        result["malformed_specification"] = True
+                candidates.append((nested_spec, depth + 1))
+            continue
+
+        if not hasattr(candidate, "model_dump") and not any(
+            hasattr(candidate, name)
+            for name in ("schema_version", "source_kind", "profile", "bound_profile")
+        ):
+            result["malformed_specification"] = True
+            continue
+        if id(candidate) in visited:
+            result["malformed_specification"] = True
+            continue
+        visited.add(id(candidate))
+        dump = getattr(candidate, "model_dump", None)
+        if callable(dump):
+            try:
+                dumped = dump(mode="json")
+                if not isinstance(dumped, dict):
+                    result["malformed_specification"] = True
+                else:
+                    candidates.append((dumped, depth + 1))
+            except Exception:
+                result["malformed_specification"] = True
+        else:
+            for key in (
+                "schema_version",
+                "source_kind",
+                "profile",
+                "profile_version",
+                "parts",
+                "sockets",
+                "assembly",
+            ):
+                value = getattr(candidate, key, None)
+                if key in {"parts", "sockets", "assembly"}:
+                    result[
+                        {
+                            "parts": "has_parts",
+                            "sockets": "has_sockets",
+                            "assembly": "has_assembly_contract",
+                        }[key]
+                    ] |= value is not None
+                elif key == "profile_version":
+                    if value is not None:
+                        if isinstance(value, bool) or not isinstance(value, int):
+                            result["malformed_specification"] = True
+                        else:
+                            result["profile_versions"].add(str(value))
+                elif value is not None:
+                    result[
+                        {
+                            "schema_version": "schema_versions",
+                            "source_kind": "source_kinds",
+                            "profile": "profile_ids",
+                        }[key]
+                    ].add(str(value))
+            bound_profile = getattr(candidate, "bound_profile", None)
+            if callable(bound_profile):
+                try:
+                    profile = bound_profile()
+                except Exception:
+                    profile = None
+                if profile is not None:
+                    for attr, bucket in (
+                        ("profile_id", "profile_ids"),
+                        ("schema_version", "profile_schemas"),
+                        ("geometry_mode", "geometry_modes"),
+                    ):
+                        value = getattr(profile, attr, None)
+                        if value is not None:
+                            result[bucket].add(str(value))
+                    version = getattr(profile, "version", None)
+                    if version is not None:
+                        result["profile_versions"].add(str(version))
+                    result["has_assembly_contract"] |= (
+                        getattr(profile, "assembly", None) is not None
+                    )
+
+    # Bound profile objects may be accessible even when model serialization is
+    # not.  For Pydantic specs, inspect that binding without trusting it as the
+    # sole source of the serialized V0.7 marker.
+    if target is not None:
+        bound_profile = getattr(target, "bound_profile", None)
+        if callable(bound_profile):
+            try:
+                profile = bound_profile()
+            except Exception:
+                profile = None
+            if profile is not None:
+                for attr, bucket in (
+                    ("profile_id", "profile_ids"),
+                    ("schema_version", "profile_schemas"),
+                    ("geometry_mode", "geometry_modes"),
+                ):
+                    value = getattr(profile, attr, None)
+                    if value is not None:
+                        result[bucket].add(str(value))
+            version = getattr(profile, "version", None)
+            if version is not None:
+                result["profile_versions"].add(str(version))
+            result["has_assembly_contract"] |= getattr(profile, "assembly", None) is not None
+
+    result["is_assembly"] = (
+        "local_operator_assembly" in result["source_kinds"]
+        or result["has_parts"]
+        or result["has_sockets"]
+        or "assembly" in result["geometry_modes"]
+        or result["has_assembly_contract"]
+    )
+    result["is_v07"] = (
+        "0.7.0" in result["schema_versions"]
+        or "provider_generated" in result["source_kinds"]
+        or "asset-profile-0.7.0" in result["profile_schemas"]
+    )
+    return result
+
+
+def _guard_paid_assembly_defense(
+    stage: str,
+    *,
+    spec: Any = None,
+    task: Task | None = None,
+    workflow: Workflow | None = None,
+    task_repo: TaskRepository | None = None,
+) -> None:
+    """Entry guard enforcing bounded V0.7 assembly defense on paid workflows."""
+    if spec is not None:
+        info = _inspect_spec_or_params(spec)
+        _validate_paid_spec_metadata(stage, info)
+        return
+
+    if task is not None:
+        task_info = _inspect_spec_or_params(task.parameters)
+        _validate_paid_spec_metadata(stage, task_info)
+
+        if workflow is not None and task_repo is not None:
+            try:
+                tasks = task_repo.list_by_workflow(workflow.id)
+            except Exception as exc:
+                raise ValidationError(
+                    f"Unable to verify the persisted prepare specification before paid stage '{stage}'",
+                    details={"stage": stage, "reason": type(exc).__name__},
+                ) from exc
+            prepare_tasks = [t for t in tasks if getattr(t, "task_type", None) == "asset_prepare"]
+            if len(prepare_tasks) != 1:
+                raise ValidationError(
+                    f"Workflow must have exactly one asset_prepare task before paid stage '{stage}'",
+                    details={"stage": stage, "prepare_task_count": len(prepare_tasks)},
+                )
+            prepare_task = prepare_tasks[0] if prepare_tasks else None
+            if prepare_task is not None and prepare_task.id != task.id:
+                prep_info = _inspect_spec_or_params(prepare_task.parameters)
+                _validate_paid_spec_metadata(stage, prep_info, source="asset_prepare")
+                binding_fields = (
+                    "schema_versions",
+                    "source_kinds",
+                    "profile_ids",
+                    "profile_versions",
+                    "profile_schemas",
+                    "geometry_modes",
+                )
+                contradictions = (
+                    any(task_info[field] != prep_info[field] for field in binding_fields)
+                    or (
+                        task_info["has_parts"] != prep_info["has_parts"]
+                        and (task_info["has_parts"] or prep_info["has_parts"])
+                    )
+                    or (
+                        task_info["has_sockets"] != prep_info["has_sockets"]
+                        and (task_info["has_sockets"] or prep_info["has_sockets"])
+                    )
+                )
+                if contradictions:
+                    raise ValidationError(
+                        f"Persisted task parameters conflict with asset_prepare specification at stage '{stage}'",
+                        details={
+                            "stage": stage,
+                            "task_id": task.id,
+                            "prepare_task_id": prepare_task.id,
+                        },
+                    )
+        if task_info["malformed_specification"]:
+            raise ValidationError(
+                f"Persisted specification cannot be inspected safely before paid stage '{stage}'",
+                details={"stage": stage, "task_id": task.id},
+            )
+
+
+def _validate_paid_spec_metadata(
+    stage: str, info: dict[str, Any], *, source: str = "specification"
+) -> None:
+    """Reject malformed or internally contradictory persisted spec layers."""
+    if info["malformed_specification"]:
+        subject = (
+            "Specification" if source == "specification" else f"Persisted {source} specification"
+        )
+        raise ValidationError(
+            f"{subject} cannot be inspected safely before paid stage '{stage}'",
+            details={"stage": stage, "source": source},
+        )
+    _raise_if_paid_assembly_or_v07(stage, info)
+    for field_name in (
+        "schema_versions",
+        "source_kinds",
+        "profile_ids",
+        "profile_versions",
+        "profile_schemas",
+        "geometry_modes",
+    ):
+        if len(info[field_name]) > 1:
+            raise ValidationError(
+                f"Persisted {source} has conflicting {field_name.replace('_', ' ')} at paid stage '{stage}'",
+                details={"stage": stage, "source": source, "field": field_name},
+            )
+
+
+def _raise_if_paid_assembly_or_v07(stage: str, info: dict[str, Any]) -> None:
+    """Raise a controlled validation error for unsupported paid bindings."""
+    source = next(iter(sorted(info["source_kinds"])), "unknown")
+    profile = next(iter(sorted(info["profile_ids"])), "unknown")
+    if info["is_assembly"]:
+        raise ValidationError(
+            f"Assembly specification with source '{source}' and profile '{profile}' is forbidden from paid pipeline at stage '{stage}'",
+            details={"stage": stage, "source": source, "profile": profile},
+        )
+    if info["is_v07"]:
+        source = source if source != "unknown" else "provider_generated"
+        raise ValidationError(
+            f"V0.7 provider-generated paid binding is unsupported for profile '{profile}'; failing closed at stage '{stage}' until available",
+            details={"stage": stage, "source": source, "profile": profile},
+        )
+
+
 def create_asset_production_workflow(
     project_id: str,
     project_root: Path | str,
-    specification: AssetSpecification,
+    specification: AssetSpecification | AssetSpecificationV07,
     concept_image: Path | str,
     concept_provenance: Path | str,
     *,
@@ -131,6 +481,10 @@ def create_asset_production_workflow(
     revision_repository: AssetRevisionRepository | None = None,
 ) -> tuple[Workflow, list[Task]]:
     """Create an asset DAG after validating inputs; no provider is contacted here."""
+    _guard_paid_assembly_defense(
+        stage="create_asset_production_workflow",
+        spec=specification,
+    )
     project_path = Path(project_root).resolve(strict=True)
     concept = Path(concept_image).resolve(strict=True)
     provenance = Path(concept_provenance).resolve(strict=True)
@@ -377,6 +731,14 @@ class AssetProductionHandlers:
         self._audit_repo = self.audit or AuditLogRepository(db)
         self._task_repo = self.tasks or TaskRepository(db)
         self._concept_version_repo = self.concept_versions or ConceptVersionRepository(db)
+
+    def _guard_paid_task(self, stage: str, workflow: Workflow, task: Task) -> None:
+        _guard_paid_assembly_defense(
+            stage=stage,
+            task=task,
+            workflow=workflow,
+            task_repo=self._task_repo,
+        )
 
     def _path(self, task: Task, name: str) -> Path:
         relative = f"{task.parameters['asset_dir']}/{name}"
@@ -644,6 +1006,7 @@ class AssetProductionHandlers:
     def paid_request_snapshot(
         self, workflow: Workflow, task: Task, execution: Execution
     ) -> TaskHandlerResult:
+        self._guard_paid_task("paid_request_snapshot", workflow, task)
         concept_task = next(
             (
                 t
@@ -872,6 +1235,7 @@ class AssetProductionHandlers:
         return TaskHandlerResult(1, "Production readiness evaluated: PASS", [art_id])
 
     def bind_paid_request_parameters(self, workflow: Workflow, task: Task) -> dict[str, Any]:
+        self._guard_paid_task("bind_paid_request_parameters", workflow, task)
         params = dict(task.parameters)
         if not is_v06_graph(task):
             return params
@@ -945,6 +1309,7 @@ class AssetProductionHandlers:
     def paid_generate(
         self, workflow: Workflow, task: Task, execution: Execution
     ) -> TaskHandlerResult:
+        self._guard_paid_task("paid_generate", workflow, task)
         params = task.parameters
         concept = self._active_concept_artifact(workflow.id)
         approval_rows = self.approvals.list_by_workflow(workflow.id)
