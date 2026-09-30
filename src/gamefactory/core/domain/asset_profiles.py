@@ -39,6 +39,21 @@ UNSUPPORTED_PROFILE_IDS = (
     "foliage",
 )
 
+# V0.7 intentionally has its own catalog and unsupported vocabulary. Candidate
+# profiles remain unavailable until their complete release gates are approved.
+UNSUPPORTED_PROFILE_IDS_V07 = (
+    "character",
+    "rigged_character",
+    "weapon",
+    "aircraft",
+    "building",
+    "terrain",
+    "animation",
+    "vfx",
+    "foliage",
+    "vehicle",
+)
+
 
 class ProfileContractError(SpecInvalidError):
     """A profile document or profile/spec binding is invalid."""
@@ -946,6 +961,12 @@ def _load_builtin(name: str) -> AssetProfile:
     return AssetProfile(parse_profile_document(text))
 
 
+def _load_builtin_v07(name: str) -> AssetProfileV07:
+    resource = files("gamefactory").joinpath(f"resources/profiles/{name}.yml")
+    text = resource.read_text(encoding="utf-8")
+    return AssetProfileV07(parse_profile_document_v07(text))
+
+
 def builtin_registry() -> ProfileRegistry:
     """Return the explicit V0.5 registry. The object has no mutating API."""
     return ProfileRegistry(
@@ -955,6 +976,15 @@ def builtin_registry() -> ProfileRegistry:
             _load_builtin("modular_piece"),
         ),
         unsupported=UNSUPPORTED_PROFILE_IDS,
+        available_v07=(),
+    )
+
+
+def builtin_v07_registry() -> ProfileRegistry:
+    """Return the independent, currently closed V0.7 profile catalog."""
+    return ProfileRegistry(
+        available=(),
+        unsupported=UNSUPPORTED_PROFILE_IDS_V07,
         available_v07=(),
     )
 

@@ -87,7 +87,7 @@ from gamefactory.workflows.definitions import (
     create_failure_workflow,
     create_paid_safety_workflow,
 )
-from gamefactory.workflows.engine import WorkflowEngine
+from gamefactory.workflows.engine import WorkflowEngine, WorkflowExecutionResult
 from gamefactory.workflows.godot_capture import (
     create_godot_capture_workflow,
     register_godot_capture_handlers,
@@ -202,10 +202,59 @@ def build_parser() -> argparse.ArgumentParser:
     asset_commands = asset.add_subparsers(dest="asset_command", required=True)
     asset_profiles = asset_commands.add_parser("profiles", help="list built-in asset profiles")
     _add_common(asset_profiles, nested=True)
+    asset_profiles.add_argument(
+        "--contract-version",
+        default="0.5.0",
+        choices=("0.5.0", "0.7.0"),
+        help="profile catalog contract version (defaults to the legacy catalog)",
+    )
     asset_create_alias = asset_commands.add_parser(
         "create", help="create a gated profile-driven asset production workflow"
     )
     _add_asset_create_arguments(asset_create_alias)
+
+    assembly = commands.add_parser(
+        "assembly", help="ingest, authenticate, or create a local authored V0.7 assembly"
+    )
+    assembly_commands = assembly.add_subparsers(dest="assembly_command", required=True)
+    assembly_ingest = assembly_commands.add_parser(
+        "ingest", help="retain and provenance-pin a local assembly source GLB"
+    )
+    _add_common(assembly_ingest, nested=True)
+    assembly_ingest.add_argument("--spec", required=True, help="typed V0.7 assembly specification")
+    assembly_ingest.add_argument("--source", required=True, help="project-relative source GLB")
+    assembly_ingest.add_argument("--package", required=True, help="new project-relative package directory")
+    assembly_ingest.add_argument("--actor", required=True)
+    assembly_ingest.add_argument("--reason", required=True)
+    assembly_ingest.add_argument("--authoring-tool", required=True)
+    assembly_ingest.add_argument("--authoring-tool-version", required=True)
+    assembly_ingest.add_argument("--source-front", choices=("-Z", "+Z"), required=True)
+    assembly_ingest.add_argument("--source-sha256")
+
+    assembly_verify = assembly_commands.add_parser(
+        "verify", help="authenticate a retained package against an explicit provenance SHA-256 pin"
+    )
+    _add_common(assembly_verify, nested=True)
+    assembly_verify.add_argument("--spec", required=True)
+    assembly_verify.add_argument("--package", required=True, help="project-relative retained package")
+    assembly_verify.add_argument("--expected-provenance-sha256", required=True)
+
+    assembly_create = assembly_commands.add_parser(
+        "create", help="create and start a human-gated local V0.7 assembly workflow"
+    )
+    _add_common(assembly_create, nested=True)
+    assembly_create.add_argument("--spec", required=True)
+    assembly_create.add_argument("--package", required=True, help="project-relative authenticated package")
+    assembly_create.add_argument("--expected-provenance-sha256", required=True)
+    assembly_create.add_argument("--concept", required=True, help="project-relative concept PNG")
+    assembly_create.add_argument("--concept-provenance", required=True)
+    assembly_create.add_argument("--workflow-id", help="stable ID for an exact idempotent create retry")
+
+    assembly_export = assembly_commands.add_parser(
+        "export", help="advance a local assembly or revalidate its completed evidence bundle"
+    )
+    _add_common(assembly_export, nested=True)
+    assembly_export.add_argument("workflow_id")
     asset_inspect = asset_commands.add_parser("inspect", help="show one asset revision")
     _add_common(asset_inspect, nested=True)
     asset_inspect.add_argument("asset_id")
@@ -1478,7 +1527,7 @@ def _create_asset_workflow(
         concept_source_type=args.concept_source_type,
         revision_repository=AssetRevisionRepository(db),
     )
-    engine.register_workflow(workflow, tasks, allow_existing_empty_placeholder=True)
+    _register_asset_graph_if_needed(engine, workflow, tasks)
     result = engine.run_workflow(workflow.id)
     payload = _result_payload(result)
     payload.update(
@@ -1522,6 +1571,14 @@ def _create_asset_workflow(
         else:
             message += f"; review the concept artifact, then approve {result.pending_approval_id} and resume {workflow.id}"
     return payload, _result_code(result), message
+
+
+def _register_asset_graph_if_needed(engine: WorkflowEngine, workflow: Any, tasks: list[Task]) -> None:
+    """Register legacy graphs; V0.7 graph creation already committed atomically."""
+    if not tasks:
+        raise ValidationError("Asset workflow creator returned an empty task graph")
+    if tasks[0].parameters.get("graph_version") != "0.7.0":
+        engine.register_workflow(workflow, tasks, allow_existing_empty_placeholder=True)
 
 
 def _asset_provider_for_workflow(db: Database, workflow_id: str) -> str | None:
@@ -2008,15 +2065,390 @@ def _asset_concept_replace_text(payload: dict[str, Any]) -> str:
     )
 
 
+_ASSEMBLY_TASK_TYPES = (
+    "asset_v07_assembly_prepare",
+    "asset_v07_assembly_concept_review",
+    "asset_v07_assembly_source_review",
+    "asset_v07_assembly_process",
+    "asset_v07_assembly_validate",
+    "asset_v07_assembly_godot",
+    "asset_v07_assembly_final_review",
+    "asset_v07_assembly_evidence",
+)
+
+
+def _assembly_profile_registry() -> Any:
+    """Return only built-in profile availability; tests may inject private fixtures."""
+    from gamefactory.core.domain.asset_profiles import builtin_v07_registry
+
+    return builtin_v07_registry()
+
+
+def _project_input_path(
+    root: Path,
+    raw: str,
+    label: str,
+    *,
+    must_exist: bool = True,
+    preserve_lexical_path: bool = False,
+) -> Path:
+    from gamefactory.core.execution.path_guard import PathGuard
+
+    candidate = Path(raw).expanduser()
+    if candidate.is_absolute():
+        try:
+            relative = candidate.absolute().relative_to(root.absolute()).as_posix()
+        except ValueError as exc:
+            raise ValidationError(f"{label} must be inside the project root") from exc
+    else:
+        relative = candidate.as_posix()
+    safe = PathGuard(root).resolve_safe_path(relative)
+    if must_exist and not safe.is_file():
+        raise ValidationError(f"{label} must be an existing project file: {relative}")
+    # Source ingest performs a lexical symlink/reparse walk before opening the
+    # file. Preserve that path so resolving it here cannot hide a link.
+    return (root / relative) if preserve_lexical_path else safe
+
+
+def _assembly_binding(root: Path, spec_arg: str) -> tuple[Any, Any, Path]:
+    from gamefactory.core.domain.asset_contracts import (
+        AssetSpecificationV07,
+        parse_asset_specification_v07,
+    )
+    from gamefactory.core.domain.asset_profiles import AssetProfileV07
+
+    spec_path = _project_input_path(root, spec_arg, "V0.7 specification")
+    registry = _assembly_profile_registry()
+    try:
+        spec = parse_asset_specification_v07(spec_path, registry=registry)
+        profile = spec.bound_profile()
+    except Exception as exc:
+        if isinstance(exc, FactoryError):
+            raise
+        raise ValidationError(f"Could not bind V0.7 specification to a built-in available profile: {exc}") from exc
+    if type(spec) is not AssetSpecificationV07 or type(profile) is not AssetProfileV07:
+        raise ValidationError("Assembly CLI requires an exact typed V0.7 specification and profile")
+    if spec.source_kind != "local_operator_assembly":
+        raise ValidationError("Local assembly CLI accepts only source_kind 'local_operator_assembly'")
+    if profile.geometry_mode != "assembly" or spec.bound_profile() != profile:
+        raise ValidationError("Specification must bind to the exact available assembly profile")
+    profile.check_specification(spec)
+    return spec, profile, spec_path
+
+
+def _assembly_input_paths(root: Path, package_arg: str) -> tuple[Path, str]:
+    from gamefactory.core.execution.path_guard import PathGuard
+
+    raw = Path(package_arg).expanduser()
+    if raw.is_absolute():
+        raise ValidationError("Assembly package path must be project-relative")
+    relative = raw.as_posix()
+    package = PathGuard(root).resolve_safe_path(relative)
+    return package, relative
+
+
+def _assembly_ingest(root: Path, args: argparse.Namespace) -> tuple[dict[str, Any], int, str]:
+    from gamefactory.adapters.assets.assembly_ingest import ingest_assembly_source
+
+    spec, profile, _ = _assembly_binding(root, args.spec)
+    source = _project_input_path(
+        root, args.source, "Assembly source GLB", preserve_lexical_path=True
+    )
+    package, package_relative = _assembly_input_paths(root, args.package)
+    if package.exists():
+        raise ValidationError(f"Assembly package directory already exists: {package_relative}")
+    result = ingest_assembly_source(
+        source_glb_path=source,
+        managed_root=root,
+        relative_package_dir=package_relative,
+        spec=spec,
+        authoring_tool_name=args.authoring_tool,
+        authoring_tool_version=args.authoring_tool_version,
+        source_front=args.source_front,
+        actor=args.actor,
+        reason=args.reason,
+        expected_source_sha256=args.source_sha256,
+    )
+    payload = {
+        "status": "INGESTED",
+        "source_kind": spec.source_kind,
+        "asset_id": spec.asset_id,
+        "profile": profile.qualified,
+        "source_package": result.package_dir.relative_to(root).as_posix(),
+        "source_glb_sha256": result.retained_glb_sha256,
+        "source_glb_byte_size": result.retained_glb_byte_size,
+        "provenance_sha256": result.retained_provenance_sha256,
+        "spec_fingerprint": result.spec_fingerprint,
+        "paid_provider_invocations": 0,
+    }
+    return payload, EXIT_SUCCESS, f"Local assembly source retained at {payload['source_package']}; pin provenance SHA-256 {result.retained_provenance_sha256}."
+
+
+def _assembly_verify(root: Path, args: argparse.Namespace) -> tuple[dict[str, Any], int, str]:
+    from gamefactory.adapters.assets.assembly_ingest import verify_retained_assembly
+
+    spec, profile, _ = _assembly_binding(root, args.spec)
+    package, package_relative = _assembly_input_paths(root, args.package)
+    result = verify_retained_assembly(
+        package,
+        spec,
+        expected_provenance_sha256=args.expected_provenance_sha256,
+        managed_root=root,
+    )
+    payload = {
+        "status": "VERIFIED",
+        "asset_id": spec.asset_id,
+        "profile": profile.qualified,
+        "source_package": package_relative,
+        "source_glb_sha256": result.retained_glb_sha256,
+        "source_glb_byte_size": result.retained_glb_byte_size,
+        "provenance_sha256": result.retained_provenance_sha256,
+        "spec_fingerprint": result.spec_fingerprint,
+    }
+    return payload, EXIT_SUCCESS, f"Authenticated local assembly package {package_relative} ({result.retained_glb_sha256})."
+
+
+def _preflight_local_assembly_create(root: Path, args: argparse.Namespace) -> dict[str, Any]:
+    from gamefactory.adapters.assets.assembly_ingest import verify_retained_assembly
+    from gamefactory.workflows.assembly_production import (
+        _MAX_CONCEPT_BYTES,
+        _contained_file,
+        _parse_concept_provenance,
+        _read_bounded,
+        _validate_concept_png,
+    )
+
+    spec, profile, _ = _assembly_binding(root, args.spec)
+    package, package_relative = _assembly_input_paths(root, args.package)
+    retained = verify_retained_assembly(
+        package,
+        spec,
+        expected_provenance_sha256=args.expected_provenance_sha256,
+        managed_root=root,
+    )
+    concept, concept_relative = _contained_file(root, args.concept, "Concept image")
+    concept_provenance, concept_provenance_relative = _contained_file(
+        root, args.concept_provenance, "Concept provenance"
+    )
+    if concept.suffix.lower() != ".png":
+        raise ValidationError("Concept image must be a PNG")
+    _validate_concept_png(_read_bounded(concept, _MAX_CONCEPT_BYTES, "Concept PNG"))
+    _parse_concept_provenance(_read_bounded(concept_provenance, 1024 * 1024, "Concept provenance"))
+    return {
+        "spec": spec,
+        "profile": profile,
+        "package": retained.package_dir,
+        "package_relative": package_relative,
+        "concept": concept,
+        "concept_relative": concept_relative,
+        "concept_provenance": concept_provenance,
+        "concept_provenance_relative": concept_provenance_relative,
+        "provenance_sha256": retained.retained_provenance_sha256,
+    }
+
+
+def _assembly_engine(root: Path, db: Database) -> WorkflowEngine:
+    """Build a local-only workflow engine without constructing any asset provider."""
+    cfg = ConfigLoader.load_config(root)
+    policy = cfg.policies
+    return WorkflowEngine(
+        root,
+        db,
+        policy_engine=PolicyEngine(
+            PolicyRule(
+                require_approval_for_paid=policy.paid_operations_require_approval,
+                require_approval_for_destructive=policy.destructive_operations_require_approval,
+                require_approval_for_repo_write=policy.require_approval_for_repo_write,
+                require_approval_for_process_execution=policy.require_approval_for_process_execution,
+                max_operation_cost=policy.max_operation_cost,
+                project_budget=policy.project_budget,
+            )
+        ),
+        asset_provider=None,
+    )
+
+
+def _create_local_assembly(
+    root: Path,
+    db: Database,
+    args: argparse.Namespace,
+    prepared: dict[str, Any],
+) -> tuple[dict[str, Any], int, str]:
+    from gamefactory.adapters.dcc.assembly_processor import AssemblyProcessor
+    from gamefactory.workflows.assembly_production import (
+        AssemblyAdapters,
+        create_local_assembly_workflow,
+    )
+
+    cfg = ConfigLoader.load_config(root)
+    engine = _assembly_engine(root, db)
+    adapters = AssemblyAdapters(
+        blender=AssemblyProcessor(blender_executable=args.blender_path)
+        if args.blender_path
+        else None,
+        godot_executable=args.godot_path,
+    )
+    created = create_local_assembly_workflow(
+        engine,
+        cfg.project.id,
+        prepared["spec"],
+        prepared["profile"],
+        prepared["package"],
+        expected_provenance_sha256=prepared["provenance_sha256"],
+        concept_image=prepared["concept"],
+        concept_provenance=prepared["concept_provenance"],
+        workflow_id=args.workflow_id,
+        adapters=adapters,
+    )
+    result = engine.run_workflow(created.workflow.id)
+    payload = _result_payload(result)
+    payload.update(
+        {
+            "asset_id": prepared["spec"].asset_id,
+            "source_version": created.revision.revision_number,
+            "profile": prepared["profile"].qualified,
+            "generation_mode": "local_operator_assembly",
+            "paid_provider_invocations": 0,
+            "source_package": prepared["package_relative"],
+        }
+    )
+    message = f"Local assembly workflow {result.workflow_id}: {result.status.value}; source version r{created.revision.revision_number:03d}"
+    if result.pending_approval_id:
+        message += f"; human approval required: {result.pending_approval_id}"
+    if result.error_message:
+        message += f"; {result.error_message}"
+    return payload, _result_code(result), message
+
+
+def _is_local_assembly_workflow(db: Database, workflow_id: str) -> bool:
+    return any(
+        task.task_type in _ASSEMBLY_TASK_TYPES
+        for task in TaskRepository(db).list_by_workflow(workflow_id)
+    )
+
+
+def _rehydrate_local_assembly(
+    root: Path,
+    db: Database,
+    workflow_id: str,
+    *,
+    godot_path: str | None = None,
+    blender_path: str | None = None,
+) -> WorkflowEngine:
+    from gamefactory.adapters.dcc.assembly_processor import AssemblyProcessor
+    from gamefactory.core.domain.asset_contracts import (
+        AssetSpecificationV07,
+        parse_asset_specification_v07,
+        spec_fingerprint,
+    )
+    from gamefactory.core.domain.asset_profiles import AssetProfileV07
+    from gamefactory.core.execution.path_guard import PathGuard
+    from gamefactory.workflows.assembly_production import (
+        AssemblyAdapters,
+        _json_hash,
+        create_local_assembly_workflow,
+    )
+
+    cfg = ConfigLoader.load_config(root)
+    engine = _assembly_engine(root, db)
+    workflow = WorkflowRepository(db).get(workflow_id)
+    tasks = TaskRepository(db).list_by_workflow(workflow_id)
+    if workflow is None or len(tasks) != len(_ASSEMBLY_TASK_TYPES):
+        raise ValidationError("Local assembly workflow or exact persisted task graph is missing")
+    if tuple(task.task_type for task in tasks) != _ASSEMBLY_TASK_TYPES:
+        raise ValidationError("Persisted local assembly task graph differs from its immutable definition")
+    params = tasks[0].parameters
+    if any(task.parameters != params for task in tasks):
+        raise ValidationError("Persisted local assembly task parameters conflict across the task graph")
+    if params.get("workflow_id") != workflow_id or workflow.project_id != cfg.project.id:
+        raise ValidationError("Persisted local assembly workflow identity is inconsistent")
+    registry = _assembly_profile_registry()
+    persisted_specification = params.get("specification")
+    if not isinstance(persisted_specification, dict):
+        raise ValidationError("Persisted local assembly specification must remain a typed object")
+    try:
+        spec = parse_asset_specification_v07(persisted_specification, registry=registry)
+        profile = spec.bound_profile()
+    except Exception as exc:
+        if isinstance(exc, FactoryError):
+            raise
+        raise ValidationError(f"Persisted local assembly specification/profile cannot be rehydrated: {exc}") from exc
+    if (
+        type(spec) is not AssetSpecificationV07
+        or type(profile) is not AssetProfileV07
+        or spec.source_kind != "local_operator_assembly"
+        or spec_fingerprint(spec) != params.get("specification_sha256")
+        or spec.asset_id != params.get("asset_id")
+        or profile.profile_id != params.get("profile_id")
+        or type(params.get("profile_version")) is not int
+        or profile.version != params.get("profile_version")
+        or _json_hash(profile.document.model_dump(mode="json")) != params.get("profile_document_sha256")
+        or type(params.get("source_version")) is not int
+        or params.get("source_version", 0) < 1
+    ):
+        raise ValidationError("Persisted local assembly profile, specification, or revision binding was tampered")
+
+    def pinned_path(key: str, label: str) -> tuple[Path, str]:
+        value = params.get(key)
+        if not isinstance(value, str) or not value or Path(value).is_absolute():
+            raise ValidationError(f"Persisted {label} path must be a relative project path")
+        return PathGuard(root).resolve_safe_path(value), value
+
+    package, package_relative = pinned_path("source_package", "source package")
+    concept, concept_relative = pinned_path("concept_image", "concept image")
+    concept_provenance, concept_provenance_relative = pinned_path(
+        "concept_provenance", "concept provenance"
+    )
+
+    # Cross-check durable input artifact pins before trusting workflow parameters.
+    prepare = tasks[0]
+    input_roles = {
+        "assembly-source-glb": (f"{package_relative}/source.glb", params.get("source_glb_sha256")),
+        "assembly-source-provenance": (f"{package_relative}/source_provenance.json", params.get("source_provenance_sha256")),
+        "assembly-source-publication-marker": (f"{package_relative}/publication_marker.json", params.get("source_publication_marker_sha256")),
+        "asset-concept": (concept_relative, params.get("concept_image_sha256")),
+        "asset-concept-provenance": (concept_provenance_relative, params.get("concept_provenance_sha256")),
+    }
+    rows = [a for a in ArtifactRepository(db).list_by_workflow(workflow_id) if a.task_id == prepare.id and a.artifact_type in input_roles]
+    if prepare.status == TaskStatus.COMPLETED and {a.artifact_type for a in rows} != set(input_roles):
+        raise ValidationError("Completed assembly prepare task is missing durable input artifacts")
+    if len({a.artifact_type for a in rows}) != len(rows):
+        raise ValidationError("Persisted assembly input artifact roles are duplicated")
+    for row in rows:
+        expected_path, expected_hash = input_roles[row.artifact_type]
+        if row.relative_path != expected_path or row.content_hash != expected_hash:
+            raise ValidationError("Persisted assembly input artifact no longer matches its immutable pin")
+        engine.artifact_mgr.verify_artifact_integrity(row)
+
+    create_local_assembly_workflow(
+        engine,
+        cfg.project.id,
+        spec,
+        profile,
+        package,
+        expected_provenance_sha256=str(params.get("source_provenance_sha256", "")),
+        concept_image=concept,
+        concept_provenance=concept_provenance,
+        workflow_id=workflow_id,
+        adapters=AssemblyAdapters(
+            blender=AssemblyProcessor(blender_executable=blender_path) if blender_path else None,
+            godot_executable=godot_path,
+        ),
+    )
+    return engine
+
+
 def _dispatch(args: argparse.Namespace) -> tuple[Any, int, str | None]:
     root = _resolve_root(args.project)
     if args.command == "doctor":
         payload, code = _doctor(root, args.godot_path, args.blender_path)
         return payload, code, _doctor_text(payload)
     if args.command == "asset" and args.asset_command == "profiles":
-        from gamefactory.core.domain.asset_profiles import builtin_registry
+        from gamefactory.core.domain.asset_profiles import builtin_registry, builtin_v07_registry
 
-        rows = builtin_registry().availability()
+        version = getattr(args, "contract_version", "0.5.0")
+        registry = builtin_registry() if version == "0.5.0" else builtin_v07_registry()
+        rows = registry.availability()
         return {"asset_profiles": rows}, EXIT_SUCCESS, _profile_catalog_text(rows)
     if args.command == "init":
         payload = _init(root, args)
@@ -2026,6 +2458,15 @@ def _dispatch(args: argparse.Namespace) -> tuple[Any, int, str | None]:
             f"Initialized {payload['project_name']} at {payload['project_root']}"
             + (" (already initialized)" if payload["already_initialized"] else ""),
         )
+    assembly_prepared: dict[str, Any] | None = None
+    if args.command == "assembly":
+        if args.assembly_command == "ingest":
+            return _assembly_ingest(root, args)
+        if args.assembly_command == "verify":
+            return _assembly_verify(root, args)
+        if args.assembly_command == "create":
+            # Authenticate all operator-supplied inputs before opening/creating DB state.
+            assembly_prepared = _preflight_local_assembly_create(root, args)
     if args.command in {
         "status",
         "approvals",
@@ -2040,11 +2481,80 @@ def _dispatch(args: argparse.Namespace) -> tuple[Any, int, str | None]:
         "report",
         "asset-create",
         "asset",
+        "assembly",
         "accounting",
         "recovery",
     }:
         # Explicit path overrides are passed through detection; no failed explicit path falls back.
         db = _db(root)
+        if args.command == "assembly":
+            if args.assembly_command == "create":
+                assert assembly_prepared is not None
+                return _create_local_assembly(root, db, args, assembly_prepared)
+            if args.assembly_command == "export":
+                if not _is_local_assembly_workflow(db, args.workflow_id):
+                    raise ValidationError("Workflow is not a local V0.7 assembly workflow")
+                persisted_workflow = WorkflowRepository(db).get(args.workflow_id)
+                engine = _rehydrate_local_assembly(
+                    root,
+                    db,
+                    args.workflow_id,
+                    godot_path=args.godot_path,
+                    blender_path=args.blender_path,
+                )
+                if persisted_workflow is not None and persisted_workflow.status.value == "COMPLETED":
+                    from gamefactory.workflows.assembly_production import (
+                        verify_completed_local_assembly_evidence,
+                    )
+
+                    manifests = [
+                        row
+                        for row in ArtifactRepository(db).list_by_workflow(args.workflow_id)
+                        if row.artifact_type == "assembly-evidence-manifest"
+                    ]
+                    if len(manifests) != 1:
+                        raise ValidationError(
+                            "Completed local assembly has no unique cold-verified evidence manifest"
+                        )
+                    cold = verify_completed_local_assembly_evidence(
+                        engine, args.workflow_id, manifests[0]
+                    )
+                    completed_tasks = TaskRepository(db).list_by_workflow(args.workflow_id)
+                    result = WorkflowExecutionResult(
+                        workflow_id=args.workflow_id,
+                        status=persisted_workflow.status,
+                        completed_tasks=[task.id for task in completed_tasks if task.status == TaskStatus.COMPLETED],
+                        failed_tasks=[task.id for task in completed_tasks if task.status == TaskStatus.FAILED],
+                        blocked_tasks=[task.id for task in completed_tasks if task.status == TaskStatus.BLOCKED],
+                    )
+                    payload = _result_payload(result)
+                    payload["evidence_manifest"] = str(root / manifests[0].relative_path)
+                    payload["evidence_manifest_sha256"] = manifests[0].content_hash
+                    payload["evidence_verification"] = cold
+                    message = f"Local assembly evidence revalidated read-only: {args.workflow_id}"
+                    return payload, EXIT_SUCCESS, message
+
+                result = engine.run_workflow(args.workflow_id)
+                payload = _result_payload(result)
+                manifests = [
+                    row
+                    for row in ArtifactRepository(db).list_by_workflow(args.workflow_id)
+                    if row.artifact_type == "assembly-evidence-manifest"
+                ]
+                if result.status.value == "COMPLETED":
+                    if len(manifests) != 1:
+                        raise ValidationError(
+                            "Completed local assembly has no unique cold-verified evidence manifest"
+                        )
+                    engine.artifact_mgr.verify_artifact_integrity(manifests[0])
+                    payload["evidence_manifest"] = str(root / manifests[0].relative_path)
+                    payload["evidence_manifest_sha256"] = manifests[0].content_hash
+                message = f"Local assembly export gate {result.workflow_id}: {result.status.value}"
+                if result.pending_approval_id:
+                    message += f"; human approval required: {result.pending_approval_id}"
+                if result.error_message:
+                    message += f"; {result.error_message}"
+                return payload, _result_code(result), message
         if args.command == "recovery":
             if args.recovery_command == "inspect":
                 return _recovery_inspect(root, db, args.workflow_id)
@@ -2084,15 +2594,25 @@ def _dispatch(args: argparse.Namespace) -> tuple[Any, int, str | None]:
                 message += f"; {result.error_message}"
             return payload, _result_code(result), message
         if args.command == "resume":
-            provider_name = _asset_provider_for_workflow(db, args.workflow_id)
-            result = _engine(
-                root,
-                db,
-                args.godot_path,
-                args.blender_path,
-                asset_provider_name=provider_name,
-                allow_paid_calls=True,
-            ).run_workflow(args.workflow_id)
+            if _is_local_assembly_workflow(db, args.workflow_id):
+                engine = _rehydrate_local_assembly(
+                    root,
+                    db,
+                    args.workflow_id,
+                    godot_path=args.godot_path,
+                    blender_path=args.blender_path,
+                )
+                result = engine.run_workflow(args.workflow_id)
+            else:
+                provider_name = _asset_provider_for_workflow(db, args.workflow_id)
+                result = _engine(
+                    root,
+                    db,
+                    args.godot_path,
+                    args.blender_path,
+                    asset_provider_name=provider_name,
+                    allow_paid_calls=True,
+                ).run_workflow(args.workflow_id)
             payload = _result_payload(result)
             message = f"Workflow {result.workflow_id}: {result.status.value}"
             if result.pending_approval_id:
@@ -2123,15 +2643,25 @@ def _dispatch(args: argparse.Namespace) -> tuple[Any, int, str | None]:
                 message,
             )
         if args.command == "retry":
-            provider_name = _asset_provider_for_workflow(db, args.workflow_id)
-            result = _engine(
-                root,
-                db,
-                args.godot_path,
-                args.blender_path,
-                asset_provider_name=provider_name,
-                allow_paid_calls=True,
-            ).retry_task(args.workflow_id, args.task_id)
+            if _is_local_assembly_workflow(db, args.workflow_id):
+                engine = _rehydrate_local_assembly(
+                    root,
+                    db,
+                    args.workflow_id,
+                    godot_path=args.godot_path,
+                    blender_path=args.blender_path,
+                )
+                result = engine.retry_task(args.workflow_id, args.task_id)
+            else:
+                provider_name = _asset_provider_for_workflow(db, args.workflow_id)
+                result = _engine(
+                    root,
+                    db,
+                    args.godot_path,
+                    args.blender_path,
+                    asset_provider_name=provider_name,
+                    allow_paid_calls=True,
+                ).retry_task(args.workflow_id, args.task_id)
             return (
                 _result_payload(result),
                 _result_code(result),
@@ -2144,10 +2674,23 @@ def _dispatch(args: argparse.Namespace) -> tuple[Any, int, str | None]:
                 raise ConfigurationError(f"Approval not found: {args.approval_id}")
             current_inputs = None
             if args.command == "approve":
-                provider_name = _asset_provider_for_workflow(db, approval.workflow_id)
-                engine = _engine(
-                    root, db, args.godot_path, args.blender_path, asset_provider_name=provider_name
-                )
+                if _is_local_assembly_workflow(db, approval.workflow_id):
+                    engine = _rehydrate_local_assembly(
+                        root,
+                        db,
+                        approval.workflow_id,
+                        godot_path=args.godot_path,
+                        blender_path=args.blender_path,
+                    )
+                else:
+                    provider_name = _asset_provider_for_workflow(db, approval.workflow_id)
+                    engine = _engine(
+                        root,
+                        db,
+                        args.godot_path,
+                        args.blender_path,
+                        asset_provider_name=provider_name,
+                    )
                 workflow = engine.wf_repo.get(approval.workflow_id)
                 task = engine.task_repo.get(approval.task_id)
                 if workflow is None or task is None:

@@ -738,9 +738,9 @@ class AssetSpecificationV07(BaseModel):
                     f"profile_registry must be an instance of ProfileRegistry, got {type(registry).__name__}"
                 )
         else:
-            from gamefactory.core.domain.asset_profiles import builtin_registry
+            from gamefactory.core.domain.asset_profiles import builtin_v07_registry
 
-            registry = builtin_registry()
+            registry = builtin_v07_registry()
 
         try:
             profile = registry.get_v07(self.profile, self.profile_version)
@@ -772,14 +772,15 @@ def parse_asset_specification_v07(
             f"got '{data.get('schema_version')}'"
         )
     context: dict[str, Any] = {}
-    if registry is not None:
-        from gamefactory.core.domain.asset_profiles import ProfileRegistry
+    from gamefactory.core.domain.asset_profiles import ProfileRegistry, builtin_v07_registry
 
-        if not isinstance(registry, ProfileRegistry):
-            raise SpecInvalidError(
-                f"registry must be an instance of ProfileRegistry, got {type(registry).__name__}"
-            )
-        context["profile_registry"] = registry
+    if registry is None:
+        registry = builtin_v07_registry()
+    if not isinstance(registry, ProfileRegistry):
+        raise SpecInvalidError(
+            f"registry must be an instance of ProfileRegistry, got {type(registry).__name__}"
+        )
+    context["profile_registry"] = registry
     try:
         return AssetSpecificationV07.model_validate(data, context=context if context else None)
     except Exception as exc:
