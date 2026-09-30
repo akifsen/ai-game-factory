@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import copy
 import hashlib
 import json
 import math
@@ -14,6 +15,7 @@ from typing import Any, Literal
 import pytest
 
 from gamefactory.adapters.assets.assembly_ingest import ingest_assembly_source
+from gamefactory.adapters.assets.glb_validator import _accessor
 from gamefactory.adapters.assets.v07_geometry_validation import (
     VerifiedSourceNormalization,
     _triangle_soup,
@@ -898,6 +900,104 @@ def _add_collider_box(
     )
     doc["nodes"][0]["children"].append(col_node_idx)
     return doc, bin_out
+
+
+def _add_lod1_meshes(
+    doc: dict[str, Any],
+    binary: bytes,
+    spec: AssetSpecificationV07,
+    *,
+    mutate_hull: Literal["shift", "collapse"] | None = None,
+) -> tuple[dict[str, Any], bytes]:
+    output = bytearray(binary)
+    node_by_name = {node.get("name"): (index, node) for index, node in enumerate(doc["nodes"])}
+    for part in spec.parts or []:
+        lod0_name = f"SM_{spec.asset_id}_{part.part_id}_LOD0"
+        lod0_index, lod0_node = node_by_name[lod0_name]
+        mesh = copy.deepcopy(doc["meshes"][lod0_node["mesh"]])
+        mesh["name"] = f"SM_{spec.asset_id}_{part.part_id}_LOD1"
+        primitive = mesh["primitives"][0]
+        position_index = primitive["attributes"]["POSITION"]
+        rows = [
+            tuple(float(v) for v in row) for row in _accessor(doc, binary, position_index, "VEC3")
+        ]
+        if part.part_id == "hull" and mutate_hull:
+            if mutate_hull == "shift":
+                rows = [(row[0] + 0.2, row[1], row[2]) for row in rows]
+            else:
+                rows = tuple((row[0] * 0.5, row[1] * 0.5, row[2] * 0.5) for row in rows)
+        position_bytes = b"".join(struct.pack("<fff", *row) for row in rows)
+        offset = len(output)
+        output.extend(b"\0" * ((-offset) % 4))
+        offset = len(output)
+        output.extend(position_bytes)
+        view_index = len(doc["bufferViews"])
+        doc["bufferViews"].append(
+            {
+                "buffer": 0,
+                "byteOffset": offset,
+                "byteLength": len(position_bytes),
+                "target": 34962,
+            }
+        )
+        accessor_index = len(doc["accessors"])
+        doc["accessors"].append(
+            {
+                "bufferView": view_index,
+                "byteOffset": 0,
+                "componentType": 5126,
+                "count": len(rows),
+                "type": "VEC3",
+                "min": [min(row[axis] for row in rows) for axis in range(3)],
+                "max": [max(row[axis] for row in rows) for axis in range(3)],
+            }
+        )
+        primitive["attributes"]["POSITION"] = accessor_index
+        mesh_index = len(doc["meshes"])
+        doc["meshes"].append(mesh)
+        parent_index = next(
+            parent
+            for parent, node in enumerate(doc["nodes"])
+            if lod0_index in node.get("children", [])
+        )
+        lod1_index = len(doc["nodes"])
+        doc["nodes"].append({"name": mesh["name"], "mesh": mesh_index})
+        doc["nodes"][parent_index]["children"].append(lod1_index)
+    doc["buffers"][0]["byteLength"] = len(output)
+    return doc, bytes(output)
+
+
+@pytest.mark.parametrize("mutation", ["shift", "collapse"])
+def test_outside_blender_proof_rejects_per_part_lod1_bounds_drift(
+    tmp_path: Path, mutation: Literal["shift", "collapse"]
+) -> None:
+    profile = _create_assembly_profile()
+    spec = _create_assembly_spec(profile)
+    object.__setattr__(spec, "lod_policy", "lod0_lod1")
+    ingest_result = _setup_ingested_package(tmp_path, spec)
+    source_bytes = ingest_result.retained_glb_path.read_bytes()
+    document, binary = _read_glb(source_bytes)
+    document, binary = _add_lod1_meshes(document, binary, spec, mutate_hull=mutation)
+    document, binary = _add_collider_box(document, binary, spec)
+    processed_path = tmp_path / f"lod1-{mutation}.glb"
+    _write_glb(processed_path, document, binary)
+    observation = VerifiedSourceNormalization(
+        source_sha256=ingest_result.retained_glb_sha256,
+        processed_sha256=hashlib.sha256(processed_path.read_bytes()).hexdigest(),
+        source_front="-Z",
+        normalization_applied=False,
+        root_rotation_xyzw=(0, 0, 0, 1),
+        source_glb_bytes=source_bytes,
+    )
+
+    with pytest.raises(DccFailedError, match="Per-part LOD1 bounds differ from LOD0 for 'hull'"):
+        _prove_processed_assembly_glb(
+            processed_path,
+            spec,
+            profile,
+            observation,
+            source_bytes,
+        )
 
 
 def test_outside_blender_proof_oracle_catches_budget_overflow(tmp_path: Path) -> None:

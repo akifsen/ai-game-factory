@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import math
+import runpy
 import struct
 from collections.abc import Sequence
 from pathlib import Path
@@ -21,6 +22,7 @@ from gamefactory.adapters.assets.v07_geometry_validation import (
     _matrix_is_identity,
     _triangle_soup,
     triangle_soups_equivalent,
+    validate_glb_v07,
     verify_source_to_processed_preservation,
 )
 from gamefactory.adapters.dcc.assembly_processor import (
@@ -107,6 +109,7 @@ def _create_assembly_spec(
     root_basis: Any = "identity",
     root_position: list[float] | None = None,
     dimensions: tuple[float, float, float] = (1.0, 1.4, 1.2),
+    socket_rotation: Any = "identity",
 ) -> AssetSpecificationV07:
     parts = [
         {
@@ -145,7 +148,7 @@ def _create_assembly_spec(
             "socket_id": "muzzle",
             "parent_part": "barrel",
             "translation_m": [0, 0, -0.49],
-            "rotation": "identity",
+            "rotation": socket_rotation,
             "placement": "forward_end",
         }
     ]
@@ -236,6 +239,9 @@ def _create_source_assembly_glb(
         hull_rot = canonical_basis
         hull_translation = canonical_position
 
+    assert spec.sockets
+    socket = spec.sockets[0]
+    socket_rotation = list(socket.rotation) if socket.rotation != "identity" else None
     nodes: list[dict[str, Any]] = [
         {"name": "ROOT", "children": [1]},
         {
@@ -260,7 +266,11 @@ def _create_source_assembly_glb(
             "children": [6, 7],
         },
         {"name": f"SM_{spec.asset_id}_barrel_LOD0", "mesh": 0},
-        {"name": "SOCKET_muzzle", "translation": [0, 0, -0.49]},
+        {
+            "name": "SOCKET_muzzle",
+            "translation": list(socket.translation_m),
+            **({"rotation": socket_rotation} if socket_rotation else {}),
+        },
     ]
     doc["nodes"] = nodes
     doc["scenes"] = [{"nodes": [0]}]
@@ -268,7 +278,11 @@ def _create_source_assembly_glb(
 
 
 def _plus_z_fixture_spec(
-    tmp_path: Path, profile: AssetProfileV07, canonical_basis: Sequence[float]
+    tmp_path: Path,
+    profile: AssetProfileV07,
+    canonical_basis: Sequence[float],
+    *,
+    socket_rotation: Any = "identity",
 ) -> AssetSpecificationV07:
     """Derive center-origin dimensions/translation from the actual authored fixture before ingest."""
     draft = _create_assembly_spec(
@@ -276,6 +290,7 @@ def _plus_z_fixture_spec(
         source_front="+Z",
         root_basis=list(canonical_basis),
         root_position=[0.0, 0.0, 0.0],
+        socket_rotation=socket_rotation,
     )
     source_path = tmp_path / "plus_z_dimensions_draft.glb"
     _create_source_assembly_glb(source_path, draft, source_front="+Z")
@@ -298,6 +313,7 @@ def _plus_z_fixture_spec(
         root_basis=list(canonical_basis),
         root_position=[-value for value in center],
         dimensions=dimensions,
+        socket_rotation=socket_rotation,
     )
 
 
@@ -550,6 +566,56 @@ def test_blender_assembly_process_end_to_end_source_front_plus_z(tmp_path: Path)
         result.verified_normalization, processed_glb, spec
     )
     assert pres.passed, [f.message for f in pres.findings if not f.passed]
+
+
+def test_blender_rotated_hierarchy_lod_bounds_pass_full_v07_validation(
+    tmp_path: Path,
+) -> None:
+    """Exercise rotated parent-frame bounds and a semantically aligned socket end to end."""
+    if not _blender_available():
+        pytest.skip("Blender executable not available on host")
+
+    profile = _create_assembly_profile()
+    half_angle = math.radians(30.0) / 2
+    root_rotation = (math.sin(half_angle), 0.0, 0.0, math.cos(half_angle))
+    inverse_root_rotation = (-root_rotation[0], 0.0, 0.0, root_rotation[3])
+    spec = _plus_z_fixture_spec(
+        tmp_path,
+        profile,
+        root_rotation,
+        socket_rotation=inverse_root_rotation,
+    )
+    ingest_result = _setup_ingested_package(tmp_path, spec, source_front="+Z")
+    output = tmp_path / "rotated-output"
+    output.mkdir()
+    processed = output / "processed.glb"
+    report = output / "report.json"
+
+    result = AssemblyProcessor().process_assembly(
+        package=ingest_result,
+        spec=spec,
+        expected_provenance_sha256=ingest_result.retained_provenance_sha256,
+        processed_glb_path=processed,
+        report_path=report,
+        timeout_seconds=60.0,
+    )
+    validation = validate_glb_v07(
+        processed,
+        spec,
+        source_observation=result.verified_normalization,
+    )
+    assert validation.passed, [
+        (finding.rule_id, finding.message, finding.actual)
+        for finding in validation.findings
+        if finding.severity.value == "FAIL"
+    ]
+
+
+def test_lod1_fallback_is_rejected_when_original_exceeds_budget() -> None:
+    script = runpy.run_path(str(AssemblyProcessor.get_script_path()))
+    require_budget = script["_require_lod1_fallback_budget"]
+    with pytest.raises(RuntimeError, match=r"preserving LOD0 geometry \(12 triangles\).*budget 10"):
+        require_budget("hull", 12, 10)
 
 
 def test_blender_assembly_process_rejects_spec_changed_after_source_pin(tmp_path: Path) -> None:

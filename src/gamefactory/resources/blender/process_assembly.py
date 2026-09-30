@@ -34,6 +34,45 @@ from typing import Any
 
 MAX_GLB_BYTES = 50 * 1024 * 1024
 MAX_CONTRACT_BYTES = 1024 * 1024
+LOD_BOUNDS_TOLERANCE_M = 0.01
+
+
+def _world_bounds(obj: Any) -> tuple[tuple[float, float, float], tuple[float, float, float]] | None:
+    """Return actual world-space mesh bounds, or None for an empty mesh."""
+    points = [obj.matrix_world @ vertex.co for vertex in obj.data.vertices]
+    if not points:
+        return None
+    return (
+        tuple(min(float(point[axis]) for point in points) for axis in range(3)),
+        tuple(max(float(point[axis]) for point in points) for axis in range(3)),
+    )
+
+
+def _bounds_match(
+    left: tuple[tuple[float, float, float], tuple[float, float, float]] | None,
+    right: tuple[tuple[float, float, float], tuple[float, float, float]] | None,
+    tolerance: float,
+) -> bool:
+    return (
+        left is not None
+        and right is not None
+        and all(
+            abs(left[side][axis] - right[side][axis]) <= tolerance
+            for side in range(2)
+            for axis in range(3)
+        )
+    )
+
+
+def _require_lod1_fallback_budget(
+    part_id: str, lod0_triangles: int, budget: int, already_used: int = 0
+) -> None:
+    if already_used + lod0_triangles > budget:
+        raise RuntimeError(
+            f"LOD1 decimation for '{part_id}' changed world bounds and preserving "
+            f"LOD0 geometry ({lod0_triangles} triangles) with {already_used} already used "
+            f"exceeds aggregate LOD1 budget {budget}"
+        )
 
 
 @dataclasses.dataclass(frozen=True)
@@ -308,6 +347,21 @@ def main() -> None:
     lod1_ratio = float(contract.get("lod1_ratio", 0.5))
     if not 0.05 <= lod1_ratio <= 0.95:
         raise ValueError("lod1_ratio must be between 0.05 and 0.95")
+    max_triangles_lod1 = contract.get("max_triangles_lod1")
+    if lod1_required and (
+        not isinstance(max_triangles_lod1, int)
+        or isinstance(max_triangles_lod1, bool)
+        or max_triangles_lod1 <= 0
+    ):
+        raise ValueError("required LOD1 needs a positive max_triangles_lod1 budget")
+    lod_bounds_tolerance = contract.get("lod_bounds_tolerance_m", LOD_BOUNDS_TOLERANCE_M)
+    if (
+        not isinstance(lod_bounds_tolerance, (int, float))
+        or isinstance(lod_bounds_tolerance, bool)
+        or not math.isfinite(lod_bounds_tolerance)
+        or lod_bounds_tolerance <= 0
+    ):
+        raise ValueError("lod_bounds_tolerance_m must be a finite positive number")
 
     spec_parts = contract.get("parts", [])
     spec_sockets = contract.get("sockets", [])
@@ -481,6 +535,7 @@ def main() -> None:
     # 6. Generate per-part LOD1 (decimated copy) under each PART node if required
     lod1_objs: dict[str, Any] = {}
     part_metrics: dict[str, Any] = {}
+    lod1_triangles_total = 0
 
     for pid in [p["part_id"] for p in spec_parts]:
         lod0 = lod0_objs[pid]
@@ -502,8 +557,46 @@ def main() -> None:
             lod1.select_set(True)
             bpy.ops.object.modifier_apply(modifier=decimate.name)
             lod1.select_set(False)
+            bpy.context.view_layer.update()
+
+            if not _bounds_match(
+                _world_bounds(lod0),
+                _world_bounds(lod1),
+                float(lod_bounds_tolerance),
+            ):
+                # Decimation is allowed to miss extrema only when a conservative
+                # unchanged-geometry fallback still fits the declared LOD1 budget.
+                _require_lod1_fallback_budget(
+                    pid,
+                    lod0_triangles,
+                    max_triangles_lod1,
+                    already_used=lod1_triangles_total,
+                )
+                discarded_mesh = lod1.data
+                lod1.data = lod0.data.copy()
+                lod1.data.name = f"SM_{asset_id}_{pid}_LOD1_Mesh"
+                if discarded_mesh.users == 0:
+                    bpy.data.meshes.remove(discarded_mesh)
+                bpy.context.view_layer.update()
 
             lod1_triangles = sum(max(1, len(poly.vertices) - 2) for poly in lod1.data.polygons)
+            if lod1_triangles > max_triangles_lod1:
+                raise RuntimeError(
+                    f"LOD1 '{pid}' has {lod1_triangles} triangles, exceeding budget "
+                    f"{max_triangles_lod1}"
+                )
+            lod1_triangles_total += lod1_triangles
+            if lod1_triangles_total > max_triangles_lod1:
+                raise RuntimeError(
+                    f"Aggregate LOD1 has {lod1_triangles_total} triangles, exceeding "
+                    f"budget {max_triangles_lod1}"
+                )
+            if not _bounds_match(
+                _world_bounds(lod0),
+                _world_bounds(lod1),
+                float(lod_bounds_tolerance),
+            ):
+                raise RuntimeError(f"LOD1 bounds for '{pid}' do not preserve LOD0 bounds")
             lod1_objs[pid] = lod1
 
         part_metrics[pid] = {

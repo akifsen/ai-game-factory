@@ -436,6 +436,32 @@ def _prove_processed_assembly_glb(
         elif entry is not None:
             raise DccFailedError(f"Unexpected LOD1 '{lod1_name}' for an LOD0-only specification")
 
+    if lod1_required:
+        mesh_by_name = {mesh.name: mesh for mesh in proc_meshes}
+        lod_bounds_tolerance = 0.01
+        for part_id in spec_parts:
+            lod0_name = f"SM_{spec.asset_id}_{part_id}_LOD0"
+            lod1_name = f"SM_{spec.asset_id}_{part_id}_LOD1"
+            lod0_mesh = mesh_by_name.get(lod0_name)
+            lod1_mesh = mesh_by_name.get(lod1_name)
+            if lod0_mesh is None or lod1_mesh is None:
+                raise DccFailedError(f"Required per-part LOD bounds are missing for '{part_id}'")
+            if not lod0_mesh.points or not lod1_mesh.points:
+                raise DccFailedError(f"Per-part LOD meshes must contain vertices for '{part_id}'")
+            lod0_min = tuple(min(point[axis] for point in lod0_mesh.points) for axis in range(3))
+            lod0_max = tuple(max(point[axis] for point in lod0_mesh.points) for axis in range(3))
+            lod1_min = tuple(min(point[axis] for point in lod1_mesh.points) for axis in range(3))
+            lod1_max = tuple(max(point[axis] for point in lod1_mesh.points) for axis in range(3))
+            if any(
+                abs(lod0_min[axis] - lod1_min[axis]) > lod_bounds_tolerance
+                or abs(lod0_max[axis] - lod1_max[axis]) > lod_bounds_tolerance
+                for axis in range(3)
+            ):
+                raise DccFailedError(
+                    f"Per-part LOD1 bounds differ from LOD0 for '{part_id}': "
+                    f"LOD0=({lod0_min}, {lod0_max}), LOD1=({lod1_min}, {lod1_max})"
+                )
+
     # Verify all sockets are present under declared parent parts
     for sid, s in spec_sockets.items():
         sname = f"SOCKET_{sid}"
@@ -865,6 +891,8 @@ class AssemblyProcessor:
             "lod1_required": profile.document.processing.lod1_required
             or spec.lod_policy == "lod0_lod1",
             "lod1_ratio": ratio,
+            "max_triangles_lod1": spec.geometry_budget.max_triangles_lod1,
+            "lod_bounds_tolerance_m": 0.01,
             "collider_policy": spec.collider.policy,
             "dimension_tolerance_m": profile.document.processing.dimension_tolerance_m,
             "dimensions": spec.dimensions.model_dump(),
