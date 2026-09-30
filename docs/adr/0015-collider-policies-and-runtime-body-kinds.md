@@ -38,3 +38,7 @@ V0.5 implements one collider policy (`box`) and two body kinds (`static_body`, `
 ## Consequences
 
 `ProcessingPolicy` accepts `capsule`. `collider_policy: capsule` and the `collider` block exist only in `asset-spec-0.7.0`. Existing profiles and specifications are unchanged. Gameplay bodies and per-part colliders remain later work.
+
+## Geometry validator implementation note
+
+The test-only V0.7 geometry validator enforces the capsule's declared dimensions against the spec bounds and rejects any `COL_` mesh when the capsule policy is selected. It does not create the Godot `CapsuleShape3D`, verify its root-axis/base placement at runtime, or make a character profile available. Those remain vertical-integration gates.

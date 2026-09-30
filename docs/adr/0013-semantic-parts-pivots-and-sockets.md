@@ -66,3 +66,7 @@ A V0.7 spike exported a Blender assembly hull → turret → barrel → muzzle a
 ## Consequences
 
 The scene contract grows from a single `Visual` mesh to a `Visual` subtree that mirrors the part tree. `orientation.identity` does not apply to assemblies, so ADR 0018 selects it only for the single-mesh geometry mode. Single-mesh profiles (`static_prop@1`, `pickup@1`, `modular_piece@1`, `character@1`) declare no parts and keep today's contract. Only operator-authored assemblies can carry parts (ADR 0016).
+
+## Geometry validator implementation note
+
+The test-only V0.7 validator checks the declared `PART_` set and direct parent topology, positive uniform scale, individual pivot translation/basis/motion-axis rules, named direct-child LOD meshes, each part's decoded bounds and per-part LOD bounds, socket structure/parent/local transform/forward-end placement, assembly rest bounds and the root box. `pivot.collapsed` currently proves a collapsed declared origin only. A final processed GLB cannot establish whether mesh coordinates were baked from an authored parent frame without comparing the retained source; no centroid heuristic is used. Source-to-processed and Godot transform preservation remain required before production capability is enabled.

@@ -152,6 +152,29 @@ Godot: a `Node3D` root, then `Visual` (which mirrors the PART tree, with sockets
 
 Articulation check: for each non-fixed part, apply a test displacement about the declared pivot and axis. Assert that the pivot stays fixed (revolute), that descendants and sockets follow rigidly, and that the parent chain, siblings and root are unchanged. Then restore the rest pose.
 
+### Root frame clarification from the continuation review
+
+`ROOT` is the single identity scene container. The one part whose declared
+parent is `root` is the logical assembly root and is a direct child of `ROOT`.
+Unrecognized intermediate wrappers and non-identity `ROOT` transforms fail.
+
+For a declared `+Z` source, rotate that logical root part in its parent `ROOT`
+frame by 180 degrees about +Y. In the validator's column-vector convention,
+`M_canonical = R_y(pi) * M_source`. `ROOT` stays identity; descendant part and
+socket local matrices and LOD0 local geometry stay unchanged. A `-Z` source
+receives no rotation. Canonical pivot declarations are checked after this
+operation, not against the unnormalized raw top-part transform. Provenance maps
+describe the canonical specification; retained source bytes provide the raw
+transform for independent recomputation.
+
+The source package supplies declared LOD0 meshes and semantic nodes. Factory
+generates per-part LOD1 when required and the root box from the canonical rest
+bounds after normalization. The collider is not an authored moving part.
+Independent source-to-output triangle comparison must tolerate exporter vertex,
+index and primitive ordering, while rejecting geometry baking, stretching and
+translation beyond the stated float precision tolerance. A processing report
+alone cannot establish verified normalization.
+
 ## Validator composition
 
 | Geometry mode / contract | Groups (derived, never by profile id) |

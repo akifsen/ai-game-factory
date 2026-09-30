@@ -14,7 +14,7 @@ import math
 import struct
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from PIL import Image
 
@@ -23,6 +23,9 @@ from gamefactory.core.domain.asset_contracts import (
     AssetValidationResult,
     ValidationFinding,
 )
+
+if TYPE_CHECKING:
+    from gamefactory.core.domain.asset_contracts import AssetSpecificationV07
 from gamefactory.core.domain.asset_contracts import (
     ValidationFindingSeverity as Severity,
 )
@@ -61,6 +64,13 @@ def _read_glb(path: Path, max_bytes: int) -> tuple[dict[str, Any], bytes]:
     if size < 20 or size > max_bytes:
         raise _InvalidGLB(f"file size {size} is outside 20..{max_bytes} bytes")
     data = path.read_bytes()
+    return _read_glb_bytes(data, max_bytes)
+
+
+def _read_glb_bytes(data: bytes, max_bytes: int) -> tuple[dict[str, Any], bytes]:
+    """Parse immutable GLB bytes through the same bounded parser as path inputs."""
+    if len(data) < 20 or len(data) > max_bytes:
+        raise _InvalidGLB(f"file size {len(data)} is outside 20..{max_bytes} bytes")
     magic, version, total = struct.unpack_from("<4sII", data)
     if magic != b"glTF" or version != 2 or total != len(data):
         raise _InvalidGLB("invalid GLB magic, version, or declared total length")
@@ -457,11 +467,20 @@ def preflight_glb(path: Path, *, max_file_size_bytes: int = _MAX_FILE_BYTES) -> 
 
 
 def validate_glb(
-    path: Path, spec: AssetSpecification, *, max_file_size_bytes: int = _MAX_FILE_BYTES
+    path: Path,
+    spec: AssetSpecification | AssetSpecificationV07,
+    *,
+    max_file_size_bytes: int = _MAX_FILE_BYTES,
 ) -> AssetValidationResult:
     """Validate a processed GLB against the specification's bound profile."""
+    from gamefactory.core.domain.asset_contracts import AssetSpecificationV07
+
+    if isinstance(spec, AssetSpecificationV07):
+        from gamefactory.adapters.assets.v07_geometry_validation import validate_glb_v07
+
+        return validate_glb_v07(path, spec, max_file_size_bytes=max_file_size_bytes)
     if not isinstance(spec, AssetSpecification):
-        raise TypeError("validate_glb supports only V0.4/V0.5 legacy specifications")
+        raise TypeError("validate_glb requires an asset-spec-0.4/0.5/0.7 specification")
     profile = spec.bound_profile()
     contract = profile.processing_contract(spec)
     artifact = str(path)

@@ -88,13 +88,6 @@ def test_rule_composition_is_closed_and_capability_selected() -> None:
             require_implemented_groups(groups)
 
 
-def test_v07_specification_is_rejected_by_legacy_glb_facade(tmp_path: Path) -> None:
-    from gamefactory.core.domain.asset_contracts import AssetSpecificationV07
-
-    with pytest.raises(TypeError, match="only V0.4/V0.5"):
-        validate_glb(tmp_path / "unused.glb", AssetSpecificationV07.model_construct())  # type: ignore[arg-type]
-
-
 def test_validator_inspects_the_glb_once(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     import gamefactory.adapters.assets.glb_validator as validator
 
