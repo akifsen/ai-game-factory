@@ -41,6 +41,10 @@ _COMPONENTS = {
 _WIDTHS = {"SCALAR": 1, "VEC2": 2, "VEC3": 3, "VEC4": 4}
 _MAX_GLTF_NODES = 100_000
 _MAX_ACCESSOR_ELEMENTS = 1_000_000
+# Counts POSITION elements after expanding each reachable mesh primitive for
+# every node instance. Shared meshes/accessors therefore consume budget again
+# for each node that references them.
+_MAX_EXPANDED_POSITION_ELEMENTS = 1_000_000
 _MAX_TOTAL_TRIANGLES = 100_000
 _MAX_FILE_BYTES = 50 * 1024 * 1024
 
@@ -182,6 +186,59 @@ def _unique_object(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
     return result
 
 
+def _check_expanded_position_budget(
+    document: dict[str, Any],
+    nodes: list[Any],
+    meshes: list[Any],
+    reachable: set[int],
+    *,
+    maximum: int = _MAX_EXPANDED_POSITION_ELEMENTS,
+) -> int:
+    """Bound POSITION elements across reachable primitive instances before decoding."""
+    total = 0
+    accessors = document.get("accessors", [])
+    for node_index in reachable:
+        node = nodes[node_index]
+        if not isinstance(node, dict) or "mesh" not in node:
+            continue
+        mesh_index = node["mesh"]
+        if (
+            not isinstance(mesh_index, int)
+            or isinstance(mesh_index, bool)
+            or not 0 <= mesh_index < len(meshes)
+        ):
+            continue  # The regular mesh validation reports the malformed reference.
+        mesh = meshes[mesh_index]
+        if not isinstance(mesh, dict) or not isinstance(mesh.get("primitives", []), list):
+            continue  # Preserve the existing structural diagnostic.
+        for primitive in mesh.get("primitives", []):
+            if not isinstance(primitive, dict):
+                continue
+            attrs = primitive.get("attributes", {})
+            if not isinstance(attrs, dict) or "POSITION" not in attrs:
+                continue
+            accessor_index = attrs["POSITION"]
+            if (
+                not isinstance(accessor_index, int)
+                or isinstance(accessor_index, bool)
+                or not 0 <= accessor_index < len(accessors)
+            ):
+                continue  # _accessor supplies the established malformed-index error.
+            accessor = accessors[accessor_index]
+            if not isinstance(accessor, dict):
+                continue
+            count = accessor.get("count")
+            if not isinstance(count, int) or isinstance(count, bool) or count <= 0:
+                continue  # _accessor supplies the established malformed-count error.
+            total += count
+            if total > maximum:
+                raise _InvalidGLB(
+                    "expanded POSITION elements across reachable primitive instances "
+                    f"exceed safety limit {maximum}"
+                )
+    return total
+
+
 def _node_matrix(node: dict[str, Any]) -> list[list[float]]:
     if "matrix" in node:
         values = node["matrix"]
@@ -259,7 +316,10 @@ def _material_texcoords(document: dict[str, Any], material_index: int) -> list[i
 
 
 def _inspect(
-    document: dict[str, Any], binary: bytes
+    document: dict[str, Any],
+    binary: bytes,
+    *,
+    max_expanded_position_elements: int = _MAX_EXPANDED_POSITION_ELEMENTS,
 ) -> tuple[
     list[_MeshInfo],
     list[tuple[float, float, float]],
@@ -343,6 +403,13 @@ def _inspect(
 
     for root in scenes[scene_index].get("nodes", []):
         visit(root, set())
+    _check_expanded_position_budget(
+        document,
+        nodes,
+        meshes,
+        reachable,
+        maximum=max_expanded_position_elements,
+    )
     infos: list[_MeshInfo] = []
     all_points: list[tuple[float, float, float]] = []
     material_ids: set[int] = set()

@@ -11,10 +11,12 @@ from typing import Any
 
 import pytest
 
+from gamefactory.adapters.assets import glb_validator
 from gamefactory.adapters.dcc.character_processor import (
     _MAX_JSON_BYTES,
     CharacterProcessor,
     _bounded_json_bytes,
+    _raw_facts,
     _read_json_object,
 )
 from gamefactory.adapters.fakes.glb_generator import create_box_glb
@@ -122,6 +124,37 @@ def _write_glb(path: Path, document: dict[str, Any], binary: bytes) -> None:
         + struct.pack("<II", len(binary), 0x004E4942)
         + binary
     )
+
+
+def _append_attribute(
+    document: dict[str, Any],
+    binary: bytes,
+    *,
+    semantic: str,
+    values: bytes,
+    count: int,
+    accessor_type: str,
+    component_type: int,
+    normalized: bool,
+) -> bytes:
+    binary += b"\0" * ((-len(binary)) % 4)
+    view_index = len(document["bufferViews"])
+    document["bufferViews"].append(
+        {"buffer": 0, "byteOffset": len(binary), "byteLength": len(values)}
+    )
+    accessor_index = len(document["accessors"])
+    document["accessors"].append(
+        {
+            "bufferView": view_index,
+            "componentType": component_type,
+            "count": count,
+            "type": accessor_type,
+            "normalized": normalized,
+        }
+    )
+    document["meshes"][0]["primitives"][0]["attributes"][semantic] = accessor_index
+    document["buffers"][0]["byteLength"] = len(binary) + len(values)
+    return binary + values
 
 
 def _source(path: Path) -> None:
@@ -232,6 +265,226 @@ def test_rigged_or_extended_source_is_rejected_before_blender(
         _processor(runner).process_character(
             source,
             spec,
+            profile,
+            expected_raw_glb_sha256=hashlib.sha256(source.read_bytes()).hexdigest(),
+            processed_glb_path=tmp_path / "output.glb",
+        )
+    assert runner.calls == 0
+
+
+def test_repeated_shared_mesh_positions_are_bounded_before_decode_or_blender(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    source = tmp_path / "expanded.glb"
+    _source(source)
+    document, binary = _read_glb(source)
+    position_index = document["meshes"][0]["primitives"][0]["attributes"]["POSITION"]
+    # Counts alone exceed the aggregate budget. The embedded bytes intentionally
+    # remain small: the guard must run before accessor bounds checks or decoding.
+    document["accessors"][position_index]["count"] = 600_000
+    document["meshes"][0]["primitives"][0]["attributes"] = {"POSITION": position_index}
+    _write_glb(source, document, binary)
+
+    decoded: list[int] = []
+    original = glb_validator._accessor
+
+    def counted(document, binary, index, expected_type=None):
+        decoded.append(index)
+        return original(document, binary, index, expected_type)
+
+    monkeypatch.setattr(glb_validator, "_accessor", counted)
+    runner = _NoCallRunner()
+    profile = _profile()
+    with pytest.raises(ValidationError, match="expanded POSITION elements"):
+        _processor(runner).process_character(
+            source,
+            _spec(profile),
+            profile,
+            expected_raw_glb_sha256=hashlib.sha256(source.read_bytes()).hexdigest(),
+            processed_glb_path=tmp_path / "output.glb",
+        )
+    assert decoded == []
+    assert runner.calls == 0
+
+
+def test_shared_mesh_instance_budget_allows_valid_source_and_bounds_triangle_soup(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from gamefactory.adapters.dcc import character_processor
+
+    source = tmp_path / "shared.glb"
+    _source(source)
+    document, binary = _read_glb(source)
+    position_index = document["meshes"][0]["primitives"][0]["attributes"]["POSITION"]
+    count = document["accessors"][position_index]["count"]
+    # The two node instances reference the same accessor, so the expanded work
+    # is twice its accessor count; valid source remains below the same cap.
+    inspected = glb_validator._inspect(document, binary, max_expanded_position_elements=2 * count)
+    assert inspected[4] > 0
+
+    decoded: list[int] = []
+    original = glb_validator._accessor
+
+    def counted(document, binary, index, expected_type=None):
+        decoded.append(index)
+        return original(document, binary, index, expected_type)
+
+    monkeypatch.setattr(character_processor, "_accessor", counted)
+    matrices = {
+        index: [
+            [1.0, 0.0, 0.0, 0.0],
+            [0.0, 1.0, 0.0, 0.0],
+            [0.0, 0.0, 1.0, 0.0],
+            [0.0, 0.0, 0.0, 1.0],
+        ]
+        for index in range(len(document["nodes"]))
+    }
+    with pytest.raises(ValueError, match="expanded POSITION elements"):
+        character_processor._triangle_soup(
+            document,
+            binary,
+            matrices,
+            max_expanded_position_elements=2 * count - 1,
+        )
+    assert decoded == []
+
+    soup = character_processor._triangle_soup(
+        document,
+        binary,
+        matrices,
+        max_expanded_position_elements=2 * count,
+    )
+    assert soup
+    assert decoded.count(position_index) == 2
+
+
+def test_character_preflight_accepts_normalized_uv1_and_color_streams(tmp_path: Path) -> None:
+    from gamefactory.adapters.dcc import character_processor
+
+    source = tmp_path / "attributes.glb"
+    _source(source)
+    document, binary = _read_glb(source)
+    position = document["accessors"][
+        document["meshes"][0]["primitives"][0]["attributes"]["POSITION"]
+    ]
+    count = position["count"]
+    binary = _append_attribute(
+        document,
+        binary,
+        semantic="TEXCOORD_1",
+        values=bytes([0, 255] * count),
+        count=count,
+        accessor_type="VEC2",
+        component_type=5121,
+        normalized=True,
+    )
+    binary = _append_attribute(
+        document,
+        binary,
+        semantic="COLOR_0",
+        values=struct.pack("<" + "H" * (4 * count), *([65535] * (4 * count))),
+        count=count,
+        accessor_type="VEC4",
+        component_type=5123,
+        normalized=True,
+    )
+    _write_glb(source, document, binary)
+    accessors = character_processor._validate_character_vertex_attributes(document)
+    assert len(accessors) == 3
+    profile = _profile()
+    facts = _raw_facts(source.read_bytes(), _spec(profile), profile)
+    assert facts[1]["triangles"] > 0
+
+
+def test_character_attribute_aliases_decode_once_and_overlapping_descriptors_are_bounded(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from gamefactory.adapters.dcc import character_processor
+
+    source = tmp_path / "attribute-budget.glb"
+    _source(source)
+    document, binary = _read_glb(source)
+    count = document["accessors"][document["meshes"][0]["primitives"][0]["attributes"]["POSITION"]][
+        "count"
+    ]
+    binary = _append_attribute(
+        document,
+        binary,
+        semantic="TEXCOORD_1",
+        values=bytes([0, 255] * count),
+        count=count,
+        accessor_type="VEC2",
+        component_type=5121,
+        normalized=True,
+    )
+    uv_index = document["meshes"][0]["primitives"][0]["attributes"]["TEXCOORD_1"]
+    document["meshes"][0]["primitives"][0]["attributes"]["TEXCOORD_2"] = uv_index
+
+    decoded: list[int] = []
+    original = character_processor._accessor
+
+    def counted(document, binary, index, expected_type=None):
+        decoded.append(index)
+        return original(document, binary, index, expected_type)
+
+    monkeypatch.setattr(character_processor, "_accessor", counted)
+    validated = character_processor._validate_character_vertex_attributes(document)
+    assert validated.count(uv_index) == 1
+    character_processor._decode_character_vertex_attributes(document, binary, validated)
+    assert decoded.count(uv_index) == 1
+    assert len(decoded) == len(validated)
+
+    # Distinct descriptor indices over the same bytes each consume the budget.
+    document["accessors"].append(dict(document["accessors"][uv_index]))
+    second_index = len(document["accessors"]) - 1
+    document["meshes"][0]["primitives"][0]["attributes"]["TEXCOORD_3"] = second_index
+    decoded.clear()
+    with pytest.raises(ValueError, match="attribute scalar values"):
+        character_processor._validate_character_vertex_attributes(
+            document, max_scalar_values=4 * count - 1
+        )
+    assert decoded == []
+
+
+@pytest.mark.parametrize("mutation", ["count", "bounds", "normalization", "custom"])
+def test_character_preflight_rejects_malformed_unused_attribute_before_blender(
+    tmp_path: Path, mutation: str
+) -> None:
+    source = tmp_path / f"bad-attribute-{mutation}.glb"
+    _source(source)
+    document, binary = _read_glb(source)
+    position = document["accessors"][
+        document["meshes"][0]["primitives"][0]["attributes"]["POSITION"]
+    ]
+    count = position["count"]
+    binary = _append_attribute(
+        document,
+        binary,
+        semantic="TEXCOORD_1",
+        values=bytes([0, 255] * count),
+        count=count,
+        accessor_type="VEC2",
+        component_type=5121,
+        normalized=True,
+    )
+    accessor_index = document["meshes"][0]["primitives"][0]["attributes"]["TEXCOORD_1"]
+    accessor = document["accessors"][accessor_index]
+    if mutation == "count":
+        accessor["count"] -= 1
+    elif mutation == "bounds":
+        document["bufferViews"][accessor["bufferView"]]["byteLength"] = 1
+    elif mutation == "normalization":
+        accessor["normalized"] = False
+    else:
+        document["meshes"][0]["primitives"][0]["attributes"]["CUSTOM_0"] = accessor_index
+    _write_glb(source, document, binary)
+
+    profile = _profile()
+    runner = _NoCallRunner()
+    with pytest.raises(ValidationError, match="preflight"):
+        _processor(runner).process_character(
+            source,
+            _spec(profile),
             profile,
             expected_raw_glb_sha256=hashlib.sha256(source.read_bytes()).hexdigest(),
             processed_glb_path=tmp_path / "output.glb",

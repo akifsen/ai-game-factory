@@ -15,7 +15,9 @@ from pathlib import Path
 from typing import Any, cast
 
 from gamefactory.adapters.assets.glb_validator import (
+    _MAX_EXPANDED_POSITION_ELEMENTS,
     _accessor,
+    _check_expanded_position_budget,
     _inspect,
     _InvalidGLB,
     _read_glb_bytes,
@@ -41,6 +43,9 @@ from gamefactory.core.execution.process_runner import CommandRequest, ProcessRun
 
 _MAX_GLB_BYTES = 50 * 1024 * 1024
 _MAX_JSON_BYTES = 1024 * 1024
+# Scalar components across distinct non-POSITION character attribute accessors.
+# POSITION work is separately bounded by the expanded-instance vertex cap.
+_MAX_CHARACTER_ATTRIBUTE_SCALAR_VALUES = 16_000_000
 _INLINE_LOG_CHARS = 12_000
 
 
@@ -281,10 +286,26 @@ def _triangle_soup(
     binary: bytes,
     world: dict[int, list[list[float]]],
     node_names: set[str] | None = None,
+    *,
+    max_expanded_position_elements: int = _MAX_EXPANDED_POSITION_ELEMENTS,
 ) -> tuple[tuple[tuple[float, float, float], ...], ...]:
     """Decode every reachable triangle in world space from a bounded GLB context."""
     nodes = document.get("nodes", [])
     meshes = document.get("meshes", [])
+    selected_nodes = {
+        index
+        for index, node in enumerate(nodes)
+        if index in world
+        and "mesh" in node
+        and (node_names is None or node.get("name") in node_names)
+    }
+    _check_expanded_position_budget(
+        document,
+        nodes,
+        meshes,
+        selected_nodes,
+        maximum=max_expanded_position_elements,
+    )
     triangles: list[tuple[tuple[float, float, float], ...]] = []
     for node_index, node in enumerate(nodes):
         if "mesh" not in node or node_index not in world:
@@ -334,6 +355,93 @@ def _triangle_soup(
     return tuple(sorted(triangles))
 
 
+def _validate_character_vertex_attributes(
+    document: dict[str, Any],
+    *,
+    max_scalar_values: int = _MAX_CHARACTER_ATTRIBUTE_SCALAR_VALUES,
+) -> tuple[int, ...]:
+    """Validate stream descriptors and bound unique attribute scalar values."""
+    accessors = document.get("accessors", [])
+    unique_attributes: dict[int, int] = {}
+    for mesh in document.get("meshes", []):
+        for primitive in mesh.get("primitives", []):
+            attrs = primitive.get("attributes", {})
+            if not isinstance(attrs, dict):
+                raise _InvalidGLB("character primitive attributes must be an object")
+            position_index = attrs.get("POSITION")
+            if type(position_index) is not int or not 0 <= position_index < len(accessors):
+                raise _InvalidGLB("character POSITION accessor index is invalid")
+            position = accessors[position_index]
+            if not isinstance(position, dict) or type(position.get("count")) is not int:
+                raise _InvalidGLB("character POSITION accessor is malformed")
+            position_count = position["count"]
+            for semantic, accessor_index in attrs.items():
+                if semantic == "POSITION":
+                    allowed_types = {"VEC3"}
+                    allowed_components = {5126}
+                elif semantic == "NORMAL":
+                    allowed_types = {"VEC3"}
+                    allowed_components = {5126}
+                elif semantic == "TANGENT":
+                    allowed_types = {"VEC4"}
+                    allowed_components = {5126}
+                elif semantic.startswith("TEXCOORD_"):
+                    suffix = semantic.removeprefix("TEXCOORD_")
+                    if not suffix.isdecimal() or str(int(suffix)) != suffix:
+                        raise _InvalidGLB("character TEXCOORD semantic index is invalid")
+                    allowed_types = {"VEC2"}
+                    allowed_components = {5126, 5121, 5123}
+                elif semantic.startswith("COLOR_"):
+                    suffix = semantic.removeprefix("COLOR_")
+                    if not suffix.isdecimal() or str(int(suffix)) != suffix:
+                        raise _InvalidGLB("character COLOR semantic index is invalid")
+                    allowed_types = {"VEC3", "VEC4"}
+                    allowed_components = {5126, 5121, 5123}
+                else:
+                    raise _InvalidGLB(f"unsupported character vertex attribute {semantic!r}")
+                if type(accessor_index) is not int or not 0 <= accessor_index < len(accessors):
+                    raise _InvalidGLB("character vertex attribute accessor index is invalid")
+                accessor = accessors[accessor_index]
+                if (
+                    not isinstance(accessor, dict)
+                    or accessor.get("type") not in allowed_types
+                    or accessor.get("componentType") not in allowed_components
+                    or type(accessor.get("count")) is not int
+                    or accessor.get("count") != position_count
+                    or "sparse" in accessor
+                ):
+                    raise _InvalidGLB(f"character {semantic} accessor shape is unsupported")
+                component = accessor["componentType"]
+                normalized = accessor.get("normalized", False)
+                if (
+                    type(normalized) is not bool
+                    or (component == 5126 and normalized)
+                    or (component in {5121, 5123} and not normalized)
+                ):
+                    raise _InvalidGLB(
+                        f"character {semantic} normalized flag is invalid for its component type"
+                    )
+                if semantic != "POSITION":
+                    width = {"VEC2": 2, "VEC3": 3, "VEC4": 4}[accessor["type"]]
+                    unique_attributes[accessor_index] = accessor["count"] * width
+    total_values = sum(unique_attributes.values())
+    if total_values > max_scalar_values:
+        raise _InvalidGLB(
+            "character attribute scalar values across distinct accessors "
+            f"exceed safety limit {max_scalar_values}"
+        )
+    return tuple(unique_attributes)
+
+
+def _decode_character_vertex_attributes(
+    document: dict[str, Any], binary: bytes, accessor_indices: tuple[int, ...]
+) -> None:
+    """Decode each validated attribute descriptor once to check bounds and finiteness."""
+    for accessor_index in accessor_indices:
+        accessor = document["accessors"][accessor_index]
+        _accessor(document, binary, accessor_index, accessor["type"])
+
+
 def _raw_facts(
     raw_bytes: bytes,
     spec: AssetSpecificationV07,
@@ -348,9 +456,11 @@ def _raw_facts(
                 attrs = primitive.get("attributes", {})
                 if any(str(name).startswith(("JOINTS_", "WEIGHTS_")) for name in attrs):
                     raise _InvalidGLB("character source must not contain joints or weights")
+        attribute_accessors = _validate_character_vertex_attributes(document)
         mesh_infos, points, material_ids, texture_refs, triangles, world = _inspect(
             document, binary
         )
+        _decode_character_vertex_attributes(document, binary, attribute_accessors)
     except (_InvalidGLB, KeyError, TypeError, ValueError, IndexError, RecursionError) as exc:
         raise ValidationError(
             f"Character source GLB failed bounded static preflight: {exc}"
