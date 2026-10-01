@@ -18,6 +18,8 @@ from tests.unit.test_v08_candidate_evidence_cold import (
     _run_cold,
 )
 
+pytestmark = pytest.mark.candidate_slow
+
 _FROZEN_RIG_PATH = REPO / "scripts" / "verify_rig_bundle.py"
 _TRUSTED_CRLF_SHA = "3e4849b9b0781d45f805a462400b019732a0d8946bce83c6c883064d3973130e"
 _TRUSTED_LF_SHA = "708e87ba18bba6972a332c2135d80c18cd416345bbfc030398c6ca9db4647291"

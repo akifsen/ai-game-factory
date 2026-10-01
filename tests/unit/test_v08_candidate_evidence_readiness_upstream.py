@@ -29,6 +29,8 @@ from tests.unit.v08_candidate_upstream_fixtures import (
     upstream_drift_expected_cause,
 )
 
+pytestmark = pytest.mark.candidate_slow
+
 
 @pytest.fixture
 def completed_upstream_ctx(tmp_path: Path):

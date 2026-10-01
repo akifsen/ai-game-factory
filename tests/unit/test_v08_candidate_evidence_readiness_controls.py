@@ -27,6 +27,8 @@ from tests.unit.v08_candidate_c2b_readiness_fixtures import (
     run_completed_managed_evidence,
 )
 
+pytestmark = pytest.mark.candidate_slow
+
 
 @pytest.fixture(scope="module")
 def controls_managed_baseline(

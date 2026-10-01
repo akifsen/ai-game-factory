@@ -61,6 +61,8 @@ from tests.unit.test_v08_candidate_workflow import (
     _handlers as _candidate_workflow_handlers,
 )
 
+pytestmark = pytest.mark.candidate_slow
+
 REPO = Path(__file__).resolve().parents[2]
 VERIFIER_CHECKOUT = REPO / "scripts" / "verify_candidate_bundle.py"
 VERIFIER = Path(

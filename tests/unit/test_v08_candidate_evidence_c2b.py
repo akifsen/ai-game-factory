@@ -70,6 +70,8 @@ from tests.unit.v08_candidate_c2b_publication_fixtures import (
     run_workflow_to_evidence_publication_gate,
 )
 
+pytestmark = pytest.mark.candidate_slow
+
 
 def _run_full_candidate_evidence(handlers, engine, workspace, workflow_id: str) -> None:
     blocked = engine.run_workflow(workflow_id)

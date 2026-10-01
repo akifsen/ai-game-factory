@@ -95,4 +95,7 @@ minversion = "8.0"
 testpaths = ["tests"]
 python_files = ["test_*.py"]
 addopts = "-v"
-markers = ["real_godot: opt-in tests against an actual Godot executable"]
+markers = [
+    "real_godot: opt-in tests against an actual Godot executable",
+    "candidate_slow: V0.8 candidate installed-wheel slow unit gate (CI shards only)",
+]

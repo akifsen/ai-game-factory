@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import shutil
 import subprocess
 from importlib import resources
 from pathlib import Path
@@ -64,6 +65,40 @@ GODOT = os.environ.get(
     "GAMEFACTORY_TEST_GODOT",
     r"C:\Users\lenovo\devel\godot\Godot_v4.7.2-stable_win64.exe\Godot_v4.7.2-stable_win64_console.exe",
 )
+
+
+def copy_ci_candidate_evidence_if_requested(
+    project_root: Path,
+    db: object,
+    workflow_id: str,
+) -> None:
+    """Opt-in hook: copy selected publication artifacts when CI sets the destination env."""
+    dest_raw = os.environ.get("GAMEFACTORY_CI_CANDIDATE_EVIDENCE_DIR")
+    if not dest_raw:
+        return
+    dest = Path(dest_raw)
+    dest.mkdir(parents=True, exist_ok=True)
+    arts = ArtifactRepository(db).list_by_workflow(workflow_id)
+    by_type = {artifact.artifact_type: artifact for artifact in arts}
+    manifest = by_type.get("candidate-c2-evidence-manifest")
+    result = by_type.get("candidate-c2-evidence-result")
+    marker = by_type.get("candidate-c2-export-marker")
+    if manifest is None or result is None or marker is None:
+        raise AssertionError("CI candidate evidence hook missing publication artifacts")
+    manifest_path = project_root / manifest.relative_path
+    result_path = project_root / result.relative_path
+    marker_path = project_root / marker.relative_path
+    shutil.copy2(manifest_path, dest / "manifest.json")
+    shutil.copy2(result_path, dest / "result.json")
+    shutil.copy2(marker_path, dest / "export-marker.json")
+    result_doc = json.loads(result_path.read_text(encoding="utf-8"))
+    trusted = result_doc.get("trusted_cold_result")
+    if trusted is None:
+        raise AssertionError("CI candidate evidence hook missing trusted_cold_result")
+    (dest / "trusted-cold-outcome.json").write_text(
+        json.dumps(trusted, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
 
 
 def _export_script_path() -> Path:
@@ -234,3 +269,4 @@ def test_candidate_workflow_reaches_test_only_review_and_receipt(tmp_path: Path)
     assert receipt["promotion_eligible"] is False
     assert receipt["production_eligible"] is False
     assert receipt["receipt_scope"] == "candidate_test_only"
+    copy_ci_candidate_evidence_if_requested(root, db, workflow.id)

@@ -22,6 +22,8 @@ from tests.unit.v08_candidate_managed_control_fixtures import (
     mutate_coherent_trusted_cold,
 )
 
+pytestmark = pytest.mark.candidate_slow
+
 
 def _fresh_ctx(tmp_path: Any) -> CompletedEvidenceContext:
     ctx = run_completed_managed_evidence(tmp_path)

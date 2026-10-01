@@ -36,6 +36,8 @@ from tests.unit.v08_candidate_managed_control_fixtures import (
     assert_on_disk_registration_coherent,
 )
 
+pytestmark = pytest.mark.candidate_slow
+
 
 def test_managed_container_baseline_passes_readiness(tmp_path: Path) -> None:
     ctx = managed_container_baseline(tmp_path)

@@ -43,7 +43,7 @@ jobs:
       - run: ruff check src tests
       - run: ruff format --check src tests
       - run: mypy src/gamefactory
-      - run: python -m pytest -ra -p no:cacheprovider
+      - run: python -m pytest -ra -p no:cacheprovider -m "not candidate_slow"
 
   test:
     if: >-
@@ -83,7 +83,7 @@ jobs:
           path: ${{ runner.temp }}/linux-filesystem-context.txt
           if-no-files-found: warn
       - run: python -m pip install -e ".[dev]"
-      - run: python -m pytest -ra -p no:cacheprovider
+      - run: python -m pytest -ra -p no:cacheprovider -m "not candidate_slow"
       - run: ruff check src tests
       - run: ruff format --check src tests
       - run: mypy src/gamefactory
@@ -478,3 +478,363 @@ jobs:
             .verification/ci-godot-rendered/rendered-interrupt.json
             .verification/ci-godot-rendered/publish/**/*
           if-no-files-found: warn
+
+  candidate-wheel:
+    if: >-
+      github.event_name != 'pull_request'
+      || (contains(github.event.pull_request.labels.*.name, 'full-ci')
+          && (github.event.action != 'labeled' || github.event.label.name == 'full-ci'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Build exact-HEAD pure candidate wheel
+        shell: bash
+        run: |
+          set -euo pipefail
+          root="$GITHUB_WORKSPACE"
+          artifact_dir="$RUNNER_TEMP/candidate-v083-wheel"
+          mkdir -p "$artifact_dir/builder-source"
+          python "$root/scripts/verify_v08_candidate_ci.py" write-provenance \
+            --output-dir "$artifact_dir/builder-source" \
+            --require-clean \
+            --role builder
+          cp "$artifact_dir/builder-source/commit.txt" "$artifact_dir/commit.txt"
+          python -m pip install --upgrade pip build
+          python -m build --wheel --outdir "$artifact_dir"
+          wheel="$(find "$artifact_dir" -maxdepth 1 -name 'gamefactory-*.whl' -print -quit)"
+          test -n "$wheel"
+          sha256sum "$wheel" | tee "$artifact_dir/wheel.sha256"
+          python "$root/scripts/verify_v08_candidate_ci.py" wheel-verify \
+            --mode builder \
+            --wheel "$wheel" \
+            --expected-head "$(git -C "$root" rev-parse HEAD)"
+      - name: Upload candidate wheel artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: candidate-v083-wheel
+          path: ${{ runner.temp }}/candidate-v083-wheel/**
+          if-no-files-found: error
+
+  candidate-unit-installed:
+    needs: candidate-wheel
+    if: >-
+      github.event_name != 'pull_request'
+      || (contains(github.event.pull_request.labels.*.name, 'full-ci')
+          && (github.event.action != 'labeled' || github.event.label.name == 'full-ci'))
+    timeout-minutes: ${{ matrix.timeout_minutes }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: ubuntu-latest, python-version: '3.11', shard: 1, timeout_minutes: 40 }
+          - { os: ubuntu-latest, python-version: '3.12', shard: 1, timeout_minutes: 40 }
+          - { os: windows-latest, python-version: '3.11', shard: 1, timeout_minutes: 40 }
+          - { os: windows-latest, python-version: '3.12', shard: 1, timeout_minutes: 40 }
+          - { os: ubuntu-latest, python-version: '3.11', shard: 2, timeout_minutes: 35 }
+          - { os: ubuntu-latest, python-version: '3.12', shard: 2, timeout_minutes: 35 }
+          - { os: windows-latest, python-version: '3.11', shard: 2, timeout_minutes: 35 }
+          - { os: windows-latest, python-version: '3.12', shard: 2, timeout_minutes: 35 }
+          - { os: ubuntu-latest, python-version: '3.11', shard: 3, timeout_minutes: 45 }
+          - { os: ubuntu-latest, python-version: '3.12', shard: 3, timeout_minutes: 45 }
+          - { os: windows-latest, python-version: '3.11', shard: 3, timeout_minutes: 45 }
+          - { os: windows-latest, python-version: '3.12', shard: 3, timeout_minutes: 45 }
+          - { os: ubuntu-latest, python-version: '3.11', shard: 4, timeout_minutes: 35 }
+          - { os: ubuntu-latest, python-version: '3.12', shard: 4, timeout_minutes: 35 }
+          - { os: windows-latest, python-version: '3.11', shard: 4, timeout_minutes: 35 }
+          - { os: windows-latest, python-version: '3.12', shard: 4, timeout_minutes: 35 }
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Download candidate wheel artifact
+        uses: actions/download-artifact@v6
+        with:
+          name: candidate-v083-wheel
+          path: ${{ runner.temp }}/candidate-v083-wheel
+      - name: Install shared candidate wheel and run shard
+        shell: bash
+        env:
+          CANDIDATE_SHARD: ${{ matrix.shard }}
+        run: |
+          set -euo pipefail
+          root="$GITHUB_WORKSPACE"
+          artifact_dir="$RUNNER_TEMP/candidate-v083-wheel"
+          wheel="$(find "$artifact_dir" -maxdepth 1 -name 'gamefactory-*.whl' -print -quit)"
+          test -n "$wheel"
+          expected_head="$(tr -d '\n' < "$artifact_dir/commit.txt")"
+          expected_sha="$(awk '{print $1}' "$artifact_dir/wheel.sha256")"
+          test "$(git -C "$root" rev-parse HEAD)" = "$expected_head"
+          test "$(git -C "$root" rev-parse HEAD)" = "${GITHUB_SHA}"
+          python -m venv "$RUNNER_TEMP/candidate-unit-venv"
+          if [ -x "$RUNNER_TEMP/candidate-unit-venv/bin/python" ]; then
+            venv_py="$RUNNER_TEMP/candidate-unit-venv/bin/python"
+          else
+            venv_py="$RUNNER_TEMP/candidate-unit-venv/Scripts/python.exe"
+          fi
+          "$venv_py" -m pip install --upgrade pip
+          "$venv_py" -m pip install "${wheel}[dev]"
+          python "$root/scripts/verify_v08_candidate_ci.py" wheel-verify \
+            --mode consumer \
+            --wheel "$wheel" \
+            --expected-head "$expected_head" \
+            --expected-sha256 "$expected_sha" \
+            --python "$venv_py" \
+            --workspace "$root"
+          unit_evidence="$root/.verification/ci-candidate-unit/shard-${CANDIDATE_SHARD}-${{ matrix.os }}-${{ matrix.python-version }}"
+          mkdir -p "$unit_evidence/builder-source" "$unit_evidence/consumer-source"
+          python "$root/scripts/verify_v08_candidate_ci.py" write-provenance \
+            --output-dir "$unit_evidence/consumer-source" \
+            --expected-head "$expected_head" \
+            --require-clean \
+            --role consumer
+          cp -a "$artifact_dir/builder-source/." "$unit_evidence/builder-source/"
+          cp "$artifact_dir/wheel.sha256" "$unit_evidence/wheel.sha256"
+          cp "$artifact_dir/commit.txt" "$unit_evidence/commit.txt"
+          if [ "$CANDIDATE_SHARD" = "1" ] && [ "${{ matrix.python-version }}" = "3.11" ] && [ "${{ runner.os }}" = "Linux" ]; then
+            python "$root/scripts/verify_v08_candidate_ci.py" inventory \
+              --python "$venv_py" --repo "$root" --collect-cwd "$RUNNER_TEMP"
+            python "$root/scripts/verify_v08_candidate_ci.py" marker-propagation \
+              --python "$venv_py" --repo "$root"
+          fi
+          if [ "${{ runner.os }}" = "Linux" ]; then
+            platform=linux
+          else
+            platform=windows
+          fi
+          expectations="$("$venv_py" "$root/scripts/verify_v08_candidate_ci.py" shard-expectations --shard "$CANDIDATE_SHARD" --platform "$platform")"
+          raw_count="$("$venv_py" -c 'import json,sys; print(json.load(sys.stdin)["raw_test_count"])' <<<"$expectations")"
+          expected_skipped="$("$venv_py" -c 'import json,sys; print(json.load(sys.stdin)["expected_skipped"])' <<<"$expectations")"
+          mapfile -t shard_paths < <("$venv_py" -c 'import json,sys; print("\n".join(json.load(sys.stdin)["modules"]))' <<<"$expectations")"
+          collect_log="$unit_evidence/candidate-shard-collect.txt"
+          collect_nodes="$unit_evidence/candidate-shard-collect-nodes.txt"
+          abs_paths=()
+          for rel in "${shard_paths[@]}"; do
+            abs_paths+=("$root/$rel")
+          done
+          collect_node_args=(
+            --python "$venv_py" --repo "$root" --collect-cwd "$RUNNER_TEMP"
+            --output "$collect_nodes"
+            --expected-shard "$CANDIDATE_SHARD"
+          )
+          for abs_path in "${abs_paths[@]}"; do
+            collect_node_args+=(--path "$abs_path")
+          done
+          unset PYTHONPATH
+          export PYTHONNOUSERSITE=1
+          cd "$RUNNER_TEMP"
+          python "$root/scripts/verify_v08_candidate_ci.py" collect-nodes "${collect_node_args[@]}"
+          "$venv_py" -m pytest --collect-only -q --rootdir "$root" --import-mode=importlib \
+            -o "pythonpath=$root" -p no:cacheprovider "${abs_paths[@]}" 2>&1 | tee "$collect_log"
+          grep -E "(^|[[:space:]])${raw_count} tests collected" "$collect_log"
+          junit_path="$unit_evidence/candidate-unit-junit.xml"
+          install_probe="$("$venv_py" -I -c 'import json, gamefactory, pathlib; print(json.dumps({"module_path": gamefactory.__file__, "version": gamefactory.__version__}))')"
+          printf '%s\n' "$install_probe" > "$unit_evidence/installed-package.json"
+          {
+            printf 'os=%s\n' "${{ runner.os }}"
+            printf 'python_version=%s\n' "${{ matrix.python-version }}"
+            printf 'shard=%s\n' "$CANDIDATE_SHARD"
+            printf 'venv_python=%s\n' "$venv_py"
+            printf 'commit=%s\n' "$expected_head"
+            printf 'wheel_sha256=%s\n' "$expected_sha"
+            printf 'installed_package=%s\n' "$install_probe"
+          } > "$unit_evidence/environment.txt"
+          "$venv_py" -m pytest -ra --rootdir "$root" --import-mode=importlib -o "pythonpath=$root" \
+            -p no:cacheprovider --junitxml="$junit_path" "${abs_paths[@]}"
+          junit_args=(--junit "$junit_path" --tests "$raw_count" --failures 0 --errors 0 --skipped "$expected_skipped" --collect-nodes "$collect_nodes")
+          while IFS= read -r nodeid; do
+            [ -n "$nodeid" ] || continue
+            junit_args+=(--allowed-skip "$nodeid")
+          done < <("$venv_py" -c 'import json,sys; print("\n".join(json.load(sys.stdin)["platform_skip_nodeids"]))' <<<"$expectations")"
+          python "$root/scripts/verify_v08_candidate_ci.py" junit-assert "${junit_args[@]}"
+      - name: Upload candidate unit shard evidence
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: candidate-v083-unit-${{ matrix.os }}-py${{ matrix.python-version }}-shard-${{ matrix.shard }}
+          path: |
+            .verification/ci-candidate-unit/shard-${{ matrix.shard }}-${{ matrix.os }}-${{ matrix.python-version }}/**
+          if-no-files-found: error
+
+  candidate-v083-real:
+    needs: candidate-wheel
+    if: >-
+      github.event_name != 'pull_request'
+      || (contains(github.event.pull_request.labels.*.name, 'full-ci')
+          && (github.event.action != 'labeled' || github.event.label.name == 'full-ci'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      GODOT_VERSION: 4.7.2-stable
+      GODOT_EXPECTED_VERSION: 4.7.2.stable.official.ed1daf0bf
+      GODOT_ARCHIVE_SHA512: 9aa00f7a605200940bce3027a567b782f49bd8e940dd06ae9e987bd65aee1b1467edd56ed84fcdcbdd44354bf613bdbb4e5d2913e925850368e150c59ed54c65
+      LIBGL_ALWAYS_SOFTWARE: "1"
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install software OpenGL display and Blender dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y xvfb libgl1-mesa-dri mesa-utils blender python3-numpy python3-venv python3-pip
+      - name: Download candidate wheel artifact
+        uses: actions/download-artifact@v6
+        with:
+          name: candidate-v083-wheel
+          path: ${{ runner.temp }}/candidate-v083-wheel
+      - name: Install shared candidate wheel into clean virtual environment
+        shell: bash
+        run: |
+          set -euo pipefail
+          root="$GITHUB_WORKSPACE"
+          artifact_dir="$RUNNER_TEMP/candidate-v083-wheel"
+          wheel="$(find "$artifact_dir" -maxdepth 1 -name 'gamefactory-*.whl' -print -quit)"
+          test -n "$wheel"
+          expected_head="$(tr -d '\n' < "$artifact_dir/commit.txt")"
+          expected_sha="$(awk '{print $1}' "$artifact_dir/wheel.sha256")"
+          test "$(git -C "$root" rev-parse HEAD)" = "$expected_head"
+          test "$(git -C "$root" rev-parse HEAD)" = "${GITHUB_SHA}"
+          /usr/bin/python3 -m venv "$RUNNER_TEMP/candidate-real-venv"
+          venv_py="$RUNNER_TEMP/candidate-real-venv/bin/python"
+          "$venv_py" -m pip install --upgrade pip
+          "$venv_py" -m pip install "${wheel}[dev]"
+          python "$root/scripts/verify_v08_candidate_ci.py" wheel-verify \
+            --mode consumer \
+            --wheel "$wheel" \
+            --expected-head "$expected_head" \
+            --expected-sha256 "$expected_sha" \
+            --python "$venv_py" \
+            --workspace "$root"
+          BLENDER_NUMPY_PATH="$(/usr/bin/python3 -c 'import pathlib, numpy; print(pathlib.Path(numpy.__file__).resolve().parent.parent)')"
+          echo "GAMEFACTORY_BLENDER_PYTHONPATH=$BLENDER_NUMPY_PATH" >> "$GITHUB_ENV"
+          echo "GAMEFACTORY_TEST_BLENDER=$(command -v blender)" >> "$GITHUB_ENV"
+          mkdir -p "$root/.verification/ci-candidate-real"
+          "$venv_py" "$root/scripts/verify_blender_dependencies.py" \
+            --blender "$(command -v blender)" \
+            --python-path "$BLENDER_NUMPY_PATH" \
+            --forbid-python-prefix /opt/hostedtoolcache \
+            --output "$root/.verification/ci-candidate-real/blender-dependencies.json"
+      - name: Restore pinned Godot archive
+        uses: actions/cache@v5
+        with:
+          path: ~/.cache/gamefactory-godot
+          key: godot-${{ env.GODOT_VERSION }}-${{ env.GODOT_ARCHIVE_SHA512 }}
+      - name: Download and verify pinned official Godot
+        shell: bash
+        run: |
+          set -euo pipefail
+          archive="Godot_v${GODOT_VERSION}_linux.x86_64.zip"
+          cache_dir="$HOME/.cache/gamefactory-godot"
+          mkdir -p "$cache_dir"
+          if [ ! -f "$cache_dir/$archive" ]; then
+            curl --fail --location --retry 3 "https://github.com/godotengine/godot-builds/releases/download/${GODOT_VERSION}/${archive}" --output "$cache_dir/$archive"
+          fi
+          cp "$cache_dir/$archive" "$RUNNER_TEMP/$archive"
+          printf '%s  %s\n' "$GODOT_ARCHIVE_SHA512" "$RUNNER_TEMP/$archive" | sha512sum --check --strict
+          unzip "$RUNNER_TEMP/$archive" -d "$RUNNER_TEMP/godot"
+          chmod +x "$RUNNER_TEMP/godot/Godot_v${GODOT_VERSION}_linux.x86_64"
+          echo "GAMEFACTORY_TEST_GODOT=$RUNNER_TEMP/godot/Godot_v${GODOT_VERSION}_linux.x86_64" >> "$GITHUB_ENV"
+      - name: Record candidate real-tool environment evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          root="$GITHUB_WORKSPACE"
+          evidence="$root/.verification/ci-candidate-real"
+          artifact_dir="$RUNNER_TEMP/candidate-v083-wheel"
+          expected_head="$(tr -d '\n' < "$artifact_dir/commit.txt")"
+          mkdir -p "$evidence/builder-source" "$evidence/consumer-source"
+          python "$root/scripts/verify_v08_candidate_ci.py" write-provenance \
+            --output-dir "$evidence/consumer-source" \
+            --expected-head "$expected_head" \
+            --require-clean \
+            --role consumer
+          cp -a "$artifact_dir/builder-source/." "$evidence/builder-source/"
+          cp "$artifact_dir/wheel.sha256" "$evidence/wheel.sha256"
+          cp "$artifact_dir/commit.txt" "$evidence/commit.txt"
+          {
+            printf 'GAMEFACTORY_TEST_BLENDER=%s\n' "$GAMEFACTORY_TEST_BLENDER"
+            printf 'GAMEFACTORY_TEST_GODOT=%s\n' "$GAMEFACTORY_TEST_GODOT"
+            printf 'GAMEFACTORY_BLENDER_PYTHONPATH=%s\n' "$GAMEFACTORY_BLENDER_PYTHONPATH"
+            printf 'LIBGL_ALWAYS_SOFTWARE=%s\n' "$LIBGL_ALWAYS_SOFTWARE"
+            blender_version="$(blender --version | head -n 1)"
+            printf 'blender_version=%s\n' "$blender_version"
+            printf 'blender_dependencies_json=%s\n' "$evidence/blender-dependencies.json"
+            "$RUNNER_TEMP/candidate-real-venv/bin/python" -c 'import gamefactory; print("module_path=" + gamefactory.__file__)'
+            godot_version="$("$GAMEFACTORY_TEST_GODOT" --version)"
+            printf 'godot_version=%s\n' "$godot_version"
+            test "$godot_version" = "$GODOT_EXPECTED_VERSION"
+          } | tee "$evidence/environment.txt"
+      - name: Run candidate real integration gate under Xvfb
+        shell: bash
+        working-directory: ${{ runner.temp }}
+        env:
+          GAMEFACTORY_CI_CANDIDATE_EVIDENCE_DIR: ${{ github.workspace }}/.verification/ci-candidate
+        run: |
+          set -euo pipefail
+          root="$GITHUB_WORKSPACE"
+          evidence="$root/.verification/ci-candidate-real"
+          mkdir -p "$evidence/logs" "$evidence/reports"
+          venv_py="$RUNNER_TEMP/candidate-real-venv/bin/python"
+          unset PYTHONPATH
+          export PYTHONNOUSERSITE=1
+          export LIBGL_ALWAYS_SOFTWARE=1
+          integration_paths=(
+            "$root/tests/integration/test_v08_candidate_blender_static.py"
+            "$root/tests/integration/test_v08_candidate_runtime_godot.py"
+            "$root/tests/integration/test_v08_candidate_workflow_engine.py"
+          )
+          collect_log="$evidence/logs/candidate-real-collect.txt"
+          collect_nodes="$evidence/logs/candidate-real-collect-nodes.txt"
+          junit_real="$evidence/reports/candidate-real-junit.xml"
+          xvfb_collect_script="$RUNNER_TEMP/candidate-real-collect-under-xvfb.sh"
+          {
+            printf '%s\n' '#!/usr/bin/env bash'
+            printf '%s\n' 'set -euo pipefail'
+            printf '%s\n' "python \"$root/scripts/verify_v08_candidate_ci.py\" collect-nodes --python \"$venv_py\" --repo \"$root\" --collect-cwd \"$RUNNER_TEMP\" --output \"$collect_nodes\" $(printf -- '--path %q ' "${integration_paths[@]}")"
+            printf '%s\n' "\"$venv_py\" -m pytest --collect-only -q --rootdir \"$root\" --import-mode=importlib -o \"pythonpath=$root\" -p no:cacheprovider $(printf ' %q' "${integration_paths[@]}")"
+          } > "$xvfb_collect_script"
+          chmod +x "$xvfb_collect_script"
+          xvfb-run -a --server-args="-screen 0 1600x1200x24" \
+            env GAMEFACTORY_TEST_BLENDER="$GAMEFACTORY_TEST_BLENDER" \
+                GAMEFACTORY_TEST_GODOT="$GAMEFACTORY_TEST_GODOT" \
+                GAMEFACTORY_BLENDER_PYTHONPATH="$GAMEFACTORY_BLENDER_PYTHONPATH" \
+                GAMEFACTORY_CI_CANDIDATE_EVIDENCE_DIR="$GAMEFACTORY_CI_CANDIDATE_EVIDENCE_DIR" \
+                LIBGL_ALWAYS_SOFTWARE="$LIBGL_ALWAYS_SOFTWARE" \
+                PYTHONNOUSERSITE=1 \
+            "$xvfb_collect_script" \
+            2>&1 | tee "$collect_log"
+          grep -E '(^|[[:space:]])6 tests collected' "$collect_log"
+          xvfb-run -a --server-args="-screen 0 1600x1200x24" \
+            env GAMEFACTORY_TEST_BLENDER="$GAMEFACTORY_TEST_BLENDER" \
+                GAMEFACTORY_TEST_GODOT="$GAMEFACTORY_TEST_GODOT" \
+                GAMEFACTORY_BLENDER_PYTHONPATH="$GAMEFACTORY_BLENDER_PYTHONPATH" \
+                GAMEFACTORY_CI_CANDIDATE_EVIDENCE_DIR="$GAMEFACTORY_CI_CANDIDATE_EVIDENCE_DIR" \
+                LIBGL_ALWAYS_SOFTWARE="$LIBGL_ALWAYS_SOFTWARE" \
+                PYTHONNOUSERSITE=1 \
+            "$venv_py" -m pytest -ra --rootdir "$root" --import-mode=importlib -o "pythonpath=$root" \
+            -p no:cacheprovider \
+            --junitxml="$junit_real" \
+            "${integration_paths[@]}" \
+            2>&1 | tee "$evidence/logs/candidate-real-pytest.log"
+          python "$root/scripts/verify_v08_candidate_ci.py" junit-assert \
+            --junit "$junit_real" --tests 6 --failures 0 --errors 0 --skipped 0 \
+            --collect-nodes "$collect_nodes"
+          python "$root/scripts/verify_v08_candidate_ci.py" assert-ci-candidate-artifacts --repo "$root"
+      - name: Archive selected candidate real evidence
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: candidate-v083-real-evidence
+          path: |
+            .verification/ci-candidate-real/**
+            .verification/ci-candidate/manifest.json
+            .verification/ci-candidate/result.json
+            .verification/ci-candidate/export-marker.json
+            .verification/ci-candidate/trusted-cold-outcome.json
+            .verification/ci-candidate/archive-hash-manifest.sha256
+          if-no-files-found: error

@@ -91,6 +91,8 @@ from gamefactory.workflows.v08_candidate_workspace import (
     reject_unmanaged_candidate_database,
 )
 
+pytestmark = pytest.mark.candidate_slow
+
 
 class _FakeRunner(ProcessRunner):
     def run(self, request: CommandRequest) -> CommandResult:
