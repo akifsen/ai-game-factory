@@ -269,18 +269,25 @@ def run_v08_candidate_capsule_runtime(
     if staged_harness_raw != harness_raw or staged_harness_reviewed != harness_reviewed:
         raise CandidateRuntimeExecutionError("staged harness bytes do not match reviewed harness")
 
+    render_args: list[str] = [
+        str(godot_executable),
+        "--path",
+        str(stage),
+        "--script",
+        "res://candidate_capsule_harness.gd",
+    ]
+    if sys.platform.startswith("linux"):
+        render_args.extend(["--audio-driver", "Dummy"])
+    render_args.extend(
+        [
+            "--",
+            "--request",
+            str(request_path),
+        ]
+    )
     script_result = proc.run(
         CommandRequest(
-            args=[
-                str(godot_executable),
-                "--path",
-                str(stage),
-                "--script",
-                "res://candidate_capsule_harness.gd",
-                "--",
-                "--request",
-                str(request_path),
-            ],
+            args=render_args,
             cwd=stage,
             timeout_seconds=timeout_seconds,
             env_overrides=render_env,
