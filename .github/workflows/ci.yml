@@ -418,7 +418,7 @@ jobs:
           xvfb-run -a --server-args="-screen 0 1600x1200x24" \
             "$venv_python" -m pytest --collect-only -q "$skin_real" "$rig_real" \
             2>&1 | tee "$collect_log"
-          grep -E '^6 tests collected' "$collect_log"
+          grep -E '(^|[[:space:]])6 tests collected' "$collect_log"
           junit_real="$RUNNER_TEMP/internal-real-tools-junit.xml"
           xvfb-run -a --server-args="-screen 0 1600x1200x24" \
             "$venv_python" -m pytest -ra -p no:cacheprovider \

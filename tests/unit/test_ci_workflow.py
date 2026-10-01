@@ -154,7 +154,7 @@ def test_godot_rendered_internal_rig_skin_verification_step() -> None:
     assert 'xvfb-run -a --server-args="-screen 0 1600x1200x24"' in run
     assert "tests/integration/test_internal_skin_real_tools.py" in run
     assert "tests/integration/test_internal_rig_real_tools.py" in run
-    assert "grep -E '^6 tests collected'" in run
+    assert "grep -E '(^|[[:space:]])6 tests collected'" in run
     assert "(t,f,e,s)==(6,0,0,0)" in run
     assert ".verification/ci-internal-rig" in run
     assert "assert not str(mod).startswith(str(ws)), mod" in run
