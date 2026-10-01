@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import hashlib
+import sys
 from pathlib import Path
 
 import pytest
@@ -14,6 +15,12 @@ from gamefactory.adapters.engines.v08_candidate_runtime_runner import (
 from gamefactory.adapters.fakes.humanoid_skin_fixture import build_humanoid_skinned_glb
 from gamefactory.core.domain.v08_candidate_contracts import load_packaged_candidate_profile
 from gamefactory.core.execution.process_runner import CommandRequest, CommandResult, ProcessRunner
+
+
+@pytest.fixture
+def fake_linux_display(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Fake-process tests simulate Godot I/O; set DISPLAY so Linux guard does not win first."""
+    monkeypatch.setenv("DISPLAY", ":99")
 
 
 class _TypedFakeRunner(ProcessRunner):
@@ -48,7 +55,7 @@ def _spec_for_glb(path: Path):
     return parse_asset_specification_v08_candidate(data)
 
 
-def test_runner_rejects_engine_error_log_with_exit_zero(tmp_path: Path) -> None:
+def test_runner_rejects_engine_error_log_with_exit_zero(tmp_path: Path, fake_linux_display) -> None:
     glb = tmp_path / "humanoid.glb"
     glb.write_bytes(build_humanoid_skinned_glb("positive"))
     spec = _spec_for_glb(glb)
@@ -79,7 +86,7 @@ def test_runner_rejects_engine_error_log_with_exit_zero(tmp_path: Path) -> None:
         )
 
 
-def test_runner_rejects_failed_import(tmp_path: Path) -> None:
+def test_runner_rejects_failed_import(tmp_path: Path, fake_linux_display) -> None:
     glb = tmp_path / "humanoid.glb"
     glb.write_bytes(build_humanoid_skinned_glb("positive"))
     spec = _spec_for_glb(glb)
@@ -104,7 +111,7 @@ def test_runner_rejects_failed_import(tmp_path: Path) -> None:
         )
 
 
-def test_runner_rejects_import_timeout(tmp_path: Path) -> None:
+def test_runner_rejects_import_timeout(tmp_path: Path, fake_linux_display) -> None:
     glb = tmp_path / "humanoid.glb"
     glb.write_bytes(build_humanoid_skinned_glb("positive"))
     spec = _spec_for_glb(glb)
@@ -128,3 +135,34 @@ def test_runner_rejects_import_timeout(tmp_path: Path) -> None:
             runner=runner,
             timeout_seconds=0.01,
         )
+
+
+def test_runner_rejects_missing_display_on_linux_before_import(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Linux DISPLAY guard is independent of fake process outcomes (CI has no DISPLAY)."""
+    monkeypatch.setattr(sys, "platform", "linux")
+    monkeypatch.delenv("DISPLAY", raising=False)
+    glb = tmp_path / "humanoid.glb"
+    glb.write_bytes(build_humanoid_skinned_glb("positive"))
+    spec = _spec_for_glb(glb)
+    profile = load_packaged_candidate_profile()
+    runner = _TypedFakeRunner(
+        [
+            CommandResult(exit_code=0, stdout="", stderr="", timed_out=False),
+        ]
+    )
+    with pytest.raises(CandidateRuntimeExecutionError, match="requires DISPLAY"):
+        run_v08_candidate_capsule_runtime(
+            Path("godot"),
+            glb,
+            spec,
+            profile,
+            tmp_path / "out",
+            workflow_id="WF-RUN",
+            revision=1,
+            execution_id="EXEC-RUN",
+            strict_attempt_number=1,
+            runner=runner,
+        )
+    assert runner.calls == 0
