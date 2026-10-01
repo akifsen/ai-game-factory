@@ -302,12 +302,11 @@ def _fake_capsule_runtime(
 def _fake_rig_export(glb_path: Path, output_dir: Path, **kwargs: Any) -> Path:
     from unittest.mock import patch
 
-    from test_internal_rig_evidence_export import _mock_oracle
-
     from gamefactory.adapters.assets.internal_rig_canonical import (
         reviewed_text_sha256,
         sha256_bytes,
     )
+    from tests.unit.test_internal_rig_evidence_export import _mock_oracle
 
     if output_dir.exists():
         import shutil
