@@ -43,7 +43,7 @@ from gamefactory.core.domain.v08_candidate_contracts import (
 )
 from gamefactory.core.execution.process_runner import ProcessRunner
 from gamefactory.core.policies.policy_engine import PolicyEngine, PolicyRule
-from gamefactory.workflows.engine import WorkflowEngine, WorkflowExecutionResult
+from gamefactory.workflows.engine import WorkflowEngine
 from gamefactory.workflows.v08_candidate_currentness import assert_zero_provider_activity
 from gamefactory.workflows.v08_candidate_evidence_readiness import (
     assert_candidate_evidence_complete,
@@ -56,6 +56,9 @@ from gamefactory.workflows.v08_candidate_workflow import (
     create_v08_candidate_workflow,
     register_v08_candidate_handlers,
 )
+from tests.helpers.v08_candidate_workflow_failure_diagnostic import (
+    assert_workflow_completed_or_diagnose,
+)
 
 BLENDER = os.environ.get(
     "GAMEFACTORY_TEST_BLENDER",
@@ -65,92 +68,6 @@ GODOT = os.environ.get(
     "GAMEFACTORY_TEST_GODOT",
     r"C:\Users\lenovo\devel\godot\Godot_v4.7.2-stable_win64.exe\Godot_v4.7.2-stable_win64_console.exe",
 )
-
-
-def _ci_candidate_real_evidence_dir(project_root: Path) -> Path | None:
-    explicit = os.environ.get("GAMEFACTORY_CI_CANDIDATE_REAL_EVIDENCE_DIR")
-    if explicit:
-        return Path(explicit)
-    if os.environ.get("CI"):
-        return project_root / ".verification" / "ci-candidate-real"
-    return None
-
-
-def _sanitize_workflow_failure_message(message: str | None, *, limit: int = 400) -> str | None:
-    if message is None:
-        return None
-    trimmed = message.strip()
-    if len(trimmed) > limit:
-        return trimmed[: limit - 3] + "..."
-    return trimmed
-
-
-def _workflow_failure_diagnostics(
-    db: object,
-    workflow_id: str,
-    result: WorkflowExecutionResult,
-) -> dict[str, object]:
-    tasks = TaskRepository(db).list_by_workflow(workflow_id)
-    exec_repo = ExecutionRepository(db)
-    failed_summaries: list[dict[str, object]] = []
-    for task in tasks:
-        if task.status != TaskStatus.FAILED:
-            continue
-        attempts = exec_repo.list_by_task(task.id)
-        latest = attempts[-1] if attempts else None
-        failed_summaries.append(
-            {
-                "task_id": task.id,
-                "task_type": task.task_type,
-                "task_status": task.status.value,
-                "latest_execution_status": latest.status.value if latest else None,
-                "error_message": _sanitize_workflow_failure_message(
-                    latest.error_message if latest else None
-                ),
-            }
-        )
-    return {
-        "workflow_id": workflow_id,
-        "workflow_status": result.status.value,
-        "workflow_error_message": _sanitize_workflow_failure_message(result.error_message),
-        "workflow_error_code": result.error_code,
-        "failed_task_count": len(failed_summaries),
-        "failed_tasks": failed_summaries,
-    }
-
-
-def _maybe_write_ci_workflow_failure_report(
-    project_root: Path,
-    payload: dict[str, object],
-) -> None:
-    dest_root = _ci_candidate_real_evidence_dir(project_root)
-    if dest_root is None:
-        return
-    dest_root.mkdir(parents=True, exist_ok=True)
-    report_path = dest_root / "workflow-failure-diagnostic.json"
-    report_path.write_text(
-        json.dumps(payload, indent=2, sort_keys=True) + "\n",
-        encoding="utf-8",
-    )
-
-
-def assert_workflow_completed_or_diagnose(
-    db: object,
-    project_root: Path,
-    workflow_id: str,
-    result: WorkflowExecutionResult,
-) -> None:
-    if result.status == WorkflowStatus.COMPLETED:
-        return
-    diagnostics = _workflow_failure_diagnostics(db, workflow_id, result)
-    _maybe_write_ci_workflow_failure_report(project_root, diagnostics)
-    raise AssertionError(
-        "candidate workflow did not reach COMPLETED after TEST_ONLY approval: "
-        f"status={result.status.value} "
-        f"error_message={result.error_message!r} "
-        f"error_code={result.error_code!r} "
-        f"failed_tasks={diagnostics['failed_tasks']}"
-    )
 
 
 def copy_ci_candidate_evidence_if_requested(

@@ -16,14 +16,24 @@ def _load_ci_workflow() -> tuple[dict[str, Any], str]:
     return data, raw_text
 
 
-_FULL_CI_JOB_NAMES = (
+_FULL_CI_GATE_JOB_NAMES = (
     "test",
     "godot-real",
     "godot-rendered",
-    "candidate-wheel",
     "candidate-unit-installed",
+)
+
+_CANDIDATE_DIAGNOSTICS_SLICE_JOB_NAMES = (
+    "candidate-wheel",
     "candidate-v083-real",
 )
+
+_DIAGNOSTICS_ONLY_DISPATCH_GUARD = (
+    "github.event_name == 'workflow_dispatch'"
+    " && github.event.inputs.candidate_diagnostics_only == 'true'"
+)
+
+_FULL_CI_PR_LABEL_GUARD = "contains(github.event.pull_request.labels.*.name, 'full-ci')"
 
 
 def _normalized_job_if(job_data: dict[str, Any]) -> str:
@@ -42,7 +52,19 @@ def test_ci_workflow_triggers() -> None:
         "types": ["opened", "synchronize", "reopened", "labeled"],
         "paths-ignore": ["**/*.md"],
     }
-    assert triggers["workflow_dispatch"] is None
+    dispatch = triggers["workflow_dispatch"]
+    assert isinstance(dispatch, dict)
+    inputs = dispatch["inputs"]
+    assert set(inputs.keys()) == {"candidate_diagnostics_only"}
+    diag_input = inputs["candidate_diagnostics_only"]
+    assert diag_input["type"] == "boolean"
+    assert diag_input["default"] is False
+    description = diag_input["description"]
+    assert isinstance(description, str)
+    assert "diagnostic" in description.lower()
+    assert (
+        "not release" in description.lower() or "notrelease" in description.replace(" ", "").lower()
+    )
 
 
 def test_ci_workflow_cancels_superseded_pull_request_runs() -> None:
@@ -129,15 +151,87 @@ def test_pull_requests_run_quick_and_full_ci_is_label_or_main() -> None:
         assert required in commands
     test_commands = [step.get("run", "") for step in jobs["test"]["steps"]]
     assert 'python -m pytest -ra -p no:cacheprovider -m "not candidate_slow"' in test_commands
-    reference_if = _normalized_job_if(jobs["test"])
-    for name in _FULL_CI_JOB_NAMES:
+    reference_full_gate_if = _normalized_job_if(jobs["test"])
+    for name in _FULL_CI_GATE_JOB_NAMES:
         condition = _normalized_job_if(jobs[name])
-        assert condition == reference_if
-        assert condition.startswith("github.event_name != 'pull_request'")
-        assert "contains(github.event.pull_request.labels.*.name, 'full-ci')" in condition
-        # An unrelated label added to a PR must not start any job.
+        assert condition == reference_full_gate_if
+        assert condition.startswith("(github.event_name != 'pull_request'")
+        assert _FULL_CI_PR_LABEL_GUARD in condition
+        assert _DIAGNOSTICS_ONLY_DISPATCH_GUARD.replace(" ", "") in condition.replace(" ", "")
         assert "github.event.label.name == 'full-ci'" in condition
+    for name in _CANDIDATE_DIAGNOSTICS_SLICE_JOB_NAMES:
+        condition = _normalized_job_if(jobs[name])
+        assert condition.startswith("github.event_name != 'pull_request'")
+        assert _FULL_CI_PR_LABEL_GUARD in condition
+        assert _DIAGNOSTICS_ONLY_DISPATCH_GUARD.replace(" ", "") in condition.replace(" ", "")
+        assert "||" in condition
+        assert condition != reference_full_gate_if
     assert "github.event.label.name == 'full-ci'" in quick_if
+
+
+def test_ci_workflow_candidate_diagnostics_only_truth_table() -> None:
+    """Job guards must not treat missing dispatch inputs as diagnostic-only on push/PR."""
+    data, _ = _load_ci_workflow()
+    jobs = data["jobs"]
+
+    def runs(job_name: str, *, event_name: str, diagnostics_only: bool, pr_full_ci: bool) -> bool:
+        assert job_name in jobs
+        if event_name == "pull_request" and not pr_full_ci:
+            full_ci = False
+        elif event_name == "pull_request" and pr_full_ci:
+            full_ci = True
+        else:
+            full_ci = event_name != "pull_request"
+        diagnostic_dispatch = event_name == "workflow_dispatch" and diagnostics_only
+        if job_name in _FULL_CI_GATE_JOB_NAMES:
+            return full_ci and not diagnostic_dispatch
+        if job_name in _CANDIDATE_DIAGNOSTICS_SLICE_JOB_NAMES:
+            return full_ci or diagnostic_dispatch
+        raise AssertionError(f"unexpected job {job_name}")
+
+    # Default manual dispatch (input false): same expensive set as push to main.
+    for job_name in (*_FULL_CI_GATE_JOB_NAMES, *_CANDIDATE_DIAGNOSTICS_SLICE_JOB_NAMES):
+        assert runs(
+            job_name, event_name="workflow_dispatch", diagnostics_only=False, pr_full_ci=False
+        )
+
+    # Diagnostic-only manual dispatch: wheel + v083 real only.
+    for job_name in _FULL_CI_GATE_JOB_NAMES:
+        assert not runs(
+            job_name,
+            event_name="workflow_dispatch",
+            diagnostics_only=True,
+            pr_full_ci=False,
+        )
+    for job_name in _CANDIDATE_DIAGNOSTICS_SLICE_JOB_NAMES:
+        assert runs(
+            job_name,
+            event_name="workflow_dispatch",
+            diagnostics_only=True,
+            pr_full_ci=False,
+        )
+
+    # Push to main: full gate; dispatch input must not matter.
+    for job_name in (*_FULL_CI_GATE_JOB_NAMES, *_CANDIDATE_DIAGNOSTICS_SLICE_JOB_NAMES):
+        assert runs(job_name, event_name="push", diagnostics_only=True, pr_full_ci=False)
+
+    # PR without full-ci label: expensive jobs off (quick tested elsewhere).
+    for job_name in (*_FULL_CI_GATE_JOB_NAMES, *_CANDIDATE_DIAGNOSTICS_SLICE_JOB_NAMES):
+        assert not runs(
+            job_name,
+            event_name="pull_request",
+            diagnostics_only=False,
+            pr_full_ci=False,
+        )
+
+    # PR with full-ci label: full expensive set.
+    for job_name in (*_FULL_CI_GATE_JOB_NAMES, *_CANDIDATE_DIAGNOSTICS_SLICE_JOB_NAMES):
+        assert runs(
+            job_name,
+            event_name="pull_request",
+            diagnostics_only=False,
+            pr_full_ci=True,
+        )
 
 
 def test_candidate_jobs_consume_shared_wheel_artifact() -> None:

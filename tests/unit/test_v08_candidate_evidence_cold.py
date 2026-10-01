@@ -1576,7 +1576,7 @@ def test_rejects_scope_missing_approval_id(tmp_path: Path) -> None:
 
 
 def test_packaged_copy_parity() -> None:
-    assert VERIFIER.read_bytes() == VERIFIER_CHECKOUT.read_bytes()
+    assert reviewed_text_sha256(VERIFIER)[0] == reviewed_text_sha256(VERIFIER_CHECKOUT)[0]
 
 
 def test_outside_checkout_positive_and_negative(tmp_path: Path) -> None:

@@ -1,4 +1,5 @@
 name: CI
+run-name: ${{ (github.event_name == 'workflow_dispatch' && github.event.inputs.candidate_diagnostics_only == 'true') && 'Candidate diagnostics - not release proof' || github.event_name == 'workflow_dispatch' && 'Full CI' || github.event.pull_request.title || github.sha }}
 
 # CI cost policy
 # - Pull requests run only the quick job (Ubuntu, Python 3.11: tests, lint, types).
@@ -6,6 +7,9 @@ name: CI
 #   pushes to main, on manual dispatch, and on a pull request labelled `full-ci`.
 # - A newer commit on the same pull request cancels the older run.
 # - Markdown-only changes do not start CI; reports, JSON evidence and code do.
+# - Manual `candidate_diagnostics_only` (default false) skips the broad matrix and Godot
+#   jobs but still builds the shared candidate wheel and runs candidate-v083-real. Diagnostic
+#   only — not release proof; keep the input false for a full gate run.
 on:
   push:
     branches: [main]
@@ -15,6 +19,13 @@ on:
     types: [opened, synchronize, reopened, labeled]
     paths-ignore: ['**/*.md']
   workflow_dispatch:
+    inputs:
+      candidate_diagnostics_only:
+        description: >-
+          Diagnostic-only candidate slice (shared wheel + candidate-v083-real). Not release
+          proof; leave false for the full CI gate (matrix, Godot, candidate unit shards).
+        type: boolean
+        default: false
 
 concurrency:
   group: ci-${{ github.event.pull_request.number || github.ref }}
@@ -47,9 +58,11 @@ jobs:
 
   test:
     if: >-
-      github.event_name != 'pull_request'
+      (github.event_name != 'pull_request'
       || (contains(github.event.pull_request.labels.*.name, 'full-ci')
-          && (github.event.action != 'labeled' || github.event.label.name == 'full-ci'))
+          && (github.event.action != 'labeled' || github.event.label.name == 'full-ci')))
+      && !(github.event_name == 'workflow_dispatch'
+           && github.event.inputs.candidate_diagnostics_only == 'true')
     timeout-minutes: 30
     strategy:
       fail-fast: false
@@ -90,9 +103,11 @@ jobs:
 
   godot-real:
     if: >-
-      github.event_name != 'pull_request'
+      (github.event_name != 'pull_request'
       || (contains(github.event.pull_request.labels.*.name, 'full-ci')
-          && (github.event.action != 'labeled' || github.event.label.name == 'full-ci'))
+          && (github.event.action != 'labeled' || github.event.label.name == 'full-ci')))
+      && !(github.event_name == 'workflow_dispatch'
+           && github.event.inputs.candidate_diagnostics_only == 'true')
     runs-on: ubuntu-latest
     timeout-minutes: 15
     # Official Godot release metadata, pinned and reviewed with this source:
@@ -229,9 +244,11 @@ jobs:
 
   godot-rendered:
     if: >-
-      github.event_name != 'pull_request'
+      (github.event_name != 'pull_request'
       || (contains(github.event.pull_request.labels.*.name, 'full-ci')
-          && (github.event.action != 'labeled' || github.event.label.name == 'full-ci'))
+          && (github.event.action != 'labeled' || github.event.label.name == 'full-ci')))
+      && !(github.event_name == 'workflow_dispatch'
+           && github.event.inputs.candidate_diagnostics_only == 'true')
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
@@ -484,6 +501,8 @@ jobs:
       github.event_name != 'pull_request'
       || (contains(github.event.pull_request.labels.*.name, 'full-ci')
           && (github.event.action != 'labeled' || github.event.label.name == 'full-ci'))
+      || (github.event_name == 'workflow_dispatch'
+          && github.event.inputs.candidate_diagnostics_only == 'true')
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -522,9 +541,11 @@ jobs:
   candidate-unit-installed:
     needs: candidate-wheel
     if: >-
-      github.event_name != 'pull_request'
+      (github.event_name != 'pull_request'
       || (contains(github.event.pull_request.labels.*.name, 'full-ci')
-          && (github.event.action != 'labeled' || github.event.label.name == 'full-ci'))
+          && (github.event.action != 'labeled' || github.event.label.name == 'full-ci')))
+      && !(github.event_name == 'workflow_dispatch'
+           && github.event.inputs.candidate_diagnostics_only == 'true')
     timeout-minutes: ${{ matrix.timeout_minutes }}
     strategy:
       fail-fast: false
@@ -667,6 +688,8 @@ jobs:
       github.event_name != 'pull_request'
       || (contains(github.event.pull_request.labels.*.name, 'full-ci')
           && (github.event.action != 'labeled' || github.event.label.name == 'full-ci'))
+      || (github.event_name == 'workflow_dispatch'
+          && github.event.inputs.candidate_diagnostics_only == 'true')
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
