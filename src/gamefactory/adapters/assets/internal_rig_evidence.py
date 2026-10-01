@@ -40,6 +40,31 @@ def _manifest_entry(path: str, role: str, raw: bytes) -> dict[str, Any]:
     return {"path": path, "role": role, "size": len(raw), "sha256": sha256_bytes(raw)}
 
 
+def bytes_with_crlf_line_endings(raw: bytes) -> bytes:
+    """Normalize any EOL variant to LF, then encode CRLF (no double conversion)."""
+    normalized = raw.replace(b"\r\n", b"\n").replace(b"\r", b"\n")
+    return normalized.replace(b"\n", b"\r\n")
+
+
+def bind_bundled_source_declaration(
+    template: dict[str, Any],
+    contract_bytes: bytes,
+) -> dict[str, Any]:
+    """Copy the frozen template and bind raw/canonical digests to bundled contract bytes."""
+    payload = dict(template)
+    payload["contract_bytes_sha256"] = sha256_bytes(contract_bytes)
+    payload["contract_canonical_sha256"] = contract_canonical_digest(contract_bytes)
+    return payload
+
+
+def bundled_source_declaration_bytes(
+    template: dict[str, Any],
+    contract_bytes: bytes,
+) -> bytes:
+    payload = bind_bundled_source_declaration(template, contract_bytes)
+    return (json.dumps(payload, sort_keys=True, indent=2) + "\n").encode("utf-8")
+
+
 def _trusted_cold_verify(bundle_root: Path) -> None:
     verifier = Path(
         str(resources.files("gamefactory.resources.scripts").joinpath("verify_rig_bundle.py"))
@@ -165,7 +190,8 @@ def export_rig_evidence_bundle(
         (bundle_root / harness_rel).write_bytes(harness_bytes)
         files.append(_manifest_entry(harness_rel, "reviewed_godot_harness", harness_bytes))
 
-        source_decl_bytes = source_decl_src.read_bytes()
+        source_decl_template = json.loads(source_decl_src.read_bytes().decode("utf-8"))
+        source_decl_bytes = bundled_source_declaration_bytes(source_decl_template, contract_bytes)
         source_rel = "evidence/source_declaration.json"
         (bundle_root / source_rel).write_bytes(source_decl_bytes)
         files.append(_manifest_entry(source_rel, "source_declaration", source_decl_bytes))

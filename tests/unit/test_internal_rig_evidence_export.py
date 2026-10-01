@@ -9,7 +9,11 @@ from unittest.mock import patch
 
 import pytest
 
-from gamefactory.adapters.assets.internal_rig_canonical import runtime_request_digest, sha256_bytes
+from gamefactory.adapters.assets.internal_rig_canonical import (
+    contract_canonical_digest,
+    runtime_request_digest,
+    sha256_bytes,
+)
 from gamefactory.adapters.assets.internal_rig_evidence import export_rig_evidence_bundle
 from gamefactory.adapters.assets.internal_skin_decode import decode_internal_skinned_glb
 from gamefactory.adapters.assets.internal_skin_region import REGION_BOUNDARY_TOLERANCE
@@ -264,3 +268,39 @@ def test_export_cold_rejects_bad_pose_before_publish(tmp_path: Path) -> None:
         with pytest.raises(ValueError, match="cold verification"):
             export_rig_evidence_bundle(glb, out, godot_executable=Path("godot"))
     assert not out.exists()
+
+
+def test_export_binds_source_declaration_to_bundled_contract_bytes(tmp_path: Path) -> None:
+    glb = tmp_path / "humanoid.glb"
+    glb.write_bytes(build_humanoid_skinned_glb("positive"))
+    out = tmp_path / "bundle"
+
+    def _fake_oracle(
+        _godot: Path,
+        glb_path: Path,
+        _contract: object,
+        output_dir: Path,
+        *,
+        contract_sha256: str | None = None,
+        harness_sha256: str | None = None,
+        **_kwargs: object,
+    ) -> dict:
+        return _mock_oracle(
+            glb_path,
+            output_dir,
+            contract_sha256=contract_sha256 or "",
+            harness_sha256=harness_sha256 or "",
+        )
+
+    with patch(
+        "gamefactory.adapters.assets.internal_rig_evidence.run_skin_deformation_oracle",
+        side_effect=_fake_oracle,
+    ):
+        export_rig_evidence_bundle(glb, out, godot_executable=Path("godot"))
+
+    contract_raw = (out / "evidence/rig_verification_contract.json").read_bytes()
+    source_decl = json.loads((out / "evidence/source_declaration.json").read_text(encoding="utf-8"))
+    assert source_decl["contract_bytes_sha256"] == sha256_bytes(contract_raw)
+    assert source_decl["contract_canonical_sha256"] == contract_canonical_digest(contract_raw)
+    manifest = json.loads((out / "manifest.json").read_text(encoding="utf-8"))
+    assert manifest["contract_sha256"] == source_decl["contract_bytes_sha256"]

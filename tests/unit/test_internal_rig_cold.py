@@ -21,7 +21,11 @@ from gamefactory.adapters.assets.internal_rig_canonical import (
     runtime_request_digest,
     sha256_bytes,
 )
-from gamefactory.adapters.assets.internal_rig_evidence import export_rig_evidence_bundle
+from gamefactory.adapters.assets.internal_rig_evidence import (
+    bundled_source_declaration_bytes,
+    bytes_with_crlf_line_endings,
+    export_rig_evidence_bundle,
+)
 from gamefactory.adapters.assets.internal_skin import validate_internal_skinned_glb
 from gamefactory.adapters.assets.internal_skin_decode import decode_internal_skinned_glb
 from gamefactory.adapters.assets.internal_skin_region import (
@@ -205,6 +209,7 @@ def _build_offline_bundle(
             )
         )
     )
+    source_decl_template = json.loads(source_decl.read_bytes().decode("utf-8"))
     glb_path = tmp_path / "x.glb"
     glb_path.write_bytes(glb)
     validation = validate_internal_skinned_glb(glb_path, CONTRACT)
@@ -312,7 +317,9 @@ def _build_offline_bundle(
         "evidence/rig_verification_contract.json": contract_bytes,
         "reviewed/export_humanoid_12bone_fixture.py": blender_path.read_bytes(),
         "reviewed/skin_deformation_harness.gd": harness_bytes,
-        "evidence/source_declaration.json": source_decl.read_bytes(),
+        "evidence/source_declaration.json": bundled_source_declaration_bytes(
+            source_decl_template, contract_bytes
+        ),
     }
     files: list[dict] = []
     for rel, raw in paths.items():
@@ -619,6 +626,20 @@ def _refresh_manifest_file(bundle: Path, rel: str, raw: bytes) -> None:
     )
 
 
+def _normalize_line_endings_lf(raw: bytes) -> bytes:
+    return raw.replace(b"\r\n", b"\n").replace(b"\r", b"\n")
+
+
+def _contract_lf_and_crlf_from_bundle(bundle: Path) -> tuple[bytes, bytes]:
+    """Derive LF/CRLF contract bytes independent of checkout EOL on bundled contract."""
+    on_disk = (bundle / "evidence/rig_verification_contract.json").read_bytes()
+    contract_lf = _normalize_line_endings_lf(on_disk)
+    contract_crlf = bytes_with_crlf_line_endings(contract_lf)
+    assert _digest(contract_lf) != _digest(contract_crlf)
+    assert contract_canonical_digest(contract_lf) == contract_canonical_digest(contract_crlf)
+    return contract_lf, contract_crlf
+
+
 def _rehash_contract_binding_chain(
     bundle: Path,
     contract_raw: bytes,
@@ -645,6 +666,16 @@ def _rehash_contract_binding_chain(
     ):
         raw = (json.dumps(payload, sort_keys=True, indent=2) + "\n").encode()
         _refresh_manifest_file(bundle, rel, raw)
+    source_decl_path = Path(
+        str(
+            resources.files("gamefactory.resources.internal_rig").joinpath(
+                "source_declaration.json"
+            )
+        )
+    )
+    source_decl_template = json.loads(source_decl_path.read_bytes().decode("utf-8"))
+    source_decl_raw = bundled_source_declaration_bytes(source_decl_template, contract_raw)
+    _refresh_manifest_file(bundle, "evidence/source_declaration.json", source_decl_raw)
     manifest = json.loads((bundle / "manifest.json").read_text(encoding="utf-8"))
     manifest["contract_sha256"] = contract_sha256
     manifest["runtime_request_digest"] = digest
@@ -840,7 +871,7 @@ def test_blender_semantic_text_tamper_rejects_pinned_reviewed_pin(tmp_path: Path
 def test_harness_crlf_bundle_pass_lf_reviewed_pin(tmp_path: Path) -> None:
     bundle = _build_offline_bundle(tmp_path)
     rel = "reviewed/skin_deformation_harness.gd"
-    raw = (bundle / rel).read_bytes().replace(b"\n", b"\r\n")
+    raw = bytes_with_crlf_line_endings((bundle / rel).read_bytes())
     _refresh_manifest_file(bundle, rel, raw)
     code, out, err = _run_cold(bundle)
     assert code == 0, out + err
@@ -950,10 +981,92 @@ def test_reordered_vertex_samples_accepted(tmp_path: Path) -> None:
 def test_blender_crlf_bundle_pass_lf_reviewed_pin(tmp_path: Path) -> None:
     bundle = _build_offline_bundle(tmp_path)
     rel = "reviewed/export_humanoid_12bone_fixture.py"
-    raw = (bundle / rel).read_bytes().replace(b"\n", b"\r\n")
+    raw = bytes_with_crlf_line_endings((bundle / rel).read_bytes())
     _refresh_manifest_file(bundle, rel, raw)
     code, out, err = _run_cold(bundle)
     assert code == 0, out + err
+
+
+def test_bytes_with_crlf_line_endings_normalizes_before_conversion() -> None:
+    lf = b"a\nb\n"
+    crlf = b"a\r\nb\r\n"
+    assert bytes_with_crlf_line_endings(lf) == crlf
+    assert bytes_with_crlf_line_endings(crlf) == crlf
+
+
+def test_contract_crlf_bundle_passes_when_declaration_and_chain_refreshed(
+    tmp_path: Path,
+) -> None:
+    bundle = _build_offline_bundle(tmp_path)
+    report = json.loads(
+        (bundle / "evidence/rig_validation_report.json").read_text(encoding="utf-8")
+    )
+    request = json.loads((bundle / "evidence/rig_runtime_request.json").read_text(encoding="utf-8"))
+    observation = json.loads(
+        (bundle / "evidence/rig_runtime_observation.json").read_text(encoding="utf-8")
+    )
+    contract_lf, contract_crlf = _contract_lf_and_crlf_from_bundle(bundle)
+    assert contract_canonical_digest(contract_crlf) == PINNED_CONTRACT_CANONICAL_SHA256
+    _rehash_contract_binding_chain(
+        bundle,
+        contract_lf,
+        report=report,
+        request=request,
+        observation=observation,
+    )
+    _rehash_contract_binding_chain(
+        bundle,
+        contract_crlf,
+        report=report,
+        request=request,
+        observation=observation,
+    )
+    code, out, err = _run_cold(bundle)
+    assert code == 0, out + err
+
+
+def test_contract_crlf_stale_source_declaration_rejected(tmp_path: Path) -> None:
+    bundle = _build_offline_bundle(tmp_path)
+    report = json.loads(
+        (bundle / "evidence/rig_validation_report.json").read_text(encoding="utf-8")
+    )
+    request = json.loads((bundle / "evidence/rig_runtime_request.json").read_text(encoding="utf-8"))
+    observation = json.loads(
+        (bundle / "evidence/rig_runtime_observation.json").read_text(encoding="utf-8")
+    )
+    contract_lf, contract_crlf = _contract_lf_and_crlf_from_bundle(bundle)
+    _rehash_contract_binding_chain(
+        bundle,
+        contract_lf,
+        report=report,
+        request=request,
+        observation=observation,
+    )
+    contract_sha256 = _digest(contract_crlf)
+    contract_canonical = contract_canonical_digest(contract_crlf)
+    report["contract_sha256"] = contract_sha256
+    report["contract_canonical_sha256"] = contract_canonical
+    request["contract_sha256"] = contract_sha256
+    observation["contract_sha256"] = contract_sha256
+    digest = runtime_request_digest(request)
+    request["request_digest"] = digest
+    observation["request_digest"] = digest
+    _refresh_manifest_file(bundle, "evidence/rig_verification_contract.json", contract_crlf)
+    report_raw = (json.dumps(report, sort_keys=True, indent=2) + "\n").encode()
+    _refresh_manifest_file(bundle, "evidence/rig_validation_report.json", report_raw)
+    for rel, payload in (
+        ("evidence/rig_runtime_request.json", request),
+        ("evidence/rig_runtime_observation.json", observation),
+    ):
+        raw = (json.dumps(payload, sort_keys=True, indent=2) + "\n").encode()
+        _refresh_manifest_file(bundle, rel, raw)
+    manifest = json.loads((bundle / "manifest.json").read_text(encoding="utf-8"))
+    manifest["contract_sha256"] = contract_sha256
+    manifest["runtime_request_digest"] = digest
+    _rewrite_manifest(bundle, manifest)
+    code, out, _ = _run_cold(bundle)
+    assert code == 1
+    assert _cold_failure_reason(out) == "source_declaration contract_bytes_sha256 mismatch"
 
 
 def _rewrite_manifest(bundle: Path, manifest: dict) -> None:
