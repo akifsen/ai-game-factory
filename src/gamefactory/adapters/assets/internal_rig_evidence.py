@@ -22,11 +22,13 @@ from gamefactory.adapters.assets.internal_rig_canonical import (
 from gamefactory.adapters.assets.internal_skin import validate_internal_skinned_glb
 from gamefactory.adapters.engines.skin_deformation_oracle import run_skin_deformation_oracle
 from gamefactory.adapters.engines.skin_oracle_verify import verify_oracle_payload
+from gamefactory.adapters.engines.v08_candidate_runtime_runner import guard_candidate_process_runner
 from gamefactory.core.domain.asset_contracts import ValidationFindingSeverity as Severity
 from gamefactory.core.domain.internal_skin_contract import (
     InternalSkinContract,
     load_internal_skin_contract,
 )
+from gamefactory.core.execution.process_runner import ProcessRunner
 
 
 def _write_json(path: Path, value: dict[str, Any]) -> tuple[bytes, str]:
@@ -98,6 +100,7 @@ def export_rig_evidence_bundle(
     godot_executable: Path | None = None,
     appdata_dir: Path | None = None,
     bundle_id: str = "internal-rig-evidence",
+    runner: ProcessRunner | None = None,
 ) -> Path:
     """Validate GLB, optionally run Godot oracle, and write rig-evidence-0.8.0."""
     if not isinstance(bundle_id, str) or not bundle_id.strip():
@@ -200,6 +203,7 @@ def export_rig_evidence_bundle(
         observation_payload: dict[str, Any] | None = None
         runtime_status: str | None = None
         if godot_executable is not None:
+            proc = guard_candidate_process_runner(runner)
             oracle_out = (bundle_root / "_oracle_stage").resolve()
             if oracle_out.parent != bundle_root.resolve():
                 raise ValueError("oracle stage must be inside bundle export directory")
@@ -212,6 +216,7 @@ def export_rig_evidence_bundle(
                     contract_sha256=contract_sha256,
                     harness_sha256=harness_reviewed,
                     appdata_dir=appdata_dir,
+                    runner=proc,
                 )
                 request_path = Path(observation_payload["stage_dir"]) / "request.json"
                 request_payload = json.loads(request_path.read_text(encoding="utf-8"))

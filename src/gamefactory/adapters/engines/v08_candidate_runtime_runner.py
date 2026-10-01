@@ -29,6 +29,7 @@ from gamefactory.adapters.assets.v08_candidate_runtime_verify import (
     verify_candidate_runtime_observation,
 )
 from gamefactory.adapters.engines.godot_execution import _ENGINE_ERROR_PATTERNS
+from gamefactory.core.domain.errors import ToolExecutionError
 from gamefactory.core.domain.v08_candidate_contracts import (
     AssetProfileV08Candidate,
     AssetSpecificationV08Candidate,
@@ -36,9 +37,66 @@ from gamefactory.core.domain.v08_candidate_contracts import (
 from gamefactory.core.domain.v08_candidate_runtime_contract import (
     load_packaged_candidate_runtime_contract,
 )
-from gamefactory.core.execution.process_runner import CommandRequest, ProcessRunner
+from gamefactory.core.domain.v08_candidate_runtime_integers import (
+    CandidateRuntimeIntegerError,
+    strict_process_exit_code,
+)
+from gamefactory.core.execution.process_runner import CommandRequest, CommandResult, ProcessRunner
 
 MAX_RUNTIME_REQUEST_BYTES = 65536
+
+
+class CandidateGuardedProcessRunner(ProcessRunner):
+    """Wrap a ProcessRunner: strict Godot --version probes and command provenance records."""
+
+    def __init__(self, inner: ProcessRunner) -> None:
+        super().__init__(sanitize_output=getattr(inner, "sanitize_output", True))
+        self._inner = inner
+        self.command_records: list[CommandRequest] = []
+
+    @property
+    def inner(self) -> ProcessRunner:
+        return self._inner
+
+    def run(self, request: CommandRequest) -> CommandResult:
+        self.command_records.append(request)
+        result = self._inner.run(request)
+        if result.timed_out:
+            raise ToolExecutionError(
+                "candidate guarded process command timed out",
+                exit_code=result.exit_code,
+                details={"timed_out": True, "args": request.args[-3:]},
+            )
+        try:
+            exit_code = strict_process_exit_code(result.exit_code, "exit_code")
+        except CandidateRuntimeIntegerError as exc:
+            raise ToolExecutionError(
+                "candidate guarded process returned a non-integer exit code",
+                exit_code=-1,
+                details={"reason": str(exc)},
+            ) from exc
+        if "--version" in request.args:
+            if result.timed_out or exit_code != 0:
+                raise ToolExecutionError(
+                    "Godot --version probe failed",
+                    exit_code=exit_code,
+                    details={"timed_out": result.timed_out, "stderr": (result.stderr or "")[-500:]},
+                )
+            lines = (result.stdout or result.stderr or "").strip().splitlines()
+            if not lines or not lines[0].strip():
+                raise ToolExecutionError("Godot --version produced no output")
+        return result
+
+
+def guard_candidate_process_runner(
+    runner: ProcessRunner | CandidateGuardedProcessRunner | None,
+) -> CandidateGuardedProcessRunner:
+    """Return a guarded runner, or wrap an existing non-guarded runner once."""
+    if runner is None:
+        return CandidateGuardedProcessRunner(ProcessRunner(sanitize_output=True))
+    if isinstance(runner, CandidateGuardedProcessRunner):
+        return runner
+    return CandidateGuardedProcessRunner(runner)
 
 
 class CandidateRuntimeStageError(ValueError):
@@ -195,6 +253,8 @@ def run_v08_candidate_capsule_runtime(
     import_log.write_text(import_result.stdout + "\n" + import_result.stderr, encoding="utf-8")
     import_diag = import_result.stdout + "\n" + import_result.stderr
     import_errors = _scan_engine_diag(import_diag)
+    if import_result.timed_out:
+        raise CandidateRuntimeExecutionError("Godot --import timed out")
     if import_result.exit_code != 0 or import_errors:
         raise CandidateRuntimeExecutionError(
             f"Godot --import failed (exit={import_result.exit_code}, errors={import_errors})"
@@ -229,6 +289,8 @@ def run_v08_candidate_capsule_runtime(
     render_log = stage / "godot-render.log"
     render_log.write_text(script_result.stdout + "\n" + script_result.stderr, encoding="utf-8")
     render_errors = _scan_engine_diag(script_result.stdout + "\n" + script_result.stderr)
+    if script_result.timed_out:
+        raise CandidateRuntimeExecutionError("Godot render script timed out")
     if render_errors:
         raise CandidateRuntimeExecutionError(
             f"Godot render log matched engine error patterns: {render_errors}"
@@ -272,6 +334,8 @@ def run_v08_candidate_capsule_runtime(
         "bound_request": bound,
         "import_exit_code": import_result.exit_code,
         "process_exit_code": script_result.exit_code,
+        "import_timed_out": import_result.timed_out,
+        "process_timed_out": script_result.timed_out,
         "verification": verification,
     }
     (stage / "provenance.json").write_text(
@@ -279,3 +343,12 @@ def run_v08_candidate_capsule_runtime(
         encoding="utf-8",
     )
     return observation
+
+
+__all__ = [
+    "CandidateGuardedProcessRunner",
+    "CandidateRuntimeExecutionError",
+    "CandidateRuntimeStageError",
+    "guard_candidate_process_runner",
+    "run_v08_candidate_capsule_runtime",
+]

@@ -12,6 +12,15 @@ class CandidateRuntimeIntegerError(ValueError):
     """Counter field cannot be coerced to a JSON-safe runtime integer."""
 
 
+def strict_process_exit_code(value: Any, field: str) -> int:
+    """Reject bool subclasses of int; JSON false must not satisfy exit-code checks."""
+    if type(value) is not int:
+        raise CandidateRuntimeIntegerError(f"{field} must be a strict integer exit code")
+    if value < -1:
+        raise CandidateRuntimeIntegerError(f"{field} must be >= -1")
+    return value
+
+
 def strict_runtime_int(value: Any, field: str, *, minimum: int = 1) -> int:
     if isinstance(value, bool):
         raise CandidateRuntimeIntegerError(f"{field} must not be a boolean")

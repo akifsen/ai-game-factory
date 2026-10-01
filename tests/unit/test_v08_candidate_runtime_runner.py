@@ -121,7 +121,7 @@ def test_runner_rejects_import_timeout(tmp_path: Path, fake_linux_display) -> No
             CommandResult(exit_code=-1, stdout="", stderr="", timed_out=True),
         ]
     )
-    with pytest.raises(CandidateRuntimeExecutionError, match="--import failed"):
+    with pytest.raises(CandidateRuntimeExecutionError, match="timed out"):
         run_v08_candidate_capsule_runtime(
             Path("godot"),
             glb,

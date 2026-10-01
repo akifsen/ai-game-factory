@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted for V0.8-3A foundation (static validation). **V0.8-3B** implements the CLOSED candidate capsule + nine-view Godot runtime slice (request digest, observation verification, candidate-only harness). Workflow DAG, evidence envelope, and production promotion remain **not implemented**.
+Accepted for V0.8-3A foundation (static validation). **V0.8-3B** implements the CLOSED candidate capsule + nine-view Godot runtime slice (request digest, observation verification, candidate-only harness). **V0.8-3C1** implements the local WorkflowEngine DAG through TEST_ONLY review and an injectable C2 evidence export hook (full envelope and trusted cold verifier remain a separate C2 contract). Workflow DAG, evidence envelope, and production promotion remain **not implemented** beyond C1 scope.
 
 ## Context
 
