@@ -4,7 +4,7 @@ Design input: ADR 0017 (skin contract), ADR 0018 (`skin_internal` group), ADR 00
 
 The [V0.8-1 completion report](reports/v0.8-1-completion-report.md) records the independent local acceptance and remaining milestone gates.
 
-The [V0.8-2 completion report](reports/v0.8-2-completion-report.md) records final Windows full-suite and installed-wheel acceptance for evidence/cold verification. Exact committed source identity and Linux CI remain merge/release gates.
+The [V0.8-2 completion report](reports/v0.8-2-completion-report.md) records final local and remote acceptance for evidence/cold verification. Checkpoint `897c92364d0c17ea155d07e81c71e53f0d91c6e2` passed full Windows/Linux CI; V0.8-3 candidate integration and its own final gates follow separately.
 
 Invariants for V0.8-1 slice: no version bump, no production DB/artifact mutation, no paid provider calls, no evidence/cold-verifier promotion, `rigged_character` stays UNSUPPORTED.
 
@@ -21,7 +21,7 @@ Invariants for V0.8-1 slice: no version bump, no production DB/artifact mutation
 | Historical / V0.7 goldens + composition/profile regressions | **Passed (Lead run)** | Independent Lead verification; includes legacy goldens alongside skin/oracle tests |
 | Evidence records + cold verifier for skin | **Done (V0.8-2 slice)** | `rig-evidence-0.8.0`, stdlib `verify_rig_bundle.py` |
 | Profile promotion (`rigged_character` AVAILABLE) | **Not started** | Requires ADR + production groups |
-| Windows + Linux CI for skin acceptance | **Not started** | Full V0.8 |
+| Windows + Linux CI for internal skin acceptance | **Passed (V0.8-2 checkpoint)** | Full Windows/Linux 3.11/3.12; installed-wheel Linux actual rig tests under Xvfb |
 
 ## V0.8-1 deliverables
 
@@ -91,7 +91,7 @@ python scripts/build_verify_rig_bundle.py  # after changing internal_skin cold l
 
 ## Remaining full V0.8 milestone (not claimed by V0.8-1)
 
-1. Complete exact committed source identity and Linux CI evidence for the locally approved internal rig evidence/cold verifier.
+1. V0.8-3 candidate profile integration and promotion readiness, beginning from the independently reviewed, exact-SHA CI-verified V0.8-2 checkpoint.
 2. Production validator groups mirroring every ADR 0017 item 4 rule with signed fixtures.
 3. Operator-facing profile/schema promotion and CLI surfacing.
 4. Parallel Windows/Linux CI jobs for Blender export and Godot deformation acceptance.

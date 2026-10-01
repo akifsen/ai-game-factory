@@ -1,0 +1,247 @@
+{
+  "$defs": {
+    "CandidateProcessingPolicy": {
+      "additionalProperties": false,
+      "properties": {
+        "lod0_required": {
+          "const": true,
+          "title": "Lod0 Required",
+          "type": "boolean"
+        },
+        "lod1_required": {
+          "const": false,
+          "title": "Lod1 Required",
+          "type": "boolean"
+        },
+        "allowed_lod_policies": {
+          "items": {
+            "const": "lod0_only",
+            "type": "string"
+          },
+          "maxItems": 1,
+          "minItems": 1,
+          "title": "Allowed Lod Policies",
+          "type": "array"
+        },
+        "dimension_tolerance_m": {
+          "exclusiveMinimum": 0.0,
+          "maximum": 1.0,
+          "title": "Dimension Tolerance M",
+          "type": "number"
+        },
+        "rig_forbidden": {
+          "const": false,
+          "title": "Rig Forbidden",
+          "type": "boolean"
+        },
+        "animation_forbidden": {
+          "const": true,
+          "title": "Animation Forbidden",
+          "type": "boolean"
+        },
+        "max_materials": {
+          "maximum": 8,
+          "minimum": 1,
+          "title": "Max Materials",
+          "type": "integer"
+        },
+        "max_texture_dimension": {
+          "maximum": 4096,
+          "minimum": 256,
+          "title": "Max Texture Dimension",
+          "type": "integer"
+        },
+        "max_triangles_lod0": {
+          "maximum": 100000,
+          "minimum": 100,
+          "title": "Max Triangles Lod0",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "lod0_required",
+        "lod1_required",
+        "allowed_lod_policies",
+        "dimension_tolerance_m",
+        "rig_forbidden",
+        "animation_forbidden",
+        "max_materials",
+        "max_texture_dimension",
+        "max_triangles_lod0"
+      ],
+      "title": "CandidateProcessingPolicy",
+      "type": "object"
+    },
+    "CandidateRuntimePolicy": {
+      "additionalProperties": false,
+      "properties": {
+        "bounds_tolerance_ratio": {
+          "maximum": 1.0,
+          "minimum": 0.0,
+          "title": "Bounds Tolerance Ratio",
+          "type": "number"
+        },
+        "bounds_tolerance_floor_m": {
+          "maximum": 10.0,
+          "minimum": 0.0,
+          "title": "Bounds Tolerance Floor M",
+          "type": "number"
+        }
+      },
+      "required": [
+        "bounds_tolerance_ratio",
+        "bounds_tolerance_floor_m"
+      ],
+      "title": "CandidateRuntimePolicy",
+      "type": "object"
+    },
+    "DimensionRules": {
+      "additionalProperties": false,
+      "properties": {
+        "min_m": {
+          "exclusiveMinimum": 0.0,
+          "maximum": 100.0,
+          "title": "Min M",
+          "type": "number"
+        },
+        "max_m": {
+          "exclusiveMinimum": 0.0,
+          "maximum": 100.0,
+          "title": "Max M",
+          "type": "number"
+        }
+      },
+      "required": [
+        "min_m",
+        "max_m"
+      ],
+      "title": "DimensionRules",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "asset-profile-0.8.0-candidate",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "profile_id": {
+      "const": "rigged_character",
+      "title": "Profile Id",
+      "type": "string"
+    },
+    "version": {
+      "const": 1,
+      "title": "Version",
+      "type": "integer"
+    },
+    "candidate_state": {
+      "const": "CLOSED",
+      "title": "Candidate State",
+      "type": "string"
+    },
+    "public_status": {
+      "const": "UNSUPPORTED",
+      "title": "Public Status",
+      "type": "string"
+    },
+    "categories": {
+      "items": {
+        "const": "character",
+        "type": "string"
+      },
+      "maxItems": 1,
+      "minItems": 1,
+      "title": "Categories",
+      "type": "array"
+    },
+    "geometry_mode": {
+      "const": "single_mesh",
+      "title": "Geometry Mode",
+      "type": "string"
+    },
+    "rigging": {
+      "const": "humanoid_skin",
+      "title": "Rigging",
+      "type": "string"
+    },
+    "rest_pose": {
+      "const": "T",
+      "title": "Rest Pose",
+      "type": "string"
+    },
+    "runtime_body": {
+      "const": "static_body",
+      "title": "Runtime Body",
+      "type": "string"
+    },
+    "animation_forbidden": {
+      "const": true,
+      "title": "Animation Forbidden",
+      "type": "boolean"
+    },
+    "collider_policy": {
+      "const": "capsule",
+      "title": "Collider Policy",
+      "type": "string"
+    },
+    "origin_contract": {
+      "const": "humanoid_reference_root",
+      "title": "Origin Contract",
+      "type": "string"
+    },
+    "rig_contract_id": {
+      "const": "humanoid_12bone_v1",
+      "title": "Rig Contract Id",
+      "type": "string"
+    },
+    "visual_mesh_name": {
+      "const": "SM_HumanoidSkin",
+      "title": "Visual Mesh Name",
+      "type": "string"
+    },
+    "accepted_source_kinds": {
+      "items": {
+        "const": "local_verified_rig",
+        "type": "string"
+      },
+      "maxItems": 1,
+      "minItems": 1,
+      "title": "Accepted Source Kinds",
+      "type": "array"
+    },
+    "dimension_rules": {
+      "$ref": "#/$defs/DimensionRules"
+    },
+    "processing": {
+      "$ref": "#/$defs/CandidateProcessingPolicy"
+    },
+    "runtime": {
+      "$ref": "#/$defs/CandidateRuntimePolicy"
+    }
+  },
+  "required": [
+    "schema_version",
+    "profile_id",
+    "version",
+    "candidate_state",
+    "public_status",
+    "categories",
+    "geometry_mode",
+    "rigging",
+    "rest_pose",
+    "runtime_body",
+    "animation_forbidden",
+    "collider_policy",
+    "origin_contract",
+    "rig_contract_id",
+    "visual_mesh_name",
+    "accepted_source_kinds",
+    "dimension_rules",
+    "processing",
+    "runtime"
+  ],
+  "title": "ProfileDocumentV08Candidate",
+  "type": "object"
+}
