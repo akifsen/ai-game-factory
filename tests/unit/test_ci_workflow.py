@@ -108,3 +108,65 @@ def test_cached_godot_archive_is_still_verified() -> None:
     _, raw_text = _load_ci_workflow()
     assert raw_text.count("actions/cache@v5") == 2
     assert raw_text.count("sha512sum --check --strict") == 2
+
+
+def _godot_rendered_step_run(name_fragment: str) -> str:
+    data, _ = _load_ci_workflow()
+    steps = data["jobs"]["godot-rendered"]["steps"]
+    for step in steps:
+        if isinstance(step, dict) and name_fragment in step.get("name", ""):
+            run = step.get("run")
+            assert isinstance(run, str)
+            return run
+    raise AssertionError(f"no godot-rendered step matching {name_fragment!r}")
+
+
+def test_godot_rendered_internal_rig_skin_verification_step() -> None:
+    """Full CI must run six real-tool rig/skin tests from an installed wheel under Xvfb."""
+    data, raw_text = _load_ci_workflow()
+    run = _godot_rendered_step_run("Verify internal rig and skin with installed wheel")
+    steps = data["jobs"]["godot-rendered"]["steps"]
+    step = next(
+        s
+        for s in steps
+        if isinstance(s, dict)
+        and s.get("name") == "Verify internal rig and skin with installed wheel"
+    )
+    assert step.get("working-directory") == "${{ runner.temp }}"
+    v07_idx = next(
+        i
+        for i, s in enumerate(steps)
+        if isinstance(s, dict) and "Verify V0.7 assemblies" in s.get("name", "")
+    )
+    internal_idx = steps.index(step)
+    archive_idx = next(
+        i
+        for i, s in enumerate(steps)
+        if isinstance(s, dict) and s.get("name") == "Archive offline asset evidence"
+    )
+    assert v07_idx < internal_idx < archive_idx
+    assert "${wheel}[dev]" in run or "${wheel}[dev]" in run
+    assert "PYTHONNOUSERSITE=1" in run
+    assert "unset PYTHONPATH" in run
+    assert 'export GAMEFACTORY_TEST_BLENDER="$(command -v blender)"' in run
+    assert "GAMEFACTORY_TEST_GODOT" in run
+    assert "GAMEFACTORY_BLENDER_PYTHONPATH" in run
+    assert 'xvfb-run -a --server-args="-screen 0 1600x1200x24"' in run
+    assert "tests/integration/test_internal_skin_real_tools.py" in run
+    assert "tests/integration/test_internal_rig_real_tools.py" in run
+    assert "grep -E '^6 tests collected'" in run
+    assert "(t,f,e,s)==(6,0,0,0)" in run
+    assert ".verification/ci-internal-rig" in run
+    assert "assert not str(mod).startswith(str(ws)), mod" in run
+    for unit in (
+        "test_internal_rig_cold.py",
+        "test_internal_rig_evidence_export.py",
+        "test_internal_rig_schemas.py",
+        "test_internal_skin_region.py",
+        "test_internal_skin_validation.py",
+        "test_skin_oracle_runner.py",
+        "test_skin_oracle_verify.py",
+    ):
+        assert unit in run
+    assert "internal-rig-skin-ci-evidence" in raw_text
+    assert "pip install -e" not in run

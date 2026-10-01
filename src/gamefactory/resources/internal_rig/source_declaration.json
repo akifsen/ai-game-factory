@@ -1,0 +1,7 @@
+{
+  "schema_version": "internal-rig-source-declaration-0.8.0",
+  "validator_contract_version": "humanoid_12bone_v1",
+  "positive_fixture_glb_sha256": "00d48ac499bc8dc64532ea9aab535791afe4b144578799881bb95d5d9b43886e",
+  "contract_bytes_sha256": "9a0c4c2ae75909eade5b144adb1caf8fcae66e8ade8e6a6e665872f690eaa829",
+  "contract_canonical_sha256": "670e55fc5ea867bb546ff29f03c10bd05e65a6707a79954eb3f1d3e81070245e"
+}

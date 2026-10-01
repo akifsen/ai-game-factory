@@ -390,12 +390,80 @@ jobs:
             --godot "$GAMEFACTORY_TEST_GODOT" \
             --workspace "$RUNNER_TEMP/v07-acceptance-workspace" \
             --output "$evidence/v07-acceptance.json"
+      - name: Verify internal rig and skin with installed wheel
+        shell: bash
+        working-directory: ${{ runner.temp }}
+        run: |
+          set -euo pipefail
+          root="$GITHUB_WORKSPACE"
+          evidence="$root/.verification/ci-internal-rig"
+          mkdir -p "$evidence/reports" "$evidence/logs"
+          cp "$RUNNER_TEMP/gamefactory-wheel.sha256" "$evidence/wheel.sha256"
+          git -C "$root" rev-parse HEAD > "$evidence/commit.txt"
+          venv_python="$RUNNER_TEMP/gamefactory-venv/bin/python"
+          wheel="$(find "$RUNNER_TEMP/wheelhouse" -maxdepth 1 -name 'gamefactory-*.whl' -print -quit)"
+          test -n "$wheel"
+          "$venv_python" -m pip install "${wheel}[dev]"
+          export GAMEFACTORY_TEST_BLENDER="$(command -v blender)"
+          test -x "$GAMEFACTORY_TEST_BLENDER"
+          test -x "$GAMEFACTORY_TEST_GODOT"
+          echo "GAMEFACTORY_TEST_BLENDER=$GAMEFACTORY_TEST_BLENDER" >> "$GITHUB_ENV"
+          unset PYTHONPATH
+          export PYTHONNOUSERSITE=1
+          export LIBGL_ALWAYS_SOFTWARE=1
+          "$venv_python" -c 'import os; import gamefactory; from pathlib import Path; mod=Path(gamefactory.__file__).resolve(); ws=Path(os.environ["GITHUB_WORKSPACE"]).resolve(); assert not str(mod).startswith(str(ws)), mod'
+          skin_real="$root/tests/integration/test_internal_skin_real_tools.py"
+          rig_real="$root/tests/integration/test_internal_rig_real_tools.py"
+          collect_log="$evidence/logs/real-tools-collect.txt"
+          xvfb-run -a --server-args="-screen 0 1600x1200x24" \
+            "$venv_python" -m pytest --collect-only -q "$skin_real" "$rig_real" \
+            2>&1 | tee "$collect_log"
+          grep -E '^6 tests collected' "$collect_log"
+          junit_real="$RUNNER_TEMP/internal-real-tools-junit.xml"
+          xvfb-run -a --server-args="-screen 0 1600x1200x24" \
+            "$venv_python" -m pytest -ra -p no:cacheprovider \
+            --junitxml="$junit_real" \
+            "$skin_real" \
+            "$rig_real" \
+            2>&1 | tee "$evidence/logs/real-tools-pytest.log"
+          cp "$junit_real" "$evidence/reports/real-tools-junit.xml"
+          "$venv_python" -c "import sys,xml.etree.ElementTree as ET;r=ET.parse(sys.argv[1]).getroot();su=r.findall('testsuite') if r.tag=='testsuites' else [r];t=sum(int(x.get('tests',0)) for x in su);f=sum(int(x.get('failures',0)) for x in su);e=sum(int(x.get('errors',0)) for x in su);s=sum(int(x.get('skipped',0)) for x in su);assert (t,f,e,s)==(6,0,0,0),(t,f,e,s)" "$junit_real"
+          unit_paths=(
+            "$root/tests/unit/test_internal_rig_cold.py"
+            "$root/tests/unit/test_internal_rig_evidence_export.py"
+            "$root/tests/unit/test_internal_rig_schemas.py"
+            "$root/tests/unit/test_internal_skin_region.py"
+            "$root/tests/unit/test_internal_skin_validation.py"
+            "$root/tests/unit/test_skin_oracle_runner.py"
+            "$root/tests/unit/test_skin_oracle_verify.py"
+          )
+          junit_units="$RUNNER_TEMP/internal-units-junit.xml"
+          "$venv_python" -m pytest -ra -p no:cacheprovider \
+            --junitxml="$junit_units" \
+            "${unit_paths[@]}" \
+            2>&1 | tee "$evidence/logs/units-pytest.log"
+          cp "$junit_units" "$evidence/reports/units-junit.xml"
+          {
+            printf 'GAMEFACTORY_TEST_BLENDER=%s\n' "$(command -v blender)"
+            printf 'GAMEFACTORY_TEST_GODOT=%s\n' "$GAMEFACTORY_TEST_GODOT"
+            printf 'GAMEFACTORY_BLENDER_PYTHONPATH=%s\n' "$GAMEFACTORY_BLENDER_PYTHONPATH"
+            printf 'PYTHONNOUSERSITE=%s\n' "$PYTHONNOUSERSITE"
+            printf 'working_directory=%s\n' "$PWD"
+            "$venv_python" -c 'import gamefactory; print("module_path=" + gamefactory.__file__)'
+          } | tee "$evidence/environment.txt"
       - name: Archive offline asset evidence
         if: always()
         uses: actions/upload-artifact@v6
         with:
           name: asset-production-offline-evidence
           path: .verification/ci-asset-production/**/*
+          if-no-files-found: warn
+      - name: Archive internal rig and skin CI evidence
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: internal-rig-skin-ci-evidence
+          path: .verification/ci-internal-rig/**/*
           if-no-files-found: warn
       - name: Archive selected rendered evidence
         if: always()
