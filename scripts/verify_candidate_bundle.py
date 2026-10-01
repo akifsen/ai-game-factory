@@ -33,6 +33,13 @@ _CAPTURE_HEIGHT = 720
 _MAX_CAPTURE_DECODED_BYTES = _CAPTURE_WIDTH * _CAPTURE_HEIGHT * 4 + _CAPTURE_HEIGHT
 
 TRUSTED_RIG_VERIFIER_SHA256 = "3e4849b9b0781d45f805a462400b019732a0d8946bce83c6c883064d3973130e"
+TRUSTED_RIG_VERIFIER_SHA256_LF = "708e87ba18bba6972a332c2135d80c18cd416345bbfc030398c6ca9db4647291"
+TRUSTED_RIG_VERIFIER_SHA256_FIXED = frozenset(
+    {
+        TRUSTED_RIG_VERIFIER_SHA256,
+        TRUSTED_RIG_VERIFIER_SHA256_LF,
+    }
+)
 PINNED_PACKAGED_PROFILE_DOCUMENT_HASH = (
     "dffd7f9f61d3f524e042f4d6aa6882ec7de703d5886243a7f4a69cb1b3a4d08c"
 )
@@ -911,13 +918,52 @@ def _reviewed_text_sha256(raw: bytes, suffix: str) -> tuple[str, str]:
     return raw_digest, raw_digest
 
 
+def _trusted_rig_verifier_digest_allowed(raw: bytes) -> bool:
+    return _sha256(raw) in TRUSTED_RIG_VERIFIER_SHA256_FIXED
+
+
+def _counterpart_rig_verifier_path(own_script: Path) -> Path | None:
+    resolved = own_script.resolve()
+    parts = resolved.parts
+    if len(parts) >= 5 and parts[-1] == "verify_candidate_bundle.py":
+        if parts[-5:-1] == ("src", "gamefactory", "resources", "scripts"):
+            return resolved.parents[4] / "scripts" / "verify_rig_bundle.py"
+        if parts[-2] == "scripts":
+            return (
+                resolved.parents[1]
+                / "src"
+                / "gamefactory"
+                / "resources"
+                / "scripts"
+                / "verify_rig_bundle.py"
+            )
+    return None
+
+
+def _read_trusted_rig_verifier_bytes(path: Path, *, field: str) -> bytes:
+    if not path.is_file():
+        raise ValueError(f"trusted sibling {field} is missing")
+    if _path_is_link(path):
+        raise ValueError(f"trusted sibling {field} must not be a link")
+    raw = path.read_bytes()
+    if not _trusted_rig_verifier_digest_allowed(raw):
+        raise ValueError(f"trusted sibling {field} digest mismatch")
+    return raw
+
+
 def _load_trusted_rig_verifier() -> Any:
-    sibling = Path(__file__).resolve().with_name("verify_rig_bundle.py")
-    if not sibling.is_file():
-        raise ValueError("trusted sibling verify_rig_bundle.py is missing")
-    raw = sibling.read_bytes()
-    if _sha256(raw) != TRUSTED_RIG_VERIFIER_SHA256:
-        raise ValueError("trusted sibling verify_rig_bundle.py digest mismatch")
+    own_script = Path(__file__).resolve()
+    sibling = own_script.with_name("verify_rig_bundle.py")
+    raw = _read_trusted_rig_verifier_bytes(sibling, field="verify_rig_bundle.py")
+    counterpart = _counterpart_rig_verifier_path(own_script)
+    if counterpart is not None and counterpart.is_file():
+        if _path_is_link(counterpart):
+            raise ValueError("trusted counterpart verify_rig_bundle.py must not be a link")
+        counterpart_raw = counterpart.read_bytes()
+        if not _trusted_rig_verifier_digest_allowed(counterpart_raw):
+            raise ValueError("trusted counterpart verify_rig_bundle.py digest mismatch")
+        if counterpart_raw != raw:
+            raise ValueError("trusted verify_rig_bundle.py checkout parity mismatch")
     spec = importlib.util.spec_from_file_location("verify_rig_bundle_trusted", sibling)
     if spec is None or spec.loader is None:
         raise ValueError("cannot load trusted rig verifier module")
