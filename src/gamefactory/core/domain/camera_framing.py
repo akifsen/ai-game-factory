@@ -344,3 +344,49 @@ def reference_offset(
         bounds.min_y + half,
         center[2] + away[2] * distance,
     )
+
+
+@dataclass(frozen=True)
+class ProjectedFramingMetrics:
+    height_ratio: float
+    fill_ratio: float
+    center_offset: float
+    inside_margin: bool
+    horizontally_centered: bool
+
+
+def framing_metrics_from_projected_rect(
+    *,
+    x: float,
+    y: float,
+    width: float,
+    height: float,
+    viewport_width: float,
+    viewport_height: float,
+    margin_fraction: float,
+    horizontal_center_tolerance: float = 0.08,
+) -> ProjectedFramingMetrics:
+    if viewport_width <= 0 or viewport_height <= 0:
+        raise ValueError("viewport dimensions must be positive")
+    margin_x = viewport_width * margin_fraction
+    margin_y = viewport_height * margin_fraction
+    max_x = x + width
+    max_y = y + height
+    inside = (
+        x >= margin_x
+        and y >= margin_y
+        and max_x <= viewport_width - margin_x
+        and max_y <= viewport_height - margin_y
+    )
+    height_ratio = height / viewport_height
+    fill_ratio = max(height_ratio, width / viewport_width)
+    center_x = x + width * 0.5
+    center_offset = abs(center_x - viewport_width * 0.5) / viewport_width
+    horizontally_centered = center_offset <= horizontal_center_tolerance
+    return ProjectedFramingMetrics(
+        height_ratio=height_ratio,
+        fill_ratio=fill_ratio,
+        center_offset=center_offset,
+        inside_margin=inside,
+        horizontally_centered=horizontally_centered,
+    )

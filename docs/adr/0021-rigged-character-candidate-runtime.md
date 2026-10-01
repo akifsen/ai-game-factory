@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted for V0.8-3A foundation. Documents normative runtime behavior for later workflow, evidence, and Godot stages. **Not implemented** by the V0.8-3A static validation slice.
+Accepted for V0.8-3A foundation (static validation). **V0.8-3B** implements the CLOSED candidate capsule + nine-view Godot runtime slice (request digest, observation verification, candidate-only harness). Workflow DAG, evidence envelope, and production promotion remain **not implemented**.
 
 ## Context
 

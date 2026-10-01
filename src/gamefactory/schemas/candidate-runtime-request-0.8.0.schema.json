@@ -1,0 +1,278 @@
+{
+  "$defs": {
+    "CapsuleDims": {
+      "additionalProperties": false,
+      "properties": {
+        "radius_m": {
+          "exclusiveMinimum": 0.0,
+          "title": "Radius M",
+          "type": "number"
+        },
+        "height_m": {
+          "exclusiveMinimum": 0.0,
+          "title": "Height M",
+          "type": "number"
+        }
+      },
+      "required": [
+        "radius_m",
+        "height_m"
+      ],
+      "title": "CapsuleDims",
+      "type": "object"
+    },
+    "FramingContract": {
+      "additionalProperties": false,
+      "properties": {
+        "fov_degrees": {
+          "maximum": 120.0,
+          "minimum": 1.0,
+          "title": "Fov Degrees",
+          "type": "number"
+        },
+        "min_screen_fraction": {
+          "exclusiveMaximum": 1.0,
+          "exclusiveMinimum": 0.0,
+          "title": "Min Screen Fraction",
+          "type": "number"
+        },
+        "max_screen_fraction": {
+          "exclusiveMaximum": 1.0,
+          "exclusiveMinimum": 0.0,
+          "title": "Max Screen Fraction",
+          "type": "number"
+        },
+        "target_screen_fraction": {
+          "exclusiveMaximum": 1.0,
+          "exclusiveMinimum": 0.0,
+          "title": "Target Screen Fraction",
+          "type": "number"
+        },
+        "margin_fraction": {
+          "exclusiveMaximum": 0.5,
+          "minimum": 0.0,
+          "title": "Margin Fraction",
+          "type": "number"
+        }
+      },
+      "required": [
+        "fov_degrees",
+        "min_screen_fraction",
+        "max_screen_fraction",
+        "target_screen_fraction",
+        "margin_fraction"
+      ],
+      "title": "FramingContract",
+      "type": "object"
+    },
+    "RestAabb": {
+      "additionalProperties": false,
+      "properties": {
+        "min": {
+          "items": {
+            "type": "number"
+          },
+          "maxItems": 3,
+          "minItems": 3,
+          "title": "Min",
+          "type": "array"
+        },
+        "max": {
+          "items": {
+            "type": "number"
+          },
+          "maxItems": 3,
+          "minItems": 3,
+          "title": "Max",
+          "type": "array"
+        }
+      },
+      "required": [
+        "min",
+        "max"
+      ],
+      "title": "RestAabb",
+      "type": "object"
+    },
+    "ViewportContract": {
+      "additionalProperties": false,
+      "properties": {
+        "width": {
+          "const": 1280,
+          "title": "Width",
+          "type": "integer"
+        },
+        "height": {
+          "const": 720,
+          "title": "Height",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "width",
+        "height"
+      ],
+      "title": "ViewportContract",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "candidate-runtime-request-0.8.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "asset_id": {
+      "minLength": 1,
+      "title": "Asset Id",
+      "type": "string"
+    },
+    "workflow_id": {
+      "minLength": 1,
+      "title": "Workflow Id",
+      "type": "string"
+    },
+    "revision": {
+      "maximum": 9007199254740991,
+      "minimum": 1,
+      "title": "Revision",
+      "type": "integer"
+    },
+    "execution_id": {
+      "minLength": 1,
+      "title": "Execution Id",
+      "type": "string"
+    },
+    "strict_attempt_number": {
+      "maximum": 9007199254740991,
+      "minimum": 1,
+      "title": "Strict Attempt Number",
+      "type": "integer"
+    },
+    "processed_glb_sha256": {
+      "pattern": "^[a-f0-9]{64}$",
+      "title": "Processed Glb Sha256",
+      "type": "string"
+    },
+    "profile_document_hash": {
+      "pattern": "^[a-f0-9]{64}$",
+      "title": "Profile Document Hash",
+      "type": "string"
+    },
+    "spec_fingerprint": {
+      "pattern": "^[a-f0-9]{64}$",
+      "title": "Spec Fingerprint",
+      "type": "string"
+    },
+    "runtime_contract_sha256": {
+      "pattern": "^[a-f0-9]{64}$",
+      "title": "Runtime Contract Sha256",
+      "type": "string"
+    },
+    "visual_mesh_name": {
+      "const": "SM_HumanoidSkin",
+      "title": "Visual Mesh Name",
+      "type": "string"
+    },
+    "rest_aabb": {
+      "$ref": "#/$defs/RestAabb"
+    },
+    "rest_aabb_canonical_sha256": {
+      "pattern": "^[a-f0-9]{64}$",
+      "title": "Rest Aabb Canonical Sha256",
+      "type": "string"
+    },
+    "capsule_center_m": {
+      "items": {
+        "type": "number"
+      },
+      "maxItems": 3,
+      "minItems": 3,
+      "title": "Capsule Center M",
+      "type": "array"
+    },
+    "capsule": {
+      "$ref": "#/$defs/CapsuleDims"
+    },
+    "harness_sha256": {
+      "pattern": "^[a-f0-9]{64}$",
+      "title": "Harness Sha256",
+      "type": "string"
+    },
+    "nine_view_set": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 9,
+      "minItems": 9,
+      "title": "Nine View Set",
+      "type": "array"
+    },
+    "framing": {
+      "$ref": "#/$defs/FramingContract"
+    },
+    "viewport": {
+      "$ref": "#/$defs/ViewportContract"
+    },
+    "renderer_profile": {
+      "const": "gl_compatibility",
+      "title": "Renderer Profile",
+      "type": "string"
+    },
+    "godot_version": {
+      "minLength": 1,
+      "title": "Godot Version",
+      "type": "string"
+    },
+    "candidate_state": {
+      "const": "CLOSED",
+      "title": "Candidate State",
+      "type": "string"
+    },
+    "public_status": {
+      "const": "UNSUPPORTED",
+      "title": "Public Status",
+      "type": "string"
+    },
+    "production_eligible": {
+      "const": false,
+      "title": "Production Eligible",
+      "type": "boolean"
+    },
+    "request_digest": {
+      "pattern": "^[a-f0-9]{64}$",
+      "title": "Request Digest",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "asset_id",
+    "workflow_id",
+    "revision",
+    "execution_id",
+    "strict_attempt_number",
+    "processed_glb_sha256",
+    "profile_document_hash",
+    "spec_fingerprint",
+    "runtime_contract_sha256",
+    "visual_mesh_name",
+    "rest_aabb",
+    "rest_aabb_canonical_sha256",
+    "capsule_center_m",
+    "capsule",
+    "harness_sha256",
+    "nine_view_set",
+    "framing",
+    "viewport",
+    "renderer_profile",
+    "godot_version",
+    "candidate_state",
+    "public_status",
+    "production_eligible",
+    "request_digest"
+  ],
+  "title": "CandidateRuntimeRequestBound",
+  "type": "object"
+}

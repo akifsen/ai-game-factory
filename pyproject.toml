@@ -49,6 +49,7 @@ gamefactory = [
     "resources/godot/*.gd",
     "resources/internal_skin/*.json",
     "resources/internal_rig/**",
+    "resources/v08_candidate/**",
     "resources/blender/*.py",
     "resources/specs/*.yml",
     "resources/specs/*.json",

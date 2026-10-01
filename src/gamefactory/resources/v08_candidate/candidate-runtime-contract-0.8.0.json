@@ -1,0 +1,34 @@
+{
+  "schema_version": "candidate-runtime-contract-0.8.0",
+  "candidate_state": "CLOSED",
+  "public_status": "UNSUPPORTED",
+  "production_eligible": false,
+  "visual_mesh_name": "SM_HumanoidSkin",
+  "scene_root_name": "HumanoidRoot",
+  "origin_contract": "humanoid_reference_root",
+  "runtime_body_kind": "static_body",
+  "collision_shape_class": "CapsuleShape3D",
+  "min_capsule_radius_m": 0.1,
+  "viewport": {"width": 1280, "height": 720},
+  "renderer_profile": "gl_compatibility",
+  "nine_view_set": [
+    "front",
+    "left",
+    "rear",
+    "right",
+    "side",
+    "three_quarter",
+    "three_quarter_front",
+    "three_quarter_rear",
+    "top"
+  ],
+  "framing": {
+    "fov_degrees": 38.0,
+    "min_screen_fraction": 0.55,
+    "max_screen_fraction": 0.75,
+    "target_screen_fraction": 0.65,
+    "margin_fraction": 0.04
+  },
+  "require_physics_ray_hit": true,
+  "max_request_bytes": 65536
+}
