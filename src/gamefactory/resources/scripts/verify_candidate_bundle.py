@@ -15,7 +15,7 @@ import sys
 import zlib
 from dataclasses import dataclass
 from pathlib import Path, PurePosixPath
-from typing import Any
+from typing import Any, cast
 
 _SHA256 = re.compile(r"^[0-9a-f]{64}$")
 _EXCLUDED = {"manifest.json"}
@@ -944,7 +944,7 @@ def _win_reparse_point(path: Path) -> bool:
     try:
         import ctypes
 
-        attrs = ctypes.windll.kernel32.GetFileAttributesW(str(path))
+        attrs = cast(Any, ctypes).windll.kernel32.GetFileAttributesW(str(path))
         if attrs == 0xFFFFFFFF:
             if path.exists() or path.is_symlink():
                 raise ValueError(f"indeterminate junction check for {path}")
