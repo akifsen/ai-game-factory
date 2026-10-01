@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "rig-evidence-0.8.0",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "bundle_id",
+    "contract_id",
+    "glb_sha256",
+    "contract_sha256",
+    "harness_reviewed_sha256",
+    "blender_script_reviewed_sha256",
+    "validation_status",
+    "runtime_status",
+    "runtime_request_digest",
+    "files"
+  ],
+  "properties": {
+    "schema_version": {"const": "rig-evidence-0.8.0"},
+    "bundle_id": {"type": "string", "minLength": 1},
+    "contract_id": {"type": "string", "minLength": 1},
+    "glb_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "contract_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "harness_reviewed_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "blender_script_reviewed_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "validation_status": {"enum": ["PASS", "FAIL", "WARNING"]},
+    "runtime_status": {"enum": ["PASS", "FAIL"]},
+    "runtime_request_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "files": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["path", "role", "size", "sha256"],
+        "properties": {
+          "path": {"type": "string", "minLength": 1},
+          "role": {"type": "string", "minLength": 1},
+          "size": {"type": "integer", "minimum": 0},
+          "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": true
+}

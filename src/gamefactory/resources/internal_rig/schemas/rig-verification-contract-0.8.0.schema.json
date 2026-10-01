@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "rig-verification-contract-0.8.0",
+  "type": "object",
+  "required": ["contract_id", "joint_count_max", "rest_pose", "asset_root_name", "bones"],
+  "properties": {
+    "contract_id": {"type": "string"},
+    "joint_count_max": {"type": "integer", "minimum": 1},
+    "rest_pose": {"enum": ["T", "A"]},
+    "asset_root_name": {"type": "string"},
+    "bones": {"type": "array", "minItems": 1},
+    "rest_joint_origins": {"type": "object"},
+    "rest_joint_bases": {"type": "object"},
+    "deformation_oracle": {"type": "object"}
+  },
+  "additionalProperties": true
+}

@@ -1,0 +1,35 @@
+schema_version: asset-profile-0.8.0-candidate
+profile_id: rigged_character
+version: 1
+candidate_state: CLOSED
+public_status: UNSUPPORTED
+categories:
+  - character
+geometry_mode: single_mesh
+rigging: humanoid_skin
+rest_pose: T
+runtime_body: static_body
+animation_forbidden: true
+collider_policy: capsule
+origin_contract: humanoid_reference_root
+rig_contract_id: humanoid_12bone_v1
+visual_mesh_name: SM_HumanoidSkin
+accepted_source_kinds:
+  - local_verified_rig
+dimension_rules:
+  min_m: 0.1
+  max_m: 4.0
+processing:
+  lod0_required: true
+  lod1_required: false
+  allowed_lod_policies:
+    - lod0_only
+  dimension_tolerance_m: 0.02
+  rig_forbidden: false
+  animation_forbidden: true
+  max_materials: 8
+  max_texture_dimension: 4096
+  max_triangles_lod0: 100000
+runtime:
+  bounds_tolerance_ratio: 0.2
+  bounds_tolerance_floor_m: 0.15

@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "rig-validation-report-0.8.0",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "status",
+    "findings",
+    "glb_sha256",
+    "contract_id",
+    "contract_sha256",
+    "contract_canonical_sha256",
+    "validator_contract_version"
+  ],
+  "properties": {
+    "schema_version": {"const": "rig-validation-report-0.8.0"},
+    "status": {"enum": ["PASS", "FAIL", "WARNING"]},
+    "passed": {"type": "boolean"},
+    "summary": {"type": "string"},
+    "glb_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "contract_id": {"type": "string", "minLength": 1},
+    "contract_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "contract_canonical_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "validator_contract_version": {"type": "string", "minLength": 1},
+    "evaluated_at": {"type": "string"},
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["rule_id", "severity", "expected", "actual", "message"],
+        "properties": {
+          "rule_id": {"type": "string"},
+          "severity": {"enum": ["PASS", "FAIL", "WARNING"]},
+          "expected": {"type": "string"},
+          "actual": {"type": "string"},
+          "artifact": {"type": "string"},
+          "message": {"type": "string"}
+        }
+      }
+    }
+  },
+  "additionalProperties": true
+}

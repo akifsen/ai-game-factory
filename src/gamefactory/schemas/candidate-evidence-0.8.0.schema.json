@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "candidate-evidence-0.8.0",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "bundle_id",
+    "workflow_id",
+    "specification_hash",
+    "profile_document_hash",
+    "source_glb_sha256",
+    "nested_bundle_path",
+    "validation_status",
+    "runtime_status",
+    "reviewed_pins_match",
+    "snapshot_fingerprint",
+    "files"
+  ],
+  "properties": {
+    "schema_version": {"const": "candidate-evidence-0.8.0"},
+    "bundle_id": {"type": "string", "minLength": 1},
+    "workflow_id": {"type": "string", "minLength": 1},
+    "specification_hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "profile_document_hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "source_glb_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "nested_bundle_path": {"type": "string", "minLength": 1},
+    "validation_status": {"enum": ["PASS", "FAIL", "WARNING"]},
+    "runtime_status": {"enum": ["PASS", "FAIL"]},
+    "reviewed_pins_match": {"type": "boolean"},
+    "snapshot_fingerprint": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "fixture_label": {"type": "string", "minLength": 1},
+    "files": {
+      "type": "array",
+      "minItems": 27,
+      "maxItems": 27,
+      "items": {
+        "type": "object",
+        "required": ["path", "role", "size", "sha256"],
+        "properties": {
+          "path": {"type": "string", "minLength": 1},
+          "role": {
+            "type": "string",
+            "enum": [
+              "snapshot",
+              "candidate_specification",
+              "candidate_profile_document",
+              "source_glb",
+              "raw_glb",
+              "processed_glb",
+              "static_validation_report",
+              "runtime_request",
+              "runtime_observation",
+              "runtime_provenance",
+              "runtime_import_log",
+              "runtime_render_log",
+              "runtime_capture",
+              "rig_attempt_wrapper",
+              "test_only_receipt",
+              "candidate_runtime_contract",
+              "reviewed_candidate_harness",
+              "identity_report",
+              "approval_scope"
+            ]
+          },
+          "size": {"type": "integer", "minimum": 0},
+          "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+          "angle": {"type": "string", "minLength": 1}
+        },
+        "additionalProperties": false,
+        "allOf": [
+          {
+            "if": {"properties": {"role": {"const": "runtime_capture"}}},
+            "then": {"required": ["angle"]}
+          }
+        ]
+      }
+    }
+  },
+  "additionalProperties": false
+}

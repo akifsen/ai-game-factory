@@ -1011,6 +1011,7 @@ def test_builtin_registry_contents_and_isolation() -> None:
         "weapon.yml",
         "aircraft.yml",
         "character.yml",
+        "rigged_character_candidate.yml",
     }
 
     # Registry is frozen

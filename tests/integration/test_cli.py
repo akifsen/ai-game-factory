@@ -9,6 +9,8 @@ from pathlib import Path
 
 import yaml
 
+from gamefactory import __version__
+
 PROJECT = Path(__file__).parents[2]
 FIXTURE = PROJECT / "examples" / "minimal-godot"
 
@@ -36,7 +38,7 @@ def test_help_version_and_json_usage_error() -> None:
         [sys.executable, "-m", "gamefactory", "--version"], text=True, capture_output=True
     )
     assert version_result.returncode == 0
-    assert version_result.stdout.strip() == "gamefactory 0.7.0"
+    assert version_result.stdout.strip() == f"gamefactory {__version__}"
 
     bad = subprocess.run(
         [sys.executable, "-m", "gamefactory", "run", "bogus", "--json"],

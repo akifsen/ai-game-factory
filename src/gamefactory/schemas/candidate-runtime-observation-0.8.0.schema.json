@@ -1,0 +1,381 @@
+{
+  "$defs": {
+    "CaptureEntry": {
+      "additionalProperties": false,
+      "properties": {
+        "view": {
+          "minLength": 1,
+          "title": "View",
+          "type": "string"
+        },
+        "png_sha256": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Png Sha256",
+          "type": "string"
+        },
+        "png_width": {
+          "maximum": 9007199254740991,
+          "minimum": 1,
+          "title": "Png Width",
+          "type": "integer"
+        },
+        "png_height": {
+          "maximum": 9007199254740991,
+          "minimum": 1,
+          "title": "Png Height",
+          "type": "integer"
+        },
+        "execution_id": {
+          "minLength": 1,
+          "title": "Execution Id",
+          "type": "string"
+        },
+        "revision": {
+          "maximum": 9007199254740991,
+          "minimum": 1,
+          "title": "Revision",
+          "type": "integer"
+        },
+        "strict_attempt_number": {
+          "maximum": 9007199254740991,
+          "minimum": 1,
+          "title": "Strict Attempt Number",
+          "type": "integer"
+        },
+        "request_digest": {
+          "pattern": "^[a-f0-9]{64}$",
+          "title": "Request Digest",
+          "type": "string"
+        }
+      },
+      "required": [
+        "view",
+        "png_sha256",
+        "png_width",
+        "png_height",
+        "execution_id",
+        "revision",
+        "strict_attempt_number",
+        "request_digest"
+      ],
+      "title": "CaptureEntry",
+      "type": "object"
+    },
+    "ObservedCapsule": {
+      "additionalProperties": false,
+      "properties": {
+        "shape_class": {
+          "const": "CapsuleShape3D",
+          "title": "Shape Class",
+          "type": "string"
+        },
+        "observed_radius_m": {
+          "exclusiveMinimum": 0.0,
+          "title": "Observed Radius M",
+          "type": "number"
+        },
+        "observed_height_m": {
+          "exclusiveMinimum": 0.0,
+          "title": "Observed Height M",
+          "type": "number"
+        },
+        "center_m": {
+          "items": {
+            "type": "number"
+          },
+          "maxItems": 3,
+          "minItems": 3,
+          "title": "Center M",
+          "type": "array"
+        }
+      },
+      "required": [
+        "shape_class",
+        "observed_radius_m",
+        "observed_height_m",
+        "center_m"
+      ],
+      "title": "ObservedCapsule",
+      "type": "object"
+    },
+    "ProjectedRectPixels": {
+      "additionalProperties": false,
+      "properties": {
+        "x": {
+          "title": "X",
+          "type": "number"
+        },
+        "y": {
+          "title": "Y",
+          "type": "number"
+        },
+        "width": {
+          "title": "Width",
+          "type": "number"
+        },
+        "height": {
+          "title": "Height",
+          "type": "number"
+        }
+      },
+      "required": [
+        "x",
+        "y",
+        "width",
+        "height"
+      ],
+      "title": "ProjectedRectPixels",
+      "type": "object"
+    },
+    "RestAabb": {
+      "additionalProperties": false,
+      "properties": {
+        "min": {
+          "items": {
+            "type": "number"
+          },
+          "maxItems": 3,
+          "minItems": 3,
+          "title": "Min",
+          "type": "array"
+        },
+        "max": {
+          "items": {
+            "type": "number"
+          },
+          "maxItems": 3,
+          "minItems": 3,
+          "title": "Max",
+          "type": "array"
+        }
+      },
+      "required": [
+        "min",
+        "max"
+      ],
+      "title": "RestAabb",
+      "type": "object"
+    },
+    "ViewFramingEntry": {
+      "additionalProperties": false,
+      "properties": {
+        "ok": {
+          "title": "Ok",
+          "type": "boolean"
+        },
+        "reason": {
+          "title": "Reason",
+          "type": "string"
+        },
+        "height_ratio": {
+          "title": "Height Ratio",
+          "type": "number"
+        },
+        "fill_ratio": {
+          "title": "Fill Ratio",
+          "type": "number"
+        },
+        "horizontally_centered": {
+          "title": "Horizontally Centered",
+          "type": "boolean"
+        },
+        "view_axis": {
+          "minLength": 1,
+          "title": "View Axis",
+          "type": "string"
+        },
+        "camera_distance": {
+          "exclusiveMinimum": 0.0,
+          "title": "Camera Distance",
+          "type": "number"
+        },
+        "projected_rect_pixels": {
+          "$ref": "#/$defs/ProjectedRectPixels"
+        },
+        "center_offset": {
+          "minimum": 0.0,
+          "title": "Center Offset",
+          "type": "number"
+        }
+      },
+      "required": [
+        "ok",
+        "reason",
+        "height_ratio",
+        "fill_ratio",
+        "horizontally_centered",
+        "view_axis",
+        "camera_distance",
+        "projected_rect_pixels",
+        "center_offset"
+      ],
+      "title": "ViewFramingEntry",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "candidate-runtime-observation-0.8.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "workflow_id": {
+      "title": "Workflow Id",
+      "type": "string"
+    },
+    "revision": {
+      "maximum": 9007199254740991,
+      "minimum": 1,
+      "title": "Revision",
+      "type": "integer"
+    },
+    "execution_id": {
+      "title": "Execution Id",
+      "type": "string"
+    },
+    "strict_attempt_number": {
+      "maximum": 9007199254740991,
+      "minimum": 1,
+      "title": "Strict Attempt Number",
+      "type": "integer"
+    },
+    "asset_id": {
+      "title": "Asset Id",
+      "type": "string"
+    },
+    "processed_glb_sha256": {
+      "pattern": "^[a-f0-9]{64}$",
+      "title": "Processed Glb Sha256",
+      "type": "string"
+    },
+    "observed_glb_sha256": {
+      "pattern": "^[a-f0-9]{64}$",
+      "title": "Observed Glb Sha256",
+      "type": "string"
+    },
+    "request_digest": {
+      "pattern": "^[a-f0-9]{64}$",
+      "title": "Request Digest",
+      "type": "string"
+    },
+    "rest_aabb_canonical_sha256": {
+      "pattern": "^[a-f0-9]{64}$",
+      "title": "Rest Aabb Canonical Sha256",
+      "type": "string"
+    },
+    "godot_version": {
+      "title": "Godot Version",
+      "type": "string"
+    },
+    "harness_sha256": {
+      "pattern": "^[a-f0-9]{64}$",
+      "title": "Harness Sha256",
+      "type": "string"
+    },
+    "harness_sha256_raw": {
+      "pattern": "^[a-f0-9]{64}$",
+      "title": "Harness Sha256 Raw",
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "PASS",
+        "FAIL"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "candidate_state": {
+      "const": "CLOSED",
+      "title": "Candidate State",
+      "type": "string"
+    },
+    "public_status": {
+      "const": "UNSUPPORTED",
+      "title": "Public Status",
+      "type": "string"
+    },
+    "production_eligible": {
+      "const": false,
+      "title": "Production Eligible",
+      "type": "boolean"
+    },
+    "visual_mesh_name": {
+      "const": "SM_HumanoidSkin",
+      "title": "Visual Mesh Name",
+      "type": "string"
+    },
+    "runtime_body_kind": {
+      "const": "static_body",
+      "title": "Runtime Body Kind",
+      "type": "string"
+    },
+    "collision_shape_class": {
+      "const": "CapsuleShape3D",
+      "title": "Collision Shape Class",
+      "type": "string"
+    },
+    "physics_ray_hit": {
+      "title": "Physics Ray Hit",
+      "type": "boolean"
+    },
+    "rest_mesh_bounds": {
+      "$ref": "#/$defs/RestAabb"
+    },
+    "capsule": {
+      "$ref": "#/$defs/ObservedCapsule"
+    },
+    "view_framing": {
+      "additionalProperties": {
+        "$ref": "#/$defs/ViewFramingEntry"
+      },
+      "title": "View Framing",
+      "type": "object"
+    },
+    "captures": {
+      "items": {
+        "$ref": "#/$defs/CaptureEntry"
+      },
+      "title": "Captures",
+      "type": "array"
+    },
+    "errors": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Errors",
+      "type": "array"
+    }
+  },
+  "required": [
+    "schema_version",
+    "workflow_id",
+    "revision",
+    "execution_id",
+    "strict_attempt_number",
+    "asset_id",
+    "processed_glb_sha256",
+    "observed_glb_sha256",
+    "request_digest",
+    "rest_aabb_canonical_sha256",
+    "godot_version",
+    "harness_sha256",
+    "harness_sha256_raw",
+    "status",
+    "candidate_state",
+    "public_status",
+    "production_eligible",
+    "visual_mesh_name",
+    "runtime_body_kind",
+    "collision_shape_class",
+    "physics_ray_hit",
+    "rest_mesh_bounds",
+    "capsule",
+    "view_framing",
+    "captures",
+    "errors"
+  ],
+  "title": "CandidateRuntimeObservation",
+  "type": "object"
+}

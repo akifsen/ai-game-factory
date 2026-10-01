@@ -32,6 +32,7 @@ dev = [
     "ruff>=0.4.0",
     "mypy>=1.9.0",
     "types-PyYAML>=6.0.0",
+    "jsonschema>=4.0.0",
 ]
 
 [project.scripts]
@@ -47,6 +48,9 @@ version = {attr = "gamefactory.__version__"}
 gamefactory = [
     "schemas/*.json",
     "resources/godot/*.gd",
+    "resources/internal_skin/*.json",
+    "resources/internal_rig/**",
+    "resources/v08_candidate/**",
     "resources/blender/*.py",
     "resources/specs/*.yml",
     "resources/specs/*.json",
@@ -58,7 +62,7 @@ gamefactory = [
 [tool.ruff]
 line-length = 100
 target-version = "py311"
-exclude = [".venv", ".verify-venv", ".verification", ".gamefactory", "examples/minimal-godot/.godot"]
+exclude = [".venv", ".verify-venv", ".verification", ".gamefactory", "examples/minimal-godot/.godot", "scripts/verify_rig_bundle_header.py", "scripts/verify_rig_bundle_footer.py"]
 
 [tool.ruff.lint]
 select = [
@@ -91,4 +95,7 @@ minversion = "8.0"
 testpaths = ["tests"]
 python_files = ["test_*.py"]
 addopts = "-v"
-markers = ["real_godot: opt-in tests against an actual Godot executable"]
+markers = [
+    "real_godot: opt-in tests against an actual Godot executable",
+    "candidate_slow: V0.8 candidate installed-wheel slow unit gate (CI shards only)",
+]

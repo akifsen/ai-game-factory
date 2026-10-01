@@ -1,0 +1,172 @@
+{
+  "$defs": {
+    "FramingContract": {
+      "additionalProperties": false,
+      "properties": {
+        "fov_degrees": {
+          "maximum": 120.0,
+          "minimum": 1.0,
+          "title": "Fov Degrees",
+          "type": "number"
+        },
+        "min_screen_fraction": {
+          "exclusiveMaximum": 1.0,
+          "exclusiveMinimum": 0.0,
+          "title": "Min Screen Fraction",
+          "type": "number"
+        },
+        "max_screen_fraction": {
+          "exclusiveMaximum": 1.0,
+          "exclusiveMinimum": 0.0,
+          "title": "Max Screen Fraction",
+          "type": "number"
+        },
+        "target_screen_fraction": {
+          "exclusiveMaximum": 1.0,
+          "exclusiveMinimum": 0.0,
+          "title": "Target Screen Fraction",
+          "type": "number"
+        },
+        "margin_fraction": {
+          "exclusiveMaximum": 0.5,
+          "minimum": 0.0,
+          "title": "Margin Fraction",
+          "type": "number"
+        }
+      },
+      "required": [
+        "fov_degrees",
+        "min_screen_fraction",
+        "max_screen_fraction",
+        "target_screen_fraction",
+        "margin_fraction"
+      ],
+      "title": "FramingContract",
+      "type": "object"
+    },
+    "ViewportContract": {
+      "additionalProperties": false,
+      "properties": {
+        "width": {
+          "const": 1280,
+          "title": "Width",
+          "type": "integer"
+        },
+        "height": {
+          "const": 720,
+          "title": "Height",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "width",
+        "height"
+      ],
+      "title": "ViewportContract",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": "candidate-runtime-contract-0.8.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "candidate_state": {
+      "const": "CLOSED",
+      "title": "Candidate State",
+      "type": "string"
+    },
+    "public_status": {
+      "const": "UNSUPPORTED",
+      "title": "Public Status",
+      "type": "string"
+    },
+    "production_eligible": {
+      "const": false,
+      "title": "Production Eligible",
+      "type": "boolean"
+    },
+    "visual_mesh_name": {
+      "const": "SM_HumanoidSkin",
+      "title": "Visual Mesh Name",
+      "type": "string"
+    },
+    "scene_root_name": {
+      "const": "HumanoidRoot",
+      "title": "Scene Root Name",
+      "type": "string"
+    },
+    "origin_contract": {
+      "const": "humanoid_reference_root",
+      "title": "Origin Contract",
+      "type": "string"
+    },
+    "runtime_body_kind": {
+      "const": "static_body",
+      "title": "Runtime Body Kind",
+      "type": "string"
+    },
+    "collision_shape_class": {
+      "const": "CapsuleShape3D",
+      "title": "Collision Shape Class",
+      "type": "string"
+    },
+    "min_capsule_radius_m": {
+      "title": "Min Capsule Radius M",
+      "type": "number"
+    },
+    "viewport": {
+      "$ref": "#/$defs/ViewportContract"
+    },
+    "renderer_profile": {
+      "const": "gl_compatibility",
+      "title": "Renderer Profile",
+      "type": "string"
+    },
+    "nine_view_set": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 9,
+      "minItems": 9,
+      "title": "Nine View Set",
+      "type": "array"
+    },
+    "framing": {
+      "$ref": "#/$defs/FramingContract"
+    },
+    "require_physics_ray_hit": {
+      "const": true,
+      "title": "Require Physics Ray Hit",
+      "type": "boolean"
+    },
+    "max_request_bytes": {
+      "maximum": 1000000,
+      "minimum": 1024,
+      "title": "Max Request Bytes",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "schema_version",
+    "candidate_state",
+    "public_status",
+    "production_eligible",
+    "visual_mesh_name",
+    "scene_root_name",
+    "origin_contract",
+    "runtime_body_kind",
+    "collision_shape_class",
+    "min_capsule_radius_m",
+    "viewport",
+    "renderer_profile",
+    "nine_view_set",
+    "framing",
+    "require_physics_ray_hit",
+    "max_request_bytes"
+  ],
+  "title": "CandidateRuntimeContract",
+  "type": "object"
+}

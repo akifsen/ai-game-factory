@@ -1,0 +1,35 @@
+schema_version: 0.8.0-candidate
+asset_id: humanoid_skin_candidate_01
+category: character
+profile: rigged_character
+profile_version: 1
+intent: CLOSED candidate fixture for humanoid_12bone_v1 skin validation
+source_kind: local_verified_rig
+dimensions:
+  width_m: 0.72
+  depth_m: 0.24
+  height_m: 0.65
+orientation:
+  up: "+Y"
+  front: "-Z"
+origin_contract: humanoid_reference_root
+rig_contract_id: humanoid_12bone_v1
+visual_mesh_name: SM_HumanoidSkin
+geometry_budget:
+  max_triangles_lod0: 20000
+  max_triangles_lod1: 10000
+  lod_ratio: 0.5
+material_budget:
+  max_materials: 4
+texture_budget:
+  max_dimension: 2048
+lod_policy: lod0_only
+target_engine: godot
+target_import_path: assets/generated/character/humanoid_skin_candidate_01/
+collider:
+  policy: capsule
+  capsule:
+    radius_m: 0.12
+    height_m: 0.65
+profile_document_hash: dffd7f9f61d3f524e042f4d6aa6882ec7de703d5886243a7f4a69cb1b3a4d08c
+processed_glb_sha256: 00d48ac499bc8dc64532ea9aab535791afe4b144578799881bb95d5d9b43886e
