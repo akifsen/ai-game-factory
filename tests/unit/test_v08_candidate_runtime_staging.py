@@ -79,10 +79,18 @@ def test_reviewed_harness_pin_stable_under_crlf_raw_change(tmp_path: Path) -> No
     )
 
     source = packaged_candidate_harness_path()
-    reviewed, raw_lf = reviewed_text_sha256(source)
+    reviewed, _source_raw = reviewed_text_sha256(source)
     assert reviewed == PINNED_CANDIDATE_HARNESS_REVIEWED_SHA256
+    lf_copy = tmp_path / "harness_lf.gd"
+    lf_bytes = (
+        source.read_text(encoding="utf-8").replace("\r\n", "\n").replace("\r", "\n").encode("utf-8")
+    )
+    lf_copy.write_bytes(lf_bytes)
+    reviewed_lf_copy, raw_lf_copy = reviewed_text_sha256(lf_copy)
+    assert reviewed_lf_copy == PINNED_CANDIDATE_HARNESS_REVIEWED_SHA256
     crlf_copy = tmp_path / "harness_crlf.gd"
-    crlf_copy.write_bytes(source.read_bytes().replace(b"\n", b"\r\n"))
+    crlf_copy.write_bytes(lf_bytes.replace(b"\n", b"\r\n"))
     reviewed_crlf, raw_crlf = reviewed_text_sha256(crlf_copy)
+    assert raw_lf_copy == PINNED_CANDIDATE_HARNESS_REVIEWED_SHA256
     assert reviewed_crlf == reviewed
-    assert raw_crlf != raw_lf
+    assert raw_crlf != raw_lf_copy

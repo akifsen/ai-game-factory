@@ -8,6 +8,7 @@ import hashlib
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
 import sysconfig
@@ -75,6 +76,129 @@ MARKER_PROPAGATION_GUARD_MODULES: tuple[str, ...] = (
 
 EXPECTED_PACKAGE_VERSION = "0.8.0rc1"
 _COLLECTED_RE = re.compile(r"(?P<count>\d+)(?:/\d+)?\s+tests?\s+collected")
+_GITHUB_ACTIONS_EXPRESSION_RE = re.compile(r"\$\{\{[^}]+\}\}")
+_CANDIDATE_JOB_NAME_RE = re.compile(r"^  (candidate[-\w]+):\s*$")
+
+
+def neutralize_github_actions_expressions(script: str) -> str:
+    """Replace GHA template expressions so bash -n can validate run blocks offline."""
+    return _GITHUB_ACTIONS_EXPRESSION_RE.sub("PLACEHOLDER", script)
+
+
+def extract_candidate_job_bash_scripts(ci_yaml_text: str) -> list[tuple[str, str]]:
+    """Return (job_name, bash_run_body) for each candidate-* job step using shell: bash."""
+    lines = ci_yaml_text.splitlines()
+    scripts: list[tuple[str, str]] = []
+    job_name: str | None = None
+    in_candidate_job = False
+    idx = 0
+    while idx < len(lines):
+        line = lines[idx]
+        job_match = _CANDIDATE_JOB_NAME_RE.match(line)
+        if job_match:
+            job_name = job_match.group(1)
+            in_candidate_job = True
+            idx += 1
+            continue
+        if (
+            in_candidate_job
+            and line.startswith("  ")
+            and not line.startswith("    ")
+            and line.strip()
+        ):
+            in_candidate_job = False
+            job_name = None
+        if in_candidate_job and line.strip() == "shell: bash":
+            run_idx = idx + 1
+            while run_idx < len(lines):
+                stripped = lines[run_idx].strip()
+                if stripped == "":
+                    run_idx += 1
+                    continue
+                if stripped.startswith("run: |"):
+                    break
+                if stripped.startswith("- "):
+                    break
+                run_idx += 1
+            if run_idx < len(lines) and lines[run_idx].strip().startswith("run: |"):
+                body_start = run_idx + 1
+                body_lines: list[str] = []
+                while body_start < len(lines):
+                    body_line = lines[body_start]
+                    if not body_line.startswith("          "):
+                        break
+                    body_lines.append(body_line[10:])
+                    body_start += 1
+                if body_lines and job_name is not None:
+                    scripts.append((job_name, "\n".join(body_lines) + "\n"))
+                idx = body_start
+                continue
+        idx += 1
+    return scripts
+
+
+def resolve_bash_executable() -> Path | None:
+    if os.name == "nt":
+        git_bash = Path(r"C:\Program Files\Git\bin\bash.exe")
+        if git_bash.is_file():
+            return git_bash
+    bash = os.environ.get("BASH", "bash")
+    return Path(bash) if shutil.which(bash) or Path(bash).is_file() else None
+
+
+def assert_bash_script_syntax(script: str, *, bash_executable: Path) -> None:
+    with tempfile.NamedTemporaryFile(
+        mode="w",
+        suffix=".sh",
+        delete=False,
+        encoding="utf-8",
+        newline="\n",
+    ) as handle:
+        handle.write(script)
+        script_path = Path(handle.name)
+    try:
+        proc = subprocess.run(
+            [str(bash_executable), "-n", str(script_path)],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+    finally:
+        script_path.unlink(missing_ok=True)
+    if proc.returncode != 0:
+        detail = (proc.stderr or proc.stdout or "").strip()
+        raise CandidateCiError(f"bash -n failed: {detail}")
+
+
+def sample_candidate_real_xvfb_collect_script() -> str:
+    """Minimal script matching candidate-v083-real generated collect wrapper shape."""
+    root = "/tmp/repo"
+    venv_py = "/tmp/venv/bin/python"
+    collect_nodes = "/tmp/collect-nodes.txt"
+    paths = (
+        "/tmp/repo/tests/integration/test_v08_candidate_blender_static.py",
+        "/tmp/repo/tests/integration/test_v08_candidate_runtime_godot.py",
+        "/tmp/repo/tests/integration/test_v08_candidate_workflow_engine.py",
+    )
+    collect_cmd = (
+        f'python "{root}/scripts/verify_v08_candidate_ci.py" collect-nodes '
+        f'--python "{venv_py}" --repo "{root}" --collect-cwd "/tmp" '
+        f'--output "{collect_nodes}" ' + " ".join(f'--path "{path}"' for path in paths)
+    )
+    pytest_cmd = (
+        f'"{venv_py}" -m pytest --collect-only -q --rootdir "{root}" '
+        f'--import-mode=importlib -o "pythonpath={root}" -p no:cacheprovider '
+        + " ".join(f'"{path}"' for path in paths)
+    )
+    return "\n".join(
+        [
+            "#!/usr/bin/env bash",
+            "set -euo pipefail",
+            collect_cmd,
+            pytest_cmd,
+            "",
+        ]
+    )
 
 
 class CandidateCiError(RuntimeError):

@@ -16,6 +16,20 @@ def _load_ci_workflow() -> tuple[dict[str, Any], str]:
     return data, raw_text
 
 
+_FULL_CI_JOB_NAMES = (
+    "test",
+    "godot-real",
+    "godot-rendered",
+    "candidate-wheel",
+    "candidate-unit-installed",
+    "candidate-v083-real",
+)
+
+
+def _normalized_job_if(job_data: dict[str, Any]) -> str:
+    return " ".join(job_data["if"].split())
+
+
 def test_ci_workflow_triggers() -> None:
     data, _ = _load_ci_workflow()
     # PyYAML parses unquoted 'on' as boolean True
@@ -41,11 +55,29 @@ def test_ci_workflow_cancels_superseded_pull_request_runs() -> None:
 def test_ci_workflow_jobs_and_matrix() -> None:
     data, _ = _load_ci_workflow()
     jobs = data.get("jobs", {})
-    assert set(jobs.keys()) == {"quick", "test", "godot-real", "godot-rendered"}
+    assert set(jobs.keys()) == {
+        "quick",
+        "test",
+        "godot-real",
+        "godot-rendered",
+        "candidate-wheel",
+        "candidate-unit-installed",
+        "candidate-v083-real",
+    }
 
     test_matrix = jobs["test"]["strategy"]["matrix"]
     assert set(test_matrix["os"]) == {"ubuntu-latest", "windows-latest"}
     assert {str(v) for v in test_matrix["python-version"]} == {"3.11", "3.12"}
+
+    candidate_matrix = jobs["candidate-unit-installed"]["strategy"]["matrix"]["include"]
+    assert len(candidate_matrix) == 16
+    expected_shards = {(row["os"], row["python-version"], row["shard"]) for row in candidate_matrix}
+    assert expected_shards == {
+        (os_name, python_version, shard)
+        for os_name in ("ubuntu-latest", "windows-latest")
+        for python_version in ("3.11", "3.12")
+        for shard in (1, 2, 3, 4)
+    }
 
 
 def test_ci_workflow_action_versions() -> None:
@@ -92,11 +124,15 @@ def test_pull_requests_run_quick_and_full_ci_is_label_or_main() -> None:
         "ruff check src tests",
         "ruff format --check src tests",
         "mypy src/gamefactory",
-        "python -m pytest -ra -p no:cacheprovider",
+        'python -m pytest -ra -p no:cacheprovider -m "not candidate_slow"',
     ):
         assert required in commands
-    for name in ("test", "godot-real", "godot-rendered"):
-        condition = " ".join(jobs[name]["if"].split())
+    test_commands = [step.get("run", "") for step in jobs["test"]["steps"]]
+    assert 'python -m pytest -ra -p no:cacheprovider -m "not candidate_slow"' in test_commands
+    reference_if = _normalized_job_if(jobs["test"])
+    for name in _FULL_CI_JOB_NAMES:
+        condition = _normalized_job_if(jobs[name])
+        assert condition == reference_if
         assert condition.startswith("github.event_name != 'pull_request'")
         assert "contains(github.event.pull_request.labels.*.name, 'full-ci')" in condition
         # An unrelated label added to a PR must not start any job.
@@ -104,10 +140,35 @@ def test_pull_requests_run_quick_and_full_ci_is_label_or_main() -> None:
     assert "github.event.label.name == 'full-ci'" in quick_if
 
 
+def test_candidate_jobs_consume_shared_wheel_artifact() -> None:
+    data, raw_text = _load_ci_workflow()
+    jobs = data["jobs"]
+    assert jobs["candidate-unit-installed"]["needs"] == "candidate-wheel"
+    assert jobs["candidate-v083-real"]["needs"] == "candidate-wheel"
+    consumer_run = next(
+        step["run"]
+        for step in jobs["candidate-unit-installed"]["steps"]
+        if isinstance(step, dict)
+        and step.get("name") == "Install shared candidate wheel and run shard"
+    )
+    assert "find \"$artifact_dir\" -maxdepth 1 -name 'gamefactory-*.whl'" in consumer_run
+    assert "python -m build --wheel" not in consumer_run
+    assert "candidate-v083-wheel" in raw_text
+    assert raw_text.count("name: candidate-v083-wheel") == 3
+
+
 def test_cached_godot_archive_is_still_verified() -> None:
-    _, raw_text = _load_ci_workflow()
-    assert raw_text.count("actions/cache@v5") == 2
-    assert raw_text.count("sha512sum --check --strict") == 2
+    data, raw_text = _load_ci_workflow()
+    assert raw_text.count("actions/cache@v5") == 3
+    assert raw_text.count("sha512sum --check --strict") == 3
+    for job_name in ("godot-real", "godot-rendered", "candidate-v083-real"):
+        steps = data["jobs"][job_name]["steps"]
+        cache_idx = next(
+            i for i, step in enumerate(steps) if step.get("uses") == "actions/cache@v5"
+        )
+        verify_step = steps[cache_idx + 1]
+        assert "Download and verify pinned official Godot" in verify_step.get("name", "")
+        assert "sha512sum --check --strict" in verify_step.get("run", "")
 
 
 def _godot_rendered_step_run(name_fragment: str) -> str:

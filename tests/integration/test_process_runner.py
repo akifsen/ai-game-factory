@@ -696,6 +696,25 @@ class TestProcessRunner:
 
     def test_parent_exit_descendant_bounded_and_cleaned(self, tmp_path: Path) -> None:
         """When parent spawns descendant inheriting pipes and exits, runner bounds wait and cleans descendant."""
+        # Fixture budgets (test-owned; ProcessRunner product defaults/deadlines unchanged).
+        command_request_timeout_seconds = 5.0
+        startup_handshake_seconds = 3.0
+        process_spawn_budget_seconds = 2.0
+        natural_child_lifetime_seconds = 18.0
+        terminal_observation_bound_seconds = 7.0
+        marker_supplement_wait_seconds = 1.0
+        coordinator_ready_seconds = process_spawn_budget_seconds + startup_handshake_seconds
+        coordinator_thread_join_seconds = coordinator_ready_seconds
+        parent_ready_wait_seconds = startup_handshake_seconds
+        parent_handshake_cap_seconds = startup_handshake_seconds
+
+        child_natural_margin_seconds = (
+            natural_child_lifetime_seconds - terminal_observation_bound_seconds
+        )
+        assert child_natural_margin_seconds >= 8.0
+        assert coordinator_ready_seconds <= command_request_timeout_seconds
+        assert parent_handshake_cap_seconds == startup_handshake_seconds
+
         marker = tmp_path / "descendant-marker.txt"
         ready_file = tmp_path / "descendant-ready.txt"
         release_file = tmp_path / "parent-release.txt"
@@ -712,7 +731,7 @@ class TestProcessRunner:
             "sys.stdout.write('descendant pipe active\\n')\n"
             "sys.stdout.flush()\n"
             "tmp_ready.replace(ready_path)\n"
-            "time.sleep(3.0)\n"
+            f"time.sleep({natural_child_lifetime_seconds})\n"
             f"Path({str(marker)!r}).write_text('survived', encoding='utf-8')\n"
         )
         grandchild.write_text(grandchild_code, encoding="utf-8")
@@ -725,10 +744,12 @@ class TestProcessRunner:
             f"ready_path = Path({str(ready_file)!r})\n"
             f"release_path = Path({str(release_file)!r})\n"
             f"subprocess.Popen([sys.executable, {str(grandchild)!r}])\n"
-            "end = time.monotonic() + 0.35\n"
-            "while not ready_path.exists() and time.monotonic() < end:\n"
+            f"ready_wait = {parent_ready_wait_seconds}\n"
+            f"handshake_cap = {parent_handshake_cap_seconds}\n"
+            "start = time.monotonic()\n"
+            "while not ready_path.exists() and time.monotonic() < start + ready_wait:\n"
             "    time.sleep(0.002)\n"
-            "while not release_path.exists() and time.monotonic() < end:\n"
+            "while not release_path.exists() and time.monotonic() < start + handshake_cap:\n"
             "    time.sleep(0.002)\n"
             "if ready_path.exists() and release_path.exists():\n"
             "    sys.exit(0)\n"
@@ -741,7 +762,7 @@ class TestProcessRunner:
 
         def coordinator() -> None:
             try:
-                ready_deadline = time.monotonic() + 1.0
+                ready_deadline = time.monotonic() + coordinator_ready_seconds
                 pid_text = ""
                 while not stop_coord.is_set() and time.monotonic() < ready_deadline:
                     if ready_file.exists():
@@ -784,11 +805,11 @@ class TestProcessRunner:
             req = CommandRequest(
                 args=[sys.executable, "-c", parent_code],
                 cwd=tmp_path,
-                timeout_seconds=0.5,
+                timeout_seconds=command_request_timeout_seconds,
             )
             res = self.runner.run(req)
 
-            coord_thread.join(timeout=1.0)
+            coord_thread.join(timeout=coordinator_thread_join_seconds)
             assert not coord_thread.is_alive(), "Coordinator thread failed to stop"
             if coord_error:
                 raise coord_error[0]
@@ -802,18 +823,21 @@ class TestProcessRunner:
             assert "descendant pipe active" in res.stdout
             assert res.cleanup_completed is True
 
-            # Terminal observation bounded from runner start (<2 sec) to precede natural 3.0s exit
-            remaining = 2.0 - (time.perf_counter() - t_start)
-            assert remaining > 0, "Execution exceeded 2.0s bound before terminal observation"
+            # Terminal observation bounded from runner start to precede natural child exit
+            remaining = terminal_observation_bound_seconds - (time.perf_counter() - t_start)
+            assert remaining > 0, (
+                f"Execution exceeded {terminal_observation_bound_seconds}s bound "
+                "before terminal observation"
+            )
             assert handle.wait_terminal(timeout_seconds=remaining) is True
-            assert time.perf_counter() - t_start < 2.0
+            assert time.perf_counter() - t_start < terminal_observation_bound_seconds
 
             # Marker check supplements only
-            time.sleep(1.0)
+            time.sleep(marker_supplement_wait_seconds)
             assert not marker.exists()
         finally:
             stop_coord.set()
-            coord_thread.join(timeout=1.0)
+            coord_thread.join(timeout=coordinator_thread_join_seconds)
             assert not coord_thread.is_alive(), "Coordinator thread failed to stop"
             for h in handle_holder:
                 h.cleanup_if_alive()

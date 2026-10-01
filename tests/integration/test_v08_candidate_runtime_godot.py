@@ -7,6 +7,7 @@ import json
 import os
 import shutil
 import subprocess
+import sys
 import uuid
 from importlib import resources
 from pathlib import Path
@@ -45,6 +46,19 @@ BLENDER = os.environ.get(
     r"C:\Program Files\Blender Foundation\Blender 5.2\blender.exe",
 )
 HAS_DISPLAY = bool(os.environ.get("DISPLAY")) if os.name != "nt" else True
+
+
+def _linux_display_env_overrides() -> dict[str, str]:
+    """Forward display-related env for non-headless Godot script runs (matches production runner)."""
+    render_env: dict[str, str] = {}
+    if sys.platform.startswith("linux"):
+        display = os.environ.get("DISPLAY")
+        if display:
+            render_env["DISPLAY"] = display
+        for name in ("XAUTHORITY", "LIBGL_ALWAYS_SOFTWARE"):
+            if value := os.environ.get(name):
+                render_env[name] = value
+    return render_env
 
 
 def _spec_for_glb(glb: Path):
@@ -247,11 +261,13 @@ def _stage_and_run_godot(
         ),
         encoding="utf-8",
     )
+    display_env = _linux_display_env_overrides()
     import_result = runner.run(
         CommandRequest(
             args=[str(godot), "--headless", "--path", str(stage), "--import", "--quit"],
             cwd=stage,
             timeout_seconds=180.0,
+            env_overrides=display_env,
         )
     )
     assert import_result.exit_code == 0, import_result.stderr[-1500:]
@@ -269,6 +285,7 @@ def _stage_and_run_godot(
             ],
             cwd=stage,
             timeout_seconds=180.0,
+            env_overrides=display_env,
         )
     )
     assert observation_path.is_file(), script_result.stderr[-1500:]

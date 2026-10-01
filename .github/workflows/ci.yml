@@ -607,10 +607,10 @@ jobs:
           else
             platform=windows
           fi
-          expectations="$("$venv_py" "$root/scripts/verify_v08_candidate_ci.py" shard-expectations --shard "$CANDIDATE_SHARD" --platform "$platform")"
-          raw_count="$("$venv_py" -c 'import json,sys; print(json.load(sys.stdin)["raw_test_count"])' <<<"$expectations")"
-          expected_skipped="$("$venv_py" -c 'import json,sys; print(json.load(sys.stdin)["expected_skipped"])' <<<"$expectations")"
-          mapfile -t shard_paths < <("$venv_py" -c 'import json,sys; print("\n".join(json.load(sys.stdin)["modules"]))' <<<"$expectations")"
+          expectations="$("$venv_py" "$root/scripts/verify_v08_candidate_ci.py" shard-expectations --shard "$CANDIDATE_SHARD" --platform "$platform" | tr -d '\r')"
+          raw_count="$("$venv_py" -c 'import json,sys; print(json.load(sys.stdin)["raw_test_count"])' <<<"$expectations" | tr -d '\r')"
+          expected_skipped="$("$venv_py" -c 'import json,sys; print(json.load(sys.stdin)["expected_skipped"])' <<<"$expectations" | tr -d '\r')"
+          mapfile -t shard_paths < <("$venv_py" -c 'import json,sys; print("\n".join(json.load(sys.stdin)["modules"]))' <<<"$expectations" | tr -d '\r')
           collect_log="$unit_evidence/candidate-shard-collect.txt"
           collect_nodes="$unit_evidence/candidate-shard-collect-nodes.txt"
           abs_paths=()
@@ -650,7 +650,7 @@ jobs:
           while IFS= read -r nodeid; do
             [ -n "$nodeid" ] || continue
             junit_args+=(--allowed-skip "$nodeid")
-          done < <("$venv_py" -c 'import json,sys; print("\n".join(json.load(sys.stdin)["platform_skip_nodeids"]))' <<<"$expectations")"
+          done < <("$venv_py" -c 'import json,sys; print("\n".join(json.load(sys.stdin)["platform_skip_nodeids"]))' <<<"$expectations" | tr -d '\r')
           python "$root/scripts/verify_v08_candidate_ci.py" junit-assert "${junit_args[@]}"
       - name: Upload candidate unit shard evidence
         if: always()
@@ -774,6 +774,7 @@ jobs:
         working-directory: ${{ runner.temp }}
         env:
           GAMEFACTORY_CI_CANDIDATE_EVIDENCE_DIR: ${{ github.workspace }}/.verification/ci-candidate
+          GAMEFACTORY_CI_CANDIDATE_REAL_EVIDENCE_DIR: ${{ github.workspace }}/.verification/ci-candidate-real
         run: |
           set -euo pipefail
           root="$GITHUB_WORKSPACE"

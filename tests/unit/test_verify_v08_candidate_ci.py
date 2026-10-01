@@ -28,6 +28,7 @@ from scripts.verify_v08_candidate_ci import (  # noqa: E402
     RAW_CANDIDATE_SLOW_TOTAL,
     SHARD_MODULES,
     CandidateCiError,
+    assert_bash_script_syntax,
     assert_junit,
     assert_pure_py3_none_any_wheel,
     assert_raw_inventory,
@@ -36,13 +37,17 @@ from scripts.verify_v08_candidate_ci import (  # noqa: E402
     canonical_slow_nodes_path,
     discover_evidence_slow_modules,
     expected_platform_skips,
+    extract_candidate_job_bash_scripts,
     installed_package_outside_checkout_probe_source,
     junit_skipped_nodeids,
     junit_testcase_nodeid,
     load_canonical_slow_nodes,
+    neutralize_github_actions_expressions,
     parse_junit_counts,
     parse_junit_summary,
     read_canonical_slow_nodes_file,
+    resolve_bash_executable,
+    sample_candidate_real_xvfb_collect_script,
     verify_installed_package_outside_checkout,
     verify_shard_inventory_assignments,
     verify_wheel_file_builder,
@@ -72,6 +77,25 @@ def _good_wheel(tmp_path: Path, *, tag: str = "py3-none-any", version: str = "0.
             f"Metadata-Version: 2.1\nName: gamefactory\nVersion: {version}\n",
         )
     return wheel
+
+
+def test_candidate_ci_workflow_bash_run_blocks_pass_bash_n() -> None:
+    bash = resolve_bash_executable()
+    if bash is None:
+        pytest.skip("bash not available")
+    ci_yaml = (REPO_ROOT / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")
+    scripts = extract_candidate_job_bash_scripts(ci_yaml)
+    assert scripts, "expected candidate job bash run blocks in ci.yml"
+    for _job_name, body in scripts:
+        neutral = neutralize_github_actions_expressions(body)
+        assert_bash_script_syntax(neutral, bash_executable=bash)
+
+
+def test_candidate_real_xvfb_collect_script_passes_bash_n() -> None:
+    bash = resolve_bash_executable()
+    if bash is None:
+        pytest.skip("bash not available")
+    assert_bash_script_syntax(sample_candidate_real_xvfb_collect_script(), bash_executable=bash)
 
 
 def test_canonical_fixture_is_frozen_425_inventory() -> None:
