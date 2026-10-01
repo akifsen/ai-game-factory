@@ -11,6 +11,9 @@ from pathlib import Path
 
 import pytest
 
+from gamefactory.adapters.assets.v08_candidate_evidence import (
+    bind_production_candidate_evidence_exporter,
+)
 from gamefactory.adapters.assets.v08_candidate_geometry import (
     envelope_size_from_aabb,
     visual_aabb_in_reference_root_frame,
@@ -40,6 +43,11 @@ from gamefactory.core.domain.v08_candidate_contracts import (
 from gamefactory.core.execution.process_runner import ProcessRunner
 from gamefactory.core.policies.policy_engine import PolicyEngine, PolicyRule
 from gamefactory.workflows.engine import WorkflowEngine
+from gamefactory.workflows.v08_candidate_currentness import assert_zero_provider_activity
+from gamefactory.workflows.v08_candidate_evidence_readiness import (
+    assert_candidate_evidence_complete,
+    assert_candidate_workflow_engine_finalized,
+)
 from gamefactory.workflows.v08_candidate_snapshot import CANDIDATE_TEST_ONLY_APPROVAL
 from gamefactory.workflows.v08_candidate_workflow import (
     CandidateWorkflowHandlers,
@@ -118,6 +126,7 @@ def test_candidate_workflow_reaches_test_only_review_and_receipt(tmp_path: Path)
     root, db = workspace.root, workspace.db
     glb = root / "canonical.glb"
     _run_blender_export(glb)
+    source_sha_before = hashlib.sha256(glb.read_bytes()).hexdigest()
     spec = _spec_for_glb(glb)
     workflow, tasks = create_v08_candidate_workflow(workspace, glb, spec)
     handlers = CandidateWorkflowHandlers(
@@ -130,8 +139,8 @@ def test_candidate_workflow_reaches_test_only_review_and_receipt(tmp_path: Path)
         ArtifactManager(root),
         godot_path=GODOT,
         runner=ProcessRunner(sanitize_output=True),
-        c2_export_callback=None,
     )
+    bind_production_candidate_evidence_exporter(handlers)
     engine = WorkflowEngine(
         root,
         db,
@@ -158,6 +167,7 @@ def test_candidate_workflow_reaches_test_only_review_and_receipt(tmp_path: Path)
     assert approval is not None
     assert approval.approval_type == CANDIDATE_TEST_ONLY_APPROVAL
     assert ProviderInvocationRepository(db).count(workflow.id) == 0
+    assert_zero_provider_activity(db, workflow.id)
 
     task = TaskRepository(db).get(approval.task_id)
     wf = engine.wf_repo.get(workflow.id)
@@ -180,7 +190,34 @@ def test_candidate_workflow_reaches_test_only_review_and_receipt(tmp_path: Path)
         ),
     )
     after = engine.run_workflow(workflow.id)
-    assert after.status != WorkflowStatus.COMPLETED
+    for _ in range(6):
+        if after.status == WorkflowStatus.COMPLETED:
+            break
+        after = engine.run_workflow(workflow.id)
+    assert after.status == WorkflowStatus.COMPLETED
+    assert hashlib.sha256(glb.read_bytes()).hexdigest() == source_sha_before
+    assert_zero_provider_activity(db, workflow.id)
+    oracle_task = next(
+        t
+        for t in TaskRepository(db).list_by_workflow(workflow.id)
+        if t.task_type == "v08_candidate_rig_oracle"
+    )
+    oracle_attempts = ExecutionRepository(db).list_by_task(oracle_task.id)
+    assert len(oracle_attempts) == 1
+    assert oracle_attempts[0].status.value == "COMPLETED"
+    readiness = assert_candidate_evidence_complete(handlers, workflow.id)
+    assert readiness.candidate_evidence_complete is True
+    assert readiness.production_eligible is False
+    assert readiness.promotion_eligible is False
+    finalized = assert_candidate_workflow_engine_finalized(handlers, workflow.id)
+    assert finalized.candidate_evidence_complete is True
+    assert ProviderInvocationRepository(db).count(workflow.id) == 0
+    markers = [
+        a
+        for a in ArtifactRepository(db).list_by_workflow(workflow.id)
+        if a.artifact_type == "candidate-c2-export-marker"
+    ]
+    assert len(markers) == 1
     review = next(
         t
         for t in TaskRepository(db).list_by_workflow(workflow.id)

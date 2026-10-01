@@ -1057,7 +1057,7 @@ def test_c2_trivial_existing_path_callback_still_blocks_evidence(tmp_path: Path)
     latest = ExecutionRepository(workspace.db).get_latest_attempt(evidence.id)
     assert latest is not None
     assert latest.error_message is not None
-    assert "C2 trusted cold verification" in latest.error_message
+    assert "managed staging" in (latest.error_message or "")
     markers = [
         a
         for a in ArtifactRepository(workspace.db).list_by_workflow(workflow_id)
@@ -1503,7 +1503,11 @@ def test_c2_callback_injects_blocking_execution_blocks_evidence(tmp_path: Path) 
         if e.status == ExecutionStatus.FAILED
     )
     assert failed_exec.error_message is not None
-    assert "blocking status during C2 export hook" in failed_exec.error_message
+    assert (
+        "blocking status during C2 export hook" in failed_exec.error_message
+        or "newer candidate evidence attempt appeared during C2 export hook"
+        in failed_exec.error_message
+    )
     _assert_no_c2_export_artifacts(workspace.db, workflow_id)
 
 
@@ -1528,8 +1532,7 @@ def test_c2_evidence_failure_is_c2_unavailable_not_missing_artifact(tmp_path: Pa
     assert latest is not None
     assert latest.error_message is not None
     assert "missing path" not in (latest.error_message or "").casefold()
-    assert "C2 trusted cold verification" in latest.error_message
-    assert "C1 blocks evidence task completion" in latest.error_message
+    assert "managed staging" in (latest.error_message or "")
     _assert_no_c2_export_artifacts(workspace.db, workflow_id)
     receipts = [
         a
@@ -1796,3 +1799,23 @@ def test_fresh_workspace_rejects_junction_parent(tmp_path: Path) -> None:
         pytest.skip("junction creation unavailable without privilege")
     with pytest.raises(ValidationError, match="symlink or junction"):
         create_fresh_v08_candidate_workspace(junction_parent)
+
+
+@pytest.mark.skipif(sys.platform != "win32", reason="Windows junction parent guard")
+def test_fresh_workspace_rejects_junction_parent_without_is_junction_api(tmp_path: Path) -> None:
+    from unittest.mock import patch
+
+    target = tmp_path / "target"
+    target.mkdir()
+    junction_parent = tmp_path / "junction_parent"
+    try:
+        subprocess.run(
+            ["cmd", "/c", "mklink", "/J", str(junction_parent), str(target)],
+            check=True,
+            capture_output=True,
+        )
+    except (OSError, subprocess.CalledProcessError):
+        pytest.skip("junction creation unavailable without privilege")
+    with patch.object(Path, "is_junction", None, create=True):
+        with pytest.raises(ValidationError, match="symlink or junction"):
+            create_fresh_v08_candidate_workspace(junction_parent)

@@ -918,7 +918,7 @@ def _assert_c1_derived_bundle_copy_fidelity(
     snap = json.loads((bundle / "snapshot/snapshot.json").read_text(encoding="utf-8"))
     original = json.loads(json.dumps(original_snapshot))
     orig_bindings = original["pre_review_artifact_bindings"]
-    assert len(orig_bindings) == 22
+    assert len(orig_bindings) == 23
     bundle_bindings = snap["pre_review_artifact_bindings"]
     assert len(bundle_bindings) == 23
     orig_by_id = {row["artifact_id"]: row for row in orig_bindings}
@@ -1026,22 +1026,8 @@ def _build_c1_derived_candidate_evidence_bundle(
         a for a in artifacts.values() if a.artifact_type == "candidate-identity-report"
     )
     bindings = list(snapshot.get("pre_review_artifact_bindings", []))
-    if not any(row.get("role") == "candidate-identity-report" for row in bindings):
-        bindings.append(
-            {
-                "artifact_id": identity_art.id,
-                "task_id": identity_art.task_id,
-                "role": "candidate-identity-report",
-                "relative_path": identity_art.relative_path.replace("\\", "/"),
-                "content_sha256": identity_art.content_hash,
-                "size_bytes": identity_art.file_size,
-                "producing_execution_id": snapshot["identity_execution"]["id"],
-            }
-        )
-        bindings.sort(key=lambda row: row["artifact_id"])
-        snapshot["pre_review_artifact_bindings"] = bindings
-        snapshot["identity_report_sha256"] = identity_art.content_hash
     assert len(bindings) == 23
+    assert snapshot.get("identity_report_sha256") == identity_art.content_hash
 
     wrapper_art = next(
         a for a in artifacts.values() if a.artifact_type == "candidate-rig-attempt-wrapper"

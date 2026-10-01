@@ -31,6 +31,27 @@ def test_path_crosses_symlink_parent(tmp_path: Path) -> None:
         _assert_fresh_stage_dir(stage)
 
 
+def test_path_crosses_junction_when_is_junction_api_missing(tmp_path: Path) -> None:
+    if sys.platform != "win32":
+        pytest.skip("Windows junction semantics")
+    import subprocess
+    from unittest.mock import patch
+
+    target = tmp_path / "target"
+    target.mkdir()
+    junction = tmp_path / "junction"
+    try:
+        subprocess.run(
+            ["cmd", "/c", "mklink", "/J", str(junction), str(target)],
+            check=True,
+            capture_output=True,
+        )
+    except (OSError, subprocess.CalledProcessError):
+        pytest.skip("junction creation unavailable")
+    with patch.object(Path, "is_junction", None, create=True):
+        assert path_crosses_link(junction / "nested")
+
+
 @pytest.mark.skipif(sys.platform != "win32", reason="Windows junction check")
 def test_path_crosses_junction_when_available(tmp_path: Path) -> None:
     target = tmp_path / "target"

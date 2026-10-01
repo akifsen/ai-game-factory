@@ -189,6 +189,12 @@ def build_candidate_bound_snapshot(
         artifact_type="candidate-processed-glb",
         execution=identity_exec,
     )
+    identity_report_art = select_artifact_for_execution(
+        artifact_rows,
+        task_id=identity.id,
+        artifact_type="candidate-identity-report",
+        execution=identity_exec,
+    )
     if raw_art.content_hash != processed_art.content_hash:
         raise CandidateCurrentnessError("raw and processed GLB hashes must be identical")
     if processed_art.content_hash != params["source_glb_hash"]:
@@ -326,6 +332,9 @@ def build_candidate_bound_snapshot(
             _pre_review_artifact_binding(retained_source, producing_execution_id=prepare_exec.id),
             _pre_review_artifact_binding(raw_art, producing_execution_id=identity_exec.id),
             _pre_review_artifact_binding(processed_art, producing_execution_id=identity_exec.id),
+            _pre_review_artifact_binding(
+                identity_report_art, producing_execution_id=identity_exec.id
+            ),
             _pre_review_artifact_binding(static_report, producing_execution_id=static_exec.id),
             _pre_review_artifact_binding(runtime_request, producing_execution_id=capture_exec.id),
             _pre_review_artifact_binding(runtime_obs, producing_execution_id=capture_exec.id),
@@ -368,6 +377,7 @@ def build_candidate_bound_snapshot(
         "retained_source_sha256": retained_source.content_hash,
         "raw_glb_sha256": raw_art.content_hash,
         "processed_glb_sha256": processed_art.content_hash,
+        "identity_report_sha256": identity_report_art.content_hash,
         "static_validation_report_sha256": static_report.content_hash,
         "runtime_request_sha256": runtime_request.content_hash,
         "runtime_observation_sha256": runtime_obs.content_hash,

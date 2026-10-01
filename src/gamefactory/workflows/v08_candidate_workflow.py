@@ -2,14 +2,24 @@
 
 from __future__ import annotations
 
+import copy
 import json
 import shutil
 from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
+from types import SimpleNamespace
 from typing import Any, Protocol
 
 from gamefactory.adapters.assets.internal_rig_evidence import export_rig_evidence_bundle
+from gamefactory.adapters.assets.v08_candidate_evidence import (
+    assert_cold_verification_live_binding,
+    assert_fresh_managed_staging_container,
+    fingerprint_cold_bundle_payload,
+    parse_staging_container,
+    prepare_evidence_publication_container,
+    trusted_cold_verify_candidate_bundle,
+)
 from gamefactory.adapters.assets.v08_candidate_validate import validate_v08_candidate_glb
 from gamefactory.adapters.engines.godot_staging import sha256_file
 from gamefactory.adapters.engines.v08_candidate_runtime_runner import (
@@ -823,10 +833,24 @@ class CandidateWorkflowHandlers:
         receipt_doc = load_json_artifact(self.root, receipt_art)
         if receipt_doc.get("promotion_eligible") is not False:
             raise ValidationError("TEST_ONLY receipt must remain promotion-ineligible")
-        snapshot_before = self._bound_snapshot(workflow, prepare)
+        snapshot_live = self._bound_snapshot(workflow, prepare)
+        snapshot_before = CandidateBoundSnapshot(payload=copy.deepcopy(snapshot_live.payload))
         before_bytes = json.dumps(
             snapshot_before.payload, sort_keys=True, separators=(",", ":"), allow_nan=False
         )
+        snapshot_payload_canonical_bytes = before_bytes.encode("utf-8")
+        review_approval = next(
+            (
+                a
+                for a in self.approvals.list_by_workflow(workflow.id)
+                if a.task_id == review_task.id
+                and a.approval_type == CANDIDATE_TEST_ONLY_APPROVAL
+                and a.status.value == "APPROVED"
+            ),
+            None,
+        )
+        if review_approval is None:
+            raise ArtifactError("APPROVED TEST_ONLY approval missing for candidate evidence")
         validate_test_only_receipt(
             root=self.root,
             receipt_art=receipt_art,
@@ -836,67 +860,111 @@ class CandidateWorkflowHandlers:
             review_task=review_task,
             artifacts=self.artifacts.list_by_workflow(workflow.id),
         )
-        if self.c2_export_callback is not None:
-            oracle_task = next(
-                (
-                    t
-                    for t in self.tasks.list_by_workflow(workflow.id)
-                    if t.task_type == "v08_candidate_rig_oracle"
-                ),
-                None,
+        if self.c2_export_callback is None:
+            raise ValidationError(
+                "Candidate evidence completion requires C2 trusted cold verification; "
+                "C1 blocks evidence task completion"
             )
-            if oracle_task is None:
-                raise ArtifactError("Rig oracle task missing")
-            oracle_exec = assert_latest_attempt_completed(
-                self.executions, oracle_task, purpose="candidate evidence"
+        oracle_task = next(
+            (
+                t
+                for t in self.tasks.list_by_workflow(workflow.id)
+                if t.task_type == "v08_candidate_rig_oracle"
+            ),
+            None,
+        )
+        if oracle_task is None:
+            raise ArtifactError("Rig oracle task missing")
+        oracle_exec = assert_latest_attempt_completed(
+            self.executions, oracle_task, purpose="candidate evidence"
+        )
+        wrapper = select_artifact_for_execution(
+            self.artifacts.list_by_workflow(workflow.id),
+            task_id=oracle_task.id,
+            artifact_type="candidate-rig-attempt-wrapper",
+            execution=oracle_exec,
+        )
+        wrapper_doc = load_json_artifact(self.root, wrapper)
+        nested_dir = self.root / str(wrapper_doc["nested_bundle_dir"])
+        request = SimpleNamespace(
+            workflow_id=workflow.id,
+            project_root=self.root,
+            snapshot=snapshot_before,
+            nested_rig_bundle_dir=nested_dir,
+            test_only_receipt_path=self.root / receipt_art.relative_path,
+        )
+        staging_container = Path(self.c2_export_callback(request))
+        if not staging_container.exists():
+            raise ArtifactError("C2 export hook returned a missing path")
+        latest_evidence = self.executions.get_latest_attempt(task.id)
+        if latest_evidence is None or latest_evidence.id != execution.id:
+            raise ValidationError(
+                "A newer candidate evidence attempt appeared during C2 export hook"
             )
-            wrapper = select_artifact_for_execution(
-                self.artifacts.list_by_workflow(workflow.id),
-                task_id=oracle_task.id,
-                artifact_type="candidate-rig-attempt-wrapper",
-                execution=oracle_exec,
-            )
-            wrapper_doc = load_json_artifact(self.root, wrapper)
-            nested_dir = self.root / str(wrapper_doc["nested_bundle_dir"])
-            request = {
-                "workflow_id": workflow.id,
-                "project_root": self.root,
-                "snapshot": snapshot_before,
-                "nested_rig_bundle_dir": nested_dir,
-                "test_only_receipt_path": self.root / receipt_art.relative_path,
-            }
-            export_path = self.c2_export_callback(request)
-            if not export_path.exists():
-                raise ArtifactError("C2 export hook returned a missing path")
-            for row in self.tasks.list_by_workflow(workflow.id):
-                latest = self.executions.get_latest_attempt(row.id)
-                if latest is None or latest.status not in BLOCKING_EXECUTION_STATUSES:
+        for row in self.tasks.list_by_workflow(workflow.id):
+            latest = self.executions.get_latest_attempt(row.id)
+            if latest is None:
+                continue
+            if row.id == task.id:
+                if latest.id != execution.id:
+                    raise ValidationError(
+                        "A newer candidate evidence attempt appeared during C2 export hook"
+                    )
+                if latest.status == ExecutionStatus.RUNNING and latest.id == execution.id:
                     continue
-                if (
-                    row.id == task.id
-                    and latest.id == execution.id
-                    and latest.status == ExecutionStatus.RUNNING
-                ):
-                    continue
-                raise ValidationError(
-                    f"Execution {latest.id} entered blocking status during C2 export hook"
-                )
-            try:
-                snapshot_after = self._bound_snapshot(workflow, prepare)
-            except (CandidateCurrentnessError, ArtifactError) as exc:
-                raise ValidationError(
-                    "Authoritative candidate snapshot changed during C2 export hook"
-                ) from exc
-            after_bytes = json.dumps(
-                snapshot_after.payload, sort_keys=True, separators=(",", ":"), allow_nan=False
+            if latest.status not in BLOCKING_EXECUTION_STATUSES:
+                continue
+            raise ValidationError(
+                f"Execution {latest.id} entered blocking status during C2 export hook"
             )
-            if before_bytes != after_bytes:
-                raise ValidationError(
-                    "Authoritative candidate snapshot changed during C2 export hook"
-                )
-        raise ValidationError(
-            "Candidate evidence completion requires C2 trusted cold verification; "
-            "C1 blocks evidence task completion"
+        try:
+            snapshot_after = self._bound_snapshot(workflow, prepare)
+        except (CandidateCurrentnessError, ArtifactError) as exc:
+            raise ValidationError(
+                "Authoritative candidate snapshot changed during C2 export hook"
+            ) from exc
+        after_bytes = json.dumps(
+            snapshot_after.payload, sort_keys=True, separators=(",", ":"), allow_nan=False
+        )
+        if before_bytes != after_bytes:
+            raise ValidationError("Authoritative candidate snapshot changed during C2 export hook")
+        assert_fresh_managed_staging_container(self.root, staging_container)
+        layout = parse_staging_container(staging_container)
+        digest_before_cold = fingerprint_cold_bundle_payload(layout.cold_bundle_dir)
+        cold_result = trusted_cold_verify_candidate_bundle(layout.cold_bundle_dir)
+        digest_after_cold = fingerprint_cold_bundle_payload(layout.cold_bundle_dir)
+        if digest_before_cold != digest_after_cold:
+            raise ValidationError("cold verification mutated staged candidate evidence payload")
+        assert_cold_verification_live_binding(
+            cold_result=cold_result,
+            cold_bundle_dir=layout.cold_bundle_dir,
+            snapshot=snapshot_before,
+            workflow_id=workflow.id,
+            snapshot_payload_canonical_bytes=snapshot_payload_canonical_bytes,
+            review_approval_id=review_approval.id,
+        )
+        layout, d_ready = prepare_evidence_publication_container(
+            layout,
+            workflow_id=workflow.id,
+            task_id=task.id,
+            execution_id=execution.id,
+            attempt_number=execution.attempt_number,
+            snapshot_before=snapshot_before,
+            cold_result=cold_result,
+            cold_bundle_payload_digest=digest_after_cold,
+        )
+        from gamefactory.workflows.v08_candidate_evidence_publication import (
+            publish_candidate_evidence_from_staging,
+        )
+
+        return publish_candidate_evidence_from_staging(
+            self,
+            workflow,
+            task,
+            execution,
+            snapshot_before=snapshot_before,
+            staging_container=layout.container_root,
+            d_ready=d_ready,
         )
 
 
@@ -941,7 +1009,11 @@ def register_v08_candidate_handlers(
 def candidate_workflow_readiness(
     handlers: CandidateWorkflowHandlers, workflow_id: str
 ) -> CandidateBoundSnapshot:
-    """Readiness query; raises when currentness guards fail."""
+    """Upstream pre-evidence currentness query (C1 bindings through TEST_ONLY receipt).
+
+    Does not attest candidate evidence envelope completion; use
+    ``candidate_evidence_readiness`` after the evidence task has published.
+    """
     tasks = handlers.tasks.list_by_workflow(workflow_id)
     prepare = next((t for t in tasks if t.task_type == "v08_candidate_prepare"), None)
     if prepare is None:

@@ -987,6 +987,30 @@ class ArtifactRepository:
                 ),
             )
 
+    def save_many_on_connection(self, conn: sqlite3.Connection, artifacts: list[Artifact]) -> None:
+        """Insert-only artifact persistence for held writer connections (no upsert)."""
+        for artifact in artifacts:
+            conn.execute(
+                """
+                INSERT INTO artifacts (
+                    id, workflow_id, task_id, artifact_type, producer, relative_path,
+                    content_hash, file_size, validation_state, created_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+                """,
+                (
+                    artifact.id,
+                    artifact.workflow_id,
+                    artifact.task_id,
+                    artifact.artifact_type,
+                    artifact.producer,
+                    artifact.relative_path,
+                    artifact.content_hash,
+                    artifact.file_size,
+                    artifact.validation_state,
+                    artifact.created_at,
+                ),
+            )
+
     def get(self, artifact_id: str) -> Artifact | None:
         conn = self.db.connect()
         try:

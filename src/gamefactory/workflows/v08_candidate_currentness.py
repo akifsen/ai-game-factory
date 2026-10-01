@@ -82,6 +82,7 @@ def artifact_bound_to_execution(artifact: Artifact, execution: Execution) -> boo
         f"rig-attempt-{execution_id}.json",
         f"test-only-receipt-{execution_id}.json",
         f"c2-export-marker-{execution_id}.json",
+        f"c2-evidence-result-{execution_id}.json",
         f"specification-{execution_id}.json",
         f"profile-document-{execution_id}.json",
     )
