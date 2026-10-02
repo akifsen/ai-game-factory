@@ -5,6 +5,7 @@ from __future__ import annotations
 import copy
 import hashlib
 import json
+import sys
 from dataclasses import replace
 from pathlib import Path
 
@@ -12,6 +13,7 @@ import pytest
 
 from gamefactory.adapters.assets.animation_clip_input import (
     MAX_LOCAL_ANIMATION_CLIP_BYTES,
+    MAX_LOCAL_ANIMATION_CLIP_JSON_CONTAINER_DEPTH,
     assert_animation_clip_skin_influence,
     load_local_animation_clip,
 )
@@ -369,6 +371,87 @@ def test_load_rejects_deep_json(tmp_path: Path) -> None:
     deep_path.write_text(payload, encoding="utf-8")
     with pytest.raises(ValidationError, match="JSON policy"):
         load_local_animation_clip(deep_path)
+
+
+def _nested_object_json(depth: int) -> str:
+    payload = "0"
+    for _ in range(depth):
+        payload = '{"x":' + payload + "}"
+    return payload
+
+
+def _nested_mixed_container_json(depth: int) -> str:
+    payload = "0"
+    for level in range(depth):
+        if level % 2 == 0:
+            payload = "[" + payload + "]"
+        else:
+            payload = '{"x":' + payload + "}"
+    return payload
+
+
+def test_load_rejects_deep_json_with_raised_recursion_limit(tmp_path: Path) -> None:
+    depth = 3000
+    payload = '{"x":' * depth + "0" + "}" * depth
+    deep_path = tmp_path / "deep_recursion.json"
+    deep_path.write_text(payload, encoding="utf-8")
+    old_limit = sys.getrecursionlimit()
+    sys.setrecursionlimit(max(old_limit, depth * 2))
+    try:
+        with pytest.raises(ValidationError, match="JSON policy"):
+            load_local_animation_clip(deep_path)
+    finally:
+        sys.setrecursionlimit(old_limit)
+
+
+def test_load_json_container_depth_boundary_and_one_over(tmp_path: Path) -> None:
+    limit = MAX_LOCAL_ANIMATION_CLIP_JSON_CONTAINER_DEPTH
+    at_limit = tmp_path / "depth_at_limit.json"
+    at_limit.write_text(_nested_object_json(limit), encoding="utf-8")
+    with pytest.raises(ValidationError) as at_limit_exc:
+        load_local_animation_clip(at_limit)
+    assert "maximum depth" not in at_limit_exc.value.message
+
+    one_over = tmp_path / "depth_one_over.json"
+    one_over.write_text(_nested_object_json(limit + 1), encoding="utf-8")
+    with pytest.raises(ValidationError, match="JSON policy"):
+        load_local_animation_clip(one_over)
+
+    mixed_at_limit_payload = _nested_mixed_container_json(limit)
+    json.loads(mixed_at_limit_payload)
+    mixed_at_limit = tmp_path / "mixed_depth_at_limit.json"
+    mixed_at_limit.write_text(mixed_at_limit_payload, encoding="utf-8")
+    with pytest.raises(ValidationError) as mixed_at_limit_exc:
+        load_local_animation_clip(mixed_at_limit)
+    assert "maximum depth" not in mixed_at_limit_exc.value.message
+
+    mixed_over_payload = _nested_mixed_container_json(limit + 1)
+    json.loads(mixed_over_payload)
+    mixed_over = tmp_path / "mixed_depth_one_over.json"
+    mixed_over.write_text(mixed_over_payload, encoding="utf-8")
+    with pytest.raises(ValidationError, match="maximum depth"):
+        load_local_animation_clip(mixed_over)
+
+
+def test_load_json_depth_ignores_quotes_and_escapes(tmp_path: Path) -> None:
+    decorative = "{" * 80 + "[" * 40
+    escaped = r"line \" quote \\ tail"
+    payload = '{"note": "' + decorative + escaped + '", "inner": {"v": 1}, "tail": "}]}"}'
+    json.loads(payload)
+    path = tmp_path / "quoted_braces.json"
+    path.write_text(payload, encoding="utf-8")
+    with pytest.raises(ValidationError, match="unknown fields") as exc_info:
+        load_local_animation_clip(path)
+    assert "maximum depth" not in exc_info.value.message
+
+
+def test_load_valid_clip_bytes_and_sha_unchanged_by_depth_preflight(tmp_path: Path) -> None:
+    path = _write_clip(tmp_path, _valid_clip_document(bones=["Spine"]), name="preflight.json")
+    raw_bytes = path.read_bytes()
+    loaded = load_local_animation_clip(path)
+    assert loaded.raw_bytes == raw_bytes
+    assert loaded.sha256 == hashlib.sha256(raw_bytes).hexdigest()
+    assert loaded.clip.tracks[0].bone == "Spine"
 
 
 def test_load_rejects_oversize_file(tmp_path: Path) -> None:

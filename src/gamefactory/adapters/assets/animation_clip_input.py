@@ -24,6 +24,7 @@ from gamefactory.core.domain.internal_skin_contract import load_internal_skin_co
 from gamefactory.core.execution.path_guard import PathGuard
 
 MAX_LOCAL_ANIMATION_CLIP_BYTES = 64 * 1024
+MAX_LOCAL_ANIMATION_CLIP_JSON_CONTAINER_DEPTH = 32
 
 
 @dataclass(frozen=True)
@@ -67,9 +68,50 @@ def _read_bounded_regular_file(path: Path) -> bytes:
     return payload
 
 
+def _reject_excessive_json_container_depth(raw: bytes) -> None:
+    """Linear preflight: reject deeply nested containers before json.loads."""
+    try:
+        text = raw.decode("utf-8")
+    except UnicodeDecodeError:
+        return
+    limit = MAX_LOCAL_ANIMATION_CLIP_JSON_CONTAINER_DEPTH
+    depth = 0
+    index = 0
+    length = len(text)
+    while index < length:
+        char = text[index]
+        if char == '"':
+            index += 1
+            while index < length:
+                inner = text[index]
+                if inner == '"':
+                    index += 1
+                    break
+                if inner == "\\":
+                    index += 1
+                    if index < length and text[index] == "u":
+                        index += 5
+                    elif index < length:
+                        index += 1
+                    continue
+                index += 1
+            continue
+        if char in "{[":
+            depth += 1
+            if depth > limit:
+                raise ValidationError(
+                    "animation clip JSON policy violation: "
+                    f"JSON container nesting exceeds maximum depth {limit}"
+                )
+        elif char in "}]":
+            depth -= 1
+        index += 1
+
+
 def load_local_animation_clip(path: Path) -> LoadedLocalAnimationClip:
     """Load a local JSON animation clip with bounded IO and closed-schema validation."""
     raw = _read_bounded_regular_file(path)
+    _reject_excessive_json_container_depth(raw)
     try:
         document = parse_strict_runtime_json_object(raw, max_bytes=MAX_LOCAL_ANIMATION_CLIP_BYTES)
     except CandidateRuntimeJsonError as exc:
