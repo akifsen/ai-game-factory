@@ -2,7 +2,7 @@
 
 AI Game Factory is local development tooling for coordinating bounded game-development workflows. It stores workflow state, task attempts, artifacts, evidence, approvals, and policy decisions locally. A managed game remains usable without the Factory installed.
 
-The development package version is 0.8.0rc2. The published [candidate rig/skin technical prerelease](https://github.com/akifsen/ai-game-factory/releases/tag/v0.8.0-rc.1) is published from commit `5ae9677` with exact-source Windows/Linux CI and installed-wheel acceptance. See the [C2-B checkpoint report](docs/reports/v0.8-3c-candidate-evidence-completion.md) and release assets for the independently verified evidence. V0.7 added advanced asset profiles ([V0.7 completion report](docs/reports/v0.7-completion-report.md)). V0.6 added production safety and recovery ([V0.6 completion report](docs/reports/v0.6-completion-report.md)). V0.4 added a gated production pipeline: concept ingestion and human review, separately approved Meshy CLI generation, deterministic Blender processing, decoded GLB validation, and staged Godot runtime/render evidence. V0.5 runs that same pipeline from an asset profile (`static_prop@1`, `pickup@1`, `modular_piece@1`) instead of crate-specific rules. Real paid generation and final visual approval remain explicit human checkpoints. See the [V0.5 completion report](docs/reports/v0.5-completion-report.md). V0.2 headless verification and V0.3 rendered capture remain available.
+The development package version is 0.8.0rc3. The published [character and animation preview technical prerelease](https://github.com/akifsen/ai-game-factory/releases/tag/v0.8.0-rc.2) remains immutable at main commit `4af8b769` with all 24 CI jobs green on that exact source plus installed-wheel acceptance proof. This checkout is not a public production release: production and promotion eligibility remain false. V0.8-6 added authored local animation clip preview ([animation clip preview guide](docs/guides/v0.8-6-authored-animation-clip-preview.md)); V0.8-7 adds interactive animation review with a readiness-gated 13-file exporter and live currentness API ([animation review guide](docs/guides/v0.8-7-animation-review.md), [V0.8-7 checkpoint](docs/reports/v0.8-7-animation-review-checkpoint.md)). V0.7 added advanced asset profiles ([V0.7 completion report](docs/reports/v0.7-completion-report.md)). V0.6 added production safety and recovery ([V0.6 completion report](docs/reports/v0.6-completion-report.md)). V0.4 added a gated production pipeline: concept ingestion and human review, separately approved Meshy CLI generation, deterministic Blender processing, decoded GLB validation, and staged Godot runtime/render evidence. V0.5 runs that same pipeline from an asset profile (`static_prop@1`, `pickup@1`, `modular_piece@1`) instead of crate-specific rules. Real paid generation and final visual approval remain explicit human checkpoints. See the [V0.5 completion report](docs/reports/v0.5-completion-report.md). V0.2 headless verification and V0.3 rendered capture remain available.
 
 ## Install and run
 
@@ -12,7 +12,9 @@ manifest, with live currentness checks. See the [preview guide](docs/guides/v0.8
 and [development checkpoint](docs/reports/v0.8-4-preview-checkpoint.md). V0.8-5 adds a
 readiness-gated animation preview export that consumes a current V0.8-4 preview package and
 publishes a separate `rig_smoke_01` animation scene; see the
-[animation preview guide](docs/guides/v0.8-5-candidate-animation-preview.md).
+[animation preview guide](docs/guides/v0.8-5-candidate-animation-preview.md). V0.8-6 adds an
+authored local animation clip preview that consumes a current V0.8-4 preview and caller clip
+JSON; see the [animation clip preview guide](docs/guides/v0.8-6-authored-animation-clip-preview.md).
 
 Python 3.11 or newer is required.
 

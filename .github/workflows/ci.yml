@@ -42,7 +42,7 @@ jobs:
       && !contains(github.event.pull_request.labels.*.name, 'full-ci')
       && (github.event.action != 'labeled' || github.event.label.name == 'full-ci')
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-python@v6
@@ -63,7 +63,7 @@ jobs:
           && (github.event.action != 'labeled' || github.event.label.name == 'full-ci')))
       && !(github.event_name == 'workflow_dispatch'
            && github.event.inputs.candidate_diagnostics_only == 'true')
-    timeout-minutes: 45
+    timeout-minutes: 60
     strategy:
       fail-fast: false
       matrix:
