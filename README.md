@@ -12,7 +12,9 @@ manifest, with live currentness checks. See the [preview guide](docs/guides/v0.8
 and [development checkpoint](docs/reports/v0.8-4-preview-checkpoint.md). V0.8-5 adds a
 readiness-gated animation preview export that consumes a current V0.8-4 preview package and
 publishes a separate `rig_smoke_01` animation scene; see the
-[animation preview guide](docs/guides/v0.8-5-candidate-animation-preview.md).
+[animation preview guide](docs/guides/v0.8-5-candidate-animation-preview.md). V0.8-6 adds an
+authored local animation clip preview that consumes a current V0.8-4 preview and caller clip
+JSON; see the [animation clip preview guide](docs/guides/v0.8-6-authored-animation-clip-preview.md).
 
 Python 3.11 or newer is required.
 
