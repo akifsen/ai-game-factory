@@ -63,7 +63,7 @@ jobs:
           && (github.event.action != 'labeled' || github.event.label.name == 'full-ci')))
       && !(github.event_name == 'workflow_dispatch'
            && github.event.inputs.candidate_diagnostics_only == 'true')
-    timeout-minutes: 80
+    timeout-minutes: 90
     strategy:
       fail-fast: false
       matrix:
