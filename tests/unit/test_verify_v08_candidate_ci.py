@@ -64,7 +64,7 @@ def _write_junit(path: Path, xml_body: str) -> None:
     )
 
 
-def _good_wheel(tmp_path: Path, *, tag: str = "py3-none-any", version: str = "0.8.0rc1") -> Path:
+def _good_wheel(tmp_path: Path, *, tag: str = "py3-none-any", version: str = "0.8.0rc2") -> Path:
     wheel = tmp_path / f"gamefactory-{version}-{tag}.whl"
     dist = f"gamefactory-{version}.dist-info"
     with zipfile.ZipFile(wheel, "w") as archive:
@@ -325,10 +325,10 @@ def test_wheel_rejects_foreign_tag(tmp_path: Path) -> None:
 
 
 def test_wheel_rejects_ambiguous_metadata(tmp_path: Path) -> None:
-    wheel = tmp_path / "gamefactory-0.8.0rc1-py3-none-any.whl"
+    wheel = tmp_path / "gamefactory-0.8.0rc2-py3-none-any.whl"
     with zipfile.ZipFile(wheel, "w") as archive:
         archive.writestr(
-            "gamefactory-0.8.0rc1.dist-info/WHEEL",
+            "gamefactory-0.8.0rc2.dist-info/WHEEL",
             "Wheel-Version: 1.0\nGenerator: test\nRoot-Is-Purelib: true\nTag: py3-none-any\n",
         )
         archive.writestr(
@@ -336,8 +336,8 @@ def test_wheel_rejects_ambiguous_metadata(tmp_path: Path) -> None:
             "Metadata-Version: 2.1\nName: other\nVersion: 1.0.0\n",
         )
         archive.writestr(
-            "gamefactory-0.8.0rc1.dist-info/METADATA",
-            "Metadata-Version: 2.1\nName: gamefactory\nVersion: 0.8.0rc1\n",
+            "gamefactory-0.8.0rc2.dist-info/METADATA",
+            "Metadata-Version: 2.1\nName: gamefactory\nVersion: 0.8.0rc2\n",
         )
     with pytest.raises(CandidateCiError, match="exactly one dist-info"):
         assert_pure_py3_none_any_wheel(wheel)
