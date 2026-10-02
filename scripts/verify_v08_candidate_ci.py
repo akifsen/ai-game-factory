@@ -24,7 +24,7 @@ RAW_CANDIDATE_SLOW_TOTAL = 425
 CANONICAL_SLOW_NODES_REL = Path("tests/fixtures/v08_candidate_slow_nodes.txt")
 
 EXPECTED_WHEEL_DIST_NAME = "gamefactory"
-EXPECTED_WHEEL_FILENAME_PREFIX = "gamefactory-0.8.0rc1-"
+EXPECTED_WHEEL_FILENAME_PREFIX = "gamefactory-0.8.0rc2-"
 
 CANDIDATE_SLOW_MODULES: dict[str, int] = {
     "tests/unit/test_v08_candidate_workflow.py": 88,
@@ -74,7 +74,7 @@ MARKER_PROPAGATION_GUARD_MODULES: tuple[str, ...] = (
     "tests/unit/test_internal_rig_cold.py",
 )
 
-EXPECTED_PACKAGE_VERSION = "0.8.0rc1"
+EXPECTED_PACKAGE_VERSION = "0.8.0rc2"
 _COLLECTED_RE = re.compile(r"(?P<count>\d+)(?:/\d+)?\s+tests?\s+collected")
 _GITHUB_ACTIONS_EXPRESSION_RE = re.compile(r"\$\{\{[^}]+\}\}")
 _CANDIDATE_JOB_NAME_RE = re.compile(r"^  (candidate[-\w]+):\s*$")
