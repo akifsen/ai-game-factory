@@ -4,6 +4,13 @@ AI Game Factory is local development tooling for coordinating bounded game-devel
 
 The development package version is 0.8.0rc3. The published [character and animation preview technical prerelease](https://github.com/akifsen/ai-game-factory/releases/tag/v0.8.0-rc.2) remains immutable at main commit `4af8b769` with all 24 CI jobs green on that exact source plus installed-wheel acceptance proof. This checkout is not a public production release: production and promotion eligibility remain false. V0.8-6 added authored local animation clip preview ([animation clip preview guide](docs/guides/v0.8-6-authored-animation-clip-preview.md)); V0.8-7 adds interactive animation review with a readiness-gated 13-file exporter and live currentness API ([animation review guide](docs/guides/v0.8-7-animation-review.md), [V0.8-7 checkpoint](docs/reports/v0.8-7-animation-review-checkpoint.md)). V0.7 added advanced asset profiles ([V0.7 completion report](docs/reports/v0.7-completion-report.md)). V0.6 added production safety and recovery ([V0.6 completion report](docs/reports/v0.6-completion-report.md)). V0.4 added a gated production pipeline: concept ingestion and human review, separately approved Meshy CLI generation, deterministic Blender processing, decoded GLB validation, and staged Godot runtime/render evidence. V0.5 runs that same pipeline from an asset profile (`static_prop@1`, `pickup@1`, `modular_piece@1`) instead of crate-specific rules. Real paid generation and final visual approval remain explicit human checkpoints. See the [V0.5 completion report](docs/reports/v0.5-completion-report.md). V0.2 headless verification and V0.3 rendered capture remain available.
 
+V0.8-8 adds multi-clip animation review: two to eight current authored clip
+packages for one character share an ordered selector and the existing playback
+controls. The exporter preserves source bytes and detects collection drift.
+See the [multi-clip guide](docs/guides/v0.8-8-multi-clip-animation-review.md) and
+[verified checkpoint](docs/reports/v0.8-8-multi-clip-animation-review-checkpoint.md).
+Release proof for this development slice is still pending.
+
 ## Install and run
 
 The development checkout also includes a readiness-gated Godot character preview
