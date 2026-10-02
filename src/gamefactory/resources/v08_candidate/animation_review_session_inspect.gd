@@ -14,6 +14,13 @@ const EXTERNAL_DONE_NAME := "gf_session_inspect_external_complete.json"
 
 const ARG_PHASE := "--gf-session-inspect-phase="
 const ARG_RESULT := "--gf-session-inspect-result="
+const _STALE_SESSION_BANNER_FRAGMENTS := [
+	"No review session on disk",
+	"No session loaded",
+	"Loaded historical session (read-only)",
+	"Session changed elsewhere",
+	"Review set changed",
+]
 
 
 func _initialize() -> void:
@@ -76,6 +83,8 @@ func _phase_write(scene: Node3D) -> Dictionary:
 		create_btn.pressed.emit()
 		if not await _wait_bridge_idle(scene, true):
 			return {"ok": false, "error": "create session timeout"}
+		if not _banner_coherent_for_live_session(scene):
+			return {"ok": false, "error": "banner stale after create"}
 	if not await _apply_clip_a_annotations(scene):
 		return {"ok": false, "error": "clip A annotations failed"}
 	if not await _apply_clip_b_keep(scene):
@@ -83,6 +92,8 @@ func _phase_write(scene: Node3D) -> Dictionary:
 	var snap := _session_snapshot(scene)
 	if int(snap.get("stored_revision", -1)) != 4:
 		return {"ok": false, "error": "expected revision 4 after session write"}
+	if not _banner_coherent_for_live_session(scene):
+		return {"ok": false, "error": "banner stale after session write"}
 	return {"ok": true, "phase": "write", "snapshot": snap}
 
 
@@ -107,6 +118,8 @@ func _phase_reopen(scene: Node3D) -> Dictionary:
 	var snap := _session_snapshot(scene)
 	if int(snap.get("stored_revision", -1)) != 4:
 		return {"ok": false, "error": "expected revision 4 on reopen"}
+	if not _banner_coherent_for_live_session(scene):
+		return {"ok": false, "error": "banner stale on reopen"}
 	return {
 		"ok": true,
 		"phase": "reopen",
@@ -168,6 +181,8 @@ func _phase_conflict(scene: Node3D) -> Dictionary:
 		return {"ok": false, "error": "mutations still enabled"}
 	if str(after.get("raw_sha256", "")) != sha:
 		return {"ok": false, "error": "ui cached sha should remain pre-external"}
+	if not _conflict_banner_honest(after):
+		return {"ok": false, "error": "conflict banner claims saved after rejected write"}
 	return {"ok": true, "phase": "conflict", "snapshot": after, "cached_sha": sha}
 
 
@@ -236,7 +251,34 @@ func _phase_recovered(scene: Node3D) -> Dictionary:
 		return {"ok": false, "error": "clip A ui mismatch after recovery"}
 	if not await _verify_clip_b_keep_and_note(scene):
 		return {"ok": false, "error": "clip B keep or note mismatch after recovery"}
+	if not _banner_coherent_for_live_session(scene):
+		return {"ok": false, "error": "banner stale after recovery reload"}
 	return {"ok": true, "phase": "recovered", "snapshot": snap, "recovered_sha": sha}
+
+
+func _banner_coherent_for_live_session(scene: Node3D) -> bool:
+	return _banner_coherent_for_live_snapshot(_session_snapshot(scene))
+
+
+func _banner_coherent_for_live_snapshot(snap: Dictionary) -> bool:
+	if not snap.get("authority_current", false):
+		return true
+	if not snap.get("mutations_enabled", false):
+		return true
+	if int(snap.get("stored_revision", -1)) < 0:
+		return true
+	var msg := str(snap.get("status_message", ""))
+	for fragment in _STALE_SESSION_BANNER_FRAGMENTS:
+		if msg.contains(fragment):
+			return false
+	return true
+
+
+func _conflict_banner_honest(snap: Dictionary) -> bool:
+	if not snap.get("conflict_active", false):
+		return true
+	var msg := str(snap.get("status_message", "")).to_lower()
+	return not msg.contains("saved")
 
 
 func _write_controls_disabled(scene: Node3D) -> bool:
@@ -265,12 +307,16 @@ func _apply_clip_a_annotations(scene: Node3D) -> bool:
 	save_btn.pressed.emit()
 	if not await _wait_bridge_idle(scene, true):
 		return false
+	if not _banner_coherent_for_live_session(scene):
+		return false
 	var status_option: OptionButton = scene.get_node_or_null("%ClipStatusOption") as OptionButton
 	if status_option == null:
 		return false
 	status_option.select(2)
 	status_option.item_selected.emit(2)
 	if not await _wait_bridge_idle(scene, true):
+		return false
+	if not _banner_coherent_for_live_session(scene):
 		return false
 	var seek_slider: HSlider = _playback(scene).get_node_or_null("%SeekSlider") as HSlider
 	if seek_slider == null:
@@ -283,7 +329,9 @@ func _apply_clip_a_annotations(scene: Node3D) -> bool:
 	if add_btn == null:
 		return false
 	add_btn.pressed.emit()
-	return await _wait_bridge_idle(scene, true)
+	if not await _wait_bridge_idle(scene, true):
+		return false
+	return _banner_coherent_for_live_session(scene)
 
 
 func _apply_clip_b_keep(scene: Node3D) -> bool:

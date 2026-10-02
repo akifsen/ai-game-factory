@@ -719,6 +719,10 @@ func _apply_bridge_response(
 				_reload_required = false
 			if committed and action == "update" and pending_op == "SetNote":
 				_maybe_clear_note_draft_after_save(pending_clip, pending_note)
+			if action == "create":
+				_user_status_message = "Review session created."
+			else:
+				_user_status_message = ""
 			_apply_clip_annotations_for(_tracked_clip_id)
 	elif stored == null:
 		if action == "read":
@@ -749,9 +753,10 @@ func _apply_bridge_response(
 		_stored_session = parsed_stored.get("session")
 		_raw_sha256 = parsed_stored.get("raw_sha256")
 		_conflict_active = false
-		if current and action == "read":
+		if action == "read" and current:
 			_reload_required = false
-		if action == "read" and not current:
+			_user_status_message = ""
+		elif action == "read" and not current:
 			_user_status_message = "Loaded historical session (read-only)."
 		elif action == "create" and current:
 			_user_status_message = "Review session created."
