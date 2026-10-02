@@ -1096,10 +1096,10 @@ def test_export_stage_coherent_corruption_leaves_no_output(
 
     def corrupt_stage(stage, captured, *, workflow_id: str):
         gd_path = stage / "animation_review_set_player.gd"
-        text = gd_path.read_text(encoding="utf-8")
-        gd_path.write_text(
-            text.replace("AnimationReviewSet", "AnimationReviewSetX", 1), encoding="utf-8"
-        )
+        original_bytes = gd_path.read_bytes()
+        corrupted_bytes = original_bytes + b"\n# stage-coherent-corruption-oracle\n"
+        assert corrupted_bytes != original_bytes
+        gd_path.write_bytes(corrupted_bytes)
         manifest_path = stage / "animation_review_set_manifest.json"
         manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
         manifest["file_digests"]["animation_review_set_player.gd"] = sha256_file(gd_path)
