@@ -7,7 +7,6 @@ import json
 import math
 import os
 import re
-import shutil
 import subprocess
 import sys
 import time
@@ -37,6 +36,10 @@ from gamefactory.adapters.persistence.repositories import (
 from gamefactory.cli.animation_review_session_bridge import (
     BRIDGE_SCHEMA_VERSION,
     CONTEXT_SCHEMA_VERSION,
+    _parse_context_document,
+)
+from gamefactory.cli.animation_review_session_viewer import (
+    prepare_animation_review_session_viewer,
 )
 from gamefactory.core.approvals.approval_service import ApprovalService
 from gamefactory.core.artifacts.artifact_manager import ArtifactManager
@@ -100,10 +103,14 @@ GODOT = os.environ.get(
 _V08_PACKAGE = resources.files("gamefactory.resources.v08_candidate")
 _HANDSHAKE = "gf_session_inspect_handshake.json"
 _EXTERNAL_DONE = "gf_session_inspect_external_complete.json"
-_SESSION_UI_FILES = (
-    "animation_review_session.tscn",
-    "animation_review_session_controller.gd",
-    "animation_review_session_inspect.gd",
+_SESSION_INSPECT_LEAF = "animation_review_session_inspect.gd"
+_VIEWER_PREPARED_EXTRA_ROOT_FILES = frozenset(
+    {
+        "animation_review_session.tscn",
+        "animation_review_session_controller.gd",
+        "context.json",
+        _SESSION_INSPECT_LEAF,
+    }
 )
 
 
@@ -209,13 +216,6 @@ def _review_set_leaf_paths(review_dir: Path) -> list[Path]:
     return paths
 
 
-def _copy_review_set_package(source: Path, destination: Path) -> Path:
-    if destination.exists():
-        shutil.rmtree(destination)
-    shutil.copytree(source, destination)
-    return destination
-
-
 def _godot_harness_strip_main_scene(project_godot: Path) -> None:
     text = project_godot.read_text(encoding="utf-8")
     stripped = re.sub(r"^run/main_scene=.*\n", "", text, flags=re.MULTILINE)
@@ -270,9 +270,28 @@ def _terminate_owned_godot_process(proc: subprocess.Popen[str]) -> None:
     proc.wait(timeout=60)
 
 
-def _stage_session_overlay(package_dir: Path) -> None:
-    for name in _SESSION_UI_FILES:
-        (package_dir / name).write_bytes(_V08_PACKAGE.joinpath(name).read_bytes())
+def _stage_owned_inspect_script(package_dir: Path) -> None:
+    target = package_dir / _SESSION_INSPECT_LEAF
+    target.write_bytes(_V08_PACKAGE.joinpath(_SESSION_INSPECT_LEAF).read_bytes())
+
+
+def _assert_owned_viewer_bytes(
+    consumer: Path,
+    review_byte_snapshot: dict[str, bytes],
+) -> None:
+    for rel, payload in review_byte_snapshot.items():
+        if rel == "project.godot":
+            continue
+        assert (consumer / rel).read_bytes() == payload
+    review_project = review_byte_snapshot["project.godot"].decode("utf-8")
+    stripped_expected = re.sub(r"^run/main_scene=.*\n", "", review_project, flags=re.MULTILINE)
+    assert (consumer / "project.godot").read_text(encoding="utf-8") == stripped_expected
+    consumer_only = {
+        path.relative_to(consumer).as_posix() for path in consumer.rglob("*") if path.is_file()
+    }
+    review_rels = set(review_byte_snapshot)
+    extra = consumer_only - review_rels
+    assert extra == set(_VIEWER_PREPARED_EXTRA_ROOT_FILES)
 
 
 def _write_minimal_inspect_syntax_project(project_dir: Path) -> None:
@@ -626,15 +645,18 @@ def test_real_animation_review_session_ui_lifecycle(tmp_path: Path) -> None:
         session_path=session_path,
         exchange_dir=exchange_dir,
     )
-    context_path = tmp_path / "session-context.json"
-    context_path.write_text(
-        json.dumps(context_doc, sort_keys=True, separators=(",", ":")),
-        encoding="utf-8",
+    bridge_context = _parse_context_document(context_doc)
+    prepared = prepare_animation_review_session_viewer(
+        bridge_context,
+        tmp_path / "session-ui-consumer",
+        python_executable=Path(sys.executable),
     )
-
-    consumer = _copy_review_set_package(review_set_dir, tmp_path / "session-ui-consumer")
+    consumer = prepared.overlay_dir
     _godot_harness_strip_main_scene(consumer / "project.godot")
-    _stage_session_overlay(consumer)
+    _stage_owned_inspect_script(consumer)
+    _assert_owned_viewer_bytes(consumer, review_byte_snapshot)
+    context_path = prepared.context_file
+    viewer_exchange_dir = prepared.exchange_dir
     runner = ProcessRunner(sanitize_output=True)
 
     write_result_path = tmp_path / "inspect-write.json"
@@ -643,7 +665,7 @@ def test_real_animation_review_session_ui_lifecycle(tmp_path: Path) -> None:
         phase="write",
         result_path=write_result_path,
         context_path=context_path,
-        exchange_dir=exchange_dir,
+        exchange_dir=viewer_exchange_dir,
         runner=runner,
     )
     write_combined = write_proc.stdout + write_proc.stderr
@@ -670,7 +692,7 @@ def test_real_animation_review_session_ui_lifecycle(tmp_path: Path) -> None:
         phase="reopen",
         result_path=reopen_result_path,
         context_path=context_path,
-        exchange_dir=exchange_dir,
+        exchange_dir=viewer_exchange_dir,
         runner=runner,
     )
     reopen_combined = reopen_proc.stdout + reopen_proc.stderr
@@ -689,8 +711,11 @@ def test_real_animation_review_session_ui_lifecycle(tmp_path: Path) -> None:
     assert clip_b_after_reopen.get("status") == "keep"
 
     conflict_result_path = tmp_path / "inspect-conflict.json"
-    handshake_path = exchange_dir / _HANDSHAKE
-    done_path = exchange_dir / _EXTERNAL_DONE
+    handshake_path = viewer_exchange_dir / _HANDSHAKE
+    done_path = viewer_exchange_dir / _EXTERNAL_DONE
+    session_sha_after_conflict = ""
+    session_bytes_after_conflict = b""
+    conflict_proc: subprocess.Popen[str] | None = None
     if handshake_path.exists():
         handshake_path.unlink()
     if done_path.exists():
@@ -712,7 +737,7 @@ def test_real_animation_review_session_ui_lifecycle(tmp_path: Path) -> None:
         "--",
         f"--session-python-executable={sys.executable}",
         f"--session-context-file={context_path}",
-        f"--session-exchange-dir={exchange_dir}",
+        f"--session-exchange-dir={viewer_exchange_dir}",
         "--gf-session-inspect-phase=conflict",
         f"--gf-session-inspect-result={conflict_result_path}",
     ]
@@ -720,7 +745,6 @@ def test_real_animation_review_session_ui_lifecycle(tmp_path: Path) -> None:
     _log_stack = ExitStack()
     stdout_handle = _log_stack.enter_context(conflict_stdout_log.open("w", encoding="utf-8"))
     stderr_handle = _log_stack.enter_context(conflict_stderr_log.open("w", encoding="utf-8"))
-    conflict_proc: subprocess.Popen[str] | None = None
     try:
         conflict_proc = subprocess.Popen(
             conflict_cmd,
@@ -806,7 +830,8 @@ def test_real_animation_review_session_ui_lifecycle(tmp_path: Path) -> None:
         assert conflict_snap.get("raw_sha256") == session_sha_after_reopen
         session_sha_after_conflict = hashlib.sha256(session_path.read_bytes()).hexdigest()
         assert session_sha_after_conflict == external_committed_sha
-        assert session_path.read_bytes() == external_committed_bytes
+        session_bytes_after_conflict = session_path.read_bytes()
+        assert session_bytes_after_conflict == external_committed_bytes
         session_after_conflict = _session_document(session_path)
         assert session_after_conflict.get("revision") == 5
         clip_a_after_conflict = _clip_record(session_after_conflict, "arm_wave_01")
@@ -837,7 +862,7 @@ def test_real_animation_review_session_ui_lifecycle(tmp_path: Path) -> None:
             phase="stale",
             result_path=stale_result_path,
             context_path=context_path,
-            exchange_dir=exchange_dir,
+            exchange_dir=viewer_exchange_dir,
             runner=runner,
         )
         stale_combined = stale_proc.stdout + stale_proc.stderr
@@ -849,6 +874,16 @@ def test_real_animation_review_session_ui_lifecycle(tmp_path: Path) -> None:
         assert isinstance(stale_snap, dict)
         assert stale_snap.get("authority_current") is False
         assert stale_snap.get("mutations_enabled") is False
+        assert hashlib.sha256(session_path.read_bytes()).hexdigest() == session_sha_after_conflict
+        assert session_path.read_bytes() == session_bytes_after_conflict
+
+        clip_b_path.write_bytes(clip_b_before)
+        assert (
+            animation_review_set_current(
+                handlers, workflow.id, preview_dir, sources, review_set_dir
+            )
+            is True
+        )
 
         candidate_db = root / CANDIDATE_STATE_DIR / CANDIDATE_DB_FILENAME
         db_backup = tmp_path / "candidate-factory.db.offline-backup"
@@ -860,22 +895,55 @@ def test_real_animation_review_session_ui_lifecycle(tmp_path: Path) -> None:
                 phase="db_offline",
                 result_path=offline_result_path,
                 context_path=context_path,
-                exchange_dir=exchange_dir,
+                exchange_dir=viewer_exchange_dir,
                 runner=runner,
             )
             offline_combined = offline_proc.stdout + offline_proc.stderr
             assert offline_proc.returncode == 0, offline_combined[-3000:]
             offline_payload = _load_inspect_result(offline_result_path)
             assert offline_payload.get("ok") is True
+            assert offline_payload.get("session_sha") == session_sha_after_conflict
             offline_snap = offline_payload.get("snapshot")
             assert isinstance(offline_snap, dict)
             assert offline_snap.get("authority_current") is False
             assert offline_snap.get("mutations_enabled") is False
+            assert offline_snap.get("stored_revision") == 5
+            assert offline_snap.get("raw_sha256") == session_sha_after_conflict
+            assert (
+                hashlib.sha256(session_path.read_bytes()).hexdigest() == session_sha_after_conflict
+            )
+            assert session_path.read_bytes() == session_bytes_after_conflict
         finally:
             if db_backup.is_file():
                 db_backup.rename(candidate_db)
     finally:
         clip_b_path.write_bytes(clip_b_before)
+
+    assert session_bytes_after_conflict
+    assert session_sha_after_conflict
+    recovered_result_path = tmp_path / "inspect-recovered.json"
+    recovered_proc = _run_session_inspect(
+        consumer,
+        phase="recovered",
+        result_path=recovered_result_path,
+        context_path=context_path,
+        exchange_dir=viewer_exchange_dir,
+        runner=runner,
+    )
+    recovered_combined = recovered_proc.stdout + recovered_proc.stderr
+    assert recovered_proc.returncode == 0, recovered_combined[-3000:]
+    _assert_no_script_errors(recovered_combined)
+    assert "PASS: animation_review_session_recovered" in recovered_proc.stdout
+    recovered_payload = _load_inspect_result(recovered_result_path)
+    assert recovered_payload.get("ok") is True
+    assert recovered_payload.get("recovered_sha") == session_sha_after_conflict
+    recovered_snap = recovered_payload.get("snapshot")
+    assert isinstance(recovered_snap, dict)
+    assert recovered_snap.get("authority_current") is True
+    assert recovered_snap.get("mutations_enabled") is True
+    assert recovered_snap.get("stored_revision") == 5
+    assert recovered_snap.get("raw_sha256") == session_sha_after_conflict
+    assert session_path.read_bytes() == session_bytes_after_conflict
 
     for rel, payload in review_byte_snapshot.items():
         assert (review_set_dir / rel).read_bytes() == payload

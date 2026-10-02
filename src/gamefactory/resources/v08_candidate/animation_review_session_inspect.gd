@@ -3,6 +3,7 @@ extends SceneTree
 const CLIP_A := "arm_wave_01"
 const CLIP_B := "arm_reverse_02"
 const NOTE_A := "review A"
+const NOTE_B_EXTERNAL := "external B note"
 const SEEK_TARGET := 0.75
 const EPS := 0.0001
 const READY_TIMEOUT_MS := 600_000
@@ -52,6 +53,8 @@ func _run() -> void:
 			outcome = await _phase_stale(scene)
 		"db_offline":
 			outcome = await _phase_db_offline(scene)
+		"recovered":
+			outcome = await _phase_recovered(scene)
 		_:
 			_fail("unknown phase %s" % phase)
 			return
@@ -200,13 +203,40 @@ func _phase_db_offline(scene: Node3D) -> Dictionary:
 		return {"ok": false, "error": "expected readonly when db offline"}
 	if snap.get("mutations_enabled", true):
 		return {"ok": false, "error": "mutations enabled when db offline"}
-	if int(snap.get("stored_revision", -1)) < 1:
-		return {"ok": false, "error": "historical session not visible"}
+	if int(snap.get("stored_revision", -1)) != 5:
+		return {"ok": false, "error": "expected revision 5 historical session when db offline"}
+	var sha: String = str(snap.get("raw_sha256", ""))
+	if sha.length() != 64:
+		return {"ok": false, "error": "historical sha missing when db offline"}
 	if not _write_controls_disabled(scene):
 		return {"ok": false, "error": "write controls enabled when db offline"}
 	if not await _ui_matches_clip_a(scene):
 		return {"ok": false, "error": "clip A ui mismatch when db offline"}
-	return {"ok": true, "phase": "db_offline", "snapshot": snap}
+	return {"ok": true, "phase": "db_offline", "snapshot": snap, "session_sha": sha}
+
+
+func _phase_recovered(scene: Node3D) -> Dictionary:
+	var reload_btn: Button = scene.get_node_or_null("%ReloadSessionButton") as Button
+	if reload_btn == null:
+		return {"ok": false, "error": "reload missing"}
+	reload_btn.pressed.emit()
+	if not await _wait_bridge_idle(scene, true):
+		return {"ok": false, "error": "recovered reload timeout"}
+	var snap := _session_snapshot(scene)
+	if not snap.get("authority_current", false):
+		return {"ok": false, "error": "authority not current after recovery"}
+	if not snap.get("mutations_enabled", false):
+		return {"ok": false, "error": "mutations disabled after recovery"}
+	if int(snap.get("stored_revision", -1)) != 5:
+		return {"ok": false, "error": "expected revision 5 after recovery"}
+	var sha: String = str(snap.get("raw_sha256", ""))
+	if sha.length() != 64:
+		return {"ok": false, "error": "recovered sha missing"}
+	if not await _ui_matches_clip_a(scene):
+		return {"ok": false, "error": "clip A ui mismatch after recovery"}
+	if not await _verify_clip_b_keep_and_note(scene):
+		return {"ok": false, "error": "clip B keep or note mismatch after recovery"}
+	return {"ok": true, "phase": "recovered", "snapshot": snap, "recovered_sha": sha}
 
 
 func _write_controls_disabled(scene: Node3D) -> bool:
@@ -276,6 +306,18 @@ func _verify_clip_b_keep(scene: Node3D) -> bool:
 	if status_option == null:
 		return false
 	return status_option.selected == 1
+
+
+func _verify_clip_b_keep_and_note(scene: Node3D) -> bool:
+	if not await _select_clip(scene, CLIP_B):
+		return false
+	var status_option: OptionButton = scene.get_node_or_null("%ClipStatusOption") as OptionButton
+	if status_option == null or status_option.selected != 1:
+		return false
+	var note_field: LineEdit = scene.get_node_or_null("%ClipNoteField") as LineEdit
+	if note_field == null or note_field.text != NOTE_B_EXTERNAL:
+		return false
+	return true
 
 
 func _ui_matches_clip_a(scene: Node3D) -> bool:
