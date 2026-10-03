@@ -94,6 +94,8 @@ func _phase_write(scene: Node3D) -> Dictionary:
 		return {"ok": false, "error": "expected revision 4 after session write"}
 	if not _banner_coherent_for_live_session(scene):
 		return {"ok": false, "error": "banner stale after session write"}
+	if not _triage_matches_post_write(snap):
+		return {"ok": false, "error": "triage counts mismatch after session write"}
 	return {"ok": true, "phase": "write", "snapshot": snap}
 
 
@@ -254,6 +256,36 @@ func _phase_recovered(scene: Node3D) -> Dictionary:
 	if not _banner_coherent_for_live_session(scene):
 		return {"ok": false, "error": "banner stale after recovery reload"}
 	return {"ok": true, "phase": "recovered", "snapshot": snap, "recovered_sha": sha}
+
+
+func _triage_matches_post_write(snap: Dictionary) -> bool:
+	var triage: Variant = snap.get("triage", {})
+	if typeof(triage) != TYPE_DICTIONARY:
+		return false
+	if not triage.get("derived_ok", false):
+		return false
+	if triage.get("provisional", true):
+		return false
+	var counts: Variant = triage.get("counts", {})
+	if typeof(counts) != TYPE_DICTIONARY:
+		return false
+	if int(counts.get("reviewed", -1)) != 2:
+		return false
+	if int(counts.get("total", -1)) != 2:
+		return false
+	if int(counts.get("unreviewed", -1)) != 0:
+		return false
+	if int(counts.get("revise", -1)) != 1:
+		return false
+	if int(counts.get("keep", -1)) != 1:
+		return false
+	var revise_ids: Variant = triage.get("revise_clip_ids", [])
+	var revise_type := typeof(revise_ids)
+	if revise_type != TYPE_ARRAY and revise_type != TYPE_PACKED_STRING_ARRAY:
+		return false
+	if revise_ids.size() != 1:
+		return false
+	return str(revise_ids[0]) == CLIP_A
 
 
 func _banner_coherent_for_live_session(scene: Node3D) -> bool:
