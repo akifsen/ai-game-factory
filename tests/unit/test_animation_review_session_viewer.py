@@ -1007,7 +1007,6 @@ def test_assert_trusted_executable_rejects_directory_symlink_ancestor(tmp_path: 
     linked_bin = tmp_path / "linked-bin"
     _symlink_or_skip(linked_bin, real_bin, target_is_directory=True)
     alias = linked_bin / "python"
-    _symlink_or_skip(alias, interpreter)
     with pytest.raises(ValidationError, match="crosses a symlink"):
         viewer._assert_trusted_executable(alias, label="python executable")
 
