@@ -17,6 +17,7 @@ from pathlib import Path
 import pytest
 
 import gamefactory
+import gamefactory.cli.animation_review_compare_viewer as compare_viewer
 from gamefactory.adapters.assets.v08_candidate_evidence import (
     bind_production_candidate_evidence_exporter,
 )
@@ -33,6 +34,9 @@ from gamefactory.adapters.persistence.repositories import (
     ProviderInvocationRepository,
     TaskRepository,
 )
+from gamefactory.cli.animation_review_compare_viewer import (
+    prepare_animation_review_compare_viewer,
+)
 from gamefactory.cli.animation_review_session_bridge import (
     BRIDGE_SCHEMA_VERSION,
     CONTEXT_SCHEMA_VERSION,
@@ -44,6 +48,7 @@ from gamefactory.cli.animation_review_session_viewer import (
 from gamefactory.core.approvals.approval_service import ApprovalService
 from gamefactory.core.artifacts.artifact_manager import ArtifactManager
 from gamefactory.core.domain.animation_clip import ANIMATION_CLIP_SCHEMA_VERSION
+from gamefactory.core.domain.errors import ValidationError
 from gamefactory.core.domain.models import AuditEvent, WorkflowStatus, generate_id
 from gamefactory.core.domain.v08_candidate_contracts import (
     load_packaged_candidate_profile,
@@ -71,7 +76,10 @@ from gamefactory.workflows.v08_candidate_animation_review_set import (
     animation_review_set_current,
     export_rigged_character_animation_review_set,
 )
-from gamefactory.workflows.v08_candidate_currentness import assert_zero_provider_activity
+from gamefactory.workflows.v08_candidate_currentness import (
+    CandidateCurrentnessError,
+    assert_zero_provider_activity,
+)
 from gamefactory.workflows.v08_candidate_evidence_readiness import (
     assert_candidate_workflow_engine_finalized,
 )
@@ -97,6 +105,17 @@ from tests.helpers.v08_candidate_workflow_failure_diagnostic import (
 
 _FIXTURE_ASSET_ID = "humanoid_review_session_01"
 _SESSION_INSPECT_SUBPROCESS_TIMEOUT_SECONDS = 600.0
+_COMPARE_INSPECT_SUBPROCESS_TIMEOUT_SECONDS = 180.0
+_COMPARE_INSPECT_LEAF = "animation_review_compare_inspect.gd"
+_COMPARE_PREPARED_EXTRA_ROOT_FILES = frozenset(
+    {
+        "animation_review_compare.tscn",
+        "animation_review_compare_controller.gd",
+        "animation_review_compare_side.gd",
+        "compare_context.json",
+        _COMPARE_INSPECT_LEAF,
+    }
+)
 
 BLENDER = os.environ.get(
     "GAMEFACTORY_TEST_BLENDER",
@@ -302,6 +321,82 @@ def _terminate_owned_godot_process(proc: subprocess.Popen[str]) -> None:
 def _stage_owned_inspect_script(package_dir: Path) -> None:
     target = package_dir / _SESSION_INSPECT_LEAF
     target.write_bytes(_V08_PACKAGE.joinpath(_SESSION_INSPECT_LEAF).read_bytes())
+
+
+def _stage_owned_compare_inspect_script(package_dir: Path) -> None:
+    target = package_dir / _COMPARE_INSPECT_LEAF
+    target.write_bytes(_V08_PACKAGE.joinpath(_COMPARE_INSPECT_LEAF).read_bytes())
+
+
+def _compare_caller_digests(context_path: Path) -> dict[str, str]:
+    return {
+        "compare/caller-context.json": hashlib.sha256(context_path.read_bytes()).hexdigest(),
+    }
+
+
+def _assert_owned_compare_overlay_bytes(
+    overlay: Path,
+    review_byte_snapshot: dict[str, bytes],
+) -> None:
+    for rel, payload in review_byte_snapshot.items():
+        if rel == "project.godot":
+            continue
+        assert (overlay / rel).read_bytes() == payload
+    review_project = review_byte_snapshot["project.godot"].decode("utf-8")
+    stripped_expected = re.sub(r"^run/main_scene=.*\n", "", review_project, flags=re.MULTILINE)
+    assert (overlay / "project.godot").read_text(encoding="utf-8") == stripped_expected
+    overlay_only = {
+        path.relative_to(overlay).as_posix() for path in overlay.rglob("*") if path.is_file()
+    }
+    review_rels = set(review_byte_snapshot)
+    extra = overlay_only - review_rels
+    assert extra == set(_COMPARE_PREPARED_EXTRA_ROOT_FILES)
+
+
+def _run_compare_inspect(
+    overlay_dir: Path,
+    *,
+    context_path: Path,
+    result_path: Path,
+    runner: ProcessRunner,
+    timeout: float = _COMPARE_INSPECT_SUBPROCESS_TIMEOUT_SECONDS,
+) -> subprocess.CompletedProcess[str]:
+    _run_godot_import(overlay_dir, runner)
+    user_args = [
+        f"{compare_viewer._ARG_COMPARE_CONTEXT}{context_path}",
+        f"--gf-compare-inspect-result={result_path}",
+    ]
+    cmd = [
+        str(_godot_rendered_executable()),
+        "--rendering-method",
+        "gl_compatibility",
+        "--audio-driver",
+        "Dummy",
+        "--path",
+        str(overlay_dir),
+        "--script",
+        f"res://{_COMPARE_INSPECT_LEAF}",
+        "--",
+        *user_args,
+    ]
+    try:
+        return subprocess.run(
+            cmd,
+            cwd=overlay_dir,
+            capture_output=True,
+            text=True,
+            timeout=timeout,
+            env=_bridge_env(),
+        )
+    except subprocess.TimeoutExpired as exc:
+        stdout_tail = (exc.stdout or "")[-3000:] if exc.stdout else ""
+        stderr_tail = (exc.stderr or "")[-3000:] if exc.stderr else ""
+        pytest.fail(
+            "compare inspect subprocess timed out "
+            f"timeout_s={timeout} overlay_dir={overlay_dir} "
+            f"result_exists={result_path.is_file()} godot={_godot_rendered_executable()} "
+            f"stdout_tail={stdout_tail!r} stderr_tail={stderr_tail!r}"
+        )
 
 
 def _assert_owned_viewer_bytes(
@@ -1384,6 +1479,155 @@ def test_real_animation_review_session_ui_lifecycle(tmp_path: Path) -> None:
         animation_clip_preview_current(
             handlers, workflow.id, preview_dir, clip_c_path, clip_preview_c
         )
+        is True
+    )
+    assert_zero_provider_activity(db, workflow.id)
+    assert ProviderInvocationRepository(db).count(workflow.id) == 0
+
+    compare_sources_before = _real_ui_handoff_source_digests(
+        preview_dir=preview_dir,
+        review_set_dir=review_set_dir,
+        clip_preview_a=clip_preview_a,
+        clip_preview_b=clip_preview_b,
+        clip_preview_c=clip_preview_c,
+        clip_a_path=clip_a_path,
+        clip_b_path=clip_b_path,
+        clip_c_path=clip_c_path,
+        session_path=session_path,
+    )
+    compare_overlay_parent = (tmp_path / "owned-compare-root").resolve()
+    compare_overlay_parent.mkdir(parents=True, exist_ok=True)
+    rejected_same_overlay = compare_overlay_parent / "rejected-same-overlay"
+    with pytest.raises(ValidationError, match="differ"):
+        prepare_animation_review_compare_viewer(
+            handlers=handlers,
+            workflow_id=workflow.id,
+            preview_dir=preview_dir,
+            clip_packages=sources,
+            review_dir=review_set_dir,
+            overlay_dir=rejected_same_overlay,
+            left_clip_id="arm_wave_01",
+            right_clip_id="arm_wave_01",
+        )
+    assert not rejected_same_overlay.exists()
+    rejected_unknown_overlay = compare_overlay_parent / "rejected-unknown-overlay"
+    with pytest.raises(ValidationError, match="unknown"):
+        prepare_animation_review_compare_viewer(
+            handlers=handlers,
+            workflow_id=workflow.id,
+            preview_dir=preview_dir,
+            clip_packages=sources,
+            review_dir=review_set_dir,
+            overlay_dir=rejected_unknown_overlay,
+            left_clip_id="arm_wave_01",
+            right_clip_id="missing_compare_clip",
+        )
+    assert not rejected_unknown_overlay.exists()
+
+    compare_overlay = compare_overlay_parent / "compare-overlay"
+    prepared_compare = prepare_animation_review_compare_viewer(
+        handlers=handlers,
+        workflow_id=workflow.id,
+        preview_dir=preview_dir,
+        clip_packages=sources,
+        review_dir=review_set_dir,
+        overlay_dir=compare_overlay,
+        left_clip_id="arm_wave_01",
+        right_clip_id="spine_turn_03",
+    )
+    assert prepared_compare.left_clip_id == "arm_wave_01"
+    assert prepared_compare.right_clip_id == "spine_turn_03"
+    assert session_after_terminal.get("production_eligible") is False
+    assert session_after_terminal.get("promotion_eligible") is False
+    for rel, payload in review_byte_snapshot.items():
+        assert (review_set_dir / rel).read_bytes() == payload
+    compare_caller_before = _compare_caller_digests(prepared_compare.context_file)
+    _godot_harness_strip_main_scene(prepared_compare.overlay_dir / "project.godot")
+    _stage_owned_compare_inspect_script(prepared_compare.overlay_dir)
+    _assert_owned_compare_overlay_bytes(prepared_compare.overlay_dir, review_byte_snapshot)
+    staged_inspect_bytes = (prepared_compare.overlay_dir / _COMPARE_INSPECT_LEAF).read_bytes()
+    assert staged_inspect_bytes == _V08_PACKAGE.joinpath(_COMPARE_INSPECT_LEAF).read_bytes()
+
+    stale_clip_b = review_set_dir / "clips" / "001" / "animation_clip.json"
+    stale_clip_b_before = stale_clip_b.read_bytes()
+    stale_doc = json.loads(stale_clip_b_before.decode("utf-8"))
+    stale_doc["duration_seconds"] = float(stale_doc.get("duration_seconds", 2.0)) + 0.01
+    stale_clip_b.write_bytes(
+        json.dumps(stale_doc, sort_keys=True, separators=(",", ":"), allow_nan=False).encode(
+            "utf-8"
+        )
+    )
+    stale_compare_overlay = compare_overlay_parent / "rejected-stale-prepare"
+    try:
+        with pytest.raises(
+            CandidateCurrentnessError,
+            match="animation review set nested clips payload digest mismatch",
+        ):
+            animation_review_set_current(
+                handlers, workflow.id, preview_dir, sources, review_set_dir
+            )
+        with pytest.raises(
+            ValidationError,
+            match=r"(not current|nested clips payload digest mismatch)",
+        ):
+            prepare_animation_review_compare_viewer(
+                handlers=handlers,
+                workflow_id=workflow.id,
+                preview_dir=preview_dir,
+                clip_packages=sources,
+                review_dir=review_set_dir,
+                overlay_dir=stale_compare_overlay,
+                left_clip_id="arm_wave_01",
+                right_clip_id="spine_turn_03",
+            )
+        assert not stale_compare_overlay.exists()
+    finally:
+        stale_clip_b.write_bytes(stale_clip_b_before)
+    assert (
+        animation_review_set_current(handlers, workflow.id, preview_dir, sources, review_set_dir)
+        is True
+    )
+
+    compare_result_path = tmp_path / "compare-inspect-result.json"
+    compare_proc = _run_compare_inspect(
+        prepared_compare.overlay_dir,
+        context_path=prepared_compare.context_file,
+        result_path=compare_result_path,
+        runner=runner,
+    )
+    compare_combined = compare_proc.stdout + compare_proc.stderr
+    assert compare_proc.returncode == 0, compare_combined[-4000:]
+    _assert_no_script_errors(compare_combined)
+    assert "PASS: animation_review_compare_inspect" in compare_proc.stdout
+    compare_payload = json.loads(compare_result_path.read_text(encoding="utf-8"))
+    assert compare_payload.get("ok") is True
+    assert _compare_caller_digests(prepared_compare.context_file) == compare_caller_before
+    compare_sources_after = _real_ui_handoff_source_digests(
+        preview_dir=preview_dir,
+        review_set_dir=review_set_dir,
+        clip_preview_a=clip_preview_a,
+        clip_preview_b=clip_preview_b,
+        clip_preview_c=clip_preview_c,
+        clip_a_path=clip_a_path,
+        clip_b_path=clip_b_path,
+        clip_c_path=clip_c_path,
+        session_path=session_path,
+    )
+    assert compare_sources_after == compare_sources_before
+    for rel, payload in review_byte_snapshot.items():
+        assert (review_set_dir / rel).read_bytes() == payload
+    for name, payload in v086_a_before.items():
+        assert (clip_preview_a / name).read_bytes() == payload
+    for name, payload in v086_b_before.items():
+        assert (clip_preview_b / name).read_bytes() == payload
+    for name, payload in v086_c_before.items():
+        assert (clip_preview_c / name).read_bytes() == payload
+    assert clip_a_path.read_bytes() == acceptance_arm_wave_clip_raw_bytes()
+    assert clip_b_path.read_bytes() == clip_b_before
+    assert clip_c_path.read_bytes() == clip_c_before
+    assert hashlib.sha256(session_path.read_bytes()).hexdigest() == session_sha_after_terminal
+    assert (
+        animation_review_set_current(handlers, workflow.id, preview_dir, sources, review_set_dir)
         is True
     )
     assert_zero_provider_activity(db, workflow.id)
