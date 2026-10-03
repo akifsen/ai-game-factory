@@ -5,12 +5,25 @@ extends SceneTree
 const CLIP_A := "arm_wave_01"
 const CLIP_B := "arm_reverse_02"
 const CLIP_C := "spine_turn_03"
+const BONES := [
+	"Hips", "Spine", "Chest", "Neck", "Head", "LeftUpperArm", "LeftLowerArm", "LeftHand",
+	"RightUpperArm", "RightLowerArm", "RightHand", "LeftUpperLeg",
+]
 const NOTE_A_TERMINAL := "review A"
 const NOTE_A_REVISE := "El hareketi fazla sert"
 const SEEK_TARGET := 0.75
 const SPEED_TARGET := 0.5
 const BOOKMARK_A := 1.125
+const BOOKMARK_FROZEN_A := 0.75
+const BOOKMARK_C := 0.625
 const EPS := 0.0001
+const ANGLE_EPS := 0.002
+const VERT_EPS := 0.008
+const DEFORM_MIN := 0.012
+const DEFORM_MAX := 0.35
+const SKIN_MATCH_EPS := 0.01
+const SKIN_BAKE_SETTLE_FRAMES := 2
+const SKIN_ORACLE_TRANSPORT_SETTLE_FRAMES := 24
 const READY_TIMEOUT_MS := 600_000
 const BRIDGE_IDLE_TIMEOUT_MS := 600_000
 const EXTERNAL_WAIT_TIMEOUT_MS := 600_000
@@ -26,9 +39,11 @@ const ARG_RESULT := "--gf-compare-session-inspect-result="
 const LEFT_UNSAVED_DRAFT := "left-unsaved-draft-probe"
 const EXTERNAL_B_NOTE := "external compare-session B note"
 const DURATION_A := 1.5
+const DURATION_B := 2.0
 const DURATION_C := 1.25
 const VIEWPORT_ORACLE_SIZE := Vector2i(1280, 720)
 const RECT_DISPLAY_CONTAIN_TOLERANCE_PX := 1.0
+const READY_ORACLE_DIAG_PRINT_MAX := 8
 
 var _last_bridge_wait_diagnostic: String = ""
 var _last_viewport_oracle_diagnostic: String = ""
@@ -46,6 +61,17 @@ func _run() -> void:
 	var result_path := _result_path()
 	if phase.is_empty() or result_path.is_empty():
 		_fail("missing phase or result path")
+		return
+	if phase == "skin_oracle_negative":
+		var negative_outcome := _phase_skin_oracle_negative()
+		if not negative_outcome.get("ok", false):
+			_fail(str(negative_outcome.get("error", "skin oracle negative probe failed")))
+			return
+		if not _write_result(result_path, negative_outcome):
+			_fail("result write failed")
+			return
+		print("PASS: animation_review_compare_session_%s" % phase)
+		quit(0)
 		return
 	var packed := load("res://animation_review_compare_session.tscn") as PackedScene
 	if packed == null:
@@ -75,6 +101,10 @@ func _run() -> void:
 			outcome = await _phase_recovered(scene)
 		"final_mutation":
 			outcome = await _phase_final_mutation(scene)
+		"skin_oracle_quick_proof":
+			outcome = await _phase_skin_oracle_quick_proof(scene)
+		"skin_oracle_negative":
+			outcome = _phase_skin_oracle_negative()
 		_:
 			_fail("unknown phase %s" % phase)
 			return
@@ -93,14 +123,17 @@ func _phase_left_writes(scene: Node3D) -> Dictionary:
 		return {"ok": false, "error": "bootstrap timeout: %s" % _last_bridge_wait_diagnostic}
 	if not await _configure_transport(scene):
 		return {"ok": false, "error": "transport setup failed"}
-	_transport_baseline = _transport_fingerprint(scene)
+	_transport_baseline = await _transport_fingerprint(scene)
 	if not _transport_pose_samples_valid(_transport_baseline.get("pose", [])):
 		return {"ok": false, "error": "transport pose baseline empty"}
 	if not _left_pane_matches_terminal_a(scene):
 		return {"ok": false, "error": "left pane not terminal A state"}
 	var before := _session_snapshot(scene)
-	if int(before.get("stored_revision", -1)) != 6:
-		return {"ok": false, "error": "expected revision 6 before left writes"}
+	var expected_open_revision := _sidecar_revision()
+	if expected_open_revision < 6:
+		return {"ok": false, "error": "expected revision >= 6 before left writes"}
+	if int(before.get("stored_revision", -1)) != expected_open_revision:
+		return {"ok": false, "error": "expected copied revision before left writes"}
 	var note_field: LineEdit = scene.get_node_or_null("%LeftClipNoteField") as LineEdit
 	var save_btn: Button = scene.get_node_or_null("%LeftSaveNoteButton") as Button
 	var bookmark_btn: Button = scene.get_node_or_null("%LeftAddBookmarkButton") as Button
@@ -115,7 +148,7 @@ func _phase_left_writes(scene: Node3D) -> Dictionary:
 		return {"ok": false, "error": "note bridge timeout: %s" % _last_bridge_wait_diagnostic}
 	if not _verify_ack_matches_sidecar(scene, "left_writes.note"):
 		return {"ok": false, "error": "note ack sha/revision mismatch"}
-	if not _transport_unchanged(scene):
+	if not await _transport_unchanged(scene):
 		return {"ok": false, "error": "transport changed after note"}
 	var before_bookmark := _session_snapshot(scene)
 	bookmark_btn.pressed.emit()
@@ -129,18 +162,22 @@ func _phase_left_writes(scene: Node3D) -> Dictionary:
 		return {"ok": false, "error": "bookmark not at measured transport time"}
 	if not _provider_eligibility_false(scene):
 		return {"ok": false, "error": "provider eligibility not false after bookmark"}
-	if not _transport_unchanged(scene):
+	if not await _transport_unchanged(scene):
 		return {"ok": false, "error": "transport changed after bookmark"}
+	var nav_sha := str(_session_snapshot(scene).get("raw_sha256", ""))
+	var nav_result := await _exercise_stored_bookmark_navigation(scene, nav_sha)
+	if not nav_result.get("ok", false):
+		return {"ok": false, "error": nav_result.get("error", "stored bookmark navigation failed")}
 	var before_revise := _session_snapshot(scene)
 	revise_btn.pressed.emit()
 	if not await _wait_bridge_mutation(scene, before_revise, "left_writes.revise"):
 		return {"ok": false, "error": "revise bridge timeout: %s" % _last_bridge_wait_diagnostic}
 	if not _verify_ack_matches_sidecar(scene, "left_writes.revise"):
 		return {"ok": false, "error": "revise ack sha/revision mismatch"}
-	if not _transport_unchanged(scene):
+	if not await _transport_unchanged(scene):
 		return {"ok": false, "error": "transport changed after revise"}
 	var after := _session_snapshot(scene)
-	if int(after.get("stored_revision", -1)) <= 6:
+	if int(after.get("stored_revision", -1)) <= expected_open_revision:
 		return {"ok": false, "error": "revision did not advance"}
 	var sha_after: String = str(after.get("raw_sha256", ""))
 	if sha_after.length() != 64 or sha_after == str(before.get("raw_sha256", "")):
@@ -163,7 +200,7 @@ func _phase_right_writes(scene: Node3D) -> Dictionary:
 		return {"ok": false, "error": "bootstrap timeout: %s" % _last_bridge_wait_diagnostic}
 	if not await _configure_transport(scene):
 		return {"ok": false, "error": "transport setup failed"}
-	_transport_baseline = _transport_fingerprint(scene)
+	_transport_baseline = await _transport_fingerprint(scene)
 	if not _transport_pose_samples_valid(_transport_baseline.get("pose", [])):
 		return {"ok": false, "error": "transport pose baseline empty"}
 	if not _left_ui_matches_revise_state(scene):
@@ -187,7 +224,7 @@ func _phase_right_writes(scene: Node3D) -> Dictionary:
 		return {"ok": false, "error": "right keep timeout: %s" % _last_bridge_wait_diagnostic}
 	if not _verify_ack_matches_sidecar(scene, "right_writes.keep"):
 		return {"ok": false, "error": "right keep ack sha/revision mismatch"}
-	if not _transport_unchanged(scene):
+	if not await _transport_unchanged(scene):
 		return {"ok": false, "error": "transport changed after right keep"}
 	if str(scene.get_node("%LeftClipNoteField").text) != LEFT_UNSAVED_DRAFT:
 		return {"ok": false, "error": "left unsaved draft lost after right keep"}
@@ -286,9 +323,14 @@ func _phase_conflict(scene: Node3D) -> Dictionary:
 		return {"ok": false, "error": "stored left A note changed after rejected stale save"}
 	if not _clip_record_note(scene, CLIP_B, EXTERNAL_B_NOTE):
 		return {"ok": false, "error": "stored external B note changed after rejected stale save"}
-	_transport_baseline = _transport_fingerprint(scene)
+	if not await _configure_transport(scene):
+		return {"ok": false, "error": "transport setup failed after conflict"}
+	_transport_baseline = await _transport_fingerprint(scene)
 	if not _transport_pose_samples_valid(_transport_baseline.get("pose", [])):
 		return {"ok": false, "error": "transport pose baseline empty after conflict"}
+	var conflict_nav := await _exercise_stored_bookmark_navigation(scene, sha)
+	if not conflict_nav.get("ok", false):
+		return {"ok": false, "error": conflict_nav.get("error", "bookmark nav during conflict failed")}
 	var before_fresh_reload := _session_snapshot(scene)
 	reload_btn.pressed.emit()
 	if not await _wait_bridge_mutation(scene, before_fresh_reload, "conflict.fresh_reload"):
@@ -310,7 +352,7 @@ func _phase_conflict(scene: Node3D) -> Dictionary:
 		return {"ok": false, "error": "stored left A status changed after fresh reload"}
 	if not _clip_record_has_bookmark(scene, CLIP_A, BOOKMARK_A):
 		return {"ok": false, "error": "stored left A bookmarks changed after fresh reload"}
-	if not _transport_unchanged(scene):
+	if not await _transport_unchanged(scene):
 		return {"ok": false, "error": "transport changed across conflict reload"}
 	if _sidecar_file_sha256() != str(reloaded.get("raw_sha256", "")):
 		return {"ok": false, "error": "ui sha does not match sidecar after reload"}
@@ -348,6 +390,15 @@ func _phase_stale(scene: Node3D) -> Dictionary:
 	note_field.text_changed.emit(note_field.text)
 	if not await _assert_forced_save_rejected(scene, save_btn, sidecar_sha):
 		return {"ok": false, "error": "stale write was not rejected (bridge or sidecar changed)"}
+	if not await _configure_transport(scene):
+		return {"ok": false, "error": "transport setup failed when stale"}
+	_transport_baseline = await _transport_fingerprint(scene)
+	if not _transport_pose_samples_valid(_transport_baseline.get("pose", [])):
+		return {"ok": false, "error": "transport pose baseline empty when stale"}
+	var stale_sha := str(snap.get("raw_sha256", ""))
+	var stale_nav := await _exercise_stored_bookmark_navigation(scene, stale_sha)
+	if not stale_nav.get("ok", false):
+		return {"ok": false, "error": stale_nav.get("error", "bookmark nav when stale failed")}
 	return {
 		"ok": true,
 		"phase": "stale",
@@ -427,6 +478,15 @@ func _phase_db_offline(scene: Node3D) -> Dictionary:
 		return {"ok": false, "error": "db offline save control missing"}
 	if not await _assert_forced_save_rejected(scene, save_btn, sidecar_sha):
 		return {"ok": false, "error": "db offline write was not rejected"}
+	if not await _configure_transport(scene):
+		return {"ok": false, "error": "transport setup failed when db offline"}
+	_transport_baseline = await _transport_fingerprint(scene)
+	if not _transport_pose_samples_valid(_transport_baseline.get("pose", [])):
+		return {"ok": false, "error": "transport pose baseline empty when db offline"}
+	var offline_sha := str(snap.get("raw_sha256", ""))
+	var offline_nav := await _exercise_stored_bookmark_navigation(scene, offline_sha)
+	if not offline_nav.get("ok", false):
+		return {"ok": false, "error": offline_nav.get("error", "bookmark nav when db offline failed")}
 	return {
 		"ok": true,
 		"phase": "db_offline",
@@ -434,6 +494,7 @@ func _phase_db_offline(scene: Node3D) -> Dictionary:
 		"session_sha": snap.get("raw_sha256", ""),
 		"sidecar_sha": sidecar_sha,
 		"loaded_session": true,
+		"bookmark_nav": offline_nav,
 	}
 
 
@@ -507,7 +568,7 @@ func _configure_transport(scene: Node3D) -> bool:
 		return false
 	if abs(float(snap.get("speed", -1.0)) - SPEED_TARGET) > EPS:
 		return false
-	if not _transport_pose_samples_valid(_weighted_pose_sample(scene)):
+	if not await _assert_dual_pane_pose_oracle(scene):
 		return false
 	return not bool(snap.get("playing", true))
 
@@ -522,12 +583,38 @@ func _transport_fingerprint(scene: Node3D) -> Dictionary:
 		"right_position": snap.get("right_position"),
 		"left_clip_id": snap.get("left_clip_id"),
 		"right_clip_id": snap.get("right_clip_id"),
-		"pose": _weighted_pose_sample(scene),
+		"pose": await _pose_oracle_fingerprint(scene),
 	}
 
 
+func _restore_transport_baseline(scene: Node3D) -> bool:
+	if _transport_baseline.is_empty():
+		return false
+	var playback := _compare_playback(scene)
+	if playback == null:
+		return false
+	var progress := float(_transport_baseline.get("progress", -1.0))
+	var speed := float(_transport_baseline.get("speed", -1.0))
+	var playing := bool(_transport_baseline.get("playing", false))
+	if playback.has_method("request_set_playback_speed"):
+		if playback.call("request_set_playback_speed", speed).get("ok") != true:
+			return false
+	if playback.has_method("request_scrub_normalized"):
+		if playback.call("request_scrub_normalized", progress).get("ok") != true:
+			return false
+	if playing:
+		if playback.has_method("request_play"):
+			playback.call("request_play")
+	else:
+		if playback.has_method("request_pause"):
+			playback.call("request_pause")
+	for _i in range(12):
+		await process_frame
+	return await _transport_unchanged(scene)
+
+
 func _transport_unchanged(scene: Node3D) -> bool:
-	var current := _transport_fingerprint(scene)
+	var current := await _transport_fingerprint(scene)
 	if not _transport_pose_samples_valid(_transport_baseline.get("pose", [])):
 		return false
 	if not _transport_pose_samples_valid(current.get("pose", [])):
@@ -543,37 +630,550 @@ func _transport_unchanged(scene: Node3D) -> bool:
 	return true
 
 
-func _weighted_pose_sample(scene: Node3D) -> Array:
-	var samples: Array = []
-	var playback := _compare_playback(scene)
-	if playback == null:
-		return samples
-	for side_name in ["LeftSide", "RightSide"]:
-		var side: Node3D = playback.get_node_or_null("%" + side_name) as Node3D
-		if side == null:
-			return []
-		var character := _character(side)
-		var skeleton := _find_skeleton(character)
-		var mesh := _find_mesh(character)
-		if skeleton == null or mesh == null:
-			return []
-		var baked := mesh.bake_mesh_from_current_skeleton_pose()
-		if baked == null or baked.get_surface_count() != 1:
-			return []
-		var verts: PackedVector3Array = baked.surface_get_arrays(0)[Mesh.ARRAY_VERTEX]
-		if verts.is_empty():
-			return []
-		var indices := _pose_vertex_indices(verts.size())
-		for idx in indices:
-			if idx < 0 or idx >= verts.size():
-				return []
-			var v := verts[idx]
-			samples.append([side_name, idx, v.x, v.y, v.z])
-	return samples
+func _pose_oracle_fingerprint(scene: Node3D) -> Array:
+	var snap: Dictionary = _session_snapshot(scene).get("compare", {})
+	var left_pos := float(snap.get("left_position", -1.0))
+	var right_pos := float(snap.get("right_position", -1.0))
+	return await _dual_pane_pose_oracle_signature(scene, left_pos, right_pos)
 
 
 func _transport_pose_samples_valid(pose: Variant) -> bool:
 	return typeof(pose) == TYPE_ARRAY and not pose.is_empty()
+
+
+func _dual_pane_pose_oracle_signature(scene: Node3D, left_time_s: float, right_time_s: float) -> Array:
+	var out: Array = []
+	var left_sig := await _side_pose_oracle_signature(scene, true, left_time_s)
+	if left_sig.is_empty():
+		return []
+	out.append(left_sig)
+	var right_sig := await _side_pose_oracle_signature(scene, false, right_time_s)
+	if right_sig.is_empty():
+		return []
+	out.append(right_sig)
+	return out
+
+
+func _assert_dual_pane_pose_oracle(scene: Node3D) -> bool:
+	var snap: Dictionary = _session_snapshot(scene).get("compare", {})
+	var left_pos := float(snap.get("left_position", -1.0))
+	var right_pos := float(snap.get("right_position", -1.0))
+	if not await _side_pose_oracle_at_time(scene, true, left_pos):
+		return false
+	return await _side_pose_oracle_at_time(scene, false, right_pos)
+
+
+func _side_pose_oracle_signature(scene: Node3D, is_left: bool, sample_time_s: float) -> Array:
+	if not await _side_pose_oracle_at_time(scene, is_left, sample_time_s):
+		return []
+	var playback := _compare_playback(scene)
+	var side_name := "LeftSide" if is_left else "RightSide"
+	var side: Node3D = playback.get_node_or_null("%" + side_name) as Node3D
+	var mesh := _find_mesh(_character(side))
+	var skeleton := _find_skeleton(_character(side))
+	var groups := _weighted_vertex_groups(mesh, skeleton)
+	var primary: PackedInt32Array = groups.get("arm", PackedInt32Array())
+	if not is_left:
+		primary = groups.get("spine", PackedInt32Array())
+	if primary.is_empty():
+		return []
+	var baked := mesh.bake_mesh_from_current_skeleton_pose()
+	var verts: PackedVector3Array = baked.surface_get_arrays(0)[Mesh.ARRAY_VERTEX]
+	var idx := primary[0]
+	if idx < 0 or idx >= verts.size():
+		return []
+	var v := verts[idx]
+	return [side_name, sample_time_s, v.x, v.y, v.z]
+
+
+func _side_pose_oracle_at_time(scene: Node3D, is_left: bool, sample_time_s: float) -> bool:
+	if sample_time_s < 0.0 or not is_finite(sample_time_s):
+		return false
+	var playback := _compare_playback(scene)
+	if playback == null:
+		return false
+	var side_name := "LeftSide" if is_left else "RightSide"
+	var side: Node3D = playback.get_node_or_null("%" + side_name) as Node3D
+	if side == null:
+		return false
+	var character := _character(side)
+	var player := _preview_player(side)
+	var skeleton := _find_skeleton(character)
+	var mesh := _find_mesh(character)
+	if player == null or skeleton == null or mesh == null:
+		return false
+	var clip_id := CLIP_A if is_left else str(_session_snapshot(scene).get("right_clip_id", CLIP_C))
+	var clip := player.get_animation(clip_id)
+	if clip == null:
+		return false
+	var arm_bone := skeleton.find_bone("LeftUpperArm")
+	var spine_bone := skeleton.find_bone("Spine")
+	var expect_arm := is_left and clip_id == CLIP_A
+	if expect_arm:
+		var expected_arm := _rotation_at_track_time(clip, "LeftUpperArm", sample_time_s)
+		if skeleton.get_bone_pose_rotation(arm_bone).angle_to(expected_arm) > ANGLE_EPS:
+			return false
+		if skeleton.get_bone_pose_rotation(spine_bone).angle_to(Quaternion.IDENTITY) > ANGLE_EPS:
+			return false
+	else:
+		var expected_spine := _rotation_at_track_time(clip, "Spine", sample_time_s)
+		if skeleton.get_bone_pose_rotation(spine_bone).angle_to(expected_spine) > ANGLE_EPS:
+			return false
+		if skeleton.get_bone_pose_rotation(arm_bone).angle_to(Quaternion.IDENTITY) > ANGLE_EPS:
+			return false
+	var posed := _vertices(mesh.bake_mesh_from_current_skeleton_pose())
+	if posed.is_empty():
+		return false
+	var rest := await _rest_vertices_preserved_pose(mesh, skeleton)
+	if rest.is_empty() or rest.size() != posed.size():
+		return false
+	var groups := _weighted_vertex_groups(mesh, skeleton)
+	if groups["arm"].is_empty() or groups["spine"].is_empty():
+		return false
+	var primary_indices: PackedInt32Array = groups["arm"] if expect_arm else groups["spine"]
+	var secondary_indices: PackedInt32Array = groups["spine"] if expect_arm else groups["arm"]
+	if primary_indices.is_empty():
+		return false
+	var deltas := _weighted_skin_deltas(rest, posed, primary_indices, secondary_indices)
+	var primary_delta := float(deltas.get("primary_delta", 0.0))
+	var secondary_delta := float(deltas.get("secondary_delta", 0.0))
+	if not _pose_oracle_weighted_deformation_ok(primary_delta, secondary_delta, expect_arm):
+		return false
+	var expected_verts := await _bake_expected_skin_vertices(
+		mesh, skeleton, clip, expect_arm, sample_time_s
+	)
+	if expected_verts.is_empty() or expected_verts.size() != posed.size():
+		return false
+	for idx in primary_indices:
+		if posed[idx].distance_to(expected_verts[idx]) > SKIN_MATCH_EPS:
+			return false
+	return true
+
+
+func _preview_player(side: Node3D) -> AnimationPlayer:
+	var character := _character(side)
+	if character == null:
+		return null
+	return character.get_node_or_null("AnimationPlayer") as AnimationPlayer
+
+
+func _vertices(mesh: ArrayMesh) -> PackedVector3Array:
+	if mesh == null or mesh.get_surface_count() != 1:
+		return PackedVector3Array()
+	return mesh.surface_get_arrays(0)[Mesh.ARRAY_VERTEX]
+
+
+func _rotation_at_track_time(clip: Animation, bone_name: String, time_s: float) -> Quaternion:
+	for t in range(clip.get_track_count()):
+		if clip.track_get_type(t) != Animation.TYPE_ROTATION_3D:
+			continue
+		if str(clip.track_get_path(t).get_subname(0)) != bone_name:
+			continue
+		return clip.rotation_track_interpolate(t, time_s)
+	return Quaternion.IDENTITY
+
+
+func _mesh_skin_influence_stride(mesh: MeshInstance3D, arrays: Array) -> int:
+	if mesh.mesh == null:
+		return 0
+	var verts: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+	var vert_count := verts.size()
+	if vert_count == 0:
+		return 0
+	var bone_indices: PackedInt32Array = arrays[Mesh.ARRAY_BONES]
+	var weights: PackedFloat32Array = arrays[Mesh.ARRAY_WEIGHTS]
+	if bone_indices.is_empty() or weights.is_empty():
+		return 0
+	if bone_indices.size() != weights.size():
+		return 0
+	if weights.size() % vert_count != 0:
+		return 0
+	var stride := weights.size() / vert_count
+	if stride < 1 or stride > 8:
+		return 0
+	return stride
+
+
+func _skeleton_bone_from_skin_bind(
+	mesh: MeshInstance3D, skeleton: Skeleton3D, bind_index: int
+) -> int:
+	if bind_index < 0:
+		return -1
+	var skin := mesh.skin
+	if skin == null:
+		return -1
+	if bind_index >= skin.get_bind_count():
+		return -1
+	var bind_name := String(skin.get_bind_name(bind_index))
+	if not bind_name.is_empty():
+		var named_bone := skeleton.find_bone(bind_name)
+		if named_bone < 0 or named_bone >= skeleton.get_bone_count():
+			return -1
+		return named_bone
+	var skel_bone := skin.get_bind_bone(bind_index)
+	if skel_bone < 0 or skel_bone >= skeleton.get_bone_count():
+		return -1
+	return skel_bone
+
+
+func _weighted_vertex_groups(mesh: MeshInstance3D, skeleton: Skeleton3D) -> Dictionary:
+	var arrays: Array = mesh.mesh.surface_get_arrays(0)
+	var stride := _mesh_skin_influence_stride(mesh, arrays)
+	if stride <= 0:
+		return {"arm": PackedInt32Array(), "spine": PackedInt32Array()}
+	var bone_indices: PackedInt32Array = arrays[Mesh.ARRAY_BONES]
+	var weights: PackedFloat32Array = arrays[Mesh.ARRAY_WEIGHTS]
+	var arm_idx := skeleton.find_bone("LeftUpperArm")
+	var spine_idx := skeleton.find_bone("Spine")
+	var arm := PackedInt32Array()
+	var spine := PackedInt32Array()
+	var vert_count := weights.size() / stride
+	for vi in range(vert_count):
+		var dominant_bind := -1
+		var dominant_w := 0.0
+		for slot in range(stride):
+			var weight := weights[vi * stride + slot]
+			if weight > dominant_w:
+				dominant_w = weight
+				dominant_bind = bone_indices[vi * stride + slot]
+		var dominant_bone := _skeleton_bone_from_skin_bind(mesh, skeleton, dominant_bind)
+		if dominant_bone == arm_idx:
+			arm.append(vi)
+		elif dominant_bone == spine_idx:
+			spine.append(vi)
+	return {"arm": arm, "spine": spine}
+
+
+func _await_skin_bake_settle() -> void:
+	for _i in range(SKIN_BAKE_SETTLE_FRAMES):
+		await process_frame
+
+
+func _force_skeleton_skin_refresh(skeleton: Skeleton3D) -> void:
+	for bone_idx in range(skeleton.get_bone_count()):
+		skeleton.force_update_bone_child_transform(bone_idx)
+
+
+func _weighted_skin_deltas(
+	rest: PackedVector3Array,
+	posed: PackedVector3Array,
+	primary_indices: PackedInt32Array,
+	secondary_indices: PackedInt32Array,
+) -> Dictionary:
+	var primary_delta := 0.0
+	var secondary_delta := 0.0
+	for idx in primary_indices:
+		primary_delta = maxf(primary_delta, rest[idx].distance_to(posed[idx]))
+	for idx in secondary_indices:
+		secondary_delta = maxf(secondary_delta, rest[idx].distance_to(posed[idx]))
+	return {"primary_delta": primary_delta, "secondary_delta": secondary_delta}
+
+
+func _pose_oracle_weighted_deformation_ok(
+	primary_delta: float, secondary_delta: float, expect_arm: bool
+) -> bool:
+	if primary_delta < DEFORM_MIN or primary_delta > DEFORM_MAX:
+		return false
+	if expect_arm:
+		return secondary_delta <= VERT_EPS
+	return secondary_delta >= DEFORM_MIN
+
+
+func _rest_vertices_preserved_pose(mesh: MeshInstance3D, skeleton: Skeleton3D) -> PackedVector3Array:
+	var saved: Array[Quaternion] = []
+	for bone_name in BONES:
+		var idx := skeleton.find_bone(bone_name)
+		saved.append(skeleton.get_bone_pose_rotation(idx))
+	for bone_name in BONES:
+		skeleton.reset_bone_pose(skeleton.find_bone(bone_name))
+	_force_skeleton_skin_refresh(skeleton)
+	await _await_skin_bake_settle()
+	var rest := _vertices(mesh.bake_mesh_from_current_skeleton_pose())
+	for i in range(BONES.size()):
+		var idx := skeleton.find_bone(BONES[i])
+		skeleton.set_bone_pose_rotation(idx, saved[i])
+	_force_skeleton_skin_refresh(skeleton)
+	await _await_skin_bake_settle()
+	return rest
+
+
+func _bake_expected_skin_vertices(
+	mesh: MeshInstance3D,
+	skeleton: Skeleton3D,
+	clip: Animation,
+	expect_arm: bool,
+	sample_time: float,
+) -> PackedVector3Array:
+	var saved: Array[Quaternion] = []
+	for bone_name in BONES:
+		var idx := skeleton.find_bone(bone_name)
+		saved.append(skeleton.get_bone_pose_rotation(idx))
+	for bone_name in BONES:
+		skeleton.reset_bone_pose(skeleton.find_bone(bone_name))
+	if expect_arm:
+		var arm_idx := skeleton.find_bone("LeftUpperArm")
+		skeleton.set_bone_pose_rotation(
+			arm_idx, _rotation_at_track_time(clip, "LeftUpperArm", sample_time)
+		)
+	else:
+		var spine_idx := skeleton.find_bone("Spine")
+		skeleton.set_bone_pose_rotation(
+			spine_idx, _rotation_at_track_time(clip, "Spine", sample_time)
+		)
+	_force_skeleton_skin_refresh(skeleton)
+	await _await_skin_bake_settle()
+	var expected_mesh := mesh.bake_mesh_from_current_skeleton_pose()
+	var expected_verts: PackedVector3Array = expected_mesh.surface_get_arrays(0)[Mesh.ARRAY_VERTEX]
+	for i in range(BONES.size()):
+		var idx := skeleton.find_bone(BONES[i])
+		skeleton.set_bone_pose_rotation(idx, saved[i])
+	_force_skeleton_skin_refresh(skeleton)
+	await _await_skin_bake_settle()
+	return expected_verts
+
+
+func _side_pose_oracle_skin_report(scene: Node3D, is_left: bool, sample_time_s: float) -> Dictionary:
+	var report := {"ok": false, "side": "LeftSide" if is_left else "RightSide", "sample_time_s": sample_time_s}
+	if sample_time_s < 0.0 or not is_finite(sample_time_s):
+		report["error"] = "invalid_sample_time"
+		return report
+	var playback := _compare_playback(scene)
+	if playback == null:
+		report["error"] = "playback_missing"
+		return report
+	var side_name := "LeftSide" if is_left else "RightSide"
+	var side: Node3D = playback.get_node_or_null("%" + side_name) as Node3D
+	if side == null:
+		report["error"] = "side_missing"
+		return report
+	var character := _character(side)
+	var player := _preview_player(side)
+	var skeleton := _find_skeleton(character)
+	var mesh := _find_mesh(character)
+	if player == null or skeleton == null or mesh == null:
+		report["error"] = "preview_nodes_missing"
+		return report
+	var clip_id := CLIP_A if is_left else str(_session_snapshot(scene).get("right_clip_id", CLIP_C))
+	report["clip_id"] = clip_id
+	var clip := player.get_animation(clip_id)
+	if clip == null:
+		report["error"] = "clip_missing"
+		return report
+	var expect_arm := is_left and clip_id == CLIP_A
+	report["expect_arm"] = expect_arm
+	var posed := _vertices(mesh.bake_mesh_from_current_skeleton_pose())
+	if posed.is_empty():
+		report["error"] = "posed_vertices_empty"
+		return report
+	var rest := await _rest_vertices_preserved_pose(mesh, skeleton)
+	if rest.is_empty() or rest.size() != posed.size():
+		report["error"] = "rest_vertices_invalid"
+		return report
+	var groups := _weighted_vertex_groups(mesh, skeleton)
+	if groups["arm"].is_empty() or groups["spine"].is_empty():
+		report["error"] = "vertex_groups_empty"
+		return report
+	var primary_indices: PackedInt32Array = groups["arm"] if expect_arm else groups["spine"]
+	var secondary_indices: PackedInt32Array = groups["spine"] if expect_arm else groups["arm"]
+	var deltas := _weighted_skin_deltas(rest, posed, primary_indices, secondary_indices)
+	report["primary_delta"] = deltas.get("primary_delta", 0.0)
+	report["secondary_delta"] = deltas.get("secondary_delta", 0.0)
+	report["ok"] = await _side_pose_oracle_at_time(scene, is_left, sample_time_s)
+	return report
+
+
+func _scrub_skin_oracle_sample_transport(
+	scene: Node3D, expected_left_s: float, expected_right_s: float
+) -> Dictionary:
+	var report := {
+		"ok": false,
+		"expected_left_s": expected_left_s,
+		"expected_right_s": expected_right_s,
+	}
+	var norm := expected_left_s / DURATION_A
+	report["normalized_scrub"] = norm
+	var playback := _compare_playback(scene)
+	if playback == null:
+		report["error"] = "playback_missing"
+		return report
+	if not playback.has_method("request_scrub_normalized"):
+		report["error"] = "scrub_unsupported"
+		return report
+	var scrub_result: Dictionary = playback.call("request_scrub_normalized", norm)
+	if scrub_result.get("ok") != true:
+		report["error"] = "scrub_rejected"
+		report["scrub_result"] = scrub_result
+		return report
+	if playback.has_method("request_pause"):
+		playback.call("request_pause")
+	for _i in range(SKIN_ORACLE_TRANSPORT_SETTLE_FRAMES):
+		await process_frame
+	var snap: Dictionary = _session_snapshot(scene).get("compare", {})
+	var left_pos := float(snap.get("left_position", -1.0))
+	var right_pos := float(snap.get("right_position", -1.0))
+	var norm_meas := float(snap.get("normalized_progress", -1.0))
+	report["measured_left_s"] = left_pos
+	report["measured_right_s"] = right_pos
+	report["measured_normalized"] = norm_meas
+	report["playing"] = snap.get("playing", null)
+	if abs(norm_meas - norm) > EPS:
+		report["error"] = "normalized_progress_mismatch"
+		return report
+	if abs(left_pos - expected_left_s) > EPS:
+		report["error"] = "left_position_mismatch"
+		return report
+	if abs(right_pos - expected_right_s) > EPS:
+		report["error"] = "right_position_mismatch"
+		return report
+	if bool(snap.get("playing", true)):
+		report["error"] = "still_playing"
+		return report
+	report["ok"] = true
+	return report
+
+
+func _probe_skin_oracle_rejects_pose_corruption(
+	scene: Node3D, is_left: bool, sample_time_s: float
+) -> Dictionary:
+	var report := {
+		"ok": false,
+		"side": "LeftSide" if is_left else "RightSide",
+		"sample_time_s": sample_time_s,
+	}
+	var playback := _compare_playback(scene)
+	if playback == null:
+		report["error"] = "playback_missing"
+		return report
+	var side_name := "LeftSide" if is_left else "RightSide"
+	var side: Node3D = playback.get_node_or_null("%" + side_name) as Node3D
+	if side == null:
+		report["error"] = "side_missing"
+		return report
+	var skeleton := _find_skeleton(_character(side))
+	var mesh := _find_mesh(_character(side))
+	if skeleton == null or mesh == null:
+		report["error"] = "preview_nodes_missing"
+		return report
+	var bone_name := "LeftUpperArm" if is_left else "Spine"
+	var bone_idx := skeleton.find_bone(bone_name)
+	if bone_idx < 0:
+		report["error"] = "bone_missing"
+		return report
+	var saved := skeleton.get_bone_pose_rotation(bone_idx)
+	var wrong := saved * Quaternion(Vector3.UP, deg_to_rad(55.0))
+	skeleton.set_bone_pose_rotation(bone_idx, wrong)
+	_force_skeleton_skin_refresh(skeleton)
+	await _await_skin_bake_settle()
+	for _i in range(SKIN_ORACLE_TRANSPORT_SETTLE_FRAMES):
+		await process_frame
+	if await _side_pose_oracle_at_time(scene, is_left, sample_time_s):
+		report["error"] = "corruption_accepted"
+		skeleton.set_bone_pose_rotation(bone_idx, saved)
+		_force_skeleton_skin_refresh(skeleton)
+		await _await_skin_bake_settle()
+		return report
+	skeleton.set_bone_pose_rotation(bone_idx, saved)
+	_force_skeleton_skin_refresh(skeleton)
+	await _await_skin_bake_settle()
+	for _i in range(SKIN_ORACLE_TRANSPORT_SETTLE_FRAMES):
+		await process_frame
+	if not await _side_pose_oracle_at_time(scene, is_left, sample_time_s):
+		report["error"] = "restore_failed"
+		return report
+	report["ok"] = true
+	return report
+
+
+func _phase_skin_oracle_quick_proof(scene: Node3D) -> Dictionary:
+	if not await _configure_transport(scene):
+		return {"ok": false, "error": "transport setup failed for skin oracle proof"}
+	var samples := [
+		{"label": "progress_0.75", "left": SEEK_TARGET * DURATION_A, "right": SEEK_TARGET * DURATION_C},
+		{"label": "bookmark_c_0.625", "left": BOOKMARK_C / DURATION_C * DURATION_A, "right": BOOKMARK_C},
+		{
+			"label": "bookmark_a_0.75",
+			"left": BOOKMARK_FROZEN_A,
+			"right": BOOKMARK_FROZEN_A / DURATION_A * DURATION_C,
+		},
+		{"label": "bookmark_a_1.125", "left": BOOKMARK_A, "right": BOOKMARK_A / DURATION_A * DURATION_C},
+	]
+	var measurements: Array = []
+	for sample in samples:
+		var expected_left := float(sample["left"])
+		var expected_right := float(sample["right"])
+		var transport := await _scrub_skin_oracle_sample_transport(scene, expected_left, expected_right)
+		if not bool(transport.get("ok", false)):
+			return {
+				"ok": false,
+				"error": "transport scrub failed at %s: %s"
+				% [str(sample.get("label", "")), str(transport.get("error", "unknown"))],
+				"transport": transport,
+				"label": sample.get("label", ""),
+			}
+		var left_report := await _side_pose_oracle_skin_report(scene, true, expected_left)
+		var right_report := await _side_pose_oracle_skin_report(scene, false, expected_right)
+		if not bool(left_report.get("ok", false)) or not bool(right_report.get("ok", false)):
+			return {
+				"ok": false,
+				"error": "skin oracle failed at %s" % str(sample.get("label", "")),
+				"transport": transport,
+				"left": left_report,
+				"right": right_report,
+			}
+		measurements.append(
+			{
+				"label": sample["label"],
+				"transport": transport,
+				"left_primary_delta": left_report.get("primary_delta", 0.0),
+				"right_primary_delta": right_report.get("primary_delta", 0.0),
+			}
+		)
+	var corruption_left := await _probe_skin_oracle_rejects_pose_corruption(
+		scene, true, SEEK_TARGET * DURATION_A
+	)
+	if not bool(corruption_left.get("ok", false)):
+		return {
+			"ok": false,
+			"error": "pose corruption probe failed on left: %s" % str(corruption_left.get("error", "")),
+			"corruption_left": corruption_left,
+			"measurements": measurements,
+		}
+	return {
+		"ok": true,
+		"phase": "skin_oracle_quick_proof",
+		"measurements": measurements,
+		"corruption_left": corruption_left,
+	}
+
+
+func _phase_skin_oracle_negative() -> Dictionary:
+	var arm_primary := PackedInt32Array([0, 1, 2])
+	var arm_secondary := PackedInt32Array([3, 4])
+	var rest := PackedVector3Array([Vector3.ZERO, Vector3(0.1, 0.0, 0.0), Vector3(0.2, 0.0, 0.0), Vector3(0.0, 1.0, 0.0), Vector3(0.0, 1.1, 0.0)])
+	var posed_match_rest := rest.duplicate()
+	var zero_delta := _weighted_skin_deltas(rest, posed_match_rest, arm_primary, arm_secondary)
+	if _pose_oracle_weighted_deformation_ok(
+		float(zero_delta.get("primary_delta", -1.0)), float(zero_delta.get("secondary_delta", 0.0)), true
+	):
+		return {"ok": false, "error": "corruption probe accepted zero primary deformation"}
+	var posed_valid := rest.duplicate()
+	posed_valid[0] = Vector3(0.05, 0.0, 0.0)
+	posed_valid[1] = Vector3(0.18, 0.0, 0.0)
+	var valid_delta := _weighted_skin_deltas(rest, posed_valid, arm_primary, arm_secondary)
+	if not _pose_oracle_weighted_deformation_ok(
+		float(valid_delta.get("primary_delta", 0.0)), float(valid_delta.get("secondary_delta", 0.0)), true
+	):
+		return {"ok": false, "error": "corruption probe rejected valid synthetic deformation"}
+	var spine_primary := PackedInt32Array([3, 4])
+	var spine_secondary := PackedInt32Array([0, 1])
+	var posed_spine_only := rest.duplicate()
+	posed_spine_only[3] = Vector3(0.0, 1.05, 0.0)
+	var spine_fail := _weighted_skin_deltas(rest, posed_spine_only, spine_primary, spine_secondary)
+	if _pose_oracle_weighted_deformation_ok(
+		float(spine_fail.get("primary_delta", 0.0)), float(spine_fail.get("secondary_delta", 0.0)), false
+	):
+		return {"ok": false, "error": "corruption probe accepted spine clip with insufficient secondary delta"}
+	return {"ok": true, "phase": "skin_oracle_negative", "synthetic_primary_delta": valid_delta.get("primary_delta", 0.0)}
 
 
 func _viewports_nonblank(scene: Node3D) -> bool:
@@ -861,6 +1461,7 @@ func _compare_playback(scene: Node3D) -> Control:
 
 func _wait_compare_session_ready(scene: Node3D) -> bool:
 	var deadline_ms := Time.get_ticks_msec() + READY_TIMEOUT_MS
+	var diag_prints := 0
 	while Time.get_ticks_msec() < deadline_ms:
 		var snap := _session_snapshot(scene)
 		var compare: Variant = snap.get("compare", {})
@@ -868,8 +1469,43 @@ func _wait_compare_session_ready(scene: Node3D) -> bool:
 			if str(compare.get("left_clip_id", "")) == CLIP_A and str(compare.get("right_clip_id", "")) == CLIP_C:
 				if await _viewports_nonblank(scene):
 					return true
+				if (
+					diag_prints < READY_ORACLE_DIAG_PRINT_MAX
+					and not _last_viewport_oracle_diagnostic.is_empty()
+				):
+					print(_viewport_ready_oracle_diagnostic(scene))
+					diag_prints += 1
 		await process_frame
+	if diag_prints < READY_ORACLE_DIAG_PRINT_MAX and not _last_viewport_oracle_diagnostic.is_empty():
+		print(_viewport_ready_oracle_diagnostic(scene))
 	return false
+
+
+func _viewport_ready_oracle_diagnostic(scene: Node3D) -> String:
+	var parts: PackedStringArray = []
+	parts.append("compare_session_ready_oracle:%s" % _last_viewport_oracle_diagnostic)
+	var playback := _compare_playback(scene)
+	if playback == null:
+		return " ".join(parts)
+	var left_container := _viewport_container_for_side(playback, true)
+	var right_container := _viewport_container_for_side(playback, false)
+	if left_container != null:
+		parts.append("LeftRect %s" % _rect_layout_diag(left_container.get_global_rect()))
+	if right_container != null:
+		parts.append("RightRect %s" % _rect_layout_diag(right_container.get_global_rect()))
+	var session_panel := scene.get_node_or_null(
+		"SessionUI/Root/SessionMargin/SessionScroll/SessionPanel"
+	) as Control
+	if session_panel != null:
+		parts.append("PanelRect %s" % _rect_layout_diag(session_panel.get_global_rect()))
+	return " ".join(parts)
+
+
+func _rect_layout_diag(rect: Rect2) -> String:
+	return (
+		"x%.0f y%.0f w%.0f h%.0f end%.0f"
+		% [rect.position.x, rect.position.y, rect.size.x, rect.size.y, rect.position.x + rect.size.x]
+	)
 
 
 func _wait_bridge_bootstrap(scene: Node3D, require_session: bool, stage: String) -> bool:
@@ -1086,15 +1722,236 @@ func _clip_record_from_sidecar(clip_id: String) -> Dictionary:
 	return {}
 
 
+func _clip_record_from_cached_session(scene: Node3D, clip_id: String) -> Dictionary:
+	if not scene.has_method("_clip_record_for"):
+		return {}
+	var entry: Variant = scene.call("_clip_record_for", clip_id)
+	if typeof(entry) != TYPE_DICTIONARY:
+		return {}
+	return entry
+
+
 func _provider_eligibility_false(scene: Node3D) -> bool:
 	var snap := _session_snapshot(scene)
 	return snap.get("production_eligible") == false and snap.get("promotion_eligible") == false
 
 
-func _pose_vertex_indices(vert_count: int) -> Array:
-	if vert_count < 3:
-		return []
-	return [0, int(vert_count / 2), vert_count - 1]
+func _exercise_stored_bookmark_navigation(scene: Node3D, session_sha: String) -> Dictionary:
+	if not scene.has_method("request_seek_stored_bookmark"):
+		return {"ok": false, "error": "bookmark seek API missing"}
+	if str(_session_snapshot(scene).get("raw_sha256", "")) != session_sha:
+		return {"ok": false, "error": "session sha drift before bookmark navigation"}
+	var physical_sha_before := _sidecar_file_sha256()
+	if physical_sha_before.length() != 64:
+		return {"ok": false, "error": "physical sidecar missing before bookmark navigation"}
+	var cached_rev_before := int(_session_snapshot(scene).get("stored_revision", -1))
+	var physical_rev_before := _sidecar_revision()
+	if cached_rev_before < 0 or physical_rev_before < 0:
+		return {"ok": false, "error": "revision authority missing before bookmark navigation"}
+	var speed_before := float(_session_snapshot(scene).get("compare", {}).get("speed", -1.0))
+	var left_clip_before := str(_session_snapshot(scene).get("left_clip_id", ""))
+	var right_clip_before := str(_session_snapshot(scene).get("right_clip_id", ""))
+	var note_left := str(scene.get_node("%LeftClipNoteField").text)
+	var note_right := str(scene.get_node("%RightClipNoteField").text)
+	var idx_frozen := _pane_bookmark_option_index(scene, "left", BOOKMARK_FROZEN_A)
+	if idx_frozen < 0:
+		return {"ok": false, "error": "frozen left bookmark missing from selector"}
+	if not scene.call("request_seek_stored_bookmark", "left", idx_frozen).get("ok", false):
+		return {"ok": false, "error": "seek frozen left bookmark failed"}
+	for _i in range(12):
+		await process_frame
+	var snap: Dictionary = _session_snapshot(scene).get("compare", {})
+	if abs(float(snap.get("normalized_progress", -1.0)) - (BOOKMARK_FROZEN_A / DURATION_A)) > EPS:
+		return {"ok": false, "error": "frozen bookmark normalized mismatch"}
+	if abs(float(snap.get("left_position", -1.0)) - BOOKMARK_FROZEN_A) > EPS:
+		return {"ok": false, "error": "frozen bookmark left position mismatch"}
+	if abs(float(snap.get("right_position", -1.0)) - (BOOKMARK_FROZEN_A / DURATION_A) * DURATION_C) > EPS:
+		return {"ok": false, "error": "frozen bookmark right C position mismatch"}
+	if not await _assert_dual_pane_pose_oracle(scene):
+		return {"ok": false, "error": "pose oracle failed after frozen left bookmark seek"}
+	if bool(snap.get("playing", true)):
+		return {"ok": false, "error": "still playing after bookmark seek"}
+	if _sidecar_file_sha256() != physical_sha_before:
+		return {"ok": false, "error": "physical sidecar changed after frozen left seek"}
+	var idx_added := _pane_bookmark_option_index(scene, "left", BOOKMARK_A)
+	if idx_added < 0:
+		return {"ok": false, "error": "added left bookmark missing from selector"}
+	if not scene.call("request_seek_stored_bookmark", "left", idx_added).get("ok", false):
+		return {"ok": false, "error": "seek added left bookmark failed"}
+	for _i in range(12):
+		await process_frame
+	snap = _session_snapshot(scene).get("compare", {})
+	var norm_added := float(snap.get("normalized_progress", -1.0))
+	var norm_frozen := BOOKMARK_FROZEN_A / DURATION_A
+	if abs(norm_added - (BOOKMARK_A / DURATION_A)) > EPS:
+		return {"ok": false, "error": "added bookmark normalized mismatch"}
+	if abs(norm_added - norm_frozen) <= EPS:
+		return {"ok": false, "error": "added bookmark normalized matches frozen bookmark"}
+	if not await _assert_dual_pane_pose_oracle(scene):
+		return {"ok": false, "error": "pose oracle failed after added left bookmark seek"}
+	if not scene.has_method("request_step_stored_bookmark"):
+		return {"ok": false, "error": "bookmark step API missing"}
+	var idx_c := _pane_bookmark_option_index(scene, "right", BOOKMARK_C)
+	if idx_c < 0:
+		return {"ok": false, "error": "stored right C bookmark missing before single step"}
+	if _pane_bookmark_option_count(scene, "right") != 1:
+		return {"ok": false, "error": "right C expected single stored bookmark"}
+	if idx_c != 0:
+		return {"ok": false, "error": "right C bookmark expected at index 0"}
+	var playback_step := _compare_playback(scene)
+	if playback_step == null or not playback_step.has_method("request_scrub_normalized"):
+		return {"ok": false, "error": "compare playback missing for single bookmark step"}
+	if not playback_step.call("request_scrub_normalized", 0.33).get("ok", false):
+		return {"ok": false, "error": "scrub before single bookmark step failed"}
+	for _i in range(12):
+		await process_frame
+	var norm_c := BOOKMARK_C / DURATION_C
+	var step_prev: Dictionary = scene.call("request_step_stored_bookmark", "right", -1)
+	if not step_prev.get("ok", false) or step_prev.get("noop", false):
+		return {"ok": false, "error": "single bookmark prev step failed"}
+	for _i in range(12):
+		await process_frame
+	snap = _session_snapshot(scene).get("compare", {})
+	if abs(float(snap.get("normalized_progress", -1.0)) - norm_c) > EPS:
+		return {"ok": false, "error": "single bookmark prev normalized mismatch"}
+	if abs(float(snap.get("right_position", -1.0)) - BOOKMARK_C) > EPS:
+		return {"ok": false, "error": "single bookmark prev right position mismatch"}
+	if abs(float(snap.get("left_position", -1.0)) - norm_c * DURATION_A) > EPS:
+		return {"ok": false, "error": "single bookmark prev left position mismatch"}
+	if not await _assert_dual_pane_pose_oracle(scene):
+		return {"ok": false, "error": "pose oracle failed after single bookmark prev step"}
+	var step_repeat: Dictionary = scene.call("request_step_stored_bookmark", "right", 1)
+	if not step_repeat.get("ok", false) or not step_repeat.get("noop", false):
+		return {"ok": false, "error": "single bookmark repeat step not noop"}
+	if not playback_step.call("request_scrub_normalized", 0.28).get("ok", false):
+		return {"ok": false, "error": "scrub before single bookmark next step failed"}
+	for _i in range(12):
+		await process_frame
+	var step_next: Dictionary = scene.call("request_step_stored_bookmark", "right", 1)
+	if not step_next.get("ok", false) or step_next.get("noop", false):
+		return {"ok": false, "error": "single bookmark next step failed"}
+	for _i in range(12):
+		await process_frame
+	snap = _session_snapshot(scene).get("compare", {})
+	if abs(float(snap.get("normalized_progress", -1.0)) - norm_c) > EPS:
+		return {"ok": false, "error": "single bookmark next normalized mismatch"}
+	if not await _assert_dual_pane_pose_oracle(scene):
+		return {"ok": false, "error": "pose oracle failed after single bookmark next step"}
+	var step_repeat_prev: Dictionary = scene.call("request_step_stored_bookmark", "right", -1)
+	if not step_repeat_prev.get("ok", false) or not step_repeat_prev.get("noop", false):
+		return {"ok": false, "error": "single bookmark repeat prev step not noop"}
+	if not scene.call("request_seek_stored_bookmark", "left", idx_added).get("ok", false):
+		return {"ok": false, "error": "reselect same bookmark failed"}
+	if not scene.call("request_seek_stored_bookmark", "right", idx_c).get("ok", false):
+		return {"ok": false, "error": "seek right C bookmark failed"}
+	for _i in range(12):
+		await process_frame
+	snap = _session_snapshot(scene).get("compare", {})
+	if abs(float(snap.get("normalized_progress", -1.0)) - (BOOKMARK_C / DURATION_C)) > EPS:
+		return {"ok": false, "error": "right C bookmark normalized mismatch"}
+	if abs(float(snap.get("right_position", -1.0)) - BOOKMARK_C) > EPS:
+		return {"ok": false, "error": "right C bookmark position mismatch"}
+	if abs(float(snap.get("left_position", -1.0)) - (BOOKMARK_C / DURATION_C) * DURATION_A) > EPS:
+		return {"ok": false, "error": "left A position at right C bookmark mismatch"}
+	if not await _assert_dual_pane_pose_oracle(scene):
+		return {"ok": false, "error": "pose oracle failed after right C bookmark seek"}
+	var playback := _compare_playback(scene)
+	if playback == null or not playback.has_method("request_set_right_clip"):
+		return {"ok": false, "error": "compare playback missing for right clip switch"}
+	if not playback.call("request_set_right_clip", CLIP_B).get("ok", false):
+		return {"ok": false, "error": "right clip B select failed"}
+	var snap_before_race: Dictionary = _session_snapshot(scene).get("compare", {})
+	var race_seek: Dictionary = scene.call("request_seek_stored_bookmark", "right", idx_c)
+	if race_seek.get("ok", true):
+		return {"ok": false, "error": "stale right C bookmark seek accepted after same-frame B switch"}
+	if race_seek.get("error_code", "") != "clip_target_changed":
+		return {"ok": false, "error": "stale right C bookmark seek wrong error code"}
+	var snap_after_reject: Dictionary = _session_snapshot(scene).get("compare", {})
+	for key in ["normalized_progress", "playing", "speed", "left_position", "right_position"]:
+		if snap_after_reject.get(key) != snap_before_race.get(key):
+			return {"ok": false, "error": "playback changed after rejected stale bookmark seek"}
+	for _i in range(12):
+		await process_frame
+	if str(_session_snapshot(scene).get("right_clip_id", "")) != CLIP_B:
+		return {"ok": false, "error": "tracked right clip not B after race sync"}
+	var cached_b_record := _clip_record_from_cached_session(scene, CLIP_B)
+	if cached_b_record.is_empty():
+		return {"ok": false, "error": "cached clip B record missing"}
+	var cached_b_note := str(cached_b_record.get("note", ""))
+	if str(scene.get_node("%RightClipNoteField").text) != cached_b_note:
+		return {"ok": false, "error": "cached right B annotation not visible while B selected"}
+	if not scene.call("request_seek_stored_bookmark", "left", idx_frozen).get("ok", false):
+		return {"ok": false, "error": "seek frozen bookmark after right B failed"}
+	for _i in range(12):
+		await process_frame
+	snap = _session_snapshot(scene).get("compare", {})
+	if abs(float(snap.get("right_position", -1.0)) - 1.0) > EPS:
+		return {"ok": false, "error": "right B position at frozen bookmark mismatch"}
+	if not await _assert_dual_pane_pose_oracle(scene):
+		return {"ok": false, "error": "pose oracle failed after right B frozen seek"}
+	if str(_session_snapshot(scene).get("raw_sha256", "")) != session_sha:
+		return {"ok": false, "error": "session sha changed during bookmark navigation"}
+	if _sidecar_file_sha256() != physical_sha_before:
+		return {"ok": false, "error": "physical sidecar changed during bookmark navigation"}
+	var cached_rev_after := int(_session_snapshot(scene).get("stored_revision", -1))
+	var physical_rev_after := _sidecar_revision()
+	if cached_rev_after != cached_rev_before or physical_rev_after != physical_rev_before:
+		return {"ok": false, "error": "revision authority changed during bookmark navigation"}
+	if not _provider_eligibility_false(scene):
+		return {"ok": false, "error": "eligibility changed during bookmark navigation"}
+	snap = _session_snapshot(scene).get("compare", {})
+	if float(snap.get("speed", -1.0)) != speed_before:
+		return {"ok": false, "error": "speed changed during bookmark navigation"}
+	if str(_session_snapshot(scene).get("left_clip_id", "")) != left_clip_before:
+		return {"ok": false, "error": "left clip changed during bookmark navigation"}
+	if str(scene.get_node("%LeftClipNoteField").text) != note_left:
+		return {"ok": false, "error": "left note draft changed during bookmark navigation"}
+	if playback.has_method("request_set_right_clip"):
+		playback.call("request_set_right_clip", right_clip_before)
+		for _i in range(12):
+			await process_frame
+	if not await _restore_transport_baseline(scene):
+		return {"ok": false, "error": "transport baseline not restored after bookmark navigation"}
+	for _i in range(12):
+		await process_frame
+	if str(_session_snapshot(scene).get("right_clip_id", "")) != right_clip_before:
+		return {"ok": false, "error": "right clip not restored after bookmark navigation"}
+	if str(scene.get_node("%RightClipNoteField").text) != note_right:
+		return {"ok": false, "error": "right note draft changed during bookmark navigation"}
+	var right_option: OptionButton = scene.get_node_or_null("%RightBookmarkOption") as OptionButton
+	if right_option != null and right_option.item_count == 1 and right_option.selected != 0:
+		return {"ok": false, "error": "right bookmark selection not restored after navigation"}
+	return {
+		"ok": true,
+		"physical_sidecar_sha_before": physical_sha_before,
+		"physical_sidecar_sha_after": _sidecar_file_sha256(),
+		"cached_session_sha": session_sha,
+		"cached_revision_before": cached_rev_before,
+		"cached_revision_after": cached_rev_after,
+		"physical_revision_before": physical_rev_before,
+		"physical_revision_after": physical_rev_after,
+	}
+
+
+func _pane_bookmark_option_count(scene: Node3D, pane: String) -> int:
+	var node_name := "LeftBookmarkOption" if pane == "left" else "RightBookmarkOption"
+	var option: OptionButton = scene.get_node_or_null("%" + node_name) as OptionButton
+	if option == null:
+		return -1
+	return option.item_count
+
+
+func _pane_bookmark_option_index(scene: Node3D, pane: String, timestamp: float) -> int:
+	var node_name := "LeftBookmarkOption" if pane == "left" else "RightBookmarkOption"
+	var option: OptionButton = scene.get_node_or_null("%" + node_name) as OptionButton
+	if option == null:
+		return -1
+	for i in range(option.item_count):
+		var meta: Variant = option.get_item_metadata(i)
+		if typeof(meta) == TYPE_FLOAT or typeof(meta) == TYPE_INT:
+			if abs(float(meta) - timestamp) <= EPS:
+				return i
+	return -1
 
 
 func _phase_name() -> String:

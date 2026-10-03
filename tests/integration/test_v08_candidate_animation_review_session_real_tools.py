@@ -128,10 +128,12 @@ _COMPARE_SESSION_PREPARED_EXTRA_ROOT_FILES = (
     }
 )
 _COMPARE_SESSION_FROZEN_BASELINE_REVISION = 6
-_COMPARE_SESSION_REVISION_AFTER_LEFT_WRITES = 9
-_COMPARE_SESSION_REVISION_AFTER_RIGHT_WRITES = 10
-_COMPARE_SESSION_REVISION_AFTER_EXTERNAL = 11
-_COMPARE_SESSION_REVISION_AFTER_FINAL = 12
+_COMPARE_SESSION_REVISION_AFTER_C_BOOKMARK_SEED = 7
+_COMPARE_SESSION_REVISION_AFTER_LEFT_WRITES = 10
+_COMPARE_SESSION_REVISION_AFTER_RIGHT_WRITES = 11
+_COMPARE_SESSION_REVISION_AFTER_EXTERNAL = 12
+_COMPARE_SESSION_REVISION_AFTER_FINAL = 13
+_COMPARE_SESSION_C_BOOKMARK_SEED_SECONDS = 0.625
 _COMPARE_SESSION_MUTATIONS_AFTER_FROZEN_COPY = (
     _COMPARE_SESSION_REVISION_AFTER_FINAL - _COMPARE_SESSION_FROZEN_BASELINE_REVISION
 )
@@ -1844,6 +1846,34 @@ def test_real_animation_review_session_ui_lifecycle(tmp_path: Path) -> None:
     assert _sidecar_revision(copied_session_path) == _COMPARE_SESSION_FROZEN_BASELINE_REVISION
     assert _copied_sidecar_raw_sha(copied_session_path) == session_sha_after_terminal
     assert copied_session_path.read_bytes() == original_session_frozen
+    frozen_c_record = _clip_record(
+        json.loads(original_session_frozen.decode("utf-8")), "spine_turn_03"
+    )
+    assert frozen_c_record.get("bookmarks") == []
+
+    copied_sha_before_seed = _copied_sidecar_raw_sha(copied_session_path)
+    seed_code, seed_response = _invoke_bridge(
+        exchange_dir=copied_exchange_dir,
+        context_doc=copied_context_doc,
+        request_doc={
+            "schema_version": BRIDGE_SCHEMA_VERSION,
+            "action": "update",
+            "expected_raw_sha256": copied_sha_before_seed,
+            "operation": {
+                "op": "AddBookmark",
+                "clip_id": "spine_turn_03",
+                "timestamp": _COMPARE_SESSION_C_BOOKMARK_SEED_SECONDS,
+            },
+        },
+    )
+    assert seed_code == 0 and seed_response.get("ok") is True
+    copied_sha_after_seed = _copied_sidecar_raw_sha(copied_session_path)
+    assert copied_sha_after_seed != copied_sha_before_seed
+    assert _sidecar_revision(copied_session_path) == _COMPARE_SESSION_REVISION_AFTER_C_BOOKMARK_SEED
+    seeded_c_record = _clip_record(_session_document(copied_session_path), "spine_turn_03")
+    assert seeded_c_record.get("bookmarks") == [_COMPARE_SESSION_C_BOOKMARK_SEED_SECONDS]
+    assert session_path.read_bytes() == original_session_frozen
+    assert hashlib.sha256(session_path.read_bytes()).hexdigest() == session_sha_after_terminal
 
     left_writes_result = tmp_path / "compare-session-left-writes.json"
     left_writes_proc = _run_compare_session_inspect(
