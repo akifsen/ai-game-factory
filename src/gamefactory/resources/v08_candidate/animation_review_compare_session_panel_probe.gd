@@ -30,10 +30,14 @@ func _run() -> void:
 	if not await _wait_compare_ready(compare):
 		_fail("compare harness not ready")
 		return
-	if not session.has_method("_run_session_panel_regression_probe"):
-		_fail("session controller missing panel regression probe")
+	if not session.has_method("_wait_compare_ready"):
+		_fail("session controller missing compare ready wait")
 		return
-	var ok: bool = session.call("_run_session_panel_regression_probe")
+	var probe_script: GDScript = load("res://animation_review_compare_session_panel_probe.gd")
+	if probe_script == null:
+		_fail("panel probe script missing")
+		return
+	var ok: bool = await probe_script.call("run_session_panel_regression_probe_async", session)
 	quit(0 if ok else 1)
 
 
@@ -119,6 +123,30 @@ func _add_pane_controls(parent: Node, owner: Node, side: String) -> void:
 	bookmarks.unique_name_in_owner = true
 	parent.add_child(bookmarks)
 	bookmarks.owner = owner
+	var row := HBoxContainer.new()
+	row.name = "%sBookmarkRow" % prefix
+	parent.add_child(row)
+	row.owner = owner
+	var prev := Button.new()
+	prev.name = "%sPrevBookmarkButton" % prefix
+	prev.unique_name_in_owner = true
+	row.add_child(prev)
+	prev.owner = owner
+	var bookmark_option := OptionButton.new()
+	bookmark_option.name = "%sBookmarkOption" % prefix
+	bookmark_option.unique_name_in_owner = true
+	row.add_child(bookmark_option)
+	bookmark_option.owner = owner
+	var next := Button.new()
+	next.name = "%sNextBookmarkButton" % prefix
+	next.unique_name_in_owner = true
+	row.add_child(next)
+	next.owner = owner
+	var seek := Button.new()
+	seek.name = "%sSeekBookmarkButton" % prefix
+	seek.unique_name_in_owner = true
+	row.add_child(seek)
+	seek.owner = owner
 
 
 func _build_compare_controller() -> Control:
@@ -248,6 +276,10 @@ func _fail(message: String) -> void:
 
 
 static func run_session_panel_regression_probe(session: Node) -> bool:
+	return false
+
+
+static func run_session_panel_regression_probe_async(session: Node) -> bool:
 	var failures: Array[String] = []
 	var controller_script: Script = session.get_script()
 	if controller_script == null:
@@ -342,6 +374,8 @@ static func run_session_panel_regression_probe(session: Node) -> bool:
 		var bookmark_op: Dictionary = bookmark_capture.get("operation", {})
 		if bookmark_op.get("clip_id", "") != CLIP_C:
 			failures.append("bookmark capture targets right clip c")
+		elif bookmark_op.has("time") or bookmark_op.has("time_seconds"):
+			failures.append("bookmark capture wrong timestamp domain key")
 		elif abs(float(bookmark_op.get("timestamp", -1.0)) - expected_capture_ts) > 0.0001:
 			failures.append("bookmark capture uses snapshot timing")
 
@@ -484,6 +518,219 @@ static func run_session_panel_regression_probe(session: Node) -> bool:
 		failures.append("read after undo shows authority note not stale draft")
 	if session.get("_left_note_dirty"):
 		failures.append("read after undo left note still dirty")
+
+	var race_session: Dictionary = controller_script.call("_minimal_valid_session_dict_for_probe_clips", 0)
+	var race_records: Array = race_session.get("clip_records", [])
+	for i in range(race_records.size()):
+		var race_entry: Variant = race_records[i]
+		if typeof(race_entry) != TYPE_DICTIONARY:
+			continue
+		var updated: Dictionary = race_entry.duplicate(true)
+		if updated.get("clip_id", "") == CLIP_B:
+			updated["bookmarks"] = [1.0, 1.25]
+		elif updated.get("clip_id", "") == CLIP_C:
+			updated["bookmarks"] = [1.0, 1.5]
+		race_records[i] = updated
+	race_session["clip_records"] = race_records
+	session.set("_stored_session", race_session)
+	session.set("_authority_current", true)
+	session.set("_reload_required", false)
+	session.set("_conflict_active", false)
+	if playback != null:
+		if playback.has_method("request_set_left_clip"):
+			playback.call("request_set_left_clip", CLIP_A)
+		if playback.has_method("request_set_right_clip"):
+			playback.call("request_set_right_clip", CLIP_B)
+	session.call("_sync_pane_clip_targets_from_compare")
+	session.call("_apply_pane_annotations", "left")
+	session.call("_apply_pane_annotations", "right")
+	if playback != null and playback.has_method("request_set_right_clip"):
+		playback.call("request_set_right_clip", CLIP_C)
+	session.call("_sync_pane_clip_targets_from_compare")
+	session.call("_apply_pane_annotations", "right")
+	if not await session.call("_wait_compare_ready"):
+		failures.append("nav race compare not ready on clip c")
+	var race_sha := str(session.get("_raw_sha256"))
+	var race_rev := int(session.call("_stored_revision"))
+	var right_bookmark_option: OptionButton = session.get("_right_bookmark_option")
+	var stale_c_idx := 1
+	if right_bookmark_option.item_count <= stale_c_idx:
+		failures.append("nav race missing second c bookmark")
+		stale_c_idx = 0
+	session.set("_ui_syncing", true)
+	right_bookmark_option.select(stale_c_idx)
+	session.set("_ui_syncing", false)
+	var left_note_race := str(session.get("_left_note_field").text)
+	var right_note_race := str(session.get("_right_note_field").text)
+	if playback != null and playback.has_method("request_set_right_clip"):
+		playback.call("request_set_right_clip", CLIP_B)
+	var snap_after_switch: Dictionary = session.call("_compare_snapshot")
+	var stale_seek: Dictionary = session.call("request_seek_stored_bookmark", "right", stale_c_idx)
+	if stale_seek.get("ok", true):
+		failures.append("nav race seek accepted stale c bookmark on b")
+	if stale_seek.get("error_code", "") != "clip_target_changed":
+		failures.append("nav race seek error code")
+	if not _playback_fields_equal(snap_after_switch, session.call("_compare_snapshot")):
+		failures.append("nav race seek changed playback")
+	if str(session.get("_left_note_field").text) != left_note_race:
+		failures.append("nav race seek changed left note")
+	if str(session.get("_right_note_field").text) != right_note_race:
+		failures.append("nav race seek changed right note")
+	if str(session.get("_raw_sha256")) != race_sha:
+		failures.append("nav race seek changed session sha")
+	if int(session.call("_stored_revision")) != race_rev:
+		failures.append("nav race seek changed session revision")
+	if right_bookmark_option.selected != stale_c_idx:
+		failures.append("nav race seek changed bookmark selector")
+	var stale_step: Dictionary = session.call("request_step_stored_bookmark", "right", -1)
+	if stale_step.get("ok", true) and not stale_step.get("noop", false):
+		failures.append("nav race step accepted stale c bookmark on b")
+	if stale_step.get("error_code", "") != "clip_target_changed":
+		failures.append("nav race step error code")
+	session.call("_sync_pane_clip_targets_from_compare")
+	session.call("_apply_pane_annotations", "right")
+	if str(session.call("_pane_clip_id", "right")) != CLIP_B:
+		failures.append("nav race sync right clip id")
+	var idx_b := 0
+	for j in range(right_bookmark_option.item_count):
+		var meta_b: Variant = right_bookmark_option.get_item_metadata(j)
+		if typeof(meta_b) == TYPE_FLOAT or typeof(meta_b) == TYPE_INT:
+			if abs(float(meta_b) - 1.0) <= 0.0001:
+				idx_b = j
+				break
+	if not session.call("request_seek_stored_bookmark", "right", idx_b).get("ok", false):
+		failures.append("nav race seek b bookmark after sync")
+	var snap_race_b: Dictionary = session.call("_compare_snapshot")
+	if abs(float(snap_race_b.get("normalized_progress", -1.0)) - 0.5) > 0.0001:
+		failures.append("nav race b bookmark normalized")
+
+	var left_duration := 1.5
+	var right_duration := 2.0
+	var nav_session: Dictionary = controller_script.call(
+		"_minimal_valid_session_dict_with_clips",
+		0,
+		CLIP_A,
+		CLIP_B,
+		left_duration,
+		right_duration,
+	)
+	var nav_records: Array = nav_session.get("clip_records", [])
+	nav_records[0] = nav_records[0].duplicate(true)
+	nav_records[0]["bookmarks"] = [0.75, 1.125]
+	nav_records[1] = nav_records[1].duplicate(true)
+	nav_records[1]["bookmarks"] = [1.0]
+	nav_session["clip_records"] = nav_records
+	session.set("_stored_session", nav_session)
+	session.set("_authority_current", true)
+	session.set("_reload_required", false)
+	session.set("_conflict_active", false)
+	if playback != null:
+		if playback.has_method("request_set_left_clip"):
+			playback.call("request_set_left_clip", CLIP_A)
+		if playback.has_method("request_set_right_clip"):
+			playback.call("request_set_right_clip", CLIP_B)
+	session.call("_sync_pane_clip_targets_from_compare")
+	session.call("_apply_pane_annotations", "left")
+	session.call("_apply_pane_annotations", "right")
+	var nav_sha := str(session.get("_raw_sha256"))
+	if playback != null and playback.has_method("request_scrub_normalized"):
+		playback.call("request_scrub_normalized", 0.5)
+	if not await session.call("_wait_compare_ready"):
+		failures.append("nav compare not ready before first bookmark seek")
+	session.call("request_seek_stored_bookmark", "left", 0)
+	var snap_left_075: Dictionary = session.call("_compare_snapshot")
+	var left_norm_075 := 0.75 / left_duration
+	if abs(float(snap_left_075.get("normalized_progress", -1.0)) - left_norm_075) > 0.0001:
+		failures.append("nav left bookmark normalized")
+	var left_dur_snap := float(snap_left_075.get("left_duration", -1.0))
+	if abs(float(snap_left_075.get("left_position", -1.0)) - left_norm_075 * left_dur_snap) > 0.0001:
+		failures.append("nav left bookmark position")
+	session.call("request_seek_stored_bookmark", "left", 1)
+	var snap_left_1125: Dictionary = session.call("_compare_snapshot")
+	var left_norm_1125 := 1.125 / left_duration
+	if abs(float(snap_left_1125.get("normalized_progress", -1.0)) - left_norm_1125) > 0.0001:
+		failures.append("nav left added bookmark normalized")
+	if abs(left_norm_1125 - left_norm_075) <= 0.0001:
+		failures.append("nav left bookmark norms distinct")
+	if str(session.get("_raw_sha256")) != nav_sha:
+		failures.append("nav changed session sha")
+	session.call("request_seek_stored_bookmark", "right", 0)
+	var snap_right_10: Dictionary = session.call("_compare_snapshot")
+	var right_norm_10 := 1.0 / right_duration
+	if abs(float(snap_right_10.get("normalized_progress", -1.0)) - right_norm_10) > 0.0001:
+		failures.append("nav right bookmark normalized")
+	var right_dur_snap := float(snap_right_10.get("right_duration", -1.0))
+	if abs(float(snap_right_10.get("right_position", -1.0)) - right_norm_10 * right_dur_snap) > 0.0001:
+		failures.append("nav right position at right bookmark")
+	if abs(float(snap_right_10.get("left_position", -1.0)) - right_norm_10 * left_dur_snap) > 0.0001:
+		failures.append("nav left position at right bookmark")
+	var snap_before_invalid: Dictionary = session.call("_compare_snapshot")
+	if session.call("request_seek_stored_bookmark", "middle", 0).get("ok", true):
+		failures.append("nav invalid pane rejected")
+	if not _playback_fields_equal(snap_before_invalid, session.call("_compare_snapshot")):
+		failures.append("nav invalid pane left playback unchanged")
+	if session.call("request_seek_stored_bookmark", "left", 0.0).get("ok", true):
+		failures.append("nav float index rejected")
+	if session.call("request_seek_stored_bookmark", "left", true).get("ok", true):
+		failures.append("nav bool index rejected")
+	if not session.call("request_seek_stored_bookmark", "left", 0).get("ok", false):
+		failures.append("nav seek first before prev boundary")
+	var left_bookmark_option: OptionButton = session.get("_left_bookmark_option")
+	if left_bookmark_option.selected != 0:
+		failures.append("nav at first bookmark index before prev boundary")
+	var snap_before_step: Dictionary = session.call("_compare_snapshot")
+	if not snap_before_step.get("ready", false):
+		failures.append("nav compare not ready before prev boundary")
+	if abs(float(snap_before_step.get("normalized_progress", -1.0)) - left_norm_075) > 0.0001:
+		failures.append("nav playback at first bookmark before prev boundary")
+	if not session.call("request_step_stored_bookmark", "left", -1).get("noop", false):
+		failures.append("nav prev boundary")
+	if not session.call("request_seek_stored_bookmark", "left", 1).get("ok", false):
+		failures.append("nav seek last before next boundary")
+	if left_bookmark_option.selected != 1:
+		failures.append("nav at last bookmark index before next boundary")
+	var snap_at_last: Dictionary = session.call("_compare_snapshot")
+	if not snap_at_last.get("ready", false):
+		failures.append("nav compare not ready before next boundary")
+	if abs(float(snap_at_last.get("normalized_progress", -1.0)) - left_norm_1125) > 0.0001:
+		failures.append("nav playback at last bookmark before next boundary")
+	if not session.call("request_step_stored_bookmark", "left", 1).get("noop", false):
+		failures.append("nav next boundary")
+	if session.call("request_seek_stored_bookmark", "left", 99).get("ok", true):
+		failures.append("nav invalid index rejected")
+	if not session.call("request_seek_stored_bookmark", "left", 1).get("ok", false):
+		failures.append("nav reselect same bookmark")
+	if session.call("request_step_stored_bookmark", "left", 2).get("ok", true):
+		failures.append("nav invalid step delta rejected")
+	session.set("_authority_current", false)
+	session.set("_reload_required", true)
+	session.set("_conflict_active", true)
+	if not session.call("request_seek_stored_bookmark", "left", 0).get("ok", false):
+		failures.append("nav allowed during conflict")
+	if str(session.get("_raw_sha256")) != nav_sha:
+		failures.append("nav conflict changed cached sha")
+	var empty_session: Dictionary = controller_script.call(
+		"_minimal_valid_session_dict_with_clips",
+		0,
+		CLIP_A,
+		CLIP_B,
+		left_duration,
+		right_duration,
+	)
+	session.set("_stored_session", empty_session)
+	session.set("_authority_current", true)
+	session.set("_reload_required", false)
+	session.set("_conflict_active", false)
+	session.call("_apply_pane_annotations", "left")
+	if playback != null and playback.has_method("request_scrub_normalized"):
+		playback.call("request_scrub_normalized", 0.25)
+	if not await session.call("_wait_compare_ready"):
+		failures.append("nav compare not ready before empty bookmarks")
+	var snap_empty_nav: Dictionary = session.call("_compare_snapshot")
+	if not snap_empty_nav.get("ready", false):
+		failures.append("nav compare not ready before empty bookmarks")
+	if not session.call("request_step_stored_bookmark", "left", 1).get("noop", false):
+		failures.append("nav empty bookmarks noop")
 
 	if failures.is_empty():
 		print("PASS: animation_review_compare_session_panel_regression")

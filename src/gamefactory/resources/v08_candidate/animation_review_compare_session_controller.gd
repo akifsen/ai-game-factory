@@ -58,6 +58,10 @@ const _RESPONSE_EXACT_KEYS := [
 @onready var _left_save_note_button: Button = %LeftSaveNoteButton
 @onready var _left_add_bookmark_button: Button = %LeftAddBookmarkButton
 @onready var _left_bookmarks_label: Label = %LeftBookmarksLabel
+@onready var _left_prev_bookmark_button: Button = %LeftPrevBookmarkButton
+@onready var _left_bookmark_option: OptionButton = %LeftBookmarkOption
+@onready var _left_next_bookmark_button: Button = %LeftNextBookmarkButton
+@onready var _left_seek_bookmark_button: Button = %LeftSeekBookmarkButton
 @onready var _left_keep_button: Button = %LeftKeepButton
 @onready var _left_revise_button: Button = %LeftReviseButton
 @onready var _right_status_option: OptionButton = %RightClipStatusOption
@@ -65,6 +69,10 @@ const _RESPONSE_EXACT_KEYS := [
 @onready var _right_save_note_button: Button = %RightSaveNoteButton
 @onready var _right_add_bookmark_button: Button = %RightAddBookmarkButton
 @onready var _right_bookmarks_label: Label = %RightBookmarksLabel
+@onready var _right_prev_bookmark_button: Button = %RightPrevBookmarkButton
+@onready var _right_bookmark_option: OptionButton = %RightBookmarkOption
+@onready var _right_next_bookmark_button: Button = %RightNextBookmarkButton
+@onready var _right_seek_bookmark_button: Button = %RightSeekBookmarkButton
 @onready var _right_keep_button: Button = %RightKeepButton
 @onready var _right_revise_button: Button = %RightReviseButton
 
@@ -168,6 +176,18 @@ func _wire_session_ui() -> void:
 	_right_save_note_button.pressed.connect(func() -> void: _on_save_note_pressed("right"))
 	_left_add_bookmark_button.pressed.connect(func() -> void: _on_add_bookmark_pressed("left"))
 	_right_add_bookmark_button.pressed.connect(func() -> void: _on_add_bookmark_pressed("right"))
+	_left_prev_bookmark_button.pressed.connect(func() -> void: _on_step_bookmark_pressed("left", -1))
+	_right_prev_bookmark_button.pressed.connect(func() -> void: _on_step_bookmark_pressed("right", -1))
+	_left_next_bookmark_button.pressed.connect(func() -> void: _on_step_bookmark_pressed("left", 1))
+	_right_next_bookmark_button.pressed.connect(func() -> void: _on_step_bookmark_pressed("right", 1))
+	_left_seek_bookmark_button.pressed.connect(func() -> void: _on_seek_bookmark_pressed("left"))
+	_right_seek_bookmark_button.pressed.connect(func() -> void: _on_seek_bookmark_pressed("right"))
+	_left_bookmark_option.item_selected.connect(
+		func(index: int) -> void: _on_bookmark_option_selected("left", index)
+	)
+	_right_bookmark_option.item_selected.connect(
+		func(index: int) -> void: _on_bookmark_option_selected("right", index)
+	)
 	_left_keep_button.pressed.connect(func() -> void: _on_quick_status_pressed("left", "keep"))
 	_left_revise_button.pressed.connect(func() -> void: _on_quick_status_pressed("left", "revise"))
 	_right_keep_button.pressed.connect(func() -> void: _on_quick_status_pressed("right", "keep"))
@@ -298,6 +318,16 @@ func _sync_pane_clip_targets_from_compare() -> Dictionary:
 	return snap
 
 
+func _tracked_clips_match_compare() -> bool:
+	var snap := _compare_snapshot()
+	if not snap.get("ready", false):
+		return false
+	return (
+		str(snap.get("left_clip_id", "")) == _tracked_left_clip_id
+		and str(snap.get("right_clip_id", "")) == _tracked_right_clip_id
+	)
+
+
 func request_reload_session() -> Dictionary:
 	return _enqueue_bridge_action("read")
 
@@ -319,6 +349,97 @@ func _on_save_note_pressed(pane: String) -> void:
 		return
 	_inflight_pane = pane
 	_enqueue_bridge_update({"op": "SetNote", "clip_id": clip_id, "note": note}, clip_id, note)
+
+
+func request_seek_stored_bookmark(pane: String, index: Variant) -> Dictionary:
+	if not _pane_is_valid(pane):
+		return {"ok": false, "error_code": "invalid_pane"}
+	if not _bookmark_nav_index_valid(index):
+		return {"ok": false, "error_code": "invalid_bookmark_index"}
+	if not _bookmark_navigation_enabled():
+		return {"ok": false, "error_code": "navigation_unavailable"}
+	if not _tracked_clips_match_compare():
+		return {"ok": false, "error_code": "clip_target_changed"}
+	var option := _pane_bookmark_option(pane)
+	var idx := int(index)
+	if idx < 0 or idx >= option.item_count:
+		return {"ok": false, "error_code": "invalid_bookmark_index"}
+	var meta: Variant = option.get_item_metadata(idx)
+	if typeof(meta) != TYPE_FLOAT and typeof(meta) != TYPE_INT:
+		return {"ok": false, "error_code": "invalid_bookmark_metadata"}
+	var clip_id := _pane_clip_id(pane)
+	var ts := float(meta)
+	if not is_finite(ts):
+		return {"ok": false, "error_code": "invalid_bookmark_metadata"}
+	if not _bookmark_timestamp_valid(clip_id, ts):
+		return {"ok": false, "error_code": "invalid_bookmark_time"}
+	var duration := _clip_duration_seconds(clip_id)
+	var norm := _normalized_progress_for_clip_timestamp(ts, duration)
+	if norm < 0.0:
+		return {"ok": false, "error_code": "invalid_bookmark_time"}
+	if _playback == null or not _playback.has_method("request_scrub_normalized"):
+		return {"ok": false, "error_code": "playback_missing"}
+	var speed_before := float(_compare_snapshot().get("speed", -1.0))
+	var left_id_before := _tracked_left_clip_id
+	var right_id_before := _tracked_right_clip_id
+	var left_draft := _left_note_field.text
+	var right_draft := _right_note_field.text
+	var result: Dictionary = _playback.call("request_scrub_normalized", norm)
+	if not result.get("ok", false):
+		return result
+	if _playback.has_method("request_pause"):
+		_playback.call("request_pause")
+	_ui_syncing = true
+	option.select(idx)
+	_ui_syncing = false
+	var after := _compare_snapshot()
+	if float(after.get("speed", -1.0)) != speed_before:
+		return {"ok": false, "error_code": "speed_changed"}
+	if _tracked_left_clip_id != left_id_before or _tracked_right_clip_id != right_id_before:
+		return {"ok": false, "error_code": "clip_selection_changed"}
+	if _left_note_field.text != left_draft or _right_note_field.text != right_draft:
+		return {"ok": false, "error_code": "note_draft_changed"}
+	_refresh_session_controls()
+	return {"ok": true, "normalized_progress": norm, "timestamp": ts}
+
+
+func request_step_stored_bookmark(pane: String, delta: Variant) -> Dictionary:
+	if not _pane_is_valid(pane):
+		return {"ok": false, "error_code": "invalid_pane"}
+	if not _bookmark_nav_step_delta_valid(delta):
+		return {"ok": false, "error_code": "invalid_step"}
+	if not _compare_ready():
+		return {"ok": false, "error_code": "playback_not_ready"}
+	if not _tracked_clips_match_compare():
+		return {"ok": false, "error_code": "clip_target_changed"}
+	var option := _pane_bookmark_option(pane)
+	var count := option.item_count
+	if count == 0:
+		return {"ok": true, "noop": true}
+	var current := option.selected
+	var next_idx := _bounded_bookmark_step_index(current, int(delta), count)
+	if next_idx < 0:
+		return {"ok": true, "noop": true}
+	return request_seek_stored_bookmark(pane, next_idx)
+
+
+func _on_step_bookmark_pressed(pane: String, delta: int) -> void:
+	request_step_stored_bookmark(pane, delta)
+
+
+func _on_seek_bookmark_pressed(pane: String) -> void:
+	var index := _pane_bookmark_option(pane).selected
+	if index < 0:
+		return
+	request_seek_stored_bookmark(pane, index)
+
+
+func _on_bookmark_option_selected(pane: String, index: int) -> void:
+	if _ui_syncing:
+		return
+	if index < 0:
+		return
+	request_seek_stored_bookmark(pane, index)
 
 
 func _on_add_bookmark_pressed(pane: String) -> void:
@@ -381,7 +502,31 @@ func _on_note_text_changed(pane: String) -> void:
 
 
 func _pane_clip_id(pane: String) -> String:
-	return _tracked_left_clip_id if pane == "left" else _tracked_right_clip_id
+	if pane == "left":
+		return _tracked_left_clip_id
+	if pane == "right":
+		return _tracked_right_clip_id
+	return ""
+
+
+static func _pane_is_valid(pane: String) -> bool:
+	return pane == "left" or pane == "right"
+
+
+static func _bookmark_nav_index_valid(index: Variant) -> bool:
+	if typeof(index) == TYPE_BOOL:
+		return false
+	if typeof(index) != TYPE_INT:
+		return false
+	return true
+
+
+static func _bookmark_nav_step_delta_valid(delta: Variant) -> bool:
+	if typeof(delta) == TYPE_BOOL:
+		return false
+	if typeof(delta) != TYPE_INT:
+		return false
+	return delta == 1 or delta == -1
 
 
 func _pane_status_option(pane: String) -> OptionButton:
@@ -390,6 +535,16 @@ func _pane_status_option(pane: String) -> OptionButton:
 
 func _pane_note_field(pane: String) -> LineEdit:
 	return _left_note_field if pane == "left" else _right_note_field
+
+
+func _pane_bookmark_option(pane: String) -> OptionButton:
+	return _left_bookmark_option if pane == "left" else _right_bookmark_option
+
+
+func _bookmark_navigation_enabled() -> bool:
+	if _stored_session == null or typeof(_stored_session) != TYPE_DICTIONARY:
+		return false
+	return _compare_ready()
 
 
 func _bookmark_seconds_for_pane(pane: String) -> float:
@@ -459,7 +614,28 @@ func _apply_pane_annotations(pane: String) -> void:
 	_pane_note_field(pane).text = note
 	var bookmarks_label := _left_bookmarks_label if pane == "left" else _right_bookmarks_label
 	bookmarks_label.text = _format_bookmarks_line(record)
+	_populate_pane_bookmark_selector(pane, record)
 	_ui_syncing = false
+	_refresh_session_controls()
+
+
+func _populate_pane_bookmark_selector(pane: String, record: Dictionary) -> void:
+	var option := _pane_bookmark_option(pane)
+	option.clear()
+	var clip_id := _pane_clip_id(pane)
+	var bookmarks: Variant = record.get("bookmarks", [])
+	if typeof(bookmarks) == TYPE_ARRAY:
+		for entry in bookmarks:
+			if typeof(entry) != TYPE_FLOAT and typeof(entry) != TYPE_INT:
+				continue
+			var ts := float(entry)
+			if not _bookmark_timestamp_valid(clip_id, ts):
+				continue
+			var idx := option.item_count
+			option.add_item("%.3fs" % ts)
+			option.set_item_metadata(idx, ts)
+	if option.item_count > 0:
+		option.select(0)
 
 
 static func _format_bookmarks_line(record: Dictionary) -> String:
@@ -547,6 +723,27 @@ func _bookmark_timestamp_valid(clip_id: String, timestamp: float) -> bool:
 	if duration <= 0.0:
 		return false
 	return timestamp >= 0.0 and timestamp <= duration
+
+
+static func _normalized_progress_for_clip_timestamp(timestamp: float, duration: float) -> float:
+	if typeof(timestamp) == TYPE_BOOL or typeof(duration) == TYPE_BOOL:
+		return -1.0
+	if not is_finite(timestamp) or not is_finite(duration) or duration <= 0.0:
+		return -1.0
+	if timestamp < 0.0 or timestamp > duration:
+		return -1.0
+	return timestamp / duration
+
+
+static func _bounded_bookmark_step_index(current: int, delta: int, count: int) -> int:
+	if count <= 0 or delta == 0:
+		return -1
+	if current < 0:
+		current = 0
+	var next_idx := current + delta
+	if next_idx < 0 or next_idx >= count:
+		return -1
+	return next_idx
 
 
 func _apply_clip_annotations_for(clip_id: String) -> void:
@@ -956,6 +1153,23 @@ func _refresh_session_controls() -> void:
 		bookmark_btn.disabled = not mutations
 		keep_btn.disabled = not mutations
 		revise_btn.disabled = not mutations
+		var nav_enabled := _bookmark_navigation_enabled()
+		var bookmark_option := _pane_bookmark_option(pane)
+		var bookmark_count := bookmark_option.item_count
+		var prev_btn := (
+			_left_prev_bookmark_button if pane == "left" else _right_prev_bookmark_button
+		)
+		var next_btn := (
+			_left_next_bookmark_button if pane == "left" else _right_next_bookmark_button
+		)
+		var seek_btn := (
+			_left_seek_bookmark_button if pane == "left" else _right_seek_bookmark_button
+		)
+		var nav_active := nav_enabled and bookmark_count > 0
+		prev_btn.disabled = not nav_active
+		next_btn.disabled = not nav_active
+		seek_btn.disabled = not nav_active
+		bookmark_option.disabled = not nav_active
 
 	var banner := _user_status_message
 	if _bridge_busy:
@@ -1124,6 +1338,40 @@ func _run_bridge_validation_probe() -> bool:
 	}
 	if _format_bookmarks_line(bookmark_record) != "Bookmarks: 0.500s, 1.250s":
 		failures.append("bookmark display line")
+	if abs(_normalized_progress_for_clip_timestamp(0.75, 1.5) - 0.5) > 0.0001:
+		failures.append("bookmark norm left 0.75/1.5")
+	if abs(_normalized_progress_for_clip_timestamp(1.5, 2.0) - 0.75) > 0.0001:
+		failures.append("bookmark norm right 1.5/2")
+	if _normalized_progress_for_clip_timestamp(1.5001, 1.5) >= 0.0:
+		failures.append("bookmark norm rejects above duration")
+	if _normalized_progress_for_clip_timestamp(-0.1, 1.5) >= 0.0:
+		failures.append("bookmark norm rejects negative")
+	if _normalized_progress_for_clip_timestamp(INF, 1.5) >= 0.0:
+		failures.append("bookmark norm rejects inf")
+	if _normalized_progress_for_clip_timestamp(NAN, 1.5) >= 0.0:
+		failures.append("bookmark norm rejects nan")
+	if _bounded_bookmark_step_index(0, -1, 2) != -1:
+		failures.append("bookmark prev at zero")
+	if _bounded_bookmark_step_index(1, 1, 2) != -1:
+		failures.append("bookmark next at end")
+	if _bounded_bookmark_step_index(0, 1, 1) != -1:
+		failures.append("bookmark next single no-op")
+	if _bounded_bookmark_step_index(0, 0, 3) != -1:
+		failures.append("bookmark zero delta")
+	if not _pane_is_valid("left") or not _pane_is_valid("right"):
+		failures.append("pane valid left/right")
+	if _pane_is_valid("middle"):
+		failures.append("pane invalid rejected")
+	if _bookmark_nav_index_valid(0) != true:
+		failures.append("nav index int ok")
+	if _bookmark_nav_index_valid(0.0):
+		failures.append("nav index float rejected")
+	if _bookmark_nav_index_valid(true):
+		failures.append("nav index bool rejected")
+	if not _bookmark_nav_step_delta_valid(1) or not _bookmark_nav_step_delta_valid(-1):
+		failures.append("nav delta pm1 ok")
+	if _bookmark_nav_step_delta_valid(2) or _bookmark_nav_step_delta_valid(0):
+		failures.append("nav delta overshoot rejected")
 	if failures.is_empty():
 		print("PASS: animation_review_compare_session_bridge_validation")
 		return true
