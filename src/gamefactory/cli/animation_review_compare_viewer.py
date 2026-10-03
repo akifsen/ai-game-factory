@@ -1,4 +1,4 @@
-"""V0.8-12a disposable synchronized A/B animation compare Godot overlay launcher."""
+"""V0.8-12a / V0.8-13a disposable synchronized A/B animation compare Godot overlay launcher."""
 
 from __future__ import annotations
 
@@ -14,7 +14,9 @@ from typing import Any
 
 from gamefactory.adapters.assets.v08_candidate_evidence import parse_bounded_publication_json
 from gamefactory.cli.animation_review_session_bridge import (
+    BridgeContext,
     _assert_path_outside_roots,
+    _mutation_forbidden_roots,
     _read_bounded_regular_file,
     _reject_unsafe_lexical_path,
 )
@@ -27,6 +29,8 @@ from gamefactory.cli.animation_review_session_viewer import (
     _cleanup_owned_tree,
     _materialize_snapshot,
     _snapshots_match,
+    _validate_bridge_context_paths,
+    _write_context_file,
     _write_exclusive_bytes,
 )
 from gamefactory.cli.exit_codes import EXIT_CONFIG_ERROR, EXIT_SUCCESS
@@ -42,15 +46,25 @@ from gamefactory.workflows.v08_candidate_currentness import CandidateCurrentness
 from gamefactory.workflows.v08_candidate_workflow import CandidateWorkflowHandlers
 
 _SCENE_RESOURCE = "res://animation_review_compare.tscn"
+_SCENE_SESSION_RESOURCE = "res://animation_review_compare_session.tscn"
 _V08_RESOURCE_PACKAGE = "gamefactory.resources.v08_candidate"
 _CONTEXT_LEAF = "compare_context.json"
+_SESSION_CONTEXT_LEAF = "context.json"
+_EXCHANGE_DIR_NAME = "exchange"
 _COMPARE_SCHEMA_VERSION = "animation-review-compare-0.8.0"
 _MAX_CONTEXT_BYTES = 8 * 1024
 _ARG_COMPARE_CONTEXT = "--compare-context-file="
+_ARG_SESSION_PYTHON = "--session-python-executable="
+_ARG_SESSION_CONTEXT = "--session-context-file="
+_ARG_SESSION_EXCHANGE = "--session-exchange-dir="
 _PACKAGED_COMPARE_FILES = (
     "animation_review_compare.tscn",
     "animation_review_compare_controller.gd",
     "animation_review_compare_side.gd",
+)
+_PACKAGED_COMPARE_SESSION_FILES = (
+    "animation_review_compare_session.tscn",
+    "animation_review_compare_session_controller.gd",
 )
 
 
@@ -60,19 +74,48 @@ class PreparedAnimationReviewCompareViewer:
     context_file: Path
     left_clip_id: str
     right_clip_id: str
+    session_context_file: Path | None = None
+    session_exchange_dir: Path | None = None
+    python_executable: Path | None = None
 
     def godot_argv(self, *, godot_executable: Path) -> tuple[str, ...]:
         godot = _assert_trusted_executable(godot_executable, label="godot executable")
         context = _reject_unsafe_lexical_path(self.context_file, label="compare context file")
         overlay = _reject_unsafe_lexical_path(self.overlay_dir, label="overlay directory")
+        scene = (
+            _SCENE_SESSION_RESOURCE if self.session_context_file is not None else _SCENE_RESOURCE
+        )
+        tail: list[str] = [f"{_ARG_COMPARE_CONTEXT}{context}"]
+        if self.session_context_file is not None:
+            if self.python_executable is None or self.session_exchange_dir is None:
+                raise ValidationError("session compare launch is missing session paths")
+            python = _assert_trusted_executable(
+                self.python_executable,
+                label="python executable",
+            )
+            session_context = _reject_unsafe_lexical_path(
+                self.session_context_file,
+                label="session context file",
+            )
+            exchange = _reject_unsafe_lexical_path(
+                self.session_exchange_dir,
+                label="session exchange dir",
+            )
+            tail.extend(
+                (
+                    f"{_ARG_SESSION_PYTHON}{python}",
+                    f"{_ARG_SESSION_CONTEXT}{session_context}",
+                    f"{_ARG_SESSION_EXCHANGE}{exchange}",
+                )
+            )
         return (
             str(godot),
             "--path",
             str(overlay),
             "--scene",
-            _SCENE_RESOURCE,
+            scene,
             "--",
-            f"{_ARG_COMPARE_CONTEXT}{context}",
+            *tail,
         )
 
 
@@ -211,6 +254,58 @@ def _install_packaged_compare_scenes(overlay_dir: Path) -> None:
         _write_exclusive_bytes(target, payload)
 
 
+def _install_packaged_compare_session_scenes(overlay_dir: Path) -> None:
+    package = resources.files(_V08_RESOURCE_PACKAGE)
+    for leaf in _PACKAGED_COMPARE_SESSION_FILES:
+        target = overlay_dir / leaf
+        if target.exists():
+            raise ValidationError(f"overlay compare session resource {leaf} already exists")
+        payload = package.joinpath(leaf).read_bytes()
+        _write_exclusive_bytes(target, payload)
+
+
+def _canonical_clip_package_paths(
+    clip_packages: Sequence[CandidateAnimationReviewSetSource],
+) -> tuple[tuple[str, str], ...]:
+    return tuple(
+        (
+            str(Path(entry.animation_dir).resolve()),
+            str(Path(entry.clip_path).resolve()),
+        )
+        for entry in clip_packages
+    )
+
+
+def _assert_compare_session_context_matches(
+    session_context: BridgeContext,
+    *,
+    handlers: CandidateWorkflowHandlers,
+    workflow_id: str,
+    preview_dir: Path,
+    review_dir: Path,
+    clip_packages: Sequence[CandidateAnimationReviewSetSource],
+) -> None:
+    _validate_bridge_context_paths(session_context)
+    if session_context.workflow_id != workflow_id:
+        raise ValidationError("session context workflow_id mismatch")
+    if Path(session_context.project_root).resolve() != handlers.root.resolve():
+        raise ValidationError("session context project_root mismatch")
+    if Path(session_context.preview_dir).resolve() != preview_dir.resolve():
+        raise ValidationError("session context preview_dir mismatch")
+    if Path(session_context.review_dir).resolve() != review_dir.resolve():
+        raise ValidationError("session context review_dir mismatch")
+    if _canonical_clip_package_paths(
+        session_context.clip_packages
+    ) != _canonical_clip_package_paths(clip_packages):
+        raise ValidationError("session context clip_packages mismatch")
+
+
+def _resolve_session_python_executable(python_executable: Path | None) -> Path | None:
+    if python_executable is None:
+        return None
+    return _assert_trusted_executable(python_executable, label="python executable")
+
+
 def prepare_animation_review_compare_viewer(
     handlers: CandidateWorkflowHandlers,
     workflow_id: str,
@@ -220,6 +315,9 @@ def prepare_animation_review_compare_viewer(
     overlay_dir: Path,
     left_clip_id: str,
     right_clip_id: str,
+    *,
+    session_context: BridgeContext | None = None,
+    python_executable: Path | None = None,
 ) -> PreparedAnimationReviewCompareViewer:
     """Stage a disposable Godot overlay for side-by-side synchronized clip comparison."""
     if not isinstance(workflow_id, str) or not workflow_id:
@@ -228,6 +326,24 @@ def prepare_animation_review_compare_viewer(
     review_root = Path(review_dir)
     _reject_unsafe_lexical_path(preview_root, label="preview_dir")
     _reject_unsafe_lexical_path(review_root, label="review_dir")
+
+    session_enabled = session_context is not None
+    trusted_python: Path | None = None
+    if session_enabled:
+        assert session_context is not None  # noqa: S101
+        trusted_python = _resolve_session_python_executable(
+            Path(python_executable) if python_executable is not None else Path(sys.executable)
+        )
+        _assert_compare_session_context_matches(
+            session_context,
+            handlers=handlers,
+            workflow_id=workflow_id,
+            preview_dir=preview_root,
+            review_dir=review_root,
+            clip_packages=clip_packages,
+        )
+    elif python_executable is not None:
+        raise ValidationError("python_executable requires session_context")
 
     if isinstance(left_clip_id, bool) or isinstance(right_clip_id, bool):
         raise ValidationError("compare clip ids must be strings")
@@ -240,6 +356,9 @@ def prepare_animation_review_compare_viewer(
 
     overlay = _assert_fresh_overlay_path(overlay_dir)
     forbidden = _compare_forbidden_roots(handlers, preview_root, review_root, clip_packages)
+    if session_enabled:
+        assert session_context is not None  # noqa: S101
+        forbidden = forbidden + _mutation_forbidden_roots(session_context)
     _assert_path_outside_roots(overlay, forbidden, label="overlay_dir")
     _assert_overlay_parent_ready(overlay)
 
@@ -270,6 +389,8 @@ def prepare_animation_review_compare_viewer(
     )
     overlay_owned = False
     context_path: Path | None = None
+    session_context_path: Path | None = None
+    exchange_dir: Path | None = None
     try:
         overlay.mkdir(parents=False)
         overlay_owned = True
@@ -283,6 +404,18 @@ def prepare_animation_review_compare_viewer(
         if not _snapshots_match(original_snapshot, overlay_snapshot):
             raise ValidationError("overlay review set bytes drifted during materialization")
         _install_packaged_compare_scenes(overlay)
+        if session_enabled:
+            assert session_context is not None
+            assert trusted_python is not None
+            _install_packaged_compare_session_scenes(overlay)
+            exchange_dir = overlay / _EXCHANGE_DIR_NAME
+            exchange_dir.mkdir(parents=False)
+            session_context_path = overlay / _SESSION_CONTEXT_LEAF
+            _write_context_file(
+                session_context,
+                path=session_context_path,
+                exchange_dir=exchange_dir,
+            )
         context_path = overlay / _CONTEXT_LEAF
         _write_compare_context_file(context_path, left, right)
         _assert_review_set_current(
@@ -303,12 +436,20 @@ def prepare_animation_review_compare_viewer(
         raise
 
     _assert_path_outside_roots(context_path, forbidden, label="compare context file")
+    if session_enabled:
+        assert exchange_dir is not None
+        assert session_context_path is not None
+        _assert_path_outside_roots(exchange_dir, forbidden, label="exchange_dir")
+        _assert_path_outside_roots(session_context_path, forbidden, label="context file")
 
     return PreparedAnimationReviewCompareViewer(
         overlay_dir=overlay,
         context_file=context_path,
         left_clip_id=left,
         right_clip_id=right,
+        session_context_file=session_context_path,
+        session_exchange_dir=exchange_dir,
+        python_executable=trusted_python,
     )
 
 
@@ -328,6 +469,8 @@ def run_animation_review_compare_viewer(
     left_clip_id: str,
     right_clip_id: str,
     godot_executable: Path,
+    session_context: BridgeContext | None = None,
+    python_executable: Path | None = None,
 ) -> int:
     """Create a disposable overlay, launch Godot compare, and remove owned temp state on exit."""
     try:
@@ -352,6 +495,8 @@ def run_animation_review_compare_viewer(
             overlay_dir,
             left_clip_id,
             right_clip_id,
+            session_context=session_context,
+            python_executable=python_executable,
         )
         _assert_review_set_current(
             handlers,

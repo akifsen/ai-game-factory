@@ -1,0 +1,191 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="PackedScene" path="res://animation_review_compare.tscn" id="1_compare"]
+[ext_resource type="Script" path="res://animation_review_compare_session_controller.gd" id="2_controller"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_session_panel"]
+bg_color = Color(0.1, 0.11, 0.14, 0.94)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.32, 0.34, 0.4, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+content_margin_left = 12.0
+content_margin_top = 10.0
+content_margin_right = 12.0
+content_margin_bottom = 10.0
+
+[node name="AnimationReviewCompareSession" type="Node3D"]
+script = ExtResource("2_controller")
+
+[node name="PlaybackLayer" type="CanvasLayer" parent="."]
+layer = 1
+
+[node name="ComparePlayback" parent="PlaybackLayer" instance=ExtResource("1_compare")]
+unique_name_in_owner = true
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="SessionUI" type="CanvasLayer" parent="."]
+layer = 2
+
+[node name="Root" type="Control" parent="SessionUI"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="SessionMargin" type="MarginContainer" parent="SessionUI/Root"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 11
+anchor_left = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -360.0
+offset_bottom = -220.0
+grow_horizontal = 0
+grow_vertical = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 12
+
+[node name="SessionScroll" type="ScrollContainer" parent="SessionUI/Root/SessionMargin"]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="SessionPanel" type="PanelContainer" parent="SessionUI/Root/SessionMargin/SessionScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_session_panel")
+
+[node name="VBox" type="VBoxContainer" parent="SessionUI/Root/SessionMargin/SessionScroll/SessionPanel"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Title" type="Label" parent="SessionUI/Root/SessionMargin/SessionScroll/SessionPanel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.92, 0.96, 1)
+text = "Compare session"
+
+[node name="SessionStatusBanner" type="Label" parent="SessionUI/Root/SessionMargin/SessionScroll/SessionPanel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+autowrap_mode = 3
+text = "Session overlay idle."
+
+[node name="ReloadSessionButton" type="Button" parent="SessionUI/Root/SessionMargin/SessionScroll/SessionPanel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Reload"
+
+[node name="PaneRow" type="HBoxContainer" parent="SessionUI/Root/SessionMargin/SessionScroll/SessionPanel/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="LeftPane" type="VBoxContainer" parent="SessionUI/Root/SessionMargin/SessionScroll/SessionPanel/VBox/PaneRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 6
+
+[node name="LeftCaption" type="Label" parent="SessionUI/Root/SessionMargin/SessionScroll/SessionPanel/VBox/PaneRow/LeftPane"]
+layout_mode = 2
+text = "Left clip"
+
+[node name="LeftClipStatusOption" type="OptionButton" parent="SessionUI/Root/SessionMargin/SessionScroll/SessionPanel/VBox/PaneRow/LeftPane"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="LeftStatusRow" type="HBoxContainer" parent="SessionUI/Root/SessionMargin/SessionScroll/SessionPanel/VBox/PaneRow/LeftPane"]
+layout_mode = 2
+
+[node name="LeftKeepButton" type="Button" parent="SessionUI/Root/SessionMargin/SessionScroll/SessionPanel/VBox/PaneRow/LeftPane/LeftStatusRow"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Keep"
+
+[node name="LeftReviseButton" type="Button" parent="SessionUI/Root/SessionMargin/SessionScroll/SessionPanel/VBox/PaneRow/LeftPane/LeftStatusRow"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Revise"
+
+[node name="LeftClipNoteField" type="LineEdit" parent="SessionUI/Root/SessionMargin/SessionScroll/SessionPanel/VBox/PaneRow/LeftPane"]
+unique_name_in_owner = true
+layout_mode = 2
+placeholder_text = "Note"
+
+[node name="LeftSaveNoteButton" type="Button" parent="SessionUI/Root/SessionMargin/SessionScroll/SessionPanel/VBox/PaneRow/LeftPane"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Save note"
+
+[node name="LeftAddBookmarkButton" type="Button" parent="SessionUI/Root/SessionMargin/SessionScroll/SessionPanel/VBox/PaneRow/LeftPane"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Bookmark current"
+
+[node name="LeftBookmarksLabel" type="Label" parent="SessionUI/Root/SessionMargin/SessionScroll/SessionPanel/VBox/PaneRow/LeftPane"]
+unique_name_in_owner = true
+layout_mode = 2
+autowrap_mode = 3
+text = "Bookmarks: (none)"
+
+[node name="RightPane" type="VBoxContainer" parent="SessionUI/Root/SessionMargin/SessionScroll/SessionPanel/VBox/PaneRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 6
+
+[node name="RightCaption" type="Label" parent="SessionUI/Root/SessionMargin/SessionScroll/SessionPanel/VBox/PaneRow/RightPane"]
+layout_mode = 2
+text = "Right clip"
+
+[node name="RightClipStatusOption" type="OptionButton" parent="SessionUI/Root/SessionMargin/SessionScroll/SessionPanel/VBox/PaneRow/RightPane"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="RightStatusRow" type="HBoxContainer" parent="SessionUI/Root/SessionMargin/SessionScroll/SessionPanel/VBox/PaneRow/RightPane"]
+layout_mode = 2
+
+[node name="RightKeepButton" type="Button" parent="SessionUI/Root/SessionMargin/SessionScroll/SessionPanel/VBox/PaneRow/RightPane/RightStatusRow"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Keep"
+
+[node name="RightReviseButton" type="Button" parent="SessionUI/Root/SessionMargin/SessionScroll/SessionPanel/VBox/PaneRow/RightPane/RightStatusRow"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Revise"
+
+[node name="RightClipNoteField" type="LineEdit" parent="SessionUI/Root/SessionMargin/SessionScroll/SessionPanel/VBox/PaneRow/RightPane"]
+unique_name_in_owner = true
+layout_mode = 2
+placeholder_text = "Note"
+
+[node name="RightSaveNoteButton" type="Button" parent="SessionUI/Root/SessionMargin/SessionScroll/SessionPanel/VBox/PaneRow/RightPane"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Save note"
+
+[node name="RightAddBookmarkButton" type="Button" parent="SessionUI/Root/SessionMargin/SessionScroll/SessionPanel/VBox/PaneRow/RightPane"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Bookmark current"
+
+[node name="RightBookmarksLabel" type="Label" parent="SessionUI/Root/SessionMargin/SessionScroll/SessionPanel/VBox/PaneRow/RightPane"]
+unique_name_in_owner = true
+layout_mode = 2
+autowrap_mode = 3
+text = "Bookmarks: (none)"
