@@ -143,28 +143,34 @@ layout_mode = 2
 autowrap_mode = 3
 text = "Bookmarks: (none)"
 
-[node name="LeftBookmarkRow" type="HBoxContainer" parent="SessionUI/Root/SessionMargin/SessionScroll/SessionPanel/VBox/PaneRow/LeftPane"]
-layout_mode = 2
-theme_override_constants/separation = 6
-
-[node name="LeftPrevBookmarkButton" type="Button" parent="SessionUI/Root/SessionMargin/SessionScroll/SessionPanel/VBox/PaneRow/LeftPane/LeftBookmarkRow"]
-unique_name_in_owner = true
-layout_mode = 2
-text = "Prev"
-
-[node name="LeftBookmarkOption" type="OptionButton" parent="SessionUI/Root/SessionMargin/SessionScroll/SessionPanel/VBox/PaneRow/LeftPane/LeftBookmarkRow"]
+[node name="LeftBookmarkOption" type="OptionButton" parent="SessionUI/Root/SessionMargin/SessionScroll/SessionPanel/VBox/PaneRow/LeftPane"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 
+[node name="LeftBookmarkRow" type="HBoxContainer" parent="SessionUI/Root/SessionMargin/SessionScroll/SessionPanel/VBox/PaneRow/LeftPane"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="LeftPrevBookmarkButton" type="Button" parent="SessionUI/Root/SessionMargin/SessionScroll/SessionPanel/VBox/PaneRow/LeftPane/LeftBookmarkRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(36, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "Prev"
+
 [node name="LeftNextBookmarkButton" type="Button" parent="SessionUI/Root/SessionMargin/SessionScroll/SessionPanel/VBox/PaneRow/LeftPane/LeftBookmarkRow"]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(36, 0)
 layout_mode = 2
+theme_override_font_sizes/font_size = 12
 text = "Next"
 
 [node name="LeftSeekBookmarkButton" type="Button" parent="SessionUI/Root/SessionMargin/SessionScroll/SessionPanel/VBox/PaneRow/LeftPane/LeftBookmarkRow"]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(32, 0)
 layout_mode = 2
+theme_override_font_sizes/font_size = 12
 text = "Go"
 
 [node name="RightPane" type="VBoxContainer" parent="SessionUI/Root/SessionMargin/SessionScroll/SessionPanel/VBox/PaneRow"]
@@ -214,26 +220,32 @@ layout_mode = 2
 autowrap_mode = 3
 text = "Bookmarks: (none)"
 
-[node name="RightBookmarkRow" type="HBoxContainer" parent="SessionUI/Root/SessionMargin/SessionScroll/SessionPanel/VBox/PaneRow/RightPane"]
-layout_mode = 2
-theme_override_constants/separation = 6
-
-[node name="RightPrevBookmarkButton" type="Button" parent="SessionUI/Root/SessionMargin/SessionScroll/SessionPanel/VBox/PaneRow/RightPane/RightBookmarkRow"]
-unique_name_in_owner = true
-layout_mode = 2
-text = "Prev"
-
-[node name="RightBookmarkOption" type="OptionButton" parent="SessionUI/Root/SessionMargin/SessionScroll/SessionPanel/VBox/PaneRow/RightPane/RightBookmarkRow"]
+[node name="RightBookmarkOption" type="OptionButton" parent="SessionUI/Root/SessionMargin/SessionScroll/SessionPanel/VBox/PaneRow/RightPane"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
 
+[node name="RightBookmarkRow" type="HBoxContainer" parent="SessionUI/Root/SessionMargin/SessionScroll/SessionPanel/VBox/PaneRow/RightPane"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="RightPrevBookmarkButton" type="Button" parent="SessionUI/Root/SessionMargin/SessionScroll/SessionPanel/VBox/PaneRow/RightPane/RightBookmarkRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(36, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "Prev"
+
 [node name="RightNextBookmarkButton" type="Button" parent="SessionUI/Root/SessionMargin/SessionScroll/SessionPanel/VBox/PaneRow/RightPane/RightBookmarkRow"]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(36, 0)
 layout_mode = 2
+theme_override_font_sizes/font_size = 12
 text = "Next"
 
 [node name="RightSeekBookmarkButton" type="Button" parent="SessionUI/Root/SessionMargin/SessionScroll/SessionPanel/VBox/PaneRow/RightPane/RightBookmarkRow"]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(32, 0)
 layout_mode = 2
+theme_override_font_sizes/font_size = 12
 text = "Go"

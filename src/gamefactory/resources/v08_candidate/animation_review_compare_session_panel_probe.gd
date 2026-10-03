@@ -10,6 +10,10 @@ const BRIDGE_SCHEMA_VERSION := "animation-review-session-bridge-0.8.0"
 
 const CONTEXT_PREFIX := "--compare-context-file="
 const READY_FRAMES := 300
+const LAYOUT_ORACLE_SIZE := Vector2i(1280, 720)
+const LAYOUT_RECT_MIN_PX := 8.0
+const LAYOUT_DISPLAY_TOLERANCE_PX := 1.0
+const LAYOUT_READY_FRAMES := 300
 
 
 func _initialize() -> void:
@@ -123,6 +127,12 @@ func _add_pane_controls(parent: Node, owner: Node, side: String) -> void:
 	bookmarks.unique_name_in_owner = true
 	parent.add_child(bookmarks)
 	bookmarks.owner = owner
+	var bookmark_option := OptionButton.new()
+	bookmark_option.name = "%sBookmarkOption" % prefix
+	bookmark_option.unique_name_in_owner = true
+	bookmark_option.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	parent.add_child(bookmark_option)
+	bookmark_option.owner = owner
 	var row := HBoxContainer.new()
 	row.name = "%sBookmarkRow" % prefix
 	parent.add_child(row)
@@ -132,11 +142,6 @@ func _add_pane_controls(parent: Node, owner: Node, side: String) -> void:
 	prev.unique_name_in_owner = true
 	row.add_child(prev)
 	prev.owner = owner
-	var bookmark_option := OptionButton.new()
-	bookmark_option.name = "%sBookmarkOption" % prefix
-	bookmark_option.unique_name_in_owner = true
-	row.add_child(bookmark_option)
-	bookmark_option.owner = owner
 	var next := Button.new()
 	next.name = "%sNextBookmarkButton" % prefix
 	next.unique_name_in_owner = true
@@ -284,6 +289,8 @@ static func run_session_panel_regression_probe_async(session: Node) -> bool:
 	var controller_script: Script = session.get_script()
 	if controller_script == null:
 		return false
+
+	failures.append_array(await _collect_actual_scene_layout_failures(session))
 
 	session.set(
 		"_stored_session",
@@ -859,6 +866,277 @@ static func run_session_panel_regression_probe_async(session: Node) -> bool:
 	for item in failures:
 		print("FAIL: %s" % item)
 	return false
+
+
+static func _collect_actual_scene_layout_failures(session: Node) -> Array[String]:
+	var failures: Array[String] = []
+	if not ResourceLoader.exists("res://animation_review_compare_session.tscn"):
+		failures.append("layout session scene resource missing")
+		return failures
+	var packed := load("res://animation_review_compare_session.tscn") as PackedScene
+	if packed == null:
+		failures.append("layout session scene load failed")
+		return failures
+	var tree := session.get_tree()
+	if tree == null:
+		failures.append("layout scene tree missing")
+		return failures
+	var layout_scene := packed.instantiate() as Node3D
+	if layout_scene == null:
+		failures.append("layout session root invalid")
+		return failures
+	tree.root.add_child(layout_scene)
+	DisplayServer.window_set_size(LAYOUT_ORACLE_SIZE)
+	for _i in range(LAYOUT_READY_FRAMES):
+		await tree.process_frame
+	var controller_script: Script = layout_scene.get_script()
+	if controller_script == null:
+		layout_scene.queue_free()
+		failures.append("layout session controller missing")
+		return failures
+	var stored: Dictionary = _layout_regression_session_dict(controller_script)
+	layout_scene.set("_stored_session", stored)
+	layout_scene.set("_raw_sha256", "a".repeat(64))
+	layout_scene.set("_authority_current", true)
+	layout_scene.set("_reload_required", false)
+	layout_scene.set("_conflict_active", false)
+	layout_scene.set("_bridge_busy", true)
+	layout_scene.set("_user_status_message", "Session bridge busy; compare playback continues.")
+	layout_scene.set("_tracked_left_clip_id", CLIP_A)
+	layout_scene.set("_tracked_right_clip_id", CLIP_C)
+	layout_scene.call("_refresh_session_controls")
+	layout_scene.call("_apply_pane_annotations", "left")
+	layout_scene.call("_apply_pane_annotations", "right")
+	var banner: Label = layout_scene.get("_status_banner")
+	if banner != null:
+		banner.text = str(layout_scene.get("_user_status_message"))
+	for _j in range(24):
+		await tree.process_frame
+	if layout_scene.has_method("_on_session_viewport_layout"):
+		layout_scene.call("_on_session_viewport_layout")
+		await tree.process_frame
+	failures.append_array(_layout_control_visibility_failures(layout_scene))
+	failures.append_array(_layout_nav_panel_clip_failures(layout_scene))
+	failures.append_array(_layout_viewport_oracle_failures(layout_scene, tree))
+	failures.append_array(
+		await _layout_banner_state_failures(layout_scene, stored, tree)
+	)
+	layout_scene.queue_free()
+	if failures.is_empty():
+		print("PASS: animation_review_compare_session_panel_layout")
+	return failures
+
+
+static func _layout_regression_session_dict(controller_script: Script) -> Dictionary:
+	var session_doc: Dictionary = controller_script.call(
+		"_minimal_valid_session_dict_with_clips",
+		1,
+		CLIP_A,
+		CLIP_C,
+		1.5,
+		1.25,
+	)
+	var records: Variant = session_doc.get("clip_records", [])
+	if typeof(records) == TYPE_ARRAY:
+		if records.size() > 0 and typeof(records[0]) == TYPE_DICTIONARY:
+			var left_rec: Dictionary = records[0].duplicate(true)
+			left_rec["note"] = "review A"
+			left_rec["bookmarks"] = [0.75, 1.125]
+			records[0] = left_rec
+		if records.size() > 1 and typeof(records[1]) == TYPE_DICTIONARY:
+			var right_rec: Dictionary = records[1].duplicate(true)
+			right_rec["bookmarks"] = [0.625]
+			records[1] = right_rec
+	return session_doc
+
+
+static func _layout_control_visibility_failures(scene: Node3D) -> Array[String]:
+	var failures: Array[String] = []
+	for unique_name in [
+		"LeftBookmarkOption",
+		"RightBookmarkOption",
+		"LeftPrevBookmarkButton",
+		"LeftNextBookmarkButton",
+		"LeftSeekBookmarkButton",
+		"RightPrevBookmarkButton",
+		"RightNextBookmarkButton",
+		"RightSeekBookmarkButton",
+		"SessionStatusBanner",
+	]:
+		var node := scene.get_node_or_null(NodePath("%" + unique_name)) as CanvasItem
+		if node == null:
+			failures.append("layout missing %s" % unique_name)
+			continue
+		if not node.visible:
+			failures.append("layout hidden %s" % unique_name)
+	failures.append_array(_layout_bookmark_label_failures(scene))
+	return failures
+
+
+static func _layout_bookmark_label_failures(scene: Node3D) -> Array[String]:
+	var failures: Array[String] = []
+	var left_label: Label = scene.get_node_or_null("%LeftBookmarksLabel") as Label
+	if left_label == null or left_label.text.find("0.750") < 0 or left_label.text.find("1.125") < 0:
+		failures.append("layout left bookmark labels")
+	var right_label: Label = scene.get_node_or_null("%RightBookmarksLabel") as Label
+	if right_label == null or right_label.text.find("0.625") < 0:
+		failures.append("layout right bookmark labels")
+	return failures
+
+
+static func _layout_nav_panel_clip_failures(scene: Node3D) -> Array[String]:
+	var failures: Array[String] = []
+	var scroll := scene.get_node_or_null(
+		"SessionUI/Root/SessionMargin/SessionScroll"
+	) as ScrollContainer
+	if scroll == null:
+		failures.append("layout session scroll missing")
+		return failures
+	var clip_rect := scroll.get_global_rect()
+	for unique_name in [
+		"LeftPrevBookmarkButton",
+		"LeftNextBookmarkButton",
+		"LeftSeekBookmarkButton",
+		"RightPrevBookmarkButton",
+		"RightNextBookmarkButton",
+		"RightSeekBookmarkButton",
+	]:
+		var node := scene.get_node_or_null(NodePath("%" + unique_name)) as Control
+		if node == null:
+			failures.append("layout missing %s" % unique_name)
+			continue
+		if not node.is_visible_in_tree():
+			failures.append("layout nav not visible in tree %s" % unique_name)
+		if not _layout_rect_contained_in(node.get_global_rect(), clip_rect):
+			failures.append("layout nav outside session scroll %s" % unique_name)
+	return failures
+
+
+static func _layout_banner_state_failures(
+	scene: Node3D, stored: Dictionary, tree: SceneTree
+) -> Array[String]:
+	var failures: Array[String] = []
+	var cases: Array[Dictionary] = [
+		{
+			"label": "busy",
+			"bridge_busy": true,
+			"substring": "busy",
+		},
+		{
+			"label": "conflict",
+			"conflict_active": true,
+			"reload_required": true,
+			"substring": "reload",
+		},
+		{
+			"label": "stale",
+			"reload_required": true,
+			"substring": "reload",
+		},
+		{
+			"label": "offline",
+			"bridge_configured": false,
+			"substring": "unavailable",
+		},
+	]
+	for case in cases:
+		failures.append_array(
+			await _apply_layout_banner_oracle(scene, stored, case, tree)
+		)
+	return failures
+
+
+static func _apply_layout_banner_oracle(
+	scene: Node3D, stored: Dictionary, flags: Dictionary, tree: SceneTree
+) -> Array[String]:
+	var failures: Array[String] = []
+	scene.set("_stored_session", stored)
+	scene.set("_raw_sha256", "a".repeat(64))
+	scene.set("_authority_current", flags.get("authority_current", true))
+	scene.set("_bridge_configured", flags.get("bridge_configured", true))
+	scene.set("_bridge_busy", flags.get("bridge_busy", false))
+	scene.set("_conflict_active", flags.get("conflict_active", false))
+	scene.set("_reload_required", flags.get("reload_required", false))
+	scene.set("_user_status_message", str(flags.get("user_message", "")))
+	scene.set("_tracked_left_clip_id", CLIP_A)
+	scene.set("_tracked_right_clip_id", CLIP_C)
+	scene.call("_refresh_session_controls")
+	scene.call("_apply_pane_annotations", "left")
+	scene.call("_apply_pane_annotations", "right")
+	for _i in range(4):
+		await tree.process_frame
+	if scene.has_method("_on_session_viewport_layout"):
+		scene.call("_on_session_viewport_layout")
+		await tree.process_frame
+	var banner: Label = scene.get("_status_banner") as Label
+	var needle := str(flags.get("substring", ""))
+	if banner == null or banner.text.to_lower().find(needle.to_lower()) < 0:
+		failures.append("layout banner %s" % str(flags.get("label", needle)))
+	failures.append_array(_layout_bookmark_label_failures(scene))
+	failures.append_array(_layout_nav_panel_clip_failures(scene))
+	return failures
+
+
+static func _layout_viewport_oracle_failures(scene: Node3D, tree: SceneTree) -> Array[String]:
+	var failures: Array[String] = []
+	var playback := scene.get_node_or_null("%ComparePlayback") as Control
+	if playback == null:
+		failures.append("layout compare playback missing")
+		return failures
+	var display_rect := tree.root.get_viewport().get_visible_rect()
+	var left_container := _layout_viewport_container_for_side(playback, true)
+	var right_container := _layout_viewport_container_for_side(playback, false)
+	if left_container == null or right_container == null:
+		failures.append("layout viewport containers missing")
+		return failures
+	var left_rect := left_container.get_global_rect()
+	var right_rect := right_container.get_global_rect()
+	if not _layout_rect_on_display(left_rect, display_rect):
+		failures.append("layout left viewport not on display")
+	if not _layout_rect_on_display(right_rect, display_rect):
+		failures.append("layout right viewport not on display")
+	if left_rect.intersects(right_rect):
+		failures.append("layout viewport containers overlap")
+	var session_panel := scene.get_node_or_null(
+		"SessionUI/Root/SessionMargin/SessionScroll/SessionPanel"
+	) as Control
+	if session_panel == null:
+		failures.append("layout session panel missing")
+		return failures
+	var panel_rect := session_panel.get_global_rect()
+	if panel_rect.size.x >= LAYOUT_RECT_MIN_PX and panel_rect.size.y >= LAYOUT_RECT_MIN_PX:
+		if left_rect.intersects(panel_rect) or right_rect.intersects(panel_rect):
+			failures.append("layout viewport overlaps session panel")
+	return failures
+
+
+static func _layout_viewport_container_for_side(playback: Control, is_left: bool) -> SubViewportContainer:
+	var path := (
+		"ViewportSplit/LeftColumn/LeftViewportContainer"
+		if is_left
+		else "ViewportSplit/RightColumn/RightViewportContainer"
+	)
+	return playback.get_node_or_null(path) as SubViewportContainer
+
+
+static func _layout_rect_on_display(rect: Rect2, display: Rect2) -> bool:
+	return _layout_rect_contained_in(rect, display)
+
+
+static func _layout_rect_contained_in(inner: Rect2, outer: Rect2) -> bool:
+	if inner.size.x < LAYOUT_RECT_MIN_PX or inner.size.y < LAYOUT_RECT_MIN_PX:
+		return false
+	var tol := LAYOUT_DISPLAY_TOLERANCE_PX
+	var outer_max_x := outer.position.x + outer.size.x
+	var outer_max_y := outer.position.y + outer.size.y
+	var inner_max_x := inner.position.x + inner.size.x
+	var inner_max_y := inner.position.y + inner.size.y
+	return (
+		inner.position.x >= outer.position.x - tol
+		and inner.position.y >= outer.position.y - tol
+		and inner_max_x <= outer_max_x + tol
+		and inner_max_y <= outer_max_y + tol
+	)
 
 
 static func _type_note_draft(session: Node, pane: String, text: String) -> void:

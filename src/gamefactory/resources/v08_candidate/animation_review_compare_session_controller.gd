@@ -221,7 +221,18 @@ func _on_session_viewport_layout() -> void:
 	_session_margin.offset_left = -panel_width
 	_session_margin.offset_bottom = -COMPARE_BOTTOM_PANEL_PX
 	if _playback_root != null:
-		_playback_root.offset_right = -panel_width
+		_playback_root.offset_right = -_playback_inset_for_session_panel(panel_width)
+
+
+func _playback_inset_for_session_panel(fallback_width: int) -> int:
+	var root_rect := _session_root.get_global_rect()
+	var margin_rect := _session_margin.get_global_rect()
+	if root_rect.size.x < 8.0:
+		return fallback_width
+	var reserved := int(
+		round(root_rect.position.x + root_rect.size.x - margin_rect.position.x)
+	)
+	return maxi(fallback_width, reserved)
 
 
 static func _session_panel_width_for_root(root_width: int) -> int:

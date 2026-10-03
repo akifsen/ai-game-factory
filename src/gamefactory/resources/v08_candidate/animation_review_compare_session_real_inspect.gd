@@ -41,6 +41,7 @@ const DURATION_B := 2.0
 const DURATION_C := 1.25
 const VIEWPORT_ORACLE_SIZE := Vector2i(1280, 720)
 const RECT_DISPLAY_CONTAIN_TOLERANCE_PX := 1.0
+const READY_ORACLE_DIAG_PRINT_MAX := 8
 
 var _last_bridge_wait_diagnostic: String = ""
 var _last_viewport_oracle_diagnostic: String = ""
@@ -1171,6 +1172,7 @@ func _compare_playback(scene: Node3D) -> Control:
 
 func _wait_compare_session_ready(scene: Node3D) -> bool:
 	var deadline_ms := Time.get_ticks_msec() + READY_TIMEOUT_MS
+	var diag_prints := 0
 	while Time.get_ticks_msec() < deadline_ms:
 		var snap := _session_snapshot(scene)
 		var compare: Variant = snap.get("compare", {})
@@ -1178,8 +1180,43 @@ func _wait_compare_session_ready(scene: Node3D) -> bool:
 			if str(compare.get("left_clip_id", "")) == CLIP_A and str(compare.get("right_clip_id", "")) == CLIP_C:
 				if await _viewports_nonblank(scene):
 					return true
+				if (
+					diag_prints < READY_ORACLE_DIAG_PRINT_MAX
+					and not _last_viewport_oracle_diagnostic.is_empty()
+				):
+					print(_viewport_ready_oracle_diagnostic(scene))
+					diag_prints += 1
 		await process_frame
+	if diag_prints < READY_ORACLE_DIAG_PRINT_MAX and not _last_viewport_oracle_diagnostic.is_empty():
+		print(_viewport_ready_oracle_diagnostic(scene))
 	return false
+
+
+func _viewport_ready_oracle_diagnostic(scene: Node3D) -> String:
+	var parts: PackedStringArray = []
+	parts.append("compare_session_ready_oracle:%s" % _last_viewport_oracle_diagnostic)
+	var playback := _compare_playback(scene)
+	if playback == null:
+		return " ".join(parts)
+	var left_container := _viewport_container_for_side(playback, true)
+	var right_container := _viewport_container_for_side(playback, false)
+	if left_container != null:
+		parts.append("LeftRect %s" % _rect_layout_diag(left_container.get_global_rect()))
+	if right_container != null:
+		parts.append("RightRect %s" % _rect_layout_diag(right_container.get_global_rect()))
+	var session_panel := scene.get_node_or_null(
+		"SessionUI/Root/SessionMargin/SessionScroll/SessionPanel"
+	) as Control
+	if session_panel != null:
+		parts.append("PanelRect %s" % _rect_layout_diag(session_panel.get_global_rect()))
+	return " ".join(parts)
+
+
+func _rect_layout_diag(rect: Rect2) -> String:
+	return (
+		"x%.0f y%.0f w%.0f h%.0f end%.0f"
+		% [rect.position.x, rect.position.y, rect.size.x, rect.size.y, rect.position.x + rect.size.x]
+	)
 
 
 func _wait_bridge_bootstrap(scene: Node3D, require_session: bool, stage: String) -> bool:

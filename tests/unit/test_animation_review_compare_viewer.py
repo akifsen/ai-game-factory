@@ -56,6 +56,30 @@ _PROBE_SCRIPTS = (
     "animation_review_compare_probe_player.gd",
     "animation_review_compare_runtime_probe.gd",
 )
+_PANEL_PROBE_LAYOUT_SCENES = (
+    "animation_review_compare_session.tscn",
+    "animation_review_compare.tscn",
+)
+_PANEL_PROBE_MINIMAL_SET_PREVIEW_TSCN = b"""[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://animation_review_compare_probe_player.gd" id="1_player"]
+
+[node name="AnimationReviewSetPreview" type="Node3D"]
+
+[node name="Skeleton3D" type="Skeleton3D" parent="."]
+bones/0/name = "Root"
+bones/0/parent = -1
+bones/0/rest = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+bones/1/name = "Spine"
+bones/1/parent = 0
+bones/1/rest = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0)
+bones/2/name = "LeftUpperArm"
+bones/2/parent = 1
+bones/2/rest = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.2, 0.2, 0)
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+script = ExtResource("1_player")
+"""
 _V08_PACKAGE = resources.files("gamefactory.resources.v08_candidate")
 
 
@@ -799,6 +823,11 @@ def _stage_compare_session_panel_probe(tmp_path: Path) -> tuple[Path, Path]:
     )
     for name in probe_deps:
         (staged / name).write_bytes(_V08_PACKAGE.joinpath(name).read_bytes())
+    for name in _PANEL_PROBE_LAYOUT_SCENES:
+        (staged / name).write_bytes(_V08_PACKAGE.joinpath(name).read_bytes())
+    (staged / "animation_review_set_preview.tscn").write_bytes(
+        _PANEL_PROBE_MINIMAL_SET_PREVIEW_TSCN
+    )
     context_path = staged / "compare_context.json"
     context_path.write_text(
         json.dumps(
@@ -818,20 +847,21 @@ def _stage_compare_session_panel_probe(tmp_path: Path) -> tuple[Path, Path]:
 @pytest.mark.skipif(not Path(_GODOT).is_file(), reason="Godot executable not available")
 def test_compare_session_panel_regression_probe(tmp_path: Path) -> None:
     staged, context_path = _stage_compare_session_panel_probe(tmp_path)
+    probe_argv = [
+        str(_GODOT),
+        "--rendering-method",
+        "gl_compatibility",
+        "--audio-driver",
+        "Dummy",
+        "--path",
+        str(staged),
+        "--script",
+        "res://animation_review_compare_session_panel_probe.gd",
+        "--",
+        f"{compare_viewer._ARG_COMPARE_CONTEXT}{context_path}",
+    ]
     completed = subprocess.run(
-        [
-            str(_GODOT),
-            "--rendering-method",
-            "gl_compatibility",
-            "--audio-driver",
-            "Dummy",
-            "--path",
-            str(staged),
-            "--script",
-            "res://animation_review_compare_session_panel_probe.gd",
-            "--",
-            f"{compare_viewer._ARG_COMPARE_CONTEXT}{context_path}",
-        ],
+        probe_argv,
         cwd=staged,
         capture_output=True,
         text=True,
@@ -839,5 +869,19 @@ def test_compare_session_panel_regression_probe(tmp_path: Path) -> None:
     )
     out = completed.stdout + completed.stderr
     assert completed.returncode == 0, out[-3000:]
+    assert "PASS: animation_review_compare_session_panel_layout" in out
     assert "PASS: animation_review_compare_session_panel_regression" in out
     assert "SCRIPT ERROR" not in out
+
+    (staged / "animation_review_compare_session.tscn").unlink()
+    completed_missing = subprocess.run(
+        probe_argv,
+        cwd=staged,
+        capture_output=True,
+        text=True,
+        timeout=45,
+    )
+    out_missing = completed_missing.stdout + completed_missing.stderr
+    assert completed_missing.returncode != 0, out_missing[-3000:]
+    assert "layout session scene resource missing" in out_missing
+    assert "PASS: animation_review_compare_session_panel_layout" not in out_missing
