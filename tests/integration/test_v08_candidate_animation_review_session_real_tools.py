@@ -126,6 +126,28 @@ def _y_rotation_quaternion_xyzw(degrees: float) -> tuple[float, float, float, fl
     return (0.0, math.sin(half), 0.0, math.cos(half))
 
 
+def _authored_spine_turn_03_clip_raw_bytes() -> bytes:
+    identity = [0.0, 0.0, 0.0, 1.0]
+    y20 = list(_y_rotation_quaternion_xyzw(20.0))
+    doc = {
+        "schema_version": ANIMATION_CLIP_SCHEMA_VERSION,
+        "clip_id": "spine_turn_03",
+        "duration_seconds": 1.25,
+        "loop": False,
+        "tracks": [
+            {
+                "bone": "Spine",
+                "keyframes": [
+                    {"time": 0.0, "rotation_xyzw": identity},
+                    {"time": 0.625, "rotation_xyzw": y20},
+                    {"time": 1.25, "rotation_xyzw": identity},
+                ],
+            },
+        ],
+    }
+    return json.dumps(doc, sort_keys=True, separators=(",", ":"), allow_nan=False).encode("utf-8")
+
+
 def _authored_arm_reverse_02_clip_raw_bytes() -> bytes:
     identity = [0.0, 0.0, 0.0, 1.0]
     y_neg30 = list(_y_rotation_quaternion_xyzw(-30.0))
@@ -217,7 +239,7 @@ def _review_set_leaf_paths(review_dir: Path) -> list[Path]:
         "project.godot",
     }
     paths = [review_dir / name for name in sorted(root_names)]
-    for slot in ("000", "001"):
+    for slot in ("000", "001", "002"):
         for name in ("animation_clip.json", "animation_clip_manifest.json"):
             paths.append(review_dir / "clips" / slot / name)
     return paths
@@ -469,14 +491,24 @@ def _run_session_inspect(
         "--",
         *user_args,
     ]
-    return subprocess.run(
-        cmd,
-        cwd=package_dir,
-        capture_output=True,
-        text=True,
-        timeout=timeout,
-        env=_bridge_env(),
-    )
+    try:
+        return subprocess.run(
+            cmd,
+            cwd=package_dir,
+            capture_output=True,
+            text=True,
+            timeout=timeout,
+            env=_bridge_env(),
+        )
+    except subprocess.TimeoutExpired as exc:
+        stdout_tail = (exc.stdout or "")[-3000:] if exc.stdout else ""
+        stderr_tail = (exc.stderr or "")[-3000:] if exc.stderr else ""
+        pytest.fail(
+            "session inspect subprocess timed out "
+            f"phase={phase!r} timeout_s={timeout} package_dir={package_dir} "
+            f"result_exists={result_path.is_file()} godot={_godot_rendered_executable()} "
+            f"stdout_tail={stdout_tail!r} stderr_tail={stderr_tail!r}"
+        )
 
 
 def _load_inspect_result(result_path: Path) -> dict[str, object]:
@@ -512,8 +544,10 @@ def _real_ui_handoff_source_digests(
     review_set_dir: Path,
     clip_preview_a: Path,
     clip_preview_b: Path,
+    clip_preview_c: Path,
     clip_a_path: Path,
     clip_b_path: Path,
+    clip_c_path: Path,
     session_path: Path,
 ) -> dict[str, str]:
     digests: dict[str, str] = {}
@@ -531,8 +565,12 @@ def _real_ui_handoff_source_digests(
         digests[f"clip-preview-b/{name}"] = hashlib.sha256(
             (clip_preview_b / name).read_bytes()
         ).hexdigest()
+        digests[f"clip-preview-c/{name}"] = hashlib.sha256(
+            (clip_preview_c / name).read_bytes()
+        ).hexdigest()
     digests["authored/arm_wave_01.json"] = hashlib.sha256(clip_a_path.read_bytes()).hexdigest()
     digests["authored/arm_reverse_02.json"] = hashlib.sha256(clip_b_path.read_bytes()).hexdigest()
+    digests["authored/spine_turn_03.json"] = hashlib.sha256(clip_c_path.read_bytes()).hexdigest()
     digests["session/raw"] = hashlib.sha256(session_path.read_bytes()).hexdigest()
     return digests
 
@@ -584,9 +622,11 @@ def _assert_bound_handoff_report(
     assert [entry["clip_id"] for entry in doc["clips"]] == [
         "arm_wave_01",
         "arm_reverse_02",
+        "spine_turn_03",
     ]
     wave = doc["clips"][0]
     reverse = doc["clips"][1]
+    spine = doc["clips"][2]
     assert wave["status"] == "revise"
     assert wave["note"] == "review A"
     assert wave["bookmarks"] == [0.75]
@@ -595,6 +635,10 @@ def _assert_bound_handoff_report(
     assert reverse["note"] == reverse_note
     assert reverse["bookmarks"] == []
     assert reverse["duration_seconds"] == 2.0
+    assert spine["status"] == "unreviewed"
+    assert spine["note"] == ""
+    assert spine["bookmarks"] == []
+    assert spine["duration_seconds"] == 1.25
 
     md = md_path.read_text(encoding="utf-8")
     assert "keep status is annotation only, not approval." in md
@@ -609,7 +653,9 @@ def _assert_bound_handoff_report(
     assert f"clip_payload_sha256: {binding['clip_payload_sha256']}" in md
     wave_pos = md.find("arm_wave_01")
     reverse_pos = md.find("arm_reverse_02")
-    assert wave_pos != -1 and reverse_pos != -1 and wave_pos < reverse_pos
+    spine_pos = md.find("spine_turn_03")
+    assert wave_pos != -1 and reverse_pos != -1 and spine_pos != -1
+    assert wave_pos < reverse_pos < spine_pos
     assert "review A" in md
     assert "- bookmarks: 0.75" in md
     assert "revise" in md
@@ -728,16 +774,23 @@ def test_real_animation_review_session_ui_lifecycle(tmp_path: Path) -> None:
     export_rigged_character_candidate_preview(handlers, workflow.id, preview_dir)
     clip_a_path = tmp_path / "arm_wave_01.json"
     clip_b_path = tmp_path / "arm_reverse_02.json"
+    clip_c_path = tmp_path / "spine_turn_03.json"
     clip_a_path.write_bytes(acceptance_arm_wave_clip_raw_bytes())
     clip_b_path.write_bytes(_authored_arm_reverse_02_clip_raw_bytes())
+    clip_c_path.write_bytes(_authored_spine_turn_03_clip_raw_bytes())
     clip_b_before = clip_b_path.read_bytes()
+    clip_c_before = clip_c_path.read_bytes()
     clip_preview_a = tmp_path / "candidate-clip-preview-a"
     clip_preview_b = tmp_path / "candidate-clip-preview-b"
+    clip_preview_c = tmp_path / "candidate-clip-preview-c"
     export_rigged_character_animation_clip_preview(
         handlers, workflow.id, preview_dir, clip_a_path, clip_preview_a
     )
     export_rigged_character_animation_clip_preview(
         handlers, workflow.id, preview_dir, clip_b_path, clip_preview_b
+    )
+    export_rigged_character_animation_clip_preview(
+        handlers, workflow.id, preview_dir, clip_c_path, clip_preview_c
     )
     v086_a_before = {
         name: (clip_preview_a / name).read_bytes() for name in sorted(_CLIP_PACKAGE_FILES)
@@ -745,9 +798,13 @@ def test_real_animation_review_session_ui_lifecycle(tmp_path: Path) -> None:
     v086_b_before = {
         name: (clip_preview_b / name).read_bytes() for name in sorted(_CLIP_PACKAGE_FILES)
     }
+    v086_c_before = {
+        name: (clip_preview_c / name).read_bytes() for name in sorted(_CLIP_PACKAGE_FILES)
+    }
     sources = (
         CandidateAnimationReviewSetSource(clip_preview_a, clip_a_path),
         CandidateAnimationReviewSetSource(clip_preview_b, clip_b_path),
+        CandidateAnimationReviewSetSource(clip_preview_c, clip_c_path),
     )
     review_set_dir = tmp_path / "candidate-animation-review-set-out"
     review_result = export_rigged_character_animation_review_set(
@@ -791,20 +848,57 @@ def test_real_animation_review_session_ui_lifecycle(tmp_path: Path) -> None:
     viewer_exchange_dir = prepared.exchange_dir
     runner = ProcessRunner(sanitize_output=True)
 
-    write_result_path = tmp_path / "inspect-write.json"
-    write_proc = _run_session_inspect(
+    write_begin_result_path = tmp_path / "inspect-write-begin.json"
+    write_begin_proc = _run_session_inspect(
         consumer,
-        phase="write",
-        result_path=write_result_path,
+        phase="write_begin",
+        result_path=write_begin_result_path,
         context_path=context_path,
         exchange_dir=viewer_exchange_dir,
         runner=runner,
     )
-    write_combined = write_proc.stdout + write_proc.stderr
-    assert write_proc.returncode == 0, write_combined[-3000:]
-    _assert_no_script_errors(write_combined)
-    assert "PASS: animation_review_session_write" in write_proc.stdout
-    write_payload = _load_inspect_result(write_result_path)
+    write_begin_combined = write_begin_proc.stdout + write_begin_proc.stderr
+    assert write_begin_proc.returncode == 0, write_begin_combined[-3000:]
+    _assert_no_script_errors(write_begin_combined)
+    assert "PASS: animation_review_session_write_begin" in write_begin_proc.stdout
+    write_begin_payload = _load_inspect_result(write_begin_result_path)
+    assert write_begin_payload.get("ok") is True
+    write_begin_snap = write_begin_payload.get("snapshot")
+    assert isinstance(write_begin_snap, dict)
+    assert write_begin_snap.get("stored_revision") == 2
+    assert write_begin_snap.get("authority_current") is True
+    assert write_begin_snap.get("mutations_enabled") is True
+    assert isinstance(write_begin_snap.get("raw_sha256"), str)
+    assert len(str(write_begin_snap.get("raw_sha256"))) == 64
+    session_after_write_begin = _session_document(session_path)
+    assert session_after_write_begin.get("revision") == 2
+    clip_a_after_begin = _clip_record(session_after_write_begin, "arm_wave_01")
+    assert clip_a_after_begin.get("note") == "review A"
+    assert clip_a_after_begin.get("status") == "revise"
+    assert clip_a_after_begin.get("bookmarks") == []
+    clip_b_after_begin = _clip_record(session_after_write_begin, "arm_reverse_02")
+    assert clip_b_after_begin.get("status") == "unreviewed"
+    assert clip_b_after_begin.get("note") == ""
+    assert clip_b_after_begin.get("bookmarks") == []
+    clip_c_after_begin = _clip_record(session_after_write_begin, "spine_turn_03")
+    assert clip_c_after_begin.get("status") == "unreviewed"
+    assert clip_c_after_begin.get("note") == ""
+    assert clip_c_after_begin.get("bookmarks") == []
+
+    write_finish_result_path = tmp_path / "inspect-write-finish.json"
+    write_finish_proc = _run_session_inspect(
+        consumer,
+        phase="write_finish",
+        result_path=write_finish_result_path,
+        context_path=context_path,
+        exchange_dir=viewer_exchange_dir,
+        runner=runner,
+    )
+    write_finish_combined = write_finish_proc.stdout + write_finish_proc.stderr
+    assert write_finish_proc.returncode == 0, write_finish_combined[-3000:]
+    _assert_no_script_errors(write_finish_combined)
+    assert "PASS: animation_review_session_write_finish" in write_finish_proc.stdout
+    write_payload = _load_inspect_result(write_finish_result_path)
     assert write_payload.get("ok") is True
     write_snap = write_payload.get("snapshot")
     assert isinstance(write_snap, dict)
@@ -816,6 +910,10 @@ def test_real_animation_review_session_ui_lifecycle(tmp_path: Path) -> None:
     assert clip_a_after_write.get("bookmarks") == [0.75]
     clip_b_after_write = _clip_record(session_after_write, "arm_reverse_02")
     assert clip_b_after_write.get("status") == "keep"
+    clip_c_after_write = _clip_record(session_after_write, "spine_turn_03")
+    assert clip_c_after_write.get("status") == "unreviewed"
+    assert clip_c_after_write.get("note") == ""
+    assert clip_c_after_write.get("bookmarks") == []
     session_sha_after_write = hashlib.sha256(session_path.read_bytes()).hexdigest()
 
     reopen_result_path = tmp_path / "inspect-reopen.json"
@@ -856,8 +954,10 @@ def test_real_animation_review_session_ui_lifecycle(tmp_path: Path) -> None:
         review_set_dir=review_set_dir,
         clip_preview_a=clip_preview_a,
         clip_preview_b=clip_preview_b,
+        clip_preview_c=clip_preview_c,
         clip_a_path=clip_a_path,
         clip_b_path=clip_b_path,
+        clip_c_path=clip_c_path,
         session_path=session_path,
     )
     handoff_root_a = (tmp_path / "real-ui-handoff-a").resolve()
@@ -885,8 +985,10 @@ def test_real_animation_review_session_ui_lifecycle(tmp_path: Path) -> None:
             review_set_dir=review_set_dir,
             clip_preview_a=clip_preview_a,
             clip_preview_b=clip_preview_b,
+            clip_preview_c=clip_preview_c,
             clip_a_path=clip_a_path,
             clip_b_path=clip_b_path,
+            clip_c_path=clip_c_path,
             session_path=session_path,
         )
         == handoff_source_before
@@ -1042,8 +1144,10 @@ def test_real_animation_review_session_ui_lifecycle(tmp_path: Path) -> None:
         review_set_dir=review_set_dir,
         clip_preview_a=clip_preview_a,
         clip_preview_b=clip_preview_b,
+        clip_preview_c=clip_preview_c,
         clip_a_path=clip_a_path,
         clip_b_path=clip_b_path,
+        clip_c_path=clip_c_path,
         session_path=session_path,
     )
     try:
@@ -1068,8 +1172,10 @@ def test_real_animation_review_session_ui_lifecycle(tmp_path: Path) -> None:
                 review_set_dir=review_set_dir,
                 clip_preview_a=clip_preview_a,
                 clip_preview_b=clip_preview_b,
+                clip_preview_c=clip_preview_c,
                 clip_a_path=clip_a_path,
                 clip_b_path=clip_b_path,
+                clip_c_path=clip_c_path,
                 session_path=session_path,
             )
             == handoff_source_at_drift
@@ -1188,3 +1294,97 @@ def test_real_animation_review_session_ui_lifecycle(tmp_path: Path) -> None:
         is True
     )
     assert candidate_preview_current(handlers, workflow.id, preview_dir) is True
+
+    handoff_source_before_terminal = _real_ui_handoff_source_digests(
+        preview_dir=preview_dir,
+        review_set_dir=review_set_dir,
+        clip_preview_a=clip_preview_a,
+        clip_preview_b=clip_preview_b,
+        clip_preview_c=clip_preview_c,
+        clip_a_path=clip_a_path,
+        clip_b_path=clip_b_path,
+        clip_c_path=clip_c_path,
+        session_path=session_path,
+    )
+
+    terminal_result_path = tmp_path / "inspect-terminal.json"
+    terminal_proc = _run_session_inspect(
+        consumer,
+        phase="terminal",
+        result_path=terminal_result_path,
+        context_path=context_path,
+        exchange_dir=viewer_exchange_dir,
+        runner=runner,
+    )
+    terminal_combined = terminal_proc.stdout + terminal_proc.stderr
+    assert terminal_proc.returncode == 0, terminal_combined[-3000:]
+    _assert_no_script_errors(terminal_combined)
+    assert "PASS: animation_review_session_terminal" in terminal_proc.stdout
+    terminal_payload = _load_inspect_result(terminal_result_path)
+    assert terminal_payload.get("ok") is True
+    assert terminal_payload.get("pre_terminal_sha") == session_sha_after_conflict
+    session_sha_after_terminal = str(terminal_payload.get("terminal_sha", ""))
+    assert len(session_sha_after_terminal) == 64
+    assert session_sha_after_terminal != session_sha_after_conflict
+    terminal_snap = terminal_payload.get("snapshot")
+    assert isinstance(terminal_snap, dict)
+    assert terminal_snap.get("stored_revision") == 6
+    assert terminal_snap.get("raw_sha256") == session_sha_after_terminal
+    assert terminal_snap.get("authority_current") is True
+    assert terminal_snap.get("mutations_enabled") is True
+    terminal_triage = terminal_snap.get("triage")
+    assert isinstance(terminal_triage, dict)
+    terminal_counts = terminal_triage.get("counts")
+    assert isinstance(terminal_counts, dict)
+    assert terminal_counts.get("revise") == 0
+    assert terminal_counts.get("keep") == 2
+    assert terminal_counts.get("unreviewed") == 1
+    session_after_terminal = _session_document(session_path)
+    assert session_after_terminal.get("revision") == 6
+    assert session_after_terminal.get("production_eligible") is False
+    assert session_after_terminal.get("promotion_eligible") is False
+    clip_a_after_terminal = _clip_record(session_after_terminal, "arm_wave_01")
+    assert clip_a_after_terminal.get("status") == "keep"
+    assert clip_a_after_terminal.get("note") == "review A"
+    assert clip_a_after_terminal.get("bookmarks") == [0.75]
+    clip_b_after_terminal = _clip_record(session_after_terminal, "arm_reverse_02")
+    assert clip_b_after_terminal.get("status") == "keep"
+    assert clip_b_after_terminal.get("note") == "external B note"
+    assert clip_b_after_terminal.get("bookmarks") == []
+    clip_c_after_terminal = _clip_record(session_after_terminal, "spine_turn_03")
+    assert clip_c_after_terminal.get("status") == "unreviewed"
+    assert clip_c_after_terminal.get("note") == ""
+    assert clip_c_after_terminal.get("bookmarks") == []
+    assert hashlib.sha256(session_path.read_bytes()).hexdigest() == session_sha_after_terminal
+
+    handoff_source_after_terminal = _real_ui_handoff_source_digests(
+        preview_dir=preview_dir,
+        review_set_dir=review_set_dir,
+        clip_preview_a=clip_preview_a,
+        clip_preview_b=clip_preview_b,
+        clip_preview_c=clip_preview_c,
+        clip_a_path=clip_a_path,
+        clip_b_path=clip_b_path,
+        clip_c_path=clip_c_path,
+        session_path=session_path,
+    )
+    for digest_key, digest_before in handoff_source_before_terminal.items():
+        if digest_key == "session/raw":
+            continue
+        assert handoff_source_after_terminal[digest_key] == digest_before
+    assert handoff_source_after_terminal["session/raw"] == session_sha_after_terminal
+    assert handoff_source_before_terminal["session/raw"] == session_sha_after_conflict
+
+    for rel, payload in review_byte_snapshot.items():
+        assert (review_set_dir / rel).read_bytes() == payload
+    for name, payload in v086_c_before.items():
+        assert (clip_preview_c / name).read_bytes() == payload
+    assert clip_c_path.read_bytes() == clip_c_before
+    assert (
+        animation_clip_preview_current(
+            handlers, workflow.id, preview_dir, clip_c_path, clip_preview_c
+        )
+        is True
+    )
+    assert_zero_provider_activity(db, workflow.id)
+    assert ProviderInvocationRepository(db).count(workflow.id) == 0
