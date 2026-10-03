@@ -79,6 +79,67 @@ theme_override_colors/font_color = Color(0.72, 0.76, 0.82, 1)
 autowrap_mode = 3
 text = "Session overlay idle."
 
+[node name="TriageProgressLabel" type="Label" parent="SessionUI/Root/SessionMargin/SessionScroll/SessionPanel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.82, 0.86, 0.92, 1)
+autowrap_mode = 3
+text = "Progress: —"
+
+[node name="TriageCountsLabel" type="Label" parent="SessionUI/Root/SessionMargin/SessionScroll/SessionPanel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.72, 0.76, 0.82, 1)
+autowrap_mode = 3
+text = "Unreviewed —  Revise —  Keep —"
+
+[node name="TriageFilterCaption" type="Label" parent="SessionUI/Root/SessionMargin/SessionScroll/SessionPanel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.75, 0.78, 0.84, 1)
+text = "Filter clips"
+
+[node name="TriageFilterOption" type="OptionButton" parent="SessionUI/Root/SessionMargin/SessionScroll/SessionPanel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+focus_mode = 2
+
+[node name="FilteredClipCaption" type="Label" parent="SessionUI/Root/SessionMargin/SessionScroll/SessionPanel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.75, 0.78, 0.84, 1)
+text = "Filtered clip"
+
+[node name="FilteredClipOption" type="OptionButton" parent="SessionUI/Root/SessionMargin/SessionScroll/SessionPanel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+clip_text = true
+fit_to_longest_item = false
+focus_mode = 2
+
+[node name="FilteredClipOutsideLabel" type="Label" parent="SessionUI/Root/SessionMargin/SessionScroll/SessionPanel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.78, 0.72, 0.55, 1)
+autowrap_mode = 3
+text = ""
+
+[node name="ReviseNavRow" type="HBoxContainer" parent="SessionUI/Root/SessionMargin/SessionScroll/SessionPanel/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="PrevReviseButton" type="Button" parent="SessionUI/Root/SessionMargin/SessionScroll/SessionPanel/VBox/ReviseNavRow"]
+unique_name_in_owner = true
+layout_mode = 2
+focus_mode = 2
+text = "Previous revise"
+
+[node name="NextReviseButton" type="Button" parent="SessionUI/Root/SessionMargin/SessionScroll/SessionPanel/VBox/ReviseNavRow"]
+unique_name_in_owner = true
+layout_mode = 2
+focus_mode = 2
+text = "Next revise"
+
 [node name="SessionActionsRow" type="HBoxContainer" parent="SessionUI/Root/SessionMargin/SessionScroll/SessionPanel/VBox"]
 layout_mode = 2
 theme_override_constants/separation = 8

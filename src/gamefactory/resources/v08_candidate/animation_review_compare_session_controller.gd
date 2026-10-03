@@ -1,7 +1,6 @@
 extends Node3D
 
-## V0.8-9b session overlay: review-set playback plus session annotation UI.
-## Bridge I/O is implemented here; Python authority integration is wired by the launcher.
+## V0.8-13a compare overlay: synchronized A/B playback plus shared session annotations.
 
 const BRIDGE_SCHEMA_VERSION := "animation-review-session-bridge-0.8.0"
 const SESSION_SCHEMA_VERSION := "animation-review-session-0.8.0"
@@ -12,15 +11,14 @@ const MIN_BINDING_CLIPS := 2
 const MAX_BINDING_CLIPS := 8
 const MAX_DURATION_SECONDS := 10.0
 const BRIDGE_PROCESS_TIMEOUT_MS := 600_000
-const PLAYBACK_RESERVE_PX := 260
+const COMPARE_BOTTOM_PANEL_PX := 220
 const SESSION_PANEL_WIDTH_PX := 360
 const STATUS_OPTIONS := ["unreviewed", "keep", "revise"]
-const TRIAGE_FILTERS := ["all", "unreviewed", "revise", "keep"]
 
 const ARG_PYTHON := "--session-python-executable="
 const ARG_CONTEXT := "--session-context-file="
 const ARG_EXCHANGE := "--session-exchange-dir="
-const ARG_VALIDATION_PROBE := "--gf-session-bridge-validation-probe"
+const ARG_VALIDATION_PROBE := "--gf-compare-session-bridge-validation-probe"
 
 const _SESSION_KEYS := [
 	"schema_version",
@@ -49,25 +47,26 @@ const _RESPONSE_EXACT_KEYS := [
 	"error",
 ]
 
-@onready var _playback: Node = $Playback
+@onready var _playback: Control = %ComparePlayback
+@onready var _playback_root: Control = %ComparePlayback
 @onready var _session_root: Control = $SessionUI/Root
 @onready var _session_margin: MarginContainer = %SessionMargin
 @onready var _status_banner: Label = %SessionStatusBanner
 @onready var _reload_button: Button = %ReloadSessionButton
-@onready var _create_button: Button = %CreateSessionButton
-@onready var _status_option: OptionButton = %ClipStatusOption
-@onready var _note_field: LineEdit = %ClipNoteField
-@onready var _save_note_button: Button = %SaveNoteButton
-@onready var _add_bookmark_button: Button = %AddBookmarkButton
-@onready var _bookmark_option: OptionButton = %BookmarkOption
-@onready var _seek_bookmark_button: Button = %SeekBookmarkButton
-@onready var _triage_progress_label: Label = %TriageProgressLabel
-@onready var _triage_counts_label: Label = %TriageCountsLabel
-@onready var _triage_filter_option: OptionButton = %TriageFilterOption
-@onready var _filtered_clip_option: OptionButton = %FilteredClipOption
-@onready var _filtered_clip_outside_label: Label = %FilteredClipOutsideLabel
-@onready var _prev_revise_button: Button = %PrevReviseButton
-@onready var _next_revise_button: Button = %NextReviseButton
+@onready var _left_status_option: OptionButton = %LeftClipStatusOption
+@onready var _left_note_field: LineEdit = %LeftClipNoteField
+@onready var _left_save_note_button: Button = %LeftSaveNoteButton
+@onready var _left_add_bookmark_button: Button = %LeftAddBookmarkButton
+@onready var _left_bookmarks_label: Label = %LeftBookmarksLabel
+@onready var _left_keep_button: Button = %LeftKeepButton
+@onready var _left_revise_button: Button = %LeftReviseButton
+@onready var _right_status_option: OptionButton = %RightClipStatusOption
+@onready var _right_note_field: LineEdit = %RightClipNoteField
+@onready var _right_save_note_button: Button = %RightSaveNoteButton
+@onready var _right_add_bookmark_button: Button = %RightAddBookmarkButton
+@onready var _right_bookmarks_label: Label = %RightBookmarksLabel
+@onready var _right_keep_button: Button = %RightKeepButton
+@onready var _right_revise_button: Button = %RightReviseButton
 
 var _python_executable: String = ""
 var _context_file: String = ""
@@ -88,26 +87,28 @@ var _inflight_owns_exchange_files: bool = false
 var _inflight_clip_id: String = ""
 var _inflight_submitted_note: String = ""
 var _inflight_update_op: String = ""
+var _inflight_pane: String = ""
 
 var _reload_required: bool = false
 var _conflict_active: bool = false
 var _user_status_message: String = ""
 
-var _tracked_clip_id: String = ""
+var _tracked_left_clip_id: String = ""
+var _tracked_right_clip_id: String = ""
 var _ui_syncing: bool = false
-var _note_dirty: bool = false
+var _left_note_dirty: bool = false
+var _right_note_dirty: bool = false
 var _draft_notes: Dictionary = {}
 var _request_serial: int = 0
 var _bridge_rng: RandomNumberGenerator = RandomNumberGenerator.new()
-
-var _triage_filter: String = "all"
-var _triage_derived: Dictionary = {}
+var _panel_probe_bridge_intercept: bool = false
+var _panel_probe_captured_action: String = ""
+var _panel_probe_captured_request: Dictionary = {}
 
 
 func _ready() -> void:
 	if _wants_validation_probe():
-		var ok := _run_bridge_validation_probe()
-		get_tree().quit(0 if ok else 1)
+		get_tree().quit(0 if _run_bridge_validation_probe() else 1)
 		return
 	_bridge_rng.randomize()
 	_parse_launch_configuration()
@@ -131,17 +132,17 @@ func _exit_tree() -> void:
 
 
 func _bootstrap_session() -> void:
-	if not await _wait_playback_ready():
-		_set_banner("Playback is not ready; session UI is idle.")
+	if not await _wait_compare_ready():
+		_set_banner("Compare playback is not ready; session UI is idle.")
 		return
-	_tracked_clip_id = _playback_source_clip_id()
-	_apply_clip_annotations_for(_tracked_clip_id)
-	_accept_triage_from_authority()
+	_sync_tracked_clips_from_compare()
+	_apply_pane_annotations("left")
+	_apply_pane_annotations("right")
 	_refresh_session_controls()
 	if _bridge_configured:
 		request_reload_session()
 	else:
-		_set_banner("Session bridge unavailable (missing launch configuration). Playback only.")
+		_set_banner("Session bridge unavailable. Compare only.")
 
 
 func _parse_launch_configuration() -> void:
@@ -163,25 +164,25 @@ func _parse_launch_configuration() -> void:
 
 func _wire_session_ui() -> void:
 	_reload_button.pressed.connect(_on_reload_pressed)
-	_create_button.pressed.connect(_on_create_pressed)
-	_save_note_button.pressed.connect(_on_save_note_pressed)
-	_add_bookmark_button.pressed.connect(_on_add_bookmark_pressed)
-	_seek_bookmark_button.pressed.connect(_on_seek_bookmark_pressed)
-	_status_option.item_selected.connect(_on_status_option_selected)
-	_note_field.text_changed.connect(_on_note_text_changed)
-	_status_option.clear()
-	for status in STATUS_OPTIONS:
-		_status_option.add_item(status.capitalize())
-	_triage_filter_option.clear()
-	for filter_name in TRIAGE_FILTERS:
-		_triage_filter_option.add_item(filter_name.capitalize())
-	_triage_filter_option.select(0)
-	_triage_filter_option.item_selected.connect(_on_triage_filter_selected)
-	_filtered_clip_option.clip_text = true
-	_filtered_clip_option.fit_to_longest_item = false
-	_filtered_clip_option.item_selected.connect(_on_filtered_clip_selected)
-	_prev_revise_button.pressed.connect(_on_prev_revise_pressed)
-	_next_revise_button.pressed.connect(_on_next_revise_pressed)
+	_left_save_note_button.pressed.connect(func() -> void: _on_save_note_pressed("left"))
+	_right_save_note_button.pressed.connect(func() -> void: _on_save_note_pressed("right"))
+	_left_add_bookmark_button.pressed.connect(func() -> void: _on_add_bookmark_pressed("left"))
+	_right_add_bookmark_button.pressed.connect(func() -> void: _on_add_bookmark_pressed("right"))
+	_left_keep_button.pressed.connect(func() -> void: _on_quick_status_pressed("left", "keep"))
+	_left_revise_button.pressed.connect(func() -> void: _on_quick_status_pressed("left", "revise"))
+	_right_keep_button.pressed.connect(func() -> void: _on_quick_status_pressed("right", "keep"))
+	_right_revise_button.pressed.connect(func() -> void: _on_quick_status_pressed("right", "revise"))
+	for pane in ["left", "right"]:
+		var status_option := _pane_status_option(pane)
+		status_option.clear()
+		for status in STATUS_OPTIONS:
+			status_option.add_item(status.capitalize())
+		status_option.item_selected.connect(
+			func(index: int) -> void: _on_status_option_selected(pane, index)
+		)
+		_pane_note_field(pane).text_changed.connect(
+			func(_text: String) -> void: _on_note_text_changed(pane)
+		)
 
 
 func _wire_session_layout() -> void:
@@ -195,23 +196,21 @@ func _wire_session_layout() -> void:
 func _on_session_viewport_layout() -> void:
 	if _session_margin == null or _session_root == null:
 		return
-	var horizontal_margin := 32
-	var panel_width := mini(SESSION_PANEL_WIDTH_PX, maxi(200, _session_root.size.x - horizontal_margin))
+	var panel_width := _session_panel_width_for_root(int(_session_root.size.x))
 	_session_margin.offset_left = -panel_width
-	_session_margin.offset_bottom = -PLAYBACK_RESERVE_PX
+	_session_margin.offset_bottom = -COMPARE_BOTTOM_PANEL_PX
+	if _playback_root != null:
+		_playback_root.offset_right = -panel_width
+
+
+static func _session_panel_width_for_root(root_width: int) -> int:
+	var horizontal_margin := 32
+	return mini(SESSION_PANEL_WIDTH_PX, maxi(200, root_width - horizontal_margin))
 
 
 func _process(_delta: float) -> void:
 	_poll_bridge_process()
-	if _playback == null:
-		return
-	if not _playback_ready():
-		return
-	var clip_id := _playback_source_clip_id()
-	if clip_id != _tracked_clip_id:
-		_commit_note_draft_for_clip(_tracked_clip_id)
-		_tracked_clip_id = clip_id
-		_apply_clip_annotations_for(clip_id)
+	_sync_pane_clip_targets_from_compare()
 
 
 func _poll_bridge_process() -> void:
@@ -228,252 +227,197 @@ func _poll_bridge_process() -> void:
 	_finish_inflight_bridge()
 
 
-func _wait_playback_ready() -> bool:
+func _wait_compare_ready() -> bool:
 	var frames := 0
 	while frames < 300:
 		frames += 1
-		if _playback_ready():
+		if _compare_ready():
 			return true
 		await get_tree().process_frame
 	return false
 
 
-func _playback_ready() -> bool:
-	return _playback != null and _playback.has_method("review_is_ready") and _playback.review_is_ready()
+func _compare_ready() -> bool:
+	if _playback == null or not _playback.has_method("compare_snapshot"):
+		return false
+	return bool(_compare_snapshot().get("ready", false))
 
 
-func _playback_source_clip_id() -> String:
-	if _playback == null or not _playback.has_method("review_source_clip_id"):
-		return ""
-	return str(_playback.review_source_clip_id())
-
-
-# --- Public API for acceptance / inspector (baseline) ---
+func _compare_snapshot() -> Dictionary:
+	if _playback == null or not _playback.has_method("compare_snapshot"):
+		return {"ready": false}
+	return _playback.compare_snapshot()
 
 
 func session_state_snapshot() -> Dictionary:
+	var production_eligible: Variant = null
+	var promotion_eligible: Variant = null
+	if typeof(_stored_session) == TYPE_DICTIONARY:
+		production_eligible = _stored_session.get("production_eligible")
+		promotion_eligible = _stored_session.get("promotion_eligible")
 	return {
 		"bridge_configured": _bridge_configured,
 		"bridge_busy": _bridge_busy,
 		"authority_current": _authority_current,
 		"mutations_enabled": _mutations_enabled(),
 		"reload_required": _reload_required,
-		"note_unsaved": _note_dirty,
 		"conflict_active": _conflict_active,
 		"stored_revision": _stored_revision(),
 		"raw_sha256": _raw_sha256,
-		"selected_clip_id": _tracked_clip_id,
+		"production_eligible": production_eligible,
+		"promotion_eligible": promotion_eligible,
+		"left_clip_id": _tracked_left_clip_id,
+		"right_clip_id": _tracked_right_clip_id,
+		"left_note_dirty": _left_note_dirty,
+		"right_note_dirty": _right_note_dirty,
 		"status_message": _status_banner.text,
-		"playback": review_playback_snapshot(),
-		"triage": review_triage_snapshot(),
+		"compare": _compare_snapshot(),
 	}
 
 
-func review_playback_snapshot() -> Dictionary:
-	if not _playback_ready():
-		return {"ready": false}
-	var player: AnimationPlayer = _playback.review_animation_player()
-	if player == null:
-		return {"ready": false}
-	return {
-		"ready": true,
-		"clip_id": _playback_source_clip_id(),
-		"position_seconds": player.current_animation_position,
-		"duration_seconds": _playback.review_duration_seconds(),
-		"speed_scale": player.speed_scale,
-		"is_playing": player.is_playing(),
-	}
+func _sync_tracked_clips_from_compare() -> void:
+	var snap := _compare_snapshot()
+	_tracked_left_clip_id = str(snap.get("left_clip_id", ""))
+	_tracked_right_clip_id = str(snap.get("right_clip_id", ""))
+
+
+func _sync_pane_clip_targets_from_compare() -> Dictionary:
+	var snap := _compare_snapshot()
+	if not snap.get("ready", false):
+		return snap
+	var left_id := str(snap.get("left_clip_id", ""))
+	var right_id := str(snap.get("right_clip_id", ""))
+	if left_id != _tracked_left_clip_id:
+		_commit_note_draft_for_pane("left")
+		_tracked_left_clip_id = left_id
+		_apply_pane_annotations("left")
+	if right_id != _tracked_right_clip_id:
+		_commit_note_draft_for_pane("right")
+		_tracked_right_clip_id = right_id
+		_apply_pane_annotations("right")
+	return snap
 
 
 func request_reload_session() -> Dictionary:
 	return _enqueue_bridge_action("read")
 
 
-func request_create_session() -> Dictionary:
-	if not _bridge_configured:
-		return {"ok": false, "error_code": "bridge_unavailable"}
-	if _reload_required or _conflict_active:
-		return {"ok": false, "error_code": "reload_required"}
-	if not _authority_current:
-		return {"ok": false, "error_code": "authority_not_current"}
-	if _stored_session != null:
-		return {"ok": false, "error_code": "session_already_exists"}
-	return _enqueue_bridge_action("create")
-
-
-func request_save_note() -> Dictionary:
-	var clip_id := _tracked_clip_id
-	if clip_id.is_empty():
-		return {"ok": false, "error_code": "no_clip_selected"}
-	if not _mutations_enabled():
-		return {"ok": false, "error_code": "mutations_disabled"}
-	var note := _note_field.text
-	if not _note_within_limit(note):
-		_user_status_message = (
-			"Note exceeds the %d-byte limit. Shorten it and try again." % MAX_NOTE_UTF8_BYTES
-		)
-		_refresh_session_controls()
-		return {"ok": false, "error_code": "note_too_long"}
-	return _enqueue_bridge_update(
-		{"op": "SetNote", "clip_id": clip_id, "note": note},
-		clip_id,
-		note,
-	)
-
-
-func request_set_clip_status(status: String) -> Dictionary:
-	if not STATUS_OPTIONS.has(status):
-		return {"ok": false, "error_code": "invalid_status"}
-	if _tracked_clip_id.is_empty():
-		return {"ok": false, "error_code": "no_clip_selected"}
-	if not _mutations_enabled():
-		return {"ok": false, "error_code": "mutations_disabled"}
-	return _enqueue_bridge_update(
-		{"op": "SetStatus", "clip_id": _tracked_clip_id, "status": status},
-		_tracked_clip_id,
-		"",
-	)
-
-
-func request_add_bookmark_at_playback() -> Dictionary:
-	if _tracked_clip_id.is_empty():
-		return {"ok": false, "error_code": "no_clip_selected"}
-	if not _mutations_enabled():
-		return {"ok": false, "error_code": "mutations_disabled"}
-	var record := _clip_record_for(_tracked_clip_id)
-	var existing: Variant = record.get("bookmarks", [])
-	if typeof(existing) == TYPE_ARRAY and existing.size() >= MAX_BOOKMARKS_PER_CLIP:
-		return {"ok": false, "error_code": "bookmark_limit"}
-	var snap := review_playback_snapshot()
-	if not snap.get("ready", false):
-		return {"ok": false, "error_code": "playback_not_ready"}
-	var timestamp := float(snap.get("position_seconds", -1.0))
-	if not _bookmark_timestamp_valid(_tracked_clip_id, timestamp):
-		return {"ok": false, "error_code": "invalid_bookmark_time"}
-	return _enqueue_bridge_update(
-		{"op": "AddBookmark", "clip_id": _tracked_clip_id, "timestamp": timestamp},
-		_tracked_clip_id,
-		"",
-	)
-
-
-func request_seek_saved_bookmark(index: int) -> Dictionary:
-	if index < 0 or index >= _bookmark_option.item_count:
-		return {"ok": false, "error_code": "invalid_bookmark_index"}
-	var meta: Variant = _bookmark_option.get_item_metadata(index)
-	if typeof(meta) != TYPE_FLOAT and typeof(meta) != TYPE_INT:
-		return {"ok": false, "error_code": "invalid_bookmark_metadata"}
-	if _playback == null or not _playback.has_method("request_seek"):
-		return {"ok": false, "error_code": "playback_missing"}
-	return _playback.request_seek(float(meta))
-
-
-func request_refresh_clip_annotations() -> void:
-	_apply_clip_annotations_for(_tracked_clip_id)
-
-
-func review_triage_snapshot() -> Dictionary:
-	var filtered := _filtered_clip_ids_for_active_filter()
-	return {
-		"filter": _triage_filter,
-		"derived_ok": _triage_derived.get("ok", false),
-		"provisional": _triage_derived.get("provisional", false),
-		"counts": _triage_derived.get("counts", {}).duplicate() if _triage_derived.get("ok", false) else {},
-		"filtered_clip_ids": filtered,
-		"current_clip_id": _tracked_clip_id,
-		"current_in_filter": filtered.find(_tracked_clip_id) >= 0,
-		"revise_clip_ids": _revise_clip_ids_ordered(),
-	}
-
-
-func request_set_triage_filter(filter: String) -> Dictionary:
-	if not TRIAGE_FILTERS.has(filter):
-		return {"ok": false, "error_code": "invalid_filter"}
-	_triage_filter = filter
-	_refresh_triage_ui()
-	return {"ok": true, "filter": filter}
-
-
-func request_select_filtered_clip_index(index: int) -> Dictionary:
-	var ids := _filtered_clip_ids_for_active_filter()
-	if index < 0 or index >= ids.size():
-		return {"ok": false, "error_code": "invalid_filtered_index"}
-	return _triage_request_select_clip(ids[index])
-
-
-func request_previous_revise() -> Dictionary:
-	return _triage_step_revise(-1)
-
-
-func request_next_revise() -> Dictionary:
-	return _triage_step_revise(1)
-
-
-# --- UI handlers ---
-
-
 func _on_reload_pressed() -> void:
 	request_reload_session()
 
 
-func _on_create_pressed() -> void:
-	request_create_session()
+func _on_save_note_pressed(pane: String) -> void:
+	_sync_pane_clip_targets_from_compare()
+	var clip_id := _pane_clip_id(pane)
+	if clip_id.is_empty() or not _mutations_enabled():
+		return
+	var note := _pane_note_field(pane).text
+	_draft_notes[clip_id] = note
+	if not _note_within_limit(note):
+		_user_status_message = "Note exceeds the allowed size."
+		_refresh_session_controls()
+		return
+	_inflight_pane = pane
+	_enqueue_bridge_update({"op": "SetNote", "clip_id": clip_id, "note": note}, clip_id, note)
 
 
-func _on_save_note_pressed() -> void:
-	request_save_note()
+func _on_add_bookmark_pressed(pane: String) -> void:
+	var snap := _sync_pane_clip_targets_from_compare()
+	var clip_id := _pane_clip_id(pane)
+	if clip_id.is_empty() or not _mutations_enabled():
+		return
+	var record := _clip_record_for(clip_id)
+	var existing: Variant = record.get("bookmarks", [])
+	if typeof(existing) == TYPE_ARRAY and existing.size() >= MAX_BOOKMARKS_PER_CLIP:
+		return
+	var ts := _bookmark_seconds_from_snapshot(snap, pane, clip_id)
+	if ts < 0.0:
+		return
+	if not _bookmark_timestamp_valid(clip_id, ts):
+		return
+	_inflight_pane = pane
+	_enqueue_bridge_update({"op": "AddBookmark", "clip_id": clip_id, "timestamp": ts}, clip_id, "")
 
 
-func _on_add_bookmark_pressed() -> void:
-	request_add_bookmark_at_playback()
+func _on_quick_status_pressed(pane: String, status: String) -> void:
+	if not STATUS_OPTIONS.has(status) or not _mutations_enabled():
+		return
+	_sync_pane_clip_targets_from_compare()
+	var clip_id := _pane_clip_id(pane)
+	if clip_id.is_empty():
+		return
+	_ui_syncing = true
+	_pane_status_option(pane).select(_status_index(status))
+	_ui_syncing = false
+	_inflight_pane = pane
+	_enqueue_bridge_update({"op": "SetStatus", "clip_id": clip_id, "status": status}, clip_id, "")
 
 
-func _on_seek_bookmark_pressed() -> void:
-	var index := _bookmark_option.selected
-	request_seek_saved_bookmark(index)
-
-
-func _on_status_option_selected(index: int) -> void:
-	if _ui_syncing:
+func _on_status_option_selected(pane: String, index: int) -> void:
+	if _ui_syncing or not _mutations_enabled():
 		return
 	if index < 0 or index >= STATUS_OPTIONS.size():
 		return
-	var status: String = STATUS_OPTIONS[index]
-	if not _mutations_enabled():
-		return
-	request_set_clip_status(status)
+	_on_quick_status_pressed(pane, STATUS_OPTIONS[index])
 
 
-func _on_note_text_changed(_text: String) -> void:
+func _on_note_text_changed(pane: String) -> void:
 	if _ui_syncing:
 		return
-	_note_dirty = true
+	var clip_id := _pane_clip_id(pane)
+	if clip_id.is_empty():
+		return
+	var text := _pane_note_field(pane).text
+	var authority_note := _authority_note_for_clip(clip_id)
+	if text == authority_note:
+		_draft_notes.erase(clip_id)
+	else:
+		_draft_notes[clip_id] = text
+	if pane == "left":
+		_left_note_dirty = text != authority_note
+	else:
+		_right_note_dirty = text != authority_note
 	_refresh_session_controls()
 
 
-func _on_triage_filter_selected(index: int) -> void:
-	if _ui_syncing:
-		return
-	if index < 0 or index >= TRIAGE_FILTERS.size():
-		return
-	request_set_triage_filter(TRIAGE_FILTERS[index])
+func _pane_clip_id(pane: String) -> String:
+	return _tracked_left_clip_id if pane == "left" else _tracked_right_clip_id
 
 
-func _on_filtered_clip_selected(index: int) -> void:
-	if _ui_syncing:
-		return
-	request_select_filtered_clip_index(index)
+func _pane_status_option(pane: String) -> OptionButton:
+	return _left_status_option if pane == "left" else _right_status_option
 
 
-func _on_prev_revise_pressed() -> void:
-	request_previous_revise()
+func _pane_note_field(pane: String) -> LineEdit:
+	return _left_note_field if pane == "left" else _right_note_field
 
 
-func _on_next_revise_pressed() -> void:
-	request_next_revise()
+func _bookmark_seconds_for_pane(pane: String) -> float:
+	var clip_id := _pane_clip_id(pane)
+	var ts := _bookmark_seconds_from_snapshot(_compare_snapshot(), pane, clip_id)
+	if ts < 0.0:
+		return -1.0
+	if not _bookmark_timestamp_valid(clip_id, ts):
+		return -1.0
+	return ts
 
 
-# --- Session model / annotations ---
+static func _bookmark_seconds_from_snapshot(
+	snap: Dictionary, pane: String, clip_id: String
+) -> float:
+	if not snap.get("ready", false):
+		return -1.0
+	var progress := float(snap.get("normalized_progress", -1.0))
+	var dur_key := "left_duration" if pane == "left" else "right_duration"
+	var duration := float(snap.get(dur_key, -1.0))
+	if not is_finite(progress) or not is_finite(duration) or duration <= 0.0:
+		return -1.0
+	var ts := progress * duration
+	if clip_id.is_empty():
+		return -1.0
+	if ts < 0.0 or ts > duration or not is_finite(ts):
+		return -1.0
+	return ts
 
 
 func _stored_revision() -> int:
@@ -493,37 +437,65 @@ func _mutations_enabled() -> bool:
 	)
 
 
-func _apply_clip_annotations_for(clip_id: String) -> void:
+func _apply_pane_annotations(pane: String) -> void:
 	_ui_syncing = true
+	var clip_id := _pane_clip_id(pane)
 	var record := _clip_record_for(clip_id)
 	var status := "unreviewed"
 	var note := ""
-	var bookmarks: Array = []
 	if not record.is_empty():
 		if typeof(record.get("status", "")) == TYPE_STRING:
 			status = record.get("status")
 		if typeof(record.get("note", "")) == TYPE_STRING:
 			note = record.get("note")
-		var raw_bookmarks: Variant = record.get("bookmarks", [])
-		if typeof(raw_bookmarks) == TYPE_ARRAY:
-			bookmarks = raw_bookmarks.duplicate()
 	if _draft_notes.has(clip_id):
 		note = str(_draft_notes[clip_id])
-		_note_dirty = true
+	var authority_note := _authority_note_for_clip(clip_id)
+	if pane == "left":
+		_left_note_dirty = note != authority_note
 	else:
-		_note_dirty = false
-	_status_option.select(_status_index(status))
-	_note_field.text = note
-	_populate_bookmark_selector(bookmarks)
+		_right_note_dirty = note != authority_note
+	_pane_status_option(pane).select(_status_index(status))
+	_pane_note_field(pane).text = note
+	var bookmarks_label := _left_bookmarks_label if pane == "left" else _right_bookmarks_label
+	bookmarks_label.text = _format_bookmarks_line(record)
 	_ui_syncing = false
-	_refresh_session_controls()
 
 
-func _commit_note_draft_for_clip(clip_id: String) -> void:
+static func _format_bookmarks_line(record: Dictionary) -> String:
+	var bookmarks: Variant = record.get("bookmarks", [])
+	if typeof(bookmarks) != TYPE_ARRAY or bookmarks.is_empty():
+		return "Bookmarks: (none)"
+	var parts: PackedStringArray = []
+	for entry in bookmarks:
+		if typeof(entry) != TYPE_FLOAT and typeof(entry) != TYPE_INT:
+			continue
+		parts.append("%.3fs" % float(entry))
+	if parts.is_empty():
+		return "Bookmarks: (none)"
+	return "Bookmarks: " + ", ".join(parts)
+
+
+func _commit_note_draft_for_pane(pane: String) -> void:
+	var clip_id := _pane_clip_id(pane)
 	if clip_id.is_empty():
 		return
-	if _note_dirty:
-		_draft_notes[clip_id] = _note_field.text
+	var dirty := _left_note_dirty if pane == "left" else _right_note_dirty
+	if dirty:
+		_draft_notes[clip_id] = _pane_note_field(pane).text
+
+
+func _stash_visible_note_drafts() -> void:
+	for pane in ["left", "right"]:
+		_commit_note_draft_for_pane(pane)
+
+
+func _authority_note_for_clip(clip_id: String) -> String:
+	var record := _clip_record_for(clip_id)
+	var note: Variant = record.get("note", "")
+	if typeof(note) == TYPE_STRING:
+		return note
+	return ""
 
 
 func _clip_record_for(clip_id: String) -> Dictionary:
@@ -542,8 +514,6 @@ func _clip_record_for(clip_id: String) -> Dictionary:
 
 func _clip_duration_seconds(clip_id: String) -> float:
 	if _stored_session == null or typeof(_stored_session) != TYPE_DICTIONARY:
-		if _playback_ready():
-			return _playback.review_duration_seconds()
 		return 0.0
 	var binding: Variant = _stored_session.get("binding", {})
 	if typeof(binding) != TYPE_DICTIONARY:
@@ -559,19 +529,6 @@ func _clip_duration_seconds(clip_id: String) -> float:
 			if typeof(duration) == TYPE_FLOAT or typeof(duration) == TYPE_INT:
 				return float(duration)
 	return 0.0
-
-
-func _populate_bookmark_selector(bookmarks: Array) -> void:
-	_bookmark_option.clear()
-	var sorted := bookmarks.duplicate()
-	sorted.sort()
-	for ts in sorted:
-		var t := float(ts)
-		var idx := _bookmark_option.item_count
-		_bookmark_option.add_item("%.3fs" % t)
-		_bookmark_option.set_item_metadata(idx, t)
-	if _bookmark_option.item_count > 0:
-		_bookmark_option.select(0)
 
 
 func _status_index(status: String) -> int:
@@ -592,268 +549,46 @@ func _bookmark_timestamp_valid(clip_id: String, timestamp: float) -> bool:
 	return timestamp >= 0.0 and timestamp <= duration
 
 
-# --- Review triage (derived; not persisted) ---
+func _apply_clip_annotations_for(clip_id: String) -> void:
+	if clip_id == _tracked_left_clip_id:
+		_apply_pane_annotations("left")
+	if clip_id == _tracked_right_clip_id:
+		_apply_pane_annotations("right")
 
 
-func _accept_triage_from_authority() -> void:
-	_triage_derived = compute_triage_derivation(
-		_canonical_review_clip_ids(),
-		_stored_session,
-	)
+func _commit_note_draft_for_clip(clip_id: String) -> void:
+	if clip_id == _tracked_left_clip_id:
+		_commit_note_draft_for_pane("left")
+	if clip_id == _tracked_right_clip_id:
+		_commit_note_draft_for_pane("right")
 
 
-func _canonical_review_clip_ids() -> PackedStringArray:
-	if not _playback_ready():
-		return PackedStringArray()
-	if not _playback.has_method("review_set_clip_ids"):
-		return PackedStringArray()
-	return _playback.review_set_clip_ids()
-
-
-func _filtered_clip_ids_for_active_filter() -> PackedStringArray:
-	if not _triage_derived.get("ok", false):
-		return PackedStringArray()
-	return filter_clip_ids_by_triage(
-		_triage_derived.get("canonical_ids", PackedStringArray()),
-		_triage_derived.get("statuses", {}),
-		_triage_filter,
-	)
-
-
-func _revise_clip_ids_ordered() -> PackedStringArray:
-	if not _triage_derived.get("ok", false):
-		return PackedStringArray()
-	var canonical: PackedStringArray = _triage_derived.get("canonical_ids", PackedStringArray())
-	var statuses: Dictionary = _triage_derived.get("statuses", {})
-	var result := PackedStringArray()
-	for clip_id in canonical:
-		if statuses.get(clip_id, "") == "revise":
-			result.append(clip_id)
-	return result
-
-
-func _triage_step_revise(direction: int) -> Dictionary:
-	var target := revise_navigation_target(
-		_triage_derived.get("canonical_ids", PackedStringArray()),
-		_triage_derived.get("statuses", {}),
-		_tracked_clip_id,
-		direction,
-	)
-	if target.is_empty():
-		return {"ok": true, "noop": true}
-	if target == _tracked_clip_id:
-		return {"ok": true, "noop": true}
-	return _triage_request_select_clip(target)
-
-
-func _triage_request_select_clip(clip_id: String) -> Dictionary:
-	if clip_id.is_empty():
-		return {"ok": false, "error_code": "invalid_clip_id"}
-	if clip_id == _tracked_clip_id:
-		return {"ok": true, "noop": true}
-	_commit_note_draft_for_clip(_tracked_clip_id)
-	if _playback == null or not _playback.has_method("request_select_clip"):
-		return {"ok": false, "error_code": "playback_missing"}
-	return _playback.request_select_clip(clip_id)
-
-
-func _refresh_triage_ui() -> void:
-	if _triage_progress_label == null:
-		return
-	_ui_syncing = true
-	if not _triage_derived.get("ok", false):
-		_triage_progress_label.text = (
-			"Progress unavailable — review session does not match the review set."
-		)
-		_triage_counts_label.text = "Unreviewed —  Revise —  Keep —"
-	elif _triage_derived.get("provisional", false):
-		var counts: Dictionary = _triage_derived.get("counts", {})
-		_triage_progress_label.text = format_provisional_triage_progress(
-			int(counts.get("total", 0))
-		)
-		_triage_counts_label.text = (
-			"Unreviewed %d  Revise 0  Keep 0"
-			% int(counts.get("unreviewed", 0))
-		)
-	else:
-		var counts: Dictionary = _triage_derived.get("counts", {})
-		_triage_progress_label.text = (
-			"Progress: %d reviewed / %d total"
-			% [int(counts.get("reviewed", 0)), int(counts.get("total", 0))]
-		)
-		_triage_counts_label.text = (
-			"Unreviewed %d  Revise %d  Keep %d"
-			% [
-				int(counts.get("unreviewed", 0)),
-				int(counts.get("revise", 0)),
-				int(counts.get("keep", 0)),
-			]
-		)
-
-	var filter_index := TRIAGE_FILTERS.find(_triage_filter)
-	if filter_index < 0:
-		filter_index = 0
-		_triage_filter = TRIAGE_FILTERS[0]
-	_triage_filter_option.select(filter_index)
-
-	_filtered_clip_option.clear()
-	var filtered := _filtered_clip_ids_for_active_filter()
-	for clip_id in filtered:
-		_filtered_clip_option.add_item(clip_id)
-	var current_in_filter := filtered.find(_tracked_clip_id)
-	if current_in_filter >= 0:
-		_filtered_clip_option.select(current_in_filter)
-	else:
-		_filtered_clip_option.select(-1)
-	if not _tracked_clip_id.is_empty() and current_in_filter < 0:
-		_filtered_clip_outside_label.text = (
-			"Current clip %s is outside this filter (playback selection unchanged)."
-			% _tracked_clip_id
-		)
-	else:
-		_filtered_clip_outside_label.text = ""
-
-	var triage_ready: bool = bool(_triage_derived.get("ok", false)) and _playback_ready()
-	var revise_count := int(_triage_derived.get("counts", {}).get("revise", 0))
-	_triage_filter_option.disabled = not triage_ready
-	_filtered_clip_option.disabled = not triage_ready or filtered.is_empty()
-	_prev_revise_button.disabled = not triage_ready or revise_count == 0
-	_next_revise_button.disabled = not triage_ready or revise_count == 0
-	_ui_syncing = false
-
-
-static func compute_triage_derivation(
-	canonical_ids: PackedStringArray, stored_session: Variant
-) -> Dictionary:
-	if canonical_ids.is_empty():
-		return {"ok": false, "reason": "playback_not_ready"}
-	var provisional := stored_session == null
-	if provisional:
-		var statuses_provisional: Dictionary = {}
-		for clip_id in canonical_ids:
-			statuses_provisional[clip_id] = "unreviewed"
-		return {
-			"ok": true,
-			"provisional": true,
-			"canonical_ids": canonical_ids.duplicate(),
-			"statuses": statuses_provisional,
-			"counts": _triage_counts_from_statuses(canonical_ids, statuses_provisional),
-		}
-	if typeof(stored_session) != TYPE_DICTIONARY:
-		return {"ok": false, "reason": "invalid_session"}
-	if not session_binding_matches_canonical(stored_session, canonical_ids):
-		return {"ok": false, "reason": "session_mismatch"}
-	var statuses: Dictionary = {}
-	for clip_id in canonical_ids:
-		var record := _clip_record_for_static(stored_session, clip_id)
-		var status: String = "unreviewed"
-		if typeof(record.get("status", "")) == TYPE_STRING:
-			status = record.get("status")
-		if not STATUS_OPTIONS.has(status):
-			return {"ok": false, "reason": "invalid_status"}
-		statuses[clip_id] = status
-	return {
-		"ok": true,
-		"provisional": false,
-		"canonical_ids": canonical_ids.duplicate(),
-		"statuses": statuses,
-		"counts": _triage_counts_from_statuses(canonical_ids, statuses),
-	}
-
-
-static func session_binding_matches_canonical(
-	stored_session: Dictionary, canonical_ids: PackedStringArray
-) -> bool:
-	var binding: Variant = stored_session.get("binding", {})
-	if typeof(binding) != TYPE_DICTIONARY:
-		return false
-	var clips: Variant = binding.get("clips", [])
-	if typeof(clips) != TYPE_ARRAY:
-		return false
-	if clips.size() != canonical_ids.size():
-		return false
-	for index in range(canonical_ids.size()):
-		var clip: Variant = clips[index]
-		if typeof(clip) != TYPE_DICTIONARY:
-			return false
-		if clip.get("clip_id", "") != canonical_ids[index]:
-			return false
-	return true
-
-
-static func filter_clip_ids_by_triage(
-	canonical_ids: PackedStringArray, statuses: Dictionary, filter: String
-) -> PackedStringArray:
-	if not TRIAGE_FILTERS.has(filter):
-		return PackedStringArray()
-	var result := PackedStringArray()
-	for clip_id in canonical_ids:
-		if filter == "all" or statuses.get(clip_id, "") == filter:
-			result.append(clip_id)
-	return result
-
-
-static func format_provisional_triage_progress(total: int) -> String:
-	return (
-		"Progress (provisional, no session): 0 reviewed / %d total — "
-		% total
-		+ "all clips count as unreviewed until a session is loaded."
-	)
-
-
-static func revise_navigation_target(
-	canonical_ids: PackedStringArray,
-	statuses: Dictionary,
-	current_clip_id: String,
-	direction: int,
-) -> String:
-	if direction == 0 or canonical_ids.is_empty():
+func _pending_clip_note_draft_text(pending_clip: String) -> String:
+	if pending_clip.is_empty():
 		return ""
-	var revise_ids := PackedStringArray()
-	for clip_id in canonical_ids:
-		if statuses.get(clip_id, "") == "revise":
-			revise_ids.append(clip_id)
-	if revise_ids.is_empty():
-		return ""
-	if revise_ids.size() == 1 and revise_ids[0] == current_clip_id:
-		return current_clip_id
-	var current_index := canonical_ids.find(current_clip_id)
-	if current_index < 0:
-		return revise_ids[0] if direction > 0 else revise_ids[revise_ids.size() - 1]
-	var count := canonical_ids.size()
-	for step in range(1, count + 1):
-		var index := (current_index + step * direction) % count
-		if index < 0:
-			index += count
-		var clip_id: String = canonical_ids[index]
-		if statuses.get(clip_id, "") == "revise":
-			return clip_id
+	if pending_clip == _tracked_left_clip_id:
+		return _left_note_field.text
+	if pending_clip == _tracked_right_clip_id:
+		return _right_note_field.text
+	if _draft_notes.has(pending_clip):
+		return str(_draft_notes[pending_clip])
+	var record := _clip_record_for(pending_clip)
+	if typeof(record.get("note", "")) == TYPE_STRING:
+		return record.get("note")
 	return ""
 
 
-static func _triage_counts_from_statuses(
-	canonical_ids: PackedStringArray, statuses: Dictionary
-) -> Dictionary:
-	var counts := {"unreviewed": 0, "keep": 0, "revise": 0}
-	for clip_id in canonical_ids:
-		var status: String = statuses.get(clip_id, "unreviewed")
-		if counts.has(status):
-			counts[status] = int(counts[status]) + 1
-	counts["reviewed"] = int(counts["keep"]) + int(counts["revise"])
-	counts["total"] = int(counts["unreviewed"]) + int(counts["keep"]) + int(counts["revise"])
-	return counts
-
-
-static func _clip_record_for_static(stored_session: Dictionary, clip_id: String) -> Dictionary:
-	var records: Variant = stored_session.get("clip_records", [])
-	if typeof(records) != TYPE_ARRAY:
-		return {}
-	for entry in records:
-		if typeof(entry) != TYPE_DICTIONARY:
-			continue
-		if entry.get("clip_id", "") == clip_id:
-			return entry
-	return {}
+func _maybe_clear_note_draft_after_save(pending_clip: String, pending_note: String) -> void:
+	var draft_text := _pending_clip_note_draft_text(pending_clip)
+	if not _should_clear_note_draft_on_save(
+		"SetNote", pending_clip, draft_text, pending_note, true
+	):
+		return
+	_draft_notes.erase(pending_clip)
+	if pending_clip == _tracked_left_clip_id:
+		_left_note_dirty = false
+	if pending_clip == _tracked_right_clip_id:
+		_right_note_dirty = false
 
 
 # --- Bridge ---
@@ -883,13 +618,17 @@ func _enqueue_bridge_update(
 	_inflight_clip_id = clip_id
 	_inflight_submitted_note = submitted_note
 	_inflight_update_op = str(operation.get("op", ""))
-	var body := {
+	var body := _bridge_update_request_body(_raw_sha256, operation)
+	return _start_bridge_request("update", body)
+
+
+static func _bridge_update_request_body(raw_sha256: String, operation: Dictionary) -> Dictionary:
+	return {
 		"schema_version": BRIDGE_SCHEMA_VERSION,
 		"action": "update",
-		"expected_raw_sha256": _raw_sha256,
+		"expected_raw_sha256": raw_sha256,
 		"operation": operation,
 	}
-	return _start_bridge_request("update", body)
 
 
 func _start_bridge_request(action: String, body: Dictionary) -> Dictionary:
@@ -911,6 +650,11 @@ func _start_bridge_request(action: String, body: Dictionary) -> Dictionary:
 		return {"ok": false, "error_code": "request_write_failed"}
 	request_file.store_string(encoded)
 	request_file.close()
+
+	if _panel_probe_bridge_intercept:
+		_panel_probe_captured_action = action
+		_panel_probe_captured_request = body.duplicate(true)
+		return {"ok": true, "pending": false, "captured": true}
 
 	var args := PackedStringArray(
 		[
@@ -1017,6 +761,7 @@ func _apply_bridge_response(
 	pending_note: String,
 	pending_op: String,
 ) -> void:
+	_stash_visible_note_drafts()
 	var envelope := _parse_bridge_response_envelope(response)
 	if not envelope.get("ok", false):
 		_invalidate_bridge_authority(envelope.get("message", "Session response invalid. Reload required."))
@@ -1037,7 +782,9 @@ func _apply_bridge_response(
 	_authority_current = current
 
 	if not ok_flag:
-		_handle_bridge_error_response(action, committed, current, error_obj)
+		_handle_bridge_error_response(
+			action, committed, current, error_obj, pending_clip, pending_op, pending_note
+		)
 		_refresh_session_controls()
 		return
 
@@ -1070,7 +817,8 @@ func _apply_bridge_response(
 				_user_status_message = "Review session created."
 			else:
 				_user_status_message = ""
-			_apply_clip_annotations_for(_tracked_clip_id)
+			_apply_clip_annotations_for(pending_clip if not pending_clip.is_empty() else _tracked_left_clip_id)
+			_apply_clip_annotations_for(_tracked_right_clip_id)
 	elif stored == null:
 		if action == "read":
 			_stored_session = null
@@ -1078,13 +826,14 @@ func _apply_bridge_response(
 			_reload_required = false
 			_conflict_active = false
 			if current:
-				_user_status_message = "No review session on disk. Create one when ready."
+				_user_status_message = "No review session on disk. Reload when a session exists."
 			else:
 				_user_status_message = (
 					"Review set changed; stored session is stale (read-only). "
 					+ "Reload when the review set matches authority."
 				)
-			_apply_clip_annotations_for(_tracked_clip_id)
+			_apply_pane_annotations("left")
+			_apply_pane_annotations("right")
 		else:
 			_invalidate_bridge_authority("Session response missing stored payload. Reload required.")
 			_refresh_session_controls()
@@ -1108,34 +857,10 @@ func _apply_bridge_response(
 		elif action == "create" and current:
 			_user_status_message = "Review session created."
 			_reload_required = false
-		_apply_clip_annotations_for(_tracked_clip_id)
+		_apply_pane_annotations("left")
+		_apply_pane_annotations("right")
 
-	_accept_triage_from_authority()
 	_refresh_session_controls()
-
-
-func _maybe_clear_note_draft_after_save(pending_clip: String, pending_note: String) -> void:
-	var draft_text := _pending_clip_note_draft_text(pending_clip)
-	if not _should_clear_note_draft_on_save(
-		"SetNote", pending_clip, draft_text, pending_note, true
-	):
-		return
-	_draft_notes.erase(pending_clip)
-	if _tracked_clip_id == pending_clip:
-		_note_dirty = false
-
-
-func _pending_clip_note_draft_text(pending_clip: String) -> String:
-	if pending_clip.is_empty():
-		return ""
-	if pending_clip == _tracked_clip_id:
-		return _note_field.text
-	if _draft_notes.has(pending_clip):
-		return str(_draft_notes[pending_clip])
-	var record := _clip_record_for(pending_clip)
-	if typeof(record.get("note", "")) == TYPE_STRING:
-		return record.get("note")
-	return ""
 
 
 func _invalidate_bridge_authority(message: String) -> void:
@@ -1146,7 +871,13 @@ func _invalidate_bridge_authority(message: String) -> void:
 
 
 func _handle_bridge_error_response(
-	action: String, committed: bool, current: bool, error_obj: Variant
+	action: String,
+	committed: bool,
+	current: bool,
+	error_obj: Variant,
+	pending_clip: String,
+	pending_op: String,
+	pending_note: String,
 ) -> void:
 	var code := ""
 	var message := "Session update failed."
@@ -1163,8 +894,27 @@ func _handle_bridge_error_response(
 	if not committed and not user_msg.ends_with("Reload before retrying."):
 		user_msg = "%s Reload before retrying." % user_msg
 	_user_status_message = user_msg
-	if action == "update" and not committed:
-		_note_dirty = true
+	if action != "update" or committed or pending_clip.is_empty():
+		return
+	if pending_op == "SetStatus":
+		_apply_clip_annotations_for(pending_clip)
+		return
+	if pending_op != "SetNote":
+		return
+	if not _draft_notes.has(pending_clip) and pending_note != "":
+		_draft_notes[pending_clip] = pending_note
+	if pending_clip == _tracked_left_clip_id:
+		var draft := str(_draft_notes.get(pending_clip, pending_note))
+		_ui_syncing = true
+		_left_note_field.text = draft
+		_ui_syncing = false
+		_left_note_dirty = draft != _authority_note_for_clip(pending_clip)
+	elif pending_clip == _tracked_right_clip_id:
+		var draft := str(_draft_notes.get(pending_clip, pending_note))
+		_ui_syncing = true
+		_right_note_field.text = draft
+		_ui_syncing = false
+		_right_note_dirty = draft != _authority_note_for_clip(pending_clip)
 
 
 func _user_facing_bridge_error(code: String, message: String) -> String:
@@ -1195,35 +945,35 @@ func _handle_bridge_failure(message: String) -> void:
 func _refresh_session_controls() -> void:
 	var mutations := _mutations_enabled()
 	_reload_button.disabled = not _bridge_configured or _bridge_busy
-	_create_button.disabled = (
-		not _bridge_configured
-		or _bridge_busy
-		or _reload_required
-		or _conflict_active
-		or not _authority_current
-		or _stored_session != null
-	)
-	_status_option.disabled = not mutations
-	_note_field.editable = mutations
-	_save_note_button.disabled = not mutations
-	_add_bookmark_button.disabled = not mutations
-	_seek_bookmark_button.disabled = _bookmark_option.item_count == 0 or not _playback_ready()
+	for pane in ["left", "right"]:
+		_pane_status_option(pane).disabled = not mutations
+		_pane_note_field(pane).editable = mutations
+		var save_btn := _left_save_note_button if pane == "left" else _right_save_note_button
+		var bookmark_btn := _left_add_bookmark_button if pane == "left" else _right_add_bookmark_button
+		var keep_btn := _left_keep_button if pane == "left" else _right_keep_button
+		var revise_btn := _left_revise_button if pane == "left" else _right_revise_button
+		save_btn.disabled = not mutations
+		bookmark_btn.disabled = not mutations
+		keep_btn.disabled = not mutations
+		revise_btn.disabled = not mutations
 
 	var banner := _user_status_message
 	if _bridge_busy:
 		banner = "Session bridge busy…"
 	elif banner.is_empty():
 		if not _bridge_configured:
-			banner = "Session bridge unavailable. Playback only."
+			banner = "Session bridge unavailable. Compare only."
 		elif _stored_session == null and _authority_current:
-			banner = "No session loaded."
+			banner = "No session loaded (read-only until an existing session is available)."
 		elif _mutations_enabled():
-			banner = "Session current — annotations editable (Keep is a working note, not approval)."
+			banner = "Session current — per-pane annotations editable."
 		elif not _authority_current:
 			banner = "Session read-only (authority not current)."
 		elif _reload_required:
 			banner = "Reload required before editing."
-	_refresh_triage_ui()
+	var revision := _stored_revision()
+	if revision >= 0 and banner.find("Rev") < 0:
+		banner = "Rev %d — %s" % [revision, banner]
 	_set_banner(banner)
 
 
@@ -1232,6 +982,13 @@ func _set_banner(text: String) -> void:
 
 
 # --- Bridge response validation (scene-independent helpers) ---
+
+
+func _run_session_panel_regression_probe() -> bool:
+	var probe: GDScript = load("res://animation_review_compare_session_panel_probe.gd")
+	if probe == null:
+		return false
+	return bool(probe.call("run_session_panel_regression_probe", self))
 
 
 func _wants_validation_probe() -> bool:
@@ -1333,132 +1090,42 @@ func _run_bridge_validation_probe() -> bool:
 	if _should_clear_note_draft_on_save("SetStatus", "A", "A", "A", true):
 		failures.append("draft keep status")
 	_draft_notes = {"ClipA": "submitted-text"}
-	_tracked_clip_id = "ClipB"
-	if _note_field != null:
-		_ui_syncing = true
-		_note_field.text = "submitted-text"
-		_ui_syncing = false
+	_tracked_left_clip_id = "ClipB"
+	_tracked_right_clip_id = "ClipC"
 	if _pending_clip_note_draft_text("ClipA") != "submitted-text":
 		failures.append("pending draft uses map not selected field")
-	if not _should_clear_note_draft_on_save(
-		"SetNote",
-		"ClipA",
-		_pending_clip_note_draft_text("ClipA"),
-		"submitted-text",
-		true,
-	):
-		failures.append("draft clear when pending draft matches submitted")
-	_draft_notes = {"ClipA": "edited-after-submit"}
-	if _note_field != null:
-		_note_field.text = "submitted-text"
-	if _should_clear_note_draft_on_save(
-		"SetNote",
-		"ClipA",
-		_pending_clip_note_draft_text("ClipA"),
-		"submitted-text",
-		true,
-	):
-		failures.append("draft keep when pending draft differs from submitted")
-	var canonical_two := PackedStringArray(["IdleA", "IdleB"])
-	var triage_session := _minimal_valid_session_dict(2)
-	triage_session["clip_records"] = [
-		{"clip_id": "IdleA", "status": "revise", "note": "", "bookmarks": []},
-		{"clip_id": "IdleB", "status": "keep", "note": "", "bookmarks": []},
-	]
-	var triage_ok := compute_triage_derivation(canonical_two, triage_session)
-	if not triage_ok.get("ok", false):
-		failures.append("triage derived session")
-	else:
-		var tc: Dictionary = triage_ok.get("counts", {})
-		if (
-			int(tc.get("reviewed", -1)) != 2
-			or int(tc.get("total", -1)) != 2
-			or int(tc.get("unreviewed", -1)) != 0
-			or int(tc.get("revise", -1)) != 1
-			or int(tc.get("keep", -1)) != 1
-		):
-			failures.append("triage count totals")
-	var triage_prov := compute_triage_derivation(canonical_two, null)
-	if not triage_prov.get("provisional", false) or int(triage_prov.get("counts", {}).get("reviewed", -1)) != 0:
-		failures.append("triage provisional")
-	if compute_triage_derivation(PackedStringArray(["IdleA", "IdleX"]), triage_session).get("ok", false):
-		failures.append("triage mismatch fail open")
-	if not TRIAGE_FILTERS.has("all") or TRIAGE_FILTERS.has("bogus"):
-		failures.append("triage filter registry")
-	var triage_statuses := {"IdleA": "revise", "IdleB": "keep"}
-	var revise_only := filter_clip_ids_by_triage(canonical_two, triage_statuses, "revise")
-	if revise_only.size() != 1 or revise_only[0] != "IdleA":
-		failures.append("triage filter revise")
-	if filter_clip_ids_by_triage(canonical_two, triage_statuses, "not_a_filter").size() != 0:
-		failures.append("triage invalid filter")
-	var prov_progress := format_provisional_triage_progress(7)
-	if prov_progress.find("%") >= 0 or prov_progress.find("7") < 0:
-		failures.append("provisional progress format")
-	var canonical_abc := PackedStringArray(["A", "B", "C"])
-	var abc_statuses := {"A": "revise", "B": "keep", "C": "unreviewed"}
-	var abc_counts := _triage_counts_from_statuses(canonical_abc, abc_statuses)
-	if (
-		int(abc_counts.get("unreviewed", -1)) != 1
-		or int(abc_counts.get("keep", -1)) != 1
-		or int(abc_counts.get("revise", -1)) != 1
-		or int(abc_counts.get("reviewed", -1)) != 2
-		or int(abc_counts.get("total", -1)) != 3
-	):
-		failures.append("triage abc counts")
-	var abc_keep_a := abc_statuses.duplicate()
-	abc_keep_a["A"] = "keep"
-	var abc_terminal_counts := _triage_counts_from_statuses(canonical_abc, abc_keep_a)
-	if (
-		int(abc_terminal_counts.get("unreviewed", -1)) != 1
-		or int(abc_terminal_counts.get("keep", -1)) != 2
-		or int(abc_terminal_counts.get("revise", -1)) != 0
-	):
-		failures.append("triage abc terminal keep projection")
-	var abc_terminal := {"A": "keep", "B": "keep", "C": "revise"}
-	abc_terminal_counts = _triage_counts_from_statuses(canonical_abc, abc_terminal)
-	if (
-		int(abc_terminal_counts.get("unreviewed", -1)) != 0
-		or int(abc_terminal_counts.get("keep", -1)) != 2
-		or int(abc_terminal_counts.get("revise", -1)) != 1
-	):
-		failures.append("triage abc terminal 0/2/1 counts")
-	var caller_order := PackedStringArray(["C", "A", "B"])
-	var ordered_all := filter_clip_ids_by_triage(caller_order, abc_statuses, "all")
-	if ordered_all.size() != 3 or ordered_all[0] != "C" or ordered_all[1] != "A" or ordered_all[2] != "B":
-		failures.append("triage filter caller order")
-	var canonical_mixed := PackedStringArray(["zRevise", "mKeep", "aRevise", "bUnreviewed"])
-	var mixed_statuses := {
-		"zRevise": "revise",
-		"mKeep": "keep",
-		"aRevise": "revise",
-		"bUnreviewed": "unreviewed",
+	if abs(_bookmark_seconds_for_pane("left") + 1.0) > 0.0001:
+		failures.append("bookmark helper without ready compare")
+	var snap := {
+		"ready": true,
+		"normalized_progress": 0.25,
+		"left_duration": 8.0,
+		"right_duration": 4.0,
 	}
-	if revise_navigation_target(canonical_mixed, mixed_statuses, "mKeep", 1) != "aRevise":
-		failures.append("triage revise next from keep")
-	if revise_navigation_target(canonical_mixed, mixed_statuses, "mKeep", -1) != "zRevise":
-		failures.append("triage revise prev from keep")
-	if revise_navigation_target(canonical_mixed, mixed_statuses, "bUnreviewed", 1) != "zRevise":
-		failures.append("triage revise wrap forward from unreviewed")
-	if revise_navigation_target(canonical_mixed, mixed_statuses, "bUnreviewed", -1) != "aRevise":
-		failures.append("triage revise wrap back from unreviewed")
-	if revise_navigation_target(canonical_mixed, mixed_statuses, "zRevise", 1) != "aRevise":
-		failures.append("triage revise next along canonical")
-	if revise_navigation_target(canonical_mixed, mixed_statuses, "aRevise", -1) != "zRevise":
-		failures.append("triage revise prev along canonical")
-	var solo_statuses := {"solo": "revise"}
-	if revise_navigation_target(PackedStringArray(["solo"]), solo_statuses, "solo", 1) != "solo":
-		failures.append("triage sole revise noop")
-	var zero_statuses := {"solo": "keep"}
-	if revise_navigation_target(PackedStringArray(["solo"]), zero_statuses, "solo", 1) != "":
-		failures.append("triage zero revise noop")
-	var revise_only_canonical := PackedStringArray(["r1", "r2", "r3"])
-	var revise_only_statuses := {"r1": "revise", "r2": "revise", "r3": "revise"}
-	if revise_navigation_target(revise_only_canonical, revise_only_statuses, "missing", 1) != "r1":
-		failures.append("triage revise off-list forward")
-	if revise_navigation_target(revise_only_canonical, revise_only_statuses, "missing", -1) != "r3":
-		failures.append("triage revise off-list back")
+	if abs(_bookmark_seconds_from_snapshot(snap, "left", "ClipA") - 2.0) > 0.0001:
+		failures.append("bookmark left progress*duration")
+	if abs(_bookmark_seconds_from_snapshot(snap, "right", "ClipB") - 1.0) > 0.0001:
+		failures.append("bookmark right progress*duration")
+	if _session_panel_width_for_root(1280) != SESSION_PANEL_WIDTH_PX:
+		failures.append("panel width 1280")
+	if _session_panel_width_for_root(250) != 218:
+		failures.append("panel width narrow")
+	var shared_sha := "f".repeat(64)
+	var update_body := _bridge_update_request_body(
+		shared_sha, {"op": "SetNote", "clip_id": "IdleA", "note": "x"}
+	)
+	if update_body.get("expected_raw_sha256", "") != shared_sha:
+		failures.append("update body shared sha")
+	var bookmark_record := {
+		"clip_id": "IdleA",
+		"status": "keep",
+		"note": "note-a",
+		"bookmarks": [0.5, 1.25],
+	}
+	if _format_bookmarks_line(bookmark_record) != "Bookmarks: 0.500s, 1.250s":
+		failures.append("bookmark display line")
 	if failures.is_empty():
-		print("PASS: animation_review_session_bridge_validation")
+		print("PASS: animation_review_compare_session_bridge_validation")
 		return true
 	for item in failures:
 		print("FAIL: %s" % item)
@@ -1755,16 +1422,59 @@ func _sanitize_user_message(message: String) -> String:
 	return message
 
 
-func _minimal_valid_session_dict(revision: int) -> Dictionary:
+static func _minimal_valid_session_dict_for_compare() -> Dictionary:
+	return _minimal_valid_session_dict_for_probe_clips(1)
+
+
+static func _minimal_valid_session_dict_for_probe_clips(revision: int) -> Dictionary:
+	var duration := 2.0
+	var clip_ids := ["probe_clip_a", "probe_clip_b", "probe_clip_c"]
+	var sha_seeds := ["b", "c", "d"]
+	var clips: Array = []
+	var records: Array = []
+	for i in range(clip_ids.size()):
+		clips.append(
+			{
+				"clip_id": clip_ids[i],
+				"raw_clip_sha256": sha_seeds[i].repeat(64),
+				"duration_seconds": duration,
+			}
+		)
+		records.append(
+			{"clip_id": clip_ids[i], "status": "unreviewed", "note": "", "bookmarks": []}
+		)
+	return {
+		"schema_version": SESSION_SCHEMA_VERSION,
+		"binding": {
+			"review_root": "/review/root",
+			"raw_manifest_sha256": "d".repeat(64),
+			"root_payload_sha256": "e".repeat(64),
+			"clip_payload_sha256": "f".repeat(64),
+			"clips": clips,
+		},
+		"revision": revision,
+		"clip_records": records,
+		"production_eligible": false,
+		"promotion_eligible": false,
+	}
+
+
+static func _minimal_valid_session_dict_with_clips(
+	revision: int,
+	left_clip_id: String,
+	right_clip_id: String,
+	left_duration: float,
+	right_duration: float,
+) -> Dictionary:
 	var clip_a := {
-		"clip_id": "IdleA",
+		"clip_id": left_clip_id,
 		"raw_clip_sha256": "b".repeat(64),
-		"duration_seconds": 1.0,
+		"duration_seconds": left_duration,
 	}
 	var clip_b := {
-		"clip_id": "IdleB",
+		"clip_id": right_clip_id,
 		"raw_clip_sha256": "c".repeat(64),
-		"duration_seconds": 1.0,
+		"duration_seconds": right_duration,
 	}
 	return {
 		"schema_version": SESSION_SCHEMA_VERSION,
@@ -1777,9 +1487,23 @@ func _minimal_valid_session_dict(revision: int) -> Dictionary:
 		},
 		"revision": revision,
 		"clip_records": [
-			{"clip_id": "IdleA", "status": "unreviewed", "note": "", "bookmarks": []},
-			{"clip_id": "IdleB", "status": "unreviewed", "note": "", "bookmarks": []},
+			{
+				"clip_id": left_clip_id,
+				"status": "unreviewed",
+				"note": "",
+				"bookmarks": [],
+			},
+			{
+				"clip_id": right_clip_id,
+				"status": "unreviewed",
+				"note": "",
+				"bookmarks": [],
+			},
 		],
 		"production_eligible": false,
 		"promotion_eligible": false,
 	}
+
+
+func _minimal_valid_session_dict(revision: int) -> Dictionary:
+	return _minimal_valid_session_dict_with_clips(revision, "IdleA", "IdleB", 1.0, 1.0)
