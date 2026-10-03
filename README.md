@@ -19,7 +19,7 @@ V0.8-11 adds session-derived review progress, status filters and previous/next r
 
 V0.8-12 adds side-by-side animation comparison with a shared normalized timeline, independent viewports and canonical rest camera framing. Source and independently installed RC7 acceptance passed actual authored-package rendering, weighted deformation, parent-bone inheritance and source-drift rejection. See the [comparison guide](docs/guides/v0.8-12-animation-compare.md) and [technical closure](docs/reports/v0.8-12-animation-compare-technical-closure.md). Release qualification remains pending.
 
-V0.8-13 development adds an optional two-pane annotation panel backed by the existing review-session bridge. Its runtime checkpoint passed 28 focused tests; actual bridge/render and installed-package acceptance remain pending. See the [integration guide](docs/guides/v0.8-13-compare-session-integration.md) and [runtime checkpoint](docs/reports/v0.8-13a-compare-session-runtime-checkpoint.md).
+V0.8-13 adds an optional two-pane annotation panel backed by the existing review-session bridge. Fresh source and independently installed RC8 acceptance passed the same three tests with actual bridge/render checks; installed fast regressions passed 218 tests with 17 documented platform skips. Local technical qualification is complete; public release qualification remains pending. See the [integration guide](docs/guides/v0.8-13-compare-session-integration.md), [runtime checkpoint](docs/reports/v0.8-13a-compare-session-runtime-checkpoint.md) and [technical closure](docs/reports/v0.8-13-compare-session-technical-closure.md).
 
 ## Install and run
 
