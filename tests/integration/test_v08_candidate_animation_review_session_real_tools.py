@@ -107,6 +107,7 @@ _FIXTURE_ASSET_ID = "humanoid_review_session_01"
 _SESSION_INSPECT_SUBPROCESS_TIMEOUT_SECONDS = 600.0
 _COMPARE_INSPECT_SUBPROCESS_TIMEOUT_SECONDS = 180.0
 _COMPARE_INSPECT_LEAF = "animation_review_compare_inspect.gd"
+_COMPARE_SESSION_REAL_INSPECT_LEAF = "animation_review_compare_session_real_inspect.gd"
 _COMPARE_PREPARED_EXTRA_ROOT_FILES = frozenset(
     {
         "animation_review_compare.tscn",
@@ -115,6 +116,24 @@ _COMPARE_PREPARED_EXTRA_ROOT_FILES = frozenset(
         "compare_context.json",
         _COMPARE_INSPECT_LEAF,
     }
+)
+_COMPARE_SESSION_PREPARED_EXTRA_ROOT_FILES = (
+    _COMPARE_PREPARED_EXTRA_ROOT_FILES - {_COMPARE_INSPECT_LEAF}
+) | frozenset(
+    {
+        "animation_review_compare_session.tscn",
+        "animation_review_compare_session_controller.gd",
+        "context.json",
+        _COMPARE_SESSION_REAL_INSPECT_LEAF,
+    }
+)
+_COMPARE_SESSION_FROZEN_BASELINE_REVISION = 6
+_COMPARE_SESSION_REVISION_AFTER_LEFT_WRITES = 9
+_COMPARE_SESSION_REVISION_AFTER_RIGHT_WRITES = 10
+_COMPARE_SESSION_REVISION_AFTER_EXTERNAL = 11
+_COMPARE_SESSION_REVISION_AFTER_FINAL = 12
+_COMPARE_SESSION_MUTATIONS_AFTER_FROZEN_COPY = (
+    _COMPARE_SESSION_REVISION_AFTER_FINAL - _COMPARE_SESSION_FROZEN_BASELINE_REVISION
 )
 
 BLENDER = os.environ.get(
@@ -129,6 +148,8 @@ GODOT = os.environ.get(
 _V08_PACKAGE = resources.files("gamefactory.resources.v08_candidate")
 _HANDSHAKE = "gf_session_inspect_handshake.json"
 _EXTERNAL_DONE = "gf_session_inspect_external_complete.json"
+_COMPARE_SESSION_OFFLINE_READY = "gf_compare_session_inspect_offline_ready.json"
+_COMPARE_SESSION_OFFLINE_DONE = "gf_compare_session_inspect_offline_done.json"
 _SESSION_INSPECT_LEAF = "animation_review_session_inspect.gd"
 _VIEWER_PREPARED_EXTRA_ROOT_FILES = frozenset(
     {
@@ -328,6 +349,83 @@ def _stage_owned_compare_inspect_script(package_dir: Path) -> None:
     target.write_bytes(_V08_PACKAGE.joinpath(_COMPARE_INSPECT_LEAF).read_bytes())
 
 
+def _stage_owned_compare_session_real_inspect_script(package_dir: Path) -> None:
+    target = package_dir / _COMPARE_SESSION_REAL_INSPECT_LEAF
+    target.write_bytes(_V08_PACKAGE.joinpath(_COMPARE_SESSION_REAL_INSPECT_LEAF).read_bytes())
+
+
+def _assert_owned_compare_session_overlay_bytes(
+    overlay: Path,
+    review_byte_snapshot: dict[str, bytes],
+) -> None:
+    for rel, payload in review_byte_snapshot.items():
+        if rel == "project.godot":
+            continue
+        assert (overlay / rel).read_bytes() == payload
+    review_project = review_byte_snapshot["project.godot"].decode("utf-8")
+    stripped_expected = re.sub(r"^run/main_scene=.*\n", "", review_project, flags=re.MULTILINE)
+    assert (overlay / "project.godot").read_text(encoding="utf-8") == stripped_expected
+    overlay_only = {
+        path.relative_to(overlay).as_posix() for path in overlay.rglob("*") if path.is_file()
+    }
+    review_rels = set(review_byte_snapshot)
+    extra = overlay_only - review_rels
+    assert extra == set(_COMPARE_SESSION_PREPARED_EXTRA_ROOT_FILES)
+
+
+def _run_compare_session_inspect(
+    overlay_dir: Path,
+    *,
+    phase: str,
+    result_path: Path,
+    compare_context_path: Path,
+    session_context_path: Path,
+    session_exchange_dir: Path,
+    runner: ProcessRunner,
+    timeout: float = _SESSION_INSPECT_SUBPROCESS_TIMEOUT_SECONDS,
+) -> subprocess.CompletedProcess[str]:
+    _run_godot_import(overlay_dir, runner)
+    user_args = [
+        f"{compare_viewer._ARG_COMPARE_CONTEXT}{compare_context_path}",
+        f"--session-python-executable={sys.executable}",
+        f"--session-context-file={session_context_path}",
+        f"--session-exchange-dir={session_exchange_dir}",
+        f"--gf-compare-session-inspect-phase={phase}",
+        f"--gf-compare-session-inspect-result={result_path}",
+    ]
+    cmd = [
+        str(_godot_rendered_executable()),
+        "--rendering-method",
+        "gl_compatibility",
+        "--audio-driver",
+        "Dummy",
+        "--path",
+        str(overlay_dir),
+        "--script",
+        f"res://{_COMPARE_SESSION_REAL_INSPECT_LEAF}",
+        "--",
+        *user_args,
+    ]
+    try:
+        return subprocess.run(
+            cmd,
+            cwd=overlay_dir,
+            capture_output=True,
+            text=True,
+            timeout=timeout,
+            env=_bridge_env(),
+        )
+    except subprocess.TimeoutExpired as exc:
+        stdout_tail = (exc.stdout or "")[-3000:] if exc.stdout else ""
+        stderr_tail = (exc.stderr or "")[-3000:] if exc.stderr else ""
+        pytest.fail(
+            "compare session inspect subprocess timed out "
+            f"phase={phase!r} timeout_s={timeout} overlay_dir={overlay_dir} "
+            f"result_exists={result_path.is_file()} godot={_godot_rendered_executable()} "
+            f"stdout_tail={stdout_tail!r} stderr_tail={stderr_tail!r}"
+        )
+
+
 def _compare_caller_digests(context_path: Path) -> dict[str, str]:
     return {
         "compare/caller-context.json": hashlib.sha256(context_path.read_bytes()).hexdigest(),
@@ -427,6 +525,9 @@ def _write_minimal_inspect_syntax_project(project_dir: Path) -> None:
     )
     (project_dir / "animation_review_session_inspect.gd").write_bytes(
         _V08_PACKAGE.joinpath("animation_review_session_inspect.gd").read_bytes()
+    )
+    (project_dir / _COMPARE_SESSION_REAL_INSPECT_LEAF).write_bytes(
+        _V08_PACKAGE.joinpath(_COMPARE_SESSION_REAL_INSPECT_LEAF).read_bytes()
     )
 
 
@@ -624,6 +725,42 @@ def _clip_record(session_doc: dict[str, object], clip_id: str) -> dict[str, obje
     raise AssertionError(f"clip record missing for {clip_id!r}")
 
 
+def _copied_sidecar_raw_sha(copied_session_path: Path) -> str:
+    return hashlib.sha256(copied_session_path.read_bytes()).hexdigest()
+
+
+def _sidecar_revision(session_path: Path) -> int:
+    return int(_session_document(session_path).get("revision", -1))
+
+
+def _assert_compare_session_phase_payload(
+    payload: dict[str, object],
+    *,
+    copied_session_path: Path,
+    expected_revision: int,
+    original_frozen: bytes,
+    primary_session_path: Path,
+) -> str:
+    sidecar_sha = _copied_sidecar_raw_sha(copied_session_path)
+    doc_revision = _sidecar_revision(copied_session_path)
+    assert doc_revision == expected_revision
+    for key in ("session_sha", "sidecar_sha", "terminal_sha", "recovered_sha", "external_sha"):
+        value = payload.get(key)
+        if value is not None and str(value):
+            assert str(value) == sidecar_sha, f"{key} does not match copied sidecar raw sha"
+    snap = payload.get("snapshot")
+    assert isinstance(snap, dict), "compare-session inspect snapshot missing"
+    assert str(snap.get("raw_sha256", "")) == sidecar_sha
+    assert int(snap.get("stored_revision", -1)) == expected_revision
+    if expected_revision == _COMPARE_SESSION_REVISION_AFTER_FINAL:
+        assert (
+            expected_revision - _COMPARE_SESSION_FROZEN_BASELINE_REVISION
+            == _COMPARE_SESSION_MUTATIONS_AFTER_FROZEN_COPY
+        )
+    assert primary_session_path.read_bytes() == original_frozen
+    return sidecar_sha
+
+
 def _assert_handoff_module_under_imported_gamefactory() -> None:
     import gamefactory
     import gamefactory.workflows.animation_review_handoff as handoff_module
@@ -785,6 +922,24 @@ def test_animation_review_session_inspect_script_check_only(tmp_path: Path) -> N
     combined = completed.stdout + completed.stderr
     assert completed.returncode == 0, combined[-2000:]
     _assert_no_script_errors(combined)
+    compare_completed = subprocess.run(
+        [
+            str(GODOT),
+            "--headless",
+            "--path",
+            str(project_dir),
+            "--script",
+            f"res://{_COMPARE_SESSION_REAL_INSPECT_LEAF}",
+            "--check-only",
+        ],
+        cwd=project_dir,
+        capture_output=True,
+        text=True,
+        timeout=180,
+    )
+    compare_combined = compare_completed.stdout + compare_completed.stderr
+    assert compare_completed.returncode == 0, compare_combined[-2000:]
+    _assert_no_script_errors(compare_combined)
 
 
 @pytest.mark.skipif(not Path(BLENDER).is_file(), reason="Blender executable not available")
@@ -1630,5 +1785,547 @@ def test_real_animation_review_session_ui_lifecycle(tmp_path: Path) -> None:
         animation_review_set_current(handlers, workflow.id, preview_dir, sources, review_set_dir)
         is True
     )
+    assert_zero_provider_activity(db, workflow.id)
+    assert ProviderInvocationRepository(db).count(workflow.id) == 0
+
+    original_session_frozen = session_path.read_bytes()
+    assert hashlib.sha256(original_session_frozen).hexdigest() == session_sha_after_terminal
+
+    copied_session_path = (tmp_path / "compare-owned-sidecar" / "review_session.json").resolve()
+    copied_session_path.parent.mkdir(parents=True, exist_ok=True)
+    copied_session_path.write_bytes(original_session_frozen)
+    copied_exchange_dir = (tmp_path / "compare-session-ui-exchange").resolve()
+    copied_exchange_dir.mkdir(parents=True, exist_ok=True)
+    copied_context_doc = {
+        **context_doc,
+        "session_path": str(copied_session_path),
+        "exchange_dir": str(copied_exchange_dir),
+    }
+    copied_bridge_context = _parse_context_document(copied_context_doc)
+    session_compare_overlay = compare_overlay_parent / "compare-session-overlay"
+    prepared_session_compare = prepare_animation_review_compare_viewer(
+        handlers=handlers,
+        workflow_id=workflow.id,
+        preview_dir=preview_dir,
+        clip_packages=sources,
+        review_dir=review_set_dir,
+        overlay_dir=session_compare_overlay,
+        left_clip_id="arm_wave_01",
+        right_clip_id="spine_turn_03",
+        session_context=copied_bridge_context,
+        python_executable=Path(sys.executable),
+    )
+    assert prepared_session_compare.session_context_file is not None
+    assert prepared_session_compare.session_exchange_dir is not None
+    _godot_harness_strip_main_scene(prepared_session_compare.overlay_dir / "project.godot")
+    _stage_owned_compare_session_real_inspect_script(prepared_session_compare.overlay_dir)
+    _assert_owned_compare_session_overlay_bytes(
+        prepared_session_compare.overlay_dir, review_byte_snapshot
+    )
+    staged_session_real_inspect_bytes = (
+        prepared_session_compare.overlay_dir / _COMPARE_SESSION_REAL_INSPECT_LEAF
+    ).read_bytes()
+    assert (
+        staged_session_real_inspect_bytes
+        == _V08_PACKAGE.joinpath(_COMPARE_SESSION_REAL_INSPECT_LEAF).read_bytes()
+    )
+    compare_sources_same2 = _real_ui_handoff_source_digests(
+        preview_dir=preview_dir,
+        review_set_dir=review_set_dir,
+        clip_preview_a=clip_preview_a,
+        clip_preview_b=clip_preview_b,
+        clip_preview_c=clip_preview_c,
+        clip_a_path=clip_a_path,
+        clip_b_path=clip_b_path,
+        clip_c_path=clip_c_path,
+        session_path=session_path,
+    )
+    assert compare_sources_same2 == compare_sources_before
+    assert _sidecar_revision(copied_session_path) == _COMPARE_SESSION_FROZEN_BASELINE_REVISION
+    assert _copied_sidecar_raw_sha(copied_session_path) == session_sha_after_terminal
+    assert copied_session_path.read_bytes() == original_session_frozen
+
+    left_writes_result = tmp_path / "compare-session-left-writes.json"
+    left_writes_proc = _run_compare_session_inspect(
+        prepared_session_compare.overlay_dir,
+        phase="left_writes",
+        result_path=left_writes_result,
+        compare_context_path=prepared_session_compare.context_file,
+        session_context_path=prepared_session_compare.session_context_file,
+        session_exchange_dir=prepared_session_compare.session_exchange_dir,
+        runner=runner,
+    )
+    left_writes_combined = left_writes_proc.stdout + left_writes_proc.stderr
+    assert left_writes_proc.returncode == 0, left_writes_combined[-4000:]
+    _assert_no_script_errors(left_writes_combined)
+    assert "PASS: animation_review_compare_session_left_writes" in left_writes_proc.stdout
+    left_writes_payload = _load_inspect_result(left_writes_result)
+    copied_sha_after_left = _assert_compare_session_phase_payload(
+        left_writes_payload,
+        copied_session_path=copied_session_path,
+        expected_revision=_COMPARE_SESSION_REVISION_AFTER_LEFT_WRITES,
+        original_frozen=original_session_frozen,
+        primary_session_path=session_path,
+    )
+    assert copied_sha_after_left != session_sha_after_terminal
+    copied_doc_after_left = _session_document(copied_session_path)
+    clip_a_left = _clip_record(copied_doc_after_left, "arm_wave_01")
+    assert clip_a_left.get("status") == "revise"
+    assert clip_a_left.get("note") == "El hareketi fazla sert"
+    frozen_arm_wave_bookmarks = list(
+        _clip_record(json.loads(original_session_frozen.decode("utf-8")), "arm_wave_01").get(
+            "bookmarks", []
+        )
+    )
+    assert clip_a_left.get("bookmarks") == sorted(set(frozen_arm_wave_bookmarks + [1.125]))
+    assert session_path.read_bytes() == original_session_frozen
+
+    right_writes_result = tmp_path / "compare-session-right-writes.json"
+    right_writes_proc = _run_compare_session_inspect(
+        prepared_session_compare.overlay_dir,
+        phase="right_writes",
+        result_path=right_writes_result,
+        compare_context_path=prepared_session_compare.context_file,
+        session_context_path=prepared_session_compare.session_context_file,
+        session_exchange_dir=prepared_session_compare.session_exchange_dir,
+        runner=runner,
+    )
+    right_writes_combined = right_writes_proc.stdout + right_writes_proc.stderr
+    assert right_writes_proc.returncode == 0, right_writes_combined[-4000:]
+    _assert_no_script_errors(right_writes_combined)
+    assert "PASS: animation_review_compare_session_right_writes" in right_writes_proc.stdout
+    right_writes_payload = _load_inspect_result(right_writes_result)
+    copied_sha_after_right = _assert_compare_session_phase_payload(
+        right_writes_payload,
+        copied_session_path=copied_session_path,
+        expected_revision=_COMPARE_SESSION_REVISION_AFTER_RIGHT_WRITES,
+        original_frozen=original_session_frozen,
+        primary_session_path=session_path,
+    )
+    copied_doc_after_right = _session_document(copied_session_path)
+    clip_c_after_right = _clip_record(copied_doc_after_right, "spine_turn_03")
+    assert clip_c_after_right.get("status") == "keep"
+    assert session_path.read_bytes() == original_session_frozen
+
+    conflict_result_path = tmp_path / "compare-session-conflict.json"
+    handshake_path = prepared_session_compare.session_exchange_dir / _HANDSHAKE
+    done_path = prepared_session_compare.session_exchange_dir / _EXTERNAL_DONE
+    conflict_proc: subprocess.Popen[str] | None = None
+    if handshake_path.exists():
+        handshake_path.unlink()
+    if done_path.exists():
+        done_path.unlink()
+    conflict_log_dir = tmp_path / "compare-session-conflict-logs"
+    conflict_log_dir.mkdir(parents=True, exist_ok=True)
+    conflict_stdout_log = conflict_log_dir / "godot.stdout.log"
+    conflict_stderr_log = conflict_log_dir / "godot.stderr.log"
+    _run_godot_import(prepared_session_compare.overlay_dir, runner)
+    conflict_cmd = [
+        str(_godot_rendered_executable()),
+        "--rendering-method",
+        "gl_compatibility",
+        "--audio-driver",
+        "Dummy",
+        "--path",
+        str(prepared_session_compare.overlay_dir),
+        "--script",
+        f"res://{_COMPARE_SESSION_REAL_INSPECT_LEAF}",
+        "--",
+        f"{compare_viewer._ARG_COMPARE_CONTEXT}{prepared_session_compare.context_file}",
+        f"--session-python-executable={sys.executable}",
+        f"--session-context-file={prepared_session_compare.session_context_file}",
+        f"--session-exchange-dir={prepared_session_compare.session_exchange_dir}",
+        "--gf-compare-session-inspect-phase=conflict",
+        f"--gf-compare-session-inspect-result={conflict_result_path}",
+    ]
+    _log_stack = ExitStack()
+    stdout_handle = _log_stack.enter_context(conflict_stdout_log.open("w", encoding="utf-8"))
+    stderr_handle = _log_stack.enter_context(conflict_stderr_log.open("w", encoding="utf-8"))
+    try:
+        conflict_proc = subprocess.Popen(
+            conflict_cmd,
+            cwd=prepared_session_compare.overlay_dir,
+            stdout=stdout_handle,
+            stderr=stderr_handle,
+            text=True,
+            env=_bridge_env(),
+            start_new_session=(sys.platform != "win32"),
+        )
+    except OSError:
+        _log_stack.close()
+        raise
+    _log_stack.pop_all()
+    external_committed_sha = ""
+    try:
+        deadline = time.monotonic() + 600.0
+        external_exchange = tmp_path / "compare-session-external-bridge"
+        external_exchange.mkdir(parents=True, exist_ok=True)
+        while conflict_proc.poll() is None and time.monotonic() < deadline:
+            if handshake_path.is_file():
+                handshake = json.loads(handshake_path.read_text(encoding="utf-8"))
+                expected_sha = handshake["raw_sha256"]
+                assert expected_sha == copied_sha_after_right
+                code, response = _invoke_bridge(
+                    exchange_dir=external_exchange,
+                    context_doc=copied_context_doc,
+                    request_doc={
+                        "schema_version": BRIDGE_SCHEMA_VERSION,
+                        "action": "update",
+                        "expected_raw_sha256": expected_sha,
+                        "operation": {
+                            "op": "SetNote",
+                            "clip_id": "arm_reverse_02",
+                            "note": "external compare-session B note",
+                        },
+                    },
+                )
+                assert code == 0 and response.get("ok") is True
+                stored = response.get("stored")
+                assert isinstance(stored, dict)
+                external_committed_sha = str(stored.get("raw_sha256", ""))
+                done_path.write_text(
+                    json.dumps({"ok": True, "raw_sha256": external_committed_sha}),
+                    encoding="utf-8",
+                )
+                break
+            time.sleep(0.05)
+        else:
+            stdout_handle.close()
+            stderr_handle.close()
+            _terminate_owned_godot_process(conflict_proc)
+            conflict_combined = _read_owned_log_tail(conflict_stdout_log) + _read_owned_log_tail(
+                conflict_stderr_log
+            )
+            pytest.fail(
+                "compare-session conflict harness exceeded subprocess deadline "
+                f"handshake_exists={handshake_path.is_file()} "
+                f"done_exists={done_path.is_file()} "
+                f"result_exists={conflict_result_path.is_file()} "
+                f"godot={_godot_rendered_executable()} "
+                f"logs={conflict_log_dir} "
+                f"{conflict_combined[-2500:]}"
+            )
+        stdout_handle.close()
+        stderr_handle.close()
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            _terminate_owned_godot_process(conflict_proc)
+            conflict_combined = _read_owned_log_tail(conflict_stdout_log) + _read_owned_log_tail(
+                conflict_stderr_log
+            )
+            pytest.fail(
+                "compare-session conflict harness exceeded subprocess deadline "
+                f"handshake_exists={handshake_path.is_file()} "
+                f"done_exists={done_path.is_file()} "
+                f"result_exists={conflict_result_path.is_file()} "
+                f"godot={_godot_rendered_executable()} "
+                f"logs={conflict_log_dir} "
+                f"{conflict_combined[-2500:]}"
+            )
+        try:
+            conflict_proc.wait(timeout=remaining)
+        except subprocess.TimeoutExpired:
+            _terminate_owned_godot_process(conflict_proc)
+            conflict_combined = _read_owned_log_tail(conflict_stdout_log) + _read_owned_log_tail(
+                conflict_stderr_log
+            )
+            pytest.fail(
+                "compare-session conflict subprocess wait timed out "
+                f"remaining_s={remaining} overlay_dir={prepared_session_compare.overlay_dir} "
+                f"result_exists={conflict_result_path.is_file()} "
+                f"godot={_godot_rendered_executable()} "
+                f"logs={conflict_log_dir} "
+                f"{conflict_combined[-3000:]}"
+            )
+        conflict_combined = _read_owned_log_tail(conflict_stdout_log) + _read_owned_log_tail(
+            conflict_stderr_log
+        )
+        assert conflict_proc.returncode == 0, conflict_combined[-4000:]
+        _assert_no_script_errors(conflict_combined)
+    finally:
+        if not stdout_handle.closed:
+            stdout_handle.close()
+        if not stderr_handle.closed:
+            stderr_handle.close()
+        if conflict_proc is not None:
+            _terminate_owned_godot_process(conflict_proc)
+    conflict_payload = _load_inspect_result(conflict_result_path)
+    assert conflict_payload.get("cached_sha") == copied_sha_after_right
+    conflict_snap = conflict_payload.get("snapshot")
+    assert isinstance(conflict_snap, dict)
+    assert external_committed_sha != copied_sha_after_right
+    assert len(external_committed_sha) == 64
+    copied_sha_after_external = _assert_compare_session_phase_payload(
+        conflict_payload,
+        copied_session_path=copied_session_path,
+        expected_revision=_COMPARE_SESSION_REVISION_AFTER_EXTERNAL,
+        original_frozen=original_session_frozen,
+        primary_session_path=session_path,
+    )
+    assert copied_sha_after_external == external_committed_sha
+    assert str(conflict_payload.get("external_sha", "")) == external_committed_sha
+    clip_b_after_external = _clip_record(_session_document(copied_session_path), "arm_reverse_02")
+    assert clip_b_after_external.get("note") == "external compare-session B note"
+
+    stale_clip_b = review_set_dir / "clips" / "001" / "animation_clip.json"
+    stale_clip_b_before = stale_clip_b.read_bytes()
+    stale_doc = json.loads(stale_clip_b_before.decode("utf-8"))
+    stale_doc["duration_seconds"] = float(stale_doc.get("duration_seconds", 2.0)) + 0.01
+    stale_clip_b.write_bytes(
+        json.dumps(stale_doc, sort_keys=True, separators=(",", ":"), allow_nan=False).encode(
+            "utf-8"
+        )
+    )
+    try:
+        stale_result_path = tmp_path / "compare-session-stale.json"
+        stale_proc = _run_compare_session_inspect(
+            prepared_session_compare.overlay_dir,
+            phase="stale",
+            result_path=stale_result_path,
+            compare_context_path=prepared_session_compare.context_file,
+            session_context_path=prepared_session_compare.session_context_file,
+            session_exchange_dir=prepared_session_compare.session_exchange_dir,
+            runner=runner,
+        )
+        stale_combined = stale_proc.stdout + stale_proc.stderr
+        assert stale_proc.returncode == 0, stale_combined[-3000:]
+        stale_payload = _load_inspect_result(stale_result_path)
+        stale_snap = stale_payload.get("snapshot")
+        assert isinstance(stale_snap, dict)
+        assert stale_snap.get("authority_current") is False
+        assert stale_snap.get("mutations_enabled") is False
+        _assert_compare_session_phase_payload(
+            stale_payload,
+            copied_session_path=copied_session_path,
+            expected_revision=_COMPARE_SESSION_REVISION_AFTER_EXTERNAL,
+            original_frozen=original_session_frozen,
+            primary_session_path=session_path,
+        )
+    finally:
+        stale_clip_b.write_bytes(stale_clip_b_before)
+
+    candidate_db = root / CANDIDATE_STATE_DIR / CANDIDATE_DB_FILENAME
+    db_backup = tmp_path / "compare-session-candidate-factory.db.offline-backup"
+    offline_result_path = tmp_path / "compare-session-db-offline.json"
+    offline_ready_path = (
+        prepared_session_compare.session_exchange_dir / _COMPARE_SESSION_OFFLINE_READY
+    )
+    offline_done_path = (
+        prepared_session_compare.session_exchange_dir / _COMPARE_SESSION_OFFLINE_DONE
+    )
+    if offline_ready_path.exists():
+        offline_ready_path.unlink()
+    if offline_done_path.exists():
+        offline_done_path.unlink()
+    offline_log_dir = tmp_path / "compare-session-db-offline-logs"
+    offline_log_dir.mkdir(parents=True, exist_ok=True)
+    offline_stdout_log = offline_log_dir / "godot.stdout.log"
+    offline_stderr_log = offline_log_dir / "godot.stderr.log"
+    offline_proc: subprocess.Popen[str] | None = None
+    _run_godot_import(prepared_session_compare.overlay_dir, runner)
+    offline_cmd = [
+        str(_godot_rendered_executable()),
+        "--rendering-method",
+        "gl_compatibility",
+        "--audio-driver",
+        "Dummy",
+        "--path",
+        str(prepared_session_compare.overlay_dir),
+        "--script",
+        f"res://{_COMPARE_SESSION_REAL_INSPECT_LEAF}",
+        "--",
+        f"{compare_viewer._ARG_COMPARE_CONTEXT}{prepared_session_compare.context_file}",
+        f"--session-python-executable={sys.executable}",
+        f"--session-context-file={prepared_session_compare.session_context_file}",
+        f"--session-exchange-dir={prepared_session_compare.session_exchange_dir}",
+        "--gf-compare-session-inspect-phase=db_offline",
+        f"--gf-compare-session-inspect-result={offline_result_path}",
+    ]
+    _offline_log_stack = ExitStack()
+    offline_stdout_handle = _offline_log_stack.enter_context(
+        offline_stdout_log.open("w", encoding="utf-8")
+    )
+    offline_stderr_handle = _offline_log_stack.enter_context(
+        offline_stderr_log.open("w", encoding="utf-8")
+    )
+    try:
+        offline_proc = subprocess.Popen(
+            offline_cmd,
+            cwd=prepared_session_compare.overlay_dir,
+            stdout=offline_stdout_handle,
+            stderr=offline_stderr_handle,
+            text=True,
+            env=_bridge_env(),
+            start_new_session=(sys.platform != "win32"),
+        )
+    except OSError:
+        _offline_log_stack.close()
+        raise
+    _offline_log_stack.pop_all()
+    try:
+        deadline = time.monotonic() + 600.0
+        while offline_proc.poll() is None and time.monotonic() < deadline:
+            if offline_ready_path.is_file():
+                ready_payload = json.loads(offline_ready_path.read_text(encoding="utf-8"))
+                assert ready_payload.get("ok") is True
+                assert str(ready_payload.get("sidecar_sha256", "")) == copied_sha_after_external
+                candidate_db.rename(db_backup)
+                offline_done_path.write_text(json.dumps({"ok": True}), encoding="utf-8")
+                break
+            time.sleep(0.05)
+        else:
+            offline_stdout_handle.close()
+            offline_stderr_handle.close()
+            _terminate_owned_godot_process(offline_proc)
+            offline_combined = _read_owned_log_tail(offline_stdout_log) + _read_owned_log_tail(
+                offline_stderr_log
+            )
+            pytest.fail(
+                "db_offline harness exceeded subprocess deadline "
+                f"ready_exists={offline_ready_path.is_file()} "
+                f"done_exists={offline_done_path.is_file()} "
+                f"result_exists={offline_result_path.is_file()} "
+                f"godot={_godot_rendered_executable()} "
+                f"logs={offline_log_dir} "
+                f"{offline_combined[-2500:]}"
+            )
+        offline_stdout_handle.close()
+        offline_stderr_handle.close()
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            _terminate_owned_godot_process(offline_proc)
+            offline_combined = _read_owned_log_tail(offline_stdout_log) + _read_owned_log_tail(
+                offline_stderr_log
+            )
+            pytest.fail(
+                "db_offline harness exceeded subprocess deadline "
+                f"ready_exists={offline_ready_path.is_file()} "
+                f"done_exists={offline_done_path.is_file()} "
+                f"result_exists={offline_result_path.is_file()} "
+                f"godot={_godot_rendered_executable()} "
+                f"logs={offline_log_dir} "
+                f"{offline_combined[-2500:]}"
+            )
+        try:
+            offline_proc.wait(timeout=remaining)
+        except subprocess.TimeoutExpired:
+            _terminate_owned_godot_process(offline_proc)
+            offline_combined = _read_owned_log_tail(offline_stdout_log) + _read_owned_log_tail(
+                offline_stderr_log
+            )
+            pytest.fail(
+                "db_offline subprocess wait timed out "
+                f"remaining_s={remaining} overlay_dir={prepared_session_compare.overlay_dir} "
+                f"result_exists={offline_result_path.is_file()} "
+                f"godot={_godot_rendered_executable()} "
+                f"logs={offline_log_dir} "
+                f"{offline_combined[-3000:]}"
+            )
+        offline_combined = _read_owned_log_tail(offline_stdout_log) + _read_owned_log_tail(
+            offline_stderr_log
+        )
+        assert offline_proc.returncode == 0, offline_combined[-3000:]
+        _assert_no_script_errors(offline_combined)
+        offline_payload = _load_inspect_result(offline_result_path)
+        offline_snap = offline_payload.get("snapshot")
+        assert isinstance(offline_snap, dict)
+        assert offline_snap.get("authority_current") is False
+        assert offline_snap.get("mutations_enabled") is False
+        _assert_compare_session_phase_payload(
+            offline_payload,
+            copied_session_path=copied_session_path,
+            expected_revision=_COMPARE_SESSION_REVISION_AFTER_EXTERNAL,
+            original_frozen=original_session_frozen,
+            primary_session_path=session_path,
+        )
+    finally:
+        if not offline_stdout_handle.closed:
+            offline_stdout_handle.close()
+        if not offline_stderr_handle.closed:
+            offline_stderr_handle.close()
+        if db_backup.is_file() and not candidate_db.is_file():
+            db_backup.rename(candidate_db)
+        if offline_proc is not None:
+            _terminate_owned_godot_process(offline_proc)
+
+    assert (
+        animation_review_set_current(handlers, workflow.id, preview_dir, sources, review_set_dir)
+        is True
+    )
+
+    recovered_result_path = tmp_path / "compare-session-recovered.json"
+    recovered_proc = _run_compare_session_inspect(
+        prepared_session_compare.overlay_dir,
+        phase="recovered",
+        result_path=recovered_result_path,
+        compare_context_path=prepared_session_compare.context_file,
+        session_context_path=prepared_session_compare.session_context_file,
+        session_exchange_dir=prepared_session_compare.session_exchange_dir,
+        runner=runner,
+    )
+    recovered_combined = recovered_proc.stdout + recovered_proc.stderr
+    assert recovered_proc.returncode == 0, recovered_combined[-3000:]
+    recovered_payload = _load_inspect_result(recovered_result_path)
+    recovered_snap = recovered_payload.get("snapshot")
+    assert isinstance(recovered_snap, dict)
+    assert recovered_snap.get("authority_current") is True
+    assert recovered_snap.get("mutations_enabled") is True
+    _assert_compare_session_phase_payload(
+        recovered_payload,
+        copied_session_path=copied_session_path,
+        expected_revision=_COMPARE_SESSION_REVISION_AFTER_EXTERNAL,
+        original_frozen=original_session_frozen,
+        primary_session_path=session_path,
+    )
+
+    final_result_path = tmp_path / "compare-session-final.json"
+    final_proc = _run_compare_session_inspect(
+        prepared_session_compare.overlay_dir,
+        phase="final_mutation",
+        result_path=final_result_path,
+        compare_context_path=prepared_session_compare.context_file,
+        session_context_path=prepared_session_compare.session_context_file,
+        session_exchange_dir=prepared_session_compare.session_exchange_dir,
+        runner=runner,
+    )
+    final_combined = final_proc.stdout + final_proc.stderr
+    assert final_proc.returncode == 0, final_combined[-3000:]
+    final_payload = _load_inspect_result(final_result_path)
+    final_sha = _assert_compare_session_phase_payload(
+        final_payload,
+        copied_session_path=copied_session_path,
+        expected_revision=_COMPARE_SESSION_REVISION_AFTER_FINAL,
+        original_frozen=original_session_frozen,
+        primary_session_path=session_path,
+    )
+    assert final_sha != external_committed_sha
+    assert _COMPARE_SESSION_REVISION_AFTER_FINAL == _sidecar_revision(copied_session_path)
+    assert final_payload.get("mutation_count_since_baseline") == (
+        _COMPARE_SESSION_MUTATIONS_AFTER_FROZEN_COPY
+    )
+    copied_final = _session_document(copied_session_path)
+    clip_c_final = _clip_record(copied_final, "spine_turn_03")
+    assert clip_c_final.get("note") == "final accepted note"
+    assert session_path.read_bytes() == original_session_frozen
+    compare_sources_after_v13 = _real_ui_handoff_source_digests(
+        preview_dir=preview_dir,
+        review_set_dir=review_set_dir,
+        clip_preview_a=clip_preview_a,
+        clip_preview_b=clip_preview_b,
+        clip_preview_c=clip_preview_c,
+        clip_a_path=clip_a_path,
+        clip_b_path=clip_b_path,
+        clip_c_path=clip_c_path,
+        session_path=session_path,
+    )
+    assert compare_sources_after_v13 == compare_sources_before
+    assert compare_sources_after_v13 == compare_sources_same2
+    assert session_path.read_bytes() == original_session_frozen
+    for rel, payload in review_byte_snapshot.items():
+        assert (review_set_dir / rel).read_bytes() == payload
+    assert clip_a_path.read_bytes() == acceptance_arm_wave_clip_raw_bytes()
+    assert clip_b_path.read_bytes() == clip_b_before
+    assert clip_c_path.read_bytes() == clip_c_before
+    assert hashlib.sha256(session_path.read_bytes()).hexdigest() == session_sha_after_terminal
     assert_zero_provider_activity(db, workflow.id)
     assert ProviderInvocationRepository(db).count(workflow.id) == 0

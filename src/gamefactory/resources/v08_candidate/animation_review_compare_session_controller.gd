@@ -249,6 +249,32 @@ func _compare_snapshot() -> Dictionary:
 	return _playback.compare_snapshot()
 
 
+func session_state_snapshot() -> Dictionary:
+	var production_eligible: Variant = null
+	var promotion_eligible: Variant = null
+	if typeof(_stored_session) == TYPE_DICTIONARY:
+		production_eligible = _stored_session.get("production_eligible")
+		promotion_eligible = _stored_session.get("promotion_eligible")
+	return {
+		"bridge_configured": _bridge_configured,
+		"bridge_busy": _bridge_busy,
+		"authority_current": _authority_current,
+		"mutations_enabled": _mutations_enabled(),
+		"reload_required": _reload_required,
+		"conflict_active": _conflict_active,
+		"stored_revision": _stored_revision(),
+		"raw_sha256": _raw_sha256,
+		"production_eligible": production_eligible,
+		"promotion_eligible": promotion_eligible,
+		"left_clip_id": _tracked_left_clip_id,
+		"right_clip_id": _tracked_right_clip_id,
+		"left_note_dirty": _left_note_dirty,
+		"right_note_dirty": _right_note_dirty,
+		"status_message": _status_banner.text,
+		"compare": _compare_snapshot(),
+	}
+
+
 func _sync_tracked_clips_from_compare() -> void:
 	var snap := _compare_snapshot()
 	_tracked_left_clip_id = str(snap.get("left_clip_id", ""))
