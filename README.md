@@ -23,6 +23,17 @@ gamefactory doctor
 gamefactory asset profiles
 ```
 
+With an authenticated Codex CLI installed, the development checkout can draft one
+static-prop spec from natural language, without initializing a project:
+
+```sh
+gamefactory plan "A wooden treasure chest for Tide Bastion" --output plans/chest.spec.json
+```
+
+The [planning guide](docs/pipelines/natural-language-planning.md) explains the
+bounded adapter and tool requirements. Planning creates a specification, not an
+asset, and retains all production approvals.
+
 From a Godot project's root, `gamefactory init` creates local Factory configuration
 and workflow state. `gamefactory run demo` exercises a fake workflow and stops for
 approval; it does not generate a production asset.

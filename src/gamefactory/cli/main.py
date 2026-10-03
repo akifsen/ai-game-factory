@@ -49,6 +49,7 @@ from gamefactory.cli.exit_codes import (
     EXIT_TOOL_UNAVAILABLE,
     EXIT_WORKFLOW_FAILURE,
 )
+from gamefactory.cli.plan_command import run_plan_command
 from gamefactory.config.loader import ConfigLoader
 from gamefactory.core.accounting.ledger import (
     EntryType,
@@ -140,6 +141,28 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--version", action="version", version=f"gamefactory {__version__}")
     _add_common(parser)
     commands = parser.add_subparsers(dest="command")
+
+    plan_cmd = commands.add_parser(
+        "plan",
+        help="plan a static_prop asset-spec JSON via Codex (pilot; does not create assets)",
+    )
+    _add_common(plan_cmd, nested=True)
+    plan_cmd.add_argument(
+        "request",
+        help="natural-language description of one Tide Bastion static prop",
+    )
+    plan_cmd.add_argument(
+        "--output",
+        required=True,
+        help="write asset-spec-0.4.0 JSON (refuses to overwrite an existing file)",
+    )
+    plan_cmd.add_argument("--codex-path", help="explicit Codex CLI executable path")
+    plan_cmd.add_argument(
+        "--timeout",
+        type=float,
+        default=180.0,
+        help="Codex subprocess timeout in seconds (default: 180)",
+    )
 
     for name in ("doctor", "init", "status", "approvals", "artifacts"):
         cmd = commands.add_parser(name)
@@ -2238,6 +2261,8 @@ def _dispatch(args: argparse.Namespace) -> tuple[Any, int, str | None]:
     if args.command == "doctor":
         payload, code = _doctor(root, args.godot_path, args.blender_path)
         return payload, code, _doctor_text(payload)
+    if args.command == "plan":
+        return run_plan_command(root, args)
     if args.command == "asset" and args.asset_command == "register-source":
         return _register_assembly_source(root, args)
     if args.command == "asset" and args.asset_command == "profiles":

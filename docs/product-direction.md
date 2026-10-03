@@ -34,6 +34,22 @@ Track first-pass spec validity, manual spec edits, new paid submissions and cost
 accepted/installed hash equality, actual game consumption, elapsed time and human
 interventions. Current accepted customer assets: **0**. Update only with evidence.
 
+## First implementation checkpoint
+
+The real installed Codex CLI produced `prop_tide_treasure_chest_01` from a Turkish
+request on its first attempt, without manual JSON edits. The existing domain parser
+accepted the resulting `static_prop@1` specification. Independent planner, CLI and
+process-runner checks passed 62 tests with one existing platform-specific skip;
+scoped lint and type checks passed.
+
+The retained manual chest source passed Factory preflight (1,930 triangles, one
+material, 2,048-pixel textures). Real Blender processing and independent GLB
+validation passed; the existing standalone Godot harness passed runtime checks and
+rendered three views. New paid submissions: **0**. Raw results remain under ignored
+local verification storage. This is a candidate check, not a persisted workflow's
+final human acceptance or a Tide Bastion installation. Real battle consumption and
+accepted/installed hash comparison remain outstanding.
+
 ## Work frozen
 
 New animation review UI slices, V0.8-15 performance optimization, new evidence
