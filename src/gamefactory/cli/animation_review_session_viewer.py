@@ -82,6 +82,48 @@ _COLLIDER_JSON_KEYS = frozenset(
     }
 )
 _COLLIDER_MIN_RADIUS_M = 0.10
+_MAX_PUBLICATION_CONTROL_JSON_CONTAINER_DEPTH = 64
+
+
+def _reject_excessive_publication_control_json_container_depth(
+    raw: bytes,
+    *,
+    malformed_message: str,
+) -> None:
+    """Linear preflight: reject deeply nested containers before json.loads."""
+    try:
+        text = raw.decode("utf-8")
+    except UnicodeDecodeError:
+        return
+    limit = _MAX_PUBLICATION_CONTROL_JSON_CONTAINER_DEPTH
+    depth = 0
+    index = 0
+    length = len(text)
+    while index < length:
+        char = text[index]
+        if char == '"':
+            index += 1
+            while index < length:
+                inner = text[index]
+                if inner == '"':
+                    index += 1
+                    break
+                if inner == "\\":
+                    index += 1
+                    if index < length and text[index] == "u":
+                        index += 5
+                    elif index < length:
+                        index += 1
+                    continue
+                index += 1
+            continue
+        if char in "{[":
+            depth += 1
+            if depth > limit:
+                raise ValidationError(malformed_message)
+        elif char in "}]":
+            depth -= 1
+        index += 1
 
 
 @dataclass(frozen=True)
@@ -220,6 +262,10 @@ def _bounded_clip_count_from_manifest(review_dir: Path) -> int:
         label="animation_review_set_manifest.json",
         max_bytes=_MAX_REVIEW_SET_MANIFEST_BYTES,
     )
+    _reject_excessive_publication_control_json_container_depth(
+        raw,
+        malformed_message=("animation review set manifest publication control JSON is malformed"),
+    )
     document = parse_bounded_publication_json(raw)
     if document.get("schema_version") != ANIMATION_REVIEW_SET_MANIFEST_SCHEMA:
         raise ValidationError("animation review set manifest schema_version mismatch")
@@ -282,6 +328,10 @@ def _collider_json_finite_scalar(value: Any, field: str) -> float:
 
 
 def _parse_collider_publication_json(collider_bytes: bytes) -> dict[str, Any]:
+    _reject_excessive_publication_control_json_container_depth(
+        collider_bytes,
+        malformed_message="collider.json publication control JSON is malformed",
+    )
     try:
         return parse_bounded_publication_json(collider_bytes)
     except ValidationError:

@@ -491,6 +491,37 @@ def test_validated_collider_rejects_deeply_nested_malformed_bytes() -> None:
     assert len(payload) < 64 * 1024
     with pytest.raises(ValidationError, match="malformed"):
         viewer._validated_collider_fields(payload)
+    old_limit = sys.getrecursionlimit()
+    sys.setrecursionlimit(max(old_limit, 8000))
+    try:
+        with pytest.raises(ValidationError, match="malformed"):
+            viewer._validated_collider_fields(payload)
+    finally:
+        sys.setrecursionlimit(old_limit)
+
+    at_limit = _collider_deeply_nested_malformed_bytes(
+        viewer._MAX_PUBLICATION_CONTROL_JSON_CONTAINER_DEPTH,
+    )
+    with pytest.raises(ValidationError) as at_limit_exc:
+        viewer._validated_collider_fields(at_limit)
+    assert "malformed" not in at_limit_exc.value.message
+
+    one_over = _collider_deeply_nested_malformed_bytes(
+        viewer._MAX_PUBLICATION_CONTROL_JSON_CONTAINER_DEPTH + 1,
+    )
+    with pytest.raises(ValidationError, match="malformed"):
+        viewer._validated_collider_fields(one_over)
+
+    braces_in_string = json.dumps(
+        {
+            "note": ("{" * 300) + '[{\\"x\\": 1}]' + " backslash \\\\ end",
+        },
+        sort_keys=True,
+    ).encode("utf-8")
+    json.loads(braces_in_string)
+    with pytest.raises(ValidationError) as string_exc:
+        viewer._validated_collider_fields(braces_in_string)
+    assert "malformed" not in string_exc.value.message
 
 
 def test_run_viewer_returns_config_error_when_tempdir_allocation_fails(
@@ -741,6 +772,37 @@ def test_capture_review_set_structure_rejects_deeply_nested_manifest_bytes(
     (review / "animation_review_set_manifest.json").write_bytes(payload)
     with pytest.raises(ValidationError, match="malformed"):
         viewer._capture_review_set_structure(review)
+    old_limit = sys.getrecursionlimit()
+    sys.setrecursionlimit(max(old_limit, 8000))
+    try:
+        with pytest.raises(ValidationError, match="malformed"):
+            viewer._capture_review_set_structure(review)
+    finally:
+        sys.setrecursionlimit(old_limit)
+
+    limit = viewer._MAX_PUBLICATION_CONTROL_JSON_CONTAINER_DEPTH
+    at_limit = _malformed_review_manifest_deeply_nested_bytes(limit)
+    (review / "animation_review_set_manifest.json").write_bytes(at_limit)
+    with pytest.raises(ValidationError) as at_limit_exc:
+        viewer._capture_review_set_structure(review)
+    assert "malformed" not in at_limit_exc.value.message
+
+    one_over = _malformed_review_manifest_deeply_nested_bytes(limit + 1)
+    (review / "animation_review_set_manifest.json").write_bytes(one_over)
+    with pytest.raises(ValidationError, match="malformed"):
+        viewer._capture_review_set_structure(review)
+
+    braces_in_string = json.dumps(
+        {
+            "note": ("{" * 300) + '[{\\"x\\": 1}]' + " backslash \\\\ end",
+        },
+        sort_keys=True,
+    ).encode("utf-8")
+    json.loads(braces_in_string)
+    (review / "animation_review_set_manifest.json").write_bytes(braces_in_string)
+    with pytest.raises(ValidationError) as string_exc:
+        viewer._capture_review_set_structure(review)
+    assert "malformed" not in string_exc.value.message
 
 
 def test_capture_review_set_structure_maps_inspector_value_error_to_validation_error(
