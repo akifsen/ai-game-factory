@@ -50,6 +50,20 @@ local verification storage. This is a candidate check, not a persisted workflow'
 final human acceptance or a Tide Bastion installation. Real battle consumption and
 accepted/installed hash comparison remain outstanding.
 
+The reviewed `asset reuse` route for `static_prop@1` retains an
+existing external GLB with exact provenance and hash, then run the existing
+Blender, independent validation, Godot and final human review stages. It has no
+concept, paid-generation, budget-reservation or provider-invocation stage. Historic
+Meshy cost remains provenance, not a new ledger charge. Source acquisition is a
+workflow-level distinction; it does not change the existing profile contract or
+introduce a new evidence schema. Independent checks passed 65 tests with two
+existing assembly skips; full source lint, formatting and type checks passed.
+The real durable reuse workflow completed processing, validation and Godot checks
+and stopped at final human review. Its ledger has zero entries. Live `report`,
+`asset inspect` and `resume` preserve that pending approval. The customer battle
+integration is still under verification in an isolated worktree; accepted assets
+remain **0** until human acceptance and actual game installation are complete.
+
 ## Work frozen
 
 New animation review UI slices, V0.8-15 performance optimization, new evidence
