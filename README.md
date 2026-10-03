@@ -17,7 +17,7 @@ V0.8-10 adds deterministic JSON and Markdown handoff reports for saved review an
 
 V0.8-11 adds session-derived review progress, status filters and previous/next revise navigation in the existing Godot session panel. Source and independently installed RC6 real Blender/Godot acceptance passed with three clips, including conflict, stale authority, offline history and recovery. See the [technical closure](docs/reports/v0.8-11-review-triage-technical-closure.md). Release qualification remains pending.
 
-V0.8-12 development adds side-by-side animation comparison with a shared normalized timeline. Its runtime checkpoint passed 15 tests. See the [runtime checkpoint](docs/reports/v0.8-12a-animation-compare-runtime-checkpoint.md). Actual authored-package rendering, weighted deformation, installed-package acceptance and release qualification remain pending.
+V0.8-12 adds side-by-side animation comparison with a shared normalized timeline, independent viewports and canonical rest camera framing. Source and independently installed RC7 acceptance passed actual authored-package rendering, weighted deformation, parent-bone inheritance and source-drift rejection. See the [comparison guide](docs/guides/v0.8-12-animation-compare.md) and [technical closure](docs/reports/v0.8-12-animation-compare-technical-closure.md). Release qualification remains pending.
 
 ## Install and run
 
