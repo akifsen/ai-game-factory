@@ -4,8 +4,10 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import subprocess
 import sys
+import venv
 from pathlib import Path
 from typing import Any
 from unittest.mock import patch
@@ -254,7 +256,7 @@ def test_context_serializes_original_roots_and_argv_uses_equals_form(
         viewer._SCENE_RESOURCE,
     )
     assert argv[5] == "--"
-    assert argv[6] == f"--session-python-executable={prepared.python_executable.resolve()}"
+    assert argv[6] == f"--session-python-executable={prepared.python_executable}"
     assert argv[7] == f"--session-context-file={prepared.context_file.resolve()}"
     assert argv[8] == f"--session-exchange-dir={prepared.exchange_dir.resolve()}"
 
@@ -842,3 +844,253 @@ def test_session_paths_stay_outside_canonical_review_roots(tmp_path: Path) -> No
     overlay = review / "overlay-blocked"
     with pytest.raises(ValidationError, match="outside"):
         viewer.prepare_animation_review_session_viewer(ctx, overlay)
+
+
+def _symlink_or_skip(link: Path, target: Path, *, target_is_directory: bool = False) -> None:
+    try:
+        link.symlink_to(target, target_is_directory=target_is_directory)
+    except OSError as exc:
+        if os.name == "nt" and getattr(exc, "winerror", None) == 1314:
+            pytest.skip(f"Windows symlink privilege unavailable: {exc}")
+        raise
+
+
+def test_assert_trusted_executable_accepts_current_interpreter_alias() -> None:
+    alias = Path(sys.executable)
+    if not alias.is_absolute():
+        pytest.skip("sys.executable is not absolute on this platform")
+    trusted = viewer._assert_trusted_executable(alias, label="python executable")
+    assert trusted == Path(os.path.abspath(str(alias)))
+    if os.name != "nt" and alias.is_symlink():
+        assert trusted != alias.resolve()
+
+
+@pytest.mark.skipif(os.name == "nt", reason="POSIX leaf symlink alias contract")
+def test_assert_trusted_executable_venv_alias_preserves_prefix(tmp_path: Path) -> None:
+    venv_dir = tmp_path / "probe-venv"
+    venv.EnvBuilder(with_pip=False, symlinks=True).create(venv_dir)
+    venv_python = venv_dir / "bin" / "python"
+    assert venv_python.is_symlink()
+    trusted = viewer._assert_trusted_executable(venv_python, label="python executable")
+    assert trusted == Path(os.path.abspath(str(venv_python)))
+    proc = subprocess.run(
+        [str(trusted), "-c", "import sys; print(sys.prefix)"],
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    assert proc.stdout.strip() == str(venv_dir)
+
+
+@pytest.mark.skipif(os.name == "nt", reason="POSIX leaf symlink alias contract")
+def test_assert_trusted_executable_rejects_dangling_leaf_symlink(tmp_path: Path) -> None:
+    dangling = tmp_path / "dangling-python"
+    _symlink_or_skip(dangling, tmp_path / "missing-target")
+    with pytest.raises(ValidationError, match="does not exist"):
+        viewer._assert_trusted_executable(dangling, label="python executable")
+
+
+@pytest.mark.skipif(os.name == "nt", reason="POSIX leaf symlink alias contract")
+def test_assert_trusted_executable_rejects_symlink_loop(tmp_path: Path) -> None:
+    link_a = tmp_path / "loop-a"
+    link_b = tmp_path / "loop-b"
+    _symlink_or_skip(link_a, link_b)
+    _symlink_or_skip(link_b, link_a)
+    with pytest.raises(ValidationError, match="loop"):
+        viewer._assert_trusted_executable(link_a, label="python executable")
+
+
+@pytest.mark.skipif(os.name == "nt", reason="POSIX leaf symlink alias contract")
+def test_assert_trusted_executable_relative_leaf_chain_preserves_alias(tmp_path: Path) -> None:
+    real_bin = tmp_path / "real-bin"
+    real_bin.mkdir()
+    interpreter = real_bin / "python3"
+    interpreter.write_bytes(b"")
+    alias_bin = tmp_path / "alias-bin"
+    alias_bin.mkdir()
+    _symlink_or_skip(alias_bin / "python3", interpreter)
+    alias = alias_bin / "python"
+    _symlink_or_skip(alias, Path("python3"))
+    trusted = viewer._assert_trusted_executable(alias, label="python executable")
+    assert trusted == Path(os.path.abspath(str(alias)))
+
+
+@pytest.mark.skipif(os.name == "nt", reason="POSIX leaf symlink alias contract")
+def test_assert_trusted_executable_rejects_dangling_relative_symlink_target(tmp_path: Path) -> None:
+    alias = tmp_path / "python-alias"
+    _symlink_or_skip(alias, Path("relative-target"))
+    with pytest.raises(ValidationError, match="does not exist"):
+        viewer._assert_trusted_executable(alias, label="python executable")
+
+
+@pytest.mark.skipif(os.name == "nt", reason="POSIX leaf symlink alias contract")
+def test_assert_trusted_executable_rejects_absolute_target_under_linked_directory(
+    tmp_path: Path,
+) -> None:
+    real_bin = tmp_path / "real-bin"
+    real_bin.mkdir()
+    interpreter = real_bin / "python"
+    interpreter.write_bytes(b"")
+    linked_bin = tmp_path / "linked-bin"
+    _symlink_or_skip(linked_bin, real_bin, target_is_directory=True)
+    alias = tmp_path / "python-alias"
+    _symlink_or_skip(alias, linked_bin / "python")
+    with pytest.raises(ValidationError, match="crosses a symlink"):
+        viewer._assert_trusted_executable(alias, label="python executable")
+
+
+@pytest.mark.skipif(os.name == "nt", reason="POSIX leaf symlink alias contract")
+def test_assert_trusted_executable_rejects_linked_intermediate_symlink_target(
+    tmp_path: Path,
+) -> None:
+    real_bin = tmp_path / "real-bin"
+    real_bin.mkdir()
+    interpreter = real_bin / "python"
+    interpreter.write_bytes(b"")
+    linked_bin = tmp_path / "linked-bin"
+    _symlink_or_skip(linked_bin, real_bin, target_is_directory=True)
+    hop = tmp_path / "hop"
+    _symlink_or_skip(hop, linked_bin / "python")
+    alias = tmp_path / "python-alias"
+    _symlink_or_skip(alias, hop)
+    with pytest.raises(ValidationError, match="crosses a symlink"):
+        viewer._assert_trusted_executable(alias, label="python executable")
+
+
+@pytest.mark.skipif(os.name == "nt", reason="POSIX leaf symlink alias contract")
+def test_assert_trusted_executable_rejects_readlink_target_with_linked_dir_parent_dotdot(
+    tmp_path: Path,
+) -> None:
+    real_bin = tmp_path / "real-bin"
+    real_bin.mkdir()
+    interpreter = real_bin / "python"
+    interpreter.write_bytes(b"")
+    linked_bin = tmp_path / "linked-bin"
+    _symlink_or_skip(linked_bin, real_bin, target_is_directory=True)
+    alias = tmp_path / "python-alias"
+    _symlink_or_skip(alias, Path("linked-bin/../real-bin/python"))
+    with pytest.raises(ValidationError, match="crosses a symlink"):
+        viewer._assert_trusted_executable(alias, label="python executable")
+
+
+@pytest.mark.skipif(os.name == "nt", reason="POSIX leaf symlink alias contract")
+def test_assert_trusted_executable_rejects_lexical_parent_hiding_linked_directory(
+    tmp_path: Path,
+) -> None:
+    real_bin = tmp_path / "real-bin"
+    real_bin.mkdir()
+    interpreter = real_bin / "python"
+    interpreter.write_bytes(b"")
+    linked_bin = tmp_path / "linked-bin"
+    _symlink_or_skip(linked_bin, real_bin, target_is_directory=True)
+    lexical_alias = linked_bin / ".." / "linked-bin" / "python"
+    with pytest.raises(ValidationError, match="crosses a symlink"):
+        viewer._assert_trusted_executable(lexical_alias, label="python executable")
+
+
+@pytest.mark.skipif(os.name == "nt", reason="POSIX leaf symlink alias contract")
+def test_assert_trusted_executable_rejects_directory_symlink_leaf(tmp_path: Path) -> None:
+    real_dir = tmp_path / "real-dir"
+    real_dir.mkdir()
+    alias = tmp_path / "python-dirlink"
+    _symlink_or_skip(alias, real_dir, target_is_directory=True)
+    with pytest.raises(ValidationError, match="regular file"):
+        viewer._assert_trusted_executable(alias, label="python executable")
+
+
+@pytest.mark.skipif(os.name == "nt", reason="POSIX leaf symlink alias contract")
+def test_assert_trusted_executable_rejects_directory_symlink_ancestor(tmp_path: Path) -> None:
+    real_bin = tmp_path / "real-bin"
+    real_bin.mkdir()
+    interpreter = real_bin / "python"
+    interpreter.write_bytes(b"")
+    linked_bin = tmp_path / "linked-bin"
+    _symlink_or_skip(linked_bin, real_bin, target_is_directory=True)
+    alias = linked_bin / "python"
+    _symlink_or_skip(alias, interpreter)
+    with pytest.raises(ValidationError, match="crosses a symlink"):
+        viewer._assert_trusted_executable(alias, label="python executable")
+
+
+def test_assert_trusted_executable_posix_alias_does_not_use_whole_leaf_lexical_unsafe_unit(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """notOSproof: POSIX alias must use ancestor-only guard, not whole-leaf lexical unsafe."""
+    monkeypatch.setattr(viewer.sys, "platform", "linux")
+    real_bin = tmp_path / "real-bin"
+    real_bin.mkdir()
+    interpreter = real_bin / "python3"
+    interpreter.write_bytes(b"")
+    alias = tmp_path / "python-alias"
+    _symlink_or_skip(alias, interpreter)
+    with patch.object(
+        viewer,
+        "candidate_evidence_lexical_unsafe",
+        side_effect=AssertionError("whole-leaf lexical unsafe must not run for POSIX alias"),
+    ) as lexical_unsafe:
+        trusted = viewer._assert_trusted_executable(alias, label="python executable")
+    lexical_unsafe.assert_not_called()
+    assert trusted == Path(os.path.abspath(str(alias)))
+
+
+def test_assert_trusted_executable_posix_leaf_alias_synthetic_when_platform_patched(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    if os.name != "nt":
+        pytest.skip("Windows-only synthetic POSIX platform patch")
+    monkeypatch.setattr(viewer.sys, "platform", "linux")
+    real_bin = tmp_path / "real-bin"
+    real_bin.mkdir()
+    interpreter = real_bin / "python3"
+    interpreter.write_bytes(b"")
+    alias = tmp_path / "python-alias"
+    _symlink_or_skip(alias, interpreter)
+    trusted = viewer._assert_trusted_executable(alias, label="python executable")
+    assert trusted == Path(os.path.abspath(str(alias)))
+
+
+def test_assert_trusted_executable_rejects_relative_path(tmp_path: Path) -> None:
+    relative = Path("relative-python")
+    with pytest.raises(ValidationError, match="absolute"):
+        viewer._assert_trusted_executable(relative, label="python executable")
+
+
+@pytest.mark.skipif(os.name == "nt", reason="POSIX hard-link rejection uses single-link stat")
+def test_assert_trusted_executable_rejects_hard_linked_target(tmp_path: Path) -> None:
+    primary = tmp_path / "python-real"
+    primary.write_bytes(b"")
+    duplicate = tmp_path / "python-hardlink"
+    os.link(primary, duplicate)
+    with pytest.raises(ValidationError, match="hard link"):
+        viewer._assert_trusted_executable(duplicate, label="python executable")
+
+
+def test_godot_argv_preserves_python_executable_alias_in_equals_flag(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    layout = _layout(tmp_path)
+    ctx = _bridge_context(layout)
+    _noop_trusted_executables(monkeypatch)
+    monkeypatch.setattr(
+        viewer,
+        "_capture_review_set_structure",
+        lambda _path: _minimal_snapshot(),
+    )
+    overlay = _fresh_overlay_parent(tmp_path)
+    python_alias = Path(sys.executable)
+    prepared = viewer.prepare_animation_review_session_viewer(
+        ctx,
+        overlay,
+        python_executable=python_alias,
+    )
+    godot = tmp_path / "godot.bin"
+    godot.write_bytes(b"")
+    argv = prepared.godot_argv(godot_executable=godot)
+    assert argv[6] == f"--session-python-executable={prepared.python_executable}"
+    assert prepared.python_executable == viewer._assert_trusted_executable(
+        python_alias,
+        label="python executable",
+    )

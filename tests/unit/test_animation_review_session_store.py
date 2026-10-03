@@ -352,7 +352,7 @@ def test_rejects_session_symlink_leaf(tmp_path: Path) -> None:
     if store.session_path.exists():
         store.session_path.unlink()
     _require_symlink(store.session_path, real)
-    with pytest.raises(ValidationError, match="link|junction|regular"):
+    with pytest.raises(ValidationError, match="link|junction|regular|not a bounded lexical path"):
         store.load()
 
 
@@ -373,7 +373,7 @@ def test_rejects_symlink_review_root(tmp_path: Path) -> None:
     _seed_review_tree(real_root)
     link_root = tmp_path / "linked-review-set"
     _require_symlink(link_root, real_root, target_is_directory=True)
-    with pytest.raises(ValidationError, match="link|junction|reparse"):
+    with pytest.raises(ValidationError, match="link|junction|reparse|not a bounded lexical path"):
         AnimationReviewSessionStore(review_root=link_root)
 
 
