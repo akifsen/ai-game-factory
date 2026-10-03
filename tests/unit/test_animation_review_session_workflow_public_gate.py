@@ -65,6 +65,7 @@ def _review_set_tree_digest(review_set: Path) -> dict[str, str]:
     }
 
 
+@pytest.mark.candidate_slow
 def test_unmocked_session_lifecycle_and_authored_source_drift(
     managed_review_set_evidence: CompletedEvidenceContext,
     shared_preview: Path,

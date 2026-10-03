@@ -2,7 +2,8 @@
 
 Uses managed evidence and ``_copy_review_set_fixture`` from
 ``test_v08_candidate_animation_review_set``. Each bridge action runs in a new
-Python subprocess with explicit ``PYTHONPATH``; bridge/workflow/public-gate
+Python subprocess with ``PYTHONPATH`` rooted at the imported ``gamefactory`` package;
+bridge/workflow/public-gate
 code is not monkeypatched in-process.
 """
 
@@ -44,7 +45,11 @@ from tests.unit.test_v08_candidate_animation_review_set import (
 )
 from tests.unit.v08_candidate_c2b_readiness_fixtures import CompletedEvidenceContext
 
-_SRC_ROOT = Path(__file__).resolve().parents[2] / "src"
+
+def _imported_gamefactory_pythonpath_root() -> Path:
+    import gamefactory
+
+    return Path(gamefactory.__file__).resolve().parent.parent
 
 
 def _review_set_tree_digest(review_set: Path) -> dict[str, str]:
@@ -85,7 +90,7 @@ def _context_document(
 
 
 def _bridge_env() -> dict[str, str]:
-    return {**os.environ, "PYTHONPATH": str(_SRC_ROOT)}
+    return {**os.environ, "PYTHONPATH": str(_imported_gamefactory_pythonpath_root())}
 
 
 def _run_bridge_subprocess(paths: BridgePaths) -> subprocess.CompletedProcess[str]:

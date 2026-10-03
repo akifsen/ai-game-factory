@@ -25,6 +25,8 @@ from scripts.verify_v08_candidate_ci import (  # noqa: E402
     CANDIDATE_SLOW_MODULES,
     EVIDENCE_SLOW_MODULES,
     EXPECTED_PACKAGE_VERSION,
+    LEGACY_RC3_CANDIDATE_SLOW_TOTAL,
+    PUBLIC_SESSION_ACCEPTANCE_SLOW_NODEIDS,
     RAW_CANDIDATE_SLOW_TOTAL,
     SHARD_MODULES,
     CandidateCiError,
@@ -37,6 +39,7 @@ from scripts.verify_v08_candidate_ci import (  # noqa: E402
     canonical_slow_nodes_path,
     discover_evidence_slow_modules,
     expected_platform_skips,
+    expected_raw_count_for_modules,
     extract_candidate_job_bash_scripts,
     installed_package_outside_checkout_probe_source,
     junit_skipped_nodeids,
@@ -98,10 +101,23 @@ def test_candidate_real_xvfb_collect_script_passes_bash_n() -> None:
     assert_bash_script_syntax(sample_candidate_real_xvfb_collect_script(), bash_executable=bash)
 
 
-def test_canonical_fixture_is_frozen_425_inventory() -> None:
+def test_canonical_fixture_is_frozen_428_inventory() -> None:
     path = canonical_slow_nodes_path(REPO_ROOT)
+    raw_lines = path.read_text(encoding="utf-8").splitlines()
+    assert len(raw_lines) == RAW_CANDIDATE_SLOW_TOTAL
+    legacy_lines = raw_lines[:LEGACY_RC3_CANDIDATE_SLOW_TOTAL]
+    assert len(legacy_lines) == LEGACY_RC3_CANDIDATE_SLOW_TOTAL
+    public_gate_nodes = frozenset(
+        line.strip() for line in raw_lines[LEGACY_RC3_CANDIDATE_SLOW_TOTAL:] if line.strip()
+    )
+    assert public_gate_nodes == PUBLIC_SESSION_ACCEPTANCE_SLOW_NODEIDS
+
     nodes = read_canonical_slow_nodes_file(path)
     assert len(nodes) == RAW_CANDIDATE_SLOW_TOTAL
+    legacy_nodes = frozenset(legacy_lines)
+    assert len(legacy_nodes) == LEGACY_RC3_CANDIDATE_SLOW_TOTAL
+    assert nodes - legacy_nodes == public_gate_nodes
+    assert legacy_nodes <= nodes
     loaded = load_canonical_slow_nodes(REPO_ROOT)
     assert loaded == nodes
     shard_union: set[str] = set()
@@ -414,7 +430,7 @@ def test_collect_nodes_cli_expected_shard_accepts_exact_canonical_subset(
         )
     assert rc == 0
     assert read_collect_nodeids_file(output) == expected
-    assert len(expected) == CANDIDATE_SLOW_MODULES[module]
+    assert len(expected) == expected_raw_count_for_modules(SHARD_MODULES[shard])
 
 
 def test_collect_nodes_cli_expected_shard_rejects_same_count_substitution(

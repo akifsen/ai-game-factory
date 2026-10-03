@@ -20,7 +20,8 @@ from pathlib import Path
 from typing import Any, cast
 from xml.etree import ElementTree as ET
 
-RAW_CANDIDATE_SLOW_TOTAL = 425
+LEGACY_RC3_CANDIDATE_SLOW_TOTAL = 425
+RAW_CANDIDATE_SLOW_TOTAL = 428
 CANONICAL_SLOW_NODES_REL = Path("tests/fixtures/v08_candidate_slow_nodes.txt")
 
 EXPECTED_WHEEL_DIST_NAME = "gamefactory"
@@ -36,7 +37,21 @@ CANDIDATE_SLOW_MODULES: dict[str, int] = {
     "tests/unit/test_v08_candidate_evidence_readiness_managed_controls.py": 17,
     "tests/unit/test_v08_candidate_evidence_readiness_upstream.py": 26,
     "tests/unit/test_v08_candidate_evidence_readiness_container.py": 14,
+    "tests/unit/test_animation_review_session_bridge_public_gate.py": 1,
+    "tests/unit/test_animation_review_session_viewer_public_package.py": 1,
+    "tests/unit/test_animation_review_session_workflow_public_gate.py": 1,
 }
+
+PUBLIC_SESSION_ACCEPTANCE_SLOW_NODEIDS: frozenset[str] = frozenset(
+    {
+        "tests/unit/test_animation_review_session_bridge_public_gate.py::"
+        "test_unmocked_bridge_session_lifecycle_fresh_subprocess",
+        "tests/unit/test_animation_review_session_viewer_public_package.py::"
+        "test_unmocked_viewer_prepare_real_review_set_package",
+        "tests/unit/test_animation_review_session_workflow_public_gate.py::"
+        "test_unmocked_session_lifecycle_and_authored_source_drift",
+    }
+)
 
 SHARD_MODULES: dict[int, tuple[str, ...]] = {
     1: (
@@ -44,13 +59,20 @@ SHARD_MODULES: dict[int, tuple[str, ...]] = {
         "tests/unit/test_v08_candidate_evidence_cold.py",
         "tests/unit/test_v08_candidate_rig_verifier_portability.py",
     ),
-    2: ("tests/unit/test_v08_candidate_evidence_c2b.py",),
-    3: ("tests/unit/test_v08_candidate_evidence_readiness_matrix.py",),
+    2: (
+        "tests/unit/test_v08_candidate_evidence_c2b.py",
+        "tests/unit/test_animation_review_session_bridge_public_gate.py",
+    ),
+    3: (
+        "tests/unit/test_v08_candidate_evidence_readiness_matrix.py",
+        "tests/unit/test_animation_review_session_viewer_public_package.py",
+    ),
     4: (
         "tests/unit/test_v08_candidate_evidence_readiness_controls.py",
         "tests/unit/test_v08_candidate_evidence_readiness_managed_controls.py",
         "tests/unit/test_v08_candidate_evidence_readiness_upstream.py",
         "tests/unit/test_v08_candidate_evidence_readiness_container.py",
+        "tests/unit/test_animation_review_session_workflow_public_gate.py",
     ),
 }
 
@@ -258,7 +280,9 @@ def load_canonical_slow_nodes(repo: Path) -> frozenset[str]:
     for nodeid in canonical:
         module = nodeid.split("::", 1)[0]
         if module not in allowed_modules:
-            raise CandidateCiError(f"canonical node outside nine slow modules: {nodeid}")
+            raise CandidateCiError(
+                f"canonical node outside {len(CANDIDATE_SLOW_MODULES)} slow modules: {nodeid}"
+            )
     for module in allowed_modules:
         module_nodes = {n for n in canonical if n.split("::", 1)[0] == module}
         expected = CANDIDATE_SLOW_MODULES[module]
@@ -650,12 +674,12 @@ def assert_raw_inventory(
         python, repo, modules, marker="candidate_slow", cwd=collect_cwd, outside_checkout=True
     )
     if marked != frozenset(module_union):
-        raise CandidateCiError("candidate_slow marked set != union of nine slow modules")
+        raise CandidateCiError("candidate_slow marked set != union of registered slow modules")
     assert_runtime_slow_inventory_matches_canonical(
         marked, canonical, label="candidate_slow marked collect"
     )
     assert_runtime_slow_inventory_matches_canonical(
-        frozenset(module_union), canonical, label="nine-module union"
+        frozenset(module_union), canonical, label="slow-module union"
     )
 
     shard_union: set[str] = set()
@@ -1229,7 +1253,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     sub = parser.add_subparsers(dest="command", required=True)
 
-    inv = sub.add_parser("inventory", help="verify frozen 425-test shard inventory")
+    inv = sub.add_parser("inventory", help="verify frozen 428-test shard inventory")
     inv.add_argument("--python", default=None)
     inv.add_argument("--repo", default=None)
     inv.add_argument("--collect-cwd", default=None)

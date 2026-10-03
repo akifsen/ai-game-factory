@@ -43,6 +43,16 @@ from tests.unit.test_animation_review_session_workflow import _write_review_tree
 _DIGEST = "a" * 64
 
 
+def _imported_gamefactory_pythonpath_root() -> Path:
+    import gamefactory
+
+    return Path(gamefactory.__file__).resolve().parent.parent
+
+
+def _bridge_cli_subprocess_env() -> dict[str, str]:
+    return {**os.environ, "PYTHONPATH": str(_imported_gamefactory_pythonpath_root())}
+
+
 def _clip_packages(tmp_path: Path) -> list[dict[str, str]]:
     pkg_a = tmp_path / "pkg-a"
     pkg_b = tmp_path / "pkg-b"
@@ -508,7 +518,7 @@ def test_cli_rejects_relative_paths(tmp_path: Path) -> None:
         capture_output=True,
         text=True,
         cwd=str(tmp_path),
-        env={**os.environ, "PYTHONPATH": str(Path(__file__).resolve().parents[2] / "src")},
+        env=_bridge_cli_subprocess_env(),
     )
     assert proc.returncode == bridge.EXIT_CONFIG_ERROR
     assert not paths.response_file.exists()
@@ -590,7 +600,7 @@ def test_cli_module_entrypoint_subprocess(tmp_path: Path, monkeypatch: pytest.Mo
         capture_output=True,
         text=True,
         cwd=str(tmp_path),
-        env={**os.environ, "PYTHONPATH": str(Path(__file__).resolve().parents[2] / "src")},
+        env=_bridge_cli_subprocess_env(),
     )
     assert proc.returncode == bridge.EXIT_SUCCESS
     assert _read_response(paths.response_file)["ok"] is True
