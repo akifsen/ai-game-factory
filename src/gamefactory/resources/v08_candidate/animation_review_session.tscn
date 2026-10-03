@@ -1,0 +1,152 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="PackedScene" path="res://animation_review_set.tscn" id="1_playback"]
+[ext_resource type="Script" path="res://animation_review_session_controller.gd" id="2_session"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_session_panel"]
+bg_color = Color(0.1, 0.11, 0.14, 0.94)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.32, 0.34, 0.4, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+content_margin_left = 12.0
+content_margin_top = 10.0
+content_margin_right = 12.0
+content_margin_bottom = 10.0
+
+[node name="AnimationReviewSession" type="Node3D"]
+script = ExtResource("2_session")
+
+[node name="Playback" parent="." instance=ExtResource("1_playback")]
+
+[node name="SessionUI" type="CanvasLayer" parent="."]
+layer = 2
+
+[node name="Root" type="Control" parent="SessionUI"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="SessionMargin" type="MarginContainer" parent="SessionUI/Root"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 11
+anchor_left = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -360.0
+offset_bottom = -260.0
+grow_horizontal = 0
+grow_vertical = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 12
+
+[node name="SessionScroll" type="ScrollContainer" parent="SessionUI/Root/SessionMargin"]
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="SessionPanel" type="PanelContainer" parent="SessionUI/Root/SessionMargin/SessionScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_session_panel")
+
+[node name="VBox" type="VBoxContainer" parent="SessionUI/Root/SessionMargin/SessionScroll/SessionPanel"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Title" type="Label" parent="SessionUI/Root/SessionMargin/SessionScroll/SessionPanel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.92, 0.96, 1)
+theme_override_font_sizes/font_size = 15
+text = "Review session"
+
+[node name="SessionStatusBanner" type="Label" parent="SessionUI/Root/SessionMargin/SessionScroll/SessionPanel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.72, 0.76, 0.82, 1)
+autowrap_mode = 3
+text = "Session overlay idle."
+
+[node name="SessionActionsRow" type="HBoxContainer" parent="SessionUI/Root/SessionMargin/SessionScroll/SessionPanel/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="ReloadSessionButton" type="Button" parent="SessionUI/Root/SessionMargin/SessionScroll/SessionPanel/VBox/SessionActionsRow"]
+unique_name_in_owner = true
+layout_mode = 2
+focus_mode = 2
+text = "Reload session"
+
+[node name="CreateSessionButton" type="Button" parent="SessionUI/Root/SessionMargin/SessionScroll/SessionPanel/VBox/SessionActionsRow"]
+unique_name_in_owner = true
+layout_mode = 2
+focus_mode = 2
+text = "Create session"
+
+[node name="ClipStatusCaption" type="Label" parent="SessionUI/Root/SessionMargin/SessionScroll/SessionPanel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.75, 0.78, 0.84, 1)
+text = "Clip status (Keep = working note)"
+
+[node name="ClipStatusOption" type="OptionButton" parent="SessionUI/Root/SessionMargin/SessionScroll/SessionPanel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+focus_mode = 2
+
+[node name="NoteCaption" type="Label" parent="SessionUI/Root/SessionMargin/SessionScroll/SessionPanel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.75, 0.78, 0.84, 1)
+text = "Clip note"
+
+[node name="ClipNoteField" type="LineEdit" parent="SessionUI/Root/SessionMargin/SessionScroll/SessionPanel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+focus_mode = 2
+placeholder_text = "Short review note"
+
+[node name="SaveNoteButton" type="Button" parent="SessionUI/Root/SessionMargin/SessionScroll/SessionPanel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+focus_mode = 2
+text = "Save note"
+
+[node name="BookmarkCaption" type="Label" parent="SessionUI/Root/SessionMargin/SessionScroll/SessionPanel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.75, 0.78, 0.84, 1)
+text = "Bookmarks"
+
+[node name="BookmarkRow" type="HBoxContainer" parent="SessionUI/Root/SessionMargin/SessionScroll/SessionPanel/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="BookmarkOption" type="OptionButton" parent="SessionUI/Root/SessionMargin/SessionScroll/SessionPanel/VBox/BookmarkRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+focus_mode = 2
+
+[node name="SeekBookmarkButton" type="Button" parent="SessionUI/Root/SessionMargin/SessionScroll/SessionPanel/VBox/BookmarkRow"]
+unique_name_in_owner = true
+layout_mode = 2
+focus_mode = 2
+text = "Seek"
+
+[node name="AddBookmarkButton" type="Button" parent="SessionUI/Root/SessionMargin/SessionScroll/SessionPanel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+focus_mode = 2
+text = "Add bookmark at playback time"
