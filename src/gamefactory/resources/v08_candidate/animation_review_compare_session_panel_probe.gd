@@ -694,6 +694,63 @@ static func run_session_panel_regression_probe_async(session: Node) -> bool:
 		failures.append("nav compare not ready before next boundary")
 	if abs(float(snap_at_last.get("normalized_progress", -1.0)) - left_norm_1125) > 0.0001:
 		failures.append("nav playback at last bookmark before next boundary")
+	if playback != null and playback.has_method("request_play"):
+		playback.call("request_play")
+	if not await session.call("_wait_compare_ready"):
+		failures.append("nav compare not ready before go while playing")
+	var snap_playing_at_bookmark: Dictionary = session.call("_compare_snapshot")
+	if not snap_playing_at_bookmark.get("playing", false):
+		failures.append("nav playing at bookmark before go")
+	var sha_go := str(session.get("_raw_sha256"))
+	var rev_go := int(session.call("_stored_revision"))
+	var left_draft_go := str(session.get("_left_note_field").text)
+	var right_draft_go := str(session.get("_right_note_field").text)
+	var bridge_go := str(session.get("_panel_probe_captured_action"))
+	if not session.call("request_seek_stored_bookmark", "left", 1).get("ok", false):
+		failures.append("nav go while playing at bookmark")
+	var snap_after_go: Dictionary = session.call("_compare_snapshot")
+	if snap_after_go.get("playing", true):
+		failures.append("nav go while playing paused")
+	if not _bookmark_seek_transport_unchanged(snap_playing_at_bookmark, snap_after_go):
+		failures.append("nav go while playing transport fields")
+	if str(session.get("_raw_sha256")) != sha_go:
+		failures.append("nav go while playing sha")
+	if int(session.call("_stored_revision")) != rev_go:
+		failures.append("nav go while playing revision")
+	if str(session.get("_left_note_field").text) != left_draft_go:
+		failures.append("nav go while playing left draft")
+	if str(session.get("_right_note_field").text) != right_draft_go:
+		failures.append("nav go while playing right draft")
+	if str(session.get("_panel_probe_captured_action")) != bridge_go:
+		failures.append("nav go while playing bridge intercept")
+	if playback != null and playback.has_method("request_play"):
+		playback.call("request_play")
+	if not await session.call("_wait_compare_ready"):
+		failures.append("nav compare not ready before selection while playing")
+	snap_playing_at_bookmark = session.call("_compare_snapshot")
+	if not snap_playing_at_bookmark.get("playing", false):
+		failures.append("nav playing at bookmark before selection")
+	sha_go = str(session.get("_raw_sha256"))
+	rev_go = int(session.call("_stored_revision"))
+	left_draft_go = str(session.get("_left_note_field").text)
+	right_draft_go = str(session.get("_right_note_field").text)
+	bridge_go = str(session.get("_panel_probe_captured_action"))
+	session.call("_on_bookmark_option_selected", "left", 1)
+	var snap_after_select: Dictionary = session.call("_compare_snapshot")
+	if snap_after_select.get("playing", true):
+		failures.append("nav selection while playing paused")
+	if not _bookmark_seek_transport_unchanged(snap_playing_at_bookmark, snap_after_select):
+		failures.append("nav selection while playing transport fields")
+	if str(session.get("_raw_sha256")) != sha_go:
+		failures.append("nav selection while playing sha")
+	if int(session.call("_stored_revision")) != rev_go:
+		failures.append("nav selection while playing revision")
+	if str(session.get("_left_note_field").text) != left_draft_go:
+		failures.append("nav selection while playing left draft")
+	if str(session.get("_right_note_field").text) != right_draft_go:
+		failures.append("nav selection while playing right draft")
+	if str(session.get("_panel_probe_captured_action")) != bridge_go:
+		failures.append("nav selection while playing bridge intercept")
 	if not session.call("request_step_stored_bookmark", "left", 1).get("noop", false):
 		failures.append("nav next boundary")
 	if session.call("request_seek_stored_bookmark", "left", 99).get("ok", true):
@@ -702,6 +759,70 @@ static func run_session_panel_regression_probe_async(session: Node) -> bool:
 		failures.append("nav reselect same bookmark")
 	if session.call("request_step_stored_bookmark", "left", 2).get("ok", true):
 		failures.append("nav invalid step delta rejected")
+	if playback != null and playback.has_method("request_scrub_normalized"):
+		playback.call("request_scrub_normalized", 0.22)
+	if not await session.call("_wait_compare_ready"):
+		failures.append("nav single bookmark compare not ready")
+	var single_norm := 1.0 / right_duration
+	var single_step_prev: Dictionary = session.call("request_step_stored_bookmark", "right", -1)
+	if not single_step_prev.get("ok", false) or single_step_prev.get("noop", false):
+		failures.append("nav single bookmark prev seek")
+	var snap_single: Dictionary = session.call("_compare_snapshot")
+	if abs(float(snap_single.get("normalized_progress", -1.0)) - single_norm) > 0.0001:
+		failures.append("nav single bookmark prev normalized")
+	var single_right_dur := float(snap_single.get("right_duration", -1.0))
+	if abs(float(snap_single.get("right_position", -1.0)) - single_norm * single_right_dur) > 0.0001:
+		failures.append("nav single bookmark prev right position")
+	var single_left_dur := float(snap_single.get("left_duration", -1.0))
+	if abs(float(snap_single.get("left_position", -1.0)) - single_norm * single_left_dur) > 0.0001:
+		failures.append("nav single bookmark prev left position")
+	if snap_single.get("playing", true):
+		failures.append("nav single bookmark prev paused")
+	if right_bookmark_option.selected != 0:
+		failures.append("nav single bookmark prev selector")
+	if playback != null and playback.has_method("request_scrub_normalized"):
+		playback.call("request_scrub_normalized", 0.18)
+	if not await session.call("_wait_compare_ready"):
+		failures.append("nav single bookmark compare not ready before next")
+	var single_step_next: Dictionary = session.call("request_step_stored_bookmark", "right", 1)
+	if not single_step_next.get("ok", false) or single_step_next.get("noop", false):
+		failures.append("nav single bookmark next seek")
+	snap_single = session.call("_compare_snapshot")
+	if abs(float(snap_single.get("normalized_progress", -1.0)) - single_norm) > 0.0001:
+		failures.append("nav single bookmark next normalized")
+	if snap_single.get("playing", true):
+		failures.append("nav single bookmark next paused")
+	var snap_at_single: Dictionary = snap_single
+	var sha_single := str(session.get("_raw_sha256"))
+	var rev_single := int(session.call("_stored_revision"))
+	var left_draft_single := str(session.get("_left_note_field").text)
+	var right_draft_single := str(session.get("_right_note_field").text)
+	var bridge_action_single := str(session.get("_panel_probe_captured_action"))
+	var noop_step: Dictionary = session.call("request_step_stored_bookmark", "right", 1)
+	if not noop_step.get("ok", false) or not noop_step.get("noop", false):
+		failures.append("nav single bookmark repeat noop")
+	if not _playback_fields_equal(snap_at_single, session.call("_compare_snapshot")):
+		failures.append("nav single bookmark repeat playback unchanged")
+	if str(session.get("_raw_sha256")) != sha_single:
+		failures.append("nav single bookmark repeat sha")
+	if int(session.call("_stored_revision")) != rev_single:
+		failures.append("nav single bookmark repeat revision")
+	if str(session.get("_left_note_field").text) != left_draft_single:
+		failures.append("nav single bookmark repeat left draft")
+	if str(session.get("_right_note_field").text) != right_draft_single:
+		failures.append("nav single bookmark repeat right draft")
+	if str(session.get("_panel_probe_captured_action")) != bridge_action_single:
+		failures.append("nav single bookmark repeat bridge intercept")
+	var snap_before_bad_meta: Dictionary = session.call("_compare_snapshot")
+	right_bookmark_option.set_item_metadata(0, "invalid")
+	var bad_step: Dictionary = session.call("request_step_stored_bookmark", "right", -1)
+	if bad_step.get("ok", true):
+		failures.append("nav single bookmark invalid metadata rejected")
+	if bad_step.get("error_code", "") != "invalid_bookmark_metadata":
+		failures.append("nav single bookmark invalid metadata code")
+	if not _playback_fields_equal(snap_before_bad_meta, session.call("_compare_snapshot")):
+		failures.append("nav single bookmark invalid metadata playback unchanged")
+	right_bookmark_option.set_item_metadata(0, 1.0)
 	session.set("_authority_current", false)
 	session.set("_reload_required", true)
 	session.set("_conflict_active", true)
@@ -760,6 +881,21 @@ static func _playback_fields_equal(a: Dictionary, b: Dictionary) -> bool:
 	var keys := [
 		"normalized_progress",
 		"playing",
+		"speed",
+		"left_position",
+		"right_position",
+		"left_clip_id",
+		"right_clip_id",
+	]
+	for key in keys:
+		if a.get(key) != b.get(key):
+			return false
+	return true
+
+
+static func _bookmark_seek_transport_unchanged(a: Dictionary, b: Dictionary) -> bool:
+	var keys := [
+		"normalized_progress",
 		"speed",
 		"left_position",
 		"right_position",

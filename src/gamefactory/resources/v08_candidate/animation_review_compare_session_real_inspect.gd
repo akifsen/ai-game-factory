@@ -1396,6 +1396,15 @@ func _clip_record_from_sidecar(clip_id: String) -> Dictionary:
 	return {}
 
 
+func _clip_record_from_cached_session(scene: Node3D, clip_id: String) -> Dictionary:
+	if not scene.has_method("_clip_record_for"):
+		return {}
+	var entry: Variant = scene.call("_clip_record_for", clip_id)
+	if typeof(entry) != TYPE_DICTIONARY:
+		return {}
+	return entry
+
+
 func _provider_eligibility_false(scene: Node3D) -> bool:
 	var snap := _session_snapshot(scene)
 	return snap.get("production_eligible") == false and snap.get("promotion_eligible") == false
@@ -1454,11 +1463,59 @@ func _exercise_stored_bookmark_navigation(scene: Node3D, session_sha: String) ->
 		return {"ok": false, "error": "added bookmark normalized matches frozen bookmark"}
 	if not await _assert_dual_pane_pose_oracle(scene):
 		return {"ok": false, "error": "pose oracle failed after added left bookmark seek"}
-	if not scene.call("request_seek_stored_bookmark", "left", idx_added).get("ok", false):
-		return {"ok": false, "error": "reselect same bookmark failed"}
+	if not scene.has_method("request_step_stored_bookmark"):
+		return {"ok": false, "error": "bookmark step API missing"}
 	var idx_c := _pane_bookmark_option_index(scene, "right", BOOKMARK_C)
 	if idx_c < 0:
-		return {"ok": false, "error": "stored right C bookmark missing from selector"}
+		return {"ok": false, "error": "stored right C bookmark missing before single step"}
+	if _pane_bookmark_option_count(scene, "right") != 1:
+		return {"ok": false, "error": "right C expected single stored bookmark"}
+	if idx_c != 0:
+		return {"ok": false, "error": "right C bookmark expected at index 0"}
+	var playback_step := _compare_playback(scene)
+	if playback_step == null or not playback_step.has_method("request_scrub_normalized"):
+		return {"ok": false, "error": "compare playback missing for single bookmark step"}
+	if not playback_step.call("request_scrub_normalized", 0.33).get("ok", false):
+		return {"ok": false, "error": "scrub before single bookmark step failed"}
+	for _i in range(12):
+		await process_frame
+	var norm_c := BOOKMARK_C / DURATION_C
+	var step_prev: Dictionary = scene.call("request_step_stored_bookmark", "right", -1)
+	if not step_prev.get("ok", false) or step_prev.get("noop", false):
+		return {"ok": false, "error": "single bookmark prev step failed"}
+	for _i in range(12):
+		await process_frame
+	snap = _session_snapshot(scene).get("compare", {})
+	if abs(float(snap.get("normalized_progress", -1.0)) - norm_c) > EPS:
+		return {"ok": false, "error": "single bookmark prev normalized mismatch"}
+	if abs(float(snap.get("right_position", -1.0)) - BOOKMARK_C) > EPS:
+		return {"ok": false, "error": "single bookmark prev right position mismatch"}
+	if abs(float(snap.get("left_position", -1.0)) - norm_c * DURATION_A) > EPS:
+		return {"ok": false, "error": "single bookmark prev left position mismatch"}
+	if not await _assert_dual_pane_pose_oracle(scene):
+		return {"ok": false, "error": "pose oracle failed after single bookmark prev step"}
+	var step_repeat: Dictionary = scene.call("request_step_stored_bookmark", "right", 1)
+	if not step_repeat.get("ok", false) or not step_repeat.get("noop", false):
+		return {"ok": false, "error": "single bookmark repeat step not noop"}
+	if not playback_step.call("request_scrub_normalized", 0.28).get("ok", false):
+		return {"ok": false, "error": "scrub before single bookmark next step failed"}
+	for _i in range(12):
+		await process_frame
+	var step_next: Dictionary = scene.call("request_step_stored_bookmark", "right", 1)
+	if not step_next.get("ok", false) or step_next.get("noop", false):
+		return {"ok": false, "error": "single bookmark next step failed"}
+	for _i in range(12):
+		await process_frame
+	snap = _session_snapshot(scene).get("compare", {})
+	if abs(float(snap.get("normalized_progress", -1.0)) - norm_c) > EPS:
+		return {"ok": false, "error": "single bookmark next normalized mismatch"}
+	if not await _assert_dual_pane_pose_oracle(scene):
+		return {"ok": false, "error": "pose oracle failed after single bookmark next step"}
+	var step_repeat_prev: Dictionary = scene.call("request_step_stored_bookmark", "right", -1)
+	if not step_repeat_prev.get("ok", false) or not step_repeat_prev.get("noop", false):
+		return {"ok": false, "error": "single bookmark repeat prev step not noop"}
+	if not scene.call("request_seek_stored_bookmark", "left", idx_added).get("ok", false):
+		return {"ok": false, "error": "reselect same bookmark failed"}
 	if not scene.call("request_seek_stored_bookmark", "right", idx_c).get("ok", false):
 		return {"ok": false, "error": "seek right C bookmark failed"}
 	for _i in range(12):
@@ -1491,6 +1548,12 @@ func _exercise_stored_bookmark_navigation(scene: Node3D, session_sha: String) ->
 		await process_frame
 	if str(_session_snapshot(scene).get("right_clip_id", "")) != CLIP_B:
 		return {"ok": false, "error": "tracked right clip not B after race sync"}
+	var cached_b_record := _clip_record_from_cached_session(scene, CLIP_B)
+	if cached_b_record.is_empty():
+		return {"ok": false, "error": "cached clip B record missing"}
+	var cached_b_note := str(cached_b_record.get("note", ""))
+	if str(scene.get_node("%RightClipNoteField").text) != cached_b_note:
+		return {"ok": false, "error": "cached right B annotation not visible while B selected"}
 	if not scene.call("request_seek_stored_bookmark", "left", idx_frozen).get("ok", false):
 		return {"ok": false, "error": "seek frozen bookmark after right B failed"}
 	for _i in range(12):
@@ -1517,14 +1580,21 @@ func _exercise_stored_bookmark_navigation(scene: Node3D, session_sha: String) ->
 		return {"ok": false, "error": "left clip changed during bookmark navigation"}
 	if str(scene.get_node("%LeftClipNoteField").text) != note_left:
 		return {"ok": false, "error": "left note draft changed during bookmark navigation"}
-	if str(scene.get_node("%RightClipNoteField").text) != note_right:
-		return {"ok": false, "error": "right note draft changed during bookmark navigation"}
 	if playback.has_method("request_set_right_clip"):
 		playback.call("request_set_right_clip", right_clip_before)
-		for _i in range(8):
+		for _i in range(12):
 			await process_frame
 	if not await _restore_transport_baseline(scene):
 		return {"ok": false, "error": "transport baseline not restored after bookmark navigation"}
+	for _i in range(12):
+		await process_frame
+	if str(_session_snapshot(scene).get("right_clip_id", "")) != right_clip_before:
+		return {"ok": false, "error": "right clip not restored after bookmark navigation"}
+	if str(scene.get_node("%RightClipNoteField").text) != note_right:
+		return {"ok": false, "error": "right note draft changed during bookmark navigation"}
+	var right_option: OptionButton = scene.get_node_or_null("%RightBookmarkOption") as OptionButton
+	if right_option != null and right_option.item_count == 1 and right_option.selected != 0:
+		return {"ok": false, "error": "right bookmark selection not restored after navigation"}
 	return {
 		"ok": true,
 		"physical_sidecar_sha_before": physical_sha_before,
@@ -1535,6 +1605,14 @@ func _exercise_stored_bookmark_navigation(scene: Node3D, session_sha: String) ->
 		"physical_revision_before": physical_rev_before,
 		"physical_revision_after": physical_rev_after,
 	}
+
+
+func _pane_bookmark_option_count(scene: Node3D, pane: String) -> int:
+	var node_name := "LeftBookmarkOption" if pane == "left" else "RightBookmarkOption"
+	var option: OptionButton = scene.get_node_or_null("%" + node_name) as OptionButton
+	if option == null:
+		return -1
+	return option.item_count
 
 
 func _pane_bookmark_option_index(scene: Node3D, pane: String, timestamp: float) -> int:

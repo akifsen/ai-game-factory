@@ -7,6 +7,7 @@ const SESSION_SCHEMA_VERSION := "animation-review-session-0.8.0"
 const MAX_RESPONSE_BYTES := 72 * 1024
 const MAX_NOTE_UTF8_BYTES := 2048
 const MAX_BOOKMARKS_PER_CLIP := 32
+const BOOKMARK_NAV_PROGRESS_EPS := 0.0001
 const MIN_BINDING_CLIPS := 2
 const MAX_BINDING_CLIPS := 8
 const MAX_DURATION_SECONDS := 10.0
@@ -360,23 +361,13 @@ func request_seek_stored_bookmark(pane: String, index: Variant) -> Dictionary:
 		return {"ok": false, "error_code": "navigation_unavailable"}
 	if not _tracked_clips_match_compare():
 		return {"ok": false, "error_code": "clip_target_changed"}
+	var target := _resolve_stored_bookmark_seek_target(pane, int(index))
+	if not target.get("ok", false):
+		return target
 	var option := _pane_bookmark_option(pane)
-	var idx := int(index)
-	if idx < 0 or idx >= option.item_count:
-		return {"ok": false, "error_code": "invalid_bookmark_index"}
-	var meta: Variant = option.get_item_metadata(idx)
-	if typeof(meta) != TYPE_FLOAT and typeof(meta) != TYPE_INT:
-		return {"ok": false, "error_code": "invalid_bookmark_metadata"}
-	var clip_id := _pane_clip_id(pane)
-	var ts := float(meta)
-	if not is_finite(ts):
-		return {"ok": false, "error_code": "invalid_bookmark_metadata"}
-	if not _bookmark_timestamp_valid(clip_id, ts):
-		return {"ok": false, "error_code": "invalid_bookmark_time"}
-	var duration := _clip_duration_seconds(clip_id)
-	var norm := _normalized_progress_for_clip_timestamp(ts, duration)
-	if norm < 0.0:
-		return {"ok": false, "error_code": "invalid_bookmark_time"}
+	var idx := int(target.get("index", -1))
+	var ts := float(target.get("timestamp", -1.0))
+	var norm := float(target.get("normalized_progress", -1.0))
 	if _playback == null or not _playback.has_method("request_scrub_normalized"):
 		return {"ok": false, "error_code": "playback_missing"}
 	var speed_before := float(_compare_snapshot().get("speed", -1.0))
@@ -416,6 +407,16 @@ func request_step_stored_bookmark(pane: String, delta: Variant) -> Dictionary:
 	var count := option.item_count
 	if count == 0:
 		return {"ok": true, "noop": true}
+	if count == 1:
+		if not _bookmark_navigation_enabled():
+			return {"ok": false, "error_code": "navigation_unavailable"}
+		var sole_target := _resolve_stored_bookmark_seek_target(pane, 0)
+		if not sole_target.get("ok", false):
+			return sole_target
+		var sole_norm := float(sole_target.get("normalized_progress", -1.0))
+		if option.selected == 0 and _compare_progress_matches_bookmark(sole_norm):
+			return {"ok": true, "noop": true}
+		return request_seek_stored_bookmark(pane, 0)
 	var current := option.selected
 	var next_idx := _bounded_bookmark_step_index(current, int(delta), count)
 	if next_idx < 0:
@@ -744,6 +745,42 @@ static func _bounded_bookmark_step_index(current: int, delta: int, count: int) -
 	if next_idx < 0 or next_idx >= count:
 		return -1
 	return next_idx
+
+
+func _compare_progress_matches_bookmark(norm: float) -> bool:
+	if not _compare_ready():
+		return false
+	if not is_finite(norm) or norm < 0.0:
+		return false
+	var snap := _compare_snapshot()
+	if not snap.get("ready", false):
+		return false
+	return abs(float(snap.get("normalized_progress", -1.0)) - norm) <= BOOKMARK_NAV_PROGRESS_EPS
+
+
+func _resolve_stored_bookmark_seek_target(pane: String, index: int) -> Dictionary:
+	var option := _pane_bookmark_option(pane)
+	if index < 0 or index >= option.item_count:
+		return {"ok": false, "error_code": "invalid_bookmark_index"}
+	var meta: Variant = option.get_item_metadata(index)
+	if typeof(meta) != TYPE_FLOAT and typeof(meta) != TYPE_INT:
+		return {"ok": false, "error_code": "invalid_bookmark_metadata"}
+	var clip_id := _pane_clip_id(pane)
+	var ts := float(meta)
+	if not is_finite(ts):
+		return {"ok": false, "error_code": "invalid_bookmark_metadata"}
+	if not _bookmark_timestamp_valid(clip_id, ts):
+		return {"ok": false, "error_code": "invalid_bookmark_time"}
+	var duration := _clip_duration_seconds(clip_id)
+	var norm := _normalized_progress_for_clip_timestamp(ts, duration)
+	if norm < 0.0:
+		return {"ok": false, "error_code": "invalid_bookmark_time"}
+	return {
+		"ok": true,
+		"index": index,
+		"timestamp": ts,
+		"normalized_progress": norm,
+	}
 
 
 func _apply_clip_annotations_for(clip_id: String) -> void:
