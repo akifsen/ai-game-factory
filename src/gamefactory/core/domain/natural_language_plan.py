@@ -213,7 +213,9 @@ def plan_to_asset_specification(
         raise ValidationError(f"Pilot planner is restricted to profile {PILOT_PROFILE_ID}")
     qualified = spec.bound_profile().qualified
     if qualified != f"{PILOT_PROFILE_ID}@1":
-        raise ValidationError(f"Pilot planner requires profile {PILOT_PROFILE_ID}@1, got {qualified}")
+        raise ValidationError(
+            f"Pilot planner requires profile {PILOT_PROFILE_ID}@1, got {qualified}"
+        )
     return spec
 
 
