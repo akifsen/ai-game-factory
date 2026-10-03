@@ -19,6 +19,7 @@ import shlex
 import shutil
 import subprocess
 import sys
+import tempfile
 import threading
 import time
 import types
@@ -32,6 +33,8 @@ from typing import Any, Literal
 import pytest
 
 PROFILE_SHARD = 4
+
+OBSERVATION_SCOPE_PYTEST_SESSION = "pytest_session"
 
 ALLOWED_EXPECTED_VERSIONS: frozenset[str] = frozenset({"0.8.0rc8", "0.8.0rc9"})
 
@@ -170,6 +173,7 @@ class TimedOperationRecord:
     outcome: str
     nodeid: str | None = None
     phase: str | None = None
+    observation_scope: str | None = None
 
     def to_json(self) -> dict[str, Any]:
         return {
@@ -179,6 +183,7 @@ class TimedOperationRecord:
             "outcome": self.outcome,
             "nodeid": self.nodeid,
             "phase": self.phase,
+            "observation_scope": self.observation_scope,
         }
 
 
@@ -245,6 +250,15 @@ class CostObservationSession:
         self._wrapper_overhead_measured = True
         if seconds > 0:
             self.wrapper_overhead_seconds += seconds
+
+
+def _wrapped_spawn_attribution(
+    nodeid: str | None, phase: str | None
+) -> tuple[str | None, str | None, str | None]:
+    """Map pytest context to timed-operation node attribution or explicit session scope."""
+    if nodeid is None and phase is None:
+        return None, None, OBSERVATION_SCOPE_PYTEST_SESSION
+    return nodeid, phase, None
 
 
 def _strip_outer_quote_pairs(text: str) -> str:
@@ -519,6 +533,7 @@ def install_cost_observation() -> CostObservationSession:
         label = spawn_label_for_subprocess_run(call_args)
         category = classify_subprocess_category(call_args)
         nodeid, phase = session._context_snapshot()
+        attr_nodeid, attr_phase, observation_scope = _wrapped_spawn_attribution(nodeid, phase)
         wrap_start = time.monotonic()
         completed: subprocess.CompletedProcess[Any] | None = None
         exc: BaseException | None = None
@@ -536,8 +551,9 @@ def install_cost_observation() -> CostObservationSession:
                     category=category,
                     duration_seconds=duration,
                     outcome=_operation_outcome_from_subprocess(exc=exc, completed=completed),
-                    nodeid=nodeid,
-                    phase=phase,
+                    nodeid=attr_nodeid,
+                    phase=attr_phase,
+                    observation_scope=observation_scope,
                 )
             )
 
@@ -561,6 +577,7 @@ def install_cost_observation() -> CostObservationSession:
             label = f"process_runner_run:{classify_subprocess_category(call_args)}"
             category = classify_subprocess_category(call_args)
             nodeid, phase = session._context_snapshot()
+            attr_nodeid, attr_phase, observation_scope = _wrapped_spawn_attribution(nodeid, phase)
             wrap_start = time.monotonic()
             result: Any = None
             exc: BaseException | None = None
@@ -582,8 +599,9 @@ def install_cost_observation() -> CostObservationSession:
                         category=category,
                         duration_seconds=duration,
                         outcome=outcome,
-                        nodeid=nodeid,
-                        phase=phase,
+                        nodeid=attr_nodeid,
+                        phase=attr_phase,
+                        observation_scope=observation_scope,
                     )
                 )
             return result
@@ -609,11 +627,21 @@ def deactivate_cost_observation(session: CostObservationSession) -> None:
 
 def finalize_cost_observation(session: CostObservationSession) -> dict[str, Any]:
     totals = aggregate_cost_categories(session.timed_operations)
+    session_scope_count = sum(
+        1
+        for row in session.timed_operations
+        if row.observation_scope == OBSERVATION_SCOPE_PYTEST_SESSION
+    )
+    node_phase_count = len(session.timed_operations) - session_scope_count
     return {
         "schema": "v08-installed-shard-runtime-costs/v1-preliminary",
         "popen_counts_by_category": dict(session.popen_counts_by_category),
         "popen_duration_attribution": "unattributed_direct_popen_only",
         "timed_operations": [row.to_json() for row in session.timed_operations],
+        "timed_operations_observation_scope_counts": {
+            OBSERVATION_SCOPE_PYTEST_SESSION: session_scope_count,
+            "node_phase": node_phase_count,
+        },
         "timed_operations_overlap_note": (
             "nested_durations_may_overlap; never sum with pytest node phase wall times"
         ),
@@ -1551,10 +1579,26 @@ def _validate_timed_operation_record(index: int, row: Any) -> list[str]:
     ):
         nodeid = row.get("nodeid")
         phase = row.get("phase")
-        if not isinstance(nodeid, str) or not nodeid:
-            failures.append(f"timed_operations[{index}].nodeid missing for wrapped spawn")
-        if phase not in {"setup", "call", "teardown"}:
-            failures.append(f"timed_operations[{index}].phase missing or invalid for wrapped spawn")
+        observation_scope = row.get("observation_scope")
+        nodeid_valid = isinstance(nodeid, str) and bool(nodeid)
+        phase_valid = phase in {"setup", "call", "teardown"}
+        scope_session = observation_scope == OBSERVATION_SCOPE_PYTEST_SESSION
+        if nodeid_valid and phase_valid:
+            if observation_scope is not None:
+                failures.append(
+                    f"timed_operations[{index}].observation_scope must be absent for node phase"
+                )
+        elif nodeid is None and phase is None and scope_session:
+            pass
+        elif nodeid is None and phase is None:
+            failures.append(
+                f"timed_operations[{index}].observation_scope must be "
+                f"{OBSERVATION_SCOPE_PYTEST_SESSION!r} when nodeid and phase are absent"
+            )
+        else:
+            failures.append(
+                f"timed_operations[{index}] wrapped spawn has partial node phase attribution"
+            )
     return failures
 
 
@@ -1803,12 +1847,8 @@ def write_report(path: Path, payload: dict[str, Any]) -> None:
 
 def _fresh_basetemp(parent: Path) -> Path:
     parent.mkdir(parents=True, exist_ok=True)
-    stamp = time.strftime("%Y%m%d-%H%M%S")
-    candidate = parent / f"pytest-basetemp-{stamp}-{os.getpid()}"
-    if candidate.exists():
-        raise ProfileRuntimeError(f"refusing to reuse existing basetemp path: {candidate}")
-    candidate.mkdir(parents=True, exist_ok=False)
-    return candidate
+    # Short pt- prefix reduces path pressure on Windows; does not guarantee MAX_PATH for arbitrary parents.
+    return Path(tempfile.mkdtemp(prefix="pt-", dir=parent))
 
 
 def _timing_sidecar_paths(output_json: Path) -> tuple[Path, Path, Path, Path, Path]:

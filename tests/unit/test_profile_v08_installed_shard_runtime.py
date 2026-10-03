@@ -28,6 +28,7 @@ from scripts.profile_v08_installed_shard_runtime import (  # noqa: E402
     METRICS_FILLED_BY_COST_OBSERVATION,
     METRICS_FILLED_BY_WHEEL_OPTION,
     NAMED_COST_ENTRYPOINTS,
+    OBSERVATION_SCOPE_PYTEST_SESSION,
     PROFILE_SHARD,
     CostObservationSession,
     NodeTimingRecord,
@@ -76,6 +77,7 @@ from scripts.verify_v08_candidate_ci import (  # noqa: E402
 
 _INTEGRATION_MODULE = "tests/unit/test_profile_child_integration.py"
 _COST_PHASE_MODULE = "tests/unit/test_profile_child_cost_phases.py"
+_SESSION_FINISH_MODULE = "tests/unit/test_profile_session_finish_subprocess.py"
 
 _PYTEST_OFFLINE_DIST_NAMES: tuple[str, ...] = (
     "pytest",
@@ -373,6 +375,153 @@ def run_pytest_collect_nodeids(python, repo, paths, *, cwd=None, outside_checkou
 '''
     (scripts / "verify_v08_candidate_ci.py").write_text(stub, encoding="utf-8")
     return nodeids
+
+
+def _write_session_finish_subprocess_frozen_root(root: Path, *, version: str) -> frozenset[str]:
+    conftest = root / "conftest.py"
+    conftest.write_text(
+        """import subprocess
+import sys
+
+
+def pytest_sessionfinish(session, exitstatus):
+    subprocess.run(
+        [sys.executable, "-c", "pass"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+""",
+        encoding="utf-8",
+    )
+    module_path = root / _SESSION_FINISH_MODULE
+    module_path.parent.mkdir(parents=True, exist_ok=True)
+    module_path.write_text(
+        """def test_trivial() -> None:
+    assert True
+""",
+        encoding="utf-8",
+    )
+    nodeid = f"{_SESSION_FINISH_MODULE}::test_trivial"
+    fixtures = root / "tests" / "fixtures"
+    fixtures.mkdir(parents=True, exist_ok=True)
+    (fixtures / "v08_candidate_slow_nodes.txt").write_text(nodeid + "\n", encoding="utf-8")
+    scripts = root / "scripts"
+    scripts.mkdir(parents=True, exist_ok=True)
+    probe_template = installed_package_outside_checkout_probe_source(version)
+    stub = f'''"""Minimal frozen verify stub for profile session-finish subprocess tests."""
+from __future__ import annotations
+
+import os
+import re
+import subprocess
+from pathlib import Path
+
+EXPECTED_PACKAGE_VERSION = {version!r}
+SHARD_MODULES = {{4: ("{_SESSION_FINISH_MODULE}",)}}
+_PROBE_SOURCE = {probe_template!r}
+
+
+class CandidateCiError(RuntimeError):
+    pass
+
+
+_COLLECTED_RE = re.compile(r"(?P<count>\\d+)(?:/\\d+)?\\s+tests?\\s+collected")
+
+
+def _normalize_node_id(nodeid: str, repo: Path) -> str:
+    stripped = nodeid.strip()
+    if "::" not in stripped:
+        return stripped.replace("\\\\", "/")
+    file_part, rest = stripped.split("::", 1)
+    path = Path(file_part)
+    if path.is_absolute():
+        try:
+            file_part = path.resolve().relative_to(repo.resolve()).as_posix()
+        except ValueError:
+            file_part = path.as_posix()
+    else:
+        file_part = file_part.replace("\\\\", "/")
+    return f"{{file_part}}::{{rest}}"
+
+
+def load_canonical_slow_nodes(repo: Path) -> frozenset[str]:
+    path = repo / "tests" / "fixtures" / "v08_candidate_slow_nodes.txt"
+    return frozenset(
+        _normalize_node_id(line, repo)
+        for line in path.read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    )
+
+
+def canonical_nodes_for_modules(canonical, modules):
+    allowed = set(modules)
+    return frozenset(n for n in canonical if n.split("::", 1)[0] in allowed)
+
+
+def assert_runtime_slow_inventory_matches_canonical(runtime, canonical, *, label: str) -> None:
+    if runtime != canonical:
+        raise CandidateCiError(f"{{label}} identity mismatch")
+
+
+def installed_package_outside_checkout_probe_source(expected_version: str = EXPECTED_PACKAGE_VERSION) -> str:
+    return _PROBE_SOURCE
+
+
+def _collect_subprocess_env() -> dict[str, str]:
+    env = os.environ.copy()
+    env.pop("PYTHONPATH", None)
+    env["PYTHONNOUSERSITE"] = "1"
+    return env
+
+
+def _parse_collect_only_stdout(stdout: str, repo: Path):
+    nodeids = []
+    for line in stdout.splitlines():
+        stripped = line.strip()
+        if not stripped or _COLLECTED_RE.search(stripped):
+            continue
+        if "::" not in stripped or ".py" not in stripped.split("::", 1)[0]:
+            continue
+        if stripped.startswith(("=", "-", "ERROR", "!!!")):
+            continue
+        nodeids.append(_normalize_node_id(stripped, repo))
+    return frozenset(nodeids)
+
+
+def run_pytest_collect_nodeids(python, repo, paths, *, cwd=None, outside_checkout=True):
+    abs_paths = [str((repo / rel).resolve()) for rel in paths]
+    cmd = [
+        str(python),
+        "-m",
+        "pytest",
+        "--collect-only",
+        "-q",
+        "--rootdir",
+        str(repo.resolve()),
+        "-p",
+        "no:cacheprovider",
+        "--import-mode",
+        "importlib",
+        "-o",
+        f"pythonpath={{repo.resolve()}}",
+        *abs_paths,
+    ]
+    workdir = cwd if cwd is not None else repo
+    proc = subprocess.run(
+        cmd,
+        cwd=workdir,
+        capture_output=True,
+        text=True,
+        check=False,
+        env=_collect_subprocess_env(),
+    )
+    if proc.returncode not in (0, 5):
+        raise CandidateCiError(proc.stderr or proc.stdout)
+    return _parse_collect_only_stdout(proc.stdout, repo)
+'''
+    (scripts / "verify_v08_candidate_ci.py").write_text(stub, encoding="utf-8")
+    return frozenset({nodeid})
 
 
 def _write_cost_phase_integration_frozen_root(root: Path, *, version: str) -> frozenset[str]:
@@ -1174,6 +1323,9 @@ def test_subprocess_run_wrapper_preserves_success_and_errors(tmp_path: Path) -> 
         deactivate_cost_observation(session)
     assert session.timed_operations[-1].outcome == "nonzero_exit"
     assert session.timed_operations[0].outcome == "success"
+    for row in session.timed_operations:
+        assert row.observation_scope == OBSERVATION_SCOPE_PYTEST_SESSION
+        assert row.nodeid is None and row.phase is None
 
 
 def test_subprocess_run_wrapper_preserves_timeout(tmp_path: Path) -> None:
@@ -1571,6 +1723,74 @@ def test_cost_observation_attributes_setup_call_teardown_spawns(tmp_path: Path) 
     phases = {str(row["phase"]) for row in phase_ops}
     assert phases == {"setup", "call", "teardown"}
     assert len(phase_ops) == 3
+    for row in phase_ops:
+        assert row.get("observation_scope") is None
+
+
+def test_cost_observation_session_finish_subprocess_is_session_scoped(tmp_path: Path) -> None:
+    frozen_root = Path(tempfile.mkdtemp(prefix="gf-profile-session-finish-"))
+    _write_session_finish_subprocess_frozen_root(frozen_root, version=EXPECTED_PACKAGE_VERSION)
+    workspace = _disjoint_consumer_workspace()
+    _, python = _bootstrap_consumer_venv_with_pytest(tmp_path)
+    profile_script = REPO_ROOT / "scripts" / "profile_v08_installed_shard_runtime.py"
+    output, junit, _basetemp_parent = _outside_checkout_profile_paths()
+    timing_path, child_before, child_after, runtime_collect, costs_path = _timing_sidecar_paths(
+        output
+    )
+    basetemp = _fresh_basetemp(_verification_revision_basetemp_parent())
+    result = run_pytest_shard(
+        python,
+        frozen_root,
+        workspace=workspace,
+        basetemp=basetemp,
+        junit_path=junit,
+        collect_cwd=_outside_checkout_collect_cwd(),
+        profile_script=profile_script,
+        timing_path=timing_path,
+        expected_version=EXPECTED_PACKAGE_VERSION,
+        child_probe_before=child_before,
+        child_probe_after=child_after,
+        runtime_collect_path=runtime_collect,
+        observe_costs=True,
+        costs_path=costs_path,
+    )
+    assert result.exit_code == 0
+    costs = json.loads(costs_path.read_text(encoding="utf-8"))
+    assert not validate_cost_payload(costs)
+    session_ops = [
+        row
+        for row in costs["timed_operations"]
+        if row.get("observation_scope") == OBSERVATION_SCOPE_PYTEST_SESSION
+    ]
+    assert session_ops
+    assert all(row.get("nodeid") is None and row.get("phase") is None for row in session_ops)
+    assert costs["timed_operations_observation_scope_counts"][OBSERVATION_SCOPE_PYTEST_SESSION] >= 1
+
+
+def test_fresh_basetemp_child_dir_name_is_short(tmp_path: Path) -> None:
+    parent = tmp_path / "basetemp-parent"
+    first = _fresh_basetemp(parent)
+    second = _fresh_basetemp(parent)
+    assert first.name.startswith("pt-")
+    assert second.name.startswith("pt-")
+    assert first != second
+    assert len(first.name) <= 16
+    assert not first.name.startswith("pytest-basetemp")
+
+
+def test_fresh_basetemp_distinct_when_clock_and_pid_unchanged(tmp_path: Path) -> None:
+    """mkdtemp must not collide when time/PID-based ids would repeat (same millisecond)."""
+    parent = tmp_path / "basetemp-parent"
+    frozen_time = 1_700_000_000.0
+    frozen_pid = 4242
+    with (
+        patch("scripts.profile_v08_installed_shard_runtime.time.time", return_value=frozen_time),
+        patch("scripts.profile_v08_installed_shard_runtime.os.getpid", return_value=frozen_pid),
+    ):
+        first = _fresh_basetemp(parent)
+        second = _fresh_basetemp(parent)
+    assert first != second
+    assert first.is_dir() and second.is_dir()
 
 
 def _minimal_cost_payload() -> dict[str, object]:
@@ -1654,7 +1874,38 @@ def test_validate_cost_payload_rejects_invalid_durations_and_bool_counts() -> No
             "phase": "call",
         }
     ]
-    assert any("nodeid" in item for item in validate_cost_payload(bad_wrapped))
+    assert any("partial" in item for item in validate_cost_payload(bad_wrapped))
+
+    bad_session_missing_scope = dict(base)
+    bad_session_missing_scope["timed_operations"] = [
+        {
+            "spawn_label": "subprocess_run:other",
+            "category": "other",
+            "duration_seconds": 0.01,
+            "outcome": "success",
+            "nodeid": None,
+            "phase": None,
+        }
+    ]
+    assert any(
+        "observation_scope" in item for item in validate_cost_payload(bad_session_missing_scope)
+    )
+
+    good_session_scope = dict(base)
+    good_session_scope["timed_operations"] = [
+        {
+            "spawn_label": "subprocess_run:other",
+            "category": "other",
+            "duration_seconds": 0.01,
+            "outcome": "success",
+            "nodeid": None,
+            "phase": None,
+            "observation_scope": OBSERVATION_SCOPE_PYTEST_SESSION,
+        }
+    ]
+    good_session_scope["category_duration_seconds"] = dict(base["category_duration_seconds"])
+    good_session_scope["category_duration_seconds"]["other"] = 0.01
+    assert not validate_cost_payload(good_session_scope)
 
 
 def test_cost_metrics_keep_duration_missing_when_popen_without_timing() -> None:
