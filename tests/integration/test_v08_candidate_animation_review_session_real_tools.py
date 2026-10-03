@@ -52,6 +52,13 @@ from gamefactory.core.domain.v08_candidate_contracts import (
 )
 from gamefactory.core.execution.process_runner import CommandRequest, ProcessRunner
 from gamefactory.core.policies.policy_engine import PolicyEngine, PolicyRule
+from gamefactory.workflows.animation_review_handoff import (
+    ANIMATION_REVIEW_HANDOFF_REPORT_SCHEMA,
+    REVIEW_REPORT_JSON_NAME,
+    REVIEW_REPORT_MD_NAME,
+    export_animation_review_handoff,
+)
+from gamefactory.workflows.animation_review_session import AnimationReviewSessionWorkflowContext
 from gamefactory.workflows.engine import WorkflowEngine
 from gamefactory.workflows.v08_candidate_animation_clip_preview import (
     _CLIP_PACKAGE_FILES,
@@ -490,6 +497,131 @@ def _clip_record(session_doc: dict[str, object], clip_id: str) -> dict[str, obje
     raise AssertionError(f"clip record missing for {clip_id!r}")
 
 
+def _assert_handoff_module_under_imported_gamefactory() -> None:
+    import gamefactory
+    import gamefactory.workflows.animation_review_handoff as handoff_module
+
+    package_root = Path(gamefactory.__file__).resolve().parent
+    origin = Path(handoff_module.__file__).resolve()
+    assert package_root in origin.parents
+
+
+def _real_ui_handoff_source_digests(
+    *,
+    preview_dir: Path,
+    review_set_dir: Path,
+    clip_preview_a: Path,
+    clip_preview_b: Path,
+    clip_a_path: Path,
+    clip_b_path: Path,
+    session_path: Path,
+) -> dict[str, str]:
+    digests: dict[str, str] = {}
+    for path in _review_set_leaf_paths(review_set_dir):
+        rel = path.relative_to(review_set_dir).as_posix()
+        digests[f"review/{rel}"] = hashlib.sha256(path.read_bytes()).hexdigest()
+    for path in sorted(preview_dir.rglob("*")):
+        if path.is_file():
+            rel = path.relative_to(preview_dir).as_posix()
+            digests[f"preview/{rel}"] = hashlib.sha256(path.read_bytes()).hexdigest()
+    for name in sorted(_CLIP_PACKAGE_FILES):
+        digests[f"clip-preview-a/{name}"] = hashlib.sha256(
+            (clip_preview_a / name).read_bytes()
+        ).hexdigest()
+        digests[f"clip-preview-b/{name}"] = hashlib.sha256(
+            (clip_preview_b / name).read_bytes()
+        ).hexdigest()
+    digests["authored/arm_wave_01.json"] = hashlib.sha256(clip_a_path.read_bytes()).hexdigest()
+    digests["authored/arm_reverse_02.json"] = hashlib.sha256(clip_b_path.read_bytes()).hexdigest()
+    digests["session/raw"] = hashlib.sha256(session_path.read_bytes()).hexdigest()
+    return digests
+
+
+def _assert_handoff_report_files(root: Path) -> None:
+    names = {path.name for path in root.iterdir()}
+    assert names == {REVIEW_REPORT_JSON_NAME, REVIEW_REPORT_MD_NAME}
+
+
+def _assert_handoff_reports_identical(dir_a: Path, dir_b: Path) -> None:
+    _assert_handoff_report_files(dir_a)
+    _assert_handoff_report_files(dir_b)
+    for name in (REVIEW_REPORT_JSON_NAME, REVIEW_REPORT_MD_NAME):
+        assert (dir_a / name).read_bytes() == (dir_b / name).read_bytes()
+
+
+_MAX_HANDOFF_REPORT_BYTES = 128 * 1024
+
+
+def _assert_bound_handoff_report(
+    report_dir: Path,
+    *,
+    expected_raw_sha: str,
+    expected_revision: int,
+    session_current: bool,
+    captured_session_document: dict[str, object],
+    reverse_note: str = "",
+) -> None:
+    json_path = report_dir / REVIEW_REPORT_JSON_NAME
+    md_path = report_dir / REVIEW_REPORT_MD_NAME
+    assert json_path.stat().st_size <= _MAX_HANDOFF_REPORT_BYTES
+    assert md_path.stat().st_size <= _MAX_HANDOFF_REPORT_BYTES
+
+    doc = json.loads(json_path.read_text(encoding="utf-8"))
+    binding = captured_session_document.get("binding")
+    assert isinstance(binding, dict)
+
+    assert doc["schema_version"] == ANIMATION_REVIEW_HANDOFF_REPORT_SCHEMA
+    assert doc["review_root"] == binding["review_root"]
+    assert doc["raw_manifest_sha256"] == binding["raw_manifest_sha256"]
+    assert doc["root_payload_sha256"] == binding["root_payload_sha256"]
+    assert doc["clip_payload_sha256"] == binding["clip_payload_sha256"]
+    assert doc["raw_session_sha256"] == expected_raw_sha
+    assert doc["session_revision"] == expected_revision
+    assert doc["session_current"] is session_current
+    assert doc["production_eligible"] is False
+    assert doc["promotion_eligible"] is False
+    assert doc["keep_status_is_annotation_not_approval"] is True
+    assert [entry["clip_id"] for entry in doc["clips"]] == [
+        "arm_wave_01",
+        "arm_reverse_02",
+    ]
+    wave = doc["clips"][0]
+    reverse = doc["clips"][1]
+    assert wave["status"] == "revise"
+    assert wave["note"] == "review A"
+    assert wave["bookmarks"] == [0.75]
+    assert wave["duration_seconds"] == 1.5
+    assert reverse["status"] == "keep"
+    assert reverse["note"] == reverse_note
+    assert reverse["bookmarks"] == []
+    assert reverse["duration_seconds"] == 2.0
+
+    md = md_path.read_text(encoding="utf-8")
+    assert "keep status is annotation only, not approval." in md
+    assert "production_eligible: false" in md
+    assert "promotion_eligible: false" in md
+    assert str(binding["review_root"]) in md
+    assert f"raw_session_sha256: {expected_raw_sha}" in md
+    assert f"session_revision: {expected_revision}" in md
+    assert f"- session_current: {str(session_current).lower()}" in md
+    assert f"raw_manifest_sha256: {binding['raw_manifest_sha256']}" in md
+    assert f"root_payload_sha256: {binding['root_payload_sha256']}" in md
+    assert f"clip_payload_sha256: {binding['clip_payload_sha256']}" in md
+    wave_pos = md.find("arm_wave_01")
+    reverse_pos = md.find("arm_reverse_02")
+    assert wave_pos != -1 and reverse_pos != -1 and wave_pos < reverse_pos
+    assert "review A" in md
+    assert "- bookmarks: 0.75" in md
+    assert "revise" in md
+    assert "keep" in md
+    if reverse_note:
+        assert reverse_note in md
+    if session_current:
+        assert not md.startswith("# SESSION NOT CURRENT\n")
+    else:
+        assert md.startswith("# SESSION NOT CURRENT\n")
+
+
 @pytest.mark.skipif(not Path(GODOT).is_file(), reason="Godot executable not available")
 def test_animation_review_session_inspect_script_check_only(tmp_path: Path) -> None:
     project_dir = tmp_path / "inspect-syntax"
@@ -710,6 +842,56 @@ def test_real_animation_review_session_ui_lifecycle(tmp_path: Path) -> None:
     clip_b_after_reopen = _clip_record(session_after_reopen, "arm_reverse_02")
     assert clip_b_after_reopen.get("status") == "keep"
 
+    _assert_handoff_module_under_imported_gamefactory()
+    handoff_ctx = AnimationReviewSessionWorkflowContext(
+        handlers=handlers,
+        workflow_id=workflow.id,
+        preview_dir=preview_dir,
+        clip_packages=sources,
+        review_dir=review_set_dir,
+        session_path=session_path,
+    )
+    handoff_source_before = _real_ui_handoff_source_digests(
+        preview_dir=preview_dir,
+        review_set_dir=review_set_dir,
+        clip_preview_a=clip_preview_a,
+        clip_preview_b=clip_preview_b,
+        clip_a_path=clip_a_path,
+        clip_b_path=clip_b_path,
+        session_path=session_path,
+    )
+    handoff_root_a = (tmp_path / "real-ui-handoff-a").resolve()
+    handoff_root_b = (tmp_path / "real-ui-handoff-b").resolve()
+    handoff_result_a = export_animation_review_handoff(handoff_ctx, handoff_root_a)
+    handoff_result_b = export_animation_review_handoff(handoff_ctx, handoff_root_b)
+    assert handoff_result_a.production_eligible is False
+    assert handoff_result_a.promotion_eligible is False
+    assert handoff_result_a.session_current is True
+    assert handoff_result_a.session_revision == 4
+    assert handoff_result_a.raw_session_sha256 == session_sha_after_reopen
+    assert handoff_result_b.session_current is True
+    assert handoff_result_b.raw_session_sha256 == session_sha_after_reopen
+    _assert_handoff_reports_identical(handoff_root_a, handoff_root_b)
+    _assert_bound_handoff_report(
+        handoff_root_a,
+        expected_raw_sha=session_sha_after_reopen,
+        expected_revision=4,
+        session_current=True,
+        captured_session_document=session_after_reopen,
+    )
+    assert (
+        _real_ui_handoff_source_digests(
+            preview_dir=preview_dir,
+            review_set_dir=review_set_dir,
+            clip_preview_a=clip_preview_a,
+            clip_preview_b=clip_preview_b,
+            clip_a_path=clip_a_path,
+            clip_b_path=clip_b_path,
+            session_path=session_path,
+        )
+        == handoff_source_before
+    )
+
     conflict_result_path = tmp_path / "inspect-conflict.json"
     handshake_path = viewer_exchange_dir / _HANDSHAKE
     done_path = viewer_exchange_dir / _EXTERNAL_DONE
@@ -855,7 +1037,44 @@ def test_real_animation_review_session_ui_lifecycle(tmp_path: Path) -> None:
         drift_doc, sort_keys=True, separators=(",", ":"), allow_nan=False
     ).encode("utf-8")
     clip_b_path.write_bytes(drift_bytes)
+    handoff_source_at_drift = _real_ui_handoff_source_digests(
+        preview_dir=preview_dir,
+        review_set_dir=review_set_dir,
+        clip_preview_a=clip_preview_a,
+        clip_preview_b=clip_preview_b,
+        clip_a_path=clip_a_path,
+        clip_b_path=clip_b_path,
+        session_path=session_path,
+    )
     try:
+        handoff_hist_root = (tmp_path / "real-ui-handoff-hist").resolve()
+        handoff_hist = export_animation_review_handoff(handoff_ctx, handoff_hist_root)
+        assert handoff_hist.production_eligible is False
+        assert handoff_hist.promotion_eligible is False
+        assert handoff_hist.session_current is False
+        assert handoff_hist.session_revision == 5
+        assert handoff_hist.raw_session_sha256 == session_sha_after_conflict
+        _assert_bound_handoff_report(
+            handoff_hist_root,
+            expected_raw_sha=session_sha_after_conflict,
+            expected_revision=5,
+            session_current=False,
+            captured_session_document=session_after_conflict,
+            reverse_note="external B note",
+        )
+        assert (
+            _real_ui_handoff_source_digests(
+                preview_dir=preview_dir,
+                review_set_dir=review_set_dir,
+                clip_preview_a=clip_preview_a,
+                clip_preview_b=clip_preview_b,
+                clip_a_path=clip_a_path,
+                clip_b_path=clip_b_path,
+                session_path=session_path,
+            )
+            == handoff_source_at_drift
+        )
+
         stale_result_path = tmp_path / "inspect-stale.json"
         stale_proc = _run_session_inspect(
             consumer,
