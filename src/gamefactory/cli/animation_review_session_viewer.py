@@ -8,6 +8,7 @@ import json
 import math
 import os
 import shutil
+import stat
 import subprocess
 import sys
 import tempfile
@@ -109,10 +110,92 @@ class PreparedAnimationReviewSessionViewer:
         )
 
 
-def _assert_trusted_executable(path: Path, *, label: str) -> Path:
-    resolved = _reject_unsafe_lexical_path(path, label=label)
-    _assert_regular_single_link_file(resolved, label=label)
-    return resolved
+_MAX_TRUSTED_EXECUTABLE_SYMLINK_HOPS = 40
+
+
+def _trusted_executable_directory_ancestors_cross_link(path: Path) -> bool:
+    for current in path.parents:
+        try:
+            st = os.lstat(current)
+        except FileNotFoundError:
+            continue
+        except OSError:
+            return True
+        if stat.S_ISLNK(st.st_mode):
+            return True
+        reparse_tag = int(getattr(st, "st_reparse_tag", 0) or 0)
+        if reparse_tag != 0:
+            return True
+        if os.name == "nt":
+            attrs = getattr(st, "st_file_attributes", None)
+            if attrs is None:
+                return True
+            if int(attrs) & 0x400 and reparse_tag == 0:
+                return True
+    return False
+
+
+def _trusted_executable_composed_symlink_target(current: Path, link_text: str) -> Path:
+    target = Path(link_text)
+    if target.is_absolute():
+        return target
+    return current.parent / target
+
+
+def _trusted_executable_symlink_hop_target(current: Path, link_text: str) -> Path:
+    raw = _trusted_executable_composed_symlink_target(current, link_text)
+    return Path(os.path.abspath(str(raw)))
+
+
+def _resolve_trusted_executable_leaf_target(lexical: Path, *, label: str) -> Path:
+    current = lexical
+    seen: set[Path] = set()
+    for _ in range(_MAX_TRUSTED_EXECUTABLE_SYMLINK_HOPS):
+        if current in seen:
+            raise ValidationError(f"{label} symlink loop detected")
+        seen.add(current)
+        if _trusted_executable_directory_ancestors_cross_link(current):
+            raise ValidationError(f"{label} crosses a symlink or junction")
+        try:
+            st = os.lstat(current)
+        except FileNotFoundError:
+            raise ValidationError(f"{label} does not exist") from None
+        except OSError as exc:
+            raise ValidationError(f"{label} cannot be inspected: {exc}") from exc
+        if stat.S_ISLNK(st.st_mode):
+            try:
+                link_text = os.readlink(current)
+            except OSError as exc:
+                raise ValidationError(f"{label} cannot be inspected: {exc}") from exc
+            if not link_text:
+                raise ValidationError(f"{label} does not exist")
+            raw_next = _trusted_executable_composed_symlink_target(current, link_text)
+            if _trusted_executable_directory_ancestors_cross_link(raw_next):
+                raise ValidationError(f"{label} crosses a symlink or junction")
+            current = _trusted_executable_symlink_hop_target(current, link_text)
+            continue
+        return current
+    raise ValidationError(f"{label} symlink chain is too long")
+
+
+def _assert_trusted_executable(
+    path: Path,
+    *,
+    label: str,
+    allow_leaf_symlink_alias: bool = True,
+) -> Path:
+    if sys.platform == "win32" or not allow_leaf_symlink_alias:
+        resolved = _reject_unsafe_lexical_path(path, label=label)
+        _assert_regular_single_link_file(resolved, label=label)
+        return resolved
+    if not path.is_absolute():
+        raise ValidationError(f"{label} must be an absolute path")
+    if _trusted_executable_directory_ancestors_cross_link(path):
+        raise ValidationError(f"{label} crosses a symlink or junction")
+    lexical = Path(os.path.abspath(str(path)))
+    target = _resolve_trusted_executable_leaf_target(lexical, label=label)
+    _assert_regular_single_link_file(target, label=label)
+    return lexical
 
 
 def _assert_fresh_overlay_path(overlay_dir: Path) -> Path:
@@ -496,7 +579,11 @@ def prepare_animation_review_session_viewer(
 
 
 def _load_bridge_context_from_file(context_file: Path) -> BridgeContext:
-    path = _assert_trusted_executable(context_file, label="context file")
+    path = _assert_trusted_executable(
+        context_file,
+        label="context file",
+        allow_leaf_symlink_alias=False,
+    )
     document = _load_json_object(path, label="context file")
     bridge = _parse_context_document(document)
     forbidden = _mutation_forbidden_roots(bridge)
