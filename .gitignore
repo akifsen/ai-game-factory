@@ -23,3 +23,9 @@ dist/
 # Blender backups
 *.blend1
 *.blend2
+
+# New generated evidence belongs in local verification / CI artifacts.
+# Previously tracked historical reports remain tracked; authored summaries may be added.
+/docs/reports/**
+!/docs/reports/**/
+!/docs/reports/**/*.md

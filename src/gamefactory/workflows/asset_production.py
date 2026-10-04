@@ -91,6 +91,12 @@ from gamefactory.workflows.assembly_production import (
     is_assembly_graph,
     normalization_for_validation,
 )
+from gamefactory.workflows.asset_reuse import (
+    is_reuse_graph,
+    reuse_prepare,
+    verify_retained_provenance_artifact,
+    verify_retained_raw_artifact,
+)
 from gamefactory.workflows.handlers import (
     HandlerOperation,
     HandlerRecovery,
@@ -1277,6 +1283,11 @@ class AssetProductionHandlers:
         return isinstance(remote, dict) and bool(remote.get("status"))
 
     def process(self, workflow: Workflow, task: Task, execution: Execution) -> TaskHandlerResult:
+        if is_reuse_graph(task):
+            verify_retained_raw_artifact(self, workflow.id, str(task.parameters["source_glb_hash"]))
+            verify_retained_provenance_artifact(
+                self, workflow.id, str(task.parameters["source_provenance_hash"])
+            )
         spec = parse_any_asset_specification(task.parameters["specification"])
         raw_artifact = next(
             (
@@ -1411,6 +1422,16 @@ class AssetProductionHandlers:
                 "asset-runtime-observation",
                 "asset-runtime-capture",
             )
+        elif is_reuse_graph(task):
+            required = (
+                "asset-existing-source-provenance",
+                "asset-raw-glb",
+                "asset-processed-glb",
+                "asset-processing-report",
+                "asset-validation-report",
+                "asset-runtime-observation",
+                "asset-runtime-capture",
+            )
         else:
             active_concept = self._active_concept_artifact(workflow.id)
             roles["asset-concept"] = active_concept.content_hash
@@ -1516,6 +1537,10 @@ def register_asset_production_handlers(
     registry.register(
         "asset_assembly_process",
         lambda workflow, task, execution: assembly_process(handlers, workflow, task, execution),
+    )
+    registry.register(
+        "asset_reuse_prepare",
+        lambda workflow, task, execution: reuse_prepare(handlers, workflow, task, execution),
     )
     registry.register(
         "asset_concept_review",

@@ -1,5 +1,10 @@
 # AI Game Factory belgeleri
 
+Güncel ürün önceliği: [Tide Bastion pilotu](product-direction.md). İlk başarı ölçütü
+tek doğal dil isteğinden gerçek oyunda kullanılan, Factory tarafından kabul edilmiş
+bir varlığa ulaşmaktır. Yeni V0.8 inceleme arayüzü dilimleri ve V15 optimizasyonu
+dondurulmuştur; aşağıdaki eski planlar ve raporlar tarihsel kayıtlardır.
+
 Bu dizin Factory Core V0.1 ile sonraki Godot ve asset sprintlerinin planlarını,
 mimari kararlarını ve ayrı doğrulama kayıtlarını içerir. Her sürümün güncel kapsamı
 ve kabul durumu kendi kapanış raporunda belirtilir; tarihsel raporlar korunur.

@@ -1,0 +1,10 @@
+{
+  "approval_type": "final_visual_review",
+  "operation": "existing_external_reuse",
+  "provider": null,
+  "provider_status": "NOT_USED",
+  "estimate": 0,
+  "budget_reservation": null,
+  "paid": false,
+  "generated_by_this_workflow": false
+}
