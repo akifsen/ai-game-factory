@@ -2,7 +2,7 @@ name: CI
 run-name: ${{ (github.event_name == 'workflow_dispatch' && github.event.inputs.candidate_diagnostics_only == 'true') && 'Candidate diagnostics - not release proof' || github.event_name == 'workflow_dispatch' && 'Full CI' || github.event.pull_request.title || github.sha }}
 
 # CI cost policy
-# - Pull requests run only the quick job (Ubuntu, Python 3.11: tests, lint, types).
+# - Pull requests run a bounded critical-smoke job (Ubuntu, Python 3.11: selected tests, lint, types).
 # - The full set (Windows/Ubuntu x 3.11/3.12, real Godot, real Blender) runs on
 #   pushes to main, on manual dispatch, and on a pull request labelled `full-ci`.
 # - A newer commit on the same pull request cancels the older run.
@@ -36,13 +36,13 @@ env:
 
 jobs:
   quick:
-    # Fast pull request feedback. Skipped when the full set runs instead.
+    # Bounded critical smoke for fast pull request feedback. Skipped when the full set runs instead.
     if: >-
       github.event_name == 'pull_request'
       && !contains(github.event.pull_request.labels.*.name, 'full-ci')
       && (github.event.action != 'labeled' || github.event.label.name == 'full-ci')
     runs-on: ubuntu-latest
-    timeout-minutes: 65
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-python@v6
@@ -54,7 +54,13 @@ jobs:
       - run: ruff check src tests
       - run: ruff format --check src tests
       - run: mypy src/gamefactory
-      - run: python -m pytest -ra -p no:cacheprovider -m "not candidate_slow"
+      - run: >-
+          python -m pytest -ra -p no:cacheprovider
+          tests/unit/test_agent_contracts.py
+          tests/unit/test_process_provider.py
+          tests/unit/test_project_operations.py
+          tests/integration/test_factory_end_to_end.py
+          tests/integration/test_factory_approval_selection.py
 
   test:
     if: >-

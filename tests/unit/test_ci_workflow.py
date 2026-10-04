@@ -134,19 +134,20 @@ def test_ci_workflow_no_secrets_or_meshy_api_key() -> None:
 
 
 def test_pull_requests_run_quick_and_full_ci_is_label_or_main() -> None:
-    """PRs get the quick job; the expensive set runs on main, dispatch or `full-ci`."""
+    """PRs get bounded critical smoke; the full set runs on main, dispatch or `full-ci`."""
     data, _ = _load_ci_workflow()
     jobs = data["jobs"]
     quick_if = " ".join(jobs["quick"]["if"].split())
     assert "github.event_name == 'pull_request'" in quick_if
     assert "!contains(github.event.pull_request.labels.*.name, 'full-ci')" in quick_if
     assert jobs["quick"]["runs-on"] == "ubuntu-latest"
+    assert jobs["quick"]["timeout-minutes"] == 10
     commands = [step.get("run", "") for step in jobs["quick"]["steps"]]
     for required in (
         "ruff check src tests",
         "ruff format --check src tests",
         "mypy src/gamefactory",
-        'python -m pytest -ra -p no:cacheprovider -m "not candidate_slow"',
+        "python -m pytest -ra -p no:cacheprovider tests/unit/test_agent_contracts.py tests/unit/test_process_provider.py tests/unit/test_project_operations.py tests/integration/test_factory_end_to_end.py tests/integration/test_factory_approval_selection.py",
     ):
         assert required in commands
     test_commands = [step.get("run", "") for step in jobs["test"]["steps"]]

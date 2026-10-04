@@ -207,6 +207,22 @@ publication. Release verification requires a freshly built exact-main CI wheel,
 an exact complete Git package file set, byte matching, provenance and installed
 package checks in a fresh outside-checkout environment.
 
+The user requested shorter PR feedback after run `37209894606` exceeded
+40 minutes. That run was canceled, not counted as successful. PR quick now
+runs five critical Factory smoke files (42 tests, 14.70 seconds locally), with
+a 10-minute job limit and the existing lint, formatting and type checks.
+Main's full matrix and release qualification remain unchanged. The workflow
+policy's ten tests passed independently in 0.29 seconds.
+
+Profiling also identified PNG scanline reconstruction as the verifier's CPU
+bottleneck. Both verifier copies now dispatch once per filter and use equivalent
+Up/Paeth fast paths, preserving parsing limits and validation. An independent
+forward-encoder oracle passed 126 focused tests in 0.46 seconds; source lint,
+formatting and diff checks passed, and independent review approved the change.
+The implementation engineer measured the same cold verification bundle at a
+median 3.72 seconds before and 0.32 seconds after, with byte-identical output.
+This measurement is a focused benchmark, not a full CI qualification result.
+
 ## Assumptions, trade-offs and risks
 
 - Local-first single-process execution is sufficient. Sequential DAG dispatch
