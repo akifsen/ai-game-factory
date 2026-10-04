@@ -173,6 +173,22 @@ remote GitHub Action, publication, commit, or push was performed. The original
 push, main integration and continuation of the release process; remote checks
 and release qualification are a separate step from the local approval above.
 
+## Remote integration follow-up
+
+Implementation commit `00f901d2bad952120da4f7a05e86aaf9a74bc05b` was pushed to
+PR 21. Its first Ubuntu quick run, `37205180916`, failed with eight mypy errors:
+the Windows-only `msvcrt` branches in the Factory journal and asset installation
+locks used `os.name`, which did not narrow the platform-specific stubs on Linux.
+The guards now use `sys.platform == "win32"`, consistent with existing core
+locks; lock modes, offsets and acquisition/release behavior are unchanged.
+
+Independent full-source mypy checks passed for Linux and Windows/Python 3.11
+(179 files each), Ruff and formatting passed, and the Team Lead's 33 recovery,
+approval and installation regressions passed. The implementation engineer also
+ran 54 focused tests successfully; these overlap existing coverage. Exact-main
+remote qualification is still pending. The earlier local wheel predates this
+typing revision and must not be published as the revised release artifact.
+
 ## Assumptions, trade-offs and risks
 
 - Local-first single-process execution is sufficient. Sequential DAG dispatch

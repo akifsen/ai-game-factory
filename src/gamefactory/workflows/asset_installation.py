@@ -9,6 +9,7 @@ import json as _json
 import os
 import re
 import stat
+import sys
 import uuid
 from pathlib import Path
 from typing import Any, Protocol, cast
@@ -87,7 +88,7 @@ class _InstallationLock:
             if os.fstat(self.fd).st_size == 0:
                 os.write(self.fd, b"\0")
                 os.fsync(self.fd)
-            if os.name == "nt":
+            if sys.platform == "win32":
                 import msvcrt
 
                 os.lseek(self.fd, 0, os.SEEK_SET)
@@ -110,7 +111,7 @@ class _InstallationLock:
         if self.fd is None:
             return
         try:
-            if os.name == "nt":
+            if sys.platform == "win32":
                 import msvcrt
 
                 os.lseek(self.fd, 0, os.SEEK_SET)

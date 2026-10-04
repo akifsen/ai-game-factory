@@ -9,6 +9,7 @@ import os
 import re
 import shutil
 import stat
+import sys
 import tempfile
 from collections.abc import Iterator
 from contextlib import contextmanager
@@ -2939,7 +2940,7 @@ def _reserve_recovery_slot(path: Path) -> None:
 def _journal_file_lock(path: Path) -> Iterator[None]:
     fd = os.open(path, os.O_CREAT | os.O_RDWR, 0o600)
     try:
-        if os.name == "nt":
+        if sys.platform == "win32":
             import msvcrt
 
             if os.fstat(fd).st_size == 0:
@@ -2954,7 +2955,7 @@ def _journal_file_lock(path: Path) -> Iterator[None]:
             fcntl_api.flock(fd, fcntl_api.LOCK_EX)
         yield
     finally:
-        if os.name == "nt":
+        if sys.platform == "win32":
             import msvcrt
 
             os.lseek(fd, 0, os.SEEK_SET)
