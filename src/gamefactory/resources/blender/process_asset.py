@@ -11,6 +11,7 @@ import sys
 import time
 from collections.abc import Iterable
 from pathlib import Path
+from typing import Any
 
 
 def _args() -> argparse.Namespace:
@@ -57,6 +58,82 @@ def _assert_new_distinct_targets(source: Path, output: Path, report: Path) -> No
             raise ValueError(f"output path must use {suffix}: {path}")
 
 
+_LOD1_ENVELOPE_MIN_AXIS_SPAN_M = 1e-7
+_LOD1_ENVELOPE_VERIFY_EPS_M = 1e-5
+
+
+def _mesh_renderable_vertex_indices(mesh: Any) -> set[int]:
+    if not mesh.polygons:
+        raise RuntimeError("mesh has no faces")
+    referenced: set[int] = set()
+    for poly in mesh.polygons:
+        referenced.update(poly.vertices)
+    if not referenced:
+        raise RuntimeError("mesh has no renderable vertices")
+    return referenced
+
+
+def _mesh_vertex_world_aabb(obj: Any) -> tuple[Any, Any]:
+    """World AABB from vertices referenced by mesh faces (matches GLB validator indexing)."""
+    from mathutils import Vector  # type: ignore[import-not-found]
+
+    mesh = obj.data
+    referenced = _mesh_renderable_vertex_indices(mesh)
+    matrix_world = obj.matrix_world
+    corners = [matrix_world @ mesh.vertices[i].co for i in referenced]
+    return Vector(tuple(min(v[i] for v in corners) for i in range(3))), Vector(
+        tuple(max(v[i] for v in corners) for i in range(3))
+    )
+
+
+def _align_lod1_envelope_to_lod0(lod0: Any, lod1: Any) -> dict[str, object]:
+    """Remap LOD1 vertices so per-axis extrema match LOD0 after decimation shrink."""
+    ref_min, ref_max = _mesh_vertex_world_aabb(lod0)
+    cur_min, cur_max = _mesh_vertex_world_aabb(lod1)
+    pre: dict[str, object] = {
+        "lod0_renderable_bounds_min": list(ref_min),
+        "lod0_renderable_bounds_max": list(ref_max),
+        "lod1_pre_align_bounds_min": list(cur_min),
+        "lod1_pre_align_bounds_max": list(cur_max),
+    }
+    spans = [cur_max[i] - cur_min[i] for i in range(3)]
+    ref_spans = [ref_max[i] - ref_min[i] for i in range(3)]
+    for axis, span, ref_span in zip(range(3), spans, ref_spans, strict=True):
+        if span >= _LOD1_ENVELOPE_MIN_AXIS_SPAN_M:
+            continue
+        if ref_span > 0.01:
+            raise RuntimeError(
+                f"LOD1 decimation collapsed axis {axis}; cannot restore LOD0 visual envelope"
+            )
+    matrix_world = lod1.matrix_world
+    inverse = matrix_world.inverted()
+    mesh = lod1.data
+    for vertex_index in _mesh_renderable_vertex_indices(mesh):
+        vertex = mesh.vertices[vertex_index]
+        world = matrix_world @ vertex.co
+        for axis in range(3):
+            span = spans[axis]
+            if span < _LOD1_ENVELOPE_MIN_AXIS_SPAN_M:
+                world[axis] = ref_min[axis]
+                continue
+            world[axis] = ref_min[axis] + (world[axis] - cur_min[axis]) * (
+                (ref_max[axis] - ref_min[axis]) / span
+            )
+        vertex.co = inverse @ world
+    mesh.update()
+    aligned_min, aligned_max = _mesh_vertex_world_aabb(lod1)
+    for axis in range(3):
+        if (
+            abs(aligned_min[axis] - ref_min[axis]) > _LOD1_ENVELOPE_VERIFY_EPS_M
+            or abs(aligned_max[axis] - ref_max[axis]) > _LOD1_ENVELOPE_VERIFY_EPS_M
+        ):
+            raise RuntimeError("LOD1 envelope alignment did not match LOD0 extrema")
+    pre["lod1_envelope_aligned"] = True
+    pre["lod1_post_align_bounds_min"] = list(aligned_min)
+    pre["lod1_post_align_bounds_max"] = list(aligned_max)
+    return pre
+
+
 def _require_finished_export(operator_result: Iterable[object], output: Path) -> None:
     """Fail unless glTF export finished and the output file is already nonempty."""
     if isinstance(operator_result, (str, bytes)):
@@ -100,7 +177,7 @@ def main() -> None:
         raise ValueError("this processor handles single-mesh assets only")
     raw_hash = hashlib.sha256(source.read_bytes()).hexdigest()
     import bpy  # type: ignore[import-not-found]
-    from mathutils import Vector  # type: ignore[import-not-found]
+    from mathutils import Vector
 
     bpy.ops.wm.read_factory_settings(use_empty=True)
     result = bpy.ops.import_scene.gltf(filepath=str(source))
@@ -163,6 +240,7 @@ def main() -> None:
 
     lod1 = None
     lod1_triangles = None
+    lod1_envelope_metrics: dict[str, object] = {}
     if lod1_required:
         lod1 = lod0.copy()
         lod1.data = lod0.data.copy()
@@ -174,6 +252,7 @@ def main() -> None:
         bpy.context.view_layer.objects.active = lod1
         lod1.select_set(True)
         bpy.ops.object.modifier_apply(modifier=decimate.name)
+        lod1_envelope_metrics = _align_lod1_envelope_to_lod0(lod0, lod1)
         lod1_triangles = sum(max(1, len(poly.vertices) - 2) for poly in lod1.data.polygons)
 
     low, high = bounds([lod0])
@@ -228,6 +307,7 @@ def main() -> None:
             "bounds_max": list(high),
             "lod1_ratio": args.lod1_ratio,
             "nodes": [item.name for item in selected_objects],
+            **lod1_envelope_metrics,
         },
         "duration_seconds": time.monotonic() - started,
         "exit_code": 0,

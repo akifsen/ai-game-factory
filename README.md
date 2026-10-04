@@ -1,7 +1,8 @@
 # AI Game Factory
 
-AI Game Factory helps developers turn a concept image and an asset specification
-into a validated Godot asset. It coordinates Meshy generation, Blender processing,
+AI Game Factory helps developers plan and validate assets for Godot games. A real
+Codex planner turns natural-language requests into specifications; existing GLBs
+can be reused or new assets generated with Meshy. It coordinates Blender processing,
 Godot checks and human approval, while recording exactly what was requested and
 what it cost. The game remains usable without Factory installed.
 
@@ -53,6 +54,8 @@ credits; example IDs and files must be replaced with your own inputs.
 
 ## Current capabilities
 
+- Natural-language static-prop planning and [existing GLB reuse](docs/pipelines/existing-static-prop-reuse.md)
+  with source hashes, provenance and final human acceptance.
 - Provider-generated static props, pickups, modular pieces and single-mesh
   characters; characters do not include a production rig or animation.
 - Operator-authored vehicle, weapon and aircraft assemblies with named parts.
