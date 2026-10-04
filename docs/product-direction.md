@@ -32,7 +32,7 @@ battle's props. Placement must preserve lane, tower-slot and combat behavior.
 
 Track first-pass spec validity, manual spec edits, new paid submissions and cost,
 accepted/installed hash equality, actual game consumption, elapsed time and human
-interventions. Current accepted customer assets: **0**. Update only with evidence.
+interventions. Current accepted customer assets: **1**. Update only with evidence.
 
 ## First implementation checkpoint
 
@@ -46,23 +46,27 @@ The retained manual chest source passed Factory preflight (1,930 triangles, one
 material, 2,048-pixel textures). Real Blender processing and independent GLB
 validation passed; the existing standalone Godot harness passed runtime checks and
 rendered three views. New paid submissions: **0**. Raw results remain under ignored
-local verification storage. This is a candidate check, not a persisted workflow's
-final human acceptance or a Tide Bastion installation. Real battle consumption and
-accepted/installed hash comparison remain outstanding.
+local verification storage. Those standalone checks did not record acceptance
+or installation; the durable workflow and customer adoption are described below.
 
 The reviewed `asset reuse` route for `static_prop@1` retains an
-existing external GLB with exact provenance and hash, then run the existing
+existing external GLB with exact provenance and hash, then runs the existing
 Blender, independent validation, Godot and final human review stages. It has no
 concept, paid-generation, budget-reservation or provider-invocation stage. Historic
 Meshy cost remains provenance, not a new ledger charge. Source acquisition is a
 workflow-level distinction; it does not change the existing profile contract or
 introduce a new evidence schema. Independent checks passed 65 tests with two
 existing assembly skips; full source lint, formatting and type checks passed.
-The real durable reuse workflow completed processing, validation and Godot checks
-and stopped at final human review. Its ledger has zero entries. Live `report`,
-`asset inspect` and `resume` preserve that pending approval. The customer battle
-integration is still under verification in an isolated worktree; accepted assets
-remain **0** until human acceptance and actual game installation are complete.
+The real durable reuse workflow completed processing, validation and Godot checks.
+After the user accepted the presented candidate and instructed continuation,
+`APP-5b2a9f71` was approved and `WF-REUSE-230ee7ad` completed. Its ledger has zero
+entries. The accepted GLB is installed in Tide Bastion and consumed by the real
+intro battle's `IslandStage._props`; accepted and installed SHA-256 are identical:
+`57c71ed83686e9d0baf6bf8667f5ec8ab84cc6ad206bd1d1f03ba2c69f695b08`.
+Independent post-installation import, chest, slot, eleven-layout coast and battle
+flow tests passed, as did real-renderer capture and normal boot. A clean import
+without an existing Godot cache passed. Customer commit `0a0d834` is recorded in
+[Tide Bastion PR 1](https://github.com/akifsen/tide-bastion/pull/1).
 
 ## Work frozen
 

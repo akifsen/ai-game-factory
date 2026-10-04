@@ -5,10 +5,11 @@ into a validated Godot asset. It coordinates Meshy generation, Blender processin
 Godot checks and human approval, while recording exactly what was requested and
 what it cost. The game remains usable without Factory installed.
 
-The next product milestone is one useful asset in **Tide Bastion**, requested in
-natural language and accepted into its playable game. That pilot is in progress;
-automatic game development and a completed customer integration are not current
-capabilities. See the [active product direction](docs/product-direction.md).
+The first customer pilot is complete: a natural-language request produced a valid
+specification, an existing chest passed Factory validation and human acceptance,
+and **Tide Bastion** now uses the accepted asset in its playable intro battle.
+New paid submissions were zero. General automatic game development remains outside
+the current scope. See the [active product direction](docs/product-direction.md).
 
 ## Quick start
 
