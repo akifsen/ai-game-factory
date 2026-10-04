@@ -4,11 +4,13 @@ import io
 import json
 import sys
 import wave
+from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
 from pydantic import ValidationError
 
+import gamefactory.adapters.agents.process_provider as process_provider_module
 from gamefactory.adapters.agents.process_provider import (
     OperatorProcessAgentProvider,
     ProcessProviderConfig,
@@ -61,6 +63,23 @@ def test_readiness_never_launches_an_unconfigured_process():
     assert readiness.live_execution_verified is False
 
 
+def test_readiness_rejects_an_unsafe_executable_without_launching(monkeypatch):
+    monkeypatch.setattr(process_provider_module, "_contains_reparse_component", lambda _path: True)
+    provider = OperatorProcessAgentProvider(
+        config(
+            executable=str(Path(sys.executable).resolve(strict=True)),
+            allows_network=True,
+        ),
+        runner=SimpleNamespace(run=pytest.fail),
+    )
+
+    readiness = provider.readiness()
+
+    assert readiness.status.value == "UNAVAILABLE"
+    assert "unsafe launcher" in readiness.reason
+    assert readiness.live_execution_verified is False
+
+
 def test_media_validation_decodes_images_and_parses_wav_frames():
     with pytest.raises(FactoryValidationError):
         _validate_advertised_media("image/png", b"\x89PNG\r\n\x1a\n" + b"bad")
@@ -93,7 +112,10 @@ class AllowProcessIntent:
 
 def _authorized_process_provider(response, *, exit_code=0, timed_out=False):
     executable_config = config(
-        executable=sys.executable,
+        # CI setup-python may expose sys.executable through a symlink. Production
+        # intentionally rejects symlinked launchers, so point this mocked-runner
+        # test at the canonical executable and keep the rejection policy intact.
+        executable=str(Path(sys.executable).resolve(strict=True)),
         tool_name="process.execute",
         allows_network=True,
         cost=CostConstraints(max_amount=5, currency="USD", unit="request", cost_class="PAID"),

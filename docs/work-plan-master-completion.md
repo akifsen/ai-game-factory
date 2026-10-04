@@ -189,6 +189,24 @@ ran 54 focused tests successfully; these overlap existing coverage. Exact-main
 remote qualification is still pending. The earlier local wheel predates this
 typing revision and must not be published as the revised release artifact.
 
+The revised quick run, `37205789473`, passed Ruff, formatting and mypy, then
+completed with 2,064 passed, 55 skipped, 428 deselected and three failed tests.
+All three failures used `sys.executable` directly in the mocked process-provider
+fixture. Ubuntu's interpreter launcher is a symbolic link, which the production
+provider deliberately rejects. The fixture now resolves the physical executable
+before testing post-launch status and cost behavior. Production validation is
+unchanged; an additional regression explicitly rejects unsafe launchers and
+fails if readiness invokes the runner. The engineer and Team Lead each ran the
+eight process-provider tests successfully; focused Ruff, formatting and diff
+checks passed. These are overlapping checks, not extra distinct-suite totals.
+
+An independent package-member preflight also found 22 obsolete build-tree files
+in the earlier local development wheel. The prior 191-file byte comparison did
+not establish an exact package member set. That wheel remains excluded from
+publication. Release verification requires a freshly built exact-main CI wheel,
+an exact complete Git package file set, byte matching, provenance and installed
+package checks in a fresh outside-checkout environment.
+
 ## Assumptions, trade-offs and risks
 
 - Local-first single-process execution is sufficient. Sequential DAG dispatch
