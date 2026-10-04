@@ -1,11 +1,17 @@
 # AI Game Factory belgeleri
 
+Güncel çalışma kapsamı: [master Factory yeteneklerinin tamamlanması](work-plan-master-completion.md).
+[Ürün yönü](product-direction.md) kullanıcının yeni kapsamını ve önce bütün kodun
+yazılması, ardından test ve düzeltmelere geçilmesi kuralını kaydeder. Tide Bastion
+pilotu ve aşağıdaki sürüm raporları tarihsel kabul kayıtlarıdır.
+
 Bu dizin Factory Core V0.1 ile sonraki Godot ve asset sprintlerinin planlarını,
 mimari kararlarını ve ayrı doğrulama kayıtlarını içerir. Her sürümün güncel kapsamı
 ve kabul durumu kendi kapanış raporunda belirtilir; tarihsel raporlar korunur.
 
 ## Plan ve kapsam
 
+- [Master Factory tamamlama ve doğrulama sınırı](work-plan-master-completion.md)
 - [Adım adım iş planı](work-plan.md)
 - [123 maddelik gereksinim izlenebilirliği](requirements/traceability.md)
 - [Bağımsız kabul kontrol listesi](requirements/acceptance-checklist.md)
@@ -21,6 +27,8 @@ ve kabul durumu kendi kapanış raporunda belirtilir; tarihsel raporlar korunur.
 
 ## Mimari ve kullanım
 
+- [Master Factory kullanım rehberi](guides/master-factory.md)
+- [Güncel entegrasyon durumu](integrations/status.md)
 - [Mimari genel bakış](architecture/overview.md)
 - [Mimari karar kayıtları](adr/)
 - [Geliştirme rehberi](development/)

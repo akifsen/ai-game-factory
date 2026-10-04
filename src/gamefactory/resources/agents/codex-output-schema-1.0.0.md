@@ -1,0 +1,1 @@
+The response schema is generated from the Factory AgentResultProposal model at runtime and passed to Codex with --output-schema. The result is parsed again locally with strict Pydantic validation; this resource is only a prompt component identifier.

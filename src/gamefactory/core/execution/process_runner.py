@@ -66,6 +66,8 @@ class CommandRequest:
     timeout_seconds: float = 60.0
     minimal_env: bool = True
     structured_json_output: bool = False
+    stdin_text: str | None = None
+    env_drop_key_substrings: tuple[str, ...] = ()
 
 
 @dataclass
@@ -128,6 +130,11 @@ class ProcessRunner:
             else {k: v for k, v in os.environ.items() if k.upper() in _ESSENTIAL_ENV_VARS}
         )
         env.update(request.env_overrides)
+        if request.env_drop_key_substrings:
+            for key in list(env):
+                upper = key.upper()
+                if any(part in upper for part in request.env_drop_key_substrings):
+                    del env[key]
         return env
 
     @staticmethod
@@ -394,25 +401,25 @@ class ProcessRunner:
         start_time = time.perf_counter()
         deadline = start_time + request.timeout_seconds
 
+        popen_kwargs: dict[str, Any] = {
+            "args": request.args,
+            "cwd": str(cwd_path),
+            "env": self.build_env(request),
+            "stdout": subprocess.PIPE,
+            "stderr": subprocess.PIPE,
+            "shell": False,
+        }
+        if request.stdin_text is not None:
+            popen_kwargs["stdin"] = subprocess.PIPE
         try:
             if sys.platform == "win32":
                 proc = subprocess.Popen(  # noqa: S603
-                    request.args,
-                    cwd=str(cwd_path),
-                    env=self.build_env(request),
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE,
-                    shell=False,
+                    **popen_kwargs,
                     creationflags=subprocess.CREATE_NEW_PROCESS_GROUP,
                 )
             else:
                 proc = subprocess.Popen(  # noqa: S603
-                    request.args,
-                    cwd=str(cwd_path),
-                    env=self.build_env(request),
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE,
-                    shell=False,
+                    **popen_kwargs,
                     start_new_session=True,
                 )
         except FileNotFoundError as exc:
@@ -492,6 +499,27 @@ class ProcessRunner:
         ]
         for reader in readers:
             reader.start()
+
+        stdin_thread: threading.Thread | None = None
+        if request.stdin_text is not None:
+            stdin_payload = request.stdin_text
+            stdin_stream = proc.stdin
+            assert stdin_stream is not None
+
+            def _write_stdin(payload: str = stdin_payload, stream: IO[Any] = stdin_stream) -> None:
+                try:
+                    stream.write(payload.encode("utf-8"))
+                    stream.flush()
+                except OSError:
+                    pass
+                finally:
+                    try:
+                        stream.close()
+                    except OSError:
+                        pass
+
+            stdin_thread = threading.Thread(target=_write_stdin, daemon=True)
+            stdin_thread.start()
 
         cleanup_completed = True
         cleanup_status = "completed"
@@ -583,6 +611,8 @@ class ProcessRunner:
                         cleanup_error = exc
 
         finally:
+            if stdin_thread is not None:
+                stdin_thread.join(timeout=0.5)
             if windows_job is not None:
                 try:
                     self._close_windows_job(windows_job)

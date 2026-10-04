@@ -12,6 +12,7 @@ Coordinates:
 
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Any
 
 from gamefactory.adapters.persistence.database import Database
 from gamefactory.adapters.persistence.repositories import (
@@ -592,9 +593,6 @@ class WorkflowEngine:
             else None
         )
 
-        has_approved_decision = (
-            active_approval is not None and active_approval.status == ApprovalStatus.APPROVED
-        )
         declared_mandatory_type = (
             handler_profile.mandatory_approval_type
             if handler_profile is not None
@@ -617,9 +615,24 @@ class WorkflowEngine:
         )
         approval_inputs = self.approval_inputs(wf, task, effective_cost_class)
         current_op_hash = compute_operation_hash(task.id, approval_type, approval_inputs)
+        matching_approvals = [
+            approval
+            for approval in approvals
+            if approval.approval_type == approval_type
+            and approval.operation_hash == current_op_hash
+        ]
+        active_approval = (
+            max(
+                matching_approvals,
+                key=lambda approval: (approval.requested_at, approval.id),
+            )
+            if matching_approvals
+            else None
+        )
         has_approved_decision = bool(
-            has_approved_decision
-            and active_approval is not None
+            active_approval is not None
+            and active_approval.status == ApprovalStatus.APPROVED
+            and active_approval.approval_type == approval_type
             and active_approval.operation_hash == current_op_hash
         )
 
@@ -640,9 +653,14 @@ class WorkflowEngine:
         # Some workflow stages require a distinct human decision regardless of
         # optional generic policy switches. Preserve budget/denial results above;
         # this only adds the missing gate after an otherwise permitted operation.
-        if declared_mandatory_type is not None and not has_approved_decision and policy_res.allowed:
-            policy_res.allowed = False
-            policy_res.requires_approval = True
+        if (
+            declared_mandatory_type is not None
+            and not has_approved_decision
+            and (policy_res.allowed or policy_res.requires_approval)
+        ):
+            if policy_res.allowed:
+                policy_res.allowed = False
+                policy_res.requires_approval = True
             policy_res.approval_type = declared_mandatory_type
             policy_res.reason = f"{declared_mandatory_type} requires an explicit human decision"
 
@@ -758,6 +776,12 @@ class WorkflowEngine:
             ApprovalStatus.REJECTED,
             ApprovalStatus.CHANGES_REQUESTED,
         ):
+            if task.status == TaskStatus.PENDING:
+                # A recovered committed acceptance can be explicitly retried
+                # from PENDING. Record the human denial through the legal
+                # BLOCKED state before making the task terminally FAILED.
+                TaskStateMachine.validate_transition(task.id, task.status, TaskStatus.BLOCKED)
+                task.status = TaskStatus.BLOCKED
             TaskStateMachine.validate_transition(task.id, task.status, TaskStatus.FAILED)
             task.status = TaskStatus.FAILED
             self.task_repo.update_status(task.id, task.status)
@@ -1055,7 +1079,12 @@ class WorkflowEngine:
         if artifact_ids is not None:
             allowed = set(artifact_ids)
             artifacts = [item for item in artifacts if item.id in allowed]
-        elif (
+        handler_context = (
+            profile.approval_context(workflow, task)
+            if profile is not None and profile.approval_context is not None
+            else None
+        )
+        if artifact_ids is None and (
             profile is not None
             and profile.safe_paid_recovery
             and profile.recovery_check is not None
@@ -1072,16 +1101,43 @@ class WorkflowEngine:
                     ExecutionStatus.FAILED,
                     ExecutionStatus.UNCERTAIN,
                 ) and profile.recovery_check(workflow, task, previous):
-                    # Query-only recovery must validate the approval against the
-                    # exact pre-dispatch artifact set; post-crash bookkeeping
-                    # artifacts cannot redefine the paid operation.
-                    allowed = set(approvals[0].artifact_ids)
-                    artifacts = [item for item in artifacts if item.id in allowed]
-        handler_context = (
-            profile.approval_context(workflow, task)
-            if profile is not None and profile.approval_context is not None
-            else None
-        )
+                    # Query-only recovery must use the artifact set belonging to
+                    # the exact currently approved operation. Historical approvals
+                    # can remain after a candidate revision; list order alone does
+                    # not establish which one authorized this request.
+                    available_by_id = {item.id: item for item in artifacts}
+                    matching: list[tuple[ApprovalRequest, list[Any]]] = []
+                    for approval in sorted(
+                        approvals,
+                        key=lambda item: (item.requested_at, item.id),
+                        reverse=True,
+                    ):
+                        candidate_artifacts = [
+                            available_by_id[item_id]
+                            for item_id in approval.artifact_ids
+                            if item_id in available_by_id
+                        ]
+                        if len(candidate_artifacts) != len(approval.artifact_ids):
+                            continue
+                        candidate_inputs = build_operation_inputs(
+                            workflow,
+                            task,
+                            candidate_artifacts,
+                            effective_class,
+                            self.asset_provider.name
+                            if task.task_type == "paid_generation" and self.asset_provider
+                            else None,
+                            handler_context,
+                        )
+                        if (
+                            compute_operation_hash(
+                                task.id, approval.approval_type, candidate_inputs
+                            )
+                            == approval.operation_hash
+                        ):
+                            matching.append((approval, candidate_artifacts))
+                    if matching:
+                        artifacts = matching[0][1]
         return build_operation_inputs(
             workflow,
             task,

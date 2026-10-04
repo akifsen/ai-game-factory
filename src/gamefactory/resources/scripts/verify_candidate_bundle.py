@@ -1167,20 +1167,48 @@ def _png_unfilter_row(filter_type: int, row: bytes, previous: bytes, bpp: int) -
         return row
     if filter_type > 4:
         raise ValueError("runtime PNG uses an invalid scanline filter")
+    if previous and len(previous) < len(row):
+        raise IndexError("index out of range")
+    # A zero residual row reconstructs directly for Up and Paeth filters. Keep
+    # the previous-row length check equivalent to indexed access below.
+    if (
+        filter_type in {2, 4}
+        and (filter_type != 4 or bpp in {3, 4})
+        and (not previous or len(previous) >= len(row))
+        and row.count(0) == len(row)
+    ):
+        return previous[: len(row)] if previous else bytes(len(row))
     out = bytearray(len(row))
-    for index, raw_byte in enumerate(row):
-        left = out[index - bpp] if index >= bpp else 0
-        up = previous[index] if previous else 0
-        up_left = previous[index - bpp] if previous and index >= bpp else 0
-        if filter_type == 1:
-            recon = (raw_byte + left) & 0xFF
-        elif filter_type == 2:
-            recon = (raw_byte + up) & 0xFF
-        elif filter_type == 3:
-            recon = (raw_byte + ((left + up) // 2)) & 0xFF
-        else:
-            recon = (raw_byte + _png_paeth(left, up, up_left)) & 0xFF
-        out[index] = recon
+    if filter_type == 1:
+        for index, raw_byte in enumerate(row):
+            left = out[index - bpp] if index >= bpp else 0
+            out[index] = (raw_byte + left) & 0xFF
+    elif filter_type == 2:
+        for index, raw_byte in enumerate(row):
+            up = previous[index] if previous else 0
+            out[index] = (raw_byte + up) & 0xFF
+    elif filter_type == 3:
+        for index, raw_byte in enumerate(row):
+            left = out[index - bpp] if index >= bpp else 0
+            up = previous[index] if previous else 0
+            out[index] = (raw_byte + ((left + up) // 2)) & 0xFF
+    else:
+        for index, raw_byte in enumerate(row):
+            left = out[index - bpp] if index >= bpp else 0
+            if previous:
+                up = previous[index]
+                up_left = previous[index - bpp] if index >= bpp else 0
+            else:
+                up = up_left = 0
+            if left == up_left:
+                predictor = up
+            elif up == up_left:
+                predictor = left
+            elif left == up:
+                predictor = left
+            else:
+                predictor = _png_paeth(left, up, up_left)
+            out[index] = (raw_byte + predictor) & 0xFF
     return bytes(out)
 
 

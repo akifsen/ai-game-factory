@@ -37,9 +37,16 @@ def export_asset_evidence_bundle(
     """Export verified evidence; final review may still be pending or rejected."""
     project = Path(root).resolve(strict=True)
     workflow = WorkflowRepository(db).get(workflow_id)
-    if workflow is None or not workflow.name.startswith("Asset production:"):
+    if workflow is None or not (
+        workflow.name.startswith("Asset production:") or workflow.name.startswith("Asset reuse:")
+    ):
         raise ValidationError("Asset evidence export requires an asset-production workflow")
     tasks = TaskRepository(db).list_by_workflow(workflow_id)
+    if any(t.task_type == "asset_reuse_prepare" for t in tasks):
+        raise ValidationError(
+            "Asset evidence export does not support existing_external reuse workflows; "
+            "the cold bundle verifier has no honest schema for reuse without provider receipts."
+        )
     if any(t.task_type == "asset_assembly_prepare" for t in tasks):
         from gamefactory.workflows.assembly_evidence import export_assembly_evidence_bundle
 

@@ -57,6 +57,7 @@ gamefactory = [
     "resources/profiles/*.yml",
     "resources/fixtures/*.yml",
     "resources/scripts/*.py",
+    "resources/agents/*.md",
 ]
 
 [tool.ruff]

@@ -8,6 +8,7 @@ import hashlib
 import json
 import math
 import os
+import re
 import sqlite3
 import sys
 import tempfile
@@ -49,6 +50,13 @@ from gamefactory.cli.exit_codes import (
     EXIT_TOOL_UNAVAILABLE,
     EXIT_WORKFLOW_FAILURE,
 )
+from gamefactory.cli.factory_commands import (
+    add_factory_commands,
+    dispatch_factory_command,
+    load_factory_registries,
+    saved_factory_manifests,
+)
+from gamefactory.cli.plan_command import run_plan_command
 from gamefactory.config.loader import ConfigLoader
 from gamefactory.core.accounting.ledger import (
     EntryType,
@@ -140,6 +148,28 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--version", action="version", version=f"gamefactory {__version__}")
     _add_common(parser)
     commands = parser.add_subparsers(dest="command")
+
+    plan_cmd = commands.add_parser(
+        "plan",
+        help="plan a static_prop asset-spec JSON via Codex (pilot; does not create assets)",
+    )
+    _add_common(plan_cmd, nested=True)
+    plan_cmd.add_argument(
+        "request",
+        help="natural-language description of one Tide Bastion static prop",
+    )
+    plan_cmd.add_argument(
+        "--output",
+        required=True,
+        help="write asset-spec-0.4.0 JSON (refuses to overwrite an existing file)",
+    )
+    plan_cmd.add_argument("--codex-path", help="explicit Codex CLI executable path")
+    plan_cmd.add_argument(
+        "--timeout",
+        type=float,
+        default=180.0,
+        help="Codex subprocess timeout in seconds (default: 180)",
+    )
 
     for name in ("doctor", "init", "status", "approvals", "artifacts"):
         cmd = commands.add_parser(name)
@@ -238,6 +268,28 @@ def build_parser() -> argparse.ArgumentParser:
     asset_assemble.add_argument(
         "--dry-run", action="store_true", help="validate inputs without creating a workflow"
     )
+    asset_reuse = asset_commands.add_parser(
+        "reuse",
+        help="create a static_prop reuse workflow from an external/manual GLB (no provider)",
+    )
+    _add_common(asset_reuse, nested=True)
+    asset_reuse.add_argument("--spec", required=True, help="asset-spec-0.4.0 static_prop file")
+    asset_reuse.add_argument("--source", required=True, help="existing external .glb")
+    asset_reuse.add_argument(
+        "--provenance", required=True, help="existing-external-source-provenance JSON"
+    )
+    asset_install = asset_commands.add_parser(
+        "install", help="install a reviewed asset revision into the Godot project"
+    )
+    _add_common(asset_install, nested=True)
+    asset_install.add_argument("--source-workflow", required=True)
+    asset_install.add_argument("--revision", required=True)
+    asset_install.add_argument(
+        "--replace-baseline-sha256", action="append", default=[], metavar="PATH=SHA256"
+    )
+    asset_reuse.add_argument(
+        "--dry-run", action="store_true", help="validate inputs without creating a workflow"
+    )
     asset_inspect = asset_commands.add_parser("inspect", help="show one asset revision")
     _add_common(asset_inspect, nested=True)
     asset_inspect.add_argument("asset_id")
@@ -323,6 +375,8 @@ def build_parser() -> argparse.ArgumentParser:
     recovery_reclassify.add_argument(
         "--reason", help="reason for reclassification (required with --apply)"
     )
+
+    add_factory_commands(commands)
 
     return parser
 
@@ -1351,6 +1405,15 @@ def _recovery_reclassify(
 def _report(root: Path, db: Database, workflow_id: str) -> tuple[dict[str, Any], int, str]:
     """Point at the static review snapshot. This command does not approve anything."""
     workflow = WorkflowRepository(db).get(workflow_id)
+    tasks = TaskRepository(db).list_by_workflow(workflow_id)
+    from gamefactory.workflows.asset_reuse import (
+        build_static_prop_reuse_report,
+        workflow_uses_existing_external_reuse,
+    )
+
+    if workflow is not None and workflow_uses_existing_external_reuse(tasks):
+        payload, human = build_static_prop_reuse_report(root, db, workflow_id)
+        return payload, EXIT_SUCCESS, human
     if workflow is not None and workflow.name.startswith("Asset production:"):
         from gamefactory.workflows.asset_evidence import export_asset_evidence_bundle
 
@@ -1703,9 +1766,80 @@ def _create_assembly_workflow(
     return payload, _result_code(result), message
 
 
+def _create_reuse_workflow(
+    root: Path, db: Database | None, args: argparse.Namespace
+) -> tuple[dict[str, Any], int, str]:
+    from gamefactory.core.domain.asset_contracts import AssetSpecification
+    from gamefactory.workflows.asset_reuse import validate_static_prop_reuse_inputs
+
+    spec_path = _cli_path(root, args.spec).resolve(strict=True)
+    specification = parse_any_asset_specification(spec_path)
+    if not isinstance(specification, AssetSpecification):
+        raise ConfigurationError("Reuse requires an asset-spec-0.4.0 static_prop specification")
+    if args.dry_run:
+        validated = validate_static_prop_reuse_inputs(
+            root, specification, args.source, args.provenance
+        )
+        payload = {
+            "dry_run": True,
+            "asset_id": validated["asset_id"],
+            "profile": validated["profile"],
+            "source_mode": validated["source_mode"],
+            "original_provider": validated["original_provider"],
+            "specification_hash": validated["specification_hash"],
+            "source_sha256": validated["source_sha256"],
+            "required_approvals": ["final_visual_review"],
+            "paid_provider_invocations": 0,
+            "workflow_state_mutated": False,
+            "generated_by_this_workflow": False,
+            "paid_by_this_workflow": False,
+        }
+        return payload, EXIT_SUCCESS, "Dry run passed; no workflow state was created."
+    if db is None:
+        raise ConfigurationError("Reuse workflow creation requires initialized project state")
+    from gamefactory.workflows.asset_reuse import create_static_prop_reuse_workflow
+
+    cfg = ConfigLoader.load_config(root)
+    validated = validate_static_prop_reuse_inputs(root, specification, args.source, args.provenance)
+    source = Path(validated["source_glb"])
+    provenance = Path(validated["source_provenance"])
+    engine = _engine(root, db, args.godot_path, args.blender_path, asset_provider_name="local")
+    profile = specification.bound_profile()
+    workflow, tasks = create_static_prop_reuse_workflow(
+        cfg.project.id,
+        root,
+        specification,
+        source,
+        provenance,
+        revision_repository=AssetRevisionRepository(db),
+    )
+    engine.register_workflow(workflow, tasks, allow_existing_empty_placeholder=True)
+    result = engine.run_workflow(workflow.id)
+    payload = _result_payload(result)
+    payload.update(
+        {
+            "asset_id": specification.asset_id,
+            "revision": tasks[0].parameters["revision_number"],
+            "profile": profile.qualified,
+            "source_mode": "existing_external",
+            "paid_provider_invocations": 0,
+        }
+    )
+    message = (
+        f"Asset reuse workflow {workflow.id} is {result.status.value}; "
+        f"asset={specification.asset_id} revision=r{tasks[0].parameters['revision_number']:03d} "
+        f"profile={profile.qualified} source=existing_external"
+    )
+    if result.pending_approval_id:
+        message += f"; final_visual_review ID={result.pending_approval_id}"
+    if result.error_message:
+        message += f"; {result.error_message}"
+    return payload, _result_code(result), message
+
+
 def _asset_provider_for_workflow(db: Database, workflow_id: str) -> str | None:
     tasks = TaskRepository(db).list_by_workflow(workflow_id)
-    if any(task.task_type == "asset_assembly_prepare" for task in tasks):
+    if any(task.task_type in {"asset_assembly_prepare", "asset_reuse_prepare"} for task in tasks):
         return "local"
     for task in tasks:
         if task.task_type == "asset_paid_generation":
@@ -1776,6 +1910,20 @@ def _asset_approval_checkpoint(root: Path, db: Database, approval_id: str) -> di
                 "source_sha256": params.get("source_glb_hash"),
                 "source_front": params.get("source_front"),
                 "paid": False,
+            }
+        )
+    if params.get("source_mode") == "existing_external":
+        checkpoint.update(
+            {
+                "provider": None,
+                "provider_status": "NOT_USED",
+                "operation": "existing_external_reuse",
+                "estimate": 0,
+                "budget_reservation": None,
+                "source_sha256": params.get("source_glb_hash"),
+                "original_provider": params.get("original_provider"),
+                "paid": False,
+                "generated_by_this_workflow": False,
             }
         )
     if approval.approval_type == "paid_generation":
@@ -1852,6 +2000,7 @@ def _engine(
     *,
     asset_provider_name: str | None = None,
     allow_paid_calls: bool = False,
+    factory_registries: tuple[Any, Any, Any] | None = None,
 ) -> WorkflowEngine:
     """Build the legacy fake-provider engine or one explicitly selected asset provider."""
     config = ConfigLoader.load_config(root)
@@ -1907,6 +2056,57 @@ def _engine(
         engine.evi_repo,
         engine.gate_repo,
         engine.process_runner,
+    )
+    # Register the complete local runtime surface on every process entry point,
+    # including resume/approval. This keeps authorization policy and handlers
+    # consistent across initial execution and recovery.
+    from gamefactory.workflows.gameplay_quality import register_gameplay_quality_handlers
+    from gamefactory.workflows.project_operations import register_project_operation_handlers
+
+    register_gameplay_quality_handlers(
+        engine.handler_registry,
+        root,
+        engine.artifact_mgr,
+        engine.art_repo,
+        engine.exec_repo,
+        engine.evi_repo,
+        engine.gate_repo,
+        engine.process_runner,
+    )
+    register_project_operation_handlers(
+        engine.handler_registry,
+        root,
+        engine.art_repo,
+        engine.evi_repo,
+        engine.gate_repo,
+        engine.exec_repo,
+        engine.artifact_mgr,
+        engine.process_runner,
+    )
+    from gamefactory.workflows.asset_installation import register_asset_installation_handlers
+
+    register_asset_installation_handlers(
+        engine.handler_registry,
+        root,
+        db,
+        engine.art_repo,
+        engine.evi_repo,
+        engine.gate_repo,
+        engine.exec_repo,
+        engine.artifact_mgr,
+    )
+    if factory_registries is None:
+        factory_registries = load_factory_registries(root, saved_factory_manifests(root, db))[:3]
+    from gamefactory.workflows.factory_workflow import register_factory_handlers
+
+    executors, agents, gates = factory_registries
+    register_factory_handlers(
+        engine.handler_registry,
+        project_root=root,
+        db=db,
+        executor_registry=executors,
+        agent_registry=agents,
+        gate_registry=gates,
     )
     if asset_provider_name is not None:
         asset_handlers = AssetProductionHandlers(
@@ -2088,7 +2288,11 @@ def _asset_inspect(db: Database, asset_id: str) -> dict[str, Any]:
         raise ConfigurationError(f"Workflow for asset {asset_id} is missing")
     tasks = TaskRepository(db).list_by_workflow(revision.workflow_id)
     prepare = next(
-        (task for task in tasks if task.task_type in {"asset_prepare", "asset_assembly_prepare"}),
+        (
+            task
+            for task in tasks
+            if task.task_type in {"asset_prepare", "asset_assembly_prepare", "asset_reuse_prepare"}
+        ),
         None,
     )
     if prepare is None:
@@ -2099,6 +2303,24 @@ def _asset_inspect(db: Database, asset_id: str) -> dict[str, Any]:
         (task for task in tasks if task.status.value not in {"COMPLETED", "SKIPPED"}),
         None,
     )
+    if prepare.task_type == "asset_reuse_prepare":
+        params = prepare.parameters
+        return {
+            "asset_id": asset_id,
+            "revision": revision.revision_id,
+            "profile": profile.profile_id,
+            "profile_version": profile.qualified,
+            "workflow": workflow.id,
+            "workflow_status": workflow.status.value,
+            "current_gate": current.task_type if current is not None else workflow.status.value,
+            "source_mode": "existing_external",
+            "original_provider": params.get("original_provider"),
+            "source_sha256": params.get("source_glb_hash"),
+            "source_provenance_hash": params.get("source_provenance_hash"),
+            "specification_hash": params.get("specification_hash"),
+            "paid": False,
+            "concept_versions": [],
+        }
     if prepare.task_type == "asset_assembly_prepare":
         params = prepare.parameters
         return {
@@ -2171,6 +2393,11 @@ def _asset_inspect_text(payload: dict[str, Any]) -> str:
             f"Source: local_operator_assembly sha256={payload['source_sha256']} "
             f"source_front={payload['source_front']} paid=false"
         )
+    if payload.get("source_mode") == "existing_external":
+        lines.append(
+            f"Source: existing_external sha256={payload['source_sha256']} "
+            f"provider={payload.get('original_provider')} paid=false (no new provider spend)"
+        )
     if "concept_versions" in payload and payload["concept_versions"]:
         lines.append("Concept Versions:")
         for cv in payload["concept_versions"]:
@@ -2178,6 +2405,32 @@ def _asset_inspect_text(payload: dict[str, Any]) -> str:
                 f"  v{cv['version']} [{cv['status']}] sha256={cv['sha256']} actor={cv['actor']} ({cv['created_at']})"
             )
     return "\n".join(lines)
+
+
+def _asset_resume_checkpoint_suffix(checkpoint: dict[str, Any]) -> str:
+    base = (
+        f"; {checkpoint['approval_type']} approval {checkpoint['approval_id']}"
+        f"; asset={checkpoint['asset_id']} revision=r{int(checkpoint['revision']):03d}"
+        f" profile={checkpoint.get('profile_qualified') or 'unbound'}"
+    )
+    if checkpoint.get("operation") == "existing_external_reuse":
+        return (
+            f"{base}"
+            f"; source=existing_external sha256={checkpoint.get('source_sha256')}"
+            f" original_provider={checkpoint.get('original_provider')}"
+            f"; provider=None status={checkpoint['provider_status']}"
+            f"; operation={checkpoint['operation']} estimate={checkpoint['estimate']}"
+            f"; paid=false"
+            f"; resume: {checkpoint['resume_command']}"
+        )
+    return (
+        f"{base}"
+        f"; concept={checkpoint['concept_path']} sha256={checkpoint['concept_sha256']}"
+        f"; provider={checkpoint['provider']} status={checkpoint['provider_status']}"
+        f"; operation={checkpoint['operation']} estimate={checkpoint['estimate']}"
+        f"; budget reservation={checkpoint['budget_reservation']}"
+        f"; resume: {checkpoint['resume_command']}"
+    )
 
 
 def _asset_concept_replace(root: Path, db: Database, args: argparse.Namespace) -> dict[str, Any]:
@@ -2235,9 +2488,49 @@ def _asset_concept_replace_text(payload: dict[str, Any]) -> str:
 
 def _dispatch(args: argparse.Namespace) -> tuple[Any, int, str | None]:
     root = _resolve_root(args.project)
+    custom_commands = {
+        "new",
+        "discover",
+        "factory",
+        "test-game",
+        "performance-review",
+        "build",
+        "release",
+        "editor",
+        "run-scene",
+        "operation",
+    }
+    if args.command in custom_commands:
+        read_only_factory_command = args.command == "factory" and (
+            args.factory_command == "manifest"
+            and args.manifest_action in {"create", "preflight"}
+            or args.factory_command == "providers"
+        )
+        requires_db = (
+            args.command
+            in {
+                "test-game",
+                "performance-review",
+                "factory",
+                "build",
+                "release",
+                "editor",
+                "run-scene",
+                "operation",
+            }
+            and not read_only_factory_command
+        )
+        # The branch above keeps manifest authoring and provider configuration
+        # free of database migrations; stateful actions initialize explicitly.
+        db = _db(root) if requires_db else None
+        dispatched = dispatch_factory_command(args, root, db)
+        if dispatched is not None:
+            return dispatched
     if args.command == "doctor":
         payload, code = _doctor(root, args.godot_path, args.blender_path)
         return payload, code, _doctor_text(payload)
+    if args.command == "plan":
+        return run_plan_command(root, args)
     if args.command == "asset" and args.asset_command == "register-source":
         return _register_assembly_source(root, args)
     if args.command == "asset" and args.asset_command == "profiles":
@@ -2275,6 +2568,12 @@ def _dispatch(args: argparse.Namespace) -> tuple[Any, int, str | None]:
         "accounting",
         "recovery",
     }:
+        if (
+            args.command == "asset"
+            and getattr(args, "asset_command", None) == "reuse"
+            and getattr(args, "dry_run", False)
+        ):
+            return _create_reuse_workflow(root, None, args)
         # Explicit path overrides are passed through detection; no failed explicit path falls back.
         read_only = (args.command == "recovery" and args.recovery_command == "inspect") or (
             args.command == "accounting" and args.accounting_command == "ledger"
@@ -2296,6 +2595,35 @@ def _dispatch(args: argparse.Namespace) -> tuple[Any, int, str | None]:
             return _create_asset_workflow(root, db, args)
         if args.command == "asset" and args.asset_command == "assemble":
             return _create_assembly_workflow(root, db, args)
+        if args.command == "asset" and args.asset_command == "reuse":
+            return _create_reuse_workflow(root, db, args)
+        if args.command == "asset" and args.asset_command == "install":
+            from gamefactory.workflows.asset_installation import build_asset_installation_workflow
+
+            replacements: dict[str, str] = {}
+            for item in args.replace_baseline_sha256:
+                path, separator, digest = item.partition("=")
+                if not separator or not path or not re.fullmatch(r"[0-9a-f]{64}", digest):
+                    raise ValidationError("--replace-baseline-sha256 must be PATH=lowercase-SHA256")
+                replacements[path] = digest
+            cfg = ConfigLoader.load_config(root)
+            workflow, tasks = build_asset_installation_workflow(
+                cfg.project.id,
+                root,
+                args.source_workflow,
+                args.revision,
+                db=db,
+                replace_baseline_sha256=replacements or None,
+            )
+            engine = _engine(root, db, args.godot_path, args.blender_path)
+            engine.register_workflow(workflow, tasks)
+            result = engine.run_workflow(workflow.id)
+            payload = _result_payload(result)
+            return (
+                payload,
+                _result_code(result),
+                f"Asset installation {workflow.id}: {result.status.value}",
+            )
         if args.command == "asset" and args.asset_command == "inspect":
             payload = _asset_inspect(db, args.asset_id)
             return payload, EXIT_SUCCESS, _asset_inspect_text(payload)
@@ -2342,16 +2670,7 @@ def _dispatch(args: argparse.Namespace) -> tuple[Any, int, str | None]:
                     ):
                         message += f"\n\n{checkpoint['human_block']}"
                     else:
-                        message += (
-                            f"; {checkpoint['approval_type']} approval {checkpoint['approval_id']}"
-                            f"; asset={checkpoint['asset_id']} revision=r{int(checkpoint['revision']):03d}"
-                            f" profile={checkpoint.get('profile_qualified') or 'unbound'}"
-                            f"; concept={checkpoint['concept_path']} sha256={checkpoint['concept_sha256']}"
-                            f"; provider={checkpoint['provider']} status={checkpoint['provider_status']}"
-                            f"; operation={checkpoint['operation']} estimate={checkpoint['estimate']}"
-                            f"; budget reservation={checkpoint['budget_reservation']}"
-                            f"; resume: {checkpoint['resume_command']}"
-                        )
+                        message += _asset_resume_checkpoint_suffix(checkpoint)
                 else:
                     message += f"; approve with gamefactory approve {result.pending_approval_id}, then gamefactory resume {result.workflow_id}"
             return (
@@ -2385,13 +2704,13 @@ def _dispatch(args: argparse.Namespace) -> tuple[Any, int, str | None]:
                 engine = _engine(
                     root, db, args.godot_path, args.blender_path, asset_provider_name=provider_name
                 )
-                workflow = engine.wf_repo.get(approval.workflow_id)
+                approval_workflow = engine.wf_repo.get(approval.workflow_id)
                 task = engine.task_repo.get(approval.task_id)
-                if workflow is None or task is None:
+                if approval_workflow is None or task is None:
                     raise ConfigurationError(
                         f"Approval '{approval.id}' is not bound to a current workflow task"
                     )
-                current_inputs = engine.approval_inputs(workflow, task)
+                current_inputs = engine.approval_inputs(approval_workflow, task)
             if args.command == "approve":
                 decided = ApprovalService.approve(
                     approval, args.actor, args.comment, current_inputs=current_inputs

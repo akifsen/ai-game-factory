@@ -471,6 +471,76 @@ def _migration_0009_concept_versions(conn: sqlite3.Connection) -> None:
     )
 
 
+def _migration_0010_generic_operation_intents(conn: sqlite3.Connection) -> None:
+    """Durable non-asset provider call intent with its own approval binding."""
+    conn.execute(
+        """
+        CREATE TABLE IF NOT EXISTS generic_operation_intents (
+            id TEXT PRIMARY KEY,
+            workflow_id TEXT NOT NULL,
+            task_id TEXT NOT NULL,
+            executor_id TEXT NOT NULL,
+            request_fingerprint TEXT NOT NULL CHECK(length(request_fingerprint) = 64),
+            operation_hash TEXT NOT NULL CHECK(length(operation_hash) = 64),
+            approval_id TEXT NOT NULL,
+            estimated_cost REAL NOT NULL CHECK(estimated_cost >= 0),
+            maximum_cost REAL NOT NULL CHECK(maximum_cost >= 0),
+            currency TEXT NOT NULL,
+            unit TEXT NOT NULL,
+            actual_cost REAL CHECK(actual_cost IS NULL OR actual_cost >= 0),
+            cost_unit TEXT NOT NULL,
+            external_id TEXT,
+            status TEXT NOT NULL CHECK(status IN ('SUBMITTING', 'COMPLETED', 'FAILED', 'UNCERTAIN', 'RECONCILED')),
+            execution_id TEXT NOT NULL,
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL,
+            UNIQUE(task_id, request_fingerprint),
+            FOREIGN KEY (workflow_id) REFERENCES workflows(id) ON DELETE CASCADE,
+            FOREIGN KEY (task_id) REFERENCES tasks(id) ON DELETE CASCADE
+        );
+        """
+    )
+    conn.execute(
+        "CREATE INDEX IF NOT EXISTS idx_generic_operation_task ON generic_operation_intents(task_id, created_at);"
+    )
+    conn.execute(
+        """
+        CREATE TRIGGER IF NOT EXISTS trg_generic_operation_intent_no_delete
+        BEFORE DELETE ON generic_operation_intents
+        BEGIN
+            SELECT RAISE(ABORT, 'generic operation intents are immutable history');
+        END;
+        """
+    )
+    conn.execute(
+        """
+        CREATE TRIGGER IF NOT EXISTS trg_generic_operation_intent_binding_immutable
+        BEFORE UPDATE ON generic_operation_intents
+        BEGIN
+            SELECT CASE
+                WHEN OLD.id != NEW.id
+                  OR OLD.workflow_id != NEW.workflow_id
+                  OR OLD.task_id != NEW.task_id
+                  OR OLD.executor_id != NEW.executor_id
+                  OR OLD.request_fingerprint != NEW.request_fingerprint
+                  OR OLD.operation_hash != NEW.operation_hash
+                  OR OLD.approval_id != NEW.approval_id
+                  OR OLD.estimated_cost != NEW.estimated_cost
+                  OR OLD.maximum_cost != NEW.maximum_cost
+                  OR OLD.currency != NEW.currency
+                  OR OLD.unit != NEW.unit
+                  OR OLD.cost_unit != NEW.cost_unit
+                  OR OLD.execution_id != NEW.execution_id
+                  OR OLD.created_at != NEW.created_at
+                  OR (OLD.external_id IS NOT NULL AND OLD.external_id IS NOT NEW.external_id)
+                  OR (OLD.actual_cost IS NOT NULL AND OLD.actual_cost IS NOT NEW.actual_cost)
+                THEN RAISE(ABORT, 'generic operation intent binding is immutable')
+            END;
+        END;
+        """
+    )
+
+
 MIGRATIONS: list[tuple[int, str, Callable[[sqlite3.Connection], None]]] = [
     (1, "0001_initial_schema", _migration_0001_initial),
     (2, "0002_provider_invocations", _migration_0002_provider_invocations),
@@ -481,6 +551,7 @@ MIGRATIONS: list[tuple[int, str, Callable[[sqlite3.Connection], None]]] = [
     (7, "0007_cost_ledger", _migration_0007_cost_ledger),
     (8, "0008_paid_request_and_readiness", _migration_0008_paid_request_and_readiness),
     (9, "0009_concept_versions", _migration_0009_concept_versions),
+    (10, "0010_generic_operation_intents", _migration_0010_generic_operation_intents),
 ]
 
 

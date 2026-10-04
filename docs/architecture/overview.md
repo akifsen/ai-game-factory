@@ -1,87 +1,111 @@
-# Architecture through V0.2
+# Factory architecture
 
-Factory is development-time tooling. The game project is the target being inspected and edited; the game does not depend on the Factory at runtime.
+Factory is development-time tooling for an ordinary game project. The generated
+game does not depend on Python, the Factory database, an AI provider, or the
+development harness at runtime. Historical milestone reports describe earlier
+qualification; the current scope is recorded in the
+[master completion plan](../work-plan-master-completion.md).
 
 ```mermaid
 flowchart TD
-  CLI[CLI] --> CFG[Configuration loader]
-  CLI --> CAP[Capability registry]
-  CLI --> WF[Workflow engine]
-  WF --> DOMAIN[Domain models, state machines, DAG]
-  WF --> POLICY[Policy and approval services]
-  WF --> REPOS[Persistence repositories]
-  REPOS --> DB[(SQLite project state)]
-  WF --> EXEC[Process and filesystem execution]
-  WF --> ART[Artifact and evidence handling]
-  CAP --> GODOT[Godot detection and inspection]
-  CAP --> BLENDER[Blender detection]
-  CAP --> MESHY[Meshy boundary]
-  WF --> PORT[Workflow-owned provider port]
-  FAKE[Explicit fake provider for demo] -. implements .-> PORT
-  CLI --> FAKE
-  WF --> ACTIONS[Registered built-in task actions]
+  CLI[CLI and operator manifests] --> CONTRACT[Strict versioned contracts]
+  CLI --> COMPOSE[Explicit provider and gate registries]
+  CONTRACT --> ENGINE[Sequential workflow engine]
+  COMPOSE --> ENGINE
+  ENGINE --> POLICY[Policy, approvals and cost accounting]
+  ENGINE --> DB[(SQLite attempts, intents and audit)]
+  ENGINE --> CONTEXT[Bounded hash-bound context]
+  CONTEXT --> PROVIDER[Configured agent or media adapter]
+  PROVIDER --> PROPOSAL[Staged proposal or advisory findings]
+  PROPOSAL --> CANDIDATE[Isolated candidate project]
+  CANDIDATE --> QA[Independent code, gameplay and performance gates]
+  QA --> EVIDENCE[Physical artifacts and correlated evidence]
+  EVIDENCE --> HUMAN[Exact candidate and game-write approvals]
+  HUMAN --> GAME[Accepted project files]
 ```
 
-The domain package has no imports from the CLI, database, Godot, Blender, or provider packages. V0.1's `WorkflowEngine` currently composes concrete repository adapters around SQLite directly; it is the orchestration boundary, while the model and state-machine code stays persistence-independent. Adapters own the operating-system and provider-specific details.
+## Responsibilities
 
-## Workflow and evidence lifecycle
+`core/domain` defines models, versioned wire contracts, state machines and DAG
+checks. It does not import the CLI, database, engine executables or provider
+packages. `agents` builds explicit context, routes declared capabilities and
+validates proposals. A Director validates claims; it cannot spend, run code,
+write game files, approve work, or mark a workflow complete.
 
-Tasks form a validated directed acyclic graph. The sequential runner selects tasks whose prerequisites completed, checks policy, and claims a new execution attempt before dispatch. A local result validator checks the task result; artifact-producing tasks register outputs and hashes. Evidence and quality-gate decisions are persisted against task and execution IDs. Workflow completion requires the configured final evidence gate.
+`workflows` coordinates the existing engine, registered task handlers, policy,
+durable attempts, provider intents and artifact repositories. `adapters` contains
+SQLite, Godot, Blender, project discovery, Codex, Meshy and hosted-media details.
+The CLI composes these adapters explicitly and maps project policy into the same
+engine for initial execution and resume. There is no remote plugin discovery or
+model-selected executable loading.
 
-```mermaid
-stateDiagram-v2
-  [*] --> PENDING
-  PENDING --> RUNNING
-  RUNNING --> BLOCKED: policy approval required
-  BLOCKED --> RUNNING: approved and resumed
-  RUNNING --> FAILED: execution or validation failed
-  FAILED --> RUNNING: explicit retry
-  RUNNING --> COMPLETED: tasks, evidence, and gates pass
-```
+## Workflow and approval lifecycle
 
-Approval requests bind the operation inputs by fingerprint. `approve` or `reject` records actor, decision, comment, and an audit event with a compare-and-set operation. Approval alone does not resume work; an explicit `resume` rechecks policy and continues from persisted task state. An uncertain paid call is blocked for reconciliation instead of being silently repeated.
+Tasks form an acyclic dependency graph. A bounded manifest declares each task's
+family, selected agent and executor, inputs, tools, cost ceiling, exact output
+paths and required gates. Missing capabilities block preflight. A family name or
+a provider success message does not implement a production task.
 
-## Persistence and filesystem boundary
+Before dispatch the engine checks policy and claims an execution attempt.
+External provider tasks bind their configuration, model, prompt, source hashes
+and operation fingerprint into approval and durable invocation intent. An
+interrupted submission is queried only when its adapter supports safe recovery
+with a known operation ID. Otherwise it remains blocked for audited
+reconciliation; a retry is not permission to repeat a possibly charged call.
 
-Each initialized project stores its contract at `.gamefactory/factory.yml`, read-only discovery snapshot at `.gamefactory/discovery.json`, and SQLite database, migrations, and locks beneath `.gamefactory/state` and `.gamefactory/locks`. Repositories translate domain records to SQLite. Migrations are versioned. Artifacts live below Factory-managed project storage and are tracked separately by relative path, content hash, size, producer, workflow, and task. SQLite transactions protect claims, decisions, and audit updates; OS locks prevent concurrent local runners for one workflow.
+Providers return untrusted staged content or advisory observations. The Director
+checks proposal identity, scope, capabilities and hashes. Trusted local gates
+then parse or execute an isolated, hash-bound candidate and retain physical
+logs, receipts, captures and observations. Code execution approval concerns the
+actual candidate. Final gates evaluate the combined candidate rather than
+assuming independently valid fragments form a valid product.
 
-Before initialization or state access, managed directories and database/config paths are resolved against the selected project root. A path that escapes through traversal, a symlink, or a Windows junction is rejected. Existing game files are inspected read-only during initialization and are not reorganized.
+Visual analysis is advisory. Screenshot, reference and art-bible hashes bind a
+review to its exact inputs. A human visual decision cannot override a failed
+deterministic gate. Applying game files requires a separate approval tied to the
+candidate, gate reports and destination baselines. Publication uses durable
+recovery records and exclusive file creation; unexpected operator edits are
+preserved and block recovery.
 
-## Local execution and security
+## Persistence, cost and filesystem boundaries
 
-Subprocess execution uses argument arrays and `shell=False`, explicit working directories, timeouts, and redacted output. There is no generic command string supplied by AI. V0.1 demonstrator workflows use bounded built-in task types. Paid-classified fake generation cannot be dispatched before approval. The Meshy adapter rejects generation because a production transport is not implemented.
+An initialized project keeps its configuration, discovery snapshot, database,
+artifacts, operation intents and locks under `.gamefactory`. SQLite migrations
+are additive; transactions protect claims, approval compare-and-set operations,
+cost reservations and audit entries. Previous failed or uncertain attempts remain
+part of the evidence history.
 
-Configuration layers are defaults, user config under the platform user config directory, project `.gamefactory/factory.yml`, and command-line overrides for executable discovery. Project config requires schema version `0.1.0`, rejects unknown or secret-named fields, and validates finite nonnegative budget limits. Credentials must be supplied through environment variables to future adapters; V0.1 does not send them externally.
+Paths are checked against the selected root, including original symlink and
+Windows junction components. Bounded descriptor reads, source manifests and
+output limits constrain context, snapshots and artifacts. Credentials are
+referenced by environment-variable name; their values are not configuration,
+prompt, artifact or audit content.
 
-## Lifecycle and extension limits
+Unknown provider charges remain unknown and retain their reservation. Known
+charges are recorded in their actual currency and unit; no implicit conversion
+or fabricated zero charge is permitted. An already incurred overage is an audit
+and accounting fact, not authorization for more spending.
 
-The Factory initializes local project state, creates and runs demonstrator workflows, persists attempts, pauses for approval, resumes or retries, and exposes status/inspection. V0.2 also launches bounded Godot verification in an attempt-owned staged project. It does not create projects, plan natural-language work, automate Blender, generate real assets, or host plugins from third parties. See [integration status](../integrations/status.md) and the [deferred boundaries](../requirements/future-boundaries.md).
+Subprocesses use fixed argument arrays, `shell=False`, explicit working
+directories, minimal environments, timeouts and bounded redacted output. These
+controls are not an operating-system sandbox for hostile executable code.
+Operator process providers therefore require explicit process and network
+permissions. No automatic expensive fallback is enabled.
 
-`core/domain` contains plain Python models, state machines, and DAG checks. `workflows` coordinates the state machine and policy checks and owns the provider port in `ports.py`. Built-in task actions are registered in `builtin_tasks.py`; extensions use `handlers.py`. `adapters/persistence` owns SQLite and versioned migrations. `adapters/engines` and `adapters/dcc` isolate local tool detection. `adapters/external` implements provider boundaries; its legacy `base` module re-exports the inward contracts for compatibility. The CLI explicitly injects the fake provider only for demonstrator workflows.
+## Godot and release
 
-V0.1 execution is sequential. An approval pauses a task and persists the request. Resume reloads durable state. Failed attempts remain in execution history. The invocation ledger records durable intent immediately before calling any provider implementation; a crash between the record and call can conservatively require reconciliation. It is not an exactly-once guarantee, and no production paid transport is available.
+The development harness runs only declared scene, entity, input, state, capture
+and metric actions in a staged project. Python evaluates observations against
+the independent scenario and performance budget. Missing or unsupported metrics
+fail a required budget; headless execution cannot establish rendered quality.
+Performance collection uses measured real time rather than treating fixed-FPS
+simulation as a performance benchmark.
 
-Handlers are trusted local Python extensions, not a sandbox for hostile executable code. Their returned claims remain untrusted: the engine validates result shape, artifact ownership, physical files, and hashes before completion. Project policy settings are explicitly mapped into the policy engine by the CLI composition function.
+Native export uses a validated preset and a fresh staged source snapshot. The
+result binds the completed execution, executable, source, exit status, logs and
+every export file hash. Release approval selects that exact completed build.
+Release records operator approval and a manifest; it does not upload or publish
+to a store. Scratch harnesses and Factory state are excluded from export staging.
 
-Current real tool support includes Godot detection, metadata inspection and the bounded headless verification pipeline. Blender does not modify assets. Meshy does not call a service. See [integration status](../integrations/status.md) and [ADRs](../adr/).
-
-
-## V0.2 Godot verification boundary
-
-```mermaid
-flowchart LR
-  S[Strict scenario and source manifest] --> P[Central policy and fingerprinted approval]
-  P --> X[godot_execute]
-  X --> I[Staged Godot import]
-  I --> R[Real scene plus packaged harness]
-  R --> O[Correlated observations and process artifacts]
-  O --> V[godot_validate: Python assertions]
-  S --> V
-  V --> E[record_evidence: existing final gate]
-```
-
-The runtime request carries actions and sample ticks; expected values stay outside
-the harness. Handler metadata exposes process/write effects to the central policy.
-Attempt launch intent and terminal receipts support conservative recovery without
-changing the domain's state machines or SQLite schema. Interrupted ownership is
-not inferred from PID or a released lock. See [ADR 0005](../adr/0005-godot-staging-and-independent-oracle.md).
+See [integration status](../integrations/status.md),
+[the master guide](../guides/master-factory.md) and the [ADRs](../adr/).
