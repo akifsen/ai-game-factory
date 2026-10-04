@@ -32,6 +32,8 @@ from gamefactory.core.domain.natural_language_plan import (
     _MAX_CODEX_MESSAGE_BYTES,
     CODEX_MESSAGE_FILE_NAME,
     assemble_static_prop_specification,
+    build_planner_prompt,
+    codex_draft_json_schema,
     parse_plan_draft,
     plan_to_asset_specification,
     read_bounded_codex_message_json,
@@ -107,6 +109,30 @@ class TestNaturalLanguagePlanDomain:
         with pytest.raises(ValidationError):
             parse_plan_draft(bad)
 
+    def test_rejects_tall_silhouette_without_schema_fallback(self) -> None:
+        bad = {
+            **_VALID_DRAFT,
+            "style_constraints": {"silhouette": "tall", "detail_density": "medium"},
+        }
+        with pytest.raises(ValidationError):
+            parse_plan_draft(bad)
+
+    def test_codex_draft_json_schema_advertises_style_enums(self) -> None:
+        schema = codex_draft_json_schema()
+        style_props = schema["$defs"]["PlanStyleDraft"]["properties"]
+        assert set(style_props["silhouette"]["enum"]) == {
+            "angular",
+            "chunky",
+            "organic",
+            "planar",
+        }
+        assert set(style_props["detail_density"]["enum"]) == {"high", "low", "medium"}
+
+    def test_build_planner_prompt_lists_allowed_style_enums(self) -> None:
+        prompt = build_planner_prompt("rusted buoy")
+        assert "chunky" in prompt and "planar" in prompt and "angular" in prompt
+        assert "low" in prompt and "medium" in prompt and "high" in prompt
+
     def test_rejects_path_like_asset_id(self) -> None:
         bad = {**_VALID_DRAFT, "asset_id": "../escape"}
         with pytest.raises(ValidationError):
@@ -138,6 +164,10 @@ class TestCodexCliAgentProvider:
 
         def recorder(**kwargs: Any) -> CodexExecResult:
             captured.update(kwargs)
+            args = kwargs["args"]
+            schema_idx = args.index("--output-schema")
+            schema_path = Path(args[schema_idx + 1])
+            captured["written_schema"] = json.loads(schema_path.read_text(encoding="utf-8"))
             return _mock_exec_runner()(**kwargs)
 
         provider = CodexCliAgentProvider(
@@ -155,6 +185,15 @@ class TestCodexCliAgentProvider:
         assert "--skip-git-repo-check" in args
         schema_idx = args.index("--output-schema")
         assert args[schema_idx + 1].endswith("draft.schema.json")
+        written_schema = captured["written_schema"]
+        style_props = written_schema["$defs"]["PlanStyleDraft"]["properties"]
+        assert set(style_props["silhouette"]["enum"]) == {
+            "angular",
+            "chunky",
+            "organic",
+            "planar",
+        }
+        assert set(style_props["detail_density"]["enum"]) == {"high", "low", "medium"}
         message_idx = args.index("--output-last-message")
         assert args[message_idx + 1].endswith(CODEX_MESSAGE_FILE_NAME)
         assert args[-1] == "-"

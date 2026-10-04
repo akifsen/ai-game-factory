@@ -10,7 +10,7 @@ from __future__ import annotations
 import json
 import re
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal, get_args
 
 from pydantic import BaseModel, ConfigDict, Field, StrictFloat, field_validator
 
@@ -30,8 +30,11 @@ PILOT_GAME_CONTEXT = "Tide Bastion"
 _FIXED_FAMILY = "stylized_fantasy"
 _FIXED_READABILITY = "high"
 
-_ALLOWED_SILHOUETTES = frozenset({"chunky", "planar", "organic", "angular"})
-_ALLOWED_DETAIL_DENSITY = frozenset({"low", "medium", "high"})
+PlanSilhouette = Literal["chunky", "planar", "organic", "angular"]
+PlanDetailDensity = Literal["low", "medium", "high"]
+
+_ALLOWED_SILHOUETTES = frozenset(get_args(PlanSilhouette))
+_ALLOWED_DETAIL_DENSITY = frozenset(get_args(PlanDetailDensity))
 
 _MANAGED_IMPORT_PREFIX = "assets/generated/props"
 
@@ -50,8 +53,8 @@ class PlanDimensionsDraft(BaseModel):
 class PlanStyleDraft(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    silhouette: str = Field(..., min_length=1, max_length=100)
-    detail_density: str = Field(..., min_length=1, max_length=100)
+    silhouette: PlanSilhouette
+    detail_density: PlanDetailDensity
 
     @field_validator("silhouette")
     @classmethod
@@ -229,7 +232,8 @@ def build_planner_prompt(user_request: str) -> str:
         "Output ONLY JSON matching the provided schema. Do not include schema_version, profile, "
         "budgets, orientation, target_import_path, or any field outside the schema.\n"
         "Choose a unique lowercase asset_id (prop_ prefix encouraged), a concise intent, realistic "
-        "dimensions in meters, and style_constraints.silhouette plus style_constraints.detail_density "
-        "from the allowed enums.\n"
+        "dimensions in meters, and style_constraints.silhouette "
+        f"({', '.join(sorted(_ALLOWED_SILHOUETTES))}) plus style_constraints.detail_density "
+        f"({', '.join(sorted(_ALLOWED_DETAIL_DENSITY))}).\n"
         f"Operator request:\n{cleaned}\n"
     )
