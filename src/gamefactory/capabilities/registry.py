@@ -212,6 +212,49 @@ class CapabilityRegistry:
                 "reason": "Generate with an authorized image provider, then ingest hash-bound provenance",
             },
         )
+        entries["audio.speech"] = CapabilityEntry(
+            "audio.speech",
+            "Optional official speech provider contract; readiness is local config only",
+            CapabilityStatus.NOT_VERIFIED,
+            "openai.audio.speech",
+            requires_approval=True,
+            details={"provider_contract_implemented": True, "live_execution_verified": False},
+        )
+        entries["vision.review"] = CapabilityEntry(
+            "vision.review",
+            "Optional advisory visual review provider; human visual decision remains required",
+            CapabilityStatus.NOT_VERIFIED,
+            "openai.vision",
+            requires_approval=True,
+            details={"provider_contract_implemented": True, "live_execution_verified": False},
+        )
+        for name, description in {
+            "factory.manifest.execute": "Versioned, bounded provider proposals with explicit manifest preflight",
+            "factory.quality.gates": "Trusted local candidate gates with physical evidence and human visual decisions",
+            "factory.asset.install": "Review-gated, hash-bound asset installation into Godot projects",
+            "factory.project.operations": "Bounded local Godot editor, run, export and release operations",
+        }.items():
+            entries[name] = CapabilityEntry(
+                name, description, CapabilityStatus.AVAILABLE, "gamefactory-core"
+            )
+        entries["factory.gameplay.harness"] = CapabilityEntry(
+            "factory.gameplay.harness",
+            "Optional development-only real Godot gameplay and performance harness",
+            CapabilityStatus.NOT_VERIFIED if godot_res.available else CapabilityStatus.UNAVAILABLE,
+            "godot",
+            details={
+                "engine_available": godot_res.available,
+                "harness_execution_verified": False,
+                "release_project_addon": False,
+            },
+        )
+        entries["asset.profile.rigged_character"] = CapabilityEntry(
+            "asset.profile.rigged_character",
+            "Experimental rigged-character asset profile",
+            CapabilityStatus.NOT_VERIFIED,
+            "experimental-profile",
+            details={"implemented": True, "experimental": True, "generation_verified": False},
+        )
 
         # 4. Built-in Core capabilities
         entries["workflow.dag.execute"] = CapabilityEntry(

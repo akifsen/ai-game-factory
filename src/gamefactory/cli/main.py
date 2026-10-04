@@ -8,6 +8,7 @@ import hashlib
 import json
 import math
 import os
+import re
 import sqlite3
 import sys
 import tempfile
@@ -48,6 +49,12 @@ from gamefactory.cli.exit_codes import (
     EXIT_SUCCESS,
     EXIT_TOOL_UNAVAILABLE,
     EXIT_WORKFLOW_FAILURE,
+)
+from gamefactory.cli.factory_commands import (
+    add_factory_commands,
+    dispatch_factory_command,
+    load_factory_registries,
+    saved_factory_manifests,
 )
 from gamefactory.cli.plan_command import run_plan_command
 from gamefactory.config.loader import ConfigLoader
@@ -271,6 +278,15 @@ def build_parser() -> argparse.ArgumentParser:
     asset_reuse.add_argument(
         "--provenance", required=True, help="existing-external-source-provenance JSON"
     )
+    asset_install = asset_commands.add_parser(
+        "install", help="install a reviewed asset revision into the Godot project"
+    )
+    _add_common(asset_install, nested=True)
+    asset_install.add_argument("--source-workflow", required=True)
+    asset_install.add_argument("--revision", required=True)
+    asset_install.add_argument(
+        "--replace-baseline-sha256", action="append", default=[], metavar="PATH=SHA256"
+    )
     asset_reuse.add_argument(
         "--dry-run", action="store_true", help="validate inputs without creating a workflow"
     )
@@ -359,6 +375,8 @@ def build_parser() -> argparse.ArgumentParser:
     recovery_reclassify.add_argument(
         "--reason", help="reason for reclassification (required with --apply)"
     )
+
+    add_factory_commands(commands)
 
     return parser
 
@@ -1982,6 +2000,7 @@ def _engine(
     *,
     asset_provider_name: str | None = None,
     allow_paid_calls: bool = False,
+    factory_registries: tuple[Any, Any, Any] | None = None,
 ) -> WorkflowEngine:
     """Build the legacy fake-provider engine or one explicitly selected asset provider."""
     config = ConfigLoader.load_config(root)
@@ -2037,6 +2056,57 @@ def _engine(
         engine.evi_repo,
         engine.gate_repo,
         engine.process_runner,
+    )
+    # Register the complete local runtime surface on every process entry point,
+    # including resume/approval. This keeps authorization policy and handlers
+    # consistent across initial execution and recovery.
+    from gamefactory.workflows.gameplay_quality import register_gameplay_quality_handlers
+    from gamefactory.workflows.project_operations import register_project_operation_handlers
+
+    register_gameplay_quality_handlers(
+        engine.handler_registry,
+        root,
+        engine.artifact_mgr,
+        engine.art_repo,
+        engine.exec_repo,
+        engine.evi_repo,
+        engine.gate_repo,
+        engine.process_runner,
+    )
+    register_project_operation_handlers(
+        engine.handler_registry,
+        root,
+        engine.art_repo,
+        engine.evi_repo,
+        engine.gate_repo,
+        engine.exec_repo,
+        engine.artifact_mgr,
+        engine.process_runner,
+    )
+    from gamefactory.workflows.asset_installation import register_asset_installation_handlers
+
+    register_asset_installation_handlers(
+        engine.handler_registry,
+        root,
+        db,
+        engine.art_repo,
+        engine.evi_repo,
+        engine.gate_repo,
+        engine.exec_repo,
+        engine.artifact_mgr,
+    )
+    if factory_registries is None:
+        factory_registries = load_factory_registries(root, saved_factory_manifests(root, db))[:3]
+    from gamefactory.workflows.factory_workflow import register_factory_handlers
+
+    executors, agents, gates = factory_registries
+    register_factory_handlers(
+        engine.handler_registry,
+        project_root=root,
+        db=db,
+        executor_registry=executors,
+        agent_registry=agents,
+        gate_registry=gates,
     )
     if asset_provider_name is not None:
         asset_handlers = AssetProductionHandlers(
@@ -2418,6 +2488,44 @@ def _asset_concept_replace_text(payload: dict[str, Any]) -> str:
 
 def _dispatch(args: argparse.Namespace) -> tuple[Any, int, str | None]:
     root = _resolve_root(args.project)
+    custom_commands = {
+        "new",
+        "discover",
+        "factory",
+        "test-game",
+        "performance-review",
+        "build",
+        "release",
+        "editor",
+        "run-scene",
+        "operation",
+    }
+    if args.command in custom_commands:
+        read_only_factory_command = args.command == "factory" and (
+            args.factory_command == "manifest"
+            and args.manifest_action in {"create", "preflight"}
+            or args.factory_command == "providers"
+        )
+        requires_db = (
+            args.command
+            in {
+                "test-game",
+                "performance-review",
+                "factory",
+                "build",
+                "release",
+                "editor",
+                "run-scene",
+                "operation",
+            }
+            and not read_only_factory_command
+        )
+        # The branch above keeps manifest authoring and provider configuration
+        # free of database migrations; stateful actions initialize explicitly.
+        db = _db(root) if requires_db else None
+        dispatched = dispatch_factory_command(args, root, db)
+        if dispatched is not None:
+            return dispatched
     if args.command == "doctor":
         payload, code = _doctor(root, args.godot_path, args.blender_path)
         return payload, code, _doctor_text(payload)
@@ -2489,6 +2597,33 @@ def _dispatch(args: argparse.Namespace) -> tuple[Any, int, str | None]:
             return _create_assembly_workflow(root, db, args)
         if args.command == "asset" and args.asset_command == "reuse":
             return _create_reuse_workflow(root, db, args)
+        if args.command == "asset" and args.asset_command == "install":
+            from gamefactory.workflows.asset_installation import build_asset_installation_workflow
+
+            replacements: dict[str, str] = {}
+            for item in args.replace_baseline_sha256:
+                path, separator, digest = item.partition("=")
+                if not separator or not path or not re.fullmatch(r"[0-9a-f]{64}", digest):
+                    raise ValidationError("--replace-baseline-sha256 must be PATH=lowercase-SHA256")
+                replacements[path] = digest
+            cfg = ConfigLoader.load_config(root)
+            workflow, tasks = build_asset_installation_workflow(
+                cfg.project.id,
+                root,
+                args.source_workflow,
+                args.revision,
+                db=db,
+                replace_baseline_sha256=replacements or None,
+            )
+            engine = _engine(root, db, args.godot_path, args.blender_path)
+            engine.register_workflow(workflow, tasks)
+            result = engine.run_workflow(workflow.id)
+            payload = _result_payload(result)
+            return (
+                payload,
+                _result_code(result),
+                f"Asset installation {workflow.id}: {result.status.value}",
+            )
         if args.command == "asset" and args.asset_command == "inspect":
             payload = _asset_inspect(db, args.asset_id)
             return payload, EXIT_SUCCESS, _asset_inspect_text(payload)
@@ -2569,13 +2704,13 @@ def _dispatch(args: argparse.Namespace) -> tuple[Any, int, str | None]:
                 engine = _engine(
                     root, db, args.godot_path, args.blender_path, asset_provider_name=provider_name
                 )
-                workflow = engine.wf_repo.get(approval.workflow_id)
+                approval_workflow = engine.wf_repo.get(approval.workflow_id)
                 task = engine.task_repo.get(approval.task_id)
-                if workflow is None or task is None:
+                if approval_workflow is None or task is None:
                     raise ConfigurationError(
                         f"Approval '{approval.id}' is not bound to a current workflow task"
                     )
-                current_inputs = engine.approval_inputs(workflow, task)
+                current_inputs = engine.approval_inputs(approval_workflow, task)
             if args.command == "approve":
                 decided = ApprovalService.approve(
                     approval, args.actor, args.comment, current_inputs=current_inputs

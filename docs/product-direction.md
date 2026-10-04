@@ -1,4 +1,25 @@
-# Active product direction — Tide Bastion pilot
+# Product direction — master capability completion
+
+## Current instruction (2026-10-04)
+
+The user expanded the active scope to all Factory capabilities in the master
+requirements, including capabilities previously deferred beyond bootstrap.
+The completed Tide Bastion pilot below remains historical customer evidence.
+Its scope freeze no longer limits the newly authorized implementation.
+
+Implementation uses local subagents; Antigravity and Cursor are temporarily
+excluded by the user's instruction. All implementation must finish before running
+tests, builds, lint, type checks, runtime verification or GitHub Actions. Test
+sources can be written during implementation, but must remain unexecuted until
+that boundary is satisfied. Read-only repository discovery and source review
+remain permitted.
+
+Existing approval, cost, evidence and standalone-game boundaries remain in force.
+Writing an integration does not authorize paid calls, publication or human
+acceptance. Implementation and independently verified readiness must be tracked
+separately; historical passing results do not qualify newly written code.
+
+## Historical Tide Bastion pilot
 
 Decision: 2026-10-04. The user selected Tide Bastion as the first customer game.
 The existing ChatGPT planning discussion supports this pivot. Engineering approval

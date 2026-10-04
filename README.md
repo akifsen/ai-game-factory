@@ -1,16 +1,17 @@
 # AI Game Factory
 
-AI Game Factory helps developers plan and validate assets for Godot games. A real
-Codex planner turns natural-language requests into specifications; existing GLBs
-can be reused or new assets generated with Meshy. It coordinates Blender processing,
-Godot checks and human approval, while recording exactly what was requested and
-what it cost. The game remains usable without Factory installed.
+AI Game Factory coordinates development work for ordinary Godot projects. It
+creates or inspects projects, routes bounded code, design, image, speech and vision
+tasks, validates candidate changes, and records approvals, artifacts, attempts and
+costs. Meshy and Blender support the existing asset-production pipelines. Generated
+games remain usable without Factory installed.
 
-The first customer pilot is complete: a natural-language request produced a valid
-specification, an existing chest passed Factory validation and human acceptance,
-and **Tide Bastion** now uses the accepted asset in its playable intro battle.
-New paid submissions were zero. General automatic game development remains outside
-the current scope. See the [active product direction](docs/product-direction.md).
+The development branch extends the completed Tide Bastion asset pilot to the
+[master Factory scope](docs/work-plan-master-completion.md). A configured adapter
+does not imply a verified live service: capability and provider reports distinguish
+missing tools or credentials from configured but unverified integrations. See the
+[integration status](docs/integrations/status.md) and
+[master usage guide](docs/guides/master-factory.md).
 
 ## Quick start
 
@@ -36,9 +37,32 @@ The [planning guide](docs/pipelines/natural-language-planning.md) explains the
 bounded adapter and tool requirements. Planning creates a specification, not an
 asset, and retains all production approvals.
 
-From a Godot project's root, `gamefactory init` creates local Factory configuration
-and workflow state. `gamefactory run demo` exercises a fake workflow and stops for
-approval; it does not generate a production asset.
+Create a new independent project, or initialize an existing project in place:
+
+```sh
+gamefactory new "My Game" --path ../my-game --dimension 3d
+gamefactory -p ../my-game discover --path .
+# From an existing Godot project's root:
+gamefactory init
+gamefactory factory providers list --json
+```
+
+`init` records local Factory configuration, discovery and workflow state while
+preserving existing game files. `gamefactory run demo` exercises a fake workflow
+and stops for approval; fake outputs do not satisfy production capability gates.
+
+General production uses a versioned, operator-readable workflow manifest:
+
+```sh
+gamefactory factory manifest preflight workflow.json --json
+gamefactory factory run --manifest workflow.json --json
+gamefactory approvals
+```
+
+The [master guide](docs/guides/master-factory.md) covers provider configuration,
+exact output paths, real gameplay and performance evidence, visual review,
+accepted-asset installation, build and release. Preflight reports missing
+capabilities without launching an external provider.
 
 For a production workflow, supply a strict spec, a concept PNG and its provenance:
 
@@ -52,7 +76,7 @@ Meshy access, Blender and Godot are needed for real production. Read the
 [production guide](docs/pipelines/generalized-asset-production.md) before spending
 credits; example IDs and files must be replaced with your own inputs.
 
-## Current capabilities
+## Development capabilities
 
 - Natural-language static-prop planning and [existing GLB reuse](docs/pipelines/existing-static-prop-reuse.md)
   with source hashes, provenance and final human acceptance.
@@ -61,10 +85,19 @@ credits; example IDs and files must be replaced with your own inputs.
 - Operator-authored vehicle, weapon and aircraft assemblies with named parts.
 - Concept review, exact paid-request snapshots, budget accounting, recovery,
   Blender validation and Godot runtime/render checks.
-- Local character and animation review tooling under development.
+- Strict agent contracts, bounded hash-bound context, explicit capability routing,
+  versioned prompts and non-authoritative proposals.
+- General design, feature, level, UI, image, audio and vision workflow families
+  backed by explicitly configured executors and independent quality gates.
+- Scratch-only Godot gameplay scenarios, documented performance monitors and
+  platform budgets; advisory vision findings require a separate human decision.
+- Accepted asset revision installation, controlled native editor/run operations,
+  export artifacts and hash-bound human release approval.
+- Experimental character and animation review tools.
 
-`rigged_character`, building, terrain, animation, VFX and foliage production remain
-unsupported. Review tooling does not make those production profiles available.
+Dedicated `rigged_character`, building, terrain, animation, VFX and foliage asset
+production profiles remain unsupported. General code workflows and experimental
+review tools do not change those profile qualifications.
 See [profile details](docs/architecture/advanced-asset-profiles.md) and
 [assembly production](docs/pipelines/assembly-production.md).
 
@@ -76,7 +109,7 @@ checkpoint. A provider reporting success is insufficient: artifact hashes and
 independent validation must agree. See [paid requests](docs/architecture/paid-request-snapshot.md)
 and [accounting](docs/architecture/accounting.md).
 
-The published stable release is [v0.7.0](https://github.com/akifsen/ai-game-factory/releases/tag/v0.7.0).
-Development and technical prereleases have separate qualification; version history
-belongs in [release notes](docs/releases/) and [GitHub releases](https://github.com/akifsen/ai-game-factory/releases).
+Development work and published releases have separate qualification. Version
+history belongs in [release notes](docs/releases/) and
+[GitHub releases](https://github.com/akifsen/ai-game-factory/releases).
 Architecture, detailed guides and historical reports are in the [documentation index](docs/README.md).

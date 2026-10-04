@@ -1,0 +1,50 @@
+{
+  "schema_version": "factory-workflow-1.0.0",
+  "workflow_id": "WF-EXAMPLE-CODE-CHANGE",
+  "project_id": "project.replace-after-init",
+  "name": "Bounded code change",
+  "require_human_game_acceptance": true,
+  "tasks": [
+    {
+      "task_id": "task.player-controller",
+      "name": "Propose a player controller change",
+      "family": "feature",
+      "kind": "code",
+      "executor_id": "agent.codex.readonly",
+      "agent_id": "agent.codex.readonly",
+      "objective": "Make the declared player controller change and return only the requested project file.",
+      "prompt_template_id": "codex.readonly",
+      "prompt_template_version": "1.0.0",
+      "inputs": [
+        {"path": "project.godot", "purpose": "Project settings and input map"},
+        {"path": "scripts/player.gd", "purpose": "Current player controller"}
+      ],
+      "capabilities": ["code.propose"],
+      "allowed_tools": ["codex.execute_readonly"],
+      "forbidden_tools": ["shell.execute", "repository.write"],
+      "tool_constraints": {
+        "allowed_tools": ["codex.execute_readonly"],
+        "forbidden_tools": ["shell.execute", "repository.write"],
+        "max_tool_calls": 1,
+        "timeout_seconds": 180,
+        "network_allowed": true,
+        "repository_write_allowed": false,
+        "process_execution_allowed": true
+      },
+      "output_scopes": ["scripts/player.gd"],
+      "expected_artifacts": ["scripts/player.gd"],
+      "required_gates": ["code"],
+      "acceptance_criteria": ["Godot imports and parses the staged candidate without script errors."],
+      "timeout_seconds": 180,
+      "max_retries": 0,
+      "cost": {
+        "cost_class": "METERED",
+        "max_amount": 1.0,
+        "currency": "USD",
+        "unit": "request",
+        "approval_required": true
+      },
+      "game_write": true
+    }
+  ]
+}

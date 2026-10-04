@@ -440,6 +440,21 @@ class TaskRepository:
         with self.db.transaction() as conn:
             # Serialize budget reads with reservations from other workflow locks.
             conn.execute("BEGIN IMMEDIATE")
+            # A project's append-only ledger is intentionally single-unit. Check
+            # this while holding the same SQLite writer lock as the first reserve
+            # so concurrent workflows cannot mix, for example, USD and credits.
+            if execution.cost > 0:
+                units = conn.execute(
+                    "SELECT DISTINCT cost_unit FROM cost_ledger WHERE project_id = ? AND entry_type IN ('RESERVE', 'SETTLE', 'ADJUSTMENT') LIMIT 2",
+                    (project_id,),
+                ).fetchall()
+                known_units = {row["cost_unit"] for row in units}
+                requested_unit = execution.cost_unit or "credits"
+                if known_units and known_units != {requested_unit}:
+                    raise ValidationError(
+                        "Project cost ledger uses a different currency/unit; implicit conversion is forbidden",
+                        details={"existing": sorted(known_units), "requested": requested_unit},
+                    )
             spent_row = conn.execute(
                 "SELECT COALESCE(SUM(CASE WHEN entry_type = 'RELEASE' THEN -amount ELSE amount END), 0.0) AS total FROM cost_ledger WHERE project_id = ?",
                 (project_id,),
@@ -782,6 +797,68 @@ class ExecutionRepository:
             if changed != 1:
                 return False
             _insert_audit_event(conn, audit_event)
+            return True
+
+    def make_factory_committed_retry_eligible(
+        self,
+        task_id: str,
+        execution_id: str,
+        audit_event: AuditEvent,
+    ) -> bool:
+        """Atomically expose one journal-proven acceptance continuation."""
+        with self.db.transaction() as conn:
+            conn.execute("BEGIN IMMEDIATE")
+            row = conn.execute(
+                "SELECT t.status AS task_status, t.max_retries, e.status AS execution_status, e.retryable, e.attempt_number, (SELECT MAX(attempt_number) FROM executions WHERE task_id=t.id) AS latest_attempt FROM tasks t JOIN executions e ON e.task_id=t.id WHERE t.id=? AND e.id=?",
+                (task_id, execution_id),
+            ).fetchone()
+            if row is None or row["attempt_number"] != row["latest_attempt"]:
+                return False
+            if row["attempt_number"] >= row["max_retries"] + 1:
+                return False
+            if (
+                row["task_status"] == TaskStatus.FAILED.value
+                and row["execution_status"] == ExecutionStatus.FAILED.value
+                and row["retryable"]
+            ):
+                return True
+            valid = (
+                row["task_status"] == TaskStatus.BLOCKED.value
+                and row["execution_status"] == ExecutionStatus.UNCERTAIN.value
+            ) or (
+                row["task_status"] == TaskStatus.FAILED.value
+                and row["execution_status"] == ExecutionStatus.FAILED.value
+                and not row["retryable"]
+            )
+            if not valid:
+                return False
+            changed_execution = conn.execute(
+                "UPDATE executions SET status=?, retryable=1, completed_at=COALESCE(completed_at, ?) WHERE id=? AND status=? AND retryable=?",
+                (
+                    ExecutionStatus.FAILED.value,
+                    audit_event.timestamp,
+                    execution_id,
+                    row["execution_status"],
+                    row["retryable"],
+                ),
+            ).rowcount
+            if changed_execution != 1:
+                return False
+            changed_task = conn.execute(
+                "UPDATE tasks SET status=?, updated_at=? WHERE id=? AND status=?",
+                (TaskStatus.FAILED.value, audit_event.timestamp, task_id, row["task_status"]),
+            ).rowcount
+            if changed_task != 1:
+                raise ValueError("Acceptance task changed during committed retry eligibility")
+            _insert_audit_event(
+                conn,
+                replace(
+                    audit_event,
+                    previous_state=row["task_status"],
+                    new_state=TaskStatus.FAILED.value,
+                    details={**audit_event.details, "execution_id": execution_id},
+                ),
+            )
             return True
 
     def _row_to_execution(self, row: Any) -> Execution:
