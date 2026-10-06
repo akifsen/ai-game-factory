@@ -143,15 +143,23 @@ class _CliParser(argparse.ArgumentParser):
 
 def build_parser() -> argparse.ArgumentParser:
     parser = _CliParser(
-        prog="gamefactory", description="Local-first game development workflow orchestration"
+        prog="gamefactory",
+        description=(
+            "Local-first game development workflow orchestration "
+            "(capabilities without Tide Bastion customer evidence are experimental)"
+        ),
     )
     parser.add_argument("--version", action="version", version=f"gamefactory {__version__}")
     _add_common(parser)
     commands = parser.add_subparsers(dest="command")
 
+    _plan_help = (
+        "plan a static_prop asset-spec JSON via Codex (experimental; pilot; does not create assets)"
+    )
     plan_cmd = commands.add_parser(
         "plan",
-        help="plan a static_prop asset-spec JSON via Codex (pilot; does not create assets)",
+        help=_plan_help,
+        description=_plan_help,
     )
     _add_common(plan_cmd, nested=True)
     plan_cmd.add_argument(
@@ -161,7 +169,10 @@ def build_parser() -> argparse.ArgumentParser:
     plan_cmd.add_argument(
         "--output",
         required=True,
-        help="write asset-spec-0.4.0 JSON (refuses to overwrite an existing file)",
+        help=(
+            "project-root-relative asset-spec-0.4.0 JSON path "
+            "(must stay under -p; refuses to overwrite an existing file)"
+        ),
     )
     plan_cmd.add_argument("--codex-path", help="explicit Codex CLI executable path")
     plan_cmd.add_argument(
@@ -181,7 +192,11 @@ def build_parser() -> argparse.ArgumentParser:
     _add_common(report, nested=True)
     report.add_argument("--workflow", required=True)
 
-    run = commands.add_parser("run", help="run a built-in demonstrator workflow")
+    run = commands.add_parser(
+        "run",
+        help="run a built-in demonstrator workflow (experimental)",
+        description="run a built-in demonstrator workflow (experimental; fake outputs are not customer evidence)",
+    )
     _add_common(run, nested=True)
     run.add_argument(
         "kind", choices=("demo", "failure", "paid-safety", "godot-verify", "godot-capture")
@@ -210,8 +225,11 @@ def build_parser() -> argparse.ArgumentParser:
     _add_common(inspect, nested=True)
     inspect.add_argument("workflow_id")
 
+    _asset_create_help = "create a gated profile-driven asset production workflow (experimental)"
     asset_create = commands.add_parser(
-        "asset-create", help="create a gated profile-driven asset production workflow"
+        "asset-create",
+        help=_asset_create_help,
+        description=_asset_create_help,
     )
     _add_common(asset_create, nested=True)
     asset_create.add_argument("--spec", required=True, help="strict asset-spec-0.4.0 YAML or JSON")
@@ -228,17 +246,33 @@ def build_parser() -> argparse.ArgumentParser:
         help="maximum budget reservation when provider cost is UNKNOWN; not a cost estimate",
     )
 
-    asset = commands.add_parser("asset", help="profile-aware asset commands")
+    _asset_help = "profile-aware asset commands (experimental unless reuse/install)"
+    asset = commands.add_parser(
+        "asset",
+        help=_asset_help,
+        description=_asset_help,
+    )
     asset_commands = asset.add_subparsers(dest="asset_command", required=True)
-    asset_profiles = asset_commands.add_parser("profiles", help="list built-in asset profiles")
+    _asset_profiles_help = "list built-in asset profiles (experimental)"
+    asset_profiles = asset_commands.add_parser(
+        "profiles",
+        help=_asset_profiles_help,
+        description=_asset_profiles_help,
+    )
     _add_common(asset_profiles, nested=True)
     asset_create_alias = asset_commands.add_parser(
-        "create", help="create a gated profile-driven asset production workflow"
+        "create",
+        help=_asset_create_help,
+        description=_asset_create_help,
     )
     _add_asset_create_arguments(asset_create_alias)
+    _asset_register_help = (
+        "write the source registration for an operator-authored assembly GLB (experimental)"
+    )
     asset_register = asset_commands.add_parser(
         "register-source",
-        help="write the source registration for an operator-authored assembly GLB",
+        help=_asset_register_help,
+        description=_asset_register_help,
     )
     _add_common(asset_register, nested=True)
     asset_register.add_argument("--spec", required=True, help="asset-spec-0.7.0 file")
@@ -257,9 +291,14 @@ def build_parser() -> argparse.ArgumentParser:
     asset_register.add_argument("--actor", required=True, help="registering operator")
     asset_register.add_argument("--reason", required=True, help="why this source is registered")
     asset_register.add_argument("--output", required=True, help="registration JSON to write")
+    _asset_assemble_help = (
+        "create a V0.7 assembly workflow from a registered operator source "
+        "(experimental; no provider)"
+    )
     asset_assemble = asset_commands.add_parser(
         "assemble",
-        help="create a V0.7 assembly workflow from a registered operator source (no provider)",
+        help=_asset_assemble_help,
+        description=_asset_assemble_help,
     )
     _add_common(asset_assemble, nested=True)
     asset_assemble.add_argument("--spec", required=True, help="asset-spec-0.7.0 file")
@@ -270,7 +309,10 @@ def build_parser() -> argparse.ArgumentParser:
     )
     asset_reuse = asset_commands.add_parser(
         "reuse",
-        help="create a static_prop reuse workflow from an external/manual GLB (no provider)",
+        help=(
+            "create a static_prop reuse workflow from an external/manual GLB "
+            "(qualified WF-REUSE customer evidence; not general Meshy production)"
+        ),
     )
     _add_common(asset_reuse, nested=True)
     asset_reuse.add_argument("--spec", required=True, help="asset-spec-0.4.0 static_prop file")
@@ -279,7 +321,11 @@ def build_parser() -> argparse.ArgumentParser:
         "--provenance", required=True, help="existing-external-source-provenance JSON"
     )
     asset_install = asset_commands.add_parser(
-        "install", help="install a reviewed asset revision into the Godot project"
+        "install",
+        help=(
+            "install a reviewed asset revision into the Godot project "
+            "(qualified WF-REUSE install evidence; other workflows experimental)"
+        ),
     )
     _add_common(asset_install, nested=True)
     asset_install.add_argument("--source-workflow", required=True)
@@ -290,14 +336,27 @@ def build_parser() -> argparse.ArgumentParser:
     asset_reuse.add_argument(
         "--dry-run", action="store_true", help="validate inputs without creating a workflow"
     )
-    asset_inspect = asset_commands.add_parser("inspect", help="show one asset revision")
+    _asset_inspect_help = "show one asset revision (experimental)"
+    asset_inspect = asset_commands.add_parser(
+        "inspect",
+        help=_asset_inspect_help,
+        description=_asset_inspect_help,
+    )
     _add_common(asset_inspect, nested=True)
     asset_inspect.add_argument("asset_id")
 
-    asset_concept = asset_commands.add_parser("concept", help="manage concept versions")
+    _asset_concept_help = "manage concept versions (experimental)"
+    asset_concept = asset_commands.add_parser(
+        "concept",
+        help=_asset_concept_help,
+        description=_asset_concept_help,
+    )
     asset_concept_commands = asset_concept.add_subparsers(dest="concept_command", required=True)
+    _asset_concept_replace_help = "replace concept before paid production (experimental)"
     asset_concept_replace = asset_concept_commands.add_parser(
-        "replace", help="replace concept before paid production"
+        "replace",
+        help=_asset_concept_replace_help,
+        description=_asset_concept_replace_help,
     )
     _add_common(asset_concept_replace, nested=True)
     asset_concept_replace.add_argument("--workflow", required=True, help="workflow ID")

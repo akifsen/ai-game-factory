@@ -217,3 +217,128 @@ def test_real_godot_gameplay_harness_observes_state_and_raw_metrics(tmp_path: Pa
         result["path"] == "broken.gd" and result["status"] == "FAIL"
         for result in broken_evidence["script_results"]
     )
+
+
+@pytest.mark.real_godot
+def test_real_godot_import_gate_compiles_scripts_with_autoload_context(tmp_path: Path) -> None:
+    executable_value = os.environ.get("GAMEFACTORY_TEST_GODOT")
+    if not executable_value:
+        pytest.skip("Set GAMEFACTORY_TEST_GODOT to run real Godot import gate acceptance")
+    executable = Path(executable_value).expanduser().resolve(strict=True)
+    project = tmp_path / "autoload-import-gate"
+    project.mkdir()
+    (project / "project.godot").write_text(
+        'config_version=5\n\n[application]\nconfig/name="Autoload import gate"\n\n'
+        '[autoload]\nGateAutoload="*res://gate_autoload.gd"\n',
+        encoding="utf-8",
+    )
+    (project / "gate_helper.gd").write_text(
+        "extends RefCounted\nclass_name GateHelper\n\nstatic func value() -> int:\n\treturn 7\n",
+        encoding="utf-8",
+    )
+    (project / "gate_autoload.gd").write_text(
+        "extends Node\n\nfunc value() -> int:\n\treturn GateHelper.value()\n",
+        encoding="utf-8",
+    )
+    (project / "uses_autoload.gd").write_text(
+        "extends Node\n\nfunc _ready() -> void:\n\tvar total := GateAutoload.value()\n",
+        encoding="utf-8",
+    )
+
+    gate = GodotImportGateRunner(project, executable, timeout_seconds=120)
+    gate_receipts: list[tuple[str, dict[str, object]]] = []
+
+    def record_process_intent(kind: str, details: dict[str, object]) -> str:
+        gate_receipts.append((kind, details))
+        return f"receipt-{len(gate_receipts)}"
+
+    _, candidate_sha256 = GodotStager(
+        project, project / ".gamefactory" / "scratch"
+    ).source_manifest()
+    valid_result = gate.evaluate(
+        project,
+        candidate_sha256,
+        gate="code",
+        task_spec={"task_id": "TASK-AUTOLOAD-VALID", "parameters": {}},
+        parameters={
+            "execution_id": "EXEC-AUTOLOAD-VALID",
+            "runner_config_sha256": gate.config_fingerprint,
+            "record_process_intent": record_process_intent,
+            "timeout_seconds": 120,
+        },
+    )
+    valid_evidence = json.loads(
+        base64.b64decode(valid_result["evidence_files"][0]["content_base64"])
+    )
+    by_path = {item["path"]: item for item in valid_evidence["script_results"]}
+    assert valid_result["report"]["findings"][0]["status"] == "PASS", repr(valid_evidence)
+    assert by_path["uses_autoload.gd"]["status"] == "PASS"
+    assert gate_receipts[1][1]["profile"] == "project-context-batch-parse"
+
+    (project / "invalid_unused.gd").write_text("extends Node\nfunc broken(:\n", encoding="utf-8")
+    _, invalid_candidate_sha256 = GodotStager(
+        project, project / ".gamefactory" / "scratch"
+    ).source_manifest()
+    invalid_result = gate.evaluate(
+        project,
+        invalid_candidate_sha256,
+        gate="code",
+        task_spec={"task_id": "TASK-AUTOLOAD-INVALID", "parameters": {}},
+        parameters={
+            "execution_id": "EXEC-AUTOLOAD-INVALID",
+            "runner_config_sha256": gate.config_fingerprint,
+            "record_process_intent": record_process_intent,
+            "timeout_seconds": 120,
+        },
+    )
+    invalid_evidence = json.loads(
+        base64.b64decode(invalid_result["evidence_files"][0]["content_base64"])
+    )
+    assert invalid_result["report"]["findings"][0]["status"] == "FAIL"
+    invalid_by_path = {item["path"]: item for item in invalid_evidence["script_results"]}
+    assert invalid_by_path["invalid_unused.gd"]["status"] == "FAIL"
+
+
+@pytest.mark.real_godot
+def test_real_godot_import_gate_passes_scene_only_candidate_without_gdscripts(
+    tmp_path: Path,
+) -> None:
+    executable_value = os.environ.get("GAMEFACTORY_TEST_GODOT")
+    if not executable_value:
+        pytest.skip("Set GAMEFACTORY_TEST_GODOT to run real Godot import gate acceptance")
+    executable = Path(executable_value).expanduser().resolve(strict=True)
+    project = tmp_path / "scene-only-import-gate"
+    project.mkdir()
+    (project / "project.godot").write_text(
+        'config_version=5\n\n[application]\nconfig/name="Scene only import gate"\n',
+        encoding="utf-8",
+    )
+    (project / "main.tscn").write_text(
+        '[gd_scene format=3]\n\n[node name="Main" type="Node2D"]\n',
+        encoding="utf-8",
+    )
+
+    gate = GodotImportGateRunner(project, executable, timeout_seconds=120)
+
+    def record_process_intent(_kind: str, _details: dict[str, object]) -> str:
+        return "receipt-scene-only"
+
+    _, candidate_sha256 = GodotStager(
+        project, project / ".gamefactory" / "scratch"
+    ).source_manifest()
+    result = gate.evaluate(
+        project,
+        candidate_sha256,
+        gate="code",
+        task_spec={"task_id": "TASK-SCENE-ONLY", "parameters": {}},
+        parameters={
+            "execution_id": "EXEC-SCENE-ONLY",
+            "runner_config_sha256": gate.config_fingerprint,
+            "record_process_intent": record_process_intent,
+            "timeout_seconds": 120,
+        },
+    )
+    evidence = json.loads(base64.b64decode(result["evidence_files"][0]["content_base64"]))
+    assert result["report"]["findings"][0]["status"] == "PASS", repr(evidence)
+    assert evidence["script_results"] == []
+    assert result["process_receipt_ids"] == ["receipt-scene-only"]

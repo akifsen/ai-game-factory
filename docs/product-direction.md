@@ -1,6 +1,58 @@
-# Product direction — master capability completion
+# Product direction — real customer use
 
 ## Current instruction (2026-10-04)
+
+Implementation is frozen; real customer use begins. This instruction supersedes
+the master-scope expansion and the instruction to finish all implementation before
+testing. Add no capability, command, adapter, schema, ADR, RC or version number.
+Fix only faults exposed by real use, with relevant tests, lint and type checks
+after each change. A capability works only after a real Tide Bastion job; unit
+tests, fake providers and source inspection are insufficient evidence.
+
+Complete these milestones in order, without starting the next before the previous
+one succeeds:
+
+1. **M0:** main's natural CI must be green. Fix failures first; do not repeatedly
+   dispatch CI manually.
+2. **M1:** use `gamefactory factory run --manifest ...` to obtain a bounded Codex
+   code proposal for Tide Bastion, pass the code gate, obtain human approval and
+   apply it. Completion requires a Tide Bastion commit.
+3. **M2:** run at least one `gamefactory test-game` scenario in the real battle
+   scene and independently verify the expected states. Obtain gameplay acceptance.
+4. **M3:** use `gamefactory build` to export one platform; inspect the output for
+   Factory harness files and secrets and verify it launches without Factory.
+5. **M4:** produce a second asset from natural-language request through `plan`,
+   concept, paid Meshy approval, Blender, Godot validation, installation and real
+   battle-scene use. At most one paid submission, with prior human approval.
+
+For every milestone, record workflow ID, customer commit, human interventions,
+manual corrections, credits/fees and elapsed time in a short Markdown summary
+under `docs/reports`. Keep raw logs and screenshots out of Git. Use explicit
+unknown or not-run values instead of invented evidence or costs.
+
+The integration status table must include **Tide Bastion'da gerçek kullanım**:
+workflow ID plus customer commit, or **YOK**. Every capability without customer
+evidence is **experimental** in README and CLI help. OpenAI image, speech and
+vision adapters remain experimental until an approved real invocation. As of
+2026-10-18, prepare a removal proposal for capabilities still marked YOK; remove
+nothing without approval.
+
+During use, address the outside-project path errors for `plan --output` and
+`factory manifest preflight` by actionable diagnostics or a documented example
+copy step; do not weaken path containment to bypass them.
+
+Only after M1–M4, in a separate PR, split `factory_workflow.py` into modules
+without behavior changes, using the same tests before and after. Also write an
+archive migration plan for historical reports, identifying verifier dependencies
+and release-attachment preservation. Do not execute the migration without approval.
+
+Stop for prior approval before every paid call, for visual/gameplay acceptance,
+before deleting any file or history, and when a milestone fails twice. Do not
+write new capabilities to work around a failed milestone. ChatGPT may answer
+planning questions; it cannot substitute for the user's human acceptance or
+paid-call approval.
+
+## Historical master capability completion instruction (2026-10-04; superseded)
 
 The user expanded the active scope to all Factory capabilities in the master
 requirements, including capabilities previously deferred beyond bootstrap.

@@ -4,15 +4,21 @@ Bounded pilot: turn a short natural-language description into a strict `asset-sp
 
 ## Command
 
+`plan` remains **experimental**: planner evidence is not yet linked to a durable
+Factory workflow ID and customer commit in
+[integration status](../integrations/status.md). `--output` must resolve **inside** the selected
+project directory (`PathGuard`); use `-p` when your shell is not already at the
+game root.
+
 ```powershell
-gamefactory plan "rusted tide buoy for the dock" --output plans/prop_tide_buoy_01.json
+gamefactory -p ../my-game plan "rusted tide buoy for the dock" --output plans/prop_tide_buoy_01.json
 ```
 
 Optional flags:
 
 - `--codex-path` — explicit Codex CLI executable (batch `.cmd` launchers are rejected on Windows; prefer `codex.exe` or a direct binary path).
 - `--timeout` — finite subprocess timeout in seconds (default `180`).
-- `-p` / `--project` — directory used to resolve relative `--output` paths (defaults to the current directory). **Factory `init` is not required.**
+- `-p` / `--project` — project root used to resolve relative `--output` paths (defaults to the current directory). **Factory `init` is not required.** Paths such as `../outside/plan.json` are rejected.
 
 The command invokes the installed **Codex CLI** with:
 
@@ -37,7 +43,10 @@ Factory derives fixed pilot values locally: `schema_version` `0.4.0`, `category`
 
 ## Output safety
 
-- `--output` must resolve under the project directory (`PathGuard`); traversal and unsafe path spellings are rejected.
+- `--output` must resolve under the project directory selected with `-p` / `--project`
+  (`PathGuard`); traversal and unsafe path spellings are rejected. Writing from the
+  Factory checkout without `-p` only works when the current directory is already the
+  intended project root.
 - Existing output files are never overwritten; successful writes use a staged temp file and exclusive hard link (no clobber).
 - Credentials, environment secrets, and raw subprocess stderr are not echoed to the console.
 

@@ -98,17 +98,34 @@ Reserved state directories, secrets, traversal paths and ambiguous output paths
 are rejected.
 
 The [code-change example](../../examples/factory/code-change-manifest.json)
-shows a complete declaration. Copy it into the initialized game project and
-replace its project ID, workflow/task IDs, player-controller paths, objective and
-cost ceiling with your own values. The example assumes an existing
-`scripts/player.gd`; a newly scaffolded project uses `main.gd`. Placeholder IDs
-and missing inputs should fail preflight rather than create an accidental run.
+lives in this Factory checkout, not inside your game tree. Copy it into an
+initialized customer project with a root-relative destination, then edit
+`project_id`, `workflow_id`, task IDs, input paths, objective and cost ceiling.
+Paths inside the manifest are **project-root-relative** (for example
+`scripts/player.gd`). The example assumes an existing `scripts/player.gd`; a newly
+scaffolded project uses `main.gd`. Placeholder IDs and missing inputs should fail
+preflight rather than create an accidental run.
+
+From the Factory checkout (replace `../my-game` with your initialized project):
 
 ```sh
-gamefactory factory manifest preflight workflow.json --json
-gamefactory factory run --manifest workflow.json --json
-gamefactory approvals
-gamefactory inspect WORKFLOW_ID
+mkdir -p ../my-game/workflows
+cp examples/factory/code-change-manifest.json ../my-game/workflows/code-change.json
+```
+
+```powershell
+New-Item -ItemType Directory -Force -Path ../my-game/workflows | Out-Null
+Copy-Item examples/factory/code-change-manifest.json ../my-game/workflows/code-change.json
+```
+
+Preflight and run always use `-p` when your shell is not already in the game root.
+The manifest path is also root-relative to that project:
+
+```sh
+gamefactory -p ../my-game factory manifest preflight workflows/code-change.json --json
+gamefactory -p ../my-game factory run --manifest workflows/code-change.json --json
+gamefactory -p ../my-game approvals
+gamefactory -p ../my-game inspect WORKFLOW_ID
 ```
 
 Preflight checks declarations and configured provider/gate availability. Running
