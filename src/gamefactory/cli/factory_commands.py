@@ -14,6 +14,8 @@ import tempfile
 from pathlib import Path
 from typing import Any, Protocol
 
+from pydantic import ValidationError as PydanticValidationError
+
 from gamefactory.adapters.agents.base import ProviderReadiness
 from gamefactory.adapters.agents.codex import CodexAgentConfig, CodexAgentProvider
 from gamefactory.adapters.agents.openai_media import (
@@ -117,12 +119,27 @@ def add_factory_commands(commands: Any) -> None:
     discover.add_argument("--path", default=".")
     discover.add_argument("--include-git", action="store_true")
 
-    factory = commands.add_parser("factory", help="manage general Factory manifests and providers")
+    _factory_help = "manage general Factory manifests and providers (experimental)"
+    factory = commands.add_parser(
+        "factory",
+        help=_factory_help,
+        description=_factory_help,
+    )
     _add_common(factory)
     family = factory.add_subparsers(dest="factory_command", required=True)
-    manifest = family.add_parser("manifest", help="create or preflight a strict workflow manifest")
+    _manifest_help = "create or preflight a strict workflow manifest (experimental)"
+    manifest = family.add_parser(
+        "manifest",
+        help=_manifest_help,
+        description=_manifest_help,
+    )
     manifest_action = manifest.add_subparsers(dest="manifest_action", required=True)
-    create = manifest_action.add_parser("create", help="write a one-task workflow manifest")
+    _manifest_create_help = "write a one-task workflow manifest (experimental)"
+    create = manifest_action.add_parser(
+        "create",
+        help=_manifest_create_help,
+        description=_manifest_create_help,
+    )
     _add_common(create)
     create.add_argument("--output", required=True)
     create.add_argument("--workflow-name", required=True)
@@ -179,18 +196,32 @@ def add_factory_commands(commands: Any) -> None:
     )
     create.add_argument("--timeout", type=float, default=300)
 
+    _preflight_help = (
+        "check local provider and gate readiness "
+        "(experimental; manifest path is project-root-relative)"
+    )
     preflight = manifest_action.add_parser(
-        "preflight", help="check local provider and gate readiness"
+        "preflight",
+        help=_preflight_help,
+        description=_preflight_help,
     )
     _add_common(preflight)
     preflight.add_argument("path")
 
-    providers = family.add_parser("providers", help="show or configure explicit local providers")
+    _providers_help = "show or configure explicit local providers (experimental)"
+    providers = family.add_parser(
+        "providers",
+        help=_providers_help,
+        description=_providers_help,
+    )
     provider_action = providers.add_subparsers(dest="provider_action", required=True)
     provider_action.add_parser("list", help="report configured status without making remote calls")
     _add_common(provider_action.choices["list"])
+    _codex_help = "configure read-only Codex proposal provider (experimental)"
     codex = provider_action.add_parser(
-        "add-codex", help="configure read-only Codex proposal provider"
+        "add-codex",
+        help=_codex_help,
+        description=_codex_help,
     )
     _add_common(codex)
     codex.add_argument("--model", required=True)
@@ -204,17 +235,25 @@ def add_factory_commands(commands: Any) -> None:
         "--cost-unit", choices=("request", "task", "minute", "token", "artifact"), default="request"
     )
     codex.add_argument("--replace", action="store_true")
+    _process_help = "register an operator-specified provider (experimental)"
     process = provider_action.add_parser(
-        "add-process", help="register an operator-specified provider"
+        "add-process",
+        help=_process_help,
+        description=_process_help,
     )
     _add_common(process)
     process.add_argument("--config", required=True, help="strict ProcessProviderConfig JSON")
     process.add_argument("--agent-definition", required=True, help="strict AgentDefinition JSON")
     process.add_argument("--replace", action="store_true")
+    _openai_media_help = (
+        "configure an explicit official OpenAI media provider without making a request "
+        "(experimental)"
+    )
     for name in ("add-openai-image", "add-openai-speech", "add-openai-vision"):
         media = provider_action.add_parser(
             name,
-            help="configure an explicit official OpenAI media provider without making a request",
+            help=_openai_media_help,
+            description=_openai_media_help,
         )
         _add_common(media)
         media.add_argument(
@@ -226,28 +265,48 @@ def add_factory_commands(commands: Any) -> None:
             media.add_argument("--voice", required=True)
         media.add_argument("--replace", action="store_true")
 
-    run = family.add_parser("run", help="preflight and run a versioned workflow manifest")
+    _factory_run_help = "preflight and run a versioned workflow manifest (experimental)"
+    run = family.add_parser(
+        "run",
+        help=_factory_run_help,
+        description=_factory_run_help,
+    )
     _add_common(run)
     run.add_argument("--manifest", required=True)
 
-    test_game = commands.add_parser("test-game", help="execute an allowlisted gameplay scenario")
+    _test_game_help = (
+        "execute an allowlisted gameplay scenario (Tide Bastion first-wave pause/resume "
+        "verified; other scenarios experimental)"
+    )
+    test_game = commands.add_parser(
+        "test-game",
+        help=_test_game_help,
+        description=_test_game_help,
+    )
     _add_common(test_game)
     test_game.add_argument("--scenario", required=True)
     test_game.add_argument("--timeout", type=float, default=120)
 
+    _performance_help = "collect real engine performance evidence (experimental)"
     performance = commands.add_parser(
-        "performance-review", help="collect real engine performance evidence"
+        "performance-review",
+        help=_performance_help,
+        description=_performance_help,
     )
     _add_common(performance)
     performance.add_argument("--scenario", required=True)
     performance.add_argument("--timeout", type=float, default=120)
 
     for verb in ("editor", "run-scene"):
+        _godot_op_help = (
+            "run the bounded Godot "
+            + ("editor" if verb == "editor" else "scene")
+            + " operation (experimental)"
+        )
         operation = commands.add_parser(
             verb,
-            help="run the bounded Godot "
-            + ("editor" if verb == "editor" else "scene")
-            + " operation",
+            help=_godot_op_help,
+            description=_godot_op_help,
         )
         _add_common(operation)
         operation.add_argument("--executable", required=True)
@@ -256,7 +315,17 @@ def add_factory_commands(commands: Any) -> None:
         operation.add_argument("--timeout", type=float, default=300)
 
     for verb in ("build", "release"):
-        operation = commands.add_parser(verb, help=f"run the reviewed Godot {verb} workflow")
+        _build_help = (
+            "run the reviewed Godot build workflow (Tide Bastion Windows x86_64 verified; "
+            "other platforms experimental)"
+            if verb == "build"
+            else "run the reviewed Godot release workflow (experimental)"
+        )
+        operation = commands.add_parser(
+            verb,
+            help=_build_help,
+            description=_build_help,
+        )
         _add_common(operation)
         if verb == "build":
             operation.add_argument("--executable", required=True)
@@ -266,16 +335,27 @@ def add_factory_commands(commands: Any) -> None:
             operation.add_argument("--build-attempt", required=True)
         operation.add_argument("--timeout", type=float, default=300)
 
+    _operation_help = "inspect or reconcile provider operation intents (experimental)"
     operation = commands.add_parser(
-        "operation", help="inspect or reconcile provider operation intents"
+        "operation",
+        help=_operation_help,
+        description=_operation_help,
     )
     _add_common(operation)
     op_action = operation.add_subparsers(dest="operation_action", required=True)
-    op_inspect = op_action.add_parser("inspect")
+    op_inspect = op_action.add_parser(
+        "inspect",
+        help="inspect provider intents (experimental)",
+        description="inspect provider intents (experimental)",
+    )
     _add_common(op_inspect)
     op_inspect.add_argument("--workflow")
     op_inspect.add_argument("--project-id")
-    op_reconcile = op_action.add_parser("reconcile")
+    op_reconcile = op_action.add_parser(
+        "reconcile",
+        help="reconcile provider intents (experimental)",
+        description="reconcile provider intents (experimental)",
+    )
     _add_common(op_reconcile)
     op_reconcile.add_argument("--task", required=True)
     op_reconcile.add_argument("--request-fingerprint", required=True)
@@ -292,8 +372,11 @@ def add_factory_commands(commands: Any) -> None:
     op_reconcile.add_argument("--actual-cost", type=float)
     op_reconcile.add_argument("--apply", action="store_true")
 
+    _recover_apply_help = "inspect or safely recover a Factory apply journal (experimental)"
     recovery = family.add_parser(
-        "recover-apply", help="inspect or safely recover a Factory apply journal"
+        "recover-apply",
+        help=_recover_apply_help,
+        description=_recover_apply_help,
     )
     _add_common(recovery)
     recovery.add_argument("--journal", required=True, help="project-relative apply journal path")
@@ -560,11 +643,15 @@ def saved_factory_manifests(root: Path, db: Database) -> tuple[FactoryWorkflowMa
         }
         matches: list[FactoryWorkflowManifest] = []
         for require_acceptance in (False, True):
-            candidate = FactoryWorkflowManifest.model_validate_json(
-                json.dumps(
-                    {**base, "require_human_game_acceptance": require_acceptance}, allow_nan=False
+            try:
+                candidate = FactoryWorkflowManifest.model_validate_json(
+                    json.dumps(
+                        {**base, "require_human_game_acceptance": require_acceptance},
+                        allow_nan=False,
+                    )
                 )
-            )
+            except PydanticValidationError:
+                continue
             if candidate.sha256 == expected_hash:
                 matches.append(candidate)
         if len(matches) != 1:

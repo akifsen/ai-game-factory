@@ -6,12 +6,15 @@ tasks, validates candidate changes, and records approvals, artifacts, attempts a
 costs. Meshy and Blender support the existing asset-production pipelines. Generated
 games remain usable without Factory installed.
 
-The development branch extends the completed Tide Bastion asset pilot to the
-[master Factory scope](docs/work-plan-master-completion.md). A configured adapter
-does not imply a verified live service: capability and provider reports distinguish
-missing tools or credentials from configured but unverified integrations. See the
-[integration status](docs/integrations/status.md) and
-[master usage guide](docs/guides/master-factory.md).
+Implementation is **frozen** for real customer use; do not expect active master-scope
+expansion in this branch. Treat every capability without a recorded Tide Bastion
+workflow and customer commit in
+[integration status](docs/integrations/status.md) as **experimental**, including
+general Factory manifests, OpenAI media adapters, Meshy paid production, gameplay
+and performance harnesses, build/export, and Codex general code proposals. A
+configured adapter does not imply a verified live service: capability and provider
+reports distinguish missing tools or credentials from configured but unverified
+integrations. See the [master usage guide](docs/guides/master-factory.md).
 
 ## Quick start
 
@@ -27,10 +30,13 @@ gamefactory asset profiles
 ```
 
 With an authenticated Codex CLI installed, the development checkout can draft one
-static-prop spec from natural language, without initializing a project:
+static-prop spec from natural language (**experimental**; planner evidence is not
+yet linked to a durable workflow ID and customer commit in integration status).
+`--output` must resolve inside the selected project directory; use `-p` when the
+project root is not the current directory:
 
 ```sh
-gamefactory plan "A wooden treasure chest for Tide Bastion" --output plans/chest.spec.json
+gamefactory -p ../my-game plan "A wooden treasure chest for Tide Bastion" --output plans/chest.spec.json
 ```
 
 The [planning guide](docs/pipelines/natural-language-planning.md) explains the
@@ -51,7 +57,8 @@ gamefactory factory providers list --json
 preserving existing game files. `gamefactory run demo` exercises a fake workflow
 and stops for approval; fake outputs do not satisfy production capability gates.
 
-General production uses a versioned, operator-readable workflow manifest:
+General production uses a versioned, operator-readable workflow manifest
+(**experimental** until customer evidence):
 
 ```sh
 gamefactory factory manifest preflight workflow.json --json
@@ -64,7 +71,8 @@ exact output paths, real gameplay and performance evidence, visual review,
 accepted-asset installation, build and release. Preflight reports missing
 capabilities without launching an external provider.
 
-For a production workflow, supply a strict spec, a concept PNG and its provenance:
+For a production workflow, supply a strict spec, a concept PNG and its provenance
+(**experimental** Meshy path until customer evidence):
 
 ```sh
 gamefactory asset create --spec spec.yml --concept concept.png --provenance provenance.json --provider meshy
@@ -76,10 +84,29 @@ Meshy access, Blender and Godot are needed for real production. Read the
 [production guide](docs/pipelines/generalized-asset-production.md) before spending
 credits; example IDs and files must be replaced with your own inputs.
 
+Qualified Tide Bastion evidence exists for the bounded static-prop **reuse**
+route (Blender processing, Godot validation, install into the customer game) —
+see [integration status](docs/integrations/status.md). That does not qualify
+general Godot editor, gameplay, build or export commands. The bounded Codex
+settings-slider proposal also passed real code gates and approved application
+in `WF-M1-TEXT-SCALE-RETRY-20261005`, customer commit `1cbf6ba`; other code
+proposal families remain experimental. First-wave battle preparation, archer
+build and pause/resume also passed `test-game` and independent Godot checks in
+`WF-GAMEPLAY-6fc2f444`, customer commit `ee2fb5a`; other scenarios and performance
+measurement remain experimental.
+Windows x86_64 export also passed `gamefactory build`, pack inspection and native
+startup without Factory in `WF-PROJECT-4c53361f`, customer commit `b1fb5ec`;
+other platforms and release workflows remain experimental.
+
 ## Development capabilities
 
+Unless [integration status](docs/integrations/status.md) records a Tide Bastion
+workflow and customer commit, treat the items below as **experimental**:
+
 - Natural-language static-prop planning and [existing GLB reuse](docs/pipelines/existing-static-prop-reuse.md)
-  with source hashes, provenance and final human acceptance.
+  with source hashes, provenance and final human acceptance (reuse/install path
+  has narrow qualified customer evidence; planner evidence is not yet linked to a
+  durable workflow ID and customer commit and paid Meshy production remain experimental).
 - Provider-generated static props, pickups, modular pieces and single-mesh
   characters; characters do not include a production rig or animation.
 - Operator-authored vehicle, weapon and aircraft assemblies with named parts.

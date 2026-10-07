@@ -220,6 +220,18 @@ def _harness_digest() -> str:
     return hashlib.sha256(data).hexdigest()
 
 
+def _parse_harness_digest() -> str:
+    from importlib.resources import files
+
+    data = files("gamefactory").joinpath("resources/godot/gdscript_parse_harness.gd").read_bytes()
+    return hashlib.sha256(data).hexdigest()
+
+
+_PARSE_HARNESS_NAME = ".factory-gdscript-parse-harness.gd"
+_PARSE_MANIFEST_NAME = ".factory-gdscript-parse-manifest.json"
+_PARSE_OUTPUT_NAME = ".factory-gdscript-parse-output.json"
+
+
 def _has_project_diagnostic(log: str) -> bool:
     benign_environment_lines = {"ERROR: Failed to read the root certificate store."}
     for line in log.splitlines():
@@ -229,6 +241,35 @@ def _has_project_diagnostic(log: str) -> bool:
         if re.search(r"(?i)(?:SCRIPT ERROR|PARSE ERROR|ERROR:|failed to load script)", normalized):
             return True
     return False
+
+
+_PARSE_OUTPUT_MAX_BYTES = 2_000_000
+
+
+def _validated_gdscript_parse_scripts(
+    output_payload: Any, expected_paths: list[str]
+) -> dict[str, dict[str, str]] | None:
+    if not isinstance(output_payload, dict):
+        return None
+    scripts = output_payload.get("scripts")
+    if not isinstance(scripts, list):
+        return None
+    parsed: dict[str, dict[str, str]] = {}
+    for entry in scripts:
+        if not isinstance(entry, dict):
+            return None
+        path = entry.get("path")
+        status = entry.get("status")
+        if not isinstance(path, str) or not isinstance(status, str):
+            return None
+        if status not in {"PASS", "FAIL"}:
+            return None
+        if path in parsed:
+            return None
+        parsed[path] = {"status": status, "message": str(entry.get("message", ""))}
+    if set(parsed) != set(expected_paths):
+        return None
+    return parsed
 
 
 class GodotImportGateRunner:
@@ -242,6 +283,7 @@ class GodotImportGateRunner:
         self.timeout_seconds = _timeout(timeout_seconds)
         self.executable_sha256 = sha256_file(executable)
         self.harness_sha256 = _harness_digest()
+        self.parse_harness_sha256 = _parse_harness_digest()
         self._fingerprint = _canonical_hash(
             {
                 "gate": "code",
@@ -250,6 +292,7 @@ class GodotImportGateRunner:
                 "executable": str(executable),
                 "executable_sha256": self.executable_sha256,
                 "harness_sha256": self.harness_sha256,
+                "parse_harness_sha256": self.parse_harness_sha256,
                 "timeout_seconds": self.timeout_seconds,
             }
         )
@@ -259,6 +302,7 @@ class GodotImportGateRunner:
         if (
             sha256_file(self.executable) != self.executable_sha256
             or _harness_digest() != self.harness_sha256
+            or _parse_harness_digest() != self.parse_harness_sha256
         ):
             raise ValidationError(
                 "Code gate executable or harness changed after runner registration"
@@ -368,15 +412,33 @@ class GodotImportGateRunner:
         ]
         if len(script_paths) > 256:
             raise ValidationError("Code gate supports at most 256 GDScript files per candidate")
+        parse_harness_bytes = (
+            resource_files("gamefactory")
+            .joinpath("resources/godot/gdscript_parse_harness.gd")
+            .read_bytes()
+        )
+        if hashlib.sha256(parse_harness_bytes).hexdigest() != self.parse_harness_sha256:
+            raise ValidationError("GDScript parse harness changed after gate registration")
+        parse_harness_path = stage / _PARSE_HARNESS_NAME
+        with parse_harness_path.open("xb") as handle:
+            handle.write(parse_harness_bytes)
+        manifest_payload = json.dumps(
+            {"scripts": script_paths}, sort_keys=True, separators=(",", ":")
+        ).encode("utf-8")
+        manifest_path = stage / _PARSE_MANIFEST_NAME
+        with manifest_path.open("xb") as handle:
+            handle.write(manifest_payload)
+        remaining = timeout - (time.monotonic() - process_started)
         parser_failed = False
-        for relative in script_paths:
-            remaining = timeout - (time.monotonic() - process_started)
-            if remaining <= 0:
-                parser_failed = True
+        parse_receipt = ""
+        if not script_paths:
+            parser_failed = False
+        elif remaining <= 0:
+            parser_failed = True
+            for relative in script_paths:
                 script_results.append({"path": relative, "status": "budget_exhausted"})
-                break
-            script_path = stage / relative
-            script_hash = sha256_file(script_path)
+        else:
+            parse_timeout = min(remaining, max(30.0, len(script_paths) * 2.0))
             parse_receipt = _intent(
                 parameters,
                 "code",
@@ -384,9 +446,9 @@ class GodotImportGateRunner:
                 self.config_fingerprint,
                 "gdscript-parse",
                 {
-                    "input_sha256": script_hash,
-                    "timeout_seconds": min(remaining, 30.0),
-                    "profile": f"--check-only --script {relative}",
+                    "input_sha256": hashlib.sha256(manifest_payload).hexdigest(),
+                    "timeout_seconds": parse_timeout,
+                    "profile": "project-context-batch-parse",
                 },
             )
             parse_result = ProcessRunner(sanitize_output=True).run(
@@ -396,43 +458,74 @@ class GodotImportGateRunner:
                         "--headless",
                         "--path",
                         str(stage),
-                        "--check-only",
                         "--script",
-                        str(script_path),
+                        str(parse_harness_path),
+                        "--",
+                        "--manifest",
+                        str(manifest_path),
+                        "--output",
+                        str(stage / _PARSE_OUTPUT_NAME),
                     ],
                     cwd=stage,
-                    timeout_seconds=min(remaining, 30.0),
+                    timeout_seconds=parse_timeout,
                     env_overrides=godot_env,
                     minimal_env=True,
                 )
             )
             parse_log = (parse_result.stdout + "\n" + parse_result.stderr)[:1_000_000]
             parse_log_error = _has_project_diagnostic(parse_log)
-            ok = (
+            parsed_scripts: dict[str, dict[str, str]] = {}
+            output_missing = True
+            try:
+                _, output_raw = _safe_file(
+                    stage,
+                    _PARSE_OUTPUT_NAME,
+                    label="GDScript parse output",
+                    max_bytes=_PARSE_OUTPUT_MAX_BYTES,
+                )
+                output_payload = json.loads(output_raw.decode("utf-8"))
+                validated = _validated_gdscript_parse_scripts(output_payload, script_paths)
+                if validated is not None:
+                    parsed_scripts = validated
+                    output_missing = False
+            except (ValidationError, UnicodeDecodeError, json.JSONDecodeError):
+                output_missing = True
+            batch_ok = (
                 parse_result.exit_code == 0
                 and not parse_result.timed_out
                 and parse_result.cleanup_completed
                 and not parse_log_error
+                and not output_missing
             )
-            parser_failed = parser_failed or not ok
-            script_results.append(
-                {
-                    "path": relative,
-                    "sha256": script_hash,
-                    "status": "PASS" if ok else "FAIL",
-                    "process_receipt_id": parse_receipt,
-                    "result": _bounded_result(parse_result),
-                    "log_excerpt": parse_log[:2048],
-                    "log_error": parse_log_error,
-                }
-            )
+            parser_failed = not batch_ok
+            for relative in script_paths:
+                script_path = stage / relative
+                script_hash = sha256_file(script_path)
+                entry = parsed_scripts.get(relative)
+                if entry is None:
+                    ok = False
+                    status = "FAIL"
+                    message = "missing_parse_result"
+                else:
+                    ok = entry["status"] == "PASS" and batch_ok
+                    status = "PASS" if ok else "FAIL"
+                    message = entry.get("message", "")
+                parser_failed = parser_failed or not ok
+                script_results.append(
+                    {
+                        "path": relative,
+                        "sha256": script_hash,
+                        "status": status,
+                        "message": message,
+                        "process_receipt_id": parse_receipt,
+                        "result": _bounded_result(parse_result),
+                        "log_excerpt": parse_log[:2048],
+                        "log_error": parse_log_error or output_missing,
+                    }
+                )
         intent_ids = [
             intent_id,
-            *[
-                item["process_receipt_id"]
-                for item in script_results
-                if "process_receipt_id" in item
-            ],
+            *([parse_receipt] if parse_receipt else []),
         ]
         passed = (
             result.exit_code == 0
